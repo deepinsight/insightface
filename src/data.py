@@ -7,7 +7,7 @@ import random
 import logging
 import sys
 import sklearn
-import faiss
+#import faiss
 import numpy as np
 
 try:
@@ -437,8 +437,10 @@ class FaceImageIter2(io.DataIter):
 
         self.path_root = path_root
         self.mean = mean
+        self.nd_mean = None
         if self.mean:
           self.mean = np.array(self.mean, dtype=np.float32).reshape(1,1,3)
+          self.nd_mean = mx.nd.array(self.mean).reshape((1,1,3))
         self.patch = patch
 
         self.check_data_shape(data_shape)
@@ -543,23 +545,26 @@ class FaceImageIter2(io.DataIter):
             while i < batch_size:
                 label, s, bbox, landmark = self.next_sample()
                 _data = self.imdecode(s)
-                #_npdata = _data
-                _npdata = _data.asnumpy()
-                if landmark is not None:
-                  _npdata = face_preprocess.preprocess(_npdata, bbox = bbox, landmark=landmark, image_size=self.image_size)
-                #_npdata = self.color_aug(_npdata, 0.1)
                 if self.rand_mirror:
-                  _npdata = self.mirror_aug(_npdata)
-                if self.mean is not None:
-                  _npdata = _npdata.astype(np.float32)
-                  _npdata -= self.mean
-                  _npdata *= 0.0078125
-                nimg = np.zeros(_npdata.shape, dtype=np.float32)
-                nimg[self.patch[1]:self.patch[3],self.patch[0]:self.patch[2],:] = _npdata[self.patch[1]:self.patch[3], self.patch[0]:self.patch[2], :]
-                #print(_npdata.shape)
-                #print(_npdata)
-                _data = mx.nd.array(nimg)
-                #print(_data.shape)
+                  _rd = random.randint(0,1)
+                  if _rd==1:
+                    _data = mx.ndarray.flip(data=_data, axis=1)
+                if self.nd_mean is not None:
+                    _data = _data.astype('float32')
+		    _data -= self.nd_mean
+                    _data *= 0.0078125
+                #_npdata = _data.asnumpy()
+                #if landmark is not None:
+                #  _npdata = face_preprocess.preprocess(_npdata, bbox = bbox, landmark=landmark, image_size=self.image_size)
+                #if self.rand_mirror:
+                #  _npdata = self.mirror_aug(_npdata)
+                #if self.mean is not None:
+                #  _npdata = _npdata.astype(np.float32)
+                #  _npdata -= self.mean
+                #  _npdata *= 0.0078125
+                #nimg = np.zeros(_npdata.shape, dtype=np.float32)
+                #nimg[self.patch[1]:self.patch[3],self.patch[0]:self.patch[2],:] = _npdata[self.patch[1]:self.patch[3], self.patch[0]:self.patch[2], :]
+                #_data = mx.nd.array(nimg)
                 data = [_data]
                 try:
                     self.check_valid_image(data)
@@ -599,7 +604,7 @@ class FaceImageIter2(io.DataIter):
         See mx.img.imdecode for more details."""
         #arr = np.fromstring(s, np.uint8)
         if self.patch[4]%2==0:
-          img = mx.image.imdecode(s)
+          img = mx.image.imdecode(s) #mx.ndarray
           #img = cv2.imdecode(arr, cv2.CV_LOAD_IMAGE_COLOR)
           #img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
