@@ -491,6 +491,12 @@ class FaceImageIter2(io.DataIter):
           else:
             label, fname, bbox, landmark = self.imglist[idx]
             return label, self.read_image(fname), bbox, landmark
+        else:
+            s = self.imgrec.read()
+            if s is None:
+                raise StopIteration
+            header, img = recordio.unpack(s)
+            return header.label, img, None, None
 
     def brightness_aug(self, src, x):
       alpha = 1.0 + random.uniform(-x, x)

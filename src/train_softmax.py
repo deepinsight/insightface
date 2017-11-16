@@ -17,7 +17,6 @@ from mxnet import ndarray as nd
 import argparse
 import mxnet.optimizer as optimizer
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
-import resnet_dcn
 import spherenet
 import marginalnet
 import inceptions
@@ -26,7 +25,8 @@ import lfw
 import sklearn
 from sklearn.decomposition import PCA
 #from center_loss import *
-import asoftmax
+#import resnet_dcn
+#import asoftmax
 
 
 logger = logging.getLogger()
@@ -105,6 +105,8 @@ def parse_args():
       help='')
   parser.add_argument('--loss-type', type=int, default=1,
       help='')
+  parser.add_argument('--incay', action='store_true', default=False,
+      help='feature incay')
   parser.add_argument('--use-deformable', type=int, default=0,
       help='')
   parser.add_argument('--patch', type=str, default='0_0_96_112_0',
@@ -138,6 +140,7 @@ def get_symbol(args, arg_params, aux_params):
     _,_,embedding,_ = resnet_dcn.get_symbol(512, args.num_layers)
   gt_label = mx.symbol.Variable('softmax_label')
   assert args.loss_type>=0
+  extra_loss = None
   if args.loss_type==0:
     _weight = mx.symbol.Variable('fc7_weight')
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
@@ -206,12 +209,22 @@ def get_symbol(args, arg_params, aux_params):
     softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
   else:
     softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax')
+  if args.loss_type<=1 and args.incay:
+    params = [1.e-10, 0.01]
+    sel = mx.symbol.argmax(data = fc7, axis=1)
+    sel = (sel==gt_label)
+    norm = embedding*embedding
+    norm = mx.symbol.sum(norm, axis=1)
+    norm += params[0]
+    feature_incay = sel/norm
+    feature_incay = mx.symbol.mean(feature_incay) * params[1]
+    extra_loss = mx.symbol.MakeLoss(feature_incay)
   #out = softmax
   #l2_embedding = mx.symbol.L2Normalization(embedding)
 
   #ce = mx.symbol.softmax_cross_entropy(fc7, gt_label, name='softmax_ce')/args.per_batch_size
   #out = mx.symbol.Group([mx.symbol.BlockGrad(embedding), softmax, mx.symbol.BlockGrad(ce)])
-  if args.loss_type>=10 and extra_loss is not None:
+  if extra_loss is not None:
     out = mx.symbol.Group([mx.symbol.BlockGrad(embedding), softmax, extra_loss])
   else:
     out = mx.symbol.Group([mx.symbol.BlockGrad(embedding), softmax])
@@ -277,7 +290,7 @@ def train_net(args):
 
     path_imglist = "/raid5data/dplearn/faces_normed/train.lst"
     args.num_classes = 82395
-    args.use_val = True
+    args.use_val = False
     val_path = "/raid5data/dplearn/faces_normed/val.lst"
     path_imgrec = "/opt/jiaguo/faces_normed/train.rec"
     val_rec = "/opt/jiaguo/faces_normed/val.rec"
@@ -291,7 +304,7 @@ def train_net(args):
     data_shape = (args.image_channel,112,96)
     mean = [127.5,127.5,127.5]
 
-    if args.use_val and args.loss_type<=1:
+    if args.use_val:
       val_dataiter = FaceImageIter2(
           batch_size           = args.batch_size,
           data_shape           = data_shape,
@@ -349,7 +362,7 @@ def train_net(args):
       )
 
 
-    if args.loss_type<=1:
+    if args.loss_type<=9:
       train_dataiter = FaceImageIter2(
           batch_size           = args.batch_size,
           data_shape           = data_shape,
@@ -570,7 +583,8 @@ def train_net(args):
     global_step = [0]
     save_step = [0]
     if len(args.lr_steps)==0:
-      lr_steps = [40000, 70000, 90000]
+      #lr_steps = [40000, 70000, 90000]
+      lr_steps = [30000, 50000, 70000, 90000]
       if args.loss_type==1:
         lr_steps = [70000, 100000]
     else:
@@ -595,16 +609,21 @@ def train_net(args):
         acc, embeddings_list = lfw_test(mbatch)
         save_step[0]+=1
         msave = save_step[0]
+        do_save = False
         if acc>=highest_acc[0]:
           highest_acc[0] = acc
-          if acc>=0.992:
-            print('saving', msave)
-            arg, aux = model.get_params()
-            mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
-            lfw_npy = "%s-lfw-%04d" % (prefix, msave)
-            X = np.concatenate(embeddings_list, axis=0)
-            print(X.shape)
-            np.save(lfw_npy, X)
+          if acc>=0.995:
+            do_save = True
+        if mbatch>lr_steps[-1] and msave%5==0:
+          do_save = True
+        if do_save:
+          print('saving', msave)
+          arg, aux = model.get_params()
+          mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
+          #lfw_npy = "%s-lfw-%04d" % (prefix, msave)
+          #X = np.concatenate(embeddings_list, axis=0)
+          #print(X.shape)
+          #np.save(lfw_npy, X)
         print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[0]))
       if mbatch<=args.beta_freeze:
         _beta = args.beta
