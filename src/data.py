@@ -557,7 +557,7 @@ class FaceImageIter2(io.DataIter):
                     _data = mx.ndarray.flip(data=_data, axis=1)
                 if self.nd_mean is not None:
                     _data = _data.astype('float32')
-		    _data -= self.nd_mean
+                    _data -= self.nd_mean
                     _data *= 0.0078125
                 #_npdata = _data.asnumpy()
                 #if landmark is not None:

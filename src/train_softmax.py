@@ -303,7 +303,8 @@ def train_net(args):
 
     data_shape = (args.image_channel,112,96)
     mean = [127.5,127.5,127.5]
-    if args.network[0]=='m' and args.num_layers==27:
+    #if args.network[0]=='m' and args.num_layers==27:
+    if args.network[0]=='m':
       mean = None
 
     if args.use_val:
@@ -588,7 +589,7 @@ def train_net(args):
       #lr_steps = [40000, 70000, 90000]
       lr_steps = [30000, 50000, 70000, 90000]
       if args.loss_type==1:
-        lr_steps = [70000, 100000]
+        lr_steps = [100000, 140000, 160000]
     else:
       lr_steps = [int(x) for x in args.lr_steps.split(',')]
     print('lr_steps', lr_steps)
