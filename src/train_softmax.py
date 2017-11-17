@@ -217,7 +217,7 @@ def get_symbol(args, arg_params, aux_params):
     sel = (sel==gt_label)
     norm = embedding*embedding
     norm = mx.symbol.sum(norm, axis=1)
-    norm += params[0]
+    norm = norm+params[0]
     feature_incay = sel/norm
     feature_incay = mx.symbol.mean(feature_incay) * params[1]
     extra_loss = mx.symbol.MakeLoss(feature_incay)
