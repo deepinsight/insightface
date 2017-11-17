@@ -303,6 +303,8 @@ def train_net(args):
 
     data_shape = (args.image_channel,112,96)
     mean = [127.5,127.5,127.5]
+    if args.network[0]=='m' and args.num_layers==27:
+      mean = None
 
     if args.use_val:
       val_dataiter = FaceImageIter2(
