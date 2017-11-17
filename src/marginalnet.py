@@ -94,6 +94,9 @@ def get_symbol(num_classes, num_layers, conv_workspace=256):
     bn_mom = 0.9
     if num_layers==27:
       data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
+    else:
+      data = data-127.5
+      data = data*0.0078125
     units = [1,2,5,3] # all number of layers = sum(units)*2+len(units)+1
     filter_list = [64, 128, 256, 512]
     rtype = 1
