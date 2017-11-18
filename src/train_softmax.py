@@ -83,6 +83,8 @@ def parse_args():
       help='true means continue training.')
   parser.add_argument('--lr', type=float, default=0.1,
       help='')
+  parser.add_argument('--wd', type=float, default=0.0005,
+      help='')
   parser.add_argument('--images-per-identity', type=int, default=16,
       help='')
   parser.add_argument('--embedding-dim', type=int, default=512,
@@ -326,7 +328,7 @@ def train_net(args):
 
     begin_epoch = 0
     base_lr = args.lr
-    base_wd = 0.0005
+    base_wd = args.wd
     base_mom = 0.9
     if not args.retrain:
       #load and initialize params
@@ -589,7 +591,7 @@ def train_net(args):
       #lr_steps = [40000, 70000, 90000]
       lr_steps = [30000, 50000, 70000, 90000]
       if args.loss_type==1:
-        lr_steps = [100000, 140000, 160000]
+        lr_steps = [60000, 80000]
     else:
       lr_steps = [int(x) for x in args.lr_steps.split(',')]
     print('lr_steps', lr_steps)
@@ -615,18 +617,18 @@ def train_net(args):
         do_save = False
         if acc>=highest_acc[0]:
           highest_acc[0] = acc
-          if acc>=0.995:
+          if acc>=0.996:
             do_save = True
-        if mbatch>lr_steps[-1] and msave%5==0:
+        if mbatch>lr_steps[-1] and acc-highest_acc[0]>=-0.0001:
           do_save = True
         if do_save:
           print('saving', msave)
           arg, aux = model.get_params()
           mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
-          #lfw_npy = "%s-lfw-%04d" % (prefix, msave)
-          #X = np.concatenate(embeddings_list, axis=0)
-          #print(X.shape)
-          #np.save(lfw_npy, X)
+          lfw_npy = "%s-lfw-%04d" % (prefix, msave)
+          X = np.concatenate(embeddings_list, axis=0)
+          print(X.shape)
+          np.save(lfw_npy, X)
         print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[0]))
       if mbatch<=args.beta_freeze:
         _beta = args.beta
