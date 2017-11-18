@@ -591,7 +591,7 @@ def train_net(args):
       #lr_steps = [40000, 70000, 90000]
       lr_steps = [30000, 50000, 70000, 90000]
       if args.loss_type==1:
-        lr_steps = [60000, 80000]
+        lr_steps = [60000, 90000]
     else:
       lr_steps = [int(x) for x in args.lr_steps.split(',')]
     print('lr_steps', lr_steps)
