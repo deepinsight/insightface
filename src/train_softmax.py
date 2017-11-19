@@ -214,7 +214,7 @@ def get_symbol(args, arg_params, aux_params):
   else:
     softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax')
   if args.loss_type<=1 and args.incay:
-    params = [1.e-10, 0.01]
+    params = [1.e-10, 0.1]
     sel = mx.symbol.argmax(data = fc7, axis=1)
     sel = (sel==gt_label)
     norm = embedding*embedding
