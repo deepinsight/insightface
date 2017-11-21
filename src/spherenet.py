@@ -58,6 +58,8 @@ def get_symbol(num_classes, num_layers, conv_workspace=256, **kwargs):
     filters = [64,128,256,512]
     #filters = [64, 256, 512, 1024]
   data = mx.symbol.Variable('data')
+  data = data-127.5
+  data = data*0.0078125
   body = conv_main(data = data, units = units, filters = filters, workspace = conv_workspace)
   #modify begin
 

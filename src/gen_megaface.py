@@ -29,9 +29,9 @@ from mxnet import ndarray as nd
 
 facescrub_aligned_root = '/raid5data/dplearn/megaface/facescrub_aligned_mtcnn'
 facescrub_aligned_root = None
-megaface_out = '/raid5data/dplearn/megaface/MegaFace_LBPFeatures'
+megaface_out = '/raid5data/dplearn/megaface/MegaFace_Features'
 #facescrub_out = '/raid5data/dplearn/megaface/FaceScrubSubset_Features'
-facescrub_out = '/raid5data/dplearn/megaface/FaceScrubSubset_Features2'
+facescrub_out = '/raid5data/dplearn/megaface/FaceScrub_Features'
 
 
 def do_flip(data):
@@ -47,7 +47,7 @@ def ch_dev(arg_params, aux_params, ctx):
     new_auxs[k] = v.as_in_context(ctx)
   return new_args, new_auxs
 
-def get_feature(image_path, bbox, landmark, nets, image_shape, use_align, aligned):
+def get_feature(image_path, bbox, landmark, nets, image_shape, use_align, aligned, use_mean):
   img = face_preprocess.read_image(image_path, mode='rgb')
   #print(img.shape)
   if img is None:
@@ -64,9 +64,10 @@ def get_feature(image_path, bbox, landmark, nets, image_shape, use_align, aligne
     #print('already aligned', image_path, img.shape)
     #img = cv2.resize(img, (image_shape[2], image_shape[1]))
   #cv2.imwrite("./align/%s"%image_path.split('/')[-1], img)
-  v_mean = np.array([127.5,127.5,127.5], dtype=np.float32).reshape( (1,1,3) )
-  img = img.astype(np.float32) - v_mean
-  img *= 0.0078125
+  if use_mean>0:
+    v_mean = np.array([127.5,127.5,127.5], dtype=np.float32).reshape( (1,1,3) )
+    img = img.astype(np.float32) - v_mean
+    img *= 0.0078125
   img = np.transpose( img, (2,0,1) )
   F = None
   for net in nets:
@@ -178,7 +179,7 @@ def main(args):
           aligned = True
         else:
           print("not aligned:",_image_path)
-      feature = get_feature(image_path, bbox, landmark, nets, image_shape, True, aligned)
+      feature = get_feature(image_path, bbox, landmark, nets, image_shape, True, aligned, args.mean)
       if feature is None:
         continue
       #print(np.linalg.norm(feature))
@@ -202,9 +203,10 @@ def main(args):
     a1, a2, b = _path[-3], _path[-2], _path[-1]
     out_dir = os.path.join(megaface_out, a1, a2)
     if not os.path.exists(out_dir):
-      continue
+      os.makedirs(out_dir)
+      #continue
     #print(landmark)
-    feature = get_feature(image_path, bbox, landmark, nets, image_shape, True, aligned)
+    feature = get_feature(image_path, bbox, landmark, nets, image_shape, True, aligned, args.mean)
     if feature is None:
       continue
     out_path = os.path.join(out_dir, b+"_%s_%dx%d.bin"%(args.algo, image_shape[1], image_shape[2]))
@@ -220,6 +222,7 @@ def parse_arguments(argv):
   parser.add_argument('--batch_size', type=int, help='', default=100)
   parser.add_argument('--image_size', type=str, help='', default='3,112,96')
   parser.add_argument('--gpu', type=int, help='', default=7)
+  parser.add_argument('--mean', type=int, help='', default=1)
   parser.add_argument('--seed', type=int, help='', default=727)
   parser.add_argument('--skip', type=int, help='', default=0)
   parser.add_argument('--algo', type=str, help='', default='mxsphereface20c')

@@ -3,11 +3,19 @@ import numpy as np
 
 
 
-def Conv(data, num_filter, kernel, stride, pad, name, no_bias=False, workspace=256):
+def _Conv(data, num_filter, kernel, stride, pad, name, no_bias=False, workspace=256):
     _weight = mx.symbol.Variable(name+'_weight')
     _bias = mx.symbol.Variable(name+'_bias', lr_mult=2.0, wd_mult=0.0)
     body = mx.sym.Convolution(data=data, weight = _weight, bias = _bias, num_filter=num_filter, kernel=kernel, stride=stride, pad=pad, no_bias = no_bias, workspace = workspace, name = name)
     return body
+
+def Conv(**kwargs):
+    name = kwargs.get('name')
+    _weight = mx.symbol.Variable(name+'_weight')
+    _bias = mx.symbol.Variable(name+'_bias', lr_mult=2.0, wd_mult=0.0)
+    body = mx.sym.Convolution(weight = _weight, bias = _bias, **kwargs)
+    return body
+
 
 def Act(data, name):
     body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
@@ -67,19 +75,83 @@ def resnet_unit3(data, num_filter, name, dim_match=True, workspace = 256):
     body = body+shortcut
   return body
 
+def resnet_unit4(data, num_filter, name, dim_match=True, workspace = 256):
+  bn_mom = 0.9
+  shortcut = data
+  body = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn1')
+  body = Act(data=body, name=name+'_relu1')
+  body = Conv(data=data, num_filter=int(num_filter*0.25), kernel=(1,1), stride=(1,1), pad=(0,0),
+                            name=name+"_conv1", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn2')
+  body = Act(data=body, name=name+'_relu2')
+  body = Conv(data=body, num_filter=int(num_filter*0.25), kernel=(3,3), stride=(1,1), pad=(1, 1),
+                            name=name+"_conv2", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn3')
+  body = Act(data=body, name=name+'_relu3')
+  body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0, 0),
+                            name=name+"_conv3", workspace=workspace)
+  if dim_match:
+    body = body+shortcut
+  return body
+
+def resnet_unit5(data, num_filter, name, dim_match=True, workspace = 256):
+  bn_mom = 0.9
+  shortcut = data
+  body = Conv(data=data, num_filter=int(num_filter*0.5), kernel=(1,1), stride=(1,1), pad=(0,0),
+                            name=name+"_conv1", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn1')
+  body = Act(data=body, name=name+'_relu1')
+  body = Conv(data=body, num_filter=int(num_filter*0.5), kernel=(3,3), stride=(1,1), pad=(1, 1), num_group=32,
+                            name=name+"_conv2", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn2')
+  body = Act(data=body, name=name+'_relu2')
+  body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                            name=name+"_conv3", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn3')
+  if dim_match:
+    body = body+shortcut
+  body = Act(data=body, name=name+'_relu3')
+  return body
+
+def resnet_unit6(data, num_filter, name, dim_match=True, workspace = 256):
+  bn_mom = 0.9
+  shortcut = data
+  body = Conv(data=data, num_filter=num_filter*4, kernel=(1,1), stride=(1,1), pad=(0,0),
+                            name=name+"_conv1", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn1')
+  body = Act(data=body, name=name+'_relu1')
+  body = Conv(data=body, num_filter=num_filter*4, kernel=(3,3), stride=(1,1), pad=(1, 1), num_group=32,
+                            name=name+"_conv2", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn2')
+  body = Act(data=body, name=name+'_relu2')
+  body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                            name=name+"_conv3", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn3')
+  if dim_match:
+    body = body+shortcut
+  body = Act(data=body, name=name+'_relu3')
+  return body
+
+
 def resnet_unit(rtype, data, num_filter, name, dim_match=True, workspace = 256):
   if rtype==1:
     return resnet_unit1(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
   elif rtype==2:
     return resnet_unit2(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
-  else:
+  elif rtype==3:
     return resnet_unit3(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
+  elif rtype==4:
+    return resnet_unit4(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
+  elif rtype==5:
+    return resnet_unit5(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
+  elif rtype==6:
+    return resnet_unit6(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
 
 def resnet(data, units, filters, rtype, workspace):
   body = resnet_unit0(data=data, num_filter=32, name="stage%d_unit%d"%(0, 0))
   for i in xrange(len(units)):
     f = filters[i]
-    if rtype>=10:
+    if rtype>=44:
       body = resnet_unit(rtype=rtype, data=body, num_filter=f, name="stage%d_unit%d"%(i+1, 0), dim_match=False) # do not connect to last layer, dim not match
     else:
       body = resnet_unit0(data=body, num_filter=f, name="stage%d_unit%d"%(i+1, 0)) # do not connect to last layer, dim not match
@@ -113,6 +185,18 @@ def get_symbol(num_classes, num_layers, conv_workspace=256):
     elif num_layers==51:
       units = [2,3,15,3]
       rtype = 3
+    elif num_layers==74:
+      units = [2,3,15,3]
+      rtype = 4
+    elif num_layers==75:
+      units = [2,3,15,3]
+      rtype = 5
+    elif num_layers==76:
+      filter_list = [16, 32, 64, 128]
+      units = [2,3,15,3]
+      rtype = 6
+    else:
+      assert(False)
 
     body = resnet(data = data, units = units, filters = filter_list, rtype=rtype, workspace = conv_workspace)
     if use_dropout:

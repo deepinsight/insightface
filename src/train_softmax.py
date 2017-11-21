@@ -105,11 +105,11 @@ def parse_args():
       help='')
   parser.add_argument('--scale', type=float, default=0.9993,
       help='')
-  parser.add_argument('--verbose', type=int, default=1000,
+  parser.add_argument('--verbose', type=int, default=2000,
       help='')
   parser.add_argument('--loss-type', type=int, default=1,
       help='')
-  parser.add_argument('--incay', action='store_true', default=False,
+  parser.add_argument('--incay', type=float, default=0.0,
       help='feature incay')
   parser.add_argument('--use-deformable', type=int, default=0,
       help='')
@@ -213,15 +213,15 @@ def get_symbol(args, arg_params, aux_params):
     softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
   else:
     softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax')
-  if args.loss_type<=1 and args.incay:
-    params = [1.e-10, 0.1]
+  if args.loss_type<=1 and args.incay>0.0:
+    params = [1.e-10]
     sel = mx.symbol.argmax(data = fc7, axis=1)
     sel = (sel==gt_label)
     norm = embedding*embedding
     norm = mx.symbol.sum(norm, axis=1)
     norm = norm+params[0]
     feature_incay = sel/norm
-    feature_incay = mx.symbol.mean(feature_incay) * params[1]
+    feature_incay = mx.symbol.mean(feature_incay) * args.incay
     extra_loss = mx.symbol.MakeLoss(feature_incay)
   #out = softmax
   #l2_embedding = mx.symbol.L2Normalization(embedding)
@@ -291,6 +291,7 @@ def train_net(args):
     #path_imglist = "/raid5data/dplearn/MS-Celeb-Aligned/lst2"
     path_imgrec = os.path.join(args.data_dir, "train.rec")
     val_rec = os.path.join(args.data_dir, "val.rec")
+    args.use_val = True
     #args.num_classes = 10572 #webface
     #args.num_classes = 81017
     #args.num_classes = 82395
@@ -304,17 +305,15 @@ def train_net(args):
     print('Called with argument:', args)
 
     data_shape = (args.image_channel,112,96)
-    mean = [127.5,127.5,127.5]
-    #if args.network[0]=='m' and args.num_layers==27:
-    if args.network[0]=='m':
-      mean = None
+    #mean = [127.5,127.5,127.5]
+    mean = None
 
     if args.use_val:
       val_dataiter = FaceImageIter2(
           batch_size           = args.batch_size,
           data_shape           = data_shape,
           path_imgrec          = val_rec,
-          path_imglist         = val_path,
+          #path_imglist         = val_path,
           shuffle              = False,
           exclude_lfw          = False,
           rand_mirror          = False,
@@ -582,6 +581,18 @@ def train_net(args):
       return racc, embeddings_list
 
 
+    def val_test():
+      acc = AccMetric()
+      val_metric = mx.metric.create(acc)
+      val_metric.reset()
+      val_dataiter.reset()
+      for i, eval_batch in enumerate(val_dataiter):
+        model.forward(eval_batch, is_train=False)
+        model.update_metric(val_metric, eval_batch.label)
+      acc_value = val_metric.get_name_value()[0][1]
+      print('VACC: %f'%(acc_value))
+
+
     #global_step = 0
     highest_acc = [0.0]
     last_save_acc = [0.0]
@@ -591,7 +602,7 @@ def train_net(args):
       #lr_steps = [40000, 70000, 90000]
       lr_steps = [30000, 50000, 70000, 90000]
       if args.loss_type==1:
-        lr_steps = [60000, 90000]
+        lr_steps = [100000, 140000, 160000]
     else:
       lr_steps = [int(x) for x in args.lr_steps.split(',')]
     print('lr_steps', lr_steps)
@@ -619,16 +630,19 @@ def train_net(args):
           highest_acc[0] = acc
           if acc>=0.996:
             do_save = True
-        if mbatch>lr_steps[-1] and acc-highest_acc[0]>=-0.0001:
+        if mbatch>lr_steps[-1] and mbatch%10000==0:
           do_save = True
         if do_save:
-          print('saving', msave)
+          print('saving', msave, acc)
+          if val_dataiter is not None:
+            val_test()
           arg, aux = model.get_params()
           mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
-          lfw_npy = "%s-lfw-%04d" % (prefix, msave)
-          X = np.concatenate(embeddings_list, axis=0)
-          print(X.shape)
-          np.save(lfw_npy, X)
+          if acc>=highest_acc[0]:
+            lfw_npy = "%s-lfw-%04d" % (prefix, msave)
+            X = np.concatenate(embeddings_list, axis=0)
+            print('saving lfw npy', X.shape)
+            np.save(lfw_npy, X)
         print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[0]))
       if mbatch<=args.beta_freeze:
         _beta = args.beta
