@@ -147,6 +147,22 @@ def resnet_unit7(data, num_filter, name, dim_match=True, workspace = 256):
   body = Act(data=body, name=name+'_relu2')
   return body
 
+def resnet_unit100(data, num_filter, name, dim_match=True, workspace = 256):
+  bn_mom = 0.9
+  body = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn1')
+  body = Conv(data=body, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1),
+                            name=name+"_conv1", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn2')
+  act = Act(data=body, name=name+'_relu1')
+  body = Conv(data=act, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1),
+                            name=name+"_conv2", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn3')
+  if not dim_match:
+    shortcut = Conv(data=act, num_filter=num_filter, kernel=(1,1), pad=(0,0), name=name+"_shortcut", workspace=workspace)
+  else:
+    shortcut = data
+  body = body+shortcut
+  return body
 
 def resnet_unit(rtype, data, num_filter, name, dim_match=True, workspace = 256):
   if rtype==1:
@@ -163,6 +179,8 @@ def resnet_unit(rtype, data, num_filter, name, dim_match=True, workspace = 256):
     return resnet_unit6(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
   elif rtype==7:
     return resnet_unit7(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
+  elif rtype==100:
+    return resnet_unit100(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
   else:
     assert(False)
 
@@ -170,8 +188,11 @@ def resnet(data, units, filters, rtype, workspace):
   body = resnet_unit0(data=data, num_filter=32, name="stage%d_unit%d"%(0, 0))
   for i in xrange(len(units)):
     f = filters[i]
-    if rtype>=44:
-      body = resnet_unit(rtype=rtype, data=body, num_filter=f, name="stage%d_unit%d"%(i+1, 0), dim_match=False) # do not connect to last layer, dim not match
+    dim_match = False
+    if i==0:
+      dim_match = True
+    if rtype>=100:
+      body = resnet_unit(rtype=rtype, data=body, num_filter=f, name="stage%d_unit%d"%(i+1, 0), dim_match=dim_match) # do not connect to last layer, dim not match
     else:
       body = resnet_unit0(data=body, num_filter=f, name="stage%d_unit%d"%(i+1, 0)) # do not connect to last layer, dim not match
     body = mx.sym.Pooling(data=body, kernel=(2, 2), stride=(2,2), pad=(0,0), pool_type='max', name="stage%d_pool"%(i+1))
@@ -191,8 +212,7 @@ def get_symbol(num_classes, num_layers, conv_workspace=256):
     units = [1,2,5,3] # all number of layers = sum(units)*2+len(units)+1
     filter_list = [64, 128, 256, 512]
     rtype = 1
-    use_last_bn = True
-    use_dropout = True
+    ftype = 1
     if num_layers==27:
       rtype = 1
     elif num_layers==28:
@@ -201,10 +221,16 @@ def get_symbol(num_classes, num_layers, conv_workspace=256):
       rtype = 3
       #use_last_bn = False
       #use_dropout = False
+    elif num_layers==30:
+      filter_list = [64, 256, 512, 1024]
+      rtype = 3
+    elif num_layers==31:
+      rtype = 100
     elif num_layers==51:
       units = [2,3,15,3]
       rtype = 3
     elif num_layers==52:
+      filter_list = [64, 256, 512, 1024]
       units = [2,3,15,3]
       rtype = 7
     elif num_layers==74:
@@ -221,15 +247,21 @@ def get_symbol(num_classes, num_layers, conv_workspace=256):
       assert(False)
 
     body = resnet(data = data, units = units, filters = filter_list, rtype=rtype, workspace = conv_workspace)
-    if use_dropout:
-      body = mx.symbol.Dropout(data=body, p=0.4)
     _weight = mx.symbol.Variable("fc1_weight")
     _bias = mx.symbol.Variable("fc1_bias", lr_mult=2.0, wd_mult=0.0)
-    if use_last_bn:
+    if ftype==0:
+      fc1 = mx.sym.FullyConnected(data=body, weight=_weight, bias=_bias, num_hidden=num_classes, name='fc1')
+    elif ftype==1:
+      body = mx.symbol.Dropout(data=body, p=0.4)
       fc1 = mx.sym.FullyConnected(data=body, weight=_weight, bias=_bias, num_hidden=num_classes, name='pre_fc1')
       fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
     else:
+      body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
+      body = mx.sym.Activation(data=body, act_type='relu', name='relu1')
+      body = mx.sym.Pooling(data=body, global_pool=True, kernel=(7, 7), pool_type='avg', name='pool1')
+      body = mx.sym.Flatten(data=body)
       fc1 = mx.sym.FullyConnected(data=body, weight=_weight, bias=_bias, num_hidden=num_classes, name='fc1')
+
     return fc1
 
 def init_weights(sym, data_shape_dict, num_layers):
