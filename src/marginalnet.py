@@ -132,6 +132,21 @@ def resnet_unit6(data, num_filter, name, dim_match=True, workspace = 256):
   body = Act(data=body, name=name+'_relu3')
   return body
 
+def resnet_unit7(data, num_filter, name, dim_match=True, workspace = 256):
+  bn_mom = 0.9
+  shortcut = data
+  body = Conv(data=data, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1), num_group=32,
+                            name=name+"_conv1", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn1')
+  body = Act(data=body, name=name+'_relu1')
+  body = Conv(data=body, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1), num_group=32,
+                            name=name+"_conv2", workspace=workspace)
+  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn2')
+  if dim_match:
+    body = body+shortcut
+  body = Act(data=body, name=name+'_relu2')
+  return body
+
 
 def resnet_unit(rtype, data, num_filter, name, dim_match=True, workspace = 256):
   if rtype==1:
@@ -146,6 +161,10 @@ def resnet_unit(rtype, data, num_filter, name, dim_match=True, workspace = 256):
     return resnet_unit5(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
   elif rtype==6:
     return resnet_unit6(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
+  elif rtype==7:
+    return resnet_unit7(data=data, num_filter=num_filter, name=name, dim_match=dim_match, workspace=workspace)
+  else:
+    assert(False)
 
 def resnet(data, units, filters, rtype, workspace):
   body = resnet_unit0(data=data, num_filter=32, name="stage%d_unit%d"%(0, 0))
@@ -185,6 +204,9 @@ def get_symbol(num_classes, num_layers, conv_workspace=256):
     elif num_layers==51:
       units = [2,3,15,3]
       rtype = 3
+    elif num_layers==52:
+      units = [2,3,15,3]
+      rtype = 7
     elif num_layers==74:
       units = [2,3,15,3]
       rtype = 4
