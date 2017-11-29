@@ -5,7 +5,7 @@ Face Recognition Project
 
 Default image size is 112x96 if not specified, all face images are aligned.
 
-- Softmax on LFW
+- **Softmax on LFW**
 
 |   Network/Dataset   | VGG2@112x112 | WebFace | MS1M |  -   |  -   |
 | :-----------------: | :----------: | :-----: | :--: | :--: | :--: |
