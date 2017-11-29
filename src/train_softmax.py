@@ -9,6 +9,7 @@ import random
 import logging
 import numpy as np
 from data import FaceIter
+from data import FaceImageIter
 from data import FaceImageIter2
 from data import FaceImageIter4
 from data import FaceImageIter5
@@ -16,7 +17,8 @@ import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
 import mxnet.optimizer as optimizer
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
+#sys.path.append(os.path.join(os.path.dirname(__file__), 'common'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 import spherenet
 import marginalnet
 import inceptions
@@ -113,6 +115,8 @@ def parse_args():
       help='feature incay')
   parser.add_argument('--use-deformable', type=int, default=0,
       help='')
+  parser.add_argument('--image-size', type=str, default='112,96',
+      help='')
   parser.add_argument('--patch', type=str, default='0_0_96_112_0',
       help='')
   parser.add_argument('--lr-steps', type=str, default='',
@@ -126,7 +130,7 @@ def get_symbol(args, arg_params, aux_params):
     new_args = arg_params
   else:
     new_args = None
-  data_shape = (args.image_channel,112,96)
+  data_shape = (args.image_channel,args.image_h,args.image_w)
   image_shape = ",".join([str(x) for x in data_shape])
   if args.network[0]=='s':
     embedding = spherenet.get_symbol(512, args.num_layers)
@@ -269,6 +273,9 @@ def train_net(args):
     args.rescale_threshold = 0
     args.image_channel = 3
     ppatch = [int(x) for x in args.patch.split('_')]
+    image_size = [int(x) for x in args.image_size.split(',')]
+    args.image_h = image_size[0]
+    args.image_w = image_size[1]
     assert len(ppatch)==5
     #if args.patch%2==1:
     #  args.image_channel = 1
@@ -291,7 +298,10 @@ def train_net(args):
     #path_imglist = "/raid5data/dplearn/MS-Celeb-Aligned/lst2"
     path_imgrec = os.path.join(args.data_dir, "train.rec")
     val_rec = os.path.join(args.data_dir, "val.rec")
-    args.use_val = True
+    if os.path.exists(val_rec):
+      args.use_val = True
+    else:
+      val_rec = None
     #args.num_classes = 10572 #webface
     #args.num_classes = 81017
     #args.num_classes = 82395
@@ -304,21 +314,19 @@ def train_net(args):
 
     print('Called with argument:', args)
 
-    data_shape = (args.image_channel,112,96)
+    data_shape = (args.image_channel,image_size[0],image_size[1])
     #mean = [127.5,127.5,127.5]
     mean = None
 
     if args.use_val:
-      val_dataiter = FaceImageIter2(
+      val_dataiter = FaceImageIter(
           batch_size           = args.batch_size,
           data_shape           = data_shape,
           path_imgrec          = val_rec,
           #path_imglist         = val_path,
           shuffle              = False,
-          exclude_lfw          = False,
           rand_mirror          = False,
           mean                 = mean,
-          patch                = ppatch,
       )
     else:
       val_dataiter = None
@@ -367,20 +375,13 @@ def train_net(args):
 
 
     if args.loss_type<=9:
-      train_dataiter = FaceImageIter2(
+      train_dataiter = FaceImageIter(
           batch_size           = args.batch_size,
           data_shape           = data_shape,
           path_imgrec          = path_imgrec,
-          path_imglist         = path_imglist,
           shuffle              = True,
-          exclude_lfw          = False,
           rand_mirror          = True,
-          brightness           = 0.4,
-          contrast             = 0.4,
-          saturation           = 0.4,
-          pca_noise            = 0.1,
           mean                 = mean,
-          patch                = ppatch,
       )
     elif args.loss_type==10:
       train_dataiter = FaceImageIter4(
@@ -391,7 +392,6 @@ def train_net(args):
           path_imglist         = path_imglist,
           shuffle              = True,
           rand_mirror          = True,
-          exclude_lfw          = False,
           mean                 = mean,
           patch                = ppatch,
           use_extra            = True,
@@ -406,7 +406,6 @@ def train_net(args):
           path_imglist         = path_imglist,
           shuffle              = True,
           rand_mirror          = True,
-          exclude_lfw          = False,
           mean                 = mean,
           patch                = ppatch,
       )
@@ -461,124 +460,14 @@ def train_net(args):
     _cb = mx.callback.Speedometer(args.batch_size, 10)
 
     lfw_dir = os.path.join(args.data_dir,'lfw')
-    lfw_pairs = lfw.read_pairs(os.path.join(lfw_dir, 'pairs.txt'))
-    lfw_paths, issame_list = lfw.get_paths(lfw_dir, lfw_pairs, 'jpg')
-    imgs = []
-    lfw_data_list = []
-    for flip in [0,1]:
-      lfw_data = nd.empty((len(lfw_paths), args.image_channel, 112, 96))
-      lfw_data_list.append(lfw_data)
-    i = 0
-
-    for path in lfw_paths:
-      with open(path, 'rb') as fin:
-        _bin = fin.read()
-        if ppatch[4]%2==1:
-          img = mx.image.imdecode(_bin, flag=0)
-          if img.shape[2]<args.image_channel:
-            img = nd.broadcast_to(img, (img.shape[0], img.shape[1], 3))
-        else:
-          img = mx.image.imdecode(_bin)
-        img = nd.transpose(img, axes=(2, 0, 1))
-        img = img.asnumpy()
-        #print(img.shape)
-        if mean is not None:
-          img = img.astype(np.float32)
-          img -= np.array(mean, dtype=np.float32).reshape(args.image_channel,1,1)
-          img *= 0.0078125
-        for flip in [0,1]:
-          _img = img.copy()
-          if flip==1:
-            #_img = _img.asnumpy()
-            for c in xrange(_img.shape[0]):
-              _img[c,:,:] = np.fliplr(_img[c,:,:])
-            #_img = nd.array( _img )
-          #print(img.shape)
-          nimg = np.zeros(_img.shape, dtype=np.float32)
-          nimg[:,ppatch[1]:ppatch[3],ppatch[0]:ppatch[2]] = _img[:, ppatch[1]:ppatch[3], ppatch[0]:ppatch[2]]
-          lfw_data_list[flip][i][:] = nd.array(nimg)
-        i+=1
-        if i%1000==0:
-          print('loading lfw', i)
-    print(lfw_data_list[0].shape)
-    print(lfw_data_list[1].shape)
+    lfw_set = lfw.load_dataset(lfw_dir, image_size)
 
     def lfw_test(nbatch):
-      print('testing lfw..')
-      #GLOBAL_STEP = nbatch
-      #return 0.1
-      embeddings_list = []
-      for i in xrange( len(lfw_data_list) ):
-        lfw_data = lfw_data_list[i]
-        embeddings = None
-        ba = 0
-        _ctx = ctx[0]
-        while ba<lfw_data.shape[0]:
-          bb = min(ba+args.batch_size, lfw_data.shape[0])
-          _data = nd.slice_axis(lfw_data, axis=0, begin=ba, end=bb)
-          _label = nd.ones( (bb-ba,) )
-          #print(_data.shape, _label.shape)
-          db = mx.io.DataBatch(data=(_data,), label=(_label,))
-          model.forward(db, is_train=False)
-          net_out = model.get_outputs()
-          #_arg, _aux = model.get_params()
-          #__arg = {}
-          #for k,v in _arg.iteritems():
-          #  __arg[k] = v.as_in_context(_ctx)
-          #_arg = __arg
-          #_arg["data"] = _data.as_in_context(_ctx)
-          #_arg["softmax_label"] = _label.as_in_context(_ctx)
-          #for k,v in _arg.iteritems():
-          #  print(k,v.context)
-          #exe = sym.bind(_ctx, _arg ,args_grad=None, grad_req="null", aux_states=_aux)
-          #exe.forward(is_train=False)
-          #net_out = exe.outputs
-          _embeddings = net_out[0].asnumpy()
-          #print(_embeddings.shape)
-          if embeddings is None:
-            embeddings = np.zeros( (lfw_data.shape[0], _embeddings.shape[1]) )
-          embeddings[ba:bb,:] = _embeddings
-          ba = bb
-        embeddings_list.append(embeddings)
-
-      _xnorm = 0.0
-      _xnorm_cnt = 0
-      for embed in embeddings_list:
-        for i in xrange(embed.shape[0]):
-          _em = embed[i]
-          _norm=np.linalg.norm(_em)
-          #print(_em.shape, _norm)
-          _xnorm+=_norm
-          _xnorm_cnt+=1
-      _xnorm /= _xnorm_cnt
-      print('[%d]XNorm: %f' % (nbatch, _xnorm))
-
-      acc_list = []
-      embeddings = embeddings_list[0].copy()
-      embeddings = sklearn.preprocessing.normalize(embeddings)
-      _, _, accuracy, val, val_std, far = lfw.evaluate(embeddings, issame_list, nrof_folds=10)
-      acc_list.append(np.mean(accuracy))
-      print('[%d]Accuracy: %1.5f+-%1.5f' % (nbatch, np.mean(accuracy), np.std(accuracy)))
-      #print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
-      #embeddings = np.concatenate(embeddings_list, axis=1)
-      embeddings = embeddings_list[0] + embeddings_list[1]
-      embeddings = sklearn.preprocessing.normalize(embeddings)
-      print(embeddings.shape)
-      _, _, accuracy, val, val_std, far = lfw.evaluate(embeddings, issame_list, nrof_folds=10)
-      acc_list.append(np.mean(accuracy))
-      print('[%d]Accuracy-Flip: %1.5f+-%1.5f' % (nbatch, np.mean(accuracy), np.std(accuracy)))
-      racc = acc_list[1]
-      #racc = max(*acc_list)
-      #print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
-      #pca = PCA(n_components=128)
-      #embeddings = pca.fit_transform(embeddings)
-      #embeddings = sklearn.preprocessing.normalize(embeddings)
-      #print(embeddings.shape)
-      #_, _, accuracy, val, val_std, far = lfw.evaluate(embeddings, issame_list, nrof_folds=10)
-      #acc_list.append(np.mean(accuracy))
-      #print('[%d]Accuracy-PCA: %1.3f+-%1.3f' % (nbatch, np.mean(accuracy), np.std(accuracy)))
-      #print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
-      return racc, embeddings_list
+      acc1, std1, acc2, std2, xnorm, embeddings_list = lfw.test(lfw_set, model, args.batch_size)
+      print('[%d]XNorm: %f' % (nbatch, xnorm))
+      print('[%d]Accuracy: %1.5f+-%1.5f' % (nbatch, acc1, std1))
+      print('[%d]Accuracy-Flip: %1.5f+-%1.5f' % (nbatch, acc2, std2))
+      return acc2, embeddings_list
 
 
     def val_test():
@@ -600,7 +489,7 @@ def train_net(args):
     save_step = [0]
     if len(args.lr_steps)==0:
       #lr_steps = [40000, 70000, 90000]
-      lr_steps = [30000, 50000, 70000, 90000]
+      lr_steps = [40000, 60000, 80000]
       if args.loss_type==1:
         lr_steps = [100000, 140000, 160000]
     else:

@@ -34,7 +34,10 @@ from sklearn.model_selection import KFold
 from scipy import interpolate
 import sklearn
 from sklearn.decomposition import PCA
-#import facenet
+import mxnet as mx
+from mxnet import ndarray as nd
+
+
 
 def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_folds=10, pca = 0):
     assert(embeddings1.shape[0] == embeddings2.shape[0])
@@ -186,5 +189,89 @@ def read_pairs(pairs_filename):
             pairs.append(pair)
     return np.array(pairs)
 
+def load_dataset(lfw_dir, image_size):
+  lfw_pairs = read_pairs(os.path.join(lfw_dir, 'pairs.txt'))
+  lfw_paths, issame_list = get_paths(lfw_dir, lfw_pairs, 'jpg')
+  lfw_data_list = []
+  for flip in [0,1]:
+    lfw_data = nd.empty((len(lfw_paths), 3, image_size[0], image_size[1]))
+    lfw_data_list.append(lfw_data)
+  i = 0
+  for path in lfw_paths:
+    with open(path, 'rb') as fin:
+      _bin = fin.read()
+      img = mx.image.imdecode(_bin)
+      img = nd.transpose(img, axes=(2, 0, 1))
+      for flip in [0,1]:
+        if flip==1:
+          img = mx.ndarray.flip(data=img, axis=2)
+        lfw_data_list[flip][i][:] = img
+      i+=1
+      if i%1000==0:
+        print('loading lfw', i)
+  print(lfw_data_list[0].shape)
+  print(lfw_data_list[1].shape)
+  return (lfw_data_list, issame_list)
 
+def test(lfw_set, mx_model, batch_size):
+  print('testing lfw..')
+  lfw_data_list = lfw_set[0]
+  issame_list = lfw_set[1]
+  model = mx_model
+  embeddings_list = []
+  for i in xrange( len(lfw_data_list) ):
+    lfw_data = lfw_data_list[i]
+    embeddings = None
+    ba = 0
+    while ba<lfw_data.shape[0]:
+      bb = min(ba+batch_size, lfw_data.shape[0])
+      _data = nd.slice_axis(lfw_data, axis=0, begin=ba, end=bb)
+      _label = nd.ones( (bb-ba,) )
+      #print(_data.shape, _label.shape)
+      db = mx.io.DataBatch(data=(_data,), label=(_label,))
+      model.forward(db, is_train=False)
+      net_out = model.get_outputs()
+      #_arg, _aux = model.get_params()
+      #__arg = {}
+      #for k,v in _arg.iteritems():
+      #  __arg[k] = v.as_in_context(_ctx)
+      #_arg = __arg
+      #_arg["data"] = _data.as_in_context(_ctx)
+      #_arg["softmax_label"] = _label.as_in_context(_ctx)
+      #for k,v in _arg.iteritems():
+      #  print(k,v.context)
+      #exe = sym.bind(_ctx, _arg ,args_grad=None, grad_req="null", aux_states=_aux)
+      #exe.forward(is_train=False)
+      #net_out = exe.outputs
+      _embeddings = net_out[0].asnumpy()
+      #print(_embeddings.shape)
+      if embeddings is None:
+        embeddings = np.zeros( (lfw_data.shape[0], _embeddings.shape[1]) )
+      embeddings[ba:bb,:] = _embeddings
+      ba = bb
+    embeddings_list.append(embeddings)
+
+  _xnorm = 0.0
+  _xnorm_cnt = 0
+  for embed in embeddings_list:
+    for i in xrange(embed.shape[0]):
+      _em = embed[i]
+      _norm=np.linalg.norm(_em)
+      #print(_em.shape, _norm)
+      _xnorm+=_norm
+      _xnorm_cnt+=1
+  _xnorm /= _xnorm_cnt
+
+  embeddings = embeddings_list[0].copy()
+  embeddings = sklearn.preprocessing.normalize(embeddings)
+  _, _, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=10)
+  acc1, std1 = np.mean(accuracy), np.std(accuracy)
+  #print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
+  #embeddings = np.concatenate(embeddings_list, axis=1)
+  embeddings = embeddings_list[0] + embeddings_list[1]
+  embeddings = sklearn.preprocessing.normalize(embeddings)
+  print(embeddings.shape)
+  _, _, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=10)
+  acc2, std2 = np.mean(accuracy), np.std(accuracy)
+  return acc1, std1, acc2, std2, _xnorm, embeddings_list
 

@@ -27,118 +27,140 @@ import face_preprocess
 
 logger = logging.getLogger()
 
-#modification on ImageIter
 class FaceImageIter(io.DataIter):
 
-    def __init__(self, batch_size, data_shape, images_per_person, margin = 44, path_imglist=None, path_root=None,
-                 shuffle=False, aug_list=None,
+    def __init__(self, batch_size, data_shape,
+                 path_imgrec = None,
+                 shuffle=False, aug_list=None, mean = None,
+                 rand_mirror = False,
                  data_name='data', label_name='softmax_label', **kwargs):
         super(FaceImageIter, self).__init__()
-        assert path_imglist
-        self.label2key = {}
-        self.labelkeys = []
-        print('loading image list...')
-        with open(path_imglist) as fin:
-            imglist = {}
-            imgkeys = []
-            key = 0
-            for line in iter(fin.readline, ''):
-                line = line.strip().split('\t')
-                if len(line)<17:
-                  continue #skip no detected face image
-                label = nd.array([float(line[2])])
-                ilabel = int(line[2])
-                if ilabel not in self.label2key:
-                  self.label2key[ilabel] = [key]
-                  self.labelkeys.append(ilabel)
-                  #self.labelcur[ilabel] = 0
-                else:
-                  self.label2key[ilabel].append(key)
-                #label = nd.array([float(i) for i in line[1:-1]])
-                bbox = np.array([int(i) for i in line[3:7]])
-                #key = int(line[0])
-                imglist[key] = (label, line[1], bbox)
-                imgkeys.append(key)
-                key+=1
-            self.imglist = imglist
-        print('image list size', len(self.imglist))
+        assert path_imgrec
+        if path_imgrec:
+            logging.info('loading recordio %s...',
+                         path_imgrec)
+            path_imgidx = path_imgrec[0:-4]+".idx"
+            self.imgrec = recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, 'r')  # pylint: disable=redefined-variable-type
+            s = self.imgrec.read_idx(0)
+            header, _ = recordio.unpack(s)
+            if header.flag>0:
+              print('header0 label', header.label)
+              #assert(header.flag==1)
+              self.imgidx = range(1, int(header.label[0]))
+              self.idx2range = {}
+              self.seq_identity = range(int(header.label[0]), int(header.label[1]))
+              for identity in self.seq_identity:
+                s = self.imgrec.read_idx(identity)
+                header, _ = recordio.unpack(s)
+                #print('flag', header.flag)
+                #print(header.label)
+                #assert(header.flag==2)
+                self.idx2range[identity] = (int(header.label[0]), int(header.label[1]))
+              print('idx2range', len(self.idx2range))
+            else:
+              self.imgidx = list(self.imgrec.keys)
+            if shuffle:
+              self.seq = self.imgidx
+            else:
+              self.seq = None
 
-        self.path_root = path_root
-        self.margin = margin
+        self.mean = mean
+        self.nd_mean = None
+        if self.mean:
+          self.mean = np.array(self.mean, dtype=np.float32).reshape(1,1,3)
+          self.nd_mean = mx.nd.array(self.mean).reshape((1,1,3))
 
         self.check_data_shape(data_shape)
         self.provide_data = [(data_name, (batch_size,) + data_shape)]
         self.provide_label = [(label_name, (batch_size,))]
         self.batch_size = batch_size
         self.data_shape = data_shape
-        self.images_per_person = images_per_person
-        #self.label_width = label_width
-        self.imgkeys = imgkeys
         self.shuffle = shuffle
+        self.image_size = '%d,%d'%(data_shape[1],data_shape[2])
+        self.rand_mirror = rand_mirror
+        #self.cast_aug = mx.image.CastAug()
+        #self.color_aug = mx.image.ColorJitterAug(0.4, 0.4, 0.4)
 
-        if aug_list is None:
-            self.auglist = mx.image.CreateAugmenter(data_shape, **kwargs)
-        else:
-            self.auglist = aug_list
-        print('aug size:', len(self.auglist))
-        #for aug in self.auglist:
-        #  print(aug.__name__)
         self.cur = 0
-        self.labelcur = 0
         self.reset()
 
     def reset(self):
         """Resets the iterator to the beginning of the data."""
+        print('call reset()')
         if self.shuffle:
-            #random.shuffle(self.imgkeys)
-            random.shuffle(self.labelkeys)
+            random.shuffle(self.seq)
+        if self.imgrec is not None:
+            self.imgrec.reset()
         self.cur = 0
-        self.labelcur = 0
-        #for k in self.label2key:
-        #  random.shuffle(self.label2key[k])
 
-    def _next_sample(self):
-        """Helper function for reading in next sample."""
-        #set total batch size, for example, 1800, and maximum size for each people, for example 45
-        while True:
-          if self.cur >= len(self.labelkeys):
-            raise StopIteration
-          ilabel = self.labelkeys[self.cur]
-          if self.labelcur>=min(len(self.label2key[ilabel]), self.images_per_person):
-            self.labelcur=0
-            self.cur+=1
-          else:
-            idx = self.label2key[ilabel][self.labelcur]
-            self.labelcur += 1
-            label, fname, bbox = self.imglist[idx]
-            return label, self.read_image(fname), bbox
+    def num_samples(self):
+      return len(self.seq)
 
     def next_sample(self):
         """Helper function for reading in next sample."""
         #set total batch size, for example, 1800, and maximum size for each people, for example 45
-        while True:
-          if self.cur >= len(self.labelkeys):
-            raise StopIteration
-          ilabel = self.labelkeys[self.cur]
-          if self.labelcur>=min(len(self.label2key[ilabel]), self.images_per_person):
-            self.labelcur=0
-            self.cur+=1
+        if self.seq is not None:
+          if self.cur >= len(self.seq):
+              raise StopIteration
+          idx = self.seq[self.cur]
+          self.cur += 1
+          if self.imgrec is not None:
+            s = self.imgrec.read_idx(idx)
+            header, img = recordio.unpack(s)
+            return header.label, img, None, None
           else:
-            #print('in next_sample', self.cur, self.labelcur)
-            if self.labelcur==0 and self.shuffle:
-              #print('shuffling')
-              random.shuffle(self.label2key[ilabel])
-            idx = self.label2key[ilabel][self.labelcur]
-            self.labelcur += 1
-            label, fname, bbox = self.imglist[idx]
-            return label, self.read_image(fname), bbox
+            label, fname, bbox, landmark = self.imglist[idx]
+            return label, self.read_image(fname), bbox, landmark
+        else:
+            s = self.imgrec.read()
+            if s is None:
+                raise StopIteration
+            header, img = recordio.unpack(s)
+            return header.label, img, None, None
+
+    def brightness_aug(self, src, x):
+      alpha = 1.0 + random.uniform(-x, x)
+      src *= alpha
+      return src
+
+    def contrast_aug(self, src, x):
+      alpha = 1.0 + random.uniform(-x, x)
+      coef = np.array([[[0.299, 0.587, 0.114]]])
+      gray = src * coef
+      gray = (3.0 * (1.0 - alpha) / gray.size) * np.sum(gray)
+      src *= alpha
+      src += gray
+      return src
+
+    def saturation_aug(self, src, x):
+      alpha = 1.0 + random.uniform(-x, x)
+      coef = np.array([[[0.299, 0.587, 0.114]]])
+      gray = src * coef
+      gray = np.sum(gray, axis=2, keepdims=True)
+      gray *= (1.0 - alpha)
+      src *= alpha
+      src += gray
+      return src
+
+    def color_aug(self, img, x):
+      augs = [self.brightness_aug, self.contrast_aug, self.saturation_aug]
+      random.shuffle(augs)
+      for aug in augs:
+        #print(img.shape)
+        img = aug(img, x)
+        #print(img.shape)
+      return img
+
+    def mirror_aug(self, img):
+      _rd = random.randint(0,1)
+      if _rd==1:
+        for c in xrange(img.shape[2]):
+          img[:,:,c] = np.fliplr(img[:,:,c])
+      return img
+
 
     def next(self):
         """Returns the next batch of data."""
-        if self.shuffle:
-            random.shuffle(self.labelkeys)
-            self.cur = 0
-            self.labelcur = 0
         #print('in next', self.cur, self.labelcur)
         batch_size = self.batch_size
         c, h, w = self.data_shape
@@ -147,23 +169,48 @@ class FaceImageIter(io.DataIter):
         i = 0
         try:
             while i < batch_size:
-                label, s, bbox = self.next_sample()
-                data = [self.imdecode(s, bbox)]
+                label, s, bbox, landmark = self.next_sample()
+                _data = self.imdecode(s)
+                if self.rand_mirror:
+                  _rd = random.randint(0,1)
+                  if _rd==1:
+                    _data = mx.ndarray.flip(data=_data, axis=1)
+                if self.nd_mean is not None:
+                    _data = _data.astype('float32')
+                    _data -= self.nd_mean
+                    _data *= 0.0078125
+                #_npdata = _data.asnumpy()
+                #if landmark is not None:
+                #  _npdata = face_preprocess.preprocess(_npdata, bbox = bbox, landmark=landmark, image_size=self.image_size)
+                #if self.rand_mirror:
+                #  _npdata = self.mirror_aug(_npdata)
+                #if self.mean is not None:
+                #  _npdata = _npdata.astype(np.float32)
+                #  _npdata -= self.mean
+                #  _npdata *= 0.0078125
+                #nimg = np.zeros(_npdata.shape, dtype=np.float32)
+                #nimg[self.patch[1]:self.patch[3],self.patch[0]:self.patch[2],:] = _npdata[self.patch[1]:self.patch[3], self.patch[0]:self.patch[2], :]
+                #_data = mx.nd.array(nimg)
+                data = [_data]
                 try:
                     self.check_valid_image(data)
                 except RuntimeError as e:
                     logging.debug('Invalid image, skipping:  %s', str(e))
                     continue
-                data = self.augmentation_transform(data)
+                #print('aa',data[0].shape)
+                #data = self.augmentation_transform(data)
+                #print('bb',data[0].shape)
                 for datum in data:
                     assert i < batch_size, 'Batch size must be multiples of augmenter output length'
+                    #print(datum.shape)
                     batch_data[i][:] = self.postprocess_data(datum)
                     batch_label[i][:] = label
                     i += 1
         except StopIteration:
-            if not i:
+            if i<batch_size:
                 raise StopIteration
 
+        #print('next end', batch_size, i)
         return io.DataBatch([batch_data], [batch_label], batch_size - i)
 
     def check_data_shape(self, data_shape):
@@ -178,15 +225,10 @@ class FaceImageIter(io.DataIter):
         if len(data[0].shape) == 0:
             raise RuntimeError('Data shape is wrong')
 
-    def imdecode(self, s, bbox):
+    def imdecode(self, s):
         """Decodes a string or byte string to an NDArray.
         See mx.img.imdecode for more details."""
-        img = mx.image.imdecode(s)
-        if bbox is not None:
-          #print(img.shape, bbox)
-          _begin = (max(0, bbox[1]-self.margin//2), max(0, bbox[0]-self.margin//2),0)
-          _end = (min(img.shape[0], bbox[3]+self.margin//2), min(img.shape[1], bbox[2]+self.margin//2), 3)
-          img = nd.slice(img, begin=_begin, end=_end)
+        img = mx.image.imdecode(s) #mx.ndarray
         return img
 
     def read_image(self, fname):
@@ -642,6 +684,314 @@ class FaceImageIter2(io.DataIter):
         """Final postprocessing step before image is loaded into the batch."""
         return nd.transpose(datum, axes=(2, 0, 1))
 
+class FaceImageIter3(io.DataIter):
+
+    def __init__(self, batch_size, ctx_num, images_per_identity, data_shape,
+                 path_imgrec = None,
+                 shuffle=False, mean = None, use_extra = False, model = None,
+                 patch = [0,0,96,112,0], rand_mirror = False,
+                 data_name='data', label_name='softmax_label', **kwargs):
+        super(FaceImageIter3, self).__init__()
+        assert(path_imgrec)
+        logging.info('loading recordio %s...',
+                     path_imgrec)
+        path_imgidx = path_imgrec[0:-4]+".idx"
+        self.imgrec = recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, 'r')  # pylint: disable=redefined-variable-type
+        #self.imgidx = list(self.imgrec.keys)
+        s = self.imgrec.read_idx(0)
+        header, _ = recordio.unpack(s)
+        assert(header.flag==1)
+        self.seq = range(1, int(header.label[0]))
+        self.idx2range = {}
+        self.seq_identity = range(int(header.label[0]), int(header.label[1]))
+        for identity in self.seq_identity:
+          s = self.imgrec.read_idx(identity)
+          header, _ = recordio.unpack(s)
+          assert(header.flag==2)
+          self.idx2range[identity] = (int(header.label[0]), int(header.label[1]))
+        print('idx2range', len(idx2range))
+
+
+        self.path_root = path_root
+        self.mean = mean
+        self.nd_mean = None
+        if self.mean:
+          self.mean = np.array(self.mean, dtype=np.float32).reshape(1,1,3)
+          self.nd_mean = mx.nd.array(self.mean).reshape((1,1,3))
+        self.patch = patch
+
+        self.check_data_shape(data_shape)
+        self.provide_data = [(data_name, (batch_size,) + data_shape)]
+        self.provide_label = [(label_name, (batch_size,))]
+        self.batch_size = batch_size
+        self.data_shape = data_shape
+        self.shuffle = shuffle
+        self.image_size = '%d,%d'%(data_shape[1],data_shape[2])
+        self.rand_mirror = rand_mirror
+        self.ctx_num = ctx_num 
+        self.images_per_identity = images_per_identity
+        self.identities = int(per_batch_size/self.images_per_identity)
+        self.min_per_identity = 1
+        assert self.min_per_identity<=self.images_per_identity
+        print(self.images_per_identity, self.identities, self.min_per_identity)
+        self.extra = None
+        self.model = model
+        if use_extra:
+          self.provide_data = [(data_name, (batch_size,) + data_shape), ('extra', (batch_size, per_batch_size))]
+          self.extra = np.full(self.provide_data[1][1], -1.0, dtype=np.float32)
+          c = 0
+          while c<batch_size:
+            a = 0
+            while a<per_batch_size:
+              b = a+images_per_identity
+              self.extra[(c+a):(c+b),a:b] = 1.0
+              #print(c+a, c+b, a, b)
+              a = b
+            c += per_batch_size
+          self.extra = nd.array(self.extra)
+          print(self.extra)
+        else:
+          self.provide_data = [(data_name, (batch_size,) + data_shape)]
+        self.cur = [0,0]
+        self.reset()
+        self.inited = False
+
+    def offline_reset(self):
+      self.seq_sim_identity = []
+      data = nd.zeros( self.provide_data[0][1] )
+      label = nd.zeros( self.provide_label[0][1] )
+      #label = np.zeros( self.provide_label[0][1] )
+      X = None
+      ba = 0
+      batch_num = 0
+      while ba<len(self.seq):
+        batch_num+=1
+        if batch_num%10==0:
+          print('loading batch',batch_num, ba)
+        bb = min(ba+self.batch_size, len(self.seq))
+        _count = bb-ba
+        for i in xrange(_count):
+          key = self.seq[i+ba]
+          _label, fname, bbox, landmark = self.imglist[key]
+          s = self.read_image(fname)
+          _data = self.imdecode(s)
+          #_data = self.augmentation_transform([_data])[0]
+          _npdata = _data.asnumpy()
+          if landmark is not None:
+            _npdata = face_preprocess.preprocess(_npdata, bbox = bbox, landmark=landmark, image_size=self.image_size)
+          if self.mean is not None:
+            _npdata = _npdata.astype(np.float32)
+            _npdata -= self.mean
+            _npdata *= 0.0078125
+          nimg = np.zeros(_npdata.shape, dtype=np.float32)
+          nimg[self.patch[1]:self.patch[3],self.patch[0]:self.patch[2],:] = _npdata[self.patch[1]:self.patch[3], self.patch[0]:self.patch[2], :]
+          #print(_npdata.shape)
+          #print(_npdata)
+          _data = mx.nd.array(nimg)
+          data[i][:] = self.postprocess_data(_data)
+          label[i][:] = _label
+        db = mx.io.DataBatch(data=(data,self.extra), label=(label,))
+        self.model.forward(db, is_train=False)
+        net_out = self.model.get_outputs()
+        _embeddings = net_out[0].asnumpy()
+        _embeddings = sklearn.preprocessing.normalize(_embeddings)
+        if _count<self.batch_size:
+          _embeddings = _embeddings[0:_count,:]
+        #print(_embeddings.shape)
+        if X is None:
+          X = np.zeros( (len(self.olabels), _embeddings.shape[1]), dtype=np.float32 )
+        nplabel = label.asnumpy()
+        for i in xrange(_count):
+          ilabel = int(nplabel[i])
+          #print(ilabel, ilabel.__class__)
+          X[ilabel] += _embeddings[i]
+        ba = bb
+      X = sklearn.preprocessing.normalize(X)
+      d = X.shape[1]
+      faiss_params = [20,5]
+      print('start to train faiss')
+      print(X.shape)
+      quantizer = faiss.IndexFlatL2(d)  # the other index
+      index = faiss.IndexIVFFlat(quantizer, d, faiss_params[0], faiss.METRIC_L2)
+      assert not index.is_trained
+      index.train(X)
+      index.add(X)
+      assert index.is_trained
+      print('trained')
+      index.nprobe = faiss_params[1]
+      k = self.identities
+      D, I = index.search(X, k)     # actual search
+      print(I.shape)
+      self.labels = []
+      for i in xrange(I.shape[0]):
+        #assert I[i][0]==i
+        for j in xrange(k):
+          _label = I[i][j]
+          assert _label<len(self.olabels)
+          self.labels.append(_label)
+      print('labels assigned', len(self.labels))
+
+    def reset(self):
+        """Resets the iterator to the beginning of the data."""
+        print('call reset()')
+        if self.shuffle:
+            offline_reset()
+            random.shuffle(self.seq)
+            random.shuffle(self.seq_identity)
+        if self.imgrec is not None:
+            self.imgrec.reset()
+        self.cur = [0,0]
+
+    def num_samples(self):
+      return len(self.seq)
+
+    def next_sample(self):
+        """Helper function for reading in next sample."""
+        #set total batch size, for example, 1800, and maximum size for each people, for example 45
+        while True:
+          if self.cur[0] >= len(self.seq_sim_identity):
+              raise StopIteration
+          identity = self.seq_sim_identity[self.cur[0]]
+          if self.cur[1]>=self.images_per_identity:
+            self.cur[0]+=1
+            self.cur[1]=0
+            s = self.imgrec.read_idx(identity)
+            header, _ = recordio.unpack(s)
+            self.idx_range = range(int(header.label[0]), int(header.label[1]))
+            continue
+          if self.shuffle and self.cur[1]==0:
+            random.shuffle(self.idx_range)
+          idx = self.idx_range[self.cur[1]]
+          self.cur[1] += 1
+          s = self.imgrec.read_idx(idx)
+          header, img = recordio.unpack(s)
+          return header.label, img, None, None
+
+
+    def brightness_aug(self, src, x):
+      alpha = 1.0 + random.uniform(-x, x)
+      src *= alpha
+      return src
+
+    def contrast_aug(self, src, x):
+      alpha = 1.0 + random.uniform(-x, x)
+      coef = np.array([[[0.299, 0.587, 0.114]]])
+      gray = src * coef
+      gray = (3.0 * (1.0 - alpha) / gray.size) * np.sum(gray)
+      src *= alpha
+      src += gray
+      return src
+
+    def saturation_aug(self, src, x):
+      alpha = 1.0 + random.uniform(-x, x)
+      coef = np.array([[[0.299, 0.587, 0.114]]])
+      gray = src * coef
+      gray = np.sum(gray, axis=2, keepdims=True)
+      gray *= (1.0 - alpha)
+      src *= alpha
+      src += gray
+      return src
+
+    def color_aug(self, img, x):
+      augs = [self.brightness_aug, self.contrast_aug, self.saturation_aug]
+      random.shuffle(augs)
+      for aug in augs:
+        #print(img.shape)
+        img = aug(img, x)
+        #print(img.shape)
+      return img
+
+    def mirror_aug(self, img):
+      _rd = random.randint(0,1)
+      if _rd==1:
+        for c in xrange(img.shape[2]):
+          img[:,:,c] = np.fliplr(img[:,:,c])
+      return img
+
+
+    def next(self):
+        if not self.inited:
+          self.reset()
+          self.inited = True
+        """Returns the next batch of data."""
+        #print('in next', self.cur, self.labelcur)
+        batch_size = self.batch_size
+        c, h, w = self.data_shape
+        batch_data = nd.empty((batch_size, c, h, w))
+        batch_label = nd.empty(self.provide_label[0][1])
+        i = 0
+        try:
+            while i < batch_size:
+                label, s, bbox, landmark = self.next_sample()
+                _data = self.imdecode(s)
+                if self.rand_mirror:
+                  _rd = random.randint(0,1)
+                  if _rd==1:
+                    _data = mx.ndarray.flip(data=_data, axis=1)
+                if self.nd_mean is not None:
+                    _data = _data.astype('float32')
+                    _data -= self.nd_mean
+                    _data *= 0.0078125
+                data = [_data]
+                try:
+                    self.check_valid_image(data)
+                except RuntimeError as e:
+                    logging.debug('Invalid image, skipping:  %s', str(e))
+                    continue
+                #print('aa',data[0].shape)
+                #data = self.augmentation_transform(data)
+                #print('bb',data[0].shape)
+                for datum in data:
+                    assert i < batch_size, 'Batch size must be multiples of augmenter output length'
+                    #print(datum.shape)
+                    batch_data[i][:] = self.postprocess_data(datum)
+                    batch_label[i][:] = label
+                    i += 1
+        except StopIteration:
+            if i<batch_size:
+                raise StopIteration
+
+        #print('next end', batch_size, i)
+        return io.DataBatch([batch_data], [batch_label], batch_size - i)
+
+    def check_data_shape(self, data_shape):
+        """Checks if the input data shape is valid"""
+        if not len(data_shape) == 3:
+            raise ValueError('data_shape should have length 3, with dimensions CxHxW')
+        if not data_shape[0] == 3:
+            raise ValueError('This iterator expects inputs to have 3 channels.')
+
+    def check_valid_image(self, data):
+        """Checks if the input data is valid"""
+        if len(data[0].shape) == 0:
+            raise RuntimeError('Data shape is wrong')
+
+    def imdecode(self, s):
+        """Decodes a string or byte string to an NDArray.
+        See mx.img.imdecode for more details."""
+        img = mx.image.imdecode(s) #mx.ndarray
+        return img
+
+    def read_image(self, fname):
+        """Reads an input image `fname` and returns the decoded raw bytes.
+
+        Example usage:
+        ----------
+        >>> dataIter.read_image('Face.jpg') # returns decoded raw bytes.
+        """
+        with open(os.path.join(self.path_root, fname), 'rb') as fin:
+            img = fin.read()
+        return img
+
+    def augmentation_transform(self, data):
+        """Transforms input data with specified augmentation."""
+        for aug in self.auglist:
+            data = [ret for src in data for ret in aug(src)]
+        return data
+
+    def postprocess_data(self, datum):
+        """Final postprocessing step before image is loaded into the batch."""
+        return nd.transpose(datum, axes=(2, 0, 1))
 
 class FaceImageIter4(io.DataIter):
 
@@ -705,15 +1055,6 @@ class FaceImageIter4(io.DataIter):
         per_batch_size = int(batch_size/ctx_num)
         self.provide_label = [(label_name, (batch_size,))]
         self.batch_size = batch_size
-        self.ctx_num = ctx_num 
-        self.images_per_identity = images_per_identity
-        self.identities = int(per_batch_size/self.images_per_identity)
-        self.min_per_identity = 10
-        if self.images_per_identity<=10:
-          self.min_per_identity = self.images_per_identity
-        self.min_per_identity = 1
-        assert self.min_per_identity<=self.images_per_identity
-        print(self.images_per_identity, self.identities, self.min_per_identity)
         self.data_shape = data_shape
         self.shuffle = shuffle
         self.image_size = '%d,%d'%(data_shape[1],data_shape[2])
@@ -748,6 +1089,15 @@ class FaceImageIter4(io.DataIter):
           print(self.extra)
         else:
           self.provide_data = [(data_name, (batch_size,) + data_shape)]
+        self.ctx_num = ctx_num 
+        self.images_per_identity = images_per_identity
+        self.identities = int(per_batch_size/self.images_per_identity)
+        self.min_per_identity = 10
+        if self.images_per_identity<=10:
+          self.min_per_identity = self.images_per_identity
+        self.min_per_identity = 1
+        assert self.min_per_identity<=self.images_per_identity
+        print(self.images_per_identity, self.identities, self.min_per_identity)
 
         if aug_list is None:
             self.auglist = mx.image.CreateAugmenter(data_shape, **kwargs)
@@ -893,25 +1243,14 @@ class FaceImageIter4(io.DataIter):
             while i < batch_size:
                 label, s, bbox, landmark = self.next_sample()
                 _data = self.imdecode(s)
-                #_data = self.augmentation_transform([_data])[0]
-                _npdata = _data.asnumpy()
-                if landmark is not None:
-                  _npdata = face_preprocess.preprocess(_npdata, bbox = bbox, landmark=landmark, image_size=self.image_size)
                 if self.rand_mirror:
                   _rd = random.randint(0,1)
                   if _rd==1:
-                    for c in xrange(_npdata.shape[2]):
-                      _npdata[:,:,c] = np.fliplr(_npdata[:,:,c])
-                if self.mean is not None:
-                  _npdata = _npdata.astype(np.float32)
-                  _npdata -= self.mean
-                  _npdata *= 0.0078125
-                nimg = np.zeros(_npdata.shape, dtype=np.float32)
-                nimg[self.patch[1]:self.patch[3],self.patch[0]:self.patch[2],:] = _npdata[self.patch[1]:self.patch[3], self.patch[0]:self.patch[2], :]
-                #print(_npdata.shape)
-                #print(_npdata)
-                _data = mx.nd.array(nimg)
-                #print(_data.shape)
+                    _data = mx.ndarray.flip(data=_data, axis=1)
+                if self.nd_mean is not None:
+                    _data = _data.astype('float32')
+                    _data -= self.nd_mean
+                    _data *= 0.0078125
                 data = [_data]
                 try:
                     self.check_valid_image(data)

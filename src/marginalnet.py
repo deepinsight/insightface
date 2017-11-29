@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 import mxnet as mx
 import numpy as np
 
@@ -133,18 +136,29 @@ def resnet_unit6(data, num_filter, name, dim_match=True, workspace = 256):
   return body
 
 def resnet_unit7(data, num_filter, name, dim_match=True, workspace = 256):
+  #se block
   bn_mom = 0.9
   shortcut = data
-  body = Conv(data=data, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1), num_group=32,
+  body = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn1')
+  body = Conv(data=body, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1),
                             name=name+"_conv1", workspace=workspace)
-  body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn1')
-  body = Act(data=body, name=name+'_relu1')
-  body = Conv(data=body, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1), num_group=32,
-                            name=name+"_conv2", workspace=workspace)
   body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn2')
+  body = Act(data=body, name=name+'_relu1')
+  body = Conv(data=body, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1),
+                            name=name+"_conv2", workspace=workspace)
+  res = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name+'_bn3')
+
+  body = mx.sym.Pooling(data=res, global_pool=True, kernel=(7, 7), pool_type='avg', name=name+'_se_pool1')
+  body = Conv(data=body, num_filter=num_filter//16, kernel=(1,1), stride=(1,1), pad=(0,0),
+                            name=name+"_se_conv1", workspace=workspace)
+  body = Act(data=body, name=name+'_se_relu1')
+  body = Conv(data=body, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0),
+                            name=name+"_se_conv2", workspace=workspace)
+  body = mx.symbol.Activation(data=body, act_type='sigmoid', name=name+"_se_sigmoid")
+  body = mx.symbol.broadcast_mul(res, body)
+
   if dim_match:
     body = body+shortcut
-  body = Act(data=body, name=name+'_relu2')
   return body
 
 def resnet_unit100(data, num_filter, name, dim_match=True, workspace = 256):
@@ -231,6 +245,9 @@ def get_symbol(num_classes, num_layers, conv_workspace=256):
       rtype = 3
     elif num_layers==52:
       filter_list = [64, 256, 512, 1024]
+      units = [2,3,15,3]
+      rtype = 3
+    elif num_layers==53: #se block
       units = [2,3,15,3]
       rtype = 7
     elif num_layers==74:

@@ -114,7 +114,7 @@ def get_dataset_common(input_dir):
   return ret
 
 def get_dataset(name, input_dir):
-  if name=='webface' or name=='lfw':
+  if name=='webface' or name=='lfw' or name=='vgg':
     return get_dataset_common(input_dir)
   if name=='celeb':
     return get_dataset_celeb(input_dir)
