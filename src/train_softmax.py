@@ -19,6 +19,7 @@ import argparse
 import mxnet.optimizer as optimizer
 #sys.path.append(os.path.join(os.path.dirname(__file__), 'common'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'symbols'))
 import spherenet
 import marginalnet
 import inceptions
