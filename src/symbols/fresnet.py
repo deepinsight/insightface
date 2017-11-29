@@ -85,7 +85,7 @@ def residual_unit(data, num_filter, stride, dim_match, name, bottle_neck=True, u
             shortcut._set_attr(mirror_stage='True')
         return conv2 + shortcut
 
-def resnet(units, num_stages, filter_list, num_classes, image_shape, bottle_neck=True, use_se=False, bn_mom=0.9, workspace=256, dtype='float32', memonger=False):
+def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se=False, bn_mom=0.9, workspace=256, dtype='float32', memonger=False):
     """Return ResNet symbol of
     Parameters
     ----------
@@ -177,7 +177,6 @@ def get_symbol(num_classes, num_layers, conv_workspace=256, dtype='float32', **k
                   num_stages  = num_stages,
                   filter_list = filter_list,
                   num_classes = num_classes,
-                  image_shape = image_shape,
                   bottle_neck = bottle_neck,
                   use_se      = use_se,
                   workspace   = conv_workspace,
