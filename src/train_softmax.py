@@ -22,8 +22,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'symbols'))
 import spherenet
 import marginalnet
-import inceptions
-import xception 
+import fresnet
+#import inceptions
+#import xception 
 import lfw
 import sklearn
 from sklearn.decomposition import PCA
@@ -146,7 +147,7 @@ def get_symbol(args, arg_params, aux_params):
     embedding,_ = xception.get_xception_symbol(512)
   else:
     print('init resnet', args.num_layers)
-    _,_,embedding,_ = resnet_dcn.get_symbol(512, args.num_layers)
+    embedding = fresnet.get_symbol(512, args.num_layers)
   gt_label = mx.symbol.Variable('softmax_label')
   assert args.loss_type>=0
   extra_loss = None
@@ -214,10 +215,7 @@ def get_symbol(args, arg_params, aux_params):
     #fc7 = mx.sym.Custom(data=embedding, label=gt_label, weight=_weight, num_hidden=args.num_classes,
     #                       beta=args.beta, margin=args.margin, scale=args.scale,
     #                       op_type='ASoftmax', name='fc7')
-  if args.loss_type>=args.rescale_threshold:
-    softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
-  else:
-    softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax')
+  softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
   if args.loss_type<=1 and args.incay>0.0:
     params = [1.e-10]
     sel = mx.symbol.argmax(data = fc7, axis=1)
@@ -450,9 +448,7 @@ def train_net(args):
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2) #inception
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
-    _rescale = 1.0/args.batch_size
-    if args.loss_type>=args.rescale_threshold:
-      _rescale = 1.0/args.ctx_num
+    _rescale = 1.0/args.ctx_num
     #_rescale = 1.0
     opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
     #opt = optimizer.RMSProp(learning_rate=base_lr, wd=base_wd, rescale_grad=_rescale)
