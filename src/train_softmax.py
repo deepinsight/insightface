@@ -20,9 +20,10 @@ import mxnet.optimizer as optimizer
 #sys.path.append(os.path.join(os.path.dirname(__file__), 'common'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'symbols'))
+import fresnet
+import finception_resnet_v2
 import spherenet
 import marginalnet
-import fresnet
 #import inceptions
 #import xception 
 import lfw
@@ -142,8 +143,8 @@ def get_symbol(args, arg_params, aux_params):
     print('init marginal', args.num_layers)
     embedding = marginalnet.get_symbol(512, args.num_layers)
   elif args.network[0]=='i':
-    print('init inception', args.num_layers)
-    embedding,_ = inceptions.get_symbol_irv2(512)
+    print('init inception-resnet-v2', args.num_layers)
+    embedding = finception_resnet_v2.get_symbol(512)
   elif args.network[0]=='x':
     print('init xception', args.num_layers)
     embedding,_ = xception.get_xception_symbol(512)
