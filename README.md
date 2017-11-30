@@ -5,7 +5,7 @@ Face Recognition Project
 
 Default image size is 112x96 if not specified, all face images are aligned.
 
-_v1 means original residual units.  _v2 means pre-activation units.  _v3 means BCBACB residual units.
+In ResNet setting, _v1 means original residual units.  _v2 means pre-activation units.  _v3 means BCBACB residual units.
 
 _bo means using bottleneck residual units.
 
