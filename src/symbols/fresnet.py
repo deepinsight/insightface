@@ -314,7 +314,9 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se
     assert(num_unit == num_stages)
     data = mx.sym.Variable(name='data')
     data = mx.sym.identity(data=data, name='id')
-    data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
+    data = data-127.5
+    data = data*0.0078125
+    #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
     #body = Conv(data=data, num_filter=filter_list[0], kernel=(7, 7), stride=(2,2), pad=(3, 3),
     #                          no_bias=True, name="conv0", workspace=workspace)
     body = Conv(data=data, num_filter=filter_list[0], kernel=(3,3), stride=(1,1), pad=(1, 1),
@@ -335,7 +337,7 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se
           bottle_neck=bottle_neck, use_se=use_se, workspace=workspace, memonger=memonger)
       #body = residual_unit(body, filter_list[i+1], (2,2), False, name='stage%d_unit%d' % (i+1, units[i]),
       #  bottle_neck=bottle_neck, use_se=use_se, workspace=workspace, memonger=memonger)
-    fc_type = 0#0 or 1
+    fc_type = 1#0 or 1
 
     if fc_type==0:
       bn1 = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
