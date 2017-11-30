@@ -337,7 +337,7 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se
           bottle_neck=bottle_neck, use_se=use_se, workspace=workspace, memonger=memonger)
       #body = residual_unit(body, filter_list[i+1], (2,2), False, name='stage%d_unit%d' % (i+1, units[i]),
       #  bottle_neck=bottle_neck, use_se=use_se, workspace=workspace, memonger=memonger)
-    fc_type = 1#0 or 1
+    fc_type = 0#0 or 1
 
     if fc_type==0:
       bn1 = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
@@ -345,7 +345,9 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se
       # Although kernel is not used here when global_pool=True, we should put one
       pool1 = mx.sym.Pooling(data=relu1, global_pool=True, kernel=(7, 7), pool_type='avg', name='pool1')
       flat = mx.sym.Flatten(data=pool1)
-      fc1 = mx.sym.FullyConnected(data=flat, num_hidden=num_classes, name='fc1')
+      #fc1 = mx.sym.FullyConnected(data=flat, num_hidden=num_classes, name='fc1')
+      fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
+      fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
     else:
       body = mx.symbol.Dropout(data=body, p=0.4)
       fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
