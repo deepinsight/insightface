@@ -261,11 +261,11 @@ def residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck=True
         return bn4 + shortcut
     else:
         bn1 = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
-        conv1 = Conv(data=bn1, num_filter=num_filter, kernel=(3,3), stride=stride, pad=(1,1),
+        conv1 = Conv(data=bn1, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1,1),
                                       no_bias=True, workspace=workspace, name=name + '_conv1')
         bn2 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
         act1 = Act(data=bn2, act_type='relu', name=name + '_relu1')
-        conv2 = Conv(data=act1, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1,1),
+        conv2 = Conv(data=act1, num_filter=num_filter, kernel=(3,3), stride=stride, pad=(1,1),
                                       no_bias=True, workspace=workspace, name=name + '_conv2')
         bn3 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn3')
         if use_se:
@@ -337,7 +337,7 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se
           bottle_neck=bottle_neck, use_se=use_se, workspace=workspace, memonger=memonger)
       #body = residual_unit(body, filter_list[i+1], (2,2), False, name='stage%d_unit%d' % (i+1, units[i]),
       #  bottle_neck=bottle_neck, use_se=use_se, workspace=workspace, memonger=memonger)
-    fc_type = 0#0 or 1
+    fc_type = 1#0 or 1
 
     if fc_type==0:
       bn1 = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
