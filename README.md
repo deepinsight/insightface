@@ -21,7 +21,7 @@ In last several layers, some different options can be tried to determine how emb
 
 |   Network/Dataset   |   VGG2@112x112   | WebFace | MS1M |  -   |  -   |
 | :-----------------: | :--------------: | :-----: | :--: | :--: | :--: |
-|  SE-LResNet50E_v3   |      0.9973      |    -    |  -   |      |      |
+|  SE-LResNet50E_v3   | 0.99750+-0.00201 |    -    |  -   |      |      |
 |   SE-ResNet50C_v1   | 0.99217+-0.00236 |         |      |      |      |
 |   SE-ResNet50B_v1   |  Not Converged   |         |      |      |      |
 |   SE-ResNet50D_v1   | 0.99283+-0.00366 |         |      |      |      |
