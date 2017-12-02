@@ -43,7 +43,7 @@ def Act(data, act_type, name):
     body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
     return body
 
-def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck=True, use_se=False, bn_mom=0.9, workspace=256, memonger=False):
+def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
     """Return ResNet Unit symbol for building ResNet
     Parameters
     ----------
@@ -62,6 +62,11 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck=True
     workspace : int
         Workspace used in convolution operator
     """
+    use_se = kwargs.get('use_se', False)
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    workspace = kwargs.get('workspace', 256)
+    memonger = kwargs.get('memonger', False)
+    #print('in unit1')
     if bottle_neck:
         conv1 = Conv(data=data, num_filter=int(num_filter*0.25), kernel=(1,1), stride=stride, pad=(0,0),
                                    no_bias=True, workspace=workspace, name=name + '_conv1')
@@ -126,7 +131,7 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck=True
             shortcut._set_attr(mirror_stage='True')
         return Act(data=bn2 + shortcut, act_type='relu', name=name + '_relu3')
 
-def residual_unit_v2(data, num_filter, stride, dim_match, name, bottle_neck=True, use_se=False, bn_mom=0.9, workspace=256, memonger=False):
+def residual_unit_v2(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
     """Return ResNet Unit symbol for building ResNet
     Parameters
     ----------
@@ -145,6 +150,11 @@ def residual_unit_v2(data, num_filter, stride, dim_match, name, bottle_neck=True
     workspace : int
         Workspace used in convolution operator
     """
+    use_se = kwargs.get('use_se', False)
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    workspace = kwargs.get('workspace', 256)
+    memonger = kwargs.get('memonger', False)
+    #print('in unit2')
     if bottle_neck:
         # the same as https://github.com/facebook/fb.resnet.torch#notes, a bit difference with origin paper
         bn1 = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
@@ -205,7 +215,8 @@ def residual_unit_v2(data, num_filter, stride, dim_match, name, bottle_neck=True
             shortcut._set_attr(mirror_stage='True')
         return conv2 + shortcut
 
-def residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck=True, use_se=False, bn_mom=0.9, workspace=256, memonger=False):
+def residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
+    
     """Return ResNet Unit symbol for building ResNet
     Parameters
     ----------
@@ -224,9 +235,14 @@ def residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck=True
     workspace : int
         Workspace used in convolution operator
     """
+    use_se = kwargs.get('use_se', False)
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    workspace = kwargs.get('workspace', 256)
+    memonger = kwargs.get('memonger', False)
+    #print('in unit3')
     if bottle_neck:
         bn1 = mx.sym.BatchNorm(data=data, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn1')
-        conv1 = Conv(data=bn1, num_filter=int(num_filter*0.25), kernel=(1,1), stride=stride, pad=(0,0),
+        conv1 = Conv(data=bn1, num_filter=int(num_filter*0.25), kernel=(1,1), stride=(1,1), pad=(0,0),
                                    no_bias=True, workspace=workspace, name=name + '_conv1')
         bn2 = mx.sym.BatchNorm(data=conv1, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn2')
         act1 = Act(data=bn2, act_type='relu', name=name + '_relu1')
@@ -234,7 +250,7 @@ def residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck=True
                                    no_bias=True, workspace=workspace, name=name + '_conv2')
         bn3 = mx.sym.BatchNorm(data=conv2, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn3')
         act2 = Act(data=bn3, act_type='relu', name=name + '_relu2')
-        conv3 = Conv(data=act2, num_filter=num_filter, kernel=(1,1), stride=(1,1), pad=(0,0), no_bias=True,
+        conv3 = Conv(data=act2, num_filter=num_filter, kernel=(1,1), stride=stride, pad=(0,0), no_bias=True,
                                    workspace=workspace, name=name + '_conv3')
         bn4 = mx.sym.BatchNorm(data=conv3, fix_gamma=False, eps=2e-5, momentum=bn_mom, name=name + '_bn4')
 
@@ -290,10 +306,18 @@ def residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck=True
             shortcut._set_attr(mirror_stage='True')
         return bn3 + shortcut
 
-def residual_unit(data, num_filter, stride, dim_match, name, bottle_neck=True, use_se=False, bn_mom=0.9, workspace=256, memonger=False):
-  return residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, use_se, bn_mom, workspace, memonger)
+def residual_unit(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
+  uv = kwargs.get('version_unit', 1)
+  if uv==1:
+    return residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs)
+  elif uv==2:
+    return residual_unit_v2(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs)
+  else:
+    return residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs)
 
-def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se=False, bn_mom=0.9, workspace=256, memonger=False):
+def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    workspace = kwargs.get('workspace', 256)
     """Return ResNet symbol of
     Parameters
     ----------
@@ -310,8 +334,12 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se
     workspace : int
         Workspace used in convolution operator
     """
-    L_type = False
-    fc_type = 'B'#'A'-'E'
+    version_input = kwargs.get('version_input', 0)
+    assert version_input>=0
+    version_output = kwargs.get('version_output', 'A')
+    fc_type = version_output
+    version_unit = kwargs.get('version_unit', 1)
+    print(version_input, version_output, version_unit)
     num_unit = len(units)
     assert(num_unit == num_stages)
     data = mx.sym.Variable(name='data')
@@ -319,26 +347,29 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se
     data = data-127.5
     data = data*0.0078125
     #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
-    if not L_type:
+    if version_input==0:
       body = Conv(data=data, num_filter=filter_list[0], kernel=(7, 7), stride=(2,2), pad=(3, 3),
                                 no_bias=True, name="conv0", workspace=workspace)
+      body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
+      body = Act(data=body, act_type='relu', name='relu0')
+      body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
     else:
-      body = Conv(data=data, num_filter=filter_list[0], kernel=(3,3), stride=(1,1), pad=(1, 1),
-                                no_bias=True, name="conv0", workspace=workspace)
-    body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
-    body = Act(data=body, act_type='relu', name='relu0')
-    body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
+      body = data
+      for i in xrange(version_input):
+        body = Conv(data=body, num_filter=filter_list[0], kernel=(3,3), stride=(1,1), pad=(1, 1),
+                                  no_bias=True, name="conv"+str(i), workspace=workspace)
+        body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn'+str(i))
+        body = Act(data=body, act_type='relu', name='relu'+str(i))
+      body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
 
     for i in range(num_stages):
       body = residual_unit(body, filter_list[i+1], (1 if i==0 else 2, 1 if i==0 else 2), False,
-                           name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, use_se=use_se,workspace=workspace,
-                           memonger=memonger)
+                           name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
       #body = residual_unit(body, filter_list[i+1], (2, 2), False,
-      #  name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, use_se=use_se,workspace=workspace,
-      #  memonger=memonger)
+      #  name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
       for j in range(units[i]-1):
         body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
-          bottle_neck=bottle_neck, use_se=use_se, workspace=workspace, memonger=memonger)
+          bottle_neck=bottle_neck, **kwargs)
 
 
     if fc_type=='E':
@@ -363,7 +394,7 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck=True, use_se
           fc1 = Act(data=fc1, act_type='relu', name='fc1_relu')
     return fc1
 
-def get_symbol(num_classes, num_layers, conv_workspace=256, **kwargs):
+def get_symbol(num_classes, num_layers, **kwargs):
     """
     Adapted from https://github.com/tornadomeet/ResNet/blob/master/train_resnet.py
     Original author Wei Wu
@@ -401,5 +432,4 @@ def get_symbol(num_classes, num_layers, conv_workspace=256, **kwargs):
                   filter_list = filter_list,
                   num_classes = num_classes,
                   bottle_neck = bottle_neck,
-                  use_se      = use_se,
-                  workspace   = conv_workspace)
+                  **kwargs)
