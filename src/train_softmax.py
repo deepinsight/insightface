@@ -78,10 +78,11 @@ def parse_args():
       help='directory to save model.')
   parser.add_argument('--pretrained', default='../model/resnet-152',
       help='')
-  parser.add_argument('--network', default='s20',
-      help='')
-  parser.add_argument('--use-se', action='store_true', default=False,
-      help='')
+  parser.add_argument('--network', default='s20', help='')
+  parser.add_argument('--use-se', action='store_true', default=False, help='')
+  parser.add_argument('--version-input', type=int, default=1, help='')
+  parser.add_argument('--version-output', type=str, default='A', help='')
+  parser.add_argument('--version-unit', type=int, default=1, help='')
   parser.add_argument('--load-epoch', type=int, default=0,
       help='load epoch.')
   parser.add_argument('--end-epoch', type=int, default=1000,
@@ -150,7 +151,9 @@ def get_symbol(args, arg_params, aux_params):
     embedding,_ = xception.get_xception_symbol(512)
   else:
     print('init resnet', args.num_layers)
-    embedding = fresnet.get_symbol(512, args.num_layers, use_se=args.use_se)
+    embedding = fresnet.get_symbol(512, args.num_layers, 
+        use_se=args.use_se, version_input=args.version_input, 
+        version_output=args.version_output, version_unit=args.version_unit)
   gt_label = mx.symbol.Variable('softmax_label')
   assert args.loss_type>=0
   extra_loss = None
