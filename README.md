@@ -25,8 +25,8 @@ In last several layers, some different options can be tried to determine how emb
 |   SE-ResNet50C_v1   | 0.99217+-0.00236 |         |      |      |      |
 |   SE-ResNet50B_v1   |  Not Converged   |         |      |      |      |
 |   SE-ResNet50D_v1   | 0.99283+-0.00366 |         |      |      |      |
-|  SE-ResNet50A\_v1   |                  |         |      |      |      |
-|  SE-ResNet50E\_v1   |                  |         |      |      |      |
+|  SE-ResNet50A\_v1   | 0.99367+-0.00233 |         |      |      |      |
+|  SE-ResNet50E\_v1   | 0.99267+-0.00343 |         |      |      |      |
 |  SE-LResNet50C_v1   | 0.99567+-0.00238 |         |      |      |      |
 |  SE-LResNet50E_v1   | 0.99650+-0.00174 |    -    |  -   |      |      |
 |  Inception-ResNet   |        -         |    -    |  -   |      |      |
