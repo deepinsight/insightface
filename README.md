@@ -28,6 +28,7 @@ In last several layers, some different options can be tried to determine how emb
 |   ResNet50D_v1      | 0.99350+-0.00293 |         |      |      |      |
 |  SE-ResNet50A\_v1   | 0.99367+-0.00233 |         |      |      |      |
 |  SE-ResNet50E\_v1   | 0.99267+-0.00343 |         |      |      |      |
+|  SE-ResNet50F\_v1   | 0.99367+-0.00194 |         |      |      |      |
 |  SE-LResNet50C_v1   | 0.99567+-0.00238 |         |      |      |      |
 |  SE-LResNet50E_v1   | 0.99650+-0.00174 |    -    |  -   |      |      |
 |  Inception-ResNet   |        -         |    -    |  -   |      |      |
