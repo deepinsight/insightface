@@ -25,6 +25,7 @@ In last several layers, some different options can be tried to determine how emb
 |   SE-ResNet50C_v1   | 0.99317+-0.00404 |         |      |      |      |
 |   SE-ResNet50B_v1   | 0.99200+-0.00407 |         |      |      |      |
 |   SE-ResNet50D_v1   | 0.99383+-0.00259 |         |      |      |      |
+|   ResNet50D_v1      | 0.99350+-0.00293 |         |      |      |      |
 |  SE-ResNet50A\_v1   | 0.99367+-0.00233 |         |      |      |      |
 |  SE-ResNet50E\_v1   | 0.99267+-0.00343 |         |      |      |      |
 |  SE-LResNet50C_v1   | 0.99567+-0.00238 |         |      |      |      |
