@@ -360,13 +360,15 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
                                   no_bias=True, name="conv"+str(i), workspace=workspace)
         body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn'+str(i))
         body = Act(data=body, act_type='relu', name='relu'+str(i))
-      body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
+      #body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
 
     for i in range(num_stages):
-      body = residual_unit(body, filter_list[i+1], (1 if i==0 else 2, 1 if i==0 else 2), False,
-                           name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
-      #body = residual_unit(body, filter_list[i+1], (2, 2), False,
-      #  name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
+      if version_input==0:
+        body = residual_unit(body, filter_list[i+1], (1 if i==0 else 2, 1 if i==0 else 2), False,
+                             name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
+      else:
+        body = residual_unit(body, filter_list[i+1], (2, 2), False,
+          name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
       for j in range(units[i]-1):
         body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
           bottle_neck=bottle_neck, **kwargs)
