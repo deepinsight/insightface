@@ -31,6 +31,7 @@ In last several layers, some different options can be tried to determine how emb
 |  SE-ResNet50F\_v1   | 0.99367+-0.00194 |         |      |      |      |
 |  SE-LResNet50C_v1   | 0.99567+-0.00238 |         |      |      |      |
 |  SE-LResNet50E_v1   | 0.99650+-0.00174 |    -    |  -   |      |      |
+|  SE-LResNet50D_v3   | 0.99617+-0.00358 |    -    |  -   |      |      |
 |  Inception-ResNet   |        -         |    -    |  -   |      |      |
 | SE-Inception-ResNet |        -         |    -    |  -   |      |      |
 |      MobileNet      |        -         |    -    |  -   |      |      |
