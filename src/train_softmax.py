@@ -7,6 +7,7 @@ import sys
 import math
 import random
 import logging
+import pickle
 import numpy as np
 from data import FaceIter
 from data import FaceImageIter
@@ -26,7 +27,8 @@ import spherenet
 import marginalnet
 #import inceptions
 #import xception 
-import lfw
+#import lfw
+import verification
 import sklearn
 from sklearn.decomposition import PCA
 #from center_loss import *
@@ -462,15 +464,27 @@ def train_net(args):
     #opt = optimizer.AdaGrad(learning_rate=base_lr, wd=base_wd, rescale_grad=1.0)
     _cb = mx.callback.Speedometer(args.batch_size, 10)
 
-    lfw_dir = os.path.join(args.data_dir,'lfw')
-    lfw_set = lfw.load_dataset(lfw_dir, image_size)
+    ver_list = []
+    ver_name_list = []
+    for name in ['lfw','cfp_ff','cfp_fp']:
+      path = os.path.join(args.data_dir,name+".bin")
+      if os.path.exists(path):
+        data_set = verification.load_bin(path, image_size)
+        ver_list.append(data_set)
+        ver_name_list.append(name)
+        print('ver', name)
 
-    def lfw_test(nbatch):
-      acc1, std1, acc2, std2, xnorm, embeddings_list = lfw.test(lfw_set, model, args.batch_size)
-      print('[%d]XNorm: %f' % (nbatch, xnorm))
-      print('[%d]Accuracy: %1.5f+-%1.5f' % (nbatch, acc1, std1))
-      print('[%d]Accuracy-Flip: %1.5f+-%1.5f' % (nbatch, acc2, std2))
-      return acc2, embeddings_list
+
+
+    def ver_test(nbatch):
+      results = []
+      for i in xrange(len(ver_list)):
+        acc1, std1, acc2, std2, xnorm, embeddings_list = verification.test(ver_list[i], model, args.batch_size)
+        print('[%s][%d]XNorm: %f' % (ver_name_list[i], nbatch, xnorm))
+        print('[%s][%d]Accuracy: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc1, std1))
+        print('[%s][%d]Accuracy-Flip: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc2, std2))
+        results.append(acc2)
+      return results
 
 
     def val_test():
@@ -485,13 +499,11 @@ def train_net(args):
       print('VACC: %f'%(acc_value))
 
 
-    #global_step = 0
     highest_acc = [0.0]
     last_save_acc = [0.0]
     global_step = [0]
     save_step = [0]
     if len(args.lr_steps)==0:
-      #lr_steps = [40000, 70000, 90000]
       lr_steps = [40000, 60000, 80000]
       if args.loss_type==1:
         lr_steps = [100000, 140000, 160000]
@@ -511,16 +523,16 @@ def train_net(args):
       _cb(param)
       if mbatch%1000==0:
         print('lr-batch-epoch:',opt.lr,param.nbatch,param.epoch)
-      #os.environ['GLOBAL_STEP'] = str(mbatch)
 
       if mbatch>=0 and mbatch%args.verbose==0:
-        acc, embeddings_list = lfw_test(mbatch)
+        acc_list = ver_test(mbatch)
+        acc = acc_list[0]
         save_step[0]+=1
         msave = save_step[0]
         do_save = False
         if acc>=highest_acc[0]:
           highest_acc[0] = acc
-          if acc>=0.996:
+          if acc>=0.99:
             do_save = True
         if mbatch>lr_steps[-1] and mbatch%10000==0:
           do_save = True
@@ -530,11 +542,11 @@ def train_net(args):
             val_test()
           arg, aux = model.get_params()
           mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
-          if acc>=highest_acc[0]:
-            lfw_npy = "%s-lfw-%04d" % (prefix, msave)
-            X = np.concatenate(embeddings_list, axis=0)
-            print('saving lfw npy', X.shape)
-            np.save(lfw_npy, X)
+          #if acc>=highest_acc[0]:
+          #  lfw_npy = "%s-lfw-%04d" % (prefix, msave)
+          #  X = np.concatenate(embeddings_list, axis=0)
+          #  print('saving lfw npy', X.shape)
+          #  np.save(lfw_npy, X)
         print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[0]))
       if mbatch<=args.beta_freeze:
         _beta = args.beta
