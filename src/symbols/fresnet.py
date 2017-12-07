@@ -538,7 +538,7 @@ def get_symbol(num_classes, num_layers, **kwargs):
     Adapted from https://github.com/tornadomeet/ResNet/blob/master/train_resnet.py
     Original author Wei Wu
     """
-    if num_layers >= 50:
+    if num_layers >= 101:
         filter_list = [64, 256, 512, 1024, 2048]
         bottle_neck = True
     else:
@@ -552,7 +552,11 @@ def get_symbol(num_classes, num_layers, **kwargs):
     elif num_layers == 49:
         units = [3, 4, 14, 3]
     elif num_layers == 50:
-        units = [3, 4, 6, 3]
+        units = [3, 4, 14, 3]
+    elif num_layers == 74:
+        units = [3, 6, 24, 3]
+    elif num_layers == 90:
+        units = [3, 8, 30, 3]
     elif num_layers == 101:
         units = [3, 4, 23, 3]
     elif num_layers == 152:

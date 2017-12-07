@@ -143,8 +143,8 @@ def get_symbol(num_classes=1000, **kwargs):
 
     block6 = Separable_Conv(block5, num_in_channel=filter_list[4], num_out_channel=filter_list[5], name='Exit_flow_b6_sepconv1', withBn=True, bn_mom=0.9, workspace=256)
     block6 = mx.sym.Activation(data=block6, act_type='relu', name='Exit_flow_b6_sepconv1_relu')
-    block6 = Separable_Conv(block6, num_in_channel=filter_list[5], num_out_channel=filter_list[6], name='Exit_flow_b6_sepconv2', withBn=False, bn_mom=0.9, workspace=256) #set withBn=False
-    #block6 = mx.sym.Activation(data=block6, act_type='relu', name='Exit_flow_b6_sepconv2_relu')
+    block6 = Separable_Conv(block6, num_in_channel=filter_list[5], num_out_channel=filter_list[6], name='Exit_flow_b6_sepconv2', withBn=True, bn_mom=0.9, workspace=256)
+    block6 = mx.sym.Activation(data=block6, act_type='relu', name='Exit_flow_b6_sepconv2_relu')
     fc1 = symbol_utils.get_fc1(block6, num_classes, fc_type)
     return fc1
 
