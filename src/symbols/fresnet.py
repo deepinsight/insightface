@@ -513,9 +513,9 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
     else:
       body = data
       body = Conv(data=body, num_filter=filter_list[0], kernel=(3,3), stride=(1,1), pad=(1, 1),
-                                no_bias=True, name="conv"+str(i), workspace=workspace)
-      body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn'+str(i))
-      body = Act(data=body, act_type='relu', name='relu'+str(i))
+                                no_bias=True, name="conv0", workspace=workspace)
+      body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
+      body = Act(data=body, act_type='relu', name='relu0')
       #body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
 
     for i in range(num_stages):
