@@ -1,5 +1,9 @@
 import mxnet as mx
 
+def Act(data, act_type, name):
+    #ignore param act_type, set it in this function 
+    body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
+    return body
 
 
 def get_fc1(last_conv, num_classes, fc_type):
