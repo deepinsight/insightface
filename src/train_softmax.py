@@ -460,7 +460,7 @@ def train_net(args):
     #                    'clip_gradient': None}
     if args.network[0]=='r':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
-    elif args.network[0]=='i' or args.network[0]=='x' or args.network[0]=='d':
+    elif args.network[0]=='i' or args.network[0]=='x':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2) #inception
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)

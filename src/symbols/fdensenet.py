@@ -144,7 +144,7 @@ def get_symbol(num_classes, num_layers, **kwargs):
     version_unit = kwargs.get('version_unit', 1)
     print(version_input, version_output, version_unit)
 
-    num_stages = 4
+    num_stage = 4
     reduction = 0.5
     drop_out = 0.2
     bottle_neck = True
