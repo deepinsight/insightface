@@ -76,7 +76,7 @@ def parse_args():
   # general
   parser.add_argument('--data-dir', default='',
       help='')
-  parser.add_argument('--prefix', default='../model/spherefacei',
+  parser.add_argument('--prefix', default='../model/model',
       help='directory to save model.')
   parser.add_argument('--pretrained', default='../model/resnet-152',
       help='')
@@ -258,7 +258,7 @@ def train_net(args):
       print('use cpu')
     else:
       print('gpu num:', len(ctx))
-    prefix = "%s-%s" % (args.prefix, args.network)
+    prefix = args.prefix
     prefix_dir = os.path.dirname(prefix)
     if not os.path.exists(prefix_dir):
       os.makedirs(prefix_dir)
