@@ -162,7 +162,7 @@ def get_symbol(num_classes=1000, **kwargs):
     net = repeat(net, 9, block8, scale=0.2, input_num_channels=2080)
     net = block8(net, with_act=False, input_num_channels=2080)
 
-    net = ConvFactory(data = net, num_filter=1536, kernel=(1, 1), with_act=False)
+    net = ConvFactory(data = net, num_filter=1536, kernel=(1, 1))
     body = net
     fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
     return fc1
