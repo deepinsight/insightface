@@ -530,7 +530,7 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
         body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
           bottle_neck=bottle_neck, **kwargs)
 
-    fc1 = symbol_utils.get_fc1(body, fc_type)
+    fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
     return fc1
 
 def get_symbol(num_classes, num_layers, **kwargs):

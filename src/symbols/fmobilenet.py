@@ -73,6 +73,6 @@ def get_symbol(num_classes, **kwargs):
     conv_14_dw = Conv(conv_13, num_group=1024, num_filter=1024, kernel=(3, 3), pad=(1, 1), stride=(1, 1), name="conv_14_dw") # 7/7
     conv_14 = Conv(conv_14_dw, num_filter=1024, kernel=(1, 1), pad=(0, 0), stride=(1, 1), name="conv_14") # 7/7
     body = conv_14
-    fc1 = symbol_utils.get_fc1(body, fc_type)
+    fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
     return fc1
 

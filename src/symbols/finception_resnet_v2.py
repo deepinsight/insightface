@@ -164,5 +164,5 @@ def get_symbol(num_classes=1000, **kwargs):
 
     net = ConvFactory(net, 1536, (1, 1))
     body = net
-    fc1 = symbol_utils.get_fc1(body, fc_type)
+    fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
     return fc1
