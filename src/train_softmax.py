@@ -258,7 +258,10 @@ def train_net(args):
       print('use cpu')
     else:
       print('gpu num:', len(ctx))
-    prefix = "%s-%s-p%s" % (args.prefix, args.network, args.patch)
+    prefix = "%s-%s" % (args.prefix, args.network)
+    prefix_dir = os.path.dirname(prefix)
+    if not os.path.exists(prefix_dir):
+      os.makedirs(prefix_dir)
     end_epoch = args.end_epoch
     pretrained = args.pretrained
     load_epoch = args.load_epoch
