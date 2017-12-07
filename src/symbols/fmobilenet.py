@@ -16,6 +16,7 @@
 # under the License.
 
 import mxnet as mx
+import symbol_utils
 
 def Act(data, act_type, name):
     #ignore param act_type, set it in this function 
@@ -72,38 +73,6 @@ def get_symbol(num_classes, **kwargs):
     conv_14_dw = Conv(conv_13, num_group=1024, num_filter=1024, kernel=(3, 3), pad=(1, 1), stride=(1, 1), name="conv_14_dw") # 7/7
     conv_14 = Conv(conv_14_dw, num_filter=1024, kernel=(1, 1), pad=(0, 0), stride=(1, 1), name="conv_14") # 7/7
     body = conv_14
-
-    if fc_type=='E':
-      body = mx.symbol.Dropout(data=body, p=0.4)
-      fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
-      fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, name='fc1')
-    elif fc_type=='F':
-      body = mx.symbol.Dropout(data=body, p=0.4)
-      fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
-      fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, name='fc1')
-      fc1 = Act(data=fc1, act_type='relu', name='fc1_relu')
-    else:
-      pool = mx.sym.Pooling(data=conv_14, global_pool=True, kernel=(7, 7), stride=(1, 1), pool_type="avg", name="global_pool")
-      flat = mx.sym.Flatten(data=pool, name="flatten")
-      if fc_type=='A':
-        fc1 = flat
-      else:
-        if fc_type=='G' or fc_type=='H':
-          fc1 = mx.symbol.Dropout(data=flat, p=0.2)
-          fc1 = mx.sym.FullyConnected(data=fc1, num_hidden=num_classes, name='pre_fc1')
-          if fc_type=='G':
-            return fc1
-          else:
-            fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, name='fc1')
-            return fc1
-        else:
-          #B-D
-          #B
-          fc1 = mx.sym.FullyConnected(data=flat, num_hidden=num_classes, name='pre_fc1')
-          if fc_type=='C':
-            fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, name='fc1')
-          elif fc_type=='D':
-            fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, name='fc1')
-            fc1 = Act(data=fc1, act_type='relu', name='fc1_relu')
+    fc1 = symbol_utils.get_fc1(body, fc_type)
     return fc1
 
