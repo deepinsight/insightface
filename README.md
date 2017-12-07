@@ -8,7 +8,7 @@ Face Recognition Project
 1. Download pre-aligned training dataset from our data repo which is in MXnet .rec file format(maybe ready soon), or align your dataset by yourself and then pack them to prevent random small files accessing. Check those scripts under src/common and src/align.
 2. Run src/train_softmax.py to train your model and set proper parameters. For example, loss-type=0 means pure softmax while loss-type=1 means SphereLoss. It will output LFW accuracy every 2000 batches and save the model if necessary.
 
-### Experiments
+### Notes
 
 Default image size is 112x96 if not specified, all face images are aligned.
 
@@ -24,6 +24,10 @@ In last several layers, some different options can be tried to determine how emb
 - OptionF: Use Dropout->FC->BN->PRelu after last conv layer.
 - OptionG: Use Dropout->FC after GP.
 
+
+
+
+### Experiments
 
 
 
