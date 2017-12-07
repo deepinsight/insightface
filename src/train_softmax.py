@@ -23,10 +23,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'symbols'))
 import fresnet
 import finception_resnet_v2
-import spherenet
 import fmobilenet 
-#import inceptions
-#import xception 
+import fxception
 #import lfw
 import verification
 import sklearn
@@ -152,7 +150,9 @@ def get_symbol(args, arg_params, aux_params):
     embedding = finception_resnet_v2.get_symbol(512)
   elif args.network[0]=='x':
     print('init xception', args.num_layers)
-    embedding,_ = xception.get_xception_symbol(512)
+    embedding = fxception.get_xception_symbol(512,
+        use_se=args.use_se, version_input=args.version_input, 
+        version_output=args.version_output, version_unit=args.version_unit)
   else:
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(512, args.num_layers, 
