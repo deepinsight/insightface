@@ -29,10 +29,6 @@ import fdensenet
 #import lfw
 import verification
 import sklearn
-from sklearn.decomposition import PCA
-#from center_loss import *
-#import resnet_dcn
-#import asoftmax
 
 
 logger = logging.getLogger()
@@ -292,19 +288,14 @@ def train_net(args):
     args.image_h = image_size[0]
     args.image_w = image_size[1]
     assert len(ppatch)==5
-    #if args.patch%2==1:
-    #  args.image_channel = 1
 
 
-    #os.environ['GLOBAL_STEP'] = "0"
     os.environ['BETA'] = str(args.beta)
     args.use_val = False
     path_imgrec = None
     path_imglist = None
     val_rec = None
 
-    #path_imglist = "/raid5data/dplearn/faceinsight_align_webface.lst.new"
-    #path_imglist = "/raid5data/dplearn/faceinsight_align_webface_clean.lst.new"
     for line in open(os.path.join(args.data_dir, 'property')):
       args.num_classes = int(line.strip())
     assert(args.num_classes>0)
@@ -330,7 +321,6 @@ def train_net(args):
     print('Called with argument:', args)
 
     data_shape = (args.image_channel,image_size[0],image_size[1])
-    #mean = [127.5,127.5,127.5]
     mean = None
 
     if args.use_val:
@@ -353,26 +343,12 @@ def train_net(args):
     base_wd = args.wd
     base_mom = 0.9
     if not args.retrain:
-      #load and initialize params
-      #print(pretrained)
-      #_, arg_params, aux_params = mx.model.load_checkpoint(pretrained, load_epoch)
       arg_params = None
       aux_params = None
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
-      #arg_params, aux_params = load_param(pretrained, epoch, convert=True)
-      data_shape_dict = {'data': (args.batch_size,)+data_shape, 'softmax_label': (args.batch_size,)}
-      if args.network[0]=='s':
-        arg_params, aux_params = spherenet.init_weights(sym, data_shape_dict, args.num_layers)
-      #elif args.network[0]=='m':
-      #  arg_params, aux_params = marginalnet.init_weights(sym, data_shape_dict, args.num_layers)
-      #resnet_dcn.init_weights(sym, data_shape_dict, arg_params, aux_params)
     else:
-      #sym, arg_params, aux_params = mx.model.load_checkpoint(pretrained, load_epoch)
       _, arg_params, aux_params = mx.model.load_checkpoint(pretrained, load_epoch)
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
-      #begin_epoch = load_epoch
-      #end_epoch = begin_epoch+10
-      #base_wd = 0.00005
 
 
     if args.loss_type!=10:
@@ -424,40 +400,10 @@ def train_net(args):
           mean                 = mean,
           patch                = ppatch,
       )
-    #args.epoch_size = int(math.ceil(train_dataiter.num_samples()/args.batch_size))
 
-    #_dice = DiceMetric()
     _acc = AccMetric()
     eval_metrics = [mx.metric.create(_acc)]
 
-    # rpn_eval_metric, rpn_cls_metric, rpn_bbox_metric, eval_metric, cls_metric, bbox_metric
-    #for child_metric in [fcn_loss_metric]:
-    #    eval_metrics.add(child_metric)
-
-    # callback
-    #batch_end_callback = callback.Speedometer(input_batch_size, frequent=args.frequent)
-    #epoch_end_callback = mx.callback.module_checkpoint(mod, prefix, period=1, save_optimizer_states=True)
-
-    # decide learning rate
-    #lr_step = '10,20,30'
-    #train_size = 4848
-    #nrof_batch_in_epoch = int(train_size/input_batch_size)
-    #print('nrof_batch_in_epoch:', nrof_batch_in_epoch)
-    #lr_factor = 0.1
-    #lr_epoch = [float(epoch) for epoch in lr_step.split(',')]
-    #lr_epoch_diff = [epoch - begin_epoch for epoch in lr_epoch if epoch > begin_epoch]
-    #lr = base_lr * (lr_factor ** (len(lr_epoch) - len(lr_epoch_diff)))
-    #lr_iters = [int(epoch * train_size / batch_size) for epoch in lr_epoch_diff]
-    #print 'lr', lr, 'lr_epoch_diff', lr_epoch_diff, 'lr_iters', lr_iters
-
-    #lr_scheduler = MultiFactorScheduler(lr_iters, lr_factor)
-
-    # optimizer
-    #optimizer_params = {'momentum': 0.9,
-    #                    'wd': 0.0005,
-    #                    'learning_rate': base_lr,
-    #                    'rescale_grad': 1.0,
-    #                    'clip_gradient': None}
     if args.network[0]=='r':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
     elif args.network[0]=='i' or args.network[0]=='x':
@@ -465,16 +411,12 @@ def train_net(args):
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
     _rescale = 1.0/args.ctx_num
-    #_rescale = 1.0
     opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
-    #opt = optimizer.RMSProp(learning_rate=base_lr, wd=base_wd, rescale_grad=_rescale)
-    #opt = optimizer.AdaGrad(learning_rate=base_lr, wd=base_wd, rescale_grad=_rescale)
-    #opt = optimizer.AdaGrad(learning_rate=base_lr, wd=base_wd, rescale_grad=1.0)
     _cb = mx.callback.Speedometer(args.batch_size, 10)
 
     ver_list = []
     ver_name_list = []
-    for name in ['lfw','cfp_ff','cfp_fp']:
+    for name in ['lfw','cfp_ff','cfp_fp','agedb_30']:
       path = os.path.join(args.data_dir,name+".bin")
       if os.path.exists(path):
         data_set = verification.load_bin(path, image_size)
