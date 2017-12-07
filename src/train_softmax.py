@@ -25,6 +25,7 @@ import fresnet
 import finception_resnet_v2
 import fmobilenet 
 import fxception
+import fdensenet
 #import lfw
 import verification
 import sklearn
@@ -138,8 +139,10 @@ def get_symbol(args, arg_params, aux_params):
     new_args = None
   data_shape = (args.image_channel,args.image_h,args.image_w)
   image_shape = ",".join([str(x) for x in data_shape])
-  if args.network[0]=='s':
-    embedding = spherenet.get_symbol(512, args.num_layers)
+  if args.network[0]=='d':
+    embedding = fdensenet.get_symbol(512, args.num_layers,
+        use_se=args.use_se, version_input=args.version_input, 
+        version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='m':
     print('init mobilenet', args.num_layers)
     embedding = fmobilenet.get_symbol(512, 
@@ -457,7 +460,7 @@ def train_net(args):
     #                    'clip_gradient': None}
     if args.network[0]=='r':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
-    elif args.network[0]=='i' or args.network[0]=='x':
+    elif args.network[0]=='i' or args.network[0]=='x' or args.network[0]=='d':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2) #inception
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
