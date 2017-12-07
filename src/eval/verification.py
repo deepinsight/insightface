@@ -243,3 +243,45 @@ def test(data_set, mx_model, batch_size):
   return acc1, std1, acc2, std2, _xnorm, embeddings_list
 
 
+if __name__ == '__main__':
+
+  parser = argparse.ArgumentParser(description='do verification')
+  # general
+  parser.add_argument('--data-dir', default='', help='')
+  parser.add_argument('--model', default='../model/softmax,50', help='path to load model.')
+  parser.add_argument('--image-size', default='112,96', help='image size.')
+  parser.add_argument('--target', default='lfw,cfp_ff,cfp_fp', help='test targets.')
+  parser.add_argument('--gpu', default=0, type=int, help='gpu id')
+  parser.add_argument('--batch-size', default=128, type=int, help='')
+  args = parse_arguments(sys.argv[1:])
+
+  image_size = [int(x) for x in args.image_size.split(',')]
+  ctx = mx.gpu(args.gpu)
+  nets = []
+  prefix = args.model.split(',')[0]
+  for epoch in args.model.split(',')[1].split('|'):
+    epoch = int(epoch)
+    print('loading',prefix, epoch)
+    model = mx.mod.Module.load(prefix, epoch, context = ctx)
+    nets.append(model)
+
+  ver_list = []
+  ver_name_list = []
+  for name in args.target.split(','):
+    path = os.path.join(args.data_dir,name+".bin")
+    if os.path.exists(path):
+      print('ver', name)
+      data_set = load_bin(path, image_size)
+      ver_list.append(data_set)
+      ver_name_list.append(name)
+
+  for i in xrange(len(ver_list)):
+    results = []
+    for model in nets:
+      acc1, std1, acc2, std2, xnorm, embeddings_list = test(ver_list[i], model, args.batch_size)
+      print('[%s]XNorm: %f' % (ver_name_list[i], xnorm))
+      print('[%s]Accuracy: %1.5f+-%1.5f' % (ver_name_list[i], acc1, std1))
+      print('[%s]Accuracy-Flip: %1.5f+-%1.5f' % (ver_name_list[i], acc2, std2))
+      results.append(acc2)
+    print('Max of [%s] is %1.5f' % (ver_name_list[i], np.max(results)))
+
