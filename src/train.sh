@@ -3,8 +3,11 @@ export MXNET_CPU_WORKER_NTHREADS=24
 export MXNET_CUDNN_AUTOTUNE_DEFAULT=0
 export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
-DATA_DIR=/opt/jiaguo/faces_normed
+DATA_DIR=/opt/jiaguo/faces_vgg_112x112
 
-CUDA_VISIBLE_DEVICES='4,5,6,7' python -u train_softmax.py --data-dir $DATA_DIR --network 'm29' --patch '0_0_96_112_0' --loss-type 0 --lr 0.1 --prefix '../model/softmax' --verbose 2000 --per-batch-size 128 > sx_m29.log 2>&1 &
-#CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --data-dir $DATA_DIR --network 'm29' --patch '0_0_96_112_0' --loss-type 1 --lr 0.1 --prefix '../model/spherem' --verbose 2000 --per-batch-size 224 --lr-steps '60000,80000,90000' > spm_m29.log 2>&1 &
-
+JOB=softmax1e3
+MODELDIR="../model-$JOB"
+mkdir -p "$MODELDIR"
+PREFIX="$MODELDIR/model"
+LOGFILE="$MODELDIR/log"
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --data-dir $DATA_DIR --network 'r49' --loss-type 0 --lr 0.1 --prefix "$PREFIX" --per-batch-size 128 --image-size '112,112' --version-input 1 --version-output E --version-unit 3 > "$LOGFILE" 2>&1 &
