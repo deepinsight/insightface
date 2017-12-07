@@ -23,6 +23,7 @@ on Learning
 Christian Szegedy, Sergey Ioffe, Vincent Vanhoucke, Alex Alemi
 """
 import mxnet as mx
+import symbol_utils
 
 
 def ConvFactory(data, num_filter, kernel, stride=(1, 1), pad=(0, 0), act_type="relu", mirror_attr={}, with_act=True):
@@ -102,8 +103,19 @@ def get_symbol(num_classes=1000, **kwargs):
     data = mx.symbol.Variable(name='data')
     data = data-127.5
     data = data*0.0078125
-    conv1a_3_3 = ConvFactory(data=data, num_filter=32,
-                             kernel=(3, 3), stride=(2, 2))
+    version_input = kwargs.get('version_input', 0)
+    assert version_input>=0
+    version_output = kwargs.get('version_output', 'A')
+    fc_type = version_output
+    version_unit = kwargs.get('version_unit', 1)
+    print(version_input, version_output, version_unit)
+
+    if version_input==0:
+      conv1a_3_3 = ConvFactory(data=data, num_filter=32,
+                               kernel=(3, 3), stride=(2, 2))
+    else:
+      conv1a_3_3 = ConvFactory(data=data, num_filter=32,
+                               kernel=(3, 3), stride=(1, 1))
     conv2a_3_3 = ConvFactory(conv1a_3_3, 32, (3, 3))
     conv2b_3_3 = ConvFactory(conv2a_3_3, 64, (3, 3), pad=(1, 1))
     maxpool3a_3_3 = mx.symbol.Pooling(
@@ -151,10 +163,6 @@ def get_symbol(num_classes=1000, **kwargs):
     net = block8(net, with_act=False, input_num_channels=2080)
 
     net = ConvFactory(net, 1536, (1, 1))
-    net = mx.symbol.Pooling(net, kernel=(
-        1, 1), global_pool=True, stride=(2, 2), pool_type='avg')
-    net = mx.symbol.Flatten(net)
-    net = mx.symbol.Dropout(data=net, p=0.2)
-    net = mx.symbol.FullyConnected(data=net, num_hidden=num_classes)
-    #softmax = mx.symbol.SoftmaxOutput(data=net, name='softmax')
-    return net
+    body = net
+    fc1 = symbol_utils.get_fc1(body, fc_type)
+    return fc1

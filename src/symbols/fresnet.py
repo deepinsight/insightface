@@ -28,6 +28,7 @@ from __future__ import division
 from __future__ import print_function
 import mxnet as mx
 import numpy as np
+import symbol_utils
 
 def Conv(**kwargs):
     #name = kwargs.get('name')
@@ -529,42 +530,7 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
         body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
           bottle_neck=bottle_neck, **kwargs)
 
-
-    if fc_type=='E':
-      body = mx.symbol.Dropout(data=body, p=0.4)
-      fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
-      fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
-    elif fc_type=='F':
-      body = mx.symbol.Dropout(data=body, p=0.4)
-      fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
-      fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
-      fc1 = Act(data=fc1, act_type='relu', name='fc1_relu')
-    else:
-      bn1 = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
-      relu1 = Act(data=bn1, act_type='relu', name='relu1')
-      # Although kernel is not used here when global_pool=True, we should put one
-      pool1 = mx.sym.Pooling(data=relu1, global_pool=True, kernel=(7, 7), pool_type='avg', name='pool1')
-      flat = mx.sym.Flatten(data=pool1)
-      if fc_type=='A':
-        fc1 = flat
-      else:
-        if fc_type=='G' or fc_type=='H':
-          fc1 = mx.symbol.Dropout(data=flat, p=0.2)
-          fc1 = mx.sym.FullyConnected(data=fc1, num_hidden=num_classes, name='pre_fc1')
-          if fc_type=='G':
-            return fc1
-          else:
-            fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
-            return fc1
-        else:
-          #B-D
-          #B
-          fc1 = mx.sym.FullyConnected(data=flat, num_hidden=num_classes, name='pre_fc1')
-          if fc_type=='C':
-            fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
-          elif fc_type=='D':
-            fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
-            fc1 = Act(data=fc1, act_type='relu', name='fc1_relu')
+    fc1 = symbol_utils.get_fc1(body, fc_type)
     return fc1
 
 def get_symbol(num_classes, num_layers, **kwargs):
