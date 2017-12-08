@@ -27,7 +27,7 @@ def get_fc1(last_conv, num_classes, fc_type):
     pool1 = mx.sym.Pooling(data=relu1, global_pool=True, kernel=(7, 7), pool_type='avg', name='pool1')
     flat = mx.sym.Flatten(data=pool1)
     if len(fc_type)>1:
-      if fc_type[1]=='D':
+      if fc_type[1]=='X':
         print('dropout mode')
         flat = mx.symbol.Dropout(data=flat, p=0.2)
       fc_type = fc_type[0]

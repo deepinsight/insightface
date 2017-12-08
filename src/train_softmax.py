@@ -18,7 +18,8 @@ import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
 import mxnet.optimizer as optimizer
-#sys.path.append(os.path.join(os.path.dirname(__file__), 'common'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'common'))
+import face_image
 sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'symbols'))
 import fresnet
@@ -117,8 +118,6 @@ def parse_args():
   parser.add_argument('--incay', type=float, default=0.0,
       help='feature incay')
   parser.add_argument('--use-deformable', type=int, default=0,
-      help='')
-  parser.add_argument('--image-size', type=str, default='112,96',
       help='')
   parser.add_argument('--patch', type=str, default='0_0_96_112_0',
       help='')
@@ -284,9 +283,6 @@ def train_net(args):
     args.rescale_threshold = 0
     args.image_channel = 3
     ppatch = [int(x) for x in args.patch.split('_')]
-    image_size = [int(x) for x in args.image_size.split(',')]
-    args.image_h = image_size[0]
-    args.image_w = image_size[1]
     assert len(ppatch)==5
 
 
@@ -295,9 +291,13 @@ def train_net(args):
     path_imgrec = None
     path_imglist = None
     val_rec = None
+    prop = face_image.load_property(args.data_dir)
+    args.num_classes = prop.num_classes
+    image_size = prop.image_size
+    args.image_h = image_size[0]
+    args.image_w = image_size[1]
+    print('image_size', image_size)
 
-    for line in open(os.path.join(args.data_dir, 'property')):
-      args.num_classes = int(line.strip())
     assert(args.num_classes>0)
     print('num_classes', args.num_classes)
 

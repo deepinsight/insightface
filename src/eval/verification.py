@@ -38,6 +38,8 @@ import pickle
 from sklearn.decomposition import PCA
 import mxnet as mx
 from mxnet import ndarray as nd
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
+import face_image
 
 
 
@@ -250,13 +252,14 @@ if __name__ == '__main__':
   # general
   parser.add_argument('--data-dir', default='', help='')
   parser.add_argument('--model', default='../model/softmax,50', help='path to load model.')
-  parser.add_argument('--image-size', default='112,96', help='image size.')
-  parser.add_argument('--target', default='lfw,cfp_ff,cfp_fp', help='test targets.')
+  parser.add_argument('--target', default='lfw,cfp_ff,cfp_fp,agedb_30', help='test targets.')
   parser.add_argument('--gpu', default=0, type=int, help='gpu id')
-  parser.add_argument('--batch-size', default=128, type=int, help='')
+  parser.add_argument('--batch-size', default=32, type=int, help='')
   args = parser.parse_args()
 
-  image_size = [int(x) for x in args.image_size.split(',')]
+  prop = face_image.load_property(args.data_dir)
+  image_size = prop.image_size
+  print('image_size', image_size)
   ctx = mx.gpu(args.gpu)
   nets = []
   prefix = args.model.split(',')[0]
