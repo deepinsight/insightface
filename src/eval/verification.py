@@ -256,7 +256,7 @@ if __name__ == '__main__':
   parser.add_argument('--target', default='lfw,cfp_ff,cfp_fp,agedb_30', help='test targets.')
   parser.add_argument('--gpu', default=0, type=int, help='gpu id')
   parser.add_argument('--batch-size', default=32, type=int, help='')
-  parser.add_argument('--max', default=0, type=int, help='')
+  parser.add_argument('--max', default='', type=str, help='')
   args = parser.parse_args()
 
   prop = face_image.load_property(args.data_dir)
@@ -277,8 +277,12 @@ if __name__ == '__main__':
         epoch = int(fname.split('.')[0].split('-')[1])
         epochs.append(epoch)
     epochs = sorted(epochs, reverse=True)
-    if args.max>0 and len(epochs)>args.max:
-      epochs = epochs[0:args.max]
+    if len(args.max)>0:
+      _max = [int(x) for x in args.max.split(',')]
+      assert len(_max)==2
+      if len(epochs)>_max[1]:
+        epochs = epochs[_max[0]:_max[1]]
+
   else:
     epochs = [int(x) for x in vec[1].split('|')]
   print('model number', len(epochs))
