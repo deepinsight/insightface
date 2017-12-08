@@ -557,6 +557,8 @@ def get_symbol(num_classes, num_layers, **kwargs):
         units = [3, 6, 24, 3]
     elif num_layers == 90:
         units = [3, 8, 30, 3]
+    elif num_layers == 100:
+        units = [3, 13, 30, 3]
     elif num_layers == 101:
         units = [3, 4, 23, 3]
     elif num_layers == 152:
