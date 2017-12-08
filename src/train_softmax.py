@@ -416,7 +416,7 @@ def train_net(args):
 
     ver_list = []
     ver_name_list = []
-    for name in ['lfw','cfp_ff','cfp_fp','agedb_30']:
+    for name in ['lfw','cfp_fp','agedb_30']:
       path = os.path.join(args.data_dir,name+".bin")
       if os.path.exists(path):
         data_set = verification.load_bin(path, image_size)

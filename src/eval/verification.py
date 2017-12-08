@@ -235,8 +235,11 @@ def test(data_set, mx_model, batch_size):
 
   embeddings = embeddings_list[0].copy()
   embeddings = sklearn.preprocessing.normalize(embeddings)
-  _, _, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=10)
-  acc1, std1 = np.mean(accuracy), np.std(accuracy)
+  acc1 = 0.0
+  std1 = 0.0
+  #_, _, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=10)
+  #acc1, std1 = np.mean(accuracy), np.std(accuracy)
+
   #print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
   #embeddings = np.concatenate(embeddings_list, axis=1)
   embeddings = embeddings_list[0] + embeddings_list[1]
