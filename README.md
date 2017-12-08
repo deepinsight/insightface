@@ -16,7 +16,7 @@ In ResNet setting, \_v1 means original residual units.  \_v2 means pre-activatio
 
 In last several layers, some different options can be tried to determine how embedding layer looks like and it may affect the performance. The whole network architecture can be thought as {ConvLayers(->GlobalPool)->EmbeddingLayer->Softmax}. Embedding size is set to 512 expect for optionA, as embedding size in optionA is determined by the filter size of last convolution group.
 
-- OptionXD: Same with OptionD but use dropout after GP.  OptionAD is the default setting for inception series networks.
+- Option\*X: Same with Option\* but use dropout after GP.  OptionAX is the default setting for inceptions.
 - OptionA: Use global pooling layer(GP). This is the default setting for all networks except inceptions.
 - OptionB: Use one FC layer after GP.
 - OptionC: Use FC->BN after GP.
@@ -49,16 +49,16 @@ In last several layers, some different options can be tried to determine how emb
 |    SE-LResNet50A_v3    | 0.99583+-0.00327 |                  |                  |
 |    SE-LResNet50D_v3    | 0.99617+-0.00358 |        -         |        -         |
 |    SE-LResNet50E_v3    | 0.99767+-0.00200 |        -         |        -         |
-|     LResNet50E_v3      |                  |                  |                  |
+|     LResNet50E_v3      | 0.99750+-0.00250 |                  |                  |
 |    SE-LResNet50F_v3    |                  |                  |                  |
-|    SE-LResNet50G_v3    | 0.99350+-0.00263 |                  |                  |
+|   SE-LResNet50BX_v3    | 0.99350+-0.00263 |                  |                  |
 |    SE-ResNet101D_v3    | 0.99517+-0.00252 |                  |                  |
 |    SE-ResNet101E_v3    | 0.99467+-0.00221 |                  |                  |
 |    SE-ResNet152E_v3    | 0.99500+-0.00307 |                  |                  |
-|   Inception-ResNetAD   | 0.99417+-0.00375 |        -         |        -         |
+|   Inception-ResNetBX   | 0.99417+-0.00375 |        -         |        -         |
 | SE-Inception-ResNet-v2 |        -         |        -         |        -         |
 |       MobileNetD       | 0.99150+-0.00425 |        -         |        -         |
-|      LMobileNetD       |                  |                  |                  |
-|      LMobileNetE       | 0.99600+-0.00281 |        -         |        -         |
-|      LMobileNetF       |                  |                  |                  |
+|      LMobileNetD       | 0.99383+-0.00409 |        -         |        -         |
+|      LMobileNetE       | 0.99633+-0.00314 |        -         |        -         |
+|      LMobileNetF       | 0.99617+-0.00211 |        -         |        -         |
 |    LResNeXt101E_v3     |                  |                  |                  |
