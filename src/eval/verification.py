@@ -256,6 +256,7 @@ if __name__ == '__main__':
   parser.add_argument('--target', default='lfw,cfp_ff,cfp_fp,agedb_30', help='test targets.')
   parser.add_argument('--gpu', default=0, type=int, help='gpu id')
   parser.add_argument('--batch-size', default=32, type=int, help='')
+  parser.add_argument('--max', default=0, type=int, help='')
   args = parser.parse_args()
 
   prop = face_image.load_property(args.data_dir)
@@ -263,9 +264,25 @@ if __name__ == '__main__':
   print('image_size', image_size)
   ctx = mx.gpu(args.gpu)
   nets = []
+  vec = args.model.split(',')
   prefix = args.model.split(',')[0]
-  for epoch in args.model.split(',')[1].split('|'):
-    epoch = int(epoch)
+  epochs = []
+  if len(vec)==1:
+    pdir = os.path.dirname(prefix)
+    for fname in os.listdir(pdir):
+      if not fname.endswith('.params'):
+        continue
+      _file = os.path.join(pdir, fname)
+      if _file.startswith(prefix):
+        epoch = int(fname.split('.')[0].split('-')[1])
+        epochs.append(epoch)
+    epochs = sorted(epochs, reverse=True)
+    if args.max>0 and len(epochs)>args.max:
+      epochs = epochs[0:args.max]
+  else:
+    epochs = [int(x) for x in vec[1].split('|')]
+  print('model number', len(epochs))
+  for epoch in epochs:
     print('loading',prefix, epoch)
     model = mx.mod.Module.load(prefix, epoch, context = ctx)
     model.bind(data_shapes=[('data', (args.batch_size, 3, image_size[0], image_size[1]))], label_shapes=[('softmax_label', (args.batch_size,))])
