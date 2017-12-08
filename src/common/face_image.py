@@ -2,6 +2,18 @@
 from easydict import EasyDict as edict
 import os
 
+
+def load_property(data_dir):
+  prop = edict()
+  for line in open(os.path.join(data_dir, 'property')):
+    vec = line.strip().split(',')
+    assert len(vec)==3
+    prop.num_classes = int(vec[0])
+    prop.image_size = [int(vec[1]), int(vec[2])]
+  return prop
+
+
+
 def get_dataset_webface(input_dir):
   clean_list_file = input_dir+"_clean_list.txt"
   ret = []

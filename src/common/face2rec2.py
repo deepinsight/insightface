@@ -31,6 +31,7 @@ import traceback
 #from builtins import range
 from easydict import EasyDict as edict
 import face_preprocess
+import face_image
 
 try:
     import multiprocessing
@@ -51,6 +52,9 @@ def read_list(path_in):
             item = edict()
             item.flag = 0
             item.image_path, item.label, item.bbox, item.landmark, item.aligned = face_preprocess.parse_lst_line(line)
+            if not item.aligned and item.landmark is None:
+              print('ignore line', line)
+              continue
             item.id = _id
             yield item
             if item.label!=last[0]:
@@ -89,7 +93,7 @@ def image_encode(args, i, item, q_out):
       else:
         img = cv2.imread(fullpath, args.color)
         assert item.landmark is not None
-        img = face_preprocess.preprocess(img, bbox = item.bbox, landmark=item.landmark, image_size='112,112')
+        img = face_preprocess.preprocess(img, bbox = item.bbox, landmark=item.landmark, image_size='%d,%d'%(args.image_h, args.image_w))
         s = mx.recordio.pack_img(header, img, quality=args.quality, img_fmt=args.encoding)
         q_out.put((i, s, oitem))
     else: #flag==1 or 2
@@ -179,7 +183,6 @@ def parse_args():
                         help='specify the encoding of the images.')
     rgroup.add_argument('--pack-label', type=bool, default=False,
         help='Whether to also pack multi dimensional label in the record file')
-    rgroup.add_argument('--image-size', type=str, default='112,96', choices=['112,96', '112,112'], help='image size, set to 112,96 or 112,112')
     args = parser.parse_args()
     args.prefix = os.path.abspath(args.prefix)
     #args.root = os.path.abspath(args.root)
@@ -194,6 +197,11 @@ if __name__ == '__main__':
             working_dir = args.prefix
         else:
             working_dir = os.path.dirname(args.prefix)
+        prop = face_image.load_property(working_dir)
+        image_size = prop.image_size
+        print('image_size', image_size)
+        args.image_h = image_size[0]
+        args.image_w = image_size[1]
         files = [os.path.join(working_dir, fname) for fname in os.listdir(working_dir)
                     if os.path.isfile(os.path.join(working_dir, fname))]
         count = 0
