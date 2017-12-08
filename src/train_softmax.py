@@ -169,7 +169,7 @@ def get_symbol(args, arg_params, aux_params):
     fc7 = mx.sym.LSoftmax(data=embedding, label=gt_label, num_hidden=args.num_classes,
                           weight = _weight,
                           beta=args.beta, margin=args.margin, scale=args.scale,
-                          beta_min=args.beta_min, verbose=100, name='fc7')
+                          beta_min=args.beta_min, verbose=1000, name='fc7')
   elif args.loss_type==10:
     _weight = mx.symbol.Variable('fc7_weight')
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
@@ -412,7 +412,7 @@ def train_net(args):
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
     _rescale = 1.0/args.ctx_num
     opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
-    _cb = mx.callback.Speedometer(args.batch_size, 10)
+    _cb = mx.callback.Speedometer(args.batch_size, 20)
 
     ver_list = []
     ver_name_list = []
@@ -430,8 +430,8 @@ def train_net(args):
       results = []
       for i in xrange(len(ver_list)):
         acc1, std1, acc2, std2, xnorm, embeddings_list = verification.test(ver_list[i], model, args.batch_size)
-        print('[%s][%d]XNorm: %f' % (ver_name_list[i], nbatch, xnorm))
-        print('[%s][%d]Accuracy: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc1, std1))
+        #print('[%s][%d]XNorm: %f' % (ver_name_list[i], nbatch, xnorm))
+        #print('[%s][%d]Accuracy: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc1, std1))
         print('[%s][%d]Accuracy-Flip: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc2, std2))
         results.append(acc2)
       return results
@@ -457,7 +457,7 @@ def train_net(args):
     if len(args.lr_steps)==0:
       lr_steps = [40000, 60000, 80000]
       if args.loss_type==1:
-        lr_steps = [100000, 140000, 160000]
+        lr_steps = [80000, 120000, 140000]
       p = 512.0/args.batch_size
       for l in xrange(len(lr_steps)):
         lr_steps[l] = int(lr_steps[l]*p)
