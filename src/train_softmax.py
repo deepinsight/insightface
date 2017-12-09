@@ -148,7 +148,7 @@ def get_symbol(args, arg_params, aux_params):
     embedding = finception_resnet_v2.get_symbol(512)
   elif args.network[0]=='x':
     print('init xception', args.num_layers)
-    embedding = fxception.get_xception_symbol(512,
+    embedding = fxception.get_symbol(512,
         use_se=args.use_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   else:
