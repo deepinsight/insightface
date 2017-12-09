@@ -30,6 +30,8 @@ import fdensenet
 #import lfw
 import verification
 import sklearn
+sys.path.append(os.path.join(os.path.dirname(__file__), 'losses'))
+import center_loss
 
 
 logger = logging.getLogger()
@@ -172,6 +174,12 @@ def get_symbol(args, arg_params, aux_params):
                           weight = _weight,
                           beta=args.beta, margin=args.margin, scale=args.scale,
                           beta_min=args.beta_min, verbose=1000, name='fc7')
+  elif args.loss_type==2:
+    _weight = mx.symbol.Variable('fc7_weight')
+    _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
+    fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
+    extra_loss = mx.symbol.Custom(data=embedding, label=gt_label, name='center_loss', op_type='centerloss',\
+          num_class=args.num_classes, alpha=0.5, scale=0.003, batchsize=args.per_batch_size)
   elif args.loss_type==10:
     _weight = mx.symbol.Variable('fc7_weight')
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
