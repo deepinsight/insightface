@@ -53,7 +53,7 @@ def read_list(path_in):
             item.flag = 0
             item.image_path, item.label, item.bbox, item.landmark, item.aligned = face_preprocess.parse_lst_line(line)
             if not item.aligned and item.landmark is None:
-              print('ignore line', line)
+              #print('ignore line', line)
               continue
             item.id = _id
             yield item
