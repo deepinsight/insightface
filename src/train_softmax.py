@@ -112,8 +112,9 @@ def parse_args():
       help='')
   parser.add_argument('--scale', type=float, default=0.9993,
       help='')
-  parser.add_argument('--verbose', type=int, default=2000,
-      help='')
+  parser.add_argument('--center-alpha', type=float, default=0.5, help='')
+  parser.add_argument('--center-scale', type=float, default=0.003, help='')
+  parser.add_argument('--verbose', type=int, default=2000, help='')
   parser.add_argument('--loss-type', type=int, default=1,
       help='')
   parser.add_argument('--incay', type=float, default=0.0,
@@ -178,8 +179,9 @@ def get_symbol(args, arg_params, aux_params):
     _weight = mx.symbol.Variable('fc7_weight')
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
     fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
+    print('center-loss', args.center_alpha, args.center_scale)
     extra_loss = mx.symbol.Custom(data=embedding, label=gt_label, name='center_loss', op_type='centerloss',\
-          num_class=args.num_classes, alpha=0.5, scale=0.003, batchsize=args.per_batch_size)
+          num_class=args.num_classes, alpha=args.center_alpha, scale=args.center_scale, batchsize=args.per_batch_size)
   elif args.loss_type==10:
     _weight = mx.symbol.Variable('fc7_weight')
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
