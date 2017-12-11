@@ -63,7 +63,7 @@ def residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **k
     workspace : int
         Workspace used in convolution operator
     """
-    use_se = kwargs.get('use_se', False)
+    use_se = kwargs.get('version_se', 1)
     bn_mom = kwargs.get('bn_mom', 0.9)
     workspace = kwargs.get('workspace', 256)
     memonger = kwargs.get('memonger', False)
@@ -151,7 +151,7 @@ def residual_unit_v1_L(data, num_filter, stride, dim_match, name, bottle_neck, *
     workspace : int
         Workspace used in convolution operator
     """
-    use_se = kwargs.get('use_se', False)
+    use_se = kwargs.get('version_se', 1)
     bn_mom = kwargs.get('bn_mom', 0.9)
     workspace = kwargs.get('workspace', 256)
     memonger = kwargs.get('memonger', False)
@@ -239,7 +239,7 @@ def residual_unit_v2(data, num_filter, stride, dim_match, name, bottle_neck, **k
     workspace : int
         Workspace used in convolution operator
     """
-    use_se = kwargs.get('use_se', False)
+    use_se = kwargs.get('version_se', 1)
     bn_mom = kwargs.get('bn_mom', 0.9)
     workspace = kwargs.get('workspace', 256)
     memonger = kwargs.get('memonger', False)
@@ -324,7 +324,7 @@ def residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck, **k
     workspace : int
         Workspace used in convolution operator
     """
-    use_se = kwargs.get('use_se', False)
+    use_se = kwargs.get('version_se', 1)
     bn_mom = kwargs.get('bn_mom', 0.9)
     workspace = kwargs.get('workspace', 256)
     memonger = kwargs.get('memonger', False)
@@ -416,7 +416,7 @@ def residual_unit_v3_x(data, num_filter, stride, dim_match, name, bottle_neck, *
         Workspace used in convolution operator
     """
     assert(bottle_neck)
-    use_se = kwargs.get('use_se', False)
+    use_se = kwargs.get('version_se', 1)
     bn_mom = kwargs.get('bn_mom', 0.9)
     workspace = kwargs.get('workspace', 256)
     memonger = kwargs.get('memonger', False)
@@ -458,8 +458,8 @@ def residual_unit_v3_x(data, num_filter, stride, dim_match, name, bottle_neck, *
     return bn4 + shortcut
 
 def residual_unit(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs):
-  uv = kwargs.get('version_unit', 1)
-  version_input = kwargs.get('version_input', 0)
+  uv = kwargs.get('version_unit', 3)
+  version_input = kwargs.get('version_input', 1)
   if uv==1:
     if version_input==0:
       return residual_unit_v1(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs)
@@ -492,12 +492,13 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
     workspace : int
         Workspace used in convolution operator
     """
-    version_input = kwargs.get('version_input', 0)
+    version_se = kwargs.get('version_se', 1)
+    version_input = kwargs.get('version_input', 1)
     assert version_input>=0
-    version_output = kwargs.get('version_output', 'A')
+    version_output = kwargs.get('version_output', 'E')
     fc_type = version_output
-    version_unit = kwargs.get('version_unit', 1)
-    print(version_input, version_output, version_unit)
+    version_unit = kwargs.get('version_unit', 3)
+    print(version_se, version_input, version_output, version_unit)
     num_unit = len(units)
     assert(num_unit == num_stages)
     data = mx.sym.Variable(name='data')
@@ -570,8 +571,6 @@ def get_symbol(num_classes, num_layers, **kwargs):
     else:
         raise ValueError("no experiments done on num_layers {}, you can do it yourself".format(num_layers))
 
-    use_se = kwargs.get('use_se', False)
-    print('use_se', use_se)
     return resnet(units       = units,
                   num_stages  = num_stages,
                   filter_list = filter_list,

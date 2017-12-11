@@ -76,19 +76,17 @@ def parse_args():
       help='')
   parser.add_argument('--prefix', default='../model/model',
       help='directory to save model.')
-  parser.add_argument('--pretrained', default='../model/resnet-152',
+  parser.add_argument('--pretrained', default='',
       help='')
-  parser.add_argument('--network', default='s20', help='')
-  parser.add_argument('--use-se', action='store_true', default=False, help='')
-  parser.add_argument('--version-input', type=int, default=1, help='')
-  parser.add_argument('--version-output', type=str, default='A', help='')
-  parser.add_argument('--version-unit', type=int, default=1, help='')
-  parser.add_argument('--load-epoch', type=int, default=0,
-      help='load epoch.')
-  parser.add_argument('--end-epoch', type=int, default=1000,
-      help='training epoch size.')
   parser.add_argument('--retrain', action='store_true', default=False,
       help='true means continue training.')
+  parser.add_argument('--network', default='s20', help='')
+  parser.add_argument('--version-se', type=int, default=1, help='')
+  parser.add_argument('--version-input', type=int, default=1, help='')
+  parser.add_argument('--version-output', type=str, default='E', help='')
+  parser.add_argument('--version-unit', type=int, default=3, help='')
+  parser.add_argument('--end-epoch', type=int, default=1000,
+      help='training epoch size.')
   parser.add_argument('--lr', type=float, default=0.1,
       help='')
   parser.add_argument('--wd', type=float, default=0.0005,
@@ -130,35 +128,31 @@ def parse_args():
 
 
 def get_symbol(args, arg_params, aux_params):
-  if args.retrain:
-    new_args = arg_params
-  else:
-    new_args = None
   data_shape = (args.image_channel,args.image_h,args.image_w)
   image_shape = ",".join([str(x) for x in data_shape])
   if args.network[0]=='d':
     embedding = fdensenet.get_symbol(512, args.num_layers,
-        use_se=args.use_se, version_input=args.version_input, 
+        version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='m':
     print('init mobilenet', args.num_layers)
     embedding = fmobilenet.get_symbol(512, 
-        use_se=args.use_se, version_input=args.version_input, 
+        version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='i':
     print('init inception-resnet-v2', args.num_layers)
     embedding = finception_resnet_v2.get_symbol(512,
-        use_se=args.use_se, version_input=args.version_input, 
+        version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='x':
     print('init xception', args.num_layers)
     embedding = fxception.get_symbol(512,
-        use_se=args.use_se, version_input=args.version_input, 
+        version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   else:
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(512, args.num_layers, 
-        use_se=args.use_se, version_input=args.version_input, 
+        version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   gt_label = mx.symbol.Variable('softmax_label')
   assert args.loss_type>=0
@@ -253,7 +247,7 @@ def get_symbol(args, arg_params, aux_params):
     out = mx.symbol.Group([mx.symbol.BlockGrad(embedding), softmax, extra_loss])
   else:
     out = mx.symbol.Group([mx.symbol.BlockGrad(embedding), softmax])
-  return (out, new_args, aux_params)
+  return (out, arg_params, aux_params)
 
 def train_net(args):
     ctx = []
@@ -271,8 +265,6 @@ def train_net(args):
     if not os.path.exists(prefix_dir):
       os.makedirs(prefix_dir)
     end_epoch = args.end_epoch
-    pretrained = args.pretrained
-    load_epoch = args.load_epoch
     args.ctx_num = len(ctx)
     args.num_layers = int(args.network[1:])
     print('num_layers', args.num_layers)
@@ -352,12 +344,13 @@ def train_net(args):
     base_lr = args.lr
     base_wd = args.wd
     base_mom = 0.9
-    if not args.retrain:
+    if len(args.pretrained)>0:
       arg_params = None
       aux_params = None
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
     else:
-      _, arg_params, aux_params = mx.model.load_checkpoint(pretrained, load_epoch)
+      vec = args.pretrained.split(',')
+      _, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
 
 
