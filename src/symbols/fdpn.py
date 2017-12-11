@@ -177,16 +177,15 @@ def get_symbol(num_classes = 1000, num_layers=92, **kwargs):
 
     ## define Dual Path Network
     data = mx.symbol.Variable(name="data")
-    data = data-127.5
-    data = data*0.0078125
-
-    # conv1
-    if version_input==0:
-      conv1_x_1  = Conv(data=data,  num_filter=128,  kernel=(7, 7), name='conv1_x_1', pad=(3,3), stride=(2,2))
-    else:
-      conv1_x_1  = Conv(data=data,  num_filter=128,  kernel=(3, 3), name='conv1_x_1', pad=(3,3), stride=(1,1))
-    conv1_x_1  = BN_AC(conv1_x_1, name='conv1_x_1__relu-sp')
-    conv1_x_x  = mx.symbol.Pooling(data=conv1_x_1, pool_type="max", kernel=(3, 3),  pad=(1,1), stride=(2,2), name="pool1")
+    #data = data-127.5
+    #data = data*0.0078125
+    #if version_input==0:
+    #  conv1_x_1  = Conv(data=data,  num_filter=128,  kernel=(7, 7), name='conv1_x_1', pad=(3,3), stride=(2,2))
+    #else:
+    #  conv1_x_1  = Conv(data=data,  num_filter=128,  kernel=(3, 3), name='conv1_x_1', pad=(3,3), stride=(1,1))
+    #conv1_x_1  = BN_AC(conv1_x_1, name='conv1_x_1__relu-sp')
+    #conv1_x_x  = mx.symbol.Pooling(data=conv1_x_1, pool_type="max", kernel=(3, 3),  pad=(1,1), stride=(2,2), name="pool1")
+    conv1_x_x = symbol_utils.get_head(data, version_input, 128)
 
     # conv2
     bw = 256
