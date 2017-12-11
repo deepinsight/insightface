@@ -137,11 +137,11 @@ def get_symbol(num_classes, num_layers, **kwargs):
     workspace : int
         Workspace used in convolution operator
     """
-    version_input = kwargs.get('version_input', 0)
+    version_input = kwargs.get('version_input', 1)
     assert version_input>=0
-    version_output = kwargs.get('version_output', 'A')
+    version_output = kwargs.get('version_output', 'E')
     fc_type = version_output
-    version_unit = kwargs.get('version_unit', 1)
+    version_unit = kwargs.get('version_unit', 3)
     print(version_input, version_output, version_unit)
 
     num_stage = 4

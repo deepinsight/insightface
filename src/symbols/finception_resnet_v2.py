@@ -103,11 +103,11 @@ def get_symbol(num_classes=1000, **kwargs):
     data = mx.symbol.Variable(name='data')
     data = data-127.5
     data = data*0.0078125
-    version_input = kwargs.get('version_input', 0)
+    version_input = kwargs.get('version_input', 1)
     assert version_input>=0
-    version_output = kwargs.get('version_output', 'A')
+    version_output = kwargs.get('version_output', 'E')
     fc_type = version_output
-    version_unit = kwargs.get('version_unit', 1)
+    version_unit = kwargs.get('version_unit', 3)
     print(version_input, version_output, version_unit)
 
     if version_input==0:
