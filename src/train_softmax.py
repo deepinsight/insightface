@@ -27,6 +27,7 @@ import finception_resnet_v2
 import fmobilenet 
 import fxception
 import fdensenet
+import fdpn
 #import lfw
 import verification
 import sklearn
@@ -147,6 +148,11 @@ def get_symbol(args, arg_params, aux_params):
   elif args.network[0]=='x':
     print('init xception', args.num_layers)
     embedding = fxception.get_symbol(512,
+        version_se=args.version_se, version_input=args.version_input, 
+        version_output=args.version_output, version_unit=args.version_unit)
+  elif args.network[0]=='p':
+    print('init dpn', args.num_layers)
+    embedding = fdpn.get_symbol(512, args.num_layers,
         version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   else:
@@ -344,7 +350,7 @@ def train_net(args):
     base_lr = args.lr
     base_wd = args.wd
     base_mom = 0.9
-    if len(args.pretrained)>0:
+    if len(args.pretrained)==0:
       arg_params = None
       aux_params = None
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
