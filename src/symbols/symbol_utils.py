@@ -1,5 +1,13 @@
 import mxnet as mx
 
+def Conv(**kwargs):
+    #name = kwargs.get('name')
+    #_weight = mx.symbol.Variable(name+'_weight')
+    #_bias = mx.symbol.Variable(name+'_bias', lr_mult=2.0, wd_mult=0.0)
+    #body = mx.sym.Convolution(weight = _weight, bias = _bias, **kwargs)
+    body = mx.sym.Convolution(**kwargs)
+    return body
+
 def Act(data, act_type, name):
     #ignore param act_type, set it in this function 
     body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
@@ -89,6 +97,9 @@ def residual_unit_v3(data, num_filter, stride, dim_match, name, **kwargs):
 
 
 def get_head(data, version_input, num_filter):
+    bn_mom = 0.9
+    workspace = 256
+    kwargs = {'bn_mom': bn_mom, 'workspace' : workspace}
     data = data-127.5
     data = data*0.0078125
     #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
@@ -104,8 +115,7 @@ def get_head(data, version_input, num_filter):
                                 no_bias=True, name="conv0", workspace=workspace)
       body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
       body = Act(data=body, act_type='relu', name='relu0')
-    body = residual_unit_v3(body, num_filter, (2, 2), False,
-      name='head', **kwargs)
+      body = residual_unit_v3(body, num_filter, (2, 2), False, name='head', **kwargs)
     return body
 
 
