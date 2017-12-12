@@ -9,11 +9,7 @@ import random
 import logging
 import pickle
 import numpy as np
-from data import FaceIter
 from data import FaceImageIter
-from data import FaceImageIter2
-from data import FaceImageIter4
-from data import FaceImageIter5
 import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
@@ -114,6 +110,7 @@ def parse_args():
       help='')
   parser.add_argument('--center-alpha', type=float, default=0.5, help='')
   parser.add_argument('--center-scale', type=float, default=0.003, help='')
+  parser.add_argument('--images-per-identity', type=int, default=0, help='')
   parser.add_argument('--verbose', type=int, default=2000, help='')
   parser.add_argument('--loss-type', type=int, default=1,
       help='')
@@ -222,6 +219,25 @@ def get_symbol(args, arg_params, aux_params):
     body = body/(n*n-n)
     extra_loss = mx.symbol.MakeLoss(body, grad_scale=params[1])
     #extra_loss = None
+  elif args.loss_type==12:
+    _weight = mx.symbol.Variable('fc7_weight')
+    _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
+    fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
+    params = [0.9, 0.2]
+    nembedding = mx.symbol.slice_axis(embedding, axis=0, begin=0, end=args.images_per_identity)
+    nembedding = mx.symbol.L2Normalization(nembedding, mode='instance', name='fc1n')
+    n1 = mx.sym.expand_dims(nembedding, axis=1)
+    n2 = mx.sym.expand_dims(nembedding, axis=0)
+    body = mx.sym.broadcast_sub(n1, n2) #N,N,C
+    body = body * body
+    body = mx.sym.sum(body, axis=2) # N,N
+    body = body - params[0]
+    body = mx.symbol.Activation(data=body, act_type='relu')
+    body = mx.sym.sum(body)
+    n = args.images_per_identity
+    body = body/(n*n-n)
+    extra_loss = mx.symbol.MakeLoss(body, grad_scale=params[1])
+    #extra_loss = None
   else:
     #embedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*float(args.loss_type)
     embedding = embedding * 5
@@ -235,7 +251,6 @@ def get_symbol(args, arg_params, aux_params):
     #fc7 = mx.sym.Custom(data=embedding, label=gt_label, weight=_weight, num_hidden=args.num_classes,
     #                       beta=args.beta, margin=args.margin, scale=args.scale,
     #                       op_type='ASoftmax', name='fc7')
-  softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
   if args.loss_type<=1 and args.incay>0.0:
     params = [1.e-10]
     sel = mx.symbol.argmax(data = fc7, axis=1)
@@ -251,10 +266,13 @@ def get_symbol(args, arg_params, aux_params):
 
   #ce = mx.symbol.softmax_cross_entropy(fc7, gt_label, name='softmax_ce')/args.per_batch_size
   #out = mx.symbol.Group([mx.symbol.BlockGrad(embedding), softmax, mx.symbol.BlockGrad(ce)])
+  out_list = [mx.symbol.BlockGrad(embedding)]
+  if args.loss_type<10:
+    softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
+    out_list.append(softmax)
   if extra_loss is not None:
-    out = mx.symbol.Group([mx.symbol.BlockGrad(embedding), softmax, extra_loss])
-  else:
-    out = mx.symbol.Group([mx.symbol.BlockGrad(embedding), softmax])
+    out_list.append(extra_loss)
+  out = mx.symbol.Group(out_list)
   return (out, arg_params, aux_params)
 
 def train_net(args):
@@ -314,7 +332,7 @@ def train_net(args):
     #path_imglist = "/raid5data/dplearn/MS-Celeb-Aligned/lst2"
     path_imgrec = os.path.join(args.data_dir, "train.rec")
     val_rec = os.path.join(args.data_dir, "val.rec")
-    if os.path.exists(val_rec):
+    if os.path.exists(val_rec) and args.loss_type<10:
       args.use_val = True
     else:
       val_rec = None
@@ -375,42 +393,21 @@ def train_net(args):
           data_names    = data_names,
       )
 
+    if args.loss_type<10:
+      assert args.images_per_identity==0
+    else:
+      assert args.images_per_identity>=2
 
-    if args.loss_type<=9:
-      train_dataiter = FaceImageIter(
-          batch_size           = args.batch_size,
-          data_shape           = data_shape,
-          path_imgrec          = path_imgrec,
-          shuffle              = True,
-          rand_mirror          = True,
-          mean                 = mean,
-      )
-    elif args.loss_type==10:
-      train_dataiter = FaceImageIter4(
-          batch_size           = args.batch_size,
-          ctx_num              = args.ctx_num,
-          images_per_identity  = args.images_per_identity,
-          data_shape           = data_shape,
-          path_imglist         = path_imglist,
-          shuffle              = True,
-          rand_mirror          = True,
-          mean                 = mean,
-          patch                = ppatch,
-          use_extra            = True,
-          model                = model,
-      )
-    elif args.loss_type==11:
-      train_dataiter = FaceImageIter5(
-          batch_size           = args.batch_size,
-          ctx_num              = args.ctx_num,
-          images_per_identity  = args.images_per_identity,
-          data_shape           = data_shape,
-          path_imglist         = path_imglist,
-          shuffle              = True,
-          rand_mirror          = True,
-          mean                 = mean,
-          patch                = ppatch,
-      )
+    train_dataiter = FaceImageIter(
+        batch_size           = args.batch_size,
+        data_shape           = data_shape,
+        path_imgrec          = path_imgrec,
+        shuffle              = True,
+        rand_mirror          = True,
+        mean                 = mean,
+        ctx_num              = args.ctx_num,
+        images_per_identity  = args.images_per_identity,
+    )
 
     _acc = AccMetric()
     eval_metrics = [mx.metric.create(_acc)]
