@@ -111,11 +111,12 @@ def get_head(data, version_input, num_filter):
       body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
     else:
       body = data
-      body = Conv(data=body, num_filter=num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1),
+      _num_filter = min(num_filter, 64)
+      body = Conv(data=body, num_filter=_num_filter, kernel=(3,3), stride=(1,1), pad=(1, 1),
                                 no_bias=True, name="conv0", workspace=workspace)
       body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
       body = Act(data=body, act_type='relu', name='relu0')
-      body = residual_unit_v3(body, num_filter, (2, 2), False, name='head', **kwargs)
+      body = residual_unit_v3(body, _num_filter, (2, 2), False, name='head', **kwargs)
     return body
 
 
