@@ -184,22 +184,28 @@ def load_bin(path, image_size):
   print(data_list[0].shape)
   return (data_list, issame_list)
 
-def test(data_set, mx_model, batch_size):
+def test(data_set, mx_model, batch_size, data_extra = None):
   print('testing verification..')
   data_list = data_set[0]
   issame_list = data_set[1]
   model = mx_model
   embeddings_list = []
+  if data_extra is not None:
+    _data_extra = nd.array(data_extra)
   for i in xrange( len(data_list) ):
     data = data_list[i]
     embeddings = None
     ba = 0
     while ba<data.shape[0]:
       bb = min(ba+batch_size, data.shape[0])
-      _data = nd.slice_axis(data, axis=0, begin=ba, end=bb)
-      _label = nd.ones( (bb-ba,) )
+      count = bb-ba
+      _data = nd.slice_axis(data, axis=0, begin=bb-batch_size, end=bb)
+      _label = nd.ones( (batch_size,) )
       #print(_data.shape, _label.shape)
-      db = mx.io.DataBatch(data=(_data,), label=(_label,))
+      if data_extra is None:
+        db = mx.io.DataBatch(data=(_data,), label=(_label,))
+      else:
+        db = mx.io.DataBatch(data=(_data,_data_extra), label=(_label,))
       model.forward(db, is_train=False)
       net_out = model.get_outputs()
       #_arg, _aux = model.get_params()
@@ -218,7 +224,7 @@ def test(data_set, mx_model, batch_size):
       #print(_embeddings.shape)
       if embeddings is None:
         embeddings = np.zeros( (data.shape[0], _embeddings.shape[1]) )
-      embeddings[ba:bb,:] = _embeddings
+      embeddings[ba:bb,:] = _embeddings[(batch_size-count):,:]
       ba = bb
     embeddings_list.append(embeddings)
 
