@@ -66,6 +66,19 @@ class AccMetric(mx.metric.EvalMetric):
         self.sum_metric += (pred_label.flat == label.flat).sum()
         self.num_inst += len(pred_label.flat)
 
+class LossValueMetric(mx.metric.EvalMetric):
+  def __init__(self):
+    self.axis = 1
+    super(LossValueMetric, self).__init__(
+        'lossvalue', axis=self.axis,
+        output_names=None, label_names=None)
+    self.losses = []
+
+  def update(self, labels, preds):
+    loss = preds[-1].asnumpy()[0]
+    self.sum_metric += loss
+    self.num_inst += 1.0
+
 def parse_args():
   parser = argparse.ArgumentParser(description='Train face network')
   # general
@@ -88,7 +101,7 @@ def parse_args():
       help='')
   parser.add_argument('--wd', type=float, default=0.0005,
       help='')
-  parser.add_argument('--images-per-identity', type=int, default=16,
+  parser.add_argument('--mom', type=float, default=0.9,
       help='')
   parser.add_argument('--embedding-dim', type=int, default=512,
       help='')
@@ -179,10 +192,7 @@ def get_symbol(args, arg_params, aux_params):
     print('center-loss', args.center_alpha, args.center_scale)
     extra_loss = mx.symbol.Custom(data=embedding, label=gt_label, name='center_loss', op_type='centerloss',\
           num_class=args.num_classes, alpha=args.center_alpha, scale=args.center_scale, batchsize=args.per_batch_size)
-  elif args.loss_type==10:
-    _weight = mx.symbol.Variable('fc7_weight')
-    _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
-    fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
+  elif args.loss_type==10: #marginal loss
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
     params = [1.2, 0.3, 1.0]
     n1 = mx.sym.expand_dims(nembedding, axis=1)
@@ -200,25 +210,42 @@ def get_symbol(args, arg_params, aux_params):
     body = mx.sym.sum(body)
     body = body/(args.per_batch_size*args.per_batch_size-args.per_batch_size)
     extra_loss = mx.symbol.MakeLoss(body, grad_scale=params[2])
-  elif args.loss_type==11:
-    _weight = mx.symbol.Variable('fc7_weight')
-    _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
-    fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
+  elif args.loss_type==11: #npair loss
     params = [0.9, 0.2]
-    nembedding = mx.symbol.slice_axis(embedding, axis=0, begin=0, end=args.images_per_identity)
-    nembedding = mx.symbol.L2Normalization(nembedding, mode='instance', name='fc1n')
-    n1 = mx.sym.expand_dims(nembedding, axis=1)
-    n2 = mx.sym.expand_dims(nembedding, axis=0)
-    body = mx.sym.broadcast_sub(n1, n2) #N,N,C
-    body = body * body
-    body = mx.sym.sum(body, axis=2) # N,N
-    body = body - params[0]
-    body = mx.symbol.Activation(data=body, act_type='relu')
-    body = mx.sym.sum(body)
-    n = args.images_per_identity
-    body = body/(n*n-n)
-    extra_loss = mx.symbol.MakeLoss(body, grad_scale=params[1])
-    #extra_loss = None
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
+    nembedding = mx.sym.transpose(nembedding)
+    nembedding = mx.symbol.reshape(nembedding, (512, args.per_identities, args.images_per_identity))
+    nembedding = mx.sym.transpose(nembedding, axes=(2,1,0)) #2*id*512
+    #nembedding = mx.symbol.reshape(nembedding, (512, args.images_per_identity, args.per_identities))
+    #nembedding = mx.sym.transpose(nembedding, axes=(1,2,0)) #2*id*512
+    n1 = mx.symbol.slice_axis(nembedding, axis=0, begin=0, end=1)
+    n2 = mx.symbol.slice_axis(nembedding, axis=0, begin=1, end=2)
+    #n1 = []
+    #n2 = []
+    #for i in xrange(args.per_identities):
+    #  _n1 = mx.symbol.slice_axis(nembedding, axis=0, begin=2*i, end=2*i+1)
+    #  _n2 = mx.symbol.slice_axis(nembedding, axis=0, begin=2*i+1, end=2*i+2)
+    #  n1.append(_n1)
+    #  n2.append(_n2)
+    #n1 = mx.sym.concat(*n1, dim=0)
+    #n2 = mx.sym.concat(*n2, dim=0)
+    #rembeddings = mx.symbol.reshape(nembedding, (args.images_per_identity, args.per_identities, 512))
+    #n1 = mx.symbol.slice_axis(rembeddings, axis=0, begin=0, end=1)
+    #n2 = mx.symbol.slice_axis(rembeddings, axis=0, begin=1, end=2)
+    n1 = mx.symbol.reshape(n1, (args.per_identities, 512))
+    n2 = mx.symbol.reshape(n2, (args.per_identities, 512))
+    cosine_matrix = mx.symbol.dot(lhs=n1, rhs=n2, transpose_b = True) #id*id, id=N of N-pair
+    data_extra = mx.sym.Variable('extra')
+    data_extra = mx.sym.slice_axis(data_extra, axis=0, begin=0, end=args.per_identities)
+    mask = cosine_matrix * data_extra
+    #body = mx.sym.mean(mask)
+    fii = mx.sym.sum_axis(mask, axis=1)
+    fij_fii = mx.sym.broadcast_sub(cosine_matrix, fii)
+    fij_fii = mx.sym.exp(fij_fii)
+    row = mx.sym.sum_axis(fij_fii, axis=1)
+    row = mx.sym.log(row)
+    body = mx.sym.mean(row)
+    extra_loss = mx.sym.MakeLoss(body)
   elif args.loss_type==12:
     _weight = mx.symbol.Variable('fc7_weight')
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
@@ -267,9 +294,12 @@ def get_symbol(args, arg_params, aux_params):
   #ce = mx.symbol.softmax_cross_entropy(fc7, gt_label, name='softmax_ce')/args.per_batch_size
   #out = mx.symbol.Group([mx.symbol.BlockGrad(embedding), softmax, mx.symbol.BlockGrad(ce)])
   out_list = [mx.symbol.BlockGrad(embedding)]
+  softmax = None
   if args.loss_type<10:
     softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
     out_list.append(softmax)
+  if softmax is None:
+    out_list.append(mx.sym.BlockGrad(gt_label))
   if extra_loss is not None:
     out_list.append(extra_loss)
   out = mx.symbol.Group(out_list)
@@ -346,6 +376,9 @@ def train_net(args):
       args.beta_freeze = 5000
       args.gamma = 0.06
 
+    if args.loss_type==11:
+      args.images_per_identity = 2
+
     print('Called with argument:', args)
 
     data_shape = (args.image_channel,image_size[0],image_size[1])
@@ -365,11 +398,16 @@ def train_net(args):
       val_dataiter = None
 
 
+    if args.loss_type<10:
+      assert args.images_per_identity==0
+    else:
+      assert args.images_per_identity>=2
+      args.per_identities = int(args.per_batch_size/args.images_per_identity)
 
     begin_epoch = 0
     base_lr = args.lr
     base_wd = args.wd
-    base_mom = 0.9
+    base_mom = args.mom
     if len(args.pretrained)==0:
       arg_params = None
       aux_params = None
@@ -379,24 +417,43 @@ def train_net(args):
       _, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
 
+    data_extra = None
+    if args.loss_type==10:
+      _shape = (args.batch_size, 3, image_size[0], image_size[1])
+      data_extra = np.full(_shape, -1.0, dtype=np.float32)
+      c = 0
+      while c<args.batch_size:
+        a = 0
+        while a<args.per_batch_size:
+          b = a+args.images_per_identity
+          data_extra[(c+a):(c+b),a:b] = 1.0
+          #print(c+a, c+b, a, b)
+          a = b
+        c += args.per_batch_size
+    elif args.loss_type==11:
+      data_extra = np.zeros( (args.batch_size, args.per_identities), dtype=np.float32)
+      c = 0
+      while c<args.batch_size:
+        for i in xrange(args.per_identities):
+          data_extra[c+i][i] = 1.0
+        c+=args.per_batch_size
 
-    if args.loss_type!=10:
+    label_name = 'softmax_label'
+    if data_extra is None:
       model = mx.mod.Module(
           context       = ctx,
           symbol        = sym,
       )
     else:
       data_names = ('data', 'extra')
+      #label_name = ''
       model = mx.mod.Module(
           context       = ctx,
           symbol        = sym,
           data_names    = data_names,
+          label_names   = (label_name,),
       )
 
-    if args.loss_type<10:
-      assert args.images_per_identity==0
-    else:
-      assert args.images_per_identity>=2
 
     train_dataiter = FaceImageIter(
         batch_size           = args.batch_size,
@@ -407,10 +464,15 @@ def train_net(args):
         mean                 = mean,
         ctx_num              = args.ctx_num,
         images_per_identity  = args.images_per_identity,
+        data_extra           = data_extra,
+        label_name           = label_name,
     )
 
-    _acc = AccMetric()
-    eval_metrics = [mx.metric.create(_acc)]
+    if args.loss_type<10:
+      _metric = AccMetric()
+    else:
+      _metric = LossValueMetric()
+    eval_metrics = [mx.metric.create(_metric)]
 
     if args.network[0]=='r':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
@@ -437,7 +499,7 @@ def train_net(args):
     def ver_test(nbatch):
       results = []
       for i in xrange(len(ver_list)):
-        acc1, std1, acc2, std2, xnorm, embeddings_list = verification.test(ver_list[i], model, args.batch_size)
+        acc1, std1, acc2, std2, xnorm, embeddings_list = verification.test(ver_list[i], model, args.batch_size, data_extra)
         #print('[%s][%d]XNorm: %f' % (ver_name_list[i], nbatch, xnorm))
         #print('[%s][%d]Accuracy: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc1, std1))
         print('[%s][%d]Accuracy-Flip: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc2, std2))
@@ -465,7 +527,7 @@ def train_net(args):
     if len(args.lr_steps)==0:
       lr_steps = [40000, 60000, 80000]
       if args.loss_type==1:
-        lr_steps = [80000, 120000, 140000]
+        lr_steps = [50000, 70000, 90000]
       p = 512.0/args.batch_size
       for l in xrange(len(lr_steps)):
         lr_steps[l] = int(lr_steps[l]*p)

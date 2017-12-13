@@ -33,7 +33,7 @@ class FaceImageIter(io.DataIter):
                  path_imgrec = None,
                  shuffle=False, aug_list=None, mean = None,
                  rand_mirror = False,
-                 ctx_num = 0, images_per_identity = 0,
+                 ctx_num = 0, images_per_identity = 0, data_extra = None,
                  data_name='data', label_name='softmax_label', **kwargs):
         super(FaceImageIter, self).__init__()
         assert path_imgrec
@@ -48,7 +48,7 @@ class FaceImageIter(io.DataIter):
               print('header0 label', header.label)
               #assert(header.flag==1)
               self.imgidx = range(1, int(header.label[0]))
-              self.idx2range = {}
+              self.id2range = {}
               self.seq_identity = range(int(header.label[0]), int(header.label[1]))
               for identity in self.seq_identity:
                 s = self.imgrec.read_idx(identity)
@@ -56,8 +56,8 @@ class FaceImageIter(io.DataIter):
                 #print('flag', header.flag)
                 #print(header.label)
                 #assert(header.flag==2)
-                self.idx2range[identity] = (int(header.label[0]), int(header.label[1]))
-              print('idx2range', len(self.idx2range))
+                self.id2range[identity] = (int(header.label[0]), int(header.label[1]))
+              print('id2range', len(self.id2range))
             else:
               self.imgidx = list(self.imgrec.keys)
             if shuffle:
@@ -73,7 +73,10 @@ class FaceImageIter(io.DataIter):
 
         self.check_data_shape(data_shape)
         self.provide_data = [(data_name, (batch_size,) + data_shape)]
-        self.provide_label = [(label_name, (batch_size,))]
+        if len(label_name)>0:
+          self.provide_label = [(label_name, (batch_size,))]
+        else:
+          self.provide_label = []
         self.batch_size = batch_size
         self.data_shape = data_shape
         self.shuffle = shuffle
@@ -86,7 +89,13 @@ class FaceImageIter(io.DataIter):
         self.images_per_identity = images_per_identity
         if self.images_per_identity>0:
           self.identities = int(self.per_batch_size/self.images_per_identity)
-          print(self.images_per_identity, self.identities)
+          self.repeat = 3000000.0/(self.images_per_identity*len(self.id2range))
+          self.repeat = int(self.repeat)
+          print(self.images_per_identity, self.identities, self.repeat)
+        self.data_extra = None
+        if data_extra is not None:
+          self.data_extra = nd.array(data_extra)
+          self.provide_data = [(data_name, (batch_size,) + data_shape), ('extra', data_extra.shape)]
         self.cur = 0
         self.reset()
 
@@ -96,13 +105,26 @@ class FaceImageIter(io.DataIter):
         self.cur = 0
         if self.images_per_identity>0:
           self.seq = []
-          for _id, _v in self.idx2range.iteritems():
-            _list = range(_v)
+          idlist = []
+          for _id,v in self.id2range.iteritems():
+            idlist.append((_id,range(*v)))
+          for r in xrange(self.repeat):
+            if r%10==0:
+              print('repeat', r)
             if self.shuffle:
-              random.shuffle(_list)
-            for i in xrange(self.images_per_identity):
-              _idx = _list[i%len(_list)]
-              self.seq.append(_id)
+              random.shuffle(idlist)
+            for item in idlist:
+              _id = item[0]
+              _list = item[1]
+              #random.shuffle(_list)
+              if len(_list)<self.images_per_identity:
+                random.shuffle(_list)
+              else:
+                _list = np.random.choice(_list, self.images_per_identity, replace=False)
+              for i in xrange(self.images_per_identity):
+                _idx = _list[i%len(_list)]
+                self.seq.append(_idx)
+          print('seq len', len(self.seq))
         else:
           if self.shuffle:
               random.shuffle(self.seq)
@@ -181,7 +203,8 @@ class FaceImageIter(io.DataIter):
         batch_size = self.batch_size
         c, h, w = self.data_shape
         batch_data = nd.empty((batch_size, c, h, w))
-        batch_label = nd.empty(self.provide_label[0][1])
+        if self.provide_label is not None:
+          batch_label = nd.empty(self.provide_label[0][1])
         i = 0
         try:
             while i < batch_size:
@@ -220,14 +243,21 @@ class FaceImageIter(io.DataIter):
                     assert i < batch_size, 'Batch size must be multiples of augmenter output length'
                     #print(datum.shape)
                     batch_data[i][:] = self.postprocess_data(datum)
-                    batch_label[i][:] = label
+                    if self.provide_label is not None:
+                      batch_label[i][:] = label
                     i += 1
         except StopIteration:
             if i<batch_size:
                 raise StopIteration
 
         #print('next end', batch_size, i)
-        return io.DataBatch([batch_data], [batch_label], batch_size - i)
+        _label = None
+        if self.provide_label is not None:
+          _label = [batch_label]
+        if self.data_extra is not None:
+          return io.DataBatch([batch_data, self.data_extra], _label, batch_size - i)
+        else:
+          return io.DataBatch([batch_data], _label, batch_size - i)
 
     def check_data_shape(self, data_shape):
         """Checks if the input data shape is valid"""
