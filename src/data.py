@@ -104,7 +104,8 @@ class FaceImageIter(io.DataIter):
         #self.reset()
 
     def hard_mining_reset(self):
-      import faiss
+      #import faiss
+      from annoy import AnnoyIndex
       data = nd.zeros( self.provide_data[0][1] )
       label = nd.zeros( self.provide_label[0][1] )
       #label = np.zeros( self.provide_label[0][1] )
@@ -141,25 +142,18 @@ class FaceImageIter(io.DataIter):
         ba = bb
       X = sklearn.preprocessing.normalize(X)
       d = X.shape[1]
-      faiss_params = [20,5]
-      print('start to train faiss')
+      t = AnnoyIndex(d, metric='euclidean')
+      for i in xrange(X.shape[0]):
+        t.add_item(i, X[i])
+      print('start to build index')
+      t.build(20)
       print(X.shape)
-      quantizer = faiss.IndexFlatL2(d)  # the other index
-      index = faiss.IndexIVFFlat(quantizer, d, faiss_params[0], faiss.METRIC_L2)
-      assert not index.is_trained
-      index.train(X)
-      index.add(X)
-      assert index.is_trained
-      print('trained')
-      index.nprobe = faiss_params[1]
       k = self.per_identities
-      D, I = index.search(X, k)     # actual search
-      print(I.shape)
       self.seq = []
-      for i in xrange(I.shape[0]):
-        #assert I[i][0]==i
-        for j in xrange(k):
-          _label = I[i][j]
+      for i in xrange(X.shape[0]):
+        nnlist = t.get_nns_by_item(i, k)
+        assert nnlist[0]==i
+        for _label in nnlist:
           assert _label<len(self.id2range)
           _id = self.header0[0]+_label
           v = self.id2range[_id]
@@ -171,6 +165,33 @@ class FaceImageIter(io.DataIter):
           for i in xrange(self.images_per_identity):
             _idx = _list[i%len(_list)]
             self.seq.append(_idx)
+      #faiss_params = [20,5]
+      #quantizer = faiss.IndexFlatL2(d)  # the other index
+      #index = faiss.IndexIVFFlat(quantizer, d, faiss_params[0], faiss.METRIC_L2)
+      #assert not index.is_trained
+      #index.train(X)
+      #index.add(X)
+      #assert index.is_trained
+      #print('trained')
+      #index.nprobe = faiss_params[1]
+      #D, I = index.search(X, k)     # actual search
+      #print(I.shape)
+      #self.seq = []
+      #for i in xrange(I.shape[0]):
+      #  #assert I[i][0]==i
+      #  for j in xrange(k):
+      #    _label = I[i][j]
+      #    assert _label<len(self.id2range)
+      #    _id = self.header0[0]+_label
+      #    v = self.id2range[_id]
+      #    _list = range(*v)
+      #    if len(_list)<self.images_per_identity:
+      #      random.shuffle(_list)
+      #    else:
+      #      _list = np.random.choice(_list, self.images_per_identity, replace=False)
+      #    for i in xrange(self.images_per_identity):
+      #      _idx = _list[i%len(_list)]
+      #      self.seq.append(_idx)
 
     def reset(self):
         """Resets the iterator to the beginning of the data."""
