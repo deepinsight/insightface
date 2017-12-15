@@ -524,9 +524,9 @@ def train_net(args):
     global_step = [0]
     save_step = [0]
     if len(args.lr_steps)==0:
-      lr_steps = [30000, 40000, 50000]
+      lr_steps = [40000, 60000, 70000]
       if args.loss_type==1:
-        lr_steps = [40000, 50000, 60000]
+        lr_steps = [50000, 70000, 80000]
       p = 512.0/args.batch_size
       for l in xrange(len(lr_steps)):
         lr_steps[l] = int(lr_steps[l]*p)
