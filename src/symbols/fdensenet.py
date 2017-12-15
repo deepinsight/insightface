@@ -168,17 +168,18 @@ def get_symbol(num_classes, num_layers, **kwargs):
     n_channels = init_channels
 
     data = mx.sym.Variable(name='data')
-    data = data-127.5
-    data = data*0.0078125
-    if version_input==0:
-      body = mx.sym.Convolution(data=data, num_filter=growth_rate*2, kernel=(7, 7), stride=(2,2), pad=(3, 3),
-                                no_bias=True, name="conv0", workspace=workspace)
-    else:
-      body = mx.sym.Convolution(data=data, num_filter=growth_rate*2, kernel=(3,3), stride=(1,1), pad=(1,1),
-                                no_bias=True, name="conv0", workspace=workspace)
-    body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
-    body = mx.sym.Activation(data=body, act_type='relu', name='relu0')
-    body = mx.symbol.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
+    #data = data-127.5
+    #data = data*0.0078125
+    #if version_input==0:
+    #  body = mx.sym.Convolution(data=data, num_filter=growth_rate*2, kernel=(7, 7), stride=(2,2), pad=(3, 3),
+    #                            no_bias=True, name="conv0", workspace=workspace)
+    #else:
+    #  body = mx.sym.Convolution(data=data, num_filter=growth_rate*2, kernel=(3,3), stride=(1,1), pad=(1,1),
+    #                            no_bias=True, name="conv0", workspace=workspace)
+    #body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
+    #body = mx.sym.Activation(data=body, act_type='relu', name='relu0')
+    #body = mx.symbol.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
+    body = symbol_utils.get_head(data, version_input, growth_rate*2)
 
     for i in range(num_stage-1):
         body = DenseBlock(units[i], body, growth_rate=growth_rate, name='DBstage%d' % (i + 1), bottle_neck=bottle_neck, drop_out=drop_out, bn_mom=bn_mom, workspace=workspace)
