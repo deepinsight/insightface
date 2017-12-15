@@ -7,13 +7,8 @@ import random
 import logging
 import sys
 import sklearn
-#import faiss
 import numpy as np
-
-try:
-    import cv2
-except ImportError:
-    cv2 = None
+import cv2
 
 import mxnet as mx
 from mxnet import ndarray as nd
@@ -33,7 +28,7 @@ class FaceImageIter(io.DataIter):
                  path_imgrec = None,
                  shuffle=False, aug_list=None, mean = None,
                  rand_mirror = False,
-                 ctx_num = 0, images_per_identity = 0, data_extra = None,
+                 ctx_num = 0, images_per_identity = 0, data_extra = None, hard_mining = False, mx_model = None,
                  data_name='data', label_name='softmax_label', **kwargs):
         super(FaceImageIter, self).__init__()
         assert path_imgrec
@@ -46,6 +41,7 @@ class FaceImageIter(io.DataIter):
             header, _ = recordio.unpack(s)
             if header.flag>0:
               print('header0 label', header.label)
+              self.header0 = (int(header.label[0]), int(header.label[1]))
               #assert(header.flag==1)
               self.imgidx = range(1, int(header.label[0]))
               self.id2range = {}
@@ -62,6 +58,7 @@ class FaceImageIter(io.DataIter):
               self.imgidx = list(self.imgrec.keys)
             if shuffle:
               self.seq = self.imgidx
+              self.oseq = self.imgidx
             else:
               self.seq = None
 
@@ -89,6 +86,7 @@ class FaceImageIter(io.DataIter):
         self.images_per_identity = images_per_identity
         if self.images_per_identity>0:
           self.identities = int(self.per_batch_size/self.images_per_identity)
+          self.per_identities = self.identities
           self.repeat = 3000000.0/(self.images_per_identity*len(self.id2range))
           self.repeat = int(self.repeat)
           print(self.images_per_identity, self.identities, self.repeat)
@@ -96,34 +94,112 @@ class FaceImageIter(io.DataIter):
         if data_extra is not None:
           self.data_extra = nd.array(data_extra)
           self.provide_data = [(data_name, (batch_size,) + data_shape), ('extra', data_extra.shape)]
+        self.hard_mining = hard_mining
+        self.mx_model = mx_model
+        if self.hard_mining:
+          assert self.images_per_identity>0
+          assert self.mx_model is not None
         self.cur = 0
-        self.reset()
+        self.is_init = False
+        #self.reset()
+
+    def hard_mining_reset(self):
+      import faiss
+      data = nd.zeros( self.provide_data[0][1] )
+      label = nd.zeros( self.provide_label[0][1] )
+      #label = np.zeros( self.provide_label[0][1] )
+      X = None
+      ba = 0
+      batch_num = 0
+      while ba<len(self.oseq):
+        batch_num+=1
+        if batch_num%10==0:
+          print('loading batch',batch_num, ba)
+        bb = min(ba+self.batch_size, len(self.oseq))
+        _count = bb-ba
+        for i in xrange(_count):
+          idx = self.oseq[i+ba]
+          s = self.imgrec.read_idx(idx)
+          header, img = recordio.unpack(s)
+          img = self.imdecode(img)
+          data[i][:] = self.postprocess_data(img)
+          label[i][:] = header.label
+        db = mx.io.DataBatch(data=(data,self.data_extra), label=(label,))
+        self.mx_model.forward(db, is_train=False)
+        net_out = self.mx_model.get_outputs()
+        embedding = net_out[0].asnumpy()
+        nembedding = sklearn.preprocessing.normalize(embedding)
+        if _count<self.batch_size:
+          nembedding = nembedding[0:_count,:]
+        if X is None:
+          X = np.zeros( (len(self.id2range), nembedding.shape[1]), dtype=np.float32 )
+        nplabel = label.asnumpy()
+        for i in xrange(_count):
+          ilabel = int(nplabel[i])
+          #print(ilabel, ilabel.__class__)
+          X[ilabel] += nembedding[i]
+        ba = bb
+      X = sklearn.preprocessing.normalize(X)
+      d = X.shape[1]
+      faiss_params = [20,5]
+      print('start to train faiss')
+      print(X.shape)
+      quantizer = faiss.IndexFlatL2(d)  # the other index
+      index = faiss.IndexIVFFlat(quantizer, d, faiss_params[0], faiss.METRIC_L2)
+      assert not index.is_trained
+      index.train(X)
+      index.add(X)
+      assert index.is_trained
+      print('trained')
+      index.nprobe = faiss_params[1]
+      k = self.per_identities
+      D, I = index.search(X, k)     # actual search
+      print(I.shape)
+      self.seq = []
+      for i in xrange(I.shape[0]):
+        #assert I[i][0]==i
+        for j in xrange(k):
+          _label = I[i][j]
+          assert _label<len(self.id2range)
+          _id = self.header0[0]+_label
+          v = self.id2range[_id]
+          _list = range(*v)
+          if len(_list)<self.images_per_identity:
+            random.shuffle(_list)
+          else:
+            _list = np.random.choice(_list, self.images_per_identity, replace=False)
+          for i in xrange(self.images_per_identity):
+            _idx = _list[i%len(_list)]
+            self.seq.append(_idx)
 
     def reset(self):
         """Resets the iterator to the beginning of the data."""
         print('call reset()')
         self.cur = 0
         if self.images_per_identity>0:
-          self.seq = []
-          idlist = []
-          for _id,v in self.id2range.iteritems():
-            idlist.append((_id,range(*v)))
-          for r in xrange(self.repeat):
-            if r%10==0:
-              print('repeat', r)
-            if self.shuffle:
-              random.shuffle(idlist)
-            for item in idlist:
-              _id = item[0]
-              _list = item[1]
-              #random.shuffle(_list)
-              if len(_list)<self.images_per_identity:
-                random.shuffle(_list)
-              else:
-                _list = np.random.choice(_list, self.images_per_identity, replace=False)
-              for i in xrange(self.images_per_identity):
-                _idx = _list[i%len(_list)]
-                self.seq.append(_idx)
+          if not self.hard_mining:
+            self.seq = []
+            idlist = []
+            for _id,v in self.id2range.iteritems():
+              idlist.append((_id,range(*v)))
+            for r in xrange(self.repeat):
+              if r%10==0:
+                print('repeat', r)
+              if self.shuffle:
+                random.shuffle(idlist)
+              for item in idlist:
+                _id = item[0]
+                _list = item[1]
+                #random.shuffle(_list)
+                if len(_list)<self.images_per_identity:
+                  random.shuffle(_list)
+                else:
+                  _list = np.random.choice(_list, self.images_per_identity, replace=False)
+                for i in xrange(self.images_per_identity):
+                  _idx = _list[i%len(_list)]
+                  self.seq.append(_idx)
+          else:
+            self.hard_mining_reset()
           print('seq len', len(self.seq))
         else:
           if self.shuffle:
@@ -198,6 +274,9 @@ class FaceImageIter(io.DataIter):
 
 
     def next(self):
+        if not self.is_init:
+          self.reset()
+          self.is_init = True
         """Returns the next batch of data."""
         #print('in next', self.cur, self.labelcur)
         batch_size = self.batch_size

@@ -95,7 +95,7 @@ def parse_args():
   parser.add_argument('--version-input', type=int, default=1, help='')
   parser.add_argument('--version-output', type=str, default='E', help='')
   parser.add_argument('--version-unit', type=int, default=3, help='')
-  parser.add_argument('--end-epoch', type=int, default=1000,
+  parser.add_argument('--end-epoch', type=int, default=100000,
       help='training epoch size.')
   parser.add_argument('--lr', type=float, default=0.1,
       help='')
@@ -135,6 +135,7 @@ def parse_args():
       help='')
   parser.add_argument('--lr-steps', type=str, default='',
       help='')
+  parser.add_argument('--target', type=str, default='lfw,cfp_ff,cfp_fp,agedb_30', help='')
   args = parser.parse_args()
   return args
 
@@ -195,8 +196,8 @@ def get_symbol(args, arg_params, aux_params):
   elif args.loss_type==10: #marginal loss
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
     params = [1.2, 0.3, 1.0]
-    n1 = mx.sym.expand_dims(nembedding, axis=1)
-    n2 = mx.sym.expand_dims(nembedding, axis=0)
+    n1 = mx.sym.expand_dims(nembedding, axis=1) #N,1,C
+    n2 = mx.sym.expand_dims(nembedding, axis=0) #1,N,C
     body = mx.sym.broadcast_sub(n1, n2) #N,N,C
     body = body * body
     body = mx.sym.sum(body, axis=2) # N,N
@@ -326,17 +327,8 @@ def train_net(args):
     print('num_layers', args.num_layers)
     if args.per_batch_size==0:
       args.per_batch_size = 128
-      if args.network[0]=='r':
-        args.per_batch_size = 128
-      else:
-        if args.num_layers>=64:
-          args.per_batch_size = 120
-      if args.ctx_num==2:
-        args.per_batch_size *= 2
-      elif args.ctx_num==3:
-        args.per_batch_size = 170
-      if args.network[0]=='m':
-        args.per_batch_size = 128
+      if args.loss_type==10:
+        args.per_batch_size = 256
     args.batch_size = args.per_batch_size*args.ctx_num
     args.rescale_threshold = 0
     args.image_channel = 3
@@ -378,6 +370,14 @@ def train_net(args):
 
     if args.loss_type==11:
       args.images_per_identity = 2
+    elif args.loss_type==10:
+      args.images_per_identity = 16
+
+    if args.loss_type<10:
+      assert args.images_per_identity==0
+    else:
+      assert args.images_per_identity>=2
+      args.per_identities = int(args.per_batch_size/args.images_per_identity)
 
     print('Called with argument:', args)
 
@@ -398,11 +398,6 @@ def train_net(args):
       val_dataiter = None
 
 
-    if args.loss_type<10:
-      assert args.images_per_identity==0
-    else:
-      assert args.images_per_identity>=2
-      args.per_identities = int(args.per_batch_size/args.images_per_identity)
 
     begin_epoch = 0
     base_lr = args.lr
@@ -418,8 +413,10 @@ def train_net(args):
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
 
     data_extra = None
+    hard_mining = False
     if args.loss_type==10:
-      _shape = (args.batch_size, 3, image_size[0], image_size[1])
+      hard_mining = True
+      _shape = (args.batch_size, args.per_batch_size)
       data_extra = np.full(_shape, -1.0, dtype=np.float32)
       c = 0
       while c<args.batch_size:
@@ -465,6 +462,8 @@ def train_net(args):
         ctx_num              = args.ctx_num,
         images_per_identity  = args.images_per_identity,
         data_extra           = data_extra,
+        hard_mining          = hard_mining,
+        mx_model             = model,
         label_name           = label_name,
     )
 
@@ -486,7 +485,7 @@ def train_net(args):
 
     ver_list = []
     ver_name_list = []
-    for name in ['lfw','cfp_ff','cfp_fp','agedb_30']:
+    for name in args.target.split(','):
       path = os.path.join(args.data_dir,name+".bin")
       if os.path.exists(path):
         data_set = verification.load_bin(path, image_size)
@@ -500,7 +499,7 @@ def train_net(args):
       results = []
       for i in xrange(len(ver_list)):
         acc1, std1, acc2, std2, xnorm, embeddings_list = verification.test(ver_list[i], model, args.batch_size, data_extra)
-        #print('[%s][%d]XNorm: %f' % (ver_name_list[i], nbatch, xnorm))
+        print('[%s][%d]XNorm: %f' % (ver_name_list[i], nbatch, xnorm))
         #print('[%s][%d]Accuracy: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc1, std1))
         print('[%s][%d]Accuracy-Flip: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc2, std2))
         results.append(acc2)
@@ -525,9 +524,9 @@ def train_net(args):
     global_step = [0]
     save_step = [0]
     if len(args.lr_steps)==0:
-      lr_steps = [40000, 60000, 80000]
+      lr_steps = [30000, 40000, 50000]
       if args.loss_type==1:
-        lr_steps = [50000, 70000, 90000]
+        lr_steps = [40000, 50000, 60000]
       p = 512.0/args.batch_size
       for l in xrange(len(lr_steps)):
         lr_steps[l] = int(lr_steps[l]*p)
