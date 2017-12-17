@@ -358,6 +358,7 @@ def train_net(args):
       args.use_val = True
     else:
       val_rec = None
+    args.use_val = False
     #args.num_classes = 10572 #webface
     #args.num_classes = 81017
     #args.num_classes = 82395
@@ -518,15 +519,15 @@ def train_net(args):
       print('VACC: %f'%(acc_value))
 
 
-    highest_acc = []
-    for i in xrange(len(ver_list)):
-      highest_acc.append(0.0)
+    highest_acc = [0.0]
+    #for i in xrange(len(ver_list)):
+    #  highest_acc.append(0.0)
     global_step = [0]
     save_step = [0]
     if len(args.lr_steps)==0:
-      lr_steps = [40000, 60000, 70000]
+      lr_steps = [40000, 60000, 80000]
       if args.loss_type==1:
-        lr_steps = [50000, 70000, 80000]
+        lr_steps = [100000, 140000, 160000]
       p = 512.0/args.batch_size
       for l in xrange(len(lr_steps)):
         lr_steps[l] = int(lr_steps[l]*p)
@@ -553,14 +554,18 @@ def train_net(args):
         msave = save_step[0]
         do_save = False
         lfw_score = acc_list[0]
-        for i in xrange(len(acc_list)):
-          acc = acc_list[i]
-          if acc>=highest_acc[i]:
-            highest_acc[i] = acc
-            if lfw_score>=0.99:
-              do_save = True
-        if args.loss_type==1 and mbatch>lr_steps[-1] and mbatch%10000==0:
-          do_save = True
+        if acc_list[-1]>=highest_acc[0]:
+          highest_acc[0] = acc_list[-1]
+          if lfw_score>=0.99:
+            do_save = True
+        #for i in xrange(len(acc_list)):
+        #  acc = acc_list[i]
+        #  if acc>=highest_acc[i]:
+        #    highest_acc[i] = acc
+        #    if lfw_score>=0.99:
+        #      do_save = True
+        #if args.loss_type==1 and mbatch>lr_steps[-1] and mbatch%10000==0:
+        #  do_save = True
         if do_save:
           print('saving', msave, acc)
           if val_dataiter is not None:
@@ -572,7 +577,7 @@ def train_net(args):
           #  X = np.concatenate(embeddings_list, axis=0)
           #  print('saving lfw npy', X.shape)
           #  np.save(lfw_npy, X)
-        #print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[0]))
+        print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[0]))
       if mbatch<=args.beta_freeze:
         _beta = args.beta
       else:
