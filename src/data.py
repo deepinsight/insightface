@@ -192,6 +192,7 @@ class FaceImageIter(io.DataIter):
       print('eval %d images..'%bag_size, self.triplet_oseq_cur)
       if self.triplet_oseq_cur+bag_size>len(self.oseq):
         self.triplet_oseq_reset()
+      print('eval %d images..'%bag_size, self.triplet_oseq_cur)
       #print(data.shape)
       data = nd.zeros( self.provide_data[0][1] )
       label = nd.zeros( self.provide_label[0][1] )

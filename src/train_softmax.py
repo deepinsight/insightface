@@ -369,16 +369,17 @@ def train_net(args):
       args.beta_freeze = 5000
       args.gamma = 0.06
 
-    if args.loss_type==11:
-      args.images_per_identity = 2
-    elif args.loss_type==10:
-      args.images_per_identity = 16
-    elif args.loss_type==12:
-      args.images_per_identity = 5
-
     if args.loss_type<10:
       assert args.images_per_identity==0
     else:
+      if args.images_per_identity==0:
+        if args.loss_type==11:
+          args.images_per_identity = 2
+        elif args.loss_type==10:
+          args.images_per_identity = 16
+        elif args.loss_type==12:
+          args.images_per_identity = 5
+          assert args.per_batch_size%3==0
       assert args.images_per_identity>=2
       args.per_identities = int(args.per_batch_size/args.images_per_identity)
 
