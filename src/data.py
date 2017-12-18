@@ -28,7 +28,9 @@ class FaceImageIter(io.DataIter):
                  path_imgrec = None,
                  shuffle=False, aug_list=None, mean = None,
                  rand_mirror = False,
-                 ctx_num = 0, images_per_identity = 0, data_extra = None, hard_mining = False, mx_model = None,
+                 ctx_num = 0, images_per_identity = 0, data_extra = None, hard_mining = False, 
+                 triplet_params = None,
+                 mx_model = None,
                  data_name='data', label_name='softmax_label', **kwargs):
         super(FaceImageIter, self).__init__()
         assert path_imgrec
@@ -99,9 +101,167 @@ class FaceImageIter(io.DataIter):
         if self.hard_mining:
           assert self.images_per_identity>0
           assert self.mx_model is not None
+        self.triplet_params = triplet_params
+        self.triplet_mode = False
+        if self.triplet_params is not None:
+          assert self.images_per_identity>0
+          assert self.mx_model is not None
+          self.triplet_bag_size = self.triplet_params[0]
+          self.triplet_alpha = self.triplet_params[1]
+          assert self.triplet_bag_size>0
+          assert self.triplet_alpha>=0.0
+          assert self.triplet_alpha<=1.0
+          self.triplet_mode = True
+          self.triplet_oseq_cur = 0
+          self.triplet_oseq_reset()
         self.cur = 0
         self.is_init = False
         #self.reset()
+
+    def pick_triplets(self, embeddings, nrof_images_per_class):
+      trip_idx = 0
+      emb_start_idx = 0
+      num_trips = 0
+      triplets = []
+      people_per_batch = len(nrof_images_per_class)
+      
+      # VGG Face: Choosing good triplets is crucial and should strike a balance between
+      #  selecting informative (i.e. challenging) examples and swamping training with examples that
+      #  are too hard. This is achieve by extending each pair (a, p) to a triplet (a, p, n) by sampling
+      #  the image n at random, but only between the ones that violate the triplet loss margin. The
+      #  latter is a form of hard-negative mining, but it is not as aggressive (and much cheaper) than
+      #  choosing the maximally violating example, as often done in structured output learning.
+
+      for i in xrange(people_per_batch):
+          nrof_images = int(nrof_images_per_class[i])
+          for j in xrange(1,nrof_images):
+              a_idx = emb_start_idx + j - 1
+              neg_dists_sqr = np.sum(np.square(embeddings[a_idx] - embeddings), 1)
+              for pair in xrange(j, nrof_images): # For every possible positive pair.
+                  p_idx = emb_start_idx + pair
+                  pos_dist_sqr = np.sum(np.square(embeddings[a_idx]-embeddings[p_idx]))
+                  neg_dists_sqr[emb_start_idx:emb_start_idx+nrof_images] = np.NaN
+                  all_neg = np.where(np.logical_and(neg_dists_sqr-pos_dist_sqr<self.triplet_alpha, pos_dist_sqr<neg_dists_sqr))[0]  # FaceNet selection
+                  #all_neg = np.where(neg_dists_sqr-pos_dist_sqr<alpha)[0] # VGG Face selecction
+                  nrof_random_negs = all_neg.shape[0]
+                  if nrof_random_negs>0:
+                      rnd_idx = np.random.randint(nrof_random_negs)
+                      n_idx = all_neg[rnd_idx]
+                      #triplets.append((image_paths[a_idx], image_paths[p_idx], image_paths[n_idx]))
+                      triplets.append( (a_idx, p_idx, n_idx) )
+                      #triplets.append((image_paths[a_idx], image_paths[p_idx], image_paths[n_idx]))
+                      #print('Triplet %d: (%d, %d, %d), pos_dist=%2.6f, neg_dist=%2.6f (%d, %d, %d, %d, %d)' % 
+                      #    (trip_idx, a_idx, p_idx, n_idx, pos_dist_sqr, neg_dists_sqr[n_idx], nrof_random_negs, rnd_idx, i, j, emb_start_idx))
+                      trip_idx += 1
+
+                  num_trips += 1
+
+          emb_start_idx += nrof_images
+
+      np.random.shuffle(triplets)
+      return triplets
+
+    def triplet_oseq_reset(self):
+      #reset self.oseq by identities seq
+      self.triplet_oseq_cur = 0
+      ids = []
+      for k in self.id2range:
+        ids.append(k)
+      random.shuffle(ids)
+      self.oseq = []
+      for _id in ids:
+        v = self.id2range[_id]
+        _list = range(*v)
+        random.shuffle(_list)
+        if len(_list)>self.images_per_identity:
+          _list = _list[0:self.images_per_identity]
+        self.oseq += _list
+      print('oseq', len(self.oseq))
+
+
+    def select_triplets(self):
+      self.triplet_index = 0
+      self.triplets = []
+      embeddings = None
+      bag_size = self.triplet_bag_size
+      batch_size = self.batch_size
+      #data = np.zeros( (bag_size,)+self.data_shape )
+      #label = np.zeros( (bag_size,) )
+      tag = []
+      #idx = np.zeros( (bag_size,) )
+      print('eval %d images..'%bag_size, self.triplet_oseq_cur)
+      if self.triplet_oseq_cur+bag_size>len(self.oseq):
+        self.triplet_oseq_reset()
+      #print(data.shape)
+      data = nd.zeros( self.provide_data[0][1] )
+      label = nd.zeros( self.provide_label[0][1] )
+      ba = 0
+      while True:
+        bb = min(ba+batch_size, bag_size)
+        if ba>=bb:
+          break
+        #_batch = self.data_iter.next()
+        #_data = _batch.data[0].asnumpy()
+        #print(_data.shape)
+        #_label = _batch.label[0].asnumpy()
+        #data[ba:bb,:,:,:] = _data
+        #label[ba:bb] = _label
+        for i in xrange(ba, bb):
+          _idx = self.oseq[i+self.triplet_oseq_cur]
+          s = self.imgrec.read_idx(_idx)
+          header, img = recordio.unpack(s)
+          img = self.imdecode(img)
+          data[i-ba][:] = self.postprocess_data(img)
+          label[i-ba][:] = header.label
+          tag.append( ( int(header.label), _idx) )
+          #idx[i] = _idx
+
+        db = mx.io.DataBatch(data=(data,), label=(label,))
+        self.mx_model.forward(db, is_train=False)
+        net_out = self.mx_model.get_outputs()
+        #print('eval for selecting triplets',ba,bb)
+        #print(net_out)
+        #print(len(net_out))
+        #print(net_out[0].asnumpy())
+        net_out = net_out[0].asnumpy()
+        #print(net_out)
+        #print('net_out', net_out.shape)
+        if embeddings is None:
+          embeddings = np.zeros( (bag_size, net_out.shape[1]))
+        embeddings[ba:bb,:] = net_out
+        ba = bb
+      assert len(tag)==bag_size
+      self.triplet_oseq_cur+=bag_size
+      embeddings = sklearn.preprocessing.normalize(embeddings)
+      nrof_images_per_class = [1]
+      for i in xrange(1, bag_size):
+        if tag[i][0]==tag[i-1][0]:
+          nrof_images_per_class[-1]+=1
+        else:
+          nrof_images_per_class.append(1)
+        
+      triplets = self.pick_triplets(embeddings, nrof_images_per_class) # shape=(T,3)
+      if len(triplets)==0:
+        print('triplets 0, retry...')
+        self.select_triplets()
+      else:
+        print('triplets', len(triplets))
+        self.seq = []
+        ba = 0
+        while True:
+          bb = ba+self.per_batch_size//3
+          if bb>len(triplets):
+            break
+          _triplets = triplets[ba:bb]
+          for i in xrange(3):
+            for triplet in _triplets:
+              _pos = triplet[i]
+              _idx = tag[_pos][1]
+              self.seq.append(_idx)
+          ba = bb
+
+    def triplet_reset(self):
+      self.select_triplets()
 
     def hard_mining_reset(self):
       #import faiss
@@ -198,7 +358,9 @@ class FaceImageIter(io.DataIter):
         print('call reset()')
         self.cur = 0
         if self.images_per_identity>0:
-          if not self.hard_mining:
+          if self.triplet_mode:
+            self.triplet_reset()
+          elif not self.hard_mining:
             self.seq = []
             idlist = []
             for _id,v in self.id2range.iteritems():
