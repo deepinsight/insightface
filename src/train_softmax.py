@@ -567,7 +567,7 @@ def train_net(args):
         #if args.loss_type==1 and mbatch>lr_steps[-1] and mbatch%10000==0:
         #  do_save = True
         if do_save:
-          print('saving', msave, acc)
+          print('saving', msave)
           if val_dataiter is not None:
             val_test()
           arg, aux = model.get_params()
