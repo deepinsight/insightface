@@ -78,6 +78,8 @@ class LossValueMetric(mx.metric.EvalMetric):
     loss = preds[-1].asnumpy()[0]
     self.sum_metric += loss
     self.num_inst += 1.0
+    gt_label = preds[-2].asnumpy()
+    #print(gt_label)
 
 def parse_args():
   parser = argparse.ArgumentParser(description='Train face network')
@@ -124,6 +126,8 @@ def parse_args():
   parser.add_argument('--center-alpha', type=float, default=0.5, help='')
   parser.add_argument('--center-scale', type=float, default=0.003, help='')
   parser.add_argument('--images-per-identity', type=int, default=0, help='')
+  parser.add_argument('--triplet-bag-size', type=int, default=3600, help='')
+  parser.add_argument('--triplet-alpha', type=float, default=0.2, help='')
   parser.add_argument('--verbose', type=int, default=2000, help='')
   parser.add_argument('--loss-type', type=int, default=1,
       help='')
@@ -247,25 +251,21 @@ def get_symbol(args, arg_params, aux_params):
     row = mx.sym.log(row)
     body = mx.sym.mean(row)
     extra_loss = mx.sym.MakeLoss(body)
-  elif args.loss_type==12:
-    _weight = mx.symbol.Variable('fc7_weight')
-    _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
-    fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
-    params = [0.9, 0.2]
-    nembedding = mx.symbol.slice_axis(embedding, axis=0, begin=0, end=args.images_per_identity)
-    nembedding = mx.symbol.L2Normalization(nembedding, mode='instance', name='fc1n')
-    n1 = mx.sym.expand_dims(nembedding, axis=1)
-    n2 = mx.sym.expand_dims(nembedding, axis=0)
-    body = mx.sym.broadcast_sub(n1, n2) #N,N,C
-    body = body * body
-    body = mx.sym.sum(body, axis=2) # N,N
-    body = body - params[0]
-    body = mx.symbol.Activation(data=body, act_type='relu')
-    body = mx.sym.sum(body)
-    n = args.images_per_identity
-    body = body/(n*n-n)
-    extra_loss = mx.symbol.MakeLoss(body, grad_scale=params[1])
-    #extra_loss = None
+  elif args.loss_type==12: #triplet loss
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
+    anchor = mx.symbol.slice_axis(nembedding, axis=0, begin=0, end=args.per_batch_size//3)
+    positive = mx.symbol.slice_axis(nembedding, axis=0, begin=args.per_batch_size//3, end=2*args.per_batch_size//3)
+    negative = mx.symbol.slice_axis(nembedding, axis=0, begin=2*args.per_batch_size//3, end=args.per_batch_size)
+    ap = anchor - positive
+    an = anchor - negative
+    ap = ap*ap
+    an = an*an
+    ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
+    an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
+    triplet_loss = mx.symbol.Activation(data = (ap-an+args.triplet_alpha), act_type='relu')
+    triplet_loss = mx.symbol.mean(triplet_loss)
+    #triplet_loss = mx.symbol.sum(triplet_loss)/(args.per_batch_size//3)
+    extra_loss = mx.symbol.MakeLoss(triplet_loss)
   else:
     #embedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*float(args.loss_type)
     embedding = embedding * 5
@@ -373,6 +373,8 @@ def train_net(args):
       args.images_per_identity = 2
     elif args.loss_type==10:
       args.images_per_identity = 16
+    elif args.loss_type==12:
+      args.images_per_identity = 5
 
     if args.loss_type<10:
       assert args.images_per_identity==0
@@ -410,11 +412,13 @@ def train_net(args):
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
     else:
       vec = args.pretrained.split(',')
+      print('loading', vec)
       _, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
 
     data_extra = None
     hard_mining = False
+    triplet_params = None
     if args.loss_type==10:
       hard_mining = True
       _shape = (args.batch_size, args.per_batch_size)
@@ -435,6 +439,8 @@ def train_net(args):
         for i in xrange(args.per_identities):
           data_extra[c+i][i] = 1.0
         c+=args.per_batch_size
+    elif args.loss_type==12:
+      triplet_params = [args.triplet_bag_size, args.triplet_alpha]
 
     label_name = 'softmax_label'
     if data_extra is None:
@@ -464,6 +470,7 @@ def train_net(args):
         images_per_identity  = args.images_per_identity,
         data_extra           = data_extra,
         hard_mining          = hard_mining,
+        triplet_params       = triplet_params,
         mx_model             = model,
         label_name           = label_name,
     )
@@ -482,7 +489,10 @@ def train_net(args):
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
     _rescale = 1.0/args.ctx_num
     opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
-    _cb = mx.callback.Speedometer(args.batch_size, 20)
+    som = 20
+    if args.loss_type==12:
+      som = 2
+    _cb = mx.callback.Speedometer(args.batch_size, som)
 
     ver_list = []
     ver_name_list = []
