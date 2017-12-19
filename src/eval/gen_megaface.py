@@ -18,7 +18,7 @@ import itertools
 import argparse
 import struct
 import cv2
-sys.path.append(os.path.join(os.path.dirname(__file__), 'common'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import face_preprocess
 from sklearn.preprocessing import normalize
 #import facenet
@@ -72,14 +72,14 @@ def get_feature(image_path, bbox, landmark, nets, image_shape, use_align, aligne
   F = None
   for net in nets:
     embedding = None
-    ppatch = net.patch
+    #ppatch = net.patch
     for flipid in [0,1]:
       _img = np.copy(img)
       if flipid==1:
         do_flip(_img)
-      nimg = np.zeros(_img.shape, dtype=np.float32)
-      nimg[:,ppatch[1]:ppatch[3],ppatch[0]:ppatch[2]] = _img[:, ppatch[1]:ppatch[3], ppatch[0]:ppatch[2]]
-      _img = nimg
+      #nimg = np.zeros(_img.shape, dtype=np.float32)
+      #nimg[:,ppatch[1]:ppatch[3],ppatch[0]:ppatch[2]] = _img[:, ppatch[1]:ppatch[3], ppatch[0]:ppatch[2]]
+      #_img = nimg
       input_blob = np.expand_dims(_img, axis=0)
       net.arg_params["data"] = mx.nd.array(input_blob, net.ctx)
       net.arg_params["softmax_label"] = mx.nd.empty((1,), net.ctx)
@@ -128,11 +128,11 @@ def main(args):
     net.arg_params, net.aux_params = ch_dev(net.arg_params, net.aux_params, net.ctx)
     all_layers = net.sym.get_internals()
     net.sym = all_layers['fc1_output']
-    _pp = prefix.rfind('p')+1
-    _pp = prefix[_pp:]
-    net.patch = [int(x) for x in _pp.split('_')]
-    assert len(net.patch)==5
-    print('patch', net.patch)
+    #_pp = prefix.rfind('p')+1
+    #_pp = prefix[_pp:]
+    #net.patch = [int(x) for x in _pp.split('_')]
+    #assert len(net.patch)==5
+    #print('patch', net.patch)
     nets.append(net)
   image_shape = [int(x) for x in args.image_size.split(',')]
 
@@ -222,7 +222,7 @@ def parse_arguments(argv):
   parser.add_argument('--batch_size', type=int, help='', default=100)
   parser.add_argument('--image_size', type=str, help='', default='3,112,96')
   parser.add_argument('--gpu', type=int, help='', default=7)
-  parser.add_argument('--mean', type=int, help='', default=1)
+  parser.add_argument('--mean', type=int, help='', default=0)
   parser.add_argument('--seed', type=int, help='', default=727)
   parser.add_argument('--skip', type=int, help='', default=0)
   parser.add_argument('--algo', type=str, help='', default='mxsphereface20c')

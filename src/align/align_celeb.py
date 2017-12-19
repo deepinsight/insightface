@@ -193,7 +193,7 @@ def main(args):
                 bb = det
                 points = list(points.flatten())
                 assert(len(points)==10)
-                warped = face_preprocess.preprocess(img, bbox=bb, landmark = landmark, image_size="112,96")
+                warped = face_preprocess.preprocess(img, bbox=bb, landmark = landmark, image_size=args.image_size)
                 misc.imsave(target_path, warped)
                 nrof_successfully_aligned += 1
                 oline = '%d\t%s\t%d' % (1,fimage.image_path, int(fimage.classname))
@@ -213,8 +213,7 @@ def parse_arguments(argv):
     parser.add_argument('--input-dir', type=str, help='Directory with unaligned images.')
     parser.add_argument('--name', type=str, default='celeb', help='')
     parser.add_argument('--output-dir', type=str, help='Directory with aligned face thumbnails.')
-    #parser.add_argument('--image_size', type=int,
-    #    help='Image size (height, width) in pixels.', default=182)
+    parser.add_argument('--image-size', type=str, help='Image size (height, width) in pixels.', default='112,112')
     #parser.add_argument('--margin', type=int,
     #    help='Margin for the crop around the bounding box (height, width) in pixels.', default=44)
     return parser.parse_args(argv)
