@@ -92,6 +92,7 @@ def parse_args():
       help='')
   parser.add_argument('--retrain', action='store_true', default=False,
       help='true means continue training.')
+  parser.add_argument('--ckpt', type=int, default=1, help='')
   parser.add_argument('--network', default='s20', help='')
   parser.add_argument('--version-se', type=int, default=1, help='')
   parser.add_argument('--version-input', type=int, default=1, help='')
@@ -127,7 +128,7 @@ def parse_args():
   parser.add_argument('--center-scale', type=float, default=0.003, help='')
   parser.add_argument('--images-per-identity', type=int, default=0, help='')
   parser.add_argument('--triplet-bag-size', type=int, default=3600, help='')
-  parser.add_argument('--triplet-alpha', type=float, default=0.2, help='')
+  parser.add_argument('--triplet-alpha', type=float, default=0.3, help='')
   parser.add_argument('--verbose', type=int, default=2000, help='')
   parser.add_argument('--loss-type', type=int, default=1,
       help='')
@@ -577,7 +578,7 @@ def train_net(args):
         #      do_save = True
         #if args.loss_type==1 and mbatch>lr_steps[-1] and mbatch%10000==0:
         #  do_save = True
-        if do_save:
+        if do_save and args.ckpt>0:
           print('saving', msave)
           if val_dataiter is not None:
             val_test()
