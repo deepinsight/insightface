@@ -561,6 +561,27 @@ class FaceImageIter(io.DataIter):
         """Final postprocessing step before image is loaded into the batch."""
         return nd.transpose(datum, axes=(2, 0, 1))
 
+class FaceImageIterList(io.DataIter):
+  def __init__(self, iter_list):
+    assert len(iter_list)>0
+    self.provide_data = iter_list[0].provide_data
+    self.provide_label = iter_list[0].provide_label
+    self.iter_list = iter_list
+    self.cur_iter = None
+
+  def reset(self):
+    self.cur_iter.reset()
+
+  def next(self):
+    self.cur_iter = random.choice(self.iter_list)
+    while True:
+      try:
+        ret = self.cur_iter.next()
+      except StopIteration:
+        self.cur_iter.reset()
+        continue
+      return ret
+
 class FaceIter(mx.io.DataIter):
   def __init__(self, data_shape, path_imglist, mod, ctx_num, batch_size=90, bag_size=1800, images_per_person=40, alpha = 0.2, data_name='data', label_name='softmax_label'):
     assert batch_size%ctx_num==0
