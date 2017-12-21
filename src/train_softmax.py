@@ -10,6 +10,7 @@ import logging
 import pickle
 import numpy as np
 from data import FaceImageIter
+from data import FaceImageIterList
 import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
@@ -267,6 +268,21 @@ def get_symbol(args, arg_params, aux_params):
     triplet_loss = mx.symbol.mean(triplet_loss)
     #triplet_loss = mx.symbol.sum(triplet_loss)/(args.per_batch_size//3)
     extra_loss = mx.symbol.MakeLoss(triplet_loss)
+  elif args.loss_type==13: #triplet loss II
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
+    anchor = mx.symbol.slice_axis(nembedding, axis=0, begin=0, end=args.per_batch_size//3)
+    positive = mx.symbol.slice_axis(nembedding, axis=0, begin=args.per_batch_size//3, end=2*args.per_batch_size//3)
+    negative = mx.symbol.slice_axis(nembedding, axis=0, begin=2*args.per_batch_size//3, end=args.per_batch_size)
+    ap = anchor - positive
+    an = anchor - negative
+    ap = ap*ap
+    an = an*an
+    ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
+    an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
+    triplet_loss = mx.symbol.Activation(data = (ap-an+args.triplet_alpha), act_type='relu')
+    triplet_loss = mx.symbol.mean(triplet_loss)
+    #triplet_loss = mx.symbol.sum(triplet_loss)/(args.per_batch_size//3)
+    extra_loss = mx.symbol.MakeLoss(triplet_loss)
   else:
     #embedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*float(args.loss_type)
     embedding = embedding * 5
@@ -338,11 +354,15 @@ def train_net(args):
 
 
     os.environ['BETA'] = str(args.beta)
+    data_dir_list = args.data_dir.split(',')
+    if args.loss_type!=12:
+      assert len(data_dir_list)==1
+    data_dir = data_dir_list[0]
     args.use_val = False
     path_imgrec = None
     path_imglist = None
     val_rec = None
-    prop = face_image.load_property(args.data_dir)
+    prop = face_image.load_property(data_dir)
     args.num_classes = prop.num_classes
     image_size = prop.image_size
     args.image_h = image_size[0]
@@ -353,8 +373,8 @@ def train_net(args):
     print('num_classes', args.num_classes)
 
     #path_imglist = "/raid5data/dplearn/MS-Celeb-Aligned/lst2"
-    path_imgrec = os.path.join(args.data_dir, "train.rec")
-    val_rec = os.path.join(args.data_dir, "val.rec")
+    path_imgrec = os.path.join(data_dir, "train.rec")
+    val_rec = os.path.join(data_dir, "val.rec")
     if os.path.exists(val_rec) and args.loss_type<10:
       args.use_val = True
     else:
@@ -460,22 +480,44 @@ def train_net(args):
           label_names   = (label_name,),
       )
 
-
-    train_dataiter = FaceImageIter(
-        batch_size           = args.batch_size,
-        data_shape           = data_shape,
-        path_imgrec          = path_imgrec,
-        shuffle              = True,
-        rand_mirror          = True,
-        mean                 = mean,
-        ctx_num              = args.ctx_num,
-        images_per_identity  = args.images_per_identity,
-        data_extra           = data_extra,
-        hard_mining          = hard_mining,
-        triplet_params       = triplet_params,
-        mx_model             = model,
-        label_name           = label_name,
-    )
+    if len(data_dir_list)==1:
+      train_dataiter = FaceImageIter(
+          batch_size           = args.batch_size,
+          data_shape           = data_shape,
+          path_imgrec          = path_imgrec,
+          shuffle              = True,
+          rand_mirror          = True,
+          mean                 = mean,
+          ctx_num              = args.ctx_num,
+          images_per_identity  = args.images_per_identity,
+          data_extra           = data_extra,
+          hard_mining          = hard_mining,
+          triplet_params       = triplet_params,
+          mx_model             = model,
+          label_name           = label_name,
+      )
+    else:
+      iter_list = []
+      for _data_dir in data_dir_list:
+        _path_imgrec = os.path.join(_data_dir, "train.rec")
+        _dataiter = FaceImageIter(
+            batch_size           = args.batch_size,
+            data_shape           = data_shape,
+            path_imgrec          = _path_imgrec,
+            shuffle              = True,
+            rand_mirror          = True,
+            mean                 = mean,
+            ctx_num              = args.ctx_num,
+            images_per_identity  = args.images_per_identity,
+            data_extra           = data_extra,
+            hard_mining          = hard_mining,
+            triplet_params       = triplet_params,
+            mx_model             = model,
+            label_name           = label_name,
+        )
+        iter_list.append(_dataiter)
+      iter_list.append(_dataiter)
+      train_dataiter = FaceImageIterList(iter_list)
 
     if args.loss_type<10:
       _metric = AccMetric()
@@ -499,7 +541,7 @@ def train_net(args):
     ver_list = []
     ver_name_list = []
     for name in args.target.split(','):
-      path = os.path.join(args.data_dir,name+".bin")
+      path = os.path.join(data_dir,name+".bin")
       if os.path.exists(path):
         data_set = verification.load_bin(path, image_size)
         ver_list.append(data_set)
