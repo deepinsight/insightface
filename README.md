@@ -62,3 +62,11 @@ In last several layers, some different options can be tried to determine how emb
 |      LMobileNetE       | 0.99633+-0.00314 |        -         |        -         |
 |      LMobileNetF       | 0.99617+-0.00211 |        -         |        -         |
 |    LResNeXt101E_v3     |                  |                  |                  |
+
+
+How weight decay affects:
+
+SE-LResNet50E-v3/vggface2/softmax:
+
+
+
