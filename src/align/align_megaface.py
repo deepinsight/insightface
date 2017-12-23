@@ -75,13 +75,17 @@ def main(args):
     minsize = 100 # minimum size of face
     threshold = [ 0.6, 0.7, 0.7 ]  # three steps's threshold
     factor = 0.709 # scale factor
-    image_size = [112,96]
+    #image_size = [112,96]
+    image_size = [112,112]
     src = np.array([
       [30.2946, 51.6963],
       [65.5318, 51.5014],
       [48.0252, 71.7366],
       [33.5493, 92.3655],
       [62.7299, 92.2041] ], dtype=np.float32 )
+
+    if image_size[1]==112:
+      src[:,0] += 8.0
 
     # Add a random key to the filename to allow alignment using multiple processes
     #random_key = np.random.randint(0, high=99999)
@@ -226,8 +230,7 @@ def parse_arguments(argv):
     parser.add_argument('--input-dir', type=str, help='Directory with unaligned images.')
     parser.add_argument('--name', type=str, help='dataset name, can be facescrub, megaface, webface, celeb.')
     parser.add_argument('--output-dir', type=str, help='Directory with aligned face thumbnails.')
-    #parser.add_argument('--image_size', type=int,
-    #    help='Image size (height, width) in pixels.', default=182)
+    #parser.add_argument('--image_size', type=str, help='Image size (height, width) in pixels.', default='112,112')
     #parser.add_argument('--margin', type=int,
     #    help='Margin for the crop around the bounding box (height, width) in pixels.', default=44)
     return parser.parse_args(argv)

@@ -25,6 +25,7 @@ import fmobilenet
 import fxception
 import fdensenet
 import fdpn
+import fnasnet
 #import lfw
 import verification
 import sklearn
@@ -95,7 +96,7 @@ def parse_args():
       help='true means continue training.')
   parser.add_argument('--ckpt', type=int, default=1, help='')
   parser.add_argument('--network', default='s20', help='')
-  parser.add_argument('--version-se', type=int, default=1, help='')
+  parser.add_argument('--version-se', type=int, default=0, help='')
   parser.add_argument('--version-input', type=int, default=1, help='')
   parser.add_argument('--version-output', type=str, default='E', help='')
   parser.add_argument('--version-unit', type=int, default=3, help='')
@@ -173,6 +174,9 @@ def get_symbol(args, arg_params, aux_params):
     embedding = fdpn.get_symbol(512, args.num_layers,
         version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
+  elif args.network[0]=='n':
+    print('init nasnet', args.num_layers)
+    embedding = fnasnet.get_symbol(512)
   else:
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(512, args.num_layers, 
