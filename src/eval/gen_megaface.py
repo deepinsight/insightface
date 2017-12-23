@@ -220,7 +220,7 @@ def parse_arguments(argv):
   parser = argparse.ArgumentParser()
   
   parser.add_argument('--batch_size', type=int, help='', default=100)
-  parser.add_argument('--image_size', type=str, help='', default='3,112,96')
+  parser.add_argument('--image_size', type=str, help='', default='3,112,112')
   parser.add_argument('--gpu', type=int, help='', default=7)
   parser.add_argument('--mean', type=int, help='', default=0)
   parser.add_argument('--seed', type=int, help='', default=727)
