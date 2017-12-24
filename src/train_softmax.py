@@ -577,7 +577,7 @@ def train_net(args):
       print('VACC: %f'%(acc_value))
 
 
-    highest_acc = [0.0]
+    highest_acc = [0.0, 0.0]  #lfw and target
     #for i in xrange(len(ver_list)):
     #  highest_acc.append(0.0)
     global_step = [0]
@@ -612,8 +612,12 @@ def train_net(args):
         msave = save_step[0]
         do_save = False
         lfw_score = acc_list[0]
-        if acc_list[-1]>=highest_acc[0]:
-          highest_acc[0] = acc_list[-1]
+        if lfw_score>highest_acc[0]:
+          highest_acc[0] = lfw_score
+          if lfw_score>=0.998:
+            do_save = True
+        if acc_list[-1]>=highest_acc[-1]:
+          highest_acc[-1] = acc_list[-1]
           if lfw_score>=0.99:
             do_save = True
         #for i in xrange(len(acc_list)):
@@ -635,7 +639,7 @@ def train_net(args):
           #  X = np.concatenate(embeddings_list, axis=0)
           #  print('saving lfw npy', X.shape)
           #  np.save(lfw_npy, X)
-        print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[0]))
+        print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[-1]))
       if mbatch<=args.beta_freeze:
         _beta = args.beta
       else:
