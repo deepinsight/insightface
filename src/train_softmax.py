@@ -484,7 +484,7 @@ def train_net(args):
           label_names   = (label_name,),
       )
 
-    if len(data_dir_list)==1:
+    if len(data_dir_list)==1 and args.loss_type!=12:
       train_dataiter = FaceImageIter(
           batch_size           = args.batch_size,
           data_shape           = data_shape,
