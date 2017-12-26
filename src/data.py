@@ -7,6 +7,7 @@ import random
 import logging
 import sys
 import sklearn
+import datetime
 import numpy as np
 import cv2
 
@@ -116,6 +117,7 @@ class FaceImageIter(io.DataIter):
           self.triplet_oseq_reset()
         self.cur = 0
         self.is_init = False
+        self.times = [0.0, 0.0, 0.0]
         #self.reset()
 
     def pick_triplets(self, embeddings, nrof_images_per_class):
@@ -178,6 +180,14 @@ class FaceImageIter(io.DataIter):
         self.oseq += _list
       print('oseq', len(self.oseq))
 
+    def time_reset(self):
+      self.time_now = datetime.datetime.now()
+
+    def time_elapsed(self):
+      time_now = datetime.datetime.now()
+      diff = time_now - self.time_now
+      return diff.seconds
+
 
     def select_triplets(self):
       self.triplet_index = 0
@@ -189,11 +199,15 @@ class FaceImageIter(io.DataIter):
       #label = np.zeros( (bag_size,) )
       tag = []
       #idx = np.zeros( (bag_size,) )
+      self.time_reset()
       print('eval %d images..'%bag_size, self.triplet_oseq_cur)
       if self.triplet_oseq_cur+bag_size>len(self.oseq):
         self.triplet_oseq_reset()
-      print('eval %d images..'%bag_size, self.triplet_oseq_cur)
+        print('eval %d images..'%bag_size, self.triplet_oseq_cur)
+        print('triplet time stat', self.times)
       #print(data.shape)
+      self.times[0] += self.time_elapsed()
+      self.time_reset()
       data = nd.zeros( self.provide_data[0][1] )
       label = nd.zeros( self.provide_label[0][1] )
       ba = 0
@@ -234,6 +248,8 @@ class FaceImageIter(io.DataIter):
       assert len(tag)==bag_size
       self.triplet_oseq_cur+=bag_size
       embeddings = sklearn.preprocessing.normalize(embeddings)
+      self.times[1] += self.time_elapsed()
+      self.time_reset()
       nrof_images_per_class = [1]
       for i in xrange(1, bag_size):
         if tag[i][0]==tag[i-1][0]:
@@ -260,6 +276,7 @@ class FaceImageIter(io.DataIter):
               _idx = tag[_pos][1]
               self.seq.append(_idx)
           ba = bb
+      self.times[2] += self.time_elapsed()
 
     def triplet_reset(self):
       self.select_triplets()
