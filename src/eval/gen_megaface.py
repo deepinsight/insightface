@@ -137,7 +137,7 @@ def main(args):
   image_shape = [int(x) for x in args.image_size.split(',')]
 
   #megaface_lst = "/raid5data/dplearn/faceinsight_align_megaface.lst"
-  megaface_lst = "/raid5data/dplearn/megaface/megaface_mtcnn/lst"
+  megaface_lst = "/raid5data/dplearn/megaface/megaface_mtcnn_112x112/lst"
   facescrub_lst = "/raid5data/dplearn/faceinsight_align_facescrub.lst"
 
   if args.skip==0:
@@ -221,7 +221,7 @@ def parse_arguments(argv):
   
   parser.add_argument('--batch_size', type=int, help='', default=100)
   parser.add_argument('--image_size', type=str, help='', default='3,112,112')
-  parser.add_argument('--gpu', type=int, help='', default=7)
+  parser.add_argument('--gpu', type=int, help='', default=0)
   parser.add_argument('--mean', type=int, help='', default=0)
   parser.add_argument('--seed', type=int, help='', default=727)
   parser.add_argument('--skip', type=int, help='', default=0)
