@@ -193,6 +193,7 @@ class FaceImageIter(io.DataIter):
     def select_triplets(self):
       self.seq = []
       while len(self.seq)<self.seq_min_size:
+        self.time_reset()
         embeddings = None
         bag_size = self.triplet_bag_size
         batch_size = self.batch_size
