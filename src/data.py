@@ -150,7 +150,7 @@ class FaceImageIter(io.DataIter):
           self.seq_min_size = self.batch_size*2
         self.cur = 0
         self.is_init = False
-        self.times = [0.0, 0.0, 0.0]
+        self.times = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         #self.reset()
 
 
@@ -196,21 +196,68 @@ class FaceImageIter(io.DataIter):
       np.random.shuffle(triplets)
       return triplets
 
+    #cal pairwise dists on single gpu
+    def _pairwise_dists(self, embeddings):
+      nd_embedding = mx.nd.array(embeddings, mx.gpu(0))
+      pdists = []
+      for idx in xrange(embeddings.shape[0]):
+        a_embedding = nd_embedding[idx]
+        body = mx.nd.broadcast_sub(a_embedding, nd_embedding)
+        body = body*body
+        body = mx.nd.sum_axis(body, axis=1)
+        ret = body.asnumpy()
+        #print(ret.shape)
+        pdists.append(ret)
+      return pdists
+
+    def pairwise_dists(self, embeddings):
+      nd_embedding_list = []
+      for i in xrange(self.ctx_num):
+        nd_embedding = mx.nd.array(embeddings, mx.gpu(i))
+        nd_embedding_list.append(nd_embedding)
+      nd_pdists = []
+      pdists = []
+      for idx in xrange(embeddings.shape[0]):
+        emb_idx = idx%self.ctx_num
+        nd_embedding = nd_embedding_list[emb_idx]
+        a_embedding = nd_embedding[idx]
+        body = mx.nd.broadcast_sub(a_embedding, nd_embedding)
+        body = body*body
+        body = mx.nd.sum_axis(body, axis=1)
+        nd_pdists.append(body)
+        if len(nd_pdists)==self.ctx_num or idx==embeddings.shape[0]-1:
+          for x in nd_pdists:
+            pdists.append(x.asnumpy())
+          nd_pdists = []
+      return pdists
+
     def pick_triplets(self, embeddings, nrof_images_per_class):
       emb_start_idx = 0
       triplets = []
       people_per_batch = len(nrof_images_per_class)
+      #self.time_reset()
+      pdists = self.pairwise_dists(embeddings)
+      #self.times[3] += self.time_elapsed()
 
       for i in xrange(people_per_batch):
           nrof_images = int(nrof_images_per_class[i])
           for j in xrange(1,nrof_images):
+              #self.time_reset()
               a_idx = emb_start_idx + j - 1
-              neg_dists_sqr = np.sum(np.square(embeddings[a_idx] - embeddings), 1)
+              #neg_dists_sqr = np.sum(np.square(embeddings[a_idx] - embeddings), 1)
+              neg_dists_sqr = pdists[a_idx]
+              #self.times[3] += self.time_elapsed()
+
               for pair in xrange(j, nrof_images): # For every possible positive pair.
                   p_idx = emb_start_idx + pair
+                  #self.time_reset()
                   pos_dist_sqr = np.sum(np.square(embeddings[a_idx]-embeddings[p_idx]))
+                  #self.times[4] += self.time_elapsed()
+                  #self.time_reset()
                   neg_dists_sqr[emb_start_idx:emb_start_idx+nrof_images] = np.NaN
                   all_neg = np.where(np.logical_and(neg_dists_sqr-pos_dist_sqr<self.triplet_alpha, pos_dist_sqr<neg_dists_sqr))[0]  # FaceNet selection
+                  #self.times[5] += self.time_elapsed()
+                  #self.time_reset()
                   #all_neg = np.where(neg_dists_sqr-pos_dist_sqr<alpha)[0] # VGG Face selecction
                   nrof_random_negs = all_neg.shape[0]
                   if nrof_random_negs>0:
@@ -299,7 +346,7 @@ class FaceImageIter(io.DataIter):
     def time_elapsed(self):
       time_now = datetime.datetime.now()
       diff = time_now - self.time_now
-      return diff.seconds
+      return diff.total_seconds()
 
 
     def select_triplets(self):
