@@ -2,6 +2,7 @@ from flask import Flask
 import face_model
 import argparse
 import json
+import base64
 #import requests
 import numpy as np
 import urllib
@@ -26,9 +27,9 @@ def hello_world():
   return 'Hello, This is InsightFace!'
 
 def get_image(data):
-  url = data['url']
   image = None
-  if url is not None:
+  if 'url' in data:
+    url = data['url']
     if url.startswith('http'):
       resp = urllib.urlopen(url)
       image = np.asarray(bytearray(resp.read()), dtype="uint8")
@@ -36,34 +37,44 @@ def get_image(data):
     else:
       image = cv2.imread(url, cv2.IMREAD_COLOR)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-  else:
+  elif 'data' in data:
     _bin = data['data']
     if _bin is not None:
       if not isinstance(_bin, list):
+        _bin = base64.b64decode(_bin)
+        _bin = np.fromstring(_bin, np.uint8)
         image = cv2.imdecode(_bin, cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
       else:
         image = []
         for __bin in _bin:
+          __bin = base64.b64decode(__bin)
+          __bin = np.fromstring(__bin, np.uint8)
           _image = cv2.imdecode(__bin, cv2.IMREAD_COLOR)
           _image = cv2.cvtColor(_image, cv2.COLOR_BGR2RGB)
           image.append(_image)
-    else:
-      _bin = data['video_data']
-      image = None
 
   return image
 
 @app.route('/ver', methods=['POST'])
 def ver():
-  data = request.data
-  values = json.loads(data)
-  source_image = get_image(values['source'])
-  assert not isinstance(source_image, list)
-  target_image = get_image(values['target'])
-  if not isinstance(target_image, list):
-    target_image = [target_image]
-  ret = model.is_same_id(source_image, target_image)
+  try:
+    data = request.data
+    values = json.loads(data)
+    source_image = get_image(values['source'])
+    if source_image is None:
+      return '-1'
+    assert not isinstance(source_image, list)
+    target_image = get_image(values['target'])
+    if target_image is None:
+      return '-1'
+    if not isinstance(target_image, list):
+      target_image = [target_image]
+    ret = model.is_same_id(source_image, target_image)
+  except Exception as ex:
+    print(ex)
+    return '-1'
+
   return str(int(ret))
 
 if __name__ == '__main__':
