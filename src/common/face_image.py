@@ -134,7 +134,7 @@ def get_dataset_megaface(input_dir):
       label+=1
   return ret
 
-def get_dataset_common(input_dir):
+def get_dataset_common(input_dir, min_images = 1):
   ret = []
   label = 0
   person_names = []
@@ -145,6 +145,7 @@ def get_dataset_common(input_dir):
     _subdir = os.path.join(input_dir, person_name)
     if not os.path.isdir(_subdir):
       continue
+    _ret = []
     for img in os.listdir(_subdir):
       fimage = edict()
       fimage.id = os.path.join(person_name, img)
@@ -152,8 +153,10 @@ def get_dataset_common(input_dir):
       fimage.image_path = os.path.join(_subdir, img)
       fimage.bbox = None
       fimage.landmark = None
-      ret.append(fimage)
-    label+=1
+      _ret.append(fimage)
+    if len(_ret)>=min_images:
+      ret += _ret
+      label+=1
   return ret
 
 def get_dataset(name, input_dir):
