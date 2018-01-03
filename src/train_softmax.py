@@ -396,7 +396,7 @@ def train_net(args):
 
 
 
-    if args.loss_type==1 and args.num_classes>40000:
+    if (args.loss_type==1 or args.loss_type==3) and args.num_classes>40000:
       args.beta_freeze = 5000
       args.gamma = 0.06
 
@@ -595,7 +595,7 @@ def train_net(args):
     save_step = [0]
     if len(args.lr_steps)==0:
       lr_steps = [40000, 60000, 80000]
-      if args.loss_type==1:
+      if args.loss_type==1 or args.loss_type==3:
         lr_steps = [100000, 140000, 160000]
       p = 512.0/args.batch_size
       for l in xrange(len(lr_steps)):
