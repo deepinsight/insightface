@@ -204,6 +204,14 @@ def get_symbol(args, arg_params, aux_params):
     print('center-loss', args.center_alpha, args.center_scale)
     extra_loss = mx.symbol.Custom(data=embedding, label=gt_label, name='center_loss', op_type='centerloss',\
           num_class=args.num_classes, alpha=args.center_alpha, scale=args.center_scale, batchsize=args.per_batch_size)
+  elif args.loss_type==3:
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+    _weight = mx.symbol.L2Normalization(_weight, mode='instance')
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*22.0
+    fc7 = mx.sym.LSoftmax(data=nembedding, label=gt_label, num_hidden=args.num_classes,
+                          weight = _weight,
+                          beta=args.beta, margin=args.margin, scale=args.scale,
+                          beta_min=args.beta_min, verbose=1000, name='fc7')
   elif args.loss_type==10: #marginal loss
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
     params = [1.2, 0.3, 1.0]
@@ -389,7 +397,7 @@ def train_net(args):
 
 
 
-    if args.loss_type==1 and args.num_classes>40000:
+    if (args.loss_type==1 or args.loss_type==3) and args.num_classes>40000:
       args.beta_freeze = 5000
       args.gamma = 0.06
 
@@ -588,7 +596,7 @@ def train_net(args):
     save_step = [0]
     if len(args.lr_steps)==0:
       lr_steps = [40000, 60000, 80000]
-      if args.loss_type==1:
+      if args.loss_type==1 or args.loss_type==3:
         lr_steps = [100000, 140000, 160000]
       p = 512.0/args.batch_size
       for l in xrange(len(lr_steps)):
@@ -624,6 +632,10 @@ def train_net(args):
           highest_acc[-1] = acc_list[-1]
           if lfw_score>=0.99:
             do_save = True
+        if args.ckpt==0:
+          do_save = False
+        elif args.ckpt>1:
+          do_save = True
         #for i in xrange(len(acc_list)):
         #  acc = acc_list[i]
         #  if acc>=highest_acc[i]:
@@ -632,7 +644,7 @@ def train_net(args):
         #      do_save = True
         #if args.loss_type==1 and mbatch>lr_steps[-1] and mbatch%10000==0:
         #  do_save = True
-        if do_save and args.ckpt>0:
+        if do_save:
           print('saving', msave)
           if val_dataiter is not None:
             val_test()
