@@ -131,6 +131,7 @@ def parse_args():
   parser.add_argument('--images-per-identity', type=int, default=0, help='')
   parser.add_argument('--triplet-bag-size', type=int, default=3600, help='')
   parser.add_argument('--triplet-alpha', type=float, default=0.3, help='')
+  parser.add_argument('--triplet-max-ap', type=float, default=0.0, help='')
   parser.add_argument('--verbose', type=int, default=2000, help='')
   parser.add_argument('--loss-type', type=int, default=1,
       help='')
@@ -483,7 +484,7 @@ def train_net(args):
           data_extra[c+i][i] = 1.0
         c+=args.per_batch_size
     elif args.loss_type==12:
-      triplet_params = [args.triplet_bag_size, args.triplet_alpha]
+      triplet_params = [args.triplet_bag_size, args.triplet_alpha, args.triplet_max_ap]
     elif args.loss_type==9:
       coco_mode = True
 
