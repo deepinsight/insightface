@@ -141,6 +141,7 @@ class FaceImageIter(io.DataIter):
           assert self.mx_model is not None
           self.triplet_bag_size = self.triplet_params[0]
           self.triplet_alpha = self.triplet_params[1]
+          self.triplet_max_ap = self.triplet_params[2]
           assert self.triplet_bag_size>0
           assert self.triplet_alpha>=0.0
           assert self.triplet_alpha<=1.0
@@ -255,6 +256,9 @@ class FaceImageIter(io.DataIter):
                   #self.times[4] += self.time_elapsed()
                   #self.time_reset()
                   neg_dists_sqr[emb_start_idx:emb_start_idx+nrof_images] = np.NaN
+                  if self.triplet_max_ap>0.0:
+                    if pos_dist_sqr>self.triplet_max_ap:
+                      continue
                   all_neg = np.where(np.logical_and(neg_dists_sqr-pos_dist_sqr<self.triplet_alpha, pos_dist_sqr<neg_dists_sqr))[0]  # FaceNet selection
                   #self.times[5] += self.time_elapsed()
                   #self.time_reset()
