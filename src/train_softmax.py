@@ -185,24 +185,34 @@ def get_symbol(args, arg_params, aux_params):
   gt_label = mx.symbol.Variable('softmax_label')
   assert args.loss_type>=0
   extra_loss = None
-  if args.loss_type==0:
+  if args.loss_type==0: #softmax
     _weight = mx.symbol.Variable('fc7_weight')
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
     fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
-  elif args.loss_type==1:
+  elif args.loss_type==1: #sphere
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     fc7 = mx.sym.LSoftmax(data=embedding, label=gt_label, num_hidden=args.num_classes,
                           weight = _weight,
                           beta=args.beta, margin=args.margin, scale=args.scale,
                           beta_min=args.beta_min, verbose=1000, name='fc7')
-  elif args.loss_type==2:
+  elif args.loss_type==8: #centerloss, TODO
     _weight = mx.symbol.Variable('fc7_weight')
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
     fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
     print('center-loss', args.center_alpha, args.center_scale)
     extra_loss = mx.symbol.Custom(data=embedding, label=gt_label, name='center_loss', op_type='centerloss',\
           num_class=args.num_classes, alpha=args.center_alpha, scale=args.center_scale, batchsize=args.per_batch_size)
+  elif args.loss_type==2:
+    s = 64.0
+    m = 0.35
+    s_m = s*m
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+    _weight = mx.symbol.L2Normalization(_weight, mode='instance')
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
+    fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
+    gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = s_m, off_value = 0.0)
+    fc7 = fc7-gt_one_hot
   elif args.loss_type==3:
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
@@ -396,7 +406,7 @@ def train_net(args):
 
 
 
-    if (args.loss_type==1 or args.loss_type==3) and args.num_classes>40000:
+    if (args.loss_type>=1 and args.loss_type<=5) and args.num_classes>40000:
       args.beta_freeze = 5000
       args.gamma = 0.06
 
@@ -595,7 +605,7 @@ def train_net(args):
     save_step = [0]
     if len(args.lr_steps)==0:
       lr_steps = [40000, 60000, 80000]
-      if args.loss_type==1 or args.loss_type==3:
+      if args.loss_type>=1 and args.loss_type<=5:
         lr_steps = [100000, 140000, 160000]
       p = 512.0/args.batch_size
       for l in xrange(len(lr_steps)):
