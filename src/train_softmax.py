@@ -211,13 +211,13 @@ def get_symbol(args, arg_params, aux_params):
   elif args.loss_type==2:
     s = args.margin_s
     m = args.margin_m
-    s_m = s*m
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     if s>0.0:
       nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
       fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
       if m>0.0:
+        s_m = s*m
         gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = s_m, off_value = 0.0)
         fc7 = fc7-gt_one_hot
     else:
@@ -228,7 +228,7 @@ def get_symbol(args, arg_params, aux_params):
         body = mx.sym.sqrt(body)
         body = body*m
         gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
-        body = mx.sym.boardcast_mul(gt_one_hot, body)
+        body = mx.sym.broadcast_mul(gt_one_hot, body)
         fc7 = fc7-gt_one_hot
 
   elif args.loss_type==3:
