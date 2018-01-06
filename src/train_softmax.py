@@ -112,6 +112,10 @@ def parse_args():
       help='')
   parser.add_argument('--per-batch-size', type=int, default=0,
       help='')
+  parser.add_argument('--margin-m', type=float, default=0.35,
+      help='')
+  parser.add_argument('--margin-s', type=float, default=64.0,
+      help='')
   parser.add_argument('--margin', type=int, default=4,
       help='')
   parser.add_argument('--beta', type=float, default=1000.,
@@ -205,15 +209,28 @@ def get_symbol(args, arg_params, aux_params):
     extra_loss = mx.symbol.Custom(data=embedding, label=gt_label, name='center_loss', op_type='centerloss',\
           num_class=args.num_classes, alpha=args.center_alpha, scale=args.center_scale, batchsize=args.per_batch_size)
   elif args.loss_type==2:
-    s = 64.0
-    m = 0.35
+    s = args.margin_s
+    m = args.margin_m
     s_m = s*m
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
-    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
-    fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
-    gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = s_m, off_value = 0.0)
-    fc7 = fc7-gt_one_hot
+    if s>0.0:
+      nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
+      fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
+      if m>0.0:
+        gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = s_m, off_value = 0.0)
+        fc7 = fc7-gt_one_hot
+    else:
+      fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
+      if m>0.0:
+        body = embedding*embedding
+        body = mx.sym.sum_axis(body, axis=1, keepdims=True)
+        body = mx.sym.sqrt(body)
+        body = body*m
+        gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
+        body = mx.sym.boardcast_mul(gt_one_hot, body)
+        fc7 = fc7-gt_one_hot
+
   elif args.loss_type==3:
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
