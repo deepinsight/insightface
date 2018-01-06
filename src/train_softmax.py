@@ -229,7 +229,7 @@ def get_symbol(args, arg_params, aux_params):
         body = body*m
         gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
         body = mx.sym.broadcast_mul(gt_one_hot, body)
-        fc7 = fc7-gt_one_hot
+        fc7 = fc7-body
 
   elif args.loss_type==3:
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
