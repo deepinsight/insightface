@@ -35,6 +35,7 @@ from scipy import misc
 from sklearn.model_selection import KFold
 from scipy import interpolate
 import sklearn
+import datetime
 import pickle
 from sklearn.decomposition import PCA
 import mxnet as mx
@@ -192,6 +193,7 @@ def test(data_set, mx_model, batch_size, data_extra = None):
   embeddings_list = []
   if data_extra is not None:
     _data_extra = nd.array(data_extra)
+  time_consumed = 0.0
   for i in xrange( len(data_list) ):
     data = data_list[i]
     embeddings = None
@@ -202,6 +204,7 @@ def test(data_set, mx_model, batch_size, data_extra = None):
       _data = nd.slice_axis(data, axis=0, begin=bb-batch_size, end=bb)
       _label = nd.ones( (batch_size,) )
       #print(_data.shape, _label.shape)
+      time0 = datetime.datetime.now()
       if data_extra is None:
         db = mx.io.DataBatch(data=(_data,), label=(_label,))
       else:
@@ -221,6 +224,9 @@ def test(data_set, mx_model, batch_size, data_extra = None):
       #exe.forward(is_train=False)
       #net_out = exe.outputs
       _embeddings = net_out[0].asnumpy()
+      time_now = datetime.datetime.now()
+      diff = time_now - time0
+      time_consumed+=diff.total_seconds()
       #print(_embeddings.shape)
       if embeddings is None:
         embeddings = np.zeros( (data.shape[0], _embeddings.shape[1]) )
@@ -251,6 +257,7 @@ def test(data_set, mx_model, batch_size, data_extra = None):
   embeddings = embeddings_list[0] + embeddings_list[1]
   embeddings = sklearn.preprocessing.normalize(embeddings)
   print(embeddings.shape)
+  print('infer time', time_consumed)
   _, _, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=10)
   acc2, std2 = np.mean(accuracy), np.std(accuracy)
   return acc1, std1, acc2, std2, _xnorm, embeddings_list
@@ -295,12 +302,16 @@ if __name__ == '__main__':
   else:
     epochs = [int(x) for x in vec[1].split('|')]
   print('model number', len(epochs))
+  time0 = datetime.datetime.now()
   for epoch in epochs:
     print('loading',prefix, epoch)
     model = mx.mod.Module.load(prefix, epoch, context = ctx)
     model.bind(data_shapes=[('data', (args.batch_size, 3, image_size[0], image_size[1]))], label_shapes=[('softmax_label', (args.batch_size,))])
     #model.init_params()
     nets.append(model)
+  time_now = datetime.datetime.now()
+  diff = time_now - time0
+  print('model loading time', diff.total_seconds())
 
   ver_list = []
   ver_name_list = []
