@@ -78,6 +78,7 @@ class LSoftmaxOp : public Operator {
       float _beta = std::atof(env_p);
       if (param_.verbose) {
         LOG(INFO)<<"beta:"<<_beta;
+        LOG(INFO)<<param_.margin<<","<<param_.beta<<","<<param_.beta_min<<","<<param_.scale;
       }
       param_.beta = _beta;
     }
@@ -88,9 +89,6 @@ class LSoftmaxOp : public Operator {
       }
       float _beta = param.beta*std::pow((double)param.scale, (double)nbatch);
       param_.beta = std::max(_beta, param_.beta_min);
-    }
-    if (param_.verbose) {
-      LOG(INFO)<<param_.margin<<","<<param_.beta<<","<<param_.beta_min<<","<<param_.scale;
     }
   }
 
