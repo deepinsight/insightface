@@ -239,6 +239,47 @@ def get_symbol(args, arg_params, aux_params):
                           weight = _weight,
                           beta=args.beta, margin=args.margin, scale=args.scale,
                           beta_min=args.beta_min, verbose=1000, name='fc7')
+  elif args.loss_type==4:
+    s = args.margin_s
+    m = args.margin_m
+    cos_m = math.cos(m)
+    sin_m = math.sin(m)
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+    _weight = mx.symbol.L2Normalization(_weight, mode='instance')
+    assert s>0.0
+    assert m>0.0
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
+    fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
+    zy = mx.sym.pick(fc7, gt_label, axis=1)
+    cond = mx.symbol.Activation(data=zy, act_type='relu')
+    new_zy = zy*cosm
+    cos_t = zy/s
+    #theta = mx.sym.arccos(costheta)
+    #sintheta = mx.sym.sin(theta)
+    body = cos_t*cos_t
+    body = 1.0-body
+    sin_t = mx.sym.sqrt(body)
+    new_zy = cos_t*cos_m
+    b = sin_t*sin_m
+    new_zy = new_zy - b
+    new_zy = new_zy*s
+    new_zy = mx.sym.where(cond, new_zy, zy)
+    diff = new_zy - zy
+    diff = mx.sym.expand_dims(diff, 1)
+    gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
+    body = mx.sym.broadcast_mul(gt_one_hot, diff)
+    fc7 = fc7+body
+  #elif args.loss_type==4:
+  #  s = args.margin_s
+  #  m = args.margin_m
+  #  assert s>0.0
+  #  #assert m>0.0
+  #  _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+  #  _weight = mx.symbol.L2Normalization(_weight, mode='instance')
+  #  nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
+  #  fc7 = mx.sym.AmSoftmax(data=nembedding, label=gt_label, num_hidden=args.num_classes,
+  #                        weight = _weight, verbose=1000,
+  #                        margin = m, s = s, name='fc7')
   elif args.loss_type==10: #marginal loss
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
     params = [1.2, 0.3, 1.0]
