@@ -242,13 +242,14 @@ def get_symbol(args, arg_params, aux_params):
   elif args.loss_type==4:
     s = args.margin_s
     m = args.margin_m
-    cos_m = math.cos(m)
-    sin_m = math.sin(m)
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
-    _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     assert s>0.0
     assert m>0.0
     assert m<(math.pi/2)
+    cos_m = math.cos(m)
+    sin_m = math.sin(m)
+    mm = math.sin(math.pi-m)*m
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+    _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     threshold = 0.0
     threshold = math.cos(math.pi-m)
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
@@ -269,9 +270,10 @@ def get_symbol(args, arg_params, aux_params):
     b = sin_t*sin_m
     new_zy = new_zy - b
     new_zy = new_zy*s
-    zy_keep = zy
-    _zy = sin_t*(-1.0*s*m)
-    zy_keep += _zy
+    #zy_keep = zy
+    zy_keep = zy - s*mm
+    #_zy = sin_t*(-1.0*s*m)
+    #zy_keep += _zy
     new_zy = mx.sym.where(cond, new_zy, zy_keep)
     diff = new_zy - zy
     diff = mx.sym.expand_dims(diff, 1)
