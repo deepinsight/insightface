@@ -108,7 +108,7 @@ def parse_args():
       help='')
   parser.add_argument('--mom', type=float, default=0.9,
       help='')
-  parser.add_argument('--embedding-dim', type=int, default=512,
+  parser.add_argument('--emb-size', type=int, default=512,
       help='')
   parser.add_argument('--per-batch-size', type=int, default=0,
       help='')
@@ -156,35 +156,35 @@ def get_symbol(args, arg_params, aux_params):
   data_shape = (args.image_channel,args.image_h,args.image_w)
   image_shape = ",".join([str(x) for x in data_shape])
   if args.network[0]=='d':
-    embedding = fdensenet.get_symbol(512, args.num_layers,
+    embedding = fdensenet.get_symbol(args.emb_size, args.num_layers,
         version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='m':
     print('init mobilenet', args.num_layers)
-    embedding = fmobilenet.get_symbol(512, 
+    embedding = fmobilenet.get_symbol(args.emb_size, 
         version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='i':
     print('init inception-resnet-v2', args.num_layers)
-    embedding = finception_resnet_v2.get_symbol(512,
+    embedding = finception_resnet_v2.get_symbol(args.emb_size,
         version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='x':
     print('init xception', args.num_layers)
-    embedding = fxception.get_symbol(512,
+    embedding = fxception.get_symbol(args.emb_size,
         version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='p':
     print('init dpn', args.num_layers)
-    embedding = fdpn.get_symbol(512, args.num_layers,
+    embedding = fdpn.get_symbol(args.emb_size, args.num_layers,
         version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='n':
     print('init nasnet', args.num_layers)
-    embedding = fnasnet.get_symbol(512)
+    embedding = fnasnet.get_symbol(args.emb_size)
   else:
     print('init resnet', args.num_layers)
-    embedding = fresnet.get_symbol(512, args.num_layers, 
+    embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
         version_se=args.version_se, version_input=args.version_input, 
         version_output=args.version_output, version_unit=args.version_unit)
   gt_label = mx.symbol.Variable('softmax_label')
@@ -195,7 +195,7 @@ def get_symbol(args, arg_params, aux_params):
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
     fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
   elif args.loss_type==1: #sphere
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     fc7 = mx.sym.LSoftmax(data=embedding, label=gt_label, num_hidden=args.num_classes,
                           weight = _weight,
@@ -211,7 +211,7 @@ def get_symbol(args, arg_params, aux_params):
   elif args.loss_type==2:
     s = args.margin_s
     m = args.margin_m
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     if s>0.0:
       nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
@@ -232,13 +232,34 @@ def get_symbol(args, arg_params, aux_params):
         fc7 = fc7-body
 
   elif args.loss_type==3:
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+    s = args.margin_s
+    m = args.margin_m
+    assert m==2.0 or m==4.0
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
-    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*22.0
-    fc7 = mx.sym.LSoftmax(data=nembedding, label=gt_label, num_hidden=args.num_classes,
-                          weight = _weight,
-                          beta=args.beta, margin=args.margin, scale=args.scale,
-                          beta_min=args.beta_min, verbose=1000, name='fc7')
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
+    fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
+    zy = mx.sym.pick(fc7, gt_label, axis=1)
+    threshold = math.cos(math.pi/m)
+    cos_t = zy/s
+    if m==2.0:
+      cond = mx.symbol.Activation(data=cos_t, act_type='relu')
+    else:
+      cond_v = cos_t - threshold
+      cond = mx.symbol.Activation(data=cond_v, act_type='relu')
+    body = cos_t*cos_t*2
+    body = mx.symbol.Activation(data=body, act_type='relu')
+    body = body-1
+    new_zy = body*s
+    diff = new_zy - zy
+    diff = mx.sym.expand_dims(diff, 1)
+    gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
+    body = mx.sym.broadcast_mul(gt_one_hot, diff)
+    fc7 = fc7+body
+    #fc7 = mx.sym.LSoftmax(data=nembedding, label=gt_label, num_hidden=args.num_classes,
+    #                      weight = _weight,
+    #                      beta=args.beta, margin=args.margin, scale=args.scale,
+    #                      beta_min=args.beta_min, verbose=1000, name='fc7')
   elif args.loss_type==4:
     s = args.margin_s
     m = args.margin_m
@@ -248,7 +269,7 @@ def get_symbol(args, arg_params, aux_params):
     cos_m = math.cos(m)
     sin_m = math.sin(m)
     mm = math.sin(math.pi-m)*m
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     threshold = 0.0
     threshold = math.cos(math.pi-m)
@@ -272,25 +293,12 @@ def get_symbol(args, arg_params, aux_params):
     new_zy = new_zy*s
     #zy_keep = zy
     zy_keep = zy - s*mm
-    #_zy = sin_t*(-1.0*s*m)
-    #zy_keep += _zy
     new_zy = mx.sym.where(cond, new_zy, zy_keep)
     diff = new_zy - zy
     diff = mx.sym.expand_dims(diff, 1)
     gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
     body = mx.sym.broadcast_mul(gt_one_hot, diff)
     fc7 = fc7+body
-  #elif args.loss_type==4:
-  #  s = args.margin_s
-  #  m = args.margin_m
-  #  assert s>0.0
-  #  #assert m>0.0
-  #  _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
-  #  _weight = mx.symbol.L2Normalization(_weight, mode='instance')
-  #  nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
-  #  fc7 = mx.sym.AmSoftmax(data=nembedding, label=gt_label, num_hidden=args.num_classes,
-  #                        weight = _weight, verbose=1000,
-  #                        margin = m, s = s, name='fc7')
   elif args.loss_type==10: #marginal loss
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
     params = [1.2, 0.3, 1.0]
@@ -313,9 +321,9 @@ def get_symbol(args, arg_params, aux_params):
     params = [0.9, 0.2]
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
     nembedding = mx.sym.transpose(nembedding)
-    nembedding = mx.symbol.reshape(nembedding, (512, args.per_identities, args.images_per_identity))
+    nembedding = mx.symbol.reshape(nembedding, (args.emb_size, args.per_identities, args.images_per_identity))
     nembedding = mx.sym.transpose(nembedding, axes=(2,1,0)) #2*id*512
-    #nembedding = mx.symbol.reshape(nembedding, (512, args.images_per_identity, args.per_identities))
+    #nembedding = mx.symbol.reshape(nembedding, (args.emb_size, args.images_per_identity, args.per_identities))
     #nembedding = mx.sym.transpose(nembedding, axes=(1,2,0)) #2*id*512
     n1 = mx.symbol.slice_axis(nembedding, axis=0, begin=0, end=1)
     n2 = mx.symbol.slice_axis(nembedding, axis=0, begin=1, end=2)
@@ -331,8 +339,8 @@ def get_symbol(args, arg_params, aux_params):
     #rembeddings = mx.symbol.reshape(nembedding, (args.images_per_identity, args.per_identities, 512))
     #n1 = mx.symbol.slice_axis(rembeddings, axis=0, begin=0, end=1)
     #n2 = mx.symbol.slice_axis(rembeddings, axis=0, begin=1, end=2)
-    n1 = mx.symbol.reshape(n1, (args.per_identities, 512))
-    n2 = mx.symbol.reshape(n2, (args.per_identities, 512))
+    n1 = mx.symbol.reshape(n1, (args.per_identities, args.emb_size))
+    n2 = mx.symbol.reshape(n2, (args.per_identities, args.emb_size))
     cosine_matrix = mx.symbol.dot(lhs=n1, rhs=n2, transpose_b = True) #id*id, id=N of N-pair
     data_extra = mx.sym.Variable('extra')
     data_extra = mx.sym.slice_axis(data_extra, axis=0, begin=0, end=args.per_identities)
@@ -375,7 +383,7 @@ def get_symbol(args, arg_params, aux_params):
   else:
     #embedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*float(args.loss_type)
     embedding = embedding * 5
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, 512), lr_mult=1.0)
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance') * 2
     fc7 = mx.sym.LSoftmax(data=embedding, label=gt_label, num_hidden=args.num_classes,
                           weight = _weight,
@@ -470,13 +478,8 @@ def train_net(args):
     else:
       val_rec = None
     args.use_val = False
-    #args.num_classes = 10572 #webface
-    #args.num_classes = 81017
-    #args.num_classes = 82395
 
-
-
-    if (args.loss_type>=1 and args.loss_type<=5) and args.num_classes>40000:
+    if args.loss_type==1 and args.num_classes>20000:
       args.beta_freeze = 5000
       args.gamma = 0.06
 
@@ -702,15 +705,16 @@ def train_net(args):
         save_step[0]+=1
         msave = save_step[0]
         do_save = False
-        lfw_score = acc_list[0]
-        if lfw_score>highest_acc[0]:
-          highest_acc[0] = lfw_score
-          if lfw_score>=0.998:
-            do_save = True
-        if acc_list[-1]>=highest_acc[-1]:
-          highest_acc[-1] = acc_list[-1]
-          if lfw_score>=0.99:
-            do_save = True
+        if len(acc_list)>0:
+          lfw_score = acc_list[0]
+          if lfw_score>highest_acc[0]:
+            highest_acc[0] = lfw_score
+            if lfw_score>=0.998:
+              do_save = True
+          if acc_list[-1]>=highest_acc[-1]:
+            highest_acc[-1] = acc_list[-1]
+            if lfw_score>=0.99:
+              do_save = True
         if args.ckpt==0:
           do_save = False
         elif args.ckpt>1:
