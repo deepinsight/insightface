@@ -46,12 +46,9 @@ class FaceModel:
         self.pnet, self.rnet, self.onet = detect_face.create_mtcnn(sess, None)
 
     self.threshold = args.threshold
-    minsize = 100 # minimum size of face
-    threshold = [ 0.6, 0.7, 0.7 ]  # three steps's threshold
-    factor = 0.709 # scale factor
-    self.det_minsize = 20
-    self.det_threshold = [0.6,0.7,0.9]
-    self.det_factor = 0.85
+    self.det_minsize = 50
+    self.det_threshold = [0.4,0.6,0.6]
+    self.det_factor = 0.9
     _vec = args.image_size.split(',')
     assert len(_vec)==2
     self.image_size = (int(_vec[0]), int(_vec[1]))
@@ -68,9 +65,17 @@ class FaceModel:
     self.model.sym = all_layers['fc1_output']
 
   def get_aligned_face(self, img, force = False):
+    print('before det', img.shape)
     bounding_boxes, points = detect_face.detect_face(img, self.det_minsize, self.pnet, self.rnet, self.onet, self.det_threshold, self.det_factor)
+    #if bounding_boxes.shape[0]==0:
+    #  fimg = np.copy(img)
+    #  do_flip(fimg)
+    #  bounding_boxes, points = detect_face.detect_face(fimg, self.det_minsize, self.pnet, self.rnet, self.onet, self.det_threshold, self.det_factor)
     if bounding_boxes.shape[0]==0 and force:
-      bounding_boxes, points = detect_face.detect_face_force(img, None, self.pnet, self.rnet, self.onet)
+      print('force det', img.shape)
+      bounding_boxes, points = detect_face.detect_face(img, self.det_minsize, self.pnet, self.rnet, self.onet, [0.3, 0.3, 0.1], self.det_factor)
+      #bounding_boxes, points = detect_face.detect_face_force(img, None, self.pnet, self.rnet, self.onet)
+    print('after det')
     if bounding_boxes.shape[0]==0:
       return None
     bindex = 0
@@ -98,6 +103,17 @@ class FaceModel:
     print(warped.shape)
     return warped
 
+  def get_all_faces(self, img):
+    str_image_size = "%d,%d"%(self.image_size[0], self.image_size[1])
+    bounding_boxes, points = detect_face.detect_face(img, self.det_minsize, self.pnet, self.rnet, self.onet, self.det_threshold, self.det_factor)
+    ret = []
+    for i in xrange(bounding_boxes.shape[0]):
+      bbox = bounding_boxes[i,0:4]
+      landmark = points[:, i].reshape((2,5)).T
+      aligned = face_preprocess.preprocess(img, bbox=bbox, landmark = landmark, image_size=str_image_size)
+      aligned = np.transpose(aligned, (2,0,1))
+      ret.append(aligned)
+    return ret
 
   def get_feature_impl(self, face_img, norm):
     embedding = None
@@ -131,11 +147,18 @@ class FaceModel:
 
   def is_same_id(self, source_img, target_img_list):
     source_face = self.get_aligned_face(source_img, True)
+    print('source face', source_face.shape)
     target_face_list = []
+    pp = 0
     for img in target_img_list:
-      target_face = self.get_aligned_face(img, False)
+      target_force = False
+      if pp==len(target_img_list)-1 and len(target_face_list)==0:
+        target_force = True
+      target_face = self.get_aligned_face(img, target_force)
       if target_face is not None:
         target_face_list.append(target_face)
+      pp+=1
+    print('target face', len(target_face_list)) 
     source_feature = self.get_feature(source_face, True)
     target_feature = None
     for target_face in target_face_list:
@@ -148,9 +171,32 @@ class FaceModel:
     #sim = np.dot(source_feature, target_feature.T)
     diff = np.subtract(source_feature, target_feature)
     dist = np.sum(np.square(diff),1)
+    print('dist', dist)
     #print(sim, dist)
     if dist<=self.threshold:
       return True
     else:
       return False
 
+  def sim(self, source_img, target_img_list):
+    source_face = self.get_aligned_face(source_img, True)
+    print('source face', source_face.shape)
+    target_face_list = []
+    pp = 0
+    for img in target_img_list:
+      target_force = False
+      if pp==len(target_img_list)-1 and len(target_face_list)==0:
+        target_force = True
+      target_face = self.get_aligned_face(img, target_force)
+      if target_face is not None:
+        target_face_list.append(target_face)
+      pp+=1
+    print('target face', len(target_face_list)) 
+    source_feature = self.get_feature(source_face, True)
+    target_feature = None
+    sim_list = []
+    for target_face in target_face_list:
+      _feature = self.get_feature(target_face, True)
+      _sim = np.dot(source_feature, _feature.T)
+      sim_list.append(_sim)
+    return np.max(sim_list)
