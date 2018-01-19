@@ -117,6 +117,8 @@ def parse_args():
       help='')
   parser.add_argument('--margin-s', type=float, default=64.0,
       help='')
+  parser.add_argument('--easy-margin', type=int, default=0,
+      help='')
   parser.add_argument('--margin', type=int, default=4,
       help='')
   parser.add_argument('--beta', type=float, default=1000.,
@@ -277,14 +279,16 @@ def get_symbol(args, arg_params, aux_params):
     mm = math.sin(math.pi-m)*m
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
-    threshold = 0.0
+    #threshold = 0.0
     threshold = math.cos(math.pi-m)
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
     zy = mx.sym.pick(fc7, gt_label, axis=1)
     cos_t = zy/s
-    if threshold==0.0:
+    if args.easy_margin:
       cond = mx.symbol.Activation(data=cos_t, act_type='relu')
+      #cond_v = cos_t - 0.4
+      #cond = mx.symbol.Activation(data=cond_v, act_type='relu')
     else:
       cond_v = cos_t - threshold
       cond = mx.symbol.Activation(data=cond_v, act_type='relu')
@@ -297,8 +301,10 @@ def get_symbol(args, arg_params, aux_params):
     b = sin_t*sin_m
     new_zy = new_zy - b
     new_zy = new_zy*s
-    #zy_keep = zy
-    zy_keep = zy - s*mm
+    if args.easy_margin:
+      zy_keep = zy
+    else:
+      zy_keep = zy - s*mm
     new_zy = mx.sym.where(cond, new_zy, zy_keep)
     diff = new_zy - zy
     diff = mx.sym.expand_dims(diff, 1)
