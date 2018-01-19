@@ -106,6 +106,7 @@ class FaceImageIter(io.DataIter):
         self.shuffle = shuffle
         self.image_size = '%d,%d'%(data_shape[1],data_shape[2])
         self.rand_mirror = rand_mirror
+        print('rand_mirror', rand_mirror)
         #self.cast_aug = mx.image.CastAug()
         #self.color_aug = mx.image.ColorJitterAug(0.4, 0.4, 0.4)
         self.ctx_num = ctx_num 
