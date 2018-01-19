@@ -22,6 +22,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'symbols'))
 import fresnet
 import finception_resnet_v2
 import fmobilenet 
+import fmobilenetv2
 import fxception
 import fdensenet
 import fdpn
@@ -143,10 +144,12 @@ def parse_args():
       help='feature incay')
   parser.add_argument('--use-deformable', type=int, default=0,
       help='')
+  parser.add_argument('--rand-mirror', type=int, default=1,
+      help='')
   parser.add_argument('--patch', type=str, default='0_0_96_112_0',
       help='')
-  parser.add_argument('--lr-steps', type=str, default='',
-      help='')
+  parser.add_argument('--lr-steps', type=str, default='', help='')
+  parser.add_argument('--max-steps', type=int, default=0, help='')
   parser.add_argument('--target', type=str, default='lfw,cfp_ff,cfp_fp,agedb_30', help='')
   args = parser.parse_args()
   return args
@@ -161,9 +164,12 @@ def get_symbol(args, arg_params, aux_params):
         version_output=args.version_output, version_unit=args.version_unit)
   elif args.network[0]=='m':
     print('init mobilenet', args.num_layers)
-    embedding = fmobilenet.get_symbol(args.emb_size, 
-        version_se=args.version_se, version_input=args.version_input, 
-        version_output=args.version_output, version_unit=args.version_unit)
+    if args.num_layers==1:
+      embedding = fmobilenet.get_symbol(args.emb_size, 
+          version_se=args.version_se, version_input=args.version_input, 
+          version_output=args.version_output, version_unit=args.version_unit)
+    else:
+      embedding = fmobilenetv2.get_symbol(args.emb_size)
   elif args.network[0]=='i':
     print('init inception-resnet-v2', args.num_layers)
     embedding = finception_resnet_v2.get_symbol(args.emb_size,
@@ -477,7 +483,7 @@ def train_net(args):
       args.use_val = True
     else:
       val_rec = None
-    args.use_val = False
+    #args.use_val = False
 
     if args.loss_type==1 and args.num_classes>20000:
       args.beta_freeze = 5000
@@ -502,18 +508,6 @@ def train_net(args):
     data_shape = (args.image_channel,image_size[0],image_size[1])
     mean = None
 
-    if args.use_val:
-      val_dataiter = FaceImageIter(
-          batch_size           = args.batch_size,
-          data_shape           = data_shape,
-          path_imgrec          = val_rec,
-          #path_imglist         = val_path,
-          shuffle              = False,
-          rand_mirror          = False,
-          mean                 = mean,
-      )
-    else:
-      val_dataiter = None
 
 
 
@@ -576,13 +570,28 @@ def train_net(args):
           label_names   = (label_name,),
       )
 
+    if args.use_val:
+      val_dataiter = FaceImageIter(
+          batch_size           = args.batch_size,
+          data_shape           = data_shape,
+          path_imgrec          = val_rec,
+          #path_imglist         = val_path,
+          shuffle              = False,
+          rand_mirror          = False,
+          mean                 = mean,
+          ctx_num              = args.ctx_num,
+          data_extra           = data_extra,
+      )
+    else:
+      val_dataiter = None
+
     if len(data_dir_list)==1 and args.loss_type!=12:
       train_dataiter = FaceImageIter(
           batch_size           = args.batch_size,
           data_shape           = data_shape,
           path_imgrec          = path_imgrec,
           shuffle              = True,
-          rand_mirror          = True,
+          rand_mirror          = args.rand_mirror,
           mean                 = mean,
           ctx_num              = args.ctx_num,
           images_per_identity  = args.images_per_identity,
@@ -602,7 +611,7 @@ def train_net(args):
             data_shape           = data_shape,
             path_imgrec          = _path_imgrec,
             shuffle              = True,
-            rand_mirror          = True,
+            rand_mirror          = args.rand_mirror,
             mean                 = mean,
             ctx_num              = args.ctx_num,
             images_per_identity  = args.images_per_identity,
@@ -746,6 +755,8 @@ def train_net(args):
         _beta = max(args.beta_min, args.beta*math.pow(1+args.gamma*move, -1.0*args.power))
       #print('beta', _beta)
       os.environ['BETA'] = str(_beta)
+      if args.max_steps>0 and mbatch>args.max_steps:
+        sys.exit(0)
 
     #epoch_cb = mx.callback.do_checkpoint(prefix, 1)
     epoch_cb = None
