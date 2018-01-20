@@ -249,13 +249,14 @@ def get_symbol(args, arg_params, aux_params):
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
     zy = mx.sym.pick(fc7, gt_label, axis=1)
     #threshold = math.cos(math.pi/m)
-    threshold = math.cos(0.5)
+    threshold = math.cos(1.0)
     cos_t = zy/s
     cond_v = cos_t - threshold
     cond = mx.symbol.Activation(data=cond_v, act_type='relu')
-    body = cos_t*cos_t*2
-    body = mx.symbol.Activation(data=body, act_type='relu')
-    body = body-1
+    body = cos_t
+    for i in xrange(int(m/2)):
+      body = body*body
+      body = body*2-1
     new_zy = body*s
     zy_keep = zy
     new_zy = mx.sym.where(cond, new_zy, zy_keep)
