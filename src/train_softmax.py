@@ -248,17 +248,17 @@ def get_symbol(args, arg_params, aux_params):
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
     zy = mx.sym.pick(fc7, gt_label, axis=1)
-    threshold = math.cos(math.pi/m)
+    #threshold = math.cos(math.pi/m)
+    threshold = math.cos(0.5)
     cos_t = zy/s
-    if m==2.0:
-      cond = mx.symbol.Activation(data=cos_t, act_type='relu')
-    else:
-      cond_v = cos_t - threshold
-      cond = mx.symbol.Activation(data=cond_v, act_type='relu')
+    cond_v = cos_t - threshold
+    cond = mx.symbol.Activation(data=cond_v, act_type='relu')
     body = cos_t*cos_t*2
     body = mx.symbol.Activation(data=body, act_type='relu')
     body = body-1
     new_zy = body*s
+    zy_keep = zy
+    new_zy = mx.sym.where(cond, new_zy, zy_keep)
     diff = new_zy - zy
     diff = mx.sym.expand_dims(diff, 1)
     gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
