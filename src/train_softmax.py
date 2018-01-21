@@ -52,12 +52,18 @@ class AccMetric(mx.metric.EvalMetric):
 
   def update(self, labels, preds):
     self.count+=1
-    if len(preds)==4:
+    if args.loss_type>=2 and args.loss_type<=4 and args.margin_verbose>0:
       if self.count%args.ctx_num==0:
         mbatch = self.count//args.ctx_num
         if mbatch==1 or mbatch%args.margin_verbose==0:
-          a = preds[-2].asnumpy()[0]
-          b = preds[-1].asnumpy()[0]
+          a = 0.0
+          b = 0.0
+          if len(preds)>=4:
+            a = preds[-2].asnumpy()[0]
+            b = preds[-1].asnumpy()[0]
+          elif len(preds)==3:
+            a = preds[-1].asnumpy()[0]
+            b = a
           print('[%d][MARGIN]%f,%f'%(mbatch,a,b))
     #loss = preds[2].asnumpy()[0]
     #if len(self.losses)==20:
@@ -271,32 +277,27 @@ def get_symbol(args, arg_params, aux_params):
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
     zy = mx.sym.pick(fc7, gt_label, axis=1)
-    #threshold = math.cos(math.pi/m)
-    threshold = math.cos(args.margin_m)
     cos_t = zy/s
     if args.margin_verbose>0:
       margin_symbols.append(mx.symbol.mean(cos_t))
-    cond_v = cos_t - threshold
-    cond = mx.symbol.Activation(data=cond_v, act_type='relu')
-    body = cos_t
-    for i in xrange(args.margin//2):
-      body = body*body
-      body = body*2-1
-    new_zy = body*s
-    zy_keep = zy
-    new_zy = mx.sym.where(cond, new_zy, zy_keep)
-    if args.margin_verbose>0:
-      new_cos_t = new_zy/s
-      margin_symbols.append(mx.symbol.mean(new_cos_t))
-    diff = new_zy - zy
-    diff = mx.sym.expand_dims(diff, 1)
-    gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
-    body = mx.sym.broadcast_mul(gt_one_hot, diff)
-    fc7 = fc7+body
-    #fc7 = mx.sym.LSoftmax(data=nembedding, label=gt_label, num_hidden=args.num_classes,
-    #                      weight = _weight,
-    #                      beta=args.beta, margin=args.margin, scale=args.scale,
-    #                      beta_min=args.beta_min, verbose=1000, name='fc7')
+    #threshold = math.cos(args.margin_m)
+    #cond_v = cos_t - threshold
+    #cond = mx.symbol.Activation(data=cond_v, act_type='relu')
+    #body = cos_t
+    #for i in xrange(args.margin//2):
+    #  body = body*body
+    #  body = body*2-1
+    #new_zy = body*s
+    #zy_keep = zy
+    #new_zy = mx.sym.where(cond, new_zy, zy_keep)
+    #if args.margin_verbose>0:
+    #  new_cos_t = new_zy/s
+    #  margin_symbols.append(mx.symbol.mean(new_cos_t))
+    #diff = new_zy - zy
+    #diff = mx.sym.expand_dims(diff, 1)
+    #gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
+    #body = mx.sym.broadcast_mul(gt_one_hot, diff)
+    #fc7 = fc7+body
   elif args.loss_type==4:
     s = args.margin_s
     m = args.margin_m
