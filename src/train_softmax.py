@@ -38,6 +38,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
+args = None
 
 
 class AccMetric(mx.metric.EvalMetric):
@@ -50,10 +51,14 @@ class AccMetric(mx.metric.EvalMetric):
     self.count = 0
 
   def update(self, labels, preds):
-    if self.count%800==0 and len(preds)==4:
-      a = preds[-2].asnumpy()[0]
-      b = preds[-1].asnumpy()[0]
-      print('[MARGIN]%f,%f'%(a,b))
+    self.count+=1
+    if len(preds)==4:
+      if self.count%args.ctx_num==0:
+        mbatch = self.count/args.ctx_num
+        if mbatch==1 or mbatch%args.margin_verbose==0:
+          a = preds[-2].asnumpy()[0]
+          b = preds[-1].asnumpy()[0]
+          print('[%d][MARGIN]%f,%f'%(mbatch,a,b))
     #loss = preds[2].asnumpy()[0]
     #if len(self.losses)==20:
     #  print('ce loss', sum(self.losses)/len(self.losses))
@@ -73,7 +78,6 @@ class AccMetric(mx.metric.EvalMetric):
         assert label.shape==pred_label.shape
         self.sum_metric += (pred_label.flat == label.flat).sum()
         self.num_inst += len(pred_label.flat)
-    self.count+=1
 
 class LossValueMetric(mx.metric.EvalMetric):
   def __init__(self):
@@ -117,13 +121,15 @@ def parse_args():
       help='')
   parser.add_argument('--emb-size', type=int, default=512,
       help='')
-  parser.add_argument('--per-batch-size', type=int, default=0,
+  parser.add_argument('--per-batch-size', type=int, default=128,
       help='')
   parser.add_argument('--margin-m', type=float, default=0.35,
       help='')
   parser.add_argument('--margin-s', type=float, default=64.0,
       help='')
   parser.add_argument('--easy-margin', type=int, default=0,
+      help='')
+  parser.add_argument('--margin-verbose', type=int, default=0,
       help='')
   parser.add_argument('--margin', type=int, default=4,
       help='')
@@ -232,17 +238,19 @@ def get_symbol(args, arg_params, aux_params):
       nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
       fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
       if m>0.0:
-        zy = mx.sym.pick(fc7, gt_label, axis=1)
-        cos_t = zy/s
-        margin_symbols.append(mx.symbol.mean(cos_t))
+        if args.margin_verbose>0:
+          zy = mx.sym.pick(fc7, gt_label, axis=1)
+          cos_t = zy/s
+          margin_symbols.append(mx.symbol.mean(cos_t))
 
         s_m = s*m
         gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = s_m, off_value = 0.0)
         fc7 = fc7-gt_one_hot
 
-        new_zy = mx.sym.pick(fc7, gt_label, axis=1)
-        new_cos_t = new_zy/s
-        margin_symbols.append(mx.symbol.mean(new_cos_t))
+        if args.margin_verbose>0:
+          new_zy = mx.sym.pick(fc7, gt_label, axis=1)
+          new_cos_t = new_zy/s
+          margin_symbols.append(mx.symbol.mean(new_cos_t))
     else:
       fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
       if m>0.0:
@@ -266,7 +274,8 @@ def get_symbol(args, arg_params, aux_params):
     #threshold = math.cos(math.pi/m)
     threshold = math.cos(args.margin_m)
     cos_t = zy/s
-    margin_symbols.append(mx.symbol.mean(cos_t))
+    if args.margin_verbose>0:
+      margin_symbols.append(mx.symbol.mean(cos_t))
     cond_v = cos_t - threshold
     cond = mx.symbol.Activation(data=cond_v, act_type='relu')
     body = cos_t
@@ -276,8 +285,9 @@ def get_symbol(args, arg_params, aux_params):
     new_zy = body*s
     zy_keep = zy
     new_zy = mx.sym.where(cond, new_zy, zy_keep)
-    new_cos_t = new_zy/s
-    margin_symbols.append(mx.symbol.mean(new_cos_t))
+    if args.margin_verbose>0:
+      new_cos_t = new_zy/s
+      margin_symbols.append(mx.symbol.mean(new_cos_t))
     diff = new_zy - zy
     diff = mx.sym.expand_dims(diff, 1)
     gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
@@ -304,7 +314,8 @@ def get_symbol(args, arg_params, aux_params):
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
     zy = mx.sym.pick(fc7, gt_label, axis=1)
     cos_t = zy/s
-    margin_symbols.append(mx.symbol.mean(cos_t))
+    if args.margin_verbose>0:
+      margin_symbols.append(mx.symbol.mean(cos_t))
     if args.easy_margin:
       cond = mx.symbol.Activation(data=cos_t, act_type='relu')
       #cond_v = cos_t - 0.4
@@ -326,8 +337,9 @@ def get_symbol(args, arg_params, aux_params):
     else:
       zy_keep = zy - s*mm
     new_zy = mx.sym.where(cond, new_zy, zy_keep)
-    new_cos_t = new_zy/s
-    margin_symbols.append(mx.symbol.mean(new_cos_t))
+    if args.margin_verbose>0:
+      new_cos_t = new_zy/s
+      margin_symbols.append(mx.symbol.mean(new_cos_t))
     
     diff = new_zy - zy
     diff = mx.sym.expand_dims(diff, 1)
@@ -815,6 +827,7 @@ def train_net(args):
 
 def main():
     #time.sleep(3600*6.5)
+    global args
     args = parse_args()
     train_net(args)
 
