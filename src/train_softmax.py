@@ -54,7 +54,7 @@ class AccMetric(mx.metric.EvalMetric):
     self.count+=1
     if len(preds)==4:
       if self.count%args.ctx_num==0:
-        mbatch = self.count/args.ctx_num
+        mbatch = self.count//args.ctx_num
         if mbatch==1 or mbatch%args.margin_verbose==0:
           a = preds[-2].asnumpy()[0]
           b = preds[-1].asnumpy()[0]
@@ -279,7 +279,7 @@ def get_symbol(args, arg_params, aux_params):
     cond_v = cos_t - threshold
     cond = mx.symbol.Activation(data=cond_v, act_type='relu')
     body = cos_t
-    for i in xrange(args.margin/2):
+    for i in xrange(args.margin//2):
       body = body*body
       body = body*2-1
     new_zy = body*s
