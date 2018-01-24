@@ -1,7 +1,7 @@
 
 # *InsightFace* : Implementation for paper 'InsightFace, Additive Angular Margin Loss for Deep Face Recognition'
 
-  Paper by Jiankang Deng, Jia Guo, and Stefanos Zafeiriou (Current paper name is AxxFace which will be replaced soon, to avoid conflict with others. We will probably use the name *InsightFace* directly).
+  Paper by Jiankang Deng, Jia Guo, and Stefanos Zafeiriou (Current method name ArcFace may be replaced to avoid conflicts with the company name. We will probably use the name InsightFace.)
 
 ### License
 
