@@ -84,7 +84,7 @@ def ver():
     #print(target_image.shape)
     if not isinstance(target_image, list):
       target_image = [target_image]
-    print('before call')
+    #print('before call')
     #ret = model.is_same_id(source_image, target_image)
     ret = model.sim(source_image, target_image)
   except Exception as ex:
@@ -92,6 +92,7 @@ def ver():
     return '-1'
 
   #return str(int(ret))
+  print('sim', ret)
   return "%1.3f"%ret
 
 if __name__ == '__main__':
