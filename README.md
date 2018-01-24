@@ -86,7 +86,7 @@
 
    #### Part 1: Dataset Downloading.
    **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/`**
-   1. Download the training set (`MS1M`) from [here] and place them in **`datasets/`**. Each training dataset includes following 7 files:
+   1. Download the training set (`MS1M`) from [here](https://pan.baidu.com/s/1nxmSCch) and place them in **`datasets/`**. Each training dataset includes following 7 files:
 
        ```Shell
        faces_ms1m_112x112/
