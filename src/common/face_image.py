@@ -82,6 +82,8 @@ def get_dataset_facescrub(input_dir):
       fimage.id = os.path.join(person_name, _img)
       fimage.classname = str(label)
       fimage.image_path = os.path.join(subdir, _img)
+      fimage.landmark = None
+      fimage.bbox = None
       ret.append(fimage)
     label += 1
   return ret
