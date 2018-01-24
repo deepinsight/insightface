@@ -112,7 +112,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    1. Train our method with LResNet100E-IR.
 
       ```Shell
-      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss-type 4 --margin-m 0.5 --data-dir ../datasets/faces_ms1mr_112x112  --prefix ../model-r100
+      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss-type 4 --margin-m 0.5 --data-dir ../datasets/faces_ms1m_112x112  --prefix ../model-r100
       ```
       It will output verification results of *LFW*, *CFP-FF*, *CFP-FP* and *AgeDB-30* every 2000 batches. You can check all command line options in **train\_softmax.py**.
 
@@ -121,18 +121,18 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    2. Train AMSoftmax/CosineFace with LResNet50E-IR.
 
       ```Shell
-      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r50 --loss-type 2 --margin-m 0.35 --data-dir ../datasets/faces_ms1mr_112x112 --prefix ../model-r50-amsoftmax
+      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r50 --loss-type 2 --margin-m 0.35 --data-dir ../datasets/faces_ms1m_112x112 --prefix ../model-r50-amsoftmax
       ```
 
    3. Train Softmax with LMobileNetE.
 
       ```Shell
-      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss-type 0 --data-dir ../datasets/faces_ms1mr_112x112 --prefix ../model-m1-softmax
+      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss-type 0 --data-dir ../datasets/faces_ms1m_112x112 --prefix ../model-m1-softmax
       ```
 
 4. Re-Train with Triplet on above Softmax model.
    ```Shell
-   CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss-type 12 --lr 0.005 --mom 0.0 --per-batch-size 150 --data-dir ../datasets/faces_ms1mr_112x112 --pretrained ../model-m1-softmax,50 --prefix ../model-m1-triplet
+   CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss-type 12 --lr 0.005 --mom 0.0 --per-batch-size 150 --data-dir ../datasets/faces_ms1m_112x112 --pretrained ../model-m1-softmax,50 --prefix ../model-m1-triplet
    ```
 
 5. Train Softmax with LDPN107E.
