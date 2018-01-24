@@ -62,6 +62,7 @@
 
 ### Requirements
       1. Install `MXNet` with GPU support(Python 2.7).
+      
       2. If you want to align dataset by yourself, install tensorflow as we're using the MTCNN writen in TF.
 
 ### Installation
