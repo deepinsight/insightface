@@ -111,12 +111,15 @@ def main(args):
     threshold = [ 0.6, 0.7, 0.7 ]  # three steps's threshold
     factor = 0.709 # scale factor
     image_size = [112,96]
+    image_size = [112,112]
     src = np.array([
       [30.2946, 51.6963],
       [65.5318, 51.5014],
       [48.0252, 71.7366],
       [33.5493, 92.3655],
       [62.7299, 92.2041] ], dtype=np.float32 )
+    if image_size[1]==112:
+      src[:,0] += 8.0
 
     # Add a random key to the filename to allow alignment using multiple processes
     #random_key = np.random.randint(0, high=99999)
