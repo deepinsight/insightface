@@ -88,15 +88,17 @@
    **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/`**
    1. Download the training set (`MS1M`) from [here] and place them in **`datasets/`**. Each training dataset includes following 7 files:
 
-      ```Shell
-      - train.idx
-      - train.rec
-      - property
-      - lfw.bin
-      - cfp_ff.bin
-      - cfp_fp.bin
-      - agedb_30.bin
-      ```
+       ```Shell
+       faces_ms1m_112x112/
+         train.idx
+         train.rec
+         property
+         lfw.bin
+         cfp_ff.bin
+         cfp_fp.bin
+         agedb_30.bin
+       ```
+       
        The first three files are the dataset itself while the last four ones are binary verification sets.
 
    #### Part 2: Train
@@ -180,9 +182,10 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
 ### Contact
 
-     [Jia Guo](guojia[at]gmail.com) and [Jiankang Deng](https://ibug.doc.ic.ac.uk/people/jdeng)
+```
+  [Jia Guo](guojia[at]gmail.com) and [Jiankang Deng](https://ibug.doc.ic.ac.uk/people/jdeng)
 
-     Questions can also be left as issues in the repository. We will be happy to answer them.
-  
+  Questions can also be left as issues in the repository. We will be happy to answer them.
+```
 
    
