@@ -52,7 +52,7 @@
    If you find **InsightFace** useful in your research, please consider to cite our paper.
    
 ```
-@misc{arcface2018,
+@misc{insightface2018,
   author =       {Jiankang Deng, Jia Guo and Stefanos Zafeiriou},
   title =        {Additive Angular Margin Loss for Deep Face Recognition},
   journal =      {arXiv preprint arXiv:1801.07698},
@@ -112,7 +112,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    1. Train our method with LResNet100E-IR.
 
       ```Shell
-      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss-type 4 --margin-m 0.5 --data-dir ../datasets/faces_ms1mr_112x112  --prefix ../model-r100-arcface
+      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss-type 4 --margin-m 0.5 --data-dir ../datasets/faces_ms1mr_112x112  --prefix ../model-r100
       ```
       It will output verification results of *LFW*, *CFP-FF*, *CFP-FP* and *AgeDB-30* every 2000 batches. You can check all command line options in **train\_softmax.py**.
 
