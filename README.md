@@ -75,7 +75,7 @@
             organization={Springer}}
 ```
 
-  If you want to download the packed VGG2 dataset we provided, please check its license (here)[https://www.robots.ox.ac.uk/~vgg/data/vgg_face2/licence.txt] and also cite the paper below:
+  If you want to download the packed VGG2 dataset we provided, please check its license [here](https://www.robots.ox.ac.uk/~vgg/data/vgg_face2/licence.txt) and also cite the paper below:
   
 ```
 @article{DBLP:journals/corr/abs-1710-08092,
