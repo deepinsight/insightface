@@ -31,15 +31,19 @@
 
    In InsightFace, we support several popular network backbones and can be set just in one parameter. Below is the list until today:
 
-- ResNet
+* ResNet
+* MobiletNet
+* InceptionResNetV2
+* DPN
+* DenseNet
 
-- MobiletNet
-
-- InceptionResNetV2
-
-- DPN
-
-- DenseNet
+ We also support most of popular face recognition algorithms(losses), by specifying loss type:
+ 
+ * loss-type=0:  Softmax
+ * loss-type=1:  SphereFace
+ * loss-type=2:  AMSoftmax/CosineFace
+ * loss-type=4:  Ours(InsightFace)
+ * loss-type=12: TripletLoss
 
  In our paper, we found there're overlap identities between facescrub dataset and Megaface distractors which greatly affects the identification performance. Sometimes more than 10 percent improvement can be achieved after removing these overlaps. This list will be made public soon in this repository.
 
@@ -60,8 +64,22 @@
 }
 ```
 
+  If you want to download the refined MS1M dataset we provided, please cite the paper below:
+  
+```
+@INPROCEEDINGS { guo2016msceleb,
+            author = {Guo, Yandong and Zhang, Lei and Hu, Yuxiao and He, Xiaodong and Gao, Jianfeng},
+            title = {M{S}-{C}eleb-1{M}: A Dataset and Benchmark for Large Scale Face Recognition},
+            booktitle = {European Conference on Computer Vision},
+            year = {2016},
+            organization={Springer}}
+```
+
 ### Requirements
-      1. The only requirement is `MXNet` with GPU support(Python 2.7).
+      
+   1. Install `MXNet` with GPU support(Python 2.7).
+      
+   2. If you want to align dataset by yourself, install tensorflow as we're using the tf-version MTCNN. (Note that any public available MTCNN can be used to align the faces and then transform to 112x112 crop, performance/result should not change.)
 
 ### Installation
    1. Install MXNet by 
