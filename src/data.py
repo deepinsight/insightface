@@ -1219,7 +1219,7 @@ class FaceImageIter3(io.DataIter):
           header, _ = recordio.unpack(s)
           assert(header.flag==2)
           self.idx2range[identity] = (int(header.label[0]), int(header.label[1]))
-        print('idx2range', len(idx2range))
+        print('idx2range', len(self.idx2range))
 
 
         self.path_root = path_root
