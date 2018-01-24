@@ -1,5 +1,5 @@
 
-# *InsightFace* : Implementation for paper 'ArcFace: Additive Angular Margin Loss for Deep Face Recognition'
+# *InsightFace* : Implementation for paper 'Additive Angular Margin Loss for Deep Face Recognition'
 
   Paper by Jiankang Deng, Jia Guo, and Stefanos Zafeiriou
 
@@ -23,9 +23,9 @@
 
    Paper link: [here](https://arxiv.org/abs/1801.07698). 
    
-   This repository contains the entire pipeline for deep face recognition with **`ArcFace`** and other popular methods including Softmax, Triplet Loss, SphereFace and AMSoftmax/CosineFace, etc..
+   This repository contains the entire pipeline for deep face recognition with **`InsightFace`** and other popular methods including Softmax, Triplet Loss, SphereFace and AMSoftmax/CosineFace, etc..
 
-   **ArcFace** is a recently proposed face recognition method. It was initially described in an [arXiv technical report](https://arxiv.org/abs/1801.07698). By using ArcFace and this repository, you can simply achieve LFW 99.80+ and Megaface 98%+ by a single model.
+   **InsightFace** is a recently proposed face recognition method. It was initially described in an [arXiv technical report](https://arxiv.org/abs/1801.07698). By using InsightFace and this repository, you can simply achieve LFW 99.80+ and Megaface 98%+ by a single model.
 
    We provide a refined MS1M dataset for training here, which was already packed in MXNet binary format. It allows researcher or industrial engineer to develop a deep face recognizer quickly by only two stages: 1. Download binary dataset; 2. Run training script.
 
@@ -44,17 +44,17 @@
  In our paper, we found there're overlap identities between facescrub dataset and Megaface distractors which greatly affects the identification performance. Sometimes more than 10 percent improvement can be achieved after removing these overlaps. This list will be made public soon in this repository.
 
 
-   ArcFace achieves the state-of-the-art identification performance in MegaFace Challenge, at 98%+. 
+   We achieves the state-of-the-art identification performance in MegaFace Challenge, at 98%+. 
 
 
 ### Citation
 
-   If you find **InsightFace/ArcFace** useful in your research, please consider to cite our paper.
+   If you find **InsightFace** useful in your research, please consider to cite our paper.
    
 ```
 @misc{arcface2018,
   author =       {Jiankang Deng, Jia Guo and Stefanos Zafeiriou},
-  title =        {ArcFace: Additive Angular Margin Loss for Deep Face Recognition},
+  title =        {Additive Angular Margin Loss for Deep Face Recognition},
   journal =      {arXiv preprint arXiv:1801.07698},
   year =         {2018}
 }
@@ -109,7 +109,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
  Now we give some examples below. Our experiments were all done on Tesla P40 GPU.
 
-   1. Train ArcFace with LResNet100E-IR.
+   1. Train our method with LResNet100E-IR.
 
       ```Shell
       CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss-type 4 --margin-m 0.5 --data-dir ../datasets/faces_ms1mr_112x112  --prefix ../model-r100-arcface
@@ -167,11 +167,11 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
 ### Results
    
-   We simply report the performance of **LResNet100E-IR** network trained on **MS1M** dataset with **ArcFace** loss.
+   We simply report the performance of **LResNet100E-IR** network trained on **MS1M** dataset with our method.
 
 | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
 | ------- | ------ | --------- | --------- | ----------- | ------------- |
-| ArcFace | 99.80+ | 99.85+    | 94.0+     | 97.90+      | **98.0+**     |
+|  Ours   | 99.80+ | 99.85+    | 94.0+     | 97.90+      | **98.0+**     |
 
 
 
