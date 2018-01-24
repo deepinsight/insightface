@@ -19,7 +19,7 @@
 0. [Contact](#contact)
 
 
-   ### Introduction
+### Introduction
 
    The repository contains the entire pipeline for deep face recognition with **`ArcFace`** and other popular methods including Softmax, Triplet Loss, SphereFace and AMSoftmax/CosineFace, etc..
 
@@ -45,19 +45,16 @@
    ArcFace achieves the state-of-the-art identification performance in MegaFace Challenge, at 98%+. 
 
 
-   ### Citation
+### Citation
 
    If you find **InsightFace/ArcFace** useful in your research, please consider to cite our paper.
 
    	
 
-  
-
-
-   ### Requirements
+### Requirements
       1. The only requirement is `MXNet` with GPU support(Python 2.7).
 
-   ### Installation
+### Installation
    1. Install MXNet by 
 
        ```
@@ -74,7 +71,7 @@
       
 
 
-   ### Usage
+### Usage
 
    *After successfully completing the [installation](#installation)*, you are ready to run all the following experiments.
 
@@ -154,10 +151,10 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
       ```
    4. Start to run megaface development kit to produce final result. 
 
-   ### Models
-      1. We plan to make some models public.
+### Models
+      1. We plan to make some models public soon.
 
-   ### Results
+### Results
    
    We simply report the performance of **LResNet100E-IR** network trained on **MS1M** dataset with **ArcFace** loss.
 
@@ -167,10 +164,10 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
 
 
-   ### Contribution
+### Contribution
    - Any type of PR or third-party contribution are welcome.
 
-   ### Contact
+### Contact
 
      [Jia Guo](guojia[at]gmail.com) and [Jiankang Deng](https://ibug.doc.ic.ac.uk/people/jdeng)
 
