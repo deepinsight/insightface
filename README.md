@@ -89,14 +89,13 @@
    1. Download the training set (`MS1M`) from [here] and place them in **`datasets/`**. Each training dataset includes following 7 files:
 
       ```Shell
-        － faces_ms1m_112x112/
-      	  - train.idx
-      	  - train.rec
-      	  - property
-      	  - lfw.bin
-      	  - cfp_ff.bin
-      	  - cfp_fp.bin
-      	  - agedb_30.bin
+      - train.idx
+      - train.rec
+      - property
+      - lfw.bin
+      - cfp_ff.bin
+      - cfp_fp.bin
+      - agedb_30.bin
       ```
        The first three files are the dataset itself while the last four ones are binary verification sets.
 
