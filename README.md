@@ -21,7 +21,9 @@
 
 ### Introduction
 
-   Paper link: [here](https://arxiv.org/abs/1801.07698). The repository contains the entire pipeline for deep face recognition with **`ArcFace`** and other popular methods including Softmax, Triplet Loss, SphereFace and AMSoftmax/CosineFace, etc..
+   Paper link: [here](https://arxiv.org/abs/1801.07698). 
+   
+   This repository contains the entire pipeline for deep face recognition with **`ArcFace`** and other popular methods including Softmax, Triplet Loss, SphereFace and AMSoftmax/CosineFace, etc..
 
    **ArcFace** is a recently proposed face recognition method. It was initially described in an [arXiv technical report](https://arxiv.org/abs/1801.07698). By using ArcFace and this repository, you can simply achieve LFW 99.80+ and Megaface 98%+ by a single model.
 
@@ -138,6 +140,8 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
       ```Shell
       CUDA_VISIBLE_DEVICES='0,1,2,3,4,5,6,7' python -u train_softmax.py --network p107 --loss-type 0 --per-batch-size 64 --data-dir ../datasets/faces_vgg_112x112 --prefix ../model-p107-softmax
       ```
+
+
 
    #### Part 3: MegaFace Test
 
