@@ -65,7 +65,7 @@ class FaceModel:
     self.model.sym = all_layers['fc1_output']
 
   def get_aligned_face(self, img, force = False):
-    print('before det', img.shape)
+    #print('before det', img.shape)
     bounding_boxes, points = detect_face.detect_face(img, self.det_minsize, self.pnet, self.rnet, self.onet, self.det_threshold, self.det_factor)
     #if bounding_boxes.shape[0]==0:
     #  fimg = np.copy(img)
@@ -75,7 +75,7 @@ class FaceModel:
       print('force det', img.shape)
       bounding_boxes, points = detect_face.detect_face(img, self.det_minsize, self.pnet, self.rnet, self.onet, [0.3, 0.3, 0.1], self.det_factor)
       #bounding_boxes, points = detect_face.detect_face_force(img, None, self.pnet, self.rnet, self.onet)
-    print('after det')
+    #print('after det')
     if bounding_boxes.shape[0]==0:
       return None
     bindex = 0
@@ -179,6 +179,7 @@ class FaceModel:
       return False
 
   def sim(self, source_img, target_img_list):
+    print('sim start')
     source_face = self.get_aligned_face(source_img, True)
     print('source face', source_face.shape)
     target_face_list = []
