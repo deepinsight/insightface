@@ -64,6 +64,17 @@
 }
 ```
 
+  If you want to download the refined MS1M dataset we provided, please cite the paper below:
+  
+```
+@INPROCEEDINGS { guo2016msceleb,
+            author = {Guo, Yandong and Zhang, Lei and Hu, Yuxiao and He, Xiaodong and Gao, Jianfeng},
+            title = {M{S}-{C}eleb-1{M}: A Dataset and Benchmark for Large Scale Face Recognition},
+            booktitle = {European Conference on Computer Vision},
+            year = {2016},
+            organization={Springer}}
+```
+
 ### Requirements
       
    1. Install `MXNet` with GPU support(Python 2.7).
