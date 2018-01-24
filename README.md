@@ -48,8 +48,14 @@
 ### Citation
 
    If you find **InsightFace/ArcFace** useful in your research, please consider to cite our paper.
-
-   	
+```   
+@misc{arcface2018,
+  author =       {Jiankang Deng, Jia Guo and Stefanos Zafeiriou},
+  title =        {ArcFace: Additive Angular Margin Loss for Deep Face Recognition},
+  journal =      {arXiv preprint arXiv:1801.07698},
+  year =         {2018}
+}
+```   	
 
 ### Requirements
       1. The only requirement is `MXNet` with GPU support(Python 2.7).
