@@ -21,7 +21,7 @@
 
 ### Introduction
 
-   The repository contains the entire pipeline for deep face recognition with **`ArcFace`** and other popular methods including Softmax, Triplet Loss, SphereFace and AMSoftmax/CosineFace, etc..
+   Paper link: [here](https://arxiv.org/abs/1801.07698). The repository contains the entire pipeline for deep face recognition with **`ArcFace`** and other popular methods including Softmax, Triplet Loss, SphereFace and AMSoftmax/CosineFace, etc..
 
    **ArcFace** is a recently proposed face recognition method. It was initially described in an [arXiv technical report](https://arxiv.org/abs/1801.07698). By using ArcFace and this repository, you can simply achieve LFW 99.80+ and Megaface 98%+ by a single model.
 
@@ -109,7 +109,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    1. Train ArcFace with LResNet100E-IR.
 
       ```Shell
-      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --data-dir ../datasets/faces_ms1mr_112x112 --network r100 --loss-type 4 --prefix ../model-r100-arcface --margin-m 0.5
+      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss-type 4 --margin-m 0.5 --data-dir ../datasets/faces_ms1mr_112x112  --prefix ../model-r100-arcface
       ```
       It will output verification results of *LFW*, *CFP-FF*, *CFP-FP* and *AgeDB-30* every 2000 batches. You can check all command line options in **train\_softmax.py**.
 
@@ -118,24 +118,24 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    2. Train AMSoftmax/CosineFace with LResNet50E-IR.
 
       ```Shell
-      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --data-dir ../datasets/faces_ms1mr_112x112 --network r50 --loss-type 2 --prefix ../model-r50-amsoftmax --margin-m 0.35
+      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r50 --loss-type 2 --margin-m 0.35 --data-dir ../datasets/faces_ms1mr_112x112 --prefix ../model-r50-amsoftmax
       ```
 
    3. Train Softmax with LMobileNetE.
 
       ```Shell
-      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --data-dir ../datasets/faces_ms1mr_112x112 --network m1 --loss-type 0 --prefix ../model-m1-softmax
+      CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss-type 0 --data-dir ../datasets/faces_ms1mr_112x112 --prefix ../model-m1-softmax
       ```
 
 4. Re-Train with Triplet on above Softmax model.
    ```Shell
-   CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --data-dir ../datasets/faces_ms1mr_112x112 --network m1 --loss-type 12 --pretrained ../model-m1-softmax,50 --prefix ../model-m1-triplet --lr 0.005 --mom 0.0 --per-batch-size 150
+   CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss-type 12 --lr 0.005 --mom 0.0 --per-batch-size 150 --data-dir ../datasets/faces_ms1mr_112x112 --pretrained ../model-m1-softmax,50 --prefix ../model-m1-triplet
    ```
 
 5. Train Softmax with LDPN107E.
 
       ```Shell
-      CUDA_VISIBLE_DEVICES='0,1,2,3,4,5,6,7' python -u train_softmax.py --data-dir ../datasets/faces_vgg_112x112 --network p107 --loss-type 0 --prefix ../model-p107-softmax --per-batch-size 64
+      CUDA_VISIBLE_DEVICES='0,1,2,3,4,5,6,7' python -u train_softmax.py --network p107 --loss-type 0 --per-batch-size 64 --data-dir ../datasets/faces_vgg_112x112 --prefix ../model-p107-softmax
       ```
 
    #### Part 3: MegaFace Test
