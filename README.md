@@ -1,7 +1,7 @@
 
-# *InsightFace* : Implementation for paper 'Additive Angular Margin Loss for Deep Face Recognition'
+# InsightFace :  Additive Angular Margin Loss for Deep Face Recognition
 
-  Paper by Jiankang Deng, Jia Guo, and Stefanos Zafeiriou
+  Paper by Jiankang Deng, Jia Guo, and Stefanos Zafeiriou (Current method name ArcFace may be replaced to avoid conflicts with the company name. We will probably use the name InsightFace.)
 
 ### License
 
@@ -73,6 +73,28 @@
             booktitle = {European Conference on Computer Vision},
             year = {2016},
             organization={Springer}}
+```
+
+  If you want to download the packed VGG2 dataset we provided, please check its license [here](https://www.robots.ox.ac.uk/~vgg/data/vgg_face2/licence.txt) and also cite the paper below:
+  
+```
+@article{DBLP:journals/corr/abs-1710-08092,
+  author    = {Qiong Cao and
+               Li Shen and
+               Weidi Xie and
+               Omkar M. Parkhi and
+               Andrew Zisserman},
+  title     = {VGGFace2: {A} dataset for recognising faces across pose and age},
+  journal   = {CoRR},
+  volume    = {abs/1710.08092},
+  year      = {2017},
+  url       = {http://arxiv.org/abs/1710.08092},
+  archivePrefix = {arXiv},
+  eprint    = {1710.08092},
+  timestamp = {Thu, 02 Nov 2017 14:25:36 +0100},
+  biburl    = {http://dblp.org/rec/bib/journals/corr/abs-1710-08092},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
 ```
 
 ### Requirements
