@@ -217,11 +217,17 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
 ### Results
    
-   We simply report the performance of **LResNet100E-IR** network trained on **MS1M** dataset with our method.
+   We report the performance of **LResNet100E-IR** network trained on **MS1M** dataset with our method below:
 
 | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
 | ------- | ------ | --------- | --------- | ----------- | ------------- |
 |  Ours   | 99.80+ | 99.85+    | 94.0+     | 97.90+      | **98.0+**     |
+
+   We report the performance of **LResNet50E-IR** network trained on **VGGFace2** dataset with our method below:
+
+| Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
+| ------- | ------ | --------- | --------- | ----------- | ------------- |
+|  Ours   | 99.7+  |  99.6+    |   97.1+   |   95.7+     |      -        |
 
 
 
