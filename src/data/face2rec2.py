@@ -30,6 +30,7 @@ import time
 import traceback
 #from builtins import range
 from easydict import EasyDict as edict
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import face_preprocess
 import face_image
 
@@ -191,7 +192,8 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     if args.list:
-        make_list(args)
+        pass
+        #make_list(args)
     else:
         if os.path.isdir(args.prefix):
             working_dir = args.prefix
