@@ -141,7 +141,7 @@
        
        The first three files are the dataset itself while the last four ones are binary verification sets.
        
-       **Available dataset**:
+       **Available training dataset**(all face images are aligned and cropped to 112x112):
        
        * [Refined MS1M](https://pan.baidu.com/s/1nxmSCch)
        * [VGGFace2](https://pan.baidu.com/s/1c3KeLzy)
