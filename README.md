@@ -140,6 +140,12 @@
        ```
        
        The first three files are the dataset itself while the last four ones are binary verification sets.
+       
+       **Available training dataset**(all face images are aligned and cropped to 112x112):
+       
+       * [Refined MS1M](https://pan.baidu.com/s/1nxmSCch)
+       * [VGGFace2](https://pan.baidu.com/s/1c3KeLzy)
+       * Any third-party contribution are always welcome, please check *src/data/face2rec2.py* on how to build a binary face dataset.
 
    #### Part 2: Train
    **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/src/`**. Before start  any training procedure, make sure you set the correct env params for MXNet to ensure the performance.
