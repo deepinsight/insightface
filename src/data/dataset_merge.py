@@ -216,9 +216,8 @@ def main(args):
     for _idx in xrange(a,b):
       s = imgrec.read_idx(_idx)
       _header, _content = mx.recordio.unpack(s)
-      _header.label = nlabel
-      _header.id = idx
-      s = mx.recordio.pack(_header, _content)
+      nheader = mx.recordio.IRHeader(0, nlabel, idx, 0)
+      s = mx.recordio.pack(nheader, _content)
       writer.write_idx(idx, s)
       idx+=1
   id_idx = idx
