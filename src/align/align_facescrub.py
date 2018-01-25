@@ -144,8 +144,22 @@ def main(args):
             if not os.path.exists(image_path):
               print('image not found (%s)'%image_path)
               continue
-            filename = os.path.splitext(os.path.split(image_path)[1])[0]
             #print(image_path)
+            filename = os.path.splitext(os.path.split(image_path)[1])[0]
+            _paths = fimage.image_path.split('/')
+            print(fimage.image_path)
+            a,b = _paths[-2], _paths[-1]
+            pb = b.rfind('.')
+            bname = b[0:pb]
+            pb = bname.rfind('_')
+            body = bname[(pb+1):]
+            img_id = int(body)
+            key = (a, img_id)
+            if not key in valid_key:
+              continue
+            #print(b, img_id)
+            assert key in bbox
+            fimage.bbox = bbox[key]
             try:
                 img = misc.imread(image_path)
             except (IOError, ValueError, IndexError) as e:
@@ -159,12 +173,13 @@ def main(args):
                 if img.ndim == 2:
                     img = to_rgb(img)
                 img = img[:,:,0:3]
-                _paths = fimage.image_path.split('/')
-                a,b,c = _paths[-3], _paths[-2], _paths[-1]
-                target_dir = os.path.join(args.output_dir, a, b)
+                tb = bname.replace(' ','_')+".png"
+                ta = a.replace(' ','_')
+                target_dir = os.path.join(args.output_dir, ta)
                 if not os.path.exists(target_dir):
                   os.makedirs(target_dir)
-                target_file = os.path.join(target_dir, c)
+
+                target_file = os.path.join(target_dir, tb)
                 warped = None
                 if fimage.landmark is not None:
                   dst = fimage.landmark.astype(np.float32)
