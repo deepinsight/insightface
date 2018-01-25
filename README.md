@@ -126,10 +126,11 @@
 
    #### Part 1: Dataset Downloading.
    **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/`**
-   1. Download the training set (`MS1M`) from [here](https://pan.baidu.com/s/1nxmSCch) and place them in **`datasets/`**. Each training dataset includes following 7 files:
+   1. Download the training set (`MS1M`) from the link below and place them in **`datasets/`**. Each training dataset includes following 7 files:
 
-       ```Shell
-       faces_ms1m_112x112/
+
+```Shell
+      faces_ms1m_112x112/
          train.idx
          train.rec
          property
@@ -137,15 +138,16 @@
          cfp_ff.bin
          cfp_fp.bin
          agedb_30.bin
-       ```
+```
        
-       The first three files are the dataset itself while the last four ones are binary verification sets.
+   
+   The first three files are the dataset itself while the last four ones are binary verification sets.
        
-       **Available training dataset**(all face images are aligned and cropped to 112x112):
+   **Available training dataset**(all face images are aligned and cropped to 112x112):
        
-       * [Refined MS1M](https://pan.baidu.com/s/1nxmSCch)
-       * [VGGFace2](https://pan.baidu.com/s/1c3KeLzy)
-       * Any third-party contribution are always welcome, please check *src/data/face2rec2.py* on how to build a binary face dataset.
+   * [Refined-MS1M@BaiduDrive](https://pan.baidu.com/s/1nxmSCch), [Refined-MS1M@GoogleDrive](https://drive.google.com/file/d/1XRdCt3xOw7B3saw0xUSzLRub_HI4Jbk3/view)
+   * [VGGFace2@BaiduDrive](https://pan.baidu.com/s/1c3KeLzy)
+   * Any third-party contribution are always welcome, please check *src/data/face2rec2.py* on how to build a binary face dataset.
 
    #### Part 2: Train
    **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/src/`**. Before start  any training procedure, make sure you set the correct env params for MXNet to ensure the performance.
