@@ -218,7 +218,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    4. Start to run megaface development kit to produce final result. 
 
 ### Pretrained-Models
-   1. [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1qZvZOxI)
+   1. [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1jKahEXw)
 
    Performance:
          
