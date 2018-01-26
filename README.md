@@ -185,7 +185,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss-type 12 --lr 0.005 --mom 0.0 --per-batch-size 150 --data-dir ../datasets/faces_ms1m_112x112 --pretrained ../model-m1-softmax,50 --prefix ../model-m1-triplet
    ```
 
-5. Train Softmax with LDPN107E.
+5. Train Softmax with LDPN107E on VGGFace2 dataset.
 
       ```Shell
       CUDA_VISIBLE_DEVICES='0,1,2,3,4,5,6,7' python -u train_softmax.py --network p107 --loss-type 0 --per-batch-size 64 --data-dir ../datasets/faces_vgg_112x112 --prefix ../model-p107-softmax
@@ -193,7 +193,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
 
 
-   #### Part 3: MegaFace Test
+#### Part 3: MegaFace Test
 
    **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/src/megaface/`**
 
