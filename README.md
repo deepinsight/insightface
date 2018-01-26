@@ -5,7 +5,7 @@
   
 ### Recent Update
 
-  2018.01.26: Today we provide a pretrained *LResNet34E-IR* model on public drive. We also offer a simple python program to help you deploy this model to build your own face recognition application. The only thing you should do is using your own face detector to crop a face image and send it to our program, no alignment needed. For single cropped face image(112x112), total inference time is only 17ms on my testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*). Please see deployment section for detail.
+  2018.01.26: Today we provide a pretrained *LResNet34E-IR* model on public drive. We also offer a simple python program to help you deploy this model to build your own face recognition application. The only requirement is using your own face detector to crop a face image before sending it to our program, no alignment needed. For single cropped face image(112x112), total inference time is only 17ms on my testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*). This model can archieve 99.65% on *LFW* and 96.7% on *MegaFace Rank1 Acc*. Please see deployment section for detail.
 
 ### License
 
@@ -218,7 +218,13 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    4. Start to run megaface development kit to produce final result. 
 
 ### Pretrained-Models
-      1. [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1qZvZOxI)
+   1. [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1qZvZOxI)
+
+   Performance:
+         
+   | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
+   | ------- | ------ | --------- | --------- | ----------- | ------------- |
+   |  Ours   | 99.65  | 99.77     | 92.12     | 97.70       | **96.70**     |
       
 ### Deployment      
 **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/deploy/`**.
