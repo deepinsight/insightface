@@ -197,19 +197,19 @@ def main(args):
     #  print(param1, exclude_removed)
     #  param1+=0.05
 
-    X = []
-    for id_item in all_id_list:
-      X.append(id_item[2])
-    X = np.array(X)
-    emap = {}
-    for id_item in _id_list:
-      y = id_item[2]
-      sim = np.dot(X, y.T)
-      idx = np.where(sim>=args.param2)[0]
-      for j in idx:
-        emap[j] = 1
-        all_id_list[j][1] = -1
-    print('exclude', len(emap))
+      X = []
+      for id_item in all_id_list:
+        X.append(id_item[2])
+      X = np.array(X)
+      emap = {}
+      for id_item in _id_list:
+        y = id_item[2]
+        sim = np.dot(X, y.T)
+        idx = np.where(sim>=args.param2)[0]
+        for j in idx:
+          emap[j] = 1
+          all_id_list[j][1] = -1
+      print('exclude', len(emap))
 
   if args.test>0:
     return
