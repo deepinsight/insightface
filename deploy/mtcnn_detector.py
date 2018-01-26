@@ -390,15 +390,54 @@ class MtcnnDetector(object):
         return total_boxes, points
 
 
-    def detect_face_limited(self, img):
+    def detect_face_limited(self, img, det_type=2):
         height, width, _ = img.shape
-        num_box = 1
+        if det_type>=2:
+          total_boxes = np.array( [ [0.0, 0.0, img.shape[1], img.shape[0], 0.9] ] ,dtype=np.float32)
+          num_box = total_boxes.shape[0]
+
+          # pad the bbox
+          [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(total_boxes, width, height)
+          # (3, 24, 24) is the input shape for RNet
+          input_buf = np.zeros((num_box, 3, 24, 24), dtype=np.float32)
+
+          for i in range(num_box):
+              tmp = np.zeros((tmph[i], tmpw[i], 3), dtype=np.uint8)
+              tmp[dy[i]:edy[i]+1, dx[i]:edx[i]+1, :] = img[y[i]:ey[i]+1, x[i]:ex[i]+1, :]
+              input_buf[i, :, :, :] = adjust_input(cv2.resize(tmp, (24, 24)))
+
+          output = self.RNet.predict(input_buf)
+
+          # filter the total_boxes with threshold
+          passed = np.where(output[1][:, 1] > self.threshold[1])
+          total_boxes = total_boxes[passed]
+
+          if total_boxes.size == 0:
+              return None
+
+          total_boxes[:, 4] = output[1][passed, 1].reshape((-1,))
+          reg = output[0][passed]
+
+          # nms
+          pick = nms(total_boxes, 0.7, 'Union')
+          total_boxes = total_boxes[pick]
+          total_boxes = self.calibrate_box(total_boxes, reg[pick])
+          total_boxes = self.convert_to_square(total_boxes)
+          total_boxes[:, 0:4] = np.round(total_boxes[:, 0:4])
+        else:
+          total_boxes = np.array( [ [0.0, 0.0, img.shape[1], img.shape[0], 0.9] ] ,dtype=np.float32)
+        num_box = total_boxes.shape[0]
+        [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(total_boxes, width, height)
+        # (3, 48, 48) is the input shape for ONet
         input_buf = np.zeros((num_box, 3, 48, 48), dtype=np.float32)
-        input_buf[0, :, :, :] = adjust_input(cv2.resize(img, (48, 48)))
-        total_boxes = np.array( [ [0.0, 0.0, img.shape[1], img.shape[0], 0.9] ] ,dtype=np.float32)
+
+        for i in range(num_box):
+            tmp = np.zeros((tmph[i], tmpw[i], 3), dtype=np.float32)
+            tmp[dy[i]:edy[i]+1, dx[i]:edx[i]+1, :] = img[y[i]:ey[i]+1, x[i]:ex[i]+1, :]
+            input_buf[i, :, :, :] = adjust_input(cv2.resize(tmp, (48, 48)))
 
         output = self.ONet.predict(input_buf)
-        print(output[2])
+        #print(output[2])
 
         # filter the total_boxes with threshold
         passed = np.where(output[2][:, 1] > self.threshold[2])
