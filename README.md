@@ -2,6 +2,10 @@
 # InsightFace :  Additive Angular Margin Loss for Deep Face Recognition
 
   Paper by Jiankang Deng, Jia Guo, and Stefanos Zafeiriou (Current method name ArcFace may be replaced to avoid conflicts with the company name. We will probably use the name InsightFace.)
+  
+### Recent Update
+
+  2018.01.26: Today we provide a pretrained *LResNet34E-IR* model on public drive. We also offer a simple python program to help you deploy this model to build your own face recognition application. The only thing you should do is using your own face detector to crop a face image and send it to our program, no alignment needed. Please see deployment section for detail.
 
 ### License
 
@@ -12,8 +16,9 @@
 0. [Citation](#citation)
 0. [Requirements](#requirements)
 0. [Installation](#installation)
-0. [Usage](#usage)
-0. [Models](#models)
+0. [How-To-Train](#how-to-train)
+0. [Pretrained-Models](#pretrained-models)
+0. [Deployment](#deployment)
 0. [Results](#results)
 0. [Contribution](#contribution)
 0. [Contact](#contact)
@@ -120,7 +125,7 @@
       
 
 
-### Usage
+### How-To-Train
 
    *After successfully completing the [installation](#installation)*, you are ready to run all the following experiments.
 
@@ -212,8 +217,16 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
       ```
    4. Start to run megaface development kit to produce final result. 
 
-### Models
-      1. We plan to make some models public soon.
+### Pretrained-Models
+      1. [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1qZvZOxI)
+      
+### Deployment      
+**Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/deploy/`**.
+
+  1. Download any pretrain-model above.(Or train models by yourself).
+  2. Put the model under **`$INSIGHTFACE_ROOT/models/`**. For example **`$INSIGHTFACE_ROOT/models/model-r34-amf/`**.
+  3. Check the testing script **`$INSIGHTFACE_ROOT/deploy/test.py`** then you'll know how to use it.
+  4. Note that we do not require the input face image to be aligned but it should be cropped. We use *ONet* of *MTCNN* to further align the image before sending it to recognition network.
 
 ### Results
    
