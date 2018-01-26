@@ -36,15 +36,6 @@ def do_flip(data):
   for idx in xrange(data.shape[0]):
     data[idx,:,:] = np.fliplr(data[idx,:,:])
 
-def ch_dev(arg_params, aux_params, ctx):
-  new_args = dict()
-  new_auxs = dict()
-  for k, v in arg_params.items():
-    new_args[k] = v.as_in_context(ctx)
-  for k, v in aux_params.items():
-    new_auxs[k] = v.as_in_context(ctx)
-  return new_args, new_auxs
-
 def get_feature(image_path, bbox, landmark, nets, image_shape, use_align, aligned, use_mean):
   img = face_preprocess.read_image(image_path, mode='rgb')
   #print(img.shape)
@@ -79,11 +70,10 @@ def get_feature(image_path, bbox, landmark, nets, image_shape, use_align, aligne
       #nimg[:,ppatch[1]:ppatch[3],ppatch[0]:ppatch[2]] = _img[:, ppatch[1]:ppatch[3], ppatch[0]:ppatch[2]]
       #_img = nimg
       input_blob = np.expand_dims(_img, axis=0)
-      net.arg_params["data"] = mx.nd.array(input_blob, net.ctx)
-      net.arg_params["softmax_label"] = mx.nd.empty((1,), net.ctx)
-      exe = net.sym.bind(net.ctx, net.arg_params ,args_grad=None, grad_req="null", aux_states=net.aux_params)
-      exe.forward(is_train=False)
-      _embedding = exe.outputs[0].asnumpy().flatten()
+      data = mx.nd.array(input_blob)
+      db = mx.io.DataBatch(data=(data,))
+      net.model.forward(db, is_train=False)
+      _embedding = net.model.get_outputs()[0].asnumpy().flatten()
       #print(_embedding.shape)
       if embedding is None:
         embedding = _embedding
@@ -114,6 +104,7 @@ def main(args):
   gpuid = args.gpu
   ctx = mx.gpu(gpuid)
   nets = []
+  image_shape = [int(x) for x in args.image_size.split(',')]
   for model in args.model.split('|'):
     vec = model.split(',')
     assert len(vec)>1
@@ -123,16 +114,18 @@ def main(args):
     net = edict()
     net.ctx = ctx
     net.sym, net.arg_params, net.aux_params = mx.model.load_checkpoint(prefix, epoch)
-    net.arg_params, net.aux_params = ch_dev(net.arg_params, net.aux_params, net.ctx)
+    #net.arg_params, net.aux_params = ch_dev(net.arg_params, net.aux_params, net.ctx)
     all_layers = net.sym.get_internals()
     net.sym = all_layers['fc1_output']
+    net.model = mx.mod.Module(symbol=net.sym, context=net.ctx, label_names = None)
+    net.model.bind(data_shapes=[('data', (1, 3, image_shape[1], image_shape[2]))])
+    net.model.set_params(net.arg_params, net.aux_params)
     #_pp = prefix.rfind('p')+1
     #_pp = prefix[_pp:]
     #net.patch = [int(x) for x in _pp.split('_')]
     #assert len(net.patch)==5
     #print('patch', net.patch)
     nets.append(net)
-  image_shape = [int(x) for x in args.image_size.split(',')]
 
   #megaface_lst = "/raid5data/dplearn/faceinsight_align_megaface.lst"
   megaface_lst = "/raid5data/dplearn/megaface/megaface_mtcnn_112x112/lst"
