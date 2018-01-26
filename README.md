@@ -5,7 +5,7 @@
   
 ### Recent Update
 
-  2018.01.26: Today we provide a pretrained *LResNet34E-IR* model on public drive. We also offer a simple python program to help you deploy this model to build your own face recognition application. The only thing you should do is using your own face detector to crop a face image and send it to our program, no alignment needed. Please see deployment section for detail.
+  2018.01.26: Today we provide a pretrained *LResNet34E-IR* model on public drive. We also offer a simple python program to help you deploy this model to build your own face recognition application. The only thing you should do is using your own face detector to crop a face image and send it to our program, no alignment needed. For single cropped face image(112x112), total inference time is only 17ms on my testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*). Please see deployment section for detail.
 
 ### License
 
@@ -226,7 +226,10 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
   1. Download any pretrain-model above.(Or train models by yourself).
   2. Put the model under **`$INSIGHTFACE_ROOT/models/`**. For example **`$INSIGHTFACE_ROOT/models/model-r34-amf/`**.
   3. Check the testing script **`$INSIGHTFACE_ROOT/deploy/test.py`** then you'll know how to use it.
-  4. Note that we do not require the input face image to be aligned but it should be cropped. We use *ONet* of *MTCNN* to further align the image before sending it to recognition network.
+  
+     Note that we do not require the input face image to be aligned but it should be cropped. We use *(RNet+)ONet* of *MTCNN* to further align the image before sending it to recognition network.
+  
+     For single cropped face image(112x112), total inference time is only 17ms on my testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*).
 
 ### Results
    
