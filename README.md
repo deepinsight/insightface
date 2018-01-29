@@ -5,6 +5,8 @@
   
 ### Recent Update
 
+  **`2018.01.29`**: Caffe *LResNet34E-IR* model is available now. We get it by converting original MXNet model to Caffe format but there's some performance drop. See [Pretrained-Models](#pretrained-models) for detail.
+
   **`2018.01.27`**: MS1M clean list now available at [here](https://pan.baidu.com/s/1eTn6O62).  Aligned facescrub images(112x112) can be downloaded [here](https://pan.baidu.com/s/1ghcpIH9).
   
   **`2018.01.26`**: Today we provide a pretrained *LResNet34E-IR* model on public drive. We also offer a simple python program to help you deploy this model to build your own face recognition application. The only requirement is using your own face detector to crop a face image before sending it to our program, no alignment needed. For single cropped face image(112x112), total inference time is only 17ms on my testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*). This model can archieve 99.65% on *LFW* and 96.7% on *MegaFace Rank1 Acc*. Please see deployment section for detail.
@@ -227,6 +229,14 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
    | ------- | ------ | --------- | --------- | ----------- | ------------- |
    |  Ours   | 99.65  | 99.77     | 92.12     | 97.70       | **96.70**     |
+   
+   2. Caffe [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1bpRsvYR), got by converting above MXNet model.
+
+   Performance:
+         
+   | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
+   | ------- | ------ | --------- | --------- | ----------- | ------------- |
+   |  Ours   | 99.46  | 99.60     | 87.75     | 96.00       | **93.29**     |
       
 ### Deployment      
 **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/deploy/`**.
