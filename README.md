@@ -230,7 +230,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    | ------- | ------ | --------- | --------- | ----------- | ------------- |
    |  Ours   | 99.65  | 99.77     | 92.12     | 97.70       | **96.70**     |
    
-   2. Caffe [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1bpRsvYR), got by converting above MXNet model.
+   2. **`Caffe`** [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1bpRsvYR), got by converting above MXNet model.
 
    Performance:
          
