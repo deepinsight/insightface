@@ -2,6 +2,14 @@
 # InsightFace :  Additive Angular Margin Loss for Deep Face Recognition
 
   Paper by Jiankang Deng, Jia Guo, and Stefanos Zafeiriou (Current method name ArcFace may be replaced to avoid conflicts with the company name. We will probably use the name InsightFace.)
+  
+### Recent Update
+
+  **`2018.01.29`**: Caffe *LResNet34E-IR* model is available now. We get it by converting original MXNet model to Caffe format but there's some performance drop. See [Pretrained-Models](#pretrained-models) for detail.
+
+  **`2018.01.27`**: MS1M clean list now available at [here](https://pan.baidu.com/s/1eTn6O62).  Aligned facescrub images(112x112) can be downloaded [here](https://pan.baidu.com/s/1ghcpIH9).
+  
+  **`2018.01.26`**: Today we provide a pretrained *LResNet34E-IR* model on public drive. We also offer a simple python program to help you deploy this model to build your own face recognition application. The only requirement is using your own face detector to crop a face image before sending it to our program, no alignment needed. For single cropped face image(112x112), total inference time is only 17ms on my testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*). This model can archieve 99.65% on *LFW* and 96.7% on *MegaFace Rank1 Acc*. Please see deployment section for detail.
 
 ### License
 
@@ -12,8 +20,9 @@
 0. [Citation](#citation)
 0. [Requirements](#requirements)
 0. [Installation](#installation)
-0. [Usage](#usage)
-0. [Models](#models)
+0. [How-To-Train](#how-to-train)
+0. [Pretrained-Models](#pretrained-models)
+0. [Deployment](#deployment)
 0. [Results](#results)
 0. [Contribution](#contribution)
 0. [Contact](#contact)
@@ -120,7 +129,7 @@
       
 
 
-### Usage
+### How-To-Train
 
    *After successfully completing the [installation](#installation)*, you are ready to run all the following experiments.
 
@@ -185,7 +194,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss-type 12 --lr 0.005 --mom 0.0 --per-batch-size 150 --data-dir ../datasets/faces_ms1m_112x112 --pretrained ../model-m1-softmax,50 --prefix ../model-m1-triplet
    ```
 
-5. Train Softmax with LDPN107E.
+5. Train Softmax with LDPN107E on VGGFace2 dataset.
 
       ```Shell
       CUDA_VISIBLE_DEVICES='0,1,2,3,4,5,6,7' python -u train_softmax.py --network p107 --loss-type 0 --per-batch-size 64 --data-dir ../datasets/faces_vgg_112x112 --prefix ../model-p107-softmax
@@ -193,7 +202,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
 
 
-   #### Part 3: MegaFace Test
+#### Part 3: MegaFace Test
 
    **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/src/megaface/`**
 
@@ -212,16 +221,47 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
       ```
    4. Start to run megaface development kit to produce final result. 
 
-### Models
-      1. We plan to make some models public soon.
+### Pretrained-Models
+   1. [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1jKahEXw)
+
+   Performance:
+         
+   | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
+   | ------- | ------ | --------- | --------- | ----------- | ------------- |
+   |  Ours   | 99.65  | 99.77     | 92.12     | 97.70       | **96.70**     |
+   
+   2. **`Caffe`** [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1bpRsvYR), got by converting above MXNet model.
+
+   Performance:
+         
+   | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
+   | ------- | ------ | --------- | --------- | ----------- | ------------- |
+   |  Ours   | 99.46  | 99.60     | 87.75     | 96.00       | **93.29**     |
+      
+### Deployment      
+**Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/deploy/`**.
+
+  1. Download any pretrain-model above.(Or train models by yourself).
+  2. Put the model under **`$INSIGHTFACE_ROOT/models/`**. For example **`$INSIGHTFACE_ROOT/models/model-r34-amf/`**.
+  3. Check the testing script **`$INSIGHTFACE_ROOT/deploy/test.py`** then you'll know how to use it.
+  
+     Note that we do not require the input face image to be aligned but it should be cropped. We use *(RNet+)ONet* of *MTCNN* to further align the image before sending it to recognition network.
+  
+     For single cropped face image(112x112), total inference time is only 17ms on my testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*).
 
 ### Results
    
-   We simply report the performance of **LResNet100E-IR** network trained on **MS1M** dataset with our method.
+   We report the performance of **LResNet100E-IR** network trained on **MS1M** dataset with our method below:
 
 | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
 | ------- | ------ | --------- | --------- | ----------- | ------------- |
 |  Ours   | 99.80+ | 99.85+    | 94.0+     | 97.90+      | **98.0+**     |
+
+   We report the performance of **LResNet50E-IR** network trained on **VGGFace2** dataset with our method below:
+
+| Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
+| ------- | ------ | --------- | --------- | ----------- | ------------- |
+|  Ours   | 99.7+  |  99.6+    |   97.1+   |   95.7+     |      -        |
 
 
 
