@@ -5,6 +5,8 @@
   
 ### Recent Update
 
+  **`2018.01.30`**: We provide a *LResNet50E-IR* model which can achieve **`99.80@LFW`**. See [Pretrained-Models](#pretrained-models) for detail.
+  
   **`2018.01.29`**: Caffe *LResNet34E-IR* model is available now. We get it by converting original MXNet model to Caffe format but there's some performance drop. See [Pretrained-Models](#pretrained-models) for detail.
 
   **`2018.01.27`**: MS1M clean list now available at [here](https://pan.baidu.com/s/1eTn6O62).  Aligned facescrub images(112x112) can be downloaded [here](https://pan.baidu.com/s/1ghcpIH9).
@@ -222,7 +224,18 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    4. Start to run megaface development kit to produce final result. 
 
 ### Pretrained-Models
-   1. [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1jKahEXw)
+
+   1. [LResNet50E-IR@BaiduDrive](https://pan.baidu.com/s/1mj6X7MK)
+
+   Performance:
+         
+   | Method  | LFW(%)     | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
+   | ------- | ------     | --------- | --------- | ----------- | ------------- |
+   |  Ours   | **99.80**  | 99.83     | 92.74     | 97.76       | -             |
+   
+   You can use `$INSIGHTFACE/src/eval/verification.py` to test all validation accuracy by pretrained models.
+
+   2. [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1jKahEXw)
 
    Performance:
          
@@ -230,7 +243,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
    | ------- | ------ | --------- | --------- | ----------- | ------------- |
    |  Ours   | 99.65  | 99.77     | 92.12     | 97.70       | **96.70**     |
    
-   2. **`Caffe`** [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1bpRsvYR), got by converting above MXNet model.
+   3. **`Caffe`** [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1bpRsvYR), got by converting above MXNet model.
 
    Performance:
          
