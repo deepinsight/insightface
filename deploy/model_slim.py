@@ -2,19 +2,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from scipy import misc
 import sys
 import os
 import argparse
-import tensorflow as tf
 import numpy as np
 import mxnet as mx
-import random
-import cv2
-import sklearn
-from sklearn.decomposition import PCA
-from time import sleep
-from easydict import EasyDict as edict
 
 parser = argparse.ArgumentParser(description='face model slim')
 # general
