@@ -57,6 +57,7 @@ class FaceImageIter(io.DataIter):
                  path_imgrec = None,
                  shuffle=False, aug_list=None, mean = None,
                  rand_mirror = False,
+                 c2c_threshold = 0.0, output_c2c = 0,
                  ctx_num = 0, images_per_identity = 0, data_extra = None, hard_mining = False, 
                  triplet_params = None, coco_mode = False,
                  mx_model = None,
@@ -110,6 +111,8 @@ class FaceImageIter(io.DataIter):
         #self.cast_aug = mx.image.CastAug()
         #self.color_aug = mx.image.ColorJitterAug(0.4, 0.4, 0.4)
         self.ctx_num = ctx_num 
+        self.c2c_threshold = c2c_threshold
+        self.output_c2c = output_c2c
         self.per_batch_size = int(self.batch_size/self.ctx_num)
         self.images_per_identity = images_per_identity
         if self.images_per_identity>0:
@@ -131,7 +134,10 @@ class FaceImageIter(io.DataIter):
         self.triplet_mode = False
         self.coco_mode = coco_mode
         if len(label_name)>0:
-          self.provide_label = [(label_name, (batch_size,))]
+          if output_c2c:
+            self.provide_label = [(label_name, (batch_size,2))]
+          else:
+            self.provide_label = [(label_name, (batch_size,))]
         else:
           self.provide_label = []
         if self.coco_mode:
@@ -575,17 +581,24 @@ class FaceImageIter(io.DataIter):
         """Helper function for reading in next sample."""
         #set total batch size, for example, 1800, and maximum size for each people, for example 45
         if self.seq is not None:
-          if self.cur >= len(self.seq):
-              raise StopIteration
-          idx = self.seq[self.cur]
-          self.cur += 1
-          if self.imgrec is not None:
-            s = self.imgrec.read_idx(idx)
-            header, img = recordio.unpack(s)
-            return header.label, img, None, None
-          else:
-            label, fname, bbox, landmark = self.imglist[idx]
-            return label, self.read_image(fname), bbox, landmark
+          while True:
+            if self.cur >= len(self.seq):
+                raise StopIteration
+            idx = self.seq[self.cur]
+            self.cur += 1
+            if self.imgrec is not None:
+              s = self.imgrec.read_idx(idx)
+              header, img = recordio.unpack(s)
+              label = header.label
+              if not isinstance(header.label, numbers.Number):
+                label = header.label[0]
+                c = header.label[1]
+                if c<self.c2c_threshold:
+                  continue
+              return header.label, img, None, None
+            else:
+              label, fname, bbox, landmark = self.imglist[idx]
+              return label, self.read_image(fname), bbox, landmark
         else:
             s = self.imgrec.read()
             if s is None:
@@ -685,7 +698,18 @@ class FaceImageIter(io.DataIter):
                     batch_data[i][:] = self.postprocess_data(datum)
                     if self.provide_label is not None:
                       if not self.coco_mode:
-                        batch_label[i][:] = label
+                        if len(batch_label.shape)==1:
+                          batch_label[i][:] = label
+                        else:
+                          for ll in xrange(batch_label.shape[1]):
+                            v = label[ll]
+                            if ll>0:
+                              v = min(0.5, max(0.25,math.log(v+1)*4-1.85))
+                              v = math.cos(v)
+                              v = v*v
+                              print('c2c', i,v)
+
+                            batch_label[i][ll] = v
                       else:
                         batch_label[i][:] = (i%self.per_batch_size)//self.images_per_identity
                     i += 1
