@@ -305,9 +305,14 @@ if __name__ == '__main__':
   time0 = datetime.datetime.now()
   for epoch in epochs:
     print('loading',prefix, epoch)
-    model = mx.mod.Module.load(prefix, epoch, context = ctx)
-    model.bind(data_shapes=[('data', (args.batch_size, 3, image_size[0], image_size[1]))], label_shapes=[('softmax_label', (args.batch_size,))])
-    #model.init_params()
+    sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch)
+    #arg_params, aux_params = ch_dev(arg_params, aux_params, ctx)
+    all_layers = sym.get_internals()
+    sym = all_layers['fc1_output']
+    model = mx.mod.Module(symbol=sym, context=ctx, label_names = None)
+    #model.bind(data_shapes=[('data', (args.batch_size, 3, image_size[0], image_size[1]))], label_shapes=[('softmax_label', (args.batch_size,))])
+    model.bind(data_shapes=[('data', (args.batch_size, 3, image_size[0], image_size[1]))])
+    model.set_params(arg_params, aux_params)
     nets.append(model)
   time_now = datetime.datetime.now()
   diff = time_now - time0
