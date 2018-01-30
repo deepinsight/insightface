@@ -6,6 +6,7 @@ import os
 import random
 import logging
 import sys
+import numbers
 import sklearn
 import datetime
 import numpy as np
@@ -140,6 +141,7 @@ class FaceImageIter(io.DataIter):
             self.provide_label = [(label_name, (batch_size,))]
         else:
           self.provide_label = []
+        print(self.provide_label[0][1])
         if self.coco_mode:
           assert self.triplet_params is None
           assert self.images_per_identity>0
