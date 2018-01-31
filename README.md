@@ -5,7 +5,7 @@
   
 ### Recent Update
 
-  **`2018.01.30`**: We provide a *LResNet50E-IR* model which can achieve **`99.80@LFW`**. See [Pretrained-Models](#pretrained-models) for detail.
+  **`2018.01.30`**: We provide a *LResNet50E-IR* model which can achieve **`99.80@LFW`** and **`97.64%`** at MegaFace 1M Acc. See [Pretrained-Models](#pretrained-models) for detail.
   
   **`2018.01.29`**: Caffe *LResNet34E-IR* model is available now. We get it by converting original MXNet model to Caffe format but there's some performance drop. See [Pretrained-Models](#pretrained-models) for detail.
 
@@ -231,7 +231,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
          
    | Method  | LFW(%)     | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
    | ------- | ------     | --------- | --------- | ----------- | ------------- |
-   |  Ours   | **99.80**  | 99.83     | 92.74     | 97.76       | -             |
+   |  Ours   | **99.80**  | 99.83     | 92.74     | 97.76       | 97.64         |
    
    You can use `$INSIGHTFACE/src/eval/verification.py` to test all validation accuracy by pretrained models.
 
