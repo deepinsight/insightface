@@ -225,7 +225,7 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
 ### Pretrained-Models
 
-   1. [LResNet50E-IR@BaiduDrive](https://pan.baidu.com/s/1mj6X7MK)
+   1. [LResNet50E-IR@BaiduDrive](https://pan.baidu.com/s/1mj6X7MK), [@GoogleDrive](https://drive.google.com/open?id=1x0-EiYX9jMUKiq-n1Bd9OCK4fVB3a54v)
 
    Performance:
          
