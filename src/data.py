@@ -7,6 +7,7 @@ import random
 import logging
 import sys
 import numbers
+import math
 import sklearn
 import datetime
 import numpy as np
@@ -72,6 +73,19 @@ class FaceImageIter(io.DataIter):
             self.imgrec = recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, 'r')  # pylint: disable=redefined-variable-type
             s = self.imgrec.read_idx(0)
             header, _ = recordio.unpack(s)
+            self.idx2cos = {}
+            self.idx2meancos = {}
+            self.c2c_auto = False
+            if output_c2c or c2c_threshold>0.0:
+              path_c2c = os.path.join(os.path.dirname(path_imgrec), 'c2c')
+              print(path_c2c)
+              if os.path.exists(path_c2c):
+                for line in open(path_c2c, 'r'):
+                  vec = line.strip().split(',')
+                  self.idx2cos[int(vec[0])] = float(vec[1])
+              else:
+                self.c2c_auto = True
+                self.c2c_step = 10000
             if header.flag>0:
               print('header0 label', header.label)
               self.header0 = (int(header.label[0]), int(header.label[1]))
@@ -82,11 +96,22 @@ class FaceImageIter(io.DataIter):
               for identity in self.seq_identity:
                 s = self.imgrec.read_idx(identity)
                 header, _ = recordio.unpack(s)
+                a,b = int(header.label[0]), int(header.label[1])
                 #print('flag', header.flag)
                 #print(header.label)
                 #assert(header.flag==2)
-                self.id2range[identity] = (int(header.label[0]), int(header.label[1]))
+                self.id2range[identity] = (a,b)
+                if len(self.idx2cos)>0:
+                  m = 0.0
+                  for ii in xrange(a,b):
+                    m+=self.idx2cos[ii]
+                  m/=(b-a)
+                  for ii in xrange(a,b):
+                    self.idx2meancos[ii] = m
+                  #self.idx2meancos[identity] = m
+
               print('id2range', len(self.id2range))
+              print(len(self.idx2cos), len(self.idx2meancos))
             else:
               self.imgidx = list(self.imgrec.keys)
             if shuffle:
@@ -159,6 +184,7 @@ class FaceImageIter(io.DataIter):
           self.triplet_oseq_reset()
           self.seq_min_size = self.batch_size*2
         self.cur = 0
+        self.nbatch = 0
         self.is_init = False
         self.times = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         #self.reset()
@@ -538,10 +564,63 @@ class FaceImageIter(io.DataIter):
       #    for i in xrange(self.images_per_identity):
       #      _idx = _list[i%len(_list)]
       #      self.seq.append(_idx)
+    def reset_c2c(self):
+      self.select_triplets()
+      for identity,v in self.id2range.iteritems():
+        _list = range(*v)
+      
+        for idx in _list:
+          s = imgrec.read_idx(idx)
+          ocontents.append(s)
+        embeddings = None
+        #print(len(ocontents))
+        ba = 0
+        while True:
+          bb = min(ba+args.batch_size, len(ocontents))
+          if ba>=bb:
+            break
+          _batch_size = bb-ba
+          _batch_size2 = max(_batch_size, args.ctx_num)
+          data = nd.zeros( (_batch_size2,3, image_size[0], image_size[1]) )
+          label = nd.zeros( (_batch_size2,) )
+          count = bb-ba
+          ii=0
+          for i in xrange(ba, bb):
+            header, img = mx.recordio.unpack(ocontents[i])
+            img = mx.image.imdecode(img)
+            img = nd.transpose(img, axes=(2, 0, 1))
+            data[ii][:] = img
+            label[ii][:] = header.label
+            ii+=1
+          while ii<_batch_size2:
+            data[ii][:] = data[0][:]
+            label[ii][:] = label[0][:]
+            ii+=1
+          db = mx.io.DataBatch(data=(data,), label=(label,))
+          self.mx_model.forward(db, is_train=False)
+          net_out = self.mx_model.get_outputs()
+          net_out = net_out[0].asnumpy()
+          model.forward(db, is_train=False)
+          net_out = model.get_outputs()
+          net_out = net_out[0].asnumpy()
+          if embeddings is None:
+            embeddings = np.zeros( (len(ocontents), net_out.shape[1]))
+          embeddings[ba:bb,:] = net_out[0:_batch_size,:]
+          ba = bb
+        embeddings = sklearn.preprocessing.normalize(embeddings)
+        embedding = np.mean(embeddings, axis=0, keepdims=True)
+        embedding = sklearn.preprocessing.normalize(embedding)
+        sims = np.dot(embeddings, embedding).flatten()
+        assert len(sims)==len(_list)
+        for i in xrange(len(_list)):
+          _idx = _list[i]
+          self.idx2cos[_idx] = sims[i]
 
     def reset(self):
         """Resets the iterator to the beginning of the data."""
         print('call reset()')
+        if self.c2c_auto:
+          self.reset_c2c()
         self.cur = 0
         if self.images_per_identity>0:
           if self.triplet_mode:
@@ -592,12 +671,14 @@ class FaceImageIter(io.DataIter):
               s = self.imgrec.read_idx(idx)
               header, img = recordio.unpack(s)
               label = header.label
-              if not isinstance(header.label, numbers.Number):
-                label = header.label[0]
-                c = header.label[1]
-                if c<self.c2c_threshold:
+              if self.c2c_threshold>0.0:
+                cos = self.idx2cos[idx]
+                if cos<self.c2c_threshold:
                   continue
-              return header.label, img, None, None
+              if self.output_c2c:
+                meancos = self.idx2meancos[idx]
+                label = [label, meancos]
+              return label, img, None, None
             else:
               label, fname, bbox, landmark = self.imglist[idx]
               return label, self.read_image(fname), bbox, landmark
@@ -655,6 +736,7 @@ class FaceImageIter(io.DataIter):
           self.is_init = True
         """Returns the next batch of data."""
         #print('in next', self.cur, self.labelcur)
+        self.nbatch+=1
         batch_size = self.batch_size
         c, h, w = self.data_shape
         batch_data = nd.empty((batch_size, c, h, w))
@@ -706,10 +788,25 @@ class FaceImageIter(io.DataIter):
                           for ll in xrange(batch_label.shape[1]):
                             v = label[ll]
                             if ll>0:
-                              v = min(0.5, max(0.25,math.log(v+1)*4-1.85))
-                              v = math.cos(v)
+                              c2c = v
+                              #m = min(0.55, max(0.3,math.log(c2c+1)*4-1.85))
+                              #v = math.cos(m)
+                              #v = v*v
+                              #_param = [0.5, 0.3, 0.85, 0.7]
+                              _param = [0.5, 0.25, 0.85, 0.65]
+                              _a = (_param[1]-_param[0])/(_param[3]-_param[2])
+                              m = _param[1]+_a*(c2c-_param[3])
+                              m = min(_param[0], max(_param[1],m))
+                              #m = 0.5
+                              #if c2c<0.77:
+                              #  m = 0.3
+                              #elif c2c<0.82:
+                              #  m = 0.4
+                              #elif c2c>0.88:
+                              #  m = 0.55
+                              v = math.cos(m)
                               v = v*v
-                              print('c2c', i,v)
+                              #print('c2c', i,c2c,m,v)
 
                             batch_label[i][ll] = v
                       else:
