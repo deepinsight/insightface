@@ -91,6 +91,15 @@ class FaceImageIter(io.DataIter):
               self.header0 = (int(header.label[0]), int(header.label[1]))
               #assert(header.flag==1)
               self.imgidx = range(1, int(header.label[0]))
+              if c2c_threshold>0.0:
+                imgidx2 = []
+                for idx in self.imgidx:
+                  c = self.idx2cos[idx]
+                  if c<c2c_threshold:
+                    continue
+                  imgidx2.append(idx)
+                print(len(self.imgidx), len(imgidx2))
+                self.imgidx = imgidx2
               self.id2range = {}
               self.seq_identity = range(int(header.label[0]), int(header.label[1]))
               for identity in self.seq_identity:
@@ -117,6 +126,7 @@ class FaceImageIter(io.DataIter):
             if shuffle:
               self.seq = self.imgidx
               self.oseq = self.imgidx
+              print(len(self.seq))
             else:
               self.seq = None
 
@@ -671,10 +681,6 @@ class FaceImageIter(io.DataIter):
               s = self.imgrec.read_idx(idx)
               header, img = recordio.unpack(s)
               label = header.label
-              if self.c2c_threshold>0.0:
-                cos = self.idx2cos[idx]
-                if cos<self.c2c_threshold:
-                  continue
               if self.output_c2c:
                 meancos = self.idx2meancos[idx]
                 label = [label, meancos]
