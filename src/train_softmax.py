@@ -78,7 +78,10 @@ class AccMetric(mx.metric.EvalMetric):
         if pred_label.shape != label.shape:
             pred_label = mx.ndarray.argmax(pred_label, axis=self.axis)
         pred_label = pred_label.asnumpy().astype('int32').flatten()
-        label = label.asnumpy().astype('int32').flatten()
+        label = label.asnumpy()
+        if label.ndim==2:
+          label = label[:,0]
+        label = label.astype('int32').flatten()
         #print(label)
         #print('label',label)
         #print('pred_label', pred_label)
@@ -227,7 +230,9 @@ def get_symbol(args, arg_params, aux_params):
     gt_label = all_label
   else:
     gt_label = mx.symbol.slice_axis(all_label, axis=1, begin=0, end=1)
+    gt_label = mx.symbol.reshape(gt_label, (args.per_batch_size,))
     c2c_label = mx.symbol.slice_axis(all_label, axis=1, begin=1, end=2)
+    c2c_label = mx.symbol.reshape(c2c_label, (args.per_batch_size,))
   assert args.loss_type>=0
   extra_loss = None
   if args.loss_type==0: #softmax
@@ -323,7 +328,7 @@ def get_symbol(args, arg_params, aux_params):
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
     zy = mx.sym.pick(fc7, gt_label, axis=1)
     cos_t = zy/s
-    if m>0.0:
+    if args.output_c2c==0:
       cos_m = math.cos(m)
       sin_m = math.sin(m)
       mm = math.sin(math.pi-m)*m
@@ -349,7 +354,6 @@ def get_symbol(args, arg_params, aux_params):
         zy_keep = zy - s*mm
       new_zy = mx.sym.where(cond, new_zy, zy_keep)
     else:
-      assert args.output_c2c
       #set c2c as cosm^2 in data.py
       cos_m = mx.sym.sqrt(c2c_label)
       sin_m = 1.0-c2c_label
@@ -626,6 +630,9 @@ def train_net(args):
       coco_mode = True
 
     label_name = 'softmax_label'
+    label_shape = (args.batch_size,)
+    if args.output_c2c:
+      label_shape = (args.batch_size,2)
     if data_extra is None:
       model = mx.mod.Module(
           context       = ctx,
@@ -665,6 +672,7 @@ def train_net(args):
           rand_mirror          = args.rand_mirror,
           mean                 = mean,
           c2c_threshold        = args.c2c_threshold,
+          output_c2c           = args.output_c2c,
           ctx_num              = args.ctx_num,
           images_per_identity  = args.images_per_identity,
           data_extra           = data_extra,
@@ -686,6 +694,7 @@ def train_net(args):
             rand_mirror          = args.rand_mirror,
             mean                 = mean,
             c2c_threshold        = args.c2c_threshold,
+            output_c2c           = args.output_c2c,
             ctx_num              = args.ctx_num,
             images_per_identity  = args.images_per_identity,
             data_extra           = data_extra,
@@ -733,7 +742,7 @@ def train_net(args):
     def ver_test(nbatch):
       results = []
       for i in xrange(len(ver_list)):
-        acc1, std1, acc2, std2, xnorm, embeddings_list = verification.test(ver_list[i], model, args.batch_size, data_extra)
+        acc1, std1, acc2, std2, xnorm, embeddings_list = verification.test(ver_list[i], model, args.batch_size, data_extra, label_shape)
         print('[%s][%d]XNorm: %f' % (ver_name_list[i], nbatch, xnorm))
         #print('[%s][%d]Accuracy: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc1, std1))
         print('[%s][%d]Accuracy-Flip: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc2, std2))
