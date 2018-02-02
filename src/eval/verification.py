@@ -185,7 +185,7 @@ def load_bin(path, image_size):
   print(data_list[0].shape)
   return (data_list, issame_list)
 
-def test(data_set, mx_model, batch_size, data_extra = None):
+def test(data_set, mx_model, batch_size, data_extra = None, label_shape = None):
   print('testing verification..')
   data_list = data_set[0]
   issame_list = data_set[1]
@@ -194,6 +194,10 @@ def test(data_set, mx_model, batch_size, data_extra = None):
   if data_extra is not None:
     _data_extra = nd.array(data_extra)
   time_consumed = 0.0
+  if label_shape is None:
+    _label = nd.ones( (batch_size,) )
+  else:
+    _label = nd.ones( label_shape )
   for i in xrange( len(data_list) ):
     data = data_list[i]
     embeddings = None
@@ -202,7 +206,6 @@ def test(data_set, mx_model, batch_size, data_extra = None):
       bb = min(ba+batch_size, data.shape[0])
       count = bb-ba
       _data = nd.slice_axis(data, axis=0, begin=bb-batch_size, end=bb)
-      _label = nd.ones( (batch_size,) )
       #print(_data.shape, _label.shape)
       time0 = datetime.datetime.now()
       if data_extra is None:
