@@ -27,6 +27,7 @@ import fxception
 import fdensenet
 import fdpn
 import fnasnet
+import spherenet
 #import lfw
 import verification
 import sklearn
@@ -213,6 +214,9 @@ def get_symbol(args, arg_params, aux_params):
   elif args.network[0]=='n':
     print('init nasnet', args.num_layers)
     embedding = fnasnet.get_symbol(args.emb_size)
+  elif args.network[0]=='s':
+    print('init spherenet', args.num_layers)
+    embedding = spherenet.get_symbol(args.emb_size, args.num_layers)
   else:
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
@@ -588,6 +592,9 @@ def train_net(args):
       print('loading', vec)
       _, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
+    if args.network[0]=='s':
+      data_shape_dict = {'data' : (args.per_batch_size,)+data_shape}
+      spherenet.init_weights(sym, data_shape_dict, args.num_layers)
 
     data_extra = None
     hard_mining = False
