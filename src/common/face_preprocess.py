@@ -7,7 +7,7 @@ def parse_lst_line(line):
   vec = line.strip().split("\t")
   assert len(vec)>=3
   aligned = False
-  if int(vec[0])==1:
+  if int(vec[0])>0:
     aligned = True
   image_path = vec[1]
   label = int(vec[2])
