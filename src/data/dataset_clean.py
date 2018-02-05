@@ -12,10 +12,11 @@ import time
 import sklearn
 from sklearn.decomposition import PCA
 from easydict import EasyDict as edict
-import face_image
 from sklearn.cluster import DBSCAN
 import numpy as np
 
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'common'))
+import face_image
 
 
 def do_clean(args):

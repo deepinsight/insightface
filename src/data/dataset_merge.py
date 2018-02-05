@@ -18,6 +18,9 @@ import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'common'))
 import face_image
 
+sys.path.append(os.path.join(os.path.dirname(__file__),'..', 'eval'))
+import verification
+
 def ch_dev(arg_params, aux_params, ctx):
   new_args = dict()
   new_auxs = dict()
@@ -177,6 +180,20 @@ def main(args):
         _id_list.append( (_ds_id, identity, embedding) )
         if test_limit>0 and pp>=test_limit:
           break
+    else:
+      _id_list = []
+      data_set = verification.load_bin(args.exclude, image_size)[0][0]
+      print(data_set.shape)
+      data = nd.zeros( (1,3,image_size[0], image_size[1]))
+      for i in xrange(data_set.shape[0]):
+        data[0] = data_set[i]
+        db = mx.io.DataBatch(data=(data,))
+        model.forward(db, is_train=False)
+        net_out = model.get_outputs()
+        embedding = net_out[0].asnumpy().flatten()
+        _norm=np.linalg.norm(embedding)
+        embedding /= _norm
+        _id_list.append( (i, i, embedding) )
 
     #X = []
     #for id_item in all_id_list:
@@ -259,7 +276,7 @@ if __name__ == '__main__':
   parser.add_argument('--model', default='../model/softmax,50', help='path to load model.')
   parser.add_argument('--batch-size', default=32, type=int, help='')
   parser.add_argument('--param1', default=0.3, type=float, help='')
-  parser.add_argument('--param2', default=0.45, type=float, help='')
+  parser.add_argument('--param2', default=0.4, type=float, help='')
   parser.add_argument('--mode', default=1, type=int, help='')
   parser.add_argument('--test', default=0, type=int, help='')
   args = parser.parse_args()
