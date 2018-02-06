@@ -15,6 +15,7 @@ import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
 import mxnet.optimizer as optimizer
+import memonger
 sys.path.append(os.path.join(os.path.dirname(__file__), 'common'))
 import face_image
 sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
@@ -171,6 +172,7 @@ def parse_args():
   parser.add_argument('--lr-steps', type=str, default='', help='')
   parser.add_argument('--max-steps', type=int, default=0, help='')
   parser.add_argument('--target', type=str, default='lfw,cfp_ff,cfp_fp,agedb_30', help='')
+  parser.add_argument('--memonger', action='store_true', default=False)
   args = parser.parse_args()
   return args
 
@@ -213,7 +215,10 @@ def get_symbol(args, arg_params, aux_params):
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
         version_se=args.version_se, version_input=args.version_input, 
-        version_output=args.version_output, version_unit=args.version_unit)
+        version_output=args.version_output, version_unit=args.version_unit,
+        input_shape=(args.per_batch_size, 3, 112, 112))
+    if args.memonger:
+      embedding = memonger.search_plan(embedding)
   gt_label = mx.symbol.Variable('softmax_label')
   assert args.loss_type>=0
   extra_loss = None
