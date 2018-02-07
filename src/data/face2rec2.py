@@ -52,21 +52,22 @@ def read_list(path_in):
                 break
             item = edict()
             item.flag = 0
-            item.image_path, item.label, item.bbox, item.landmark, item.aligned = face_preprocess.parse_lst_line(line)
+            item.image_path, label, item.bbox, item.landmark, item.aligned = face_preprocess.parse_lst_line(line)
             if not item.aligned and item.landmark is None:
               #print('ignore line', line)
               continue
             item.id = _id
+            item.label = [label, item.aligned]
             yield item
-            if item.label!=last[0]:
+            if label!=last[0]:
               if last[1]>=0:
                 identities.append( (last[1], _id) )
-              last[0] = item.label
+              last[0] = label
               last[1] = _id
             _id+=1
         identities.append( (last[1], _id) )
         item = edict()
-        item.flag = 1
+        item.flag = 2
         item.id = 0
         item.label = [float(_id), float(_id+len(identities))]
         yield item
@@ -82,6 +83,7 @@ def read_list(path_in):
 
 def image_encode(args, i, item, q_out):
     oitem = [item.id]
+    #print('flag', item.flag)
     if item.flag==0:
       fullpath = item.image_path
       header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
@@ -97,7 +99,7 @@ def image_encode(args, i, item, q_out):
         img = face_preprocess.preprocess(img, bbox = item.bbox, landmark=item.landmark, image_size='%d,%d'%(args.image_h, args.image_w))
         s = mx.recordio.pack_img(header, img, quality=args.quality, img_fmt=args.encoding)
         q_out.put((i, s, oitem))
-    else: #flag==1 or 2
+    else: 
       header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
       #print('write', item.flag, item.id, item.label)
       s = mx.recordio.pack(header, '')
@@ -133,6 +135,7 @@ def write_worker(q_out, fname, working_dir):
             s, item = buf[count]
             del buf[count]
             if s is not None:
+                #print('write idx', item[0])
                 record.write_idx(item[0], s)
 
             if count % 1000 == 0:
@@ -250,7 +253,9 @@ if __name__ == '__main__':
                         image_encode(args, i, item, q_out)
                         if q_out.empty():
                             continue
-                        _, s, _ = q_out.get()
+                        _, s, item = q_out.get()
+                        #header, _ = mx.recordio.unpack(s)
+                        #print('write header label', header.label)
                         record.write_idx(item[0], s)
                         if cnt % 1000 == 0:
                             cur_time = time.time()
@@ -259,3 +264,4 @@ if __name__ == '__main__':
                         cnt += 1
         if not count:
             print('Did not find and list file with prefix %s'%args.prefix)
+
