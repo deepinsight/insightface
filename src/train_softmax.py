@@ -143,6 +143,8 @@ def parse_args():
       help='')
   parser.add_argument('--c2c-threshold', type=float, default=0.0,
       help='')
+  parser.add_argument('--c2c-mode', type=int, default=-10,
+      help='')
   parser.add_argument('--output-c2c', type=int, default=0,
       help='')
   parser.add_argument('--margin', type=int, default=4,
@@ -673,6 +675,7 @@ def train_net(args):
           mean                 = mean,
           c2c_threshold        = args.c2c_threshold,
           output_c2c           = args.output_c2c,
+          c2c_mode             = args.c2c_mode,
           ctx_num              = args.ctx_num,
           images_per_identity  = args.images_per_identity,
           data_extra           = data_extra,
@@ -695,6 +698,7 @@ def train_net(args):
             mean                 = mean,
             c2c_threshold        = args.c2c_threshold,
             output_c2c           = args.output_c2c,
+            c2c_mode             = args.c2c_mode,
             ctx_num              = args.ctx_num,
             images_per_identity  = args.images_per_identity,
             data_extra           = data_extra,

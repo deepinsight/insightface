@@ -95,7 +95,7 @@ def main(args):
         img = mx.image.imdecode(img)
         img = nd.transpose(img, axes=(2, 0, 1))
         data[ii][:] = img
-        label[ii][:] = header.label
+        label[ii][:] = header.label[0]
         ii+=1
       while ii<_batch_size2:
         data[ii][:] = data[0][:]
@@ -120,7 +120,9 @@ def main(args):
     for i in xrange(len(ocontents)):
       _sim = sims[i]
       _idx = _list[i]
-      outf.write("%d,%f\n"%(_idx, _sim))
+      _header = headers[i]
+      #TODO
+      outf.write("%d,%f,%d\n"%(_idx, _sim, int(_header.label[1])))
   outf.close()
 
 if __name__ == '__main__':
