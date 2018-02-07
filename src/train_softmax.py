@@ -445,6 +445,21 @@ def get_symbol(args, arg_params, aux_params):
     triplet_loss = mx.symbol.mean(triplet_loss)
     #triplet_loss = mx.symbol.sum(triplet_loss)/(args.per_batch_size//3)
     extra_loss = mx.symbol.MakeLoss(triplet_loss)
+  elif args.loss_type==13: #triplet loss with insightface margin
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
+    anchor = mx.symbol.slice_axis(nembedding, axis=0, begin=0, end=args.per_batch_size//3)
+    positive = mx.symbol.slice_axis(nembedding, axis=0, begin=args.per_batch_size//3, end=2*args.per_batch_size//3)
+    negative = mx.symbol.slice_axis(nembedding, axis=0, begin=2*args.per_batch_size//3, end=args.per_batch_size)
+    ap = anchor * positive
+    an = anchor * negative
+    ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
+    an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
+    ap = mx.symbol.arccos(ap)
+    an = mx.symbol.arccos(an)
+    triplet_loss = mx.symbol.Activation(data = (ap-an+args.margin_m), act_type='relu')
+    triplet_loss = mx.symbol.mean(triplet_loss)
+    #triplet_loss = mx.symbol.sum(triplet_loss)/(args.per_batch_size//3)
+    extra_loss = mx.symbol.MakeLoss(triplet_loss)
   elif args.loss_type==9: #coco loss
     centroids = []
     for i in xrange(args.per_identities):
@@ -532,7 +547,7 @@ def train_net(args):
 
     os.environ['BETA'] = str(args.beta)
     data_dir_list = args.data_dir.split(',')
-    if args.loss_type!=12:
+    if args.loss_type!=12 and args.loss_type!=13:
       assert len(data_dir_list)==1
     data_dir = data_dir_list[0]
     args.use_val = False
@@ -571,7 +586,7 @@ def train_net(args):
           args.images_per_identity = 2
         elif args.loss_type==10 or args.loss_type==9:
           args.images_per_identity = 16
-        elif args.loss_type==12:
+        elif args.loss_type==12 or args.loss_type==13:
           args.images_per_identity = 5
           assert args.per_batch_size%3==0
       assert args.images_per_identity>=2
@@ -626,7 +641,7 @@ def train_net(args):
         for i in xrange(args.per_identities):
           data_extra[c+i][i] = 1.0
         c+=args.per_batch_size
-    elif args.loss_type==12:
+    elif args.loss_type==12 or args.loss_type==13:
       triplet_params = [args.triplet_bag_size, args.triplet_alpha, args.triplet_max_ap]
     elif args.loss_type==9:
       coco_mode = True
@@ -665,7 +680,7 @@ def train_net(args):
     else:
       val_dataiter = None
 
-    if len(data_dir_list)==1 and args.loss_type!=12:
+    if len(data_dir_list)==1 and args.loss_type!=12 and args.loss_type!=13:
       train_dataiter = FaceImageIter(
           batch_size           = args.batch_size,
           data_shape           = data_shape,
@@ -727,7 +742,7 @@ def train_net(args):
     _rescale = 1.0/args.ctx_num
     opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
     som = 20
-    if args.loss_type==12:
+    if args.loss_type==12 or args.loss_type==13:
       som = 2
     _cb = mx.callback.Speedometer(args.batch_size, som)
 
