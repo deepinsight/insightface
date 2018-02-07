@@ -101,7 +101,8 @@ def main(args):
             pnet, rnet, onet = detect_face.create_mtcnn(sess, None)
     
     minsize = 100 # minimum size of face
-    threshold = [ 0.6, 0.7, 0.7 ]  # three steps's threshold
+    #threshold = [ 0.6, 0.7, 0.7 ]  # three steps's threshold
+    threshold = [ 0.6, 0.6, 0.3 ]  # three steps's threshold
     factor = 0.709 # scale factor
 
     print(minsize)
@@ -126,8 +127,9 @@ def main(args):
             v = datamap.get(person, None)
             if v is None:
               continue
-            if not img_id in v[1]:
-              continue
+            #TODO
+            #if not img_id in v[1]:
+            #  continue
             labelid = v[0]
             img_str = base64.b64decode(vec[-1])
             nparr = np.fromstring(img_str, np.uint8)
@@ -148,7 +150,8 @@ def main(args):
             if fimage.bbox is not None:
               _bb = fimage.bbox
               _minsize = min( [_bb[2]-_bb[0], _bb[3]-_bb[1], img.shape[0]//2, img.shape[1]//2] )
-
+            else:
+              _minsize = min(img.shape[0]//5, img.shape[1]//5)
             bounding_boxes, points = detect_face.detect_face(img, _minsize, pnet, rnet, onet, threshold, factor)
             bindex = -1
             nrof_faces = bounding_boxes.shape[0]
