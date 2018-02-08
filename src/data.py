@@ -77,7 +77,7 @@ class FaceImageIter(io.DataIter):
             self.idx2flag = {}
             self.idx2meancos = {}
             self.c2c_auto = False
-            if output_c2c or c2c_threshold>0.0:
+            if output_c2c or c2c_threshold>0.0 or c2c_mode>=-5:
               path_c2c = os.path.join(os.path.dirname(path_imgrec), 'c2c')
               print(path_c2c)
               if os.path.exists(path_c2c):
@@ -745,7 +745,7 @@ class FaceImageIter(io.DataIter):
                 meancos = self.idx2meancos[idx]
                 label = [label, meancos]
               else:
-                if isinstance(label, list):
+                if not isinstance(label, numbers.Number):
                   label = label[0]
               return label, img, None, None
             else:
