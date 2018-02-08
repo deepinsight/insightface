@@ -6,9 +6,7 @@ from skimage import transform as trans
 def parse_lst_line(line):
   vec = line.strip().split("\t")
   assert len(vec)>=3
-  aligned = False
-  if int(vec[0])==1:
-    aligned = True
+  aligned = int(vec[0])
   image_path = vec[1]
   label = int(vec[2])
   bbox = None
