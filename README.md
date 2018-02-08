@@ -5,6 +5,8 @@
   
 ### Recent Update
 
+  **`2018.02.07`**: We evaluate LFW,CFP,AgeDB-30 again after removing training set overlaps, the results almost stay the same. See [Results](#results) for detail.
+
   **`2018.01.30`**: We provide a *LResNet50E-IR* model which can achieve **`99.80@LFW`** and **`97.64%`** at MegaFace 1M Acc. See [Pretrained-Models](#pretrained-models) for detail.
   
   **`2018.01.29`**: Caffe *LResNet34E-IR* model is available now. We get it by converting original MXNet model to Caffe format but there's some performance drop. See [Pretrained-Models](#pretrained-models) for detail.
@@ -276,7 +278,13 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 | ------- | ------ | --------- | --------- | ----------- | ------------- |
 |  Ours   | 99.7+  |  99.6+    |   97.1+   |   95.7+     |      -        |
 
+   We report the verification accuracy/performance after removing training set overlaps, to make our results more stable and reliable. `(C) means after cleaning`
 
+| Dataset  | Identities | Images  | Identites(C) | Images(C) | Acc   | Acc(C) |
+| -------- | ---------- | ------- | ------------ | --------- | ----- | ------ |
+| LFW      | 85742      | 3850179 | 80995        | 3586128   | 99.83 | 99.81  |
+| CFP-FP   | 85742      | 3850179 | 83706        | 3736338   | 94.04 | 94.03  |
+| AgeDB-30 | 85742      | 3850179 | 83775        | 3761329   | 98.08 | 97.87  |
 
 ### Contribution
    - Any type of PR or third-party contribution are welcome.
