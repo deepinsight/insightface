@@ -862,7 +862,8 @@ class FaceImageIter(io.DataIter):
                               #v = math.cos(m)
                               #v = v*v
                               #_param = [0.5, 0.3, 0.85, 0.7]
-                              _param = [0.5, 0.25, 0.85, 0.65]
+                              _param = [0.5, 0.4, 0.85, 0.75]
+                              #_param = [0.55, 0.4, 0.9, 0.75]
                               _a = (_param[1]-_param[0])/(_param[3]-_param[2])
                               m = _param[1]+_a*(c2c-_param[3])
                               m = min(_param[0], max(_param[1],m))
