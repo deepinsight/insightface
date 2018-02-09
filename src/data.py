@@ -133,7 +133,7 @@ class FaceImageIter(io.DataIter):
                   f = self.idx2flag[idx]
                   if f==2:
                     continue
-                  if c<0.1:
+                  if c<0.7:
                     continue
                   imgidx2.append(idx)
                 print('idx count', len(self.imgidx), len(imgidx2))
@@ -145,7 +145,7 @@ class FaceImageIter(io.DataIter):
                   f = self.idx2flag[idx]
                   if f==2:
                     continue
-                  if c<0.2:
+                  if c<0.73:
                     continue
                   imgidx2.append(idx)
                 print('idx count', len(self.imgidx), len(imgidx2))
