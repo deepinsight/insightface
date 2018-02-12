@@ -77,7 +77,7 @@ class FaceImageIter(io.DataIter):
             self.idx2flag = {}
             self.idx2meancos = {}
             self.c2c_auto = False
-            if output_c2c or c2c_threshold>0.0:
+            if output_c2c or c2c_threshold>0.0 or c2c_mode>=-5:
               path_c2c = os.path.join(os.path.dirname(path_imgrec), 'c2c')
               print(path_c2c)
               if os.path.exists(path_c2c):
@@ -133,7 +133,7 @@ class FaceImageIter(io.DataIter):
                   f = self.idx2flag[idx]
                   if f==2:
                     continue
-                  if c<0.1:
+                  if c<0.7:
                     continue
                   imgidx2.append(idx)
                 print('idx count', len(self.imgidx), len(imgidx2))
@@ -145,7 +145,7 @@ class FaceImageIter(io.DataIter):
                   f = self.idx2flag[idx]
                   if f==2:
                     continue
-                  if c<0.2:
+                  if c<0.73:
                     continue
                   imgidx2.append(idx)
                 print('idx count', len(self.imgidx), len(imgidx2))
@@ -745,7 +745,7 @@ class FaceImageIter(io.DataIter):
                 meancos = self.idx2meancos[idx]
                 label = [label, meancos]
               else:
-                if isinstance(label, list):
+                if not isinstance(label, numbers.Number):
                   label = label[0]
               return label, img, None, None
             else:
@@ -862,7 +862,8 @@ class FaceImageIter(io.DataIter):
                               #v = math.cos(m)
                               #v = v*v
                               #_param = [0.5, 0.3, 0.85, 0.7]
-                              _param = [0.5, 0.25, 0.85, 0.65]
+                              _param = [0.5, 0.4, 0.85, 0.75]
+                              #_param = [0.55, 0.4, 0.9, 0.75]
                               _a = (_param[1]-_param[0])/(_param[3]-_param[2])
                               m = _param[1]+_a*(c2c-_param[3])
                               m = min(_param[0], max(_param[1],m))
