@@ -301,6 +301,20 @@ def get_symbol(args, arg_params, aux_params):
     cos_t = zy/s
     if args.margin_verbose>0:
       margin_symbols.append(mx.symbol.mean(cos_t))
+    if m>1.0:
+      t = mx.sym.arccos(cos_t)
+      t = t*m
+      body = mx.sym.cos(t)
+      new_zy = body*s
+      if args.margin_verbose>0:
+        new_cos_t = new_zy/s
+        margin_symbols.append(mx.symbol.mean(new_cos_t))
+      diff = new_zy - zy
+      diff = mx.sym.expand_dims(diff, 1)
+      gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
+      body = mx.sym.broadcast_mul(gt_one_hot, diff)
+      fc7 = fc7+body
+
     #threshold = math.cos(args.margin_m)
     #cond_v = cos_t - threshold
     #cond = mx.symbol.Activation(data=cond_v, act_type='relu')
