@@ -5,6 +5,8 @@
   
 ### Recent Update
 
+  **`2018.02.16`**: We put the MegaFace noise list in this repo. Please refer to [https://github.com/deepinsight/insightface/blob/master/src/megaface] for detail.
+
   **`2018.02.13`**: We achieved state-of-the-art performance on [MegaFace-Challenge-1](http://megaface.cs.washington.edu/results/facescrub.html), at `98.06%`. Also note that the training set we used has NO identities overlap with facescrub, please check our paper for detail.
 
   **`2018.02.07`**: We evaluate LFW,CFP,AgeDB-30 again after removing training set overlaps, the results almost stay the same. See [Results](#results) for detail.
