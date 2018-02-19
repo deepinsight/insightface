@@ -17,6 +17,7 @@ import argparse
 import mxnet.optimizer as optimizer
 sys.path.append(os.path.join(os.path.dirname(__file__), 'common'))
 import face_image
+from noise_sgd import NoiseSGD
 sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'symbols'))
 import fresnet
@@ -53,7 +54,7 @@ class AccMetric(mx.metric.EvalMetric):
 
   def update(self, labels, preds):
     self.count+=1
-    if args.loss_type>=2 and args.loss_type<=4 and args.margin_verbose>0:
+    if args.loss_type>=2 and args.loss_type<=5 and args.margin_verbose>0:
       if self.count%args.ctx_num==0:
         mbatch = self.count//args.ctx_num
         if mbatch==1 or mbatch%args.margin_verbose==0:
@@ -123,10 +124,9 @@ def parse_args():
   parser.add_argument('--version-unit', type=int, default=3, help='')
   parser.add_argument('--end-epoch', type=int, default=100000,
       help='training epoch size.')
-  parser.add_argument('--lr', type=float, default=0.1,
-      help='')
-  parser.add_argument('--wd', type=float, default=0.0005,
-      help='')
+  parser.add_argument('--noise-sgd', type=float, default=0.0, help='')
+  parser.add_argument('--lr', type=float, default=0.1, help='')
+  parser.add_argument('--wd', type=float, default=0.0005, help='')
   parser.add_argument('--mom', type=float, default=0.9,
       help='')
   parser.add_argument('--emb-size', type=int, default=512,
@@ -176,6 +176,7 @@ def parse_args():
       help='')
   parser.add_argument('--rand-mirror', type=int, default=1,
       help='')
+  parser.add_argument('--cutoff', type=int, default=0, help='')
   parser.add_argument('--patch', type=str, default='0_0_96_112_0',
       help='')
   parser.add_argument('--lr-steps', type=str, default='', help='')
@@ -300,6 +301,20 @@ def get_symbol(args, arg_params, aux_params):
     cos_t = zy/s
     if args.margin_verbose>0:
       margin_symbols.append(mx.symbol.mean(cos_t))
+    if m>1.0:
+      t = mx.sym.arccos(cos_t)
+      t = t*m
+      body = mx.sym.cos(t)
+      new_zy = body*s
+      if args.margin_verbose>0:
+        new_cos_t = new_zy/s
+        margin_symbols.append(mx.symbol.mean(new_cos_t))
+      diff = new_zy - zy
+      diff = mx.sym.expand_dims(diff, 1)
+      gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
+      body = mx.sym.broadcast_mul(gt_one_hot, diff)
+      fc7 = fc7+body
+
     #threshold = math.cos(args.margin_m)
     #cond_v = cos_t - threshold
     #cond = mx.symbol.Activation(data=cond_v, act_type='relu')
@@ -376,6 +391,21 @@ def get_symbol(args, arg_params, aux_params):
     gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
     body = mx.sym.broadcast_mul(gt_one_hot, diff)
     fc7 = fc7+body
+  elif args.loss_type==5:
+    s = args.margin_s
+    m = args.margin_m
+    assert s>0.0
+    assert m>=0.0
+    assert m<(math.pi/2)
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
+    _weight = mx.symbol.L2Normalization(_weight, mode='instance')
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
+    cos_a = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
+    theta_a = mx.sym.arccos(cos_a)
+    gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = m, off_value = 0.0)
+    theta_a = theta_a+gt_one_hot
+    fc7 = math.pi/2 - theta_a
+    fc7 = fc7*s
   elif args.loss_type==10: #marginal loss
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
     params = [1.2, 0.3, 1.0]
@@ -700,6 +730,7 @@ def train_net(args):
           shuffle              = True,
           rand_mirror          = args.rand_mirror,
           mean                 = mean,
+          cutoff               = args.cutoff,
           c2c_threshold        = args.c2c_threshold,
           output_c2c           = args.output_c2c,
           c2c_mode             = args.c2c_mode,
@@ -723,6 +754,7 @@ def train_net(args):
             shuffle              = True,
             rand_mirror          = args.rand_mirror,
             mean                 = mean,
+            cutoff               = args.cutoff,
             c2c_threshold        = args.c2c_threshold,
             output_c2c           = args.output_c2c,
             c2c_mode             = args.c2c_mode,
@@ -752,7 +784,11 @@ def train_net(args):
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
     _rescale = 1.0/args.ctx_num
-    opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
+    if args.noise_sgd>0.0:
+      print('use noise sgd')
+      opt = NoiseSGD(scale = args.noise_sgd, learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
+    else:
+      opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
     som = 20
     if args.loss_type==12 or args.loss_type==13:
       som = 2
