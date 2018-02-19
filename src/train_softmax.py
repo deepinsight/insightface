@@ -445,7 +445,7 @@ def get_symbol(args, arg_params, aux_params):
     triplet_loss = mx.symbol.mean(triplet_loss)
     #triplet_loss = mx.symbol.sum(triplet_loss)/(args.per_batch_size//3)
     extra_loss = mx.symbol.MakeLoss(triplet_loss)
-  elif args.loss_type==13: #triplet loss with insightface margin
+  elif args.loss_type==13: #triplet loss with angular margin
     m = args.margin_m
     sin_m = math.sin(m)
     cos_m = math.cos(m)
@@ -457,16 +457,19 @@ def get_symbol(args, arg_params, aux_params):
     an = anchor * negative
     ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
     an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
-    #ap = mx.symbol.arccos(ap)
-    #an = mx.symbol.arccos(an)
-    #triplet_loss = mx.symbol.Activation(data = (ap-an+args.margin_m), act_type='relu')
-    body = ap*ap
-    body = 1.0-body
-    body = mx.symbol.sqrt(body)
-    body = body*sin_m
-    ap = ap*cos_m
-    ap = ap-body
-    triplet_loss = mx.symbol.Activation(data = (an-ap), act_type='relu')
+
+    ap = mx.symbol.arccos(ap)
+    an = mx.symbol.arccos(an)
+    triplet_loss = mx.symbol.Activation(data = (ap-an+args.margin_m), act_type='relu')
+
+    #body = ap*ap
+    #body = 1.0-body
+    #body = mx.symbol.sqrt(body)
+    #body = body*sin_m
+    #ap = ap*cos_m
+    #ap = ap-body
+    #triplet_loss = mx.symbol.Activation(data = (an-ap), act_type='relu')
+
     triplet_loss = mx.symbol.mean(triplet_loss)
     extra_loss = mx.symbol.MakeLoss(triplet_loss)
   elif args.loss_type==9: #coco loss

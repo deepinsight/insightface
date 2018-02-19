@@ -108,34 +108,34 @@ class FaceImageIter(io.DataIter):
                 self.imgidx = imgidx2
               elif c2c_mode==1:
                 imgidx2 = []
+                tmp = []
                 for idx in self.imgidx:
                   c = self.idx2cos[idx]
                   f = self.idx2flag[idx]
-                  if f==2 and c>=0.05:
-                    continue
-                  imgidx2.append(idx)
+                  if f==1:
+                    imgidx2.append(idx)
+                  else:
+                    tmp.append( (idx, c) )
+                tmp = sorted(tmp, key = lambda x:x[1])
+                tmp = tmp[250000:300000]
+                for _t in tmp:
+                  imgidx2.append(_t[0])
                 print('idx count', len(self.imgidx), len(imgidx2))
                 self.imgidx = imgidx2
               elif c2c_mode==2:
                 imgidx2 = []
+                tmp = []
                 for idx in self.imgidx:
                   c = self.idx2cos[idx]
                   f = self.idx2flag[idx]
-                  if f==2 and c>=0.1:
-                    continue
-                  imgidx2.append(idx)
-                print('idx count', len(self.imgidx), len(imgidx2))
-                self.imgidx = imgidx2
-              elif c2c_mode==-1:
-                imgidx2 = []
-                for idx in self.imgidx:
-                  c = self.idx2cos[idx]
-                  f = self.idx2flag[idx]
-                  if f==2:
-                    continue
-                  if c<0.7:
-                    continue
-                  imgidx2.append(idx)
+                  if f==1:
+                    imgidx2.append(idx)
+                  else:
+                    tmp.append( (idx, c) )
+                tmp = sorted(tmp, key = lambda x:x[1])
+                tmp = tmp[200000:300000]
+                for _t in tmp:
+                  imgidx2.append(_t[0])
                 print('idx count', len(self.imgidx), len(imgidx2))
                 self.imgidx = imgidx2
               elif c2c_mode==-2:
