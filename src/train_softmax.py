@@ -488,6 +488,34 @@ def get_symbol(args, arg_params, aux_params):
     gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
     body = mx.sym.broadcast_mul(gt_one_hot, diff)
     fc7 = fc7+body
+  elif args.loss_type==7:
+    s = args.margin_s
+    m = args.margin_m
+    assert s>0.0
+    assert m>=0.0
+    assert m<(math.pi/2)
+    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
+    _weight = mx.symbol.L2Normalization(_weight, mode='instance')
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
+    fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
+    zy = mx.sym.pick(fc7, gt_label, axis=1)
+    cos_t = zy/s
+    t = mx.sym.arccos(cos_t)
+    if args.margin_verbose>0:
+      margin_symbols.append(mx.symbol.mean(t))
+    var_m = mx.sym.random.uniform(low=0.4, high=0.5, shape=(1,))
+    t = t+var_m
+    body = mx.sym.cos(t)
+    new_zy = body*s
+    if args.margin_verbose>0:
+      #new_cos_t = new_zy/s
+      #margin_symbols.append(mx.symbol.mean(new_cos_t))
+      margin_symbols.append(mx.symbol.mean(t))
+    diff = new_zy - zy
+    diff = mx.sym.expand_dims(diff, 1)
+    gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
+    body = mx.sym.broadcast_mul(gt_one_hot, diff)
+    fc7 = fc7+body
   elif args.loss_type==10: #marginal loss
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
     params = [1.2, 0.3, 1.0]
