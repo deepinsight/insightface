@@ -162,12 +162,17 @@ class FaceImageIter(io.DataIter):
                 self.imgidx = imgidx2
               self.id2range = {}
               self.seq_identity = range(int(header.label[0]), int(header.label[1]))
+              c2c_stat = [0,0]
               for identity in self.seq_identity:
                 s = self.imgrec.read_idx(identity)
                 header, _ = recordio.unpack(s)
                 a,b = int(header.label[0]), int(header.label[1])
                 self.id2range[identity] = (a,b)
                 count = b-a
+                if count>=output_c2c:
+                  c2c_stat[1]+=1
+                else:
+                  c2c_stat[0]+=1
                 for ii in xrange(a,b):
                   self.idx2flag[ii] = count
                 if len(self.idx2cos)>0:
@@ -181,6 +186,7 @@ class FaceImageIter(io.DataIter):
 
               print('id2range', len(self.id2range))
               print(len(self.idx2cos), len(self.idx2meancos), len(self.idx2flag))
+              print('c2c_stat', c2c_stat)
             else:
               self.imgidx = list(self.imgrec.keys)
             if shuffle:
