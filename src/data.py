@@ -749,11 +749,26 @@ class FaceImageIter(io.DataIter):
               header, img = recordio.unpack(s)
               label = header.label
               if self.output_c2c:
-                #v = self.idx2meancos[idx]
-                v = 0.5
                 count = self.idx2flag[idx]
-                if count>=self.output_c2c:
-                  v = 0.4
+                if self.output_c2c==1:
+                  v = np.random.uniform(0.4, 0.5)
+                elif self.output_c2c==2:
+                  v = np.random.uniform(0.4, 0.5)
+                  if count>=self.output_c2c:
+                    v = np.random.uniform(0.3, 0.4)
+                elif self.output_c2c==3:
+                  v = (9.5 - math.log(2.0+count))/10.0
+                  v = min(max(v, 0.3), 0.5)
+                elif self.output_c2c==4:
+                  mu = 0.0
+                  sigma = 0.1
+                  mrange = [0.4,0.5]
+                  v = numpy.random.normal(mu, sigma)
+                  v = math.abs(v)*-1.0+mrange[1]
+                  v = max(v, mrange[0])
+                else:
+                  assert False
+
                 label = [label, v]
               else:
                 if not isinstance(label, numbers.Number):
