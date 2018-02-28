@@ -163,7 +163,7 @@
    **Available training dataset**(all face images are aligned and cropped to 112x112):
        
    * [Refined-MS1M@BaiduDrive](https://pan.baidu.com/s/1nxmSCch), [Refined-MS1M@GoogleDrive](https://drive.google.com/file/d/1XRdCt3xOw7B3saw0xUSzLRub_HI4Jbk3/view)
-   * [VGGFace2@BaiduDrive](https://pan.baidu.com/s/1c3KeLzy)
+   * [VGGFace2@BaiduDrive](https://pan.baidu.com/s/1c3KeLzy), [VGGFace2@GoogleDrive](https://drive.google.com/open?id=1KORwx_DWyIScAjD6vbo4CSRu048APoum)
    * Any third-party contribution are always welcome, please check *src/data/face2rec2.py* on how to build a binary face dataset.
 
    #### Part 2: Train
