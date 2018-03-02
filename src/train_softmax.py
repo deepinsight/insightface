@@ -394,6 +394,40 @@ def get_symbol(args, arg_params, aux_params):
     body = mx.sym.broadcast_mul(gt_one_hot, diff)
     fc7 = fc7+body
   elif args.loss_type==5:
+    #s = args.margin_s
+    #m = args.margin_m
+    #assert s>0.0
+    #assert m>=0.0
+    #assert m<(math.pi/2)
+    #_weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
+    #_weight = mx.symbol.L2Normalization(_weight, mode='instance')
+    #nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
+    #fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
+    #zy = mx.sym.pick(fc7, gt_label, axis=1)
+    #cos_t = zy/s
+    #if args.margin_verbose>0:
+    #  margin_symbols.append(mx.symbol.mean(cos_t))
+    #if m>0.0:
+    #  a1 = args.margin_a
+    #  r1 = ta-a1
+    #  r1 = mx.symbol.Activation(data=r1, act_type='relu')
+    #  r1 = r1+a1
+    #  t = mx.sym.arccos(cos_t)
+    #  cond = t-1.0
+    #  cond = mx.symbol.Activation(data=cond, act_type='relu')
+    #  r = mx.sym.where(cond, r2, r1)
+    #  t = t+var_m
+    #  body = mx.sym.cos(t)
+    #  new_zy = body*s
+    #  if args.margin_verbose>0:
+    #    new_cos_t = new_zy/s
+    #    margin_symbols.append(mx.symbol.mean(new_cos_t))
+    #    #margin_symbols.append(mx.symbol.mean(var_m))
+    #  diff = new_zy - zy
+    #  diff = mx.sym.expand_dims(diff, 1)
+    #  gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
+    #  body = mx.sym.broadcast_mul(gt_one_hot, diff)
+    #  fc7 = fc7+body
     s = args.margin_s
     m = args.margin_m
     assert s>0.0
@@ -401,41 +435,24 @@ def get_symbol(args, arg_params, aux_params):
     assert m<(math.pi/2)
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
-    #nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
-    #cos_a = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
-    #theta_a = mx.sym.arccos(cos_a)
-    #gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = m, off_value = 0.0)
-    #theta_a = theta_a+gt_one_hot
-    #fc7 = math.pi/2 - theta_a
-    #fc7 = fc7*s
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
     zy = mx.sym.pick(fc7, gt_label, axis=1)
     cos_t = zy/s
+    t = mx.sym.arccos(cos_t)
     if args.margin_verbose>0:
-      margin_symbols.append(mx.symbol.mean(cos_t))
-    if m>0.0:
-
-      a1 = args.margin_a
-      r1 = ta-a1
-      r1 = mx.symbol.Activation(data=r1, act_type='relu')
-      r1 = r1+a1
-      t = mx.sym.arccos(cos_t)
-      cond = t-1.0
-      cond = mx.symbol.Activation(data=cond, act_type='relu')
-      r = mx.sym.where(cond, r2, r1)
-      t = t+var_m
-      body = mx.sym.cos(t)
-      new_zy = body*s
-      if args.margin_verbose>0:
-        new_cos_t = new_zy/s
-        margin_symbols.append(mx.symbol.mean(new_cos_t))
-        #margin_symbols.append(mx.symbol.mean(var_m))
-      diff = new_zy - zy
-      diff = mx.sym.expand_dims(diff, 1)
-      gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
-      body = mx.sym.broadcast_mul(gt_one_hot, diff)
-      fc7 = fc7+body
+      margin_symbols.append(mx.symbol.mean(t))
+    t = t*args.margin_a
+    t = t+args.margin_m
+    body = mx.sym.cos(t)
+    new_zy = body*s
+    if args.margin_verbose>0:
+      margin_symbols.append(mx.symbol.mean(t))
+    diff = new_zy - zy
+    diff = mx.sym.expand_dims(diff, 1)
+    gt_one_hot = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = 1.0, off_value = 0.0)
+    body = mx.sym.broadcast_mul(gt_one_hot, diff)
+    fc7 = fc7+body
   elif args.loss_type==6:
     s = args.margin_s
     m = args.margin_m
