@@ -20,6 +20,7 @@ import detect_face
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import face_image
 import face_preprocess
+from six.moves import xrange
 
 def ch_dev(arg_params, aux_params, ctx):
   new_args = dict()

@@ -5,7 +5,7 @@ import json
 import base64
 #import requests
 import numpy as np
-import urllib
+import urllib.request
 import cv2
 from flask import Flask, render_template, request, jsonify
 
@@ -38,9 +38,9 @@ def get_image(data):
   if 'url' in data:
     url = data['url']
     if url.startswith('http'):
-      resp = urllib.urlopen(url)
-      image = np.asarray(bytearray(resp.read()), dtype="uint8")
-      image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+      with urllib.request.urlopen(url) as resp:
+        image = np.asarray(bytearray(resp.read()), dtype="uint8")
+        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
     else:
       image = cv2.imread(url, cv2.IMREAD_COLOR)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -69,8 +69,9 @@ def get_image(data):
 @app.route('/ver', methods=['POST'])
 def ver():
   try:
-    data = request.data
-    values = json.loads(data)
+    print('request.is_json', request.is_json)
+    values = request.get_json()
+    print('values', values)
     source_image = get_image(values['source'])
     if source_image is None:
       print('source image is None')
