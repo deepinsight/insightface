@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='do verification')
 # general
 parser.add_argument('--image-size', default='112,112', help='')
 parser.add_argument('--model', default='../model/softmax,50', help='path to load model.')
-parser.add_argument('--gpu', default=0, type=int, help='gpu id')
+parser.add_argument('--gpu', default=None, type=int, help='gpu id')
 parser.add_argument('--threshold', default=1.24, type=float, help='ver dist threshold')
 args = parser.parse_args()
 
