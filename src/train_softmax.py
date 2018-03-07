@@ -133,11 +133,13 @@ def parse_args():
       help='')
   parser.add_argument('--per-batch-size', type=int, default=128,
       help='')
-  parser.add_argument('--margin-m', type=float, default=0.35,
+  parser.add_argument('--margin-m', type=float, default=0.5,
       help='')
   parser.add_argument('--margin-s', type=float, default=64.0,
       help='')
   parser.add_argument('--margin-a', type=float, default=0.0,
+      help='')
+  parser.add_argument('--margin-b', type=float, default=0.0,
       help='')
   parser.add_argument('--easy-margin', type=int, default=0,
       help='')
@@ -170,7 +172,7 @@ def parse_args():
   parser.add_argument('--triplet-alpha', type=float, default=0.3, help='')
   parser.add_argument('--triplet-max-ap', type=float, default=0.0, help='')
   parser.add_argument('--verbose', type=int, default=2000, help='')
-  parser.add_argument('--loss-type', type=int, default=1,
+  parser.add_argument('--loss-type', type=int, default=4,
       help='')
   parser.add_argument('--incay', type=float, default=0.0,
       help='feature incay')
@@ -431,8 +433,8 @@ def get_symbol(args, arg_params, aux_params):
     s = args.margin_s
     m = args.margin_m
     assert s>0.0
-    assert m>=0.0
-    assert m<(math.pi/2)
+    #assert m>=0.0
+    #assert m<(math.pi/2)
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
@@ -442,9 +444,13 @@ def get_symbol(args, arg_params, aux_params):
     t = mx.sym.arccos(cos_t)
     if args.margin_verbose>0:
       margin_symbols.append(mx.symbol.mean(t))
-    t = t*args.margin_a
-    t = t+args.margin_m
+    if args.margin_a>0.0:
+      t = t*args.margin_a
+    if args.margin_m>0.0:
+      t = t+args.margin_m
     body = mx.sym.cos(t)
+    if args.margin_b>0.0:
+      body = body - args.margin_b
     new_zy = body*s
     if args.margin_verbose>0:
       margin_symbols.append(mx.symbol.mean(t))
