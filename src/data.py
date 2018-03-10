@@ -769,6 +769,14 @@ class FaceImageIter(io.DataIter):
                   v = numpy.random.normal(mu, sigma)
                   v = math.abs(v)*-1.0+mrange[1]
                   v = max(v, mrange[0])
+                elif self.output_c2c==5:
+                  v = np.random.uniform(0.41, 0.51)
+                  if count>=175:
+                    v = np.random.uniform(0.37, 0.47)
+                elif self.output_c2c==6:
+                  v = np.random.uniform(0.41, 0.51)
+                  if count>=175:
+                    v = np.random.uniform(0.38, 0.48)
                 else:
                   assert False
 
