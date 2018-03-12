@@ -188,8 +188,26 @@ class FaceImageIter(io.DataIter):
               print(len(self.idx2cos), len(self.idx2meancos), len(self.idx2flag))
               print('c2c_stat', c2c_stat)
               if limit>0 and limit<len(self.imgidx):
-                random.shuffle(self.imgidx)
-                self.imgidx = self.imgidx[0:limit]
+                random.seed(727)
+                prob = float(limit)/len(self.imgidx)
+                new_imgidx = []
+                new_ids = 0
+                for identity in self.seq_identity:
+                  s = self.imgrec.read_idx(identity)
+                  header, _ = recordio.unpack(s)
+                  a,b = int(header.label[0]), int(header.label[1])
+                  found = False
+                  for _idx in xrange(a,b):
+                    if random.random()<prob:
+                      found = True
+                      new_imgidx.append(_idx)
+                  if found:
+                    new_ids+=1
+                self.imgidx = new_imgidx
+                print('new ids', new_ids)
+                random.seed(None)
+                #random.Random(727).shuffle(self.imgidx)
+                #self.imgidx = self.imgidx[0:limit]
             else:
               self.imgidx = list(self.imgrec.keys)
             if shuffle:
