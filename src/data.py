@@ -59,7 +59,7 @@ class FaceImageIter(io.DataIter):
                  path_imgrec = None,
                  shuffle=False, aug_list=None, mean = None,
                  rand_mirror = False, cutoff = 0,
-                 c2c_threshold = 0.0, output_c2c = 0, c2c_mode = -10,
+                 c2c_threshold = 0.0, output_c2c = 0, c2c_mode = -10, limit = 0,
                  ctx_num = 0, images_per_identity = 0, data_extra = None, hard_mining = False, 
                  triplet_params = None, coco_mode = False,
                  mx_model = None,
@@ -187,6 +187,9 @@ class FaceImageIter(io.DataIter):
               print('id2range', len(self.id2range))
               print(len(self.idx2cos), len(self.idx2meancos), len(self.idx2flag))
               print('c2c_stat', c2c_stat)
+              if limit>0 and limit<len(self.imgidx):
+                random.shuffle(self.imgidx)
+                self.imgidx = self.imgidx[0:limit]
             else:
               self.imgidx = list(self.imgrec.keys)
             if shuffle:
