@@ -122,6 +122,7 @@ def parse_args():
   parser.add_argument('--version-input', type=int, default=1, help='')
   parser.add_argument('--version-output', type=str, default='E', help='')
   parser.add_argument('--version-unit', type=int, default=3, help='')
+  parser.add_argument('--version-act', type=str, default='prelu', help='')
   parser.add_argument('--end-epoch', type=int, default=100000,
       help='training epoch size.')
   parser.add_argument('--noise-sgd', type=float, default=0.0, help='')
@@ -231,7 +232,8 @@ def get_symbol(args, arg_params, aux_params):
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
         version_se=args.version_se, version_input=args.version_input, 
-        version_output=args.version_output, version_unit=args.version_unit)
+        version_output=args.version_output, version_unit=args.version_unit,
+        version_act=args.version_act)
   all_label = mx.symbol.Variable('softmax_label')
   if not args.output_c2c:
     gt_label = all_label
