@@ -175,6 +175,7 @@ def get_paths(lfw_dir, pairs, file_ext):
             path_list += (path0,path1)
             issame_list.append(issame)
         else:
+            print('not exists', path0, path1)
             nrof_skipped_pairs += 1
     if nrof_skipped_pairs>0:
         print('Skipped %d image pairs' % nrof_skipped_pairs)
@@ -188,6 +189,7 @@ def read_pairs(pairs_filename):
             pair = line.strip().split()
             pairs.append(pair)
     return np.array(pairs)
+
 
 def load_dataset(lfw_dir, image_size):
   lfw_pairs = read_pairs(os.path.join(lfw_dir, 'pairs.txt'))
