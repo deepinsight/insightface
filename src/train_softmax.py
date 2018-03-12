@@ -57,7 +57,8 @@ class AccMetric(mx.metric.EvalMetric):
     if args.loss_type>=2 and args.loss_type<=7 and args.margin_verbose>0:
       if self.count%args.ctx_num==0:
         mbatch = self.count//args.ctx_num
-        if mbatch==1 or mbatch%args.margin_verbose==0:
+        _verbose = args.margin_verbose
+        if mbatch==1 or mbatch%_verbose==0:
           a = 0.0
           b = 0.0
           if len(preds)>=4:
@@ -67,6 +68,20 @@ class AccMetric(mx.metric.EvalMetric):
             a = preds[-1].asnumpy()[0]
             b = a
           print('[%d][MARGIN]%f,%f'%(mbatch,a,b))
+    if args.logits_verbose>0:
+      if self.count%args.ctx_num==0:
+        mbatch = self.count//args.ctx_num
+        _verbose = args.logits_verbose
+        if mbatch==1 or mbatch%_verbose==0:
+          a = 0.0
+          b = 0.0
+          if len(preds)>=3:
+            v = preds[-1].asnumpy()
+            v = np.sort(v)
+            num = len(v)//10
+            a = np.mean(v[0:num])
+            b = np.mean(v[-1*num:])
+          print('[LOGITS] %d,%f,%f'%(mbatch,a,b))
     #loss = preds[2].asnumpy()[0]
     #if len(self.losses)==20:
     #  print('ce loss', sum(self.losses)/len(self.losses))
@@ -145,6 +160,8 @@ def parse_args():
   parser.add_argument('--easy-margin', type=int, default=0,
       help='')
   parser.add_argument('--margin-verbose', type=int, default=0,
+      help='')
+  parser.add_argument('--logits-verbose', type=int, default=0,
       help='')
   parser.add_argument('--c2c-threshold', type=float, default=0.0,
       help='')
@@ -673,6 +690,14 @@ def get_symbol(args, arg_params, aux_params):
   if args.loss_type<10:
     softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
     out_list.append(softmax)
+    if args.logits_verbose>0:
+      logits = mx.symbol.softmax(data = fc7)
+      logits = mx.sym.pick(logits, gt_label, axis=1)
+      margin_symbols.append(logits)
+      #logit_max = mx.sym.max(logits)
+      #logit_min = mx.sym.min(logits)
+      #margin_symbols.append(logit_max)
+      #margin_symbols.append(logit_min)
   if softmax is None:
     out_list.append(mx.sym.BlockGrad(gt_label))
   if extra_loss is not None:
