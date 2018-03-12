@@ -77,6 +77,10 @@ def main(args):
       minsize = 20
       threshold = [0.6,0.7,0.9]
       factor = 0.85
+    if args.name=='ytf':
+      minsize = 20
+      threshold = [0.6,0.7,0.4]
+      factor = 0.85
 
     print(minsize)
     print(threshold)
