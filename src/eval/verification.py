@@ -100,6 +100,7 @@ def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_fold
         for threshold_idx, threshold in enumerate(thresholds):
             _, _, acc_train[threshold_idx] = calculate_accuracy(threshold, dist[train_set], actual_issame[train_set])
         best_threshold_index = np.argmax(acc_train)
+        print('threshold', thresholds[best_threshold_index])
         for threshold_idx, threshold in enumerate(thresholds):
             tprs[fold_idx,threshold_idx], fprs[fold_idx,threshold_idx], _ = calculate_accuracy(threshold, dist[test_set], actual_issame[test_set])
         _, _, accuracy[fold_idx] = calculate_accuracy(thresholds[best_threshold_index], dist[test_set], actual_issame[test_set])
@@ -186,7 +187,6 @@ def load_bin(path, image_size):
   for flip in [0,1]:
     data = nd.empty((len(issame_list)*2, 3, image_size[0], image_size[1]))
     data_list.append(data)
-  i = 0
   for i in xrange(len(issame_list)*2):
     _bin = bins[i]
     img = mx.image.imdecode(_bin)
@@ -195,7 +195,6 @@ def load_bin(path, image_size):
       if flip==1:
         img = mx.ndarray.flip(data=img, axis=2)
       data_list[flip][i][:] = img
-    i+=1
     if i%1000==0:
       print('loading bin', i)
   print(data_list[0].shape)
@@ -457,6 +456,51 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra = None, lab
     cv2.putText(img,k,(img.shape[1]//2-70,img.shape[0]-5), font, 0.6, text_color, 2)
     cv2.imwrite(filename, img)
 
+def dumpR(data_set, mx_model, batch_size, name='', data_extra = None, label_shape = None):
+  print('dump verification embedding..')
+  data_list = data_set[0]
+  issame_list = data_set[1]
+  model = mx_model
+  embeddings_list = []
+  if data_extra is not None:
+    _data_extra = nd.array(data_extra)
+  time_consumed = 0.0
+  if label_shape is None:
+    _label = nd.ones( (batch_size,) )
+  else:
+    _label = nd.ones( label_shape )
+  for i in xrange( len(data_list) ):
+    data = data_list[i]
+    embeddings = None
+    ba = 0
+    while ba<data.shape[0]:
+      bb = min(ba+batch_size, data.shape[0])
+      count = bb-ba
+      _data = nd.slice_axis(data, axis=0, begin=bb-batch_size, end=bb)
+      #print(_data.shape, _label.shape)
+      time0 = datetime.datetime.now()
+      if data_extra is None:
+        db = mx.io.DataBatch(data=(_data,), label=(_label,))
+      else:
+        db = mx.io.DataBatch(data=(_data,_data_extra), label=(_label,))
+      model.forward(db, is_train=False)
+      net_out = model.get_outputs()
+      _embeddings = net_out[0].asnumpy()
+      time_now = datetime.datetime.now()
+      diff = time_now - time0
+      time_consumed+=diff.total_seconds()
+      if embeddings is None:
+        embeddings = np.zeros( (data.shape[0], _embeddings.shape[1]) )
+      embeddings[ba:bb,:] = _embeddings[(batch_size-count):,:]
+      ba = bb
+    embeddings_list.append(embeddings)
+  embeddings = embeddings_list[0] + embeddings_list[1]
+  embeddings = sklearn.preprocessing.normalize(embeddings)
+  actual_issame = np.asarray(issame_list)
+  outname = os.path.join('temp.bin')
+  with open(outname, 'wb') as f:
+    pickle.dump((embeddings, issame_list), f, protocol=pickle.HIGHEST_PROTOCOL)
+
 if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(description='do verification')
@@ -467,7 +511,7 @@ if __name__ == '__main__':
   parser.add_argument('--gpu', default=0, type=int, help='gpu id')
   parser.add_argument('--batch-size', default=32, type=int, help='')
   parser.add_argument('--max', default='', type=str, help='')
-  parser.add_argument('--badcase', default=0, type=int, help='')
+  parser.add_argument('--mode', default=0, type=int, help='')
   parser.add_argument('--nfolds', default=10, type=int, help='')
   args = parser.parse_args()
 
@@ -524,7 +568,7 @@ if __name__ == '__main__':
       ver_list.append(data_set)
       ver_name_list.append(name)
 
-  if args.badcase==0:
+  if args.mode==0:
     for i in xrange(len(ver_list)):
       results = []
       for model in nets:
@@ -534,8 +578,11 @@ if __name__ == '__main__':
         print('[%s]Accuracy-Flip: %1.5f+-%1.5f' % (ver_name_list[i], acc2, std2))
         results.append(acc2)
       print('Max of [%s] is %1.5f' % (ver_name_list[i], np.max(results)))
-  else:
+  elif args.mode==1:
     model = nets[0]
     test_badcase(ver_list[0], model, args.batch_size, args.target)
+  else:
+    model = nets[0]
+    dumpR(ver_list[0], model, args.batch_size, args.target)
 
 
