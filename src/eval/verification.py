@@ -200,7 +200,7 @@ def load_bin(path, image_size):
   print(data_list[0].shape)
   return (data_list, issame_list)
 
-def test(data_set, mx_model, batch_size, nfolds, data_extra = None, label_shape = None):
+def test(data_set, mx_model, batch_size, nfolds=10, data_extra = None, label_shape = None):
   print('testing verification..')
   data_list = data_set[0]
   issame_list = data_set[1]
