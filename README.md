@@ -35,6 +35,7 @@
 0. [Deployment](#deployment)
 0. [Results](#results)
 0. [Contribution](#contribution)
+0. [Third-party-implementation](#Third-party-implementation)
 0. [Contact](#contact)
 
 
@@ -294,6 +295,10 @@ export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
 ### Contribution
    - Any type of PR or third-party contribution are welcome.
+   
+### Third-party-implementation
+   
+   - `Tensorflow` [InsightFace_TF](https://github.com/auroua/InsightFace_TF)
 
 ### Contact
 
