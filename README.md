@@ -12,18 +12,18 @@ The code of InsightFace is released under the MIT License.
   **`2018.02.13`**: We achieved state-of-the-art performance on [MegaFace-Challenge-1](http://megaface.cs.washington.edu/results/facescrub.html). Please check our paper and code for implementation details.
 
 ## Contents
-  0. [Deep Face Recognition](#deep-face-recognition)
-  - 0. [Introduction](#introduction)
-  - 0. [Training Data](#training-Data)
-  - 0. [Train](#train)
-  - 0. [Pretrained Models](#pretrained-models)
-  - 0. [Test on MegaFace](#test-on-megaface)
-  - 0. [512-D Feature Embedding](#512-d-feature-embedding)
-  - 0. [Third-party Re-implementation](#Third-party Re-implementation)
-  0. [Face Alignment](#face alignment)
-  0. [Face Detection](#face detection)
-  0. [Citation](#citation)
-  0. [Contact](#contact)
+  [Deep Face Recognition](#deep-face-recognition)
+  - [Introduction](#introduction)
+  - [Training Data](#training-Data)
+  - [Train](#train)
+  - [Pretrained Models](#pretrained-models)
+  - [Test on MegaFace](#test-on-megaface)
+  - [Feature Embedding](#feature-embedding)
+  - [Third-party Re-implementation](#third-party-re-implementation)
+  [Face Alignment](#face-alignment)
+  [Face Detection](#face-detection)
+  [Citation](#citation)
+  [Contact](#contact)
 
 ## Deep-Face-Recognition
 
@@ -199,7 +199,7 @@ year={2017}
    | ------- | ------ | --------- | --------- | ----------- | ------------- |
    |  Ours   | 99.46  | 99.60     | 87.75     | 96.00       | 93.29         |
 
-### Test on MegaFace
+### Test-on-MegaFace
 
    **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/src/megaface/`**
 
@@ -221,7 +221,7 @@ year={2017}
  4. Run megaface development kit to produce final result.
 
 
-### 512-D Feature Embedding
+### Feature-Embedding
 
 **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/deploy/`**.
 
@@ -235,15 +235,15 @@ year={2017}
 
      For single cropped face image(112x112), total inference time is only 17ms on my testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*).
 
-### Third-party Re-implementation
+### Third-party-Re-implementation
 
-    - `Tensorflow` [InsightFace_TF](https://github.com/auroua/InsightFace_TF)
+    - **`Tensorflow`**[InsightFace_TF](https://github.com/auroua/InsightFace_TF)
 
-## Face Alignment
+## Face-Alignment
 
 Todo
 
-## Face Detection
+## Face-Detection
 
 Todo
 
