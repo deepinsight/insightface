@@ -1,7 +1,7 @@
 
 # InsightFace: 2D and 3D Face Analysis Project
 
-By Jia Guo and Jiankang Deng
+By Jia Guo and [Jiankang Deng](https://jiankangdeng.github.io/)
 
 ## License
 
@@ -9,7 +9,7 @@ The code of InsightFace is released under the MIT License.
 
 ## Recent Update
 
-  **`2018.02.13`**: We achieved state-of-the-art performance on [MegaFace-Challenge-1](http://megaface.cs.washington.edu/results/facescrub.html). Please check our paper and code for implementation details.
+  **`2018.02.13`**: We achieved state-of-the-art performance on [MegaFace-Challenge](http://megaface.cs.washington.edu/results/facescrub.html). Please check our paper and code for implementation details.
 
 ## Contents
   [Deep Face Recognition](#deep-face-recognition)
@@ -30,7 +30,7 @@ The code of InsightFace is released under the MIT License.
 
   [Contact](#contact)
 
-## Deep-Face-Recognition
+## Deep Face Recognition
 
 ### Introduction
 
@@ -52,7 +52,7 @@ The code of InsightFace is released under the MIT License.
 
    Our method, ArcFace, was initially described in an [arXiv technical report](https://arxiv.org/abs/1801.07698). By using this repository, you can simply achieve LFW 99.80%+ and Megaface 98%+ by a single model. This repository can help researcher/engineer to develop deep face recognition algorithms quickly by only two steps: download the binary dataset and run the training script.
 
-### Training-Data
+### Training Data
 
 All face images are aligned by MTCNN and cropped to 112x112:
 
@@ -176,7 +176,7 @@ year={2017}
    | CFP-FP   | 85742      | 3850179 | 83706        | 3736338   | 94.04 | 94.03  |
    | AgeDB-30 | 85742      | 3850179 | 83775        | 3761329   | 98.08 | 97.87  |
 
-### Pretrained-Models
+### Pretrained Models
 
    1. [LResNet50E-IR@BaiduDrive](https://pan.baidu.com/s/1mj6X7MK), [@GoogleDrive](https://drive.google.com/open?id=1x0-EiYX9jMUKiq-n1Bd9OCK4fVB3a54v)
 
@@ -204,7 +204,7 @@ year={2017}
    | ------- | ------ | --------- | --------- | ----------- | ------------- |
    |  Ours   | 99.46  | 99.60     | 87.75     | 96.00       | 93.29         |
 
-### Test-on-MegaFace
+### Test on MegaFace
 
    **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/src/megaface/`**
 
@@ -226,7 +226,7 @@ year={2017}
  4. Run megaface development kit to produce final result.
 
 
-### Feature-Embedding
+### Feature Embedding
 
 **Note:** In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/deploy/`**.
 
@@ -240,21 +240,21 @@ year={2017}
 
      For single cropped face image(112x112), total inference time is only 17ms on my testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*).
 
-### Third-party-Re-implementation
+### Third-party Re-implementation
 
-[InsightFace_TF](https://github.com/auroua/InsightFace_TF)
+- TensorFlow: [InsightFace_TF](https://github.com/auroua/InsightFace_TF)
 
-## Face-Alignment
+## Face Alignment
 
 Todo
 
-## Face-Detection
+## Face Detection
 
 Todo
 
 ## Citation
 
-   If you find **InsightFace** useful in your research, please consider to cite the following papers:
+If you find **InsightFace** useful in your research, please consider to cite the following papers:
 
 ```
 @article{deng2018arcface,
@@ -268,7 +268,6 @@ Todo
 ## Contact
 
 ```
-  [Jia Guo](guojia[at]gmail.com) and [Jiankang Deng] (jiankangdeng[at]gmail.com) (https://jiankangdeng.github.io/)
-
-  Questions can also be left as issues in the repository. We will answer them asap.
+[Jia Guo](guojia[at]gmail.com)
+[Jiankang Deng](jiankangdeng[at]gmail.com)
 ```
