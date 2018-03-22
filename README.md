@@ -13,6 +13,7 @@ The code of InsightFace is released under the MIT License.
 
 ## Contents
   [Deep Face Recognition](#deep-face-recognition)
+
   - [Introduction](#introduction)
   - [Training Data](#training-Data)
   - [Train](#train)
@@ -22,8 +23,11 @@ The code of InsightFace is released under the MIT License.
   - [Third-party Re-implementation](#third-party-re-implementation)
 
   [Face Alignment](#face-alignment)
+
   [Face Detection](#face-detection)
+
   [Citation](#citation)
+
   [Contact](#contact)
 
 ## Deep-Face-Recognition
@@ -238,7 +242,7 @@ year={2017}
 
 ### Third-party-Re-implementation
 
-    Tensorflow [InsightFace_TF](https://github.com/auroua/InsightFace_TF)
+[InsightFace_TF](https://github.com/auroua/InsightFace_TF)
 
 ## Face-Alignment
 
