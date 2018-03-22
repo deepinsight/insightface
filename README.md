@@ -18,7 +18,7 @@ The code of InsightFace is released under the MIT License.
 - [Train](#train)
 - [Pretrained Models](#pretrained-models)
 - [Test on MegaFace](#test-on-megaface)
-- [Feature Embedding](#feature-embedding)
+- [512-D Feature Embedding](#512-d-feature-embedding)
 - [Third-party Re-implementation](#third-party-re-implementation)
 
 [Face Alignment](#face-alignment)
@@ -49,11 +49,11 @@ Our method, ArcFace, was initially described in an [arXiv technical report](http
 
 ### Training Data
 
-All face images are aligned by MTCNN and cropped to 112x112:
+All face images are aligned by [MTCNN](https://kpzhang93.github.io/MTCNN_face_detection_alignment/index.html) and cropped to 112x112:
 
 * [Refined-MS1M@BaiduDrive](https://pan.baidu.com/s/1nxmSCch), [Refined-MS1M@GoogleDrive](https://drive.google.com/file/d/1XRdCt3xOw7B3saw0xUSzLRub_HI4Jbk3/view)
 * [VGGFace2@BaiduDrive](https://pan.baidu.com/s/1c3KeLzy), [VGGFace2@GoogleDrive](https://drive.google.com/open?id=1KORwx_DWyIScAjD6vbo4CSRu048APoum)
-* Please check *src/data/face2rec2.py* on how to build a binary face dataset. Any public available MTCNN can be used to align the faces, and the performance should not change. We will improve the face normalisation step by full pose alignment methods recently.
+* Please check *src/data/face2rec2.py* on how to build a binary face dataset. Any public available *MTCNN* can be used to align the faces, and the performance should not change. We will improve the face normalisation step by full pose alignment methods recently.
 
 **Note:** If you use the refined [MS1M](https://arxiv.org/abs/1607.08221) dataset and the cropped [VGG2](https://arxiv.org/abs/1710.08092) dataset, please cite the original papers.
 
@@ -100,7 +100,7 @@ We give some examples below. Our experiments were conducted on the Tesla P40 GPU
 CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss-type 4 --margin-m 0.5 --data-dir ../datasets/faces_ms1m_112x112  --prefix ../model-r100
 ```
 It will output verification results of *LFW*, *CFP-FF*, *CFP-FP* and *AgeDB-30* every 2000 batches. You can check all command line options in *train\_softmax.py*.
-This model can achieve **LFW 99.80+ and MegaFace 98.0%+**
+This model can achieve *LFW 99.80+* and *MegaFace 98.0%+*.
 
 (2). Train CosineFace with LResNet50E-IR.
 
@@ -175,6 +175,7 @@ Performance:
 ### Test on MegaFace
 
 In this part, we assume you are in the directory *`$INSIGHTFACE_ROOT/src/megaface/`*.
+
 **Note:** We found there are overlap identities between facescrub dataset and Megaface distractors, which significantly affects the identification performance. This list is released under *`$INSIGHTFACE_ROOT/src/megaface/`*.
 
 1. Align all face images of facescrub dataset and megaface distractors. Please check the alignment scripts under *`$INSIGHTFACE_ROOT/src/align/`*.
@@ -188,7 +189,7 @@ python -u remove_noises.py
 ```
 4. Run megaface development kit to produce final result.
 
-### Feature Embedding
+### 512-D Feature Embedding
 
 In this part, we assume you are in the directory *`$INSIGHTFACE_ROOT/deploy/`*. The input face image should be generally centre cropped. We use *RNet+ONet* of *MTCNN* to further align the image before sending it to the feature embedding network.
 
