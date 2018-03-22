@@ -20,6 +20,7 @@ The code of InsightFace is released under the MIT License.
   - [Test on MegaFace](#test-on-megaface)
   - [Feature Embedding](#feature-embedding)
   - [Third-party Re-implementation](#third-party-re-implementation)
+
   [Face Alignment](#face-alignment)
   [Face Detection](#face-detection)
   [Citation](#citation)
@@ -237,7 +238,7 @@ year={2017}
 
 ### Third-party-Re-implementation
 
-    - **`Tensorflow`**[InsightFace_TF](https://github.com/auroua/InsightFace_TF)
+    Tensorflow [InsightFace_TF](https://github.com/auroua/InsightFace_TF)
 
 ## Face-Alignment
 
