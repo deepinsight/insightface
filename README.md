@@ -20,9 +20,13 @@ The code of InsightFace is released under the MIT License.
 - [Test on MegaFace](#test-on-megaface)
 - [Feature Embedding](#feature-embedding)
 - [Third-party Re-implementation](#third-party-re-implementation)
+
 [Face Alignment](#face-alignment)
+
 [Face Detection](#face-detection)
+
 [Citation](#citation)
+
 [Contact](#contact)
 
 ## Deep Face Recognition
@@ -61,13 +65,13 @@ All face images are aligned by MTCNN and cropped to 112x112:
 pip install mxnet-cu80
 ```
 
-2. Clone the InsightFace repository. We call the directory insightface as **`INSIGHTFACE_ROOT`**.
+2. Clone the InsightFace repository. We call the directory insightface as *`INSIGHTFACE_ROOT`*.
 
 ```
 git clone --recursive https://github.com/deepinsight/insightface.git
 ```
 
-3. Download the training set (`MS1M`) and place it in **`$INSIGHTFACE_ROOT/datasets/`**. Each training dataset includes following 7 files:
+3. Download the training set (`MS1M`) and place it in *`$INSIGHTFACE_ROOT/datasets/`*. Each training dataset includes following 7 files:
 
 ```Shell
     faces_ms1m_112x112/
@@ -83,7 +87,7 @@ git clone --recursive https://github.com/deepinsight/insightface.git
 The first three files are the training dataset while the last four files are verification sets.
 
 4. Train deep face recognition models.
-In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/src/`**.
+In this part, we assume you are in the directory *`$INSIGHTFACE_ROOT/src/`*.
 ```
 export MXNET_CPU_WORKER_NTHREADS=24
 export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
@@ -95,7 +99,7 @@ We give some examples below. Our experiments were conducted on the Tesla P40 GPU
 ```Shell
 CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss-type 4 --margin-m 0.5 --data-dir ../datasets/faces_ms1m_112x112  --prefix ../model-r100
 ```
-It will output verification results of *LFW*, *CFP-FF*, *CFP-FP* and *AgeDB-30* every 2000 batches. You can check all command line options in **train\_softmax.py**.
+It will output verification results of *LFW*, *CFP-FF*, *CFP-FP* and *AgeDB-30* every 2000 batches. You can check all command line options in *train\_softmax.py*.
 This model can achieve **LFW 99.80+ and MegaFace 98.0%+**
 
 (2). Train CosineFace with LResNet50E-IR.
@@ -123,13 +127,13 @@ CUDA_VISIBLE_DEVICES='0,1,2,3,4,5,6,7' python -u train_softmax.py --network p107
 ```
 5. Verification results.
 
-**LResNet100E-IR** network trained on **MS1M** dataset with ArcFace loss:
+*LResNet100E-IR* network trained on *MS1M* dataset with ArcFace loss:
 
 | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) |  
 | ------- | ------ | --------- | --------- | ----------- |  
 |  Ours   | 99.80+ | 99.85+    | 94.0+     | 97.90+      |   
 
-**LResNet50E-IR** network trained on **VGGFace2** dataset with ArcFace loss:
+*LResNet50E-IR* network trained on *VGGFace2* dataset with ArcFace loss:
 
 | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) |
 | ------- | ------ | --------- | --------- | ----------- |  
@@ -161,7 +165,7 @@ Performance:
 | ------- | ------ | --------- | --------- | ----------- | ------------- |
 |  Ours   | 99.65  | 99.77     | 92.12     | 97.70       | 96.70         |
 
-**`Caffe`** [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1bpRsvYR), converted by the above MXNet model.
+*`Caffe`* [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1bpRsvYR), converted by the above MXNet model.
 Performance:
 
 | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
@@ -170,10 +174,10 @@ Performance:
 
 ### Test on MegaFace
 
-In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/src/megaface/`**
-**Note:** We found there are overlap identities between facescrub dataset and Megaface distractors, which significantly affects the identification performance. This list is released under **`$INSIGHTFACE_ROOT/src/megaface/`**.
+In this part, we assume you are in the directory *`$INSIGHTFACE_ROOT/src/megaface/`*.
+**Note:** We found there are overlap identities between facescrub dataset and Megaface distractors, which significantly affects the identification performance. This list is released under *`$INSIGHTFACE_ROOT/src/megaface/`*.
 
-1. Align all face images of facescrub dataset and megaface distractors. Please check the alignment scripts under **`$INSIGHTFACE_ROOT/src/align/`**.
+1. Align all face images of facescrub dataset and megaface distractors. Please check the alignment scripts under *`$INSIGHTFACE_ROOT/src/align/`*.
 2. Generate feature files for both facescrub and megaface images.
 ```
 python -u gen_megaface.py
@@ -186,11 +190,11 @@ python -u remove_noises.py
 
 ### Feature Embedding
 
-In this part, we assume you are in the directory **`$INSIGHTFACE_ROOT/deploy/`**. The input face image should be generally centre cropped. We use *(RNet+)ONet* of *MTCNN* to further align the image before sending it to the feature embedding network.
+In this part, we assume you are in the directory *`$INSIGHTFACE_ROOT/deploy/`*. The input face image should be generally centre cropped. We use *RNet+ONet* of *MTCNN* to further align the image before sending it to the feature embedding network.
 
 1. Prepare a pre-trained model.
-2. Put the model under **`$INSIGHTFACE_ROOT/models/`**. For example, **`$INSIGHTFACE_ROOT/models/model-r34-amf`**.
-3. Run the test script **`$INSIGHTFACE_ROOT/deploy/test.py`**.
+2. Put the model under *`$INSIGHTFACE_ROOT/models/`*. For example, *`$INSIGHTFACE_ROOT/models/model-r34-amf`*.
+3. Run the test script *`$INSIGHTFACE_ROOT/deploy/test.py`*.
 
 For single cropped face image(112x112), total inference time is only 17ms on our testing server(Intel E5-2660 @ 2.00GHz, Tesla M40, *LResNet34E-IR*).
 
@@ -208,7 +212,7 @@ Todo
 
 ## Citation
 
-If you find **InsightFace** useful in your research, please consider to cite the following related papers:
+If you find *InsightFace* useful in your research, please consider to cite the following related papers:
 
 ```
 @article{deng2018arcface,
