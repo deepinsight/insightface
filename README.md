@@ -43,7 +43,7 @@ The loss functions include Softmax, SphereFace, CosineFace, ArcFace and Triplet 
 * loss-type=4:  ArcFace (Our Method)
 * loss-type=12: TripletLoss
 
-![margin penalty for target logit](https://github.com/deepinsight/insightface/raw/master/resources/insightface.png)
+![margin penalty for target logit](https://github.com/deepinsight/insightface/raw/master/resources/arcface.png)
 
 Our method, ArcFace, was initially described in an [arXiv technical report](https://arxiv.org/abs/1801.07698). By using this repository, you can simply achieve LFW 99.80%+ and Megaface 98%+ by a single model. This repository can help researcher/engineer to develop deep face recognition algorithms quickly by only two steps: download the binary dataset and run the training script.
 
