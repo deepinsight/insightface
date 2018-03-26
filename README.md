@@ -9,7 +9,7 @@ The code of InsightFace is released under the MIT License.
 
 ## Recent Update
 
-**`2018.03.26`**: We can training with combined margin, see [Verification Results On Combined Margin](#verification-results-on-combined-margin).
+**`2018.03.26`**: We can train with combined margin(loss-type=5), see [Verification Results On Combined Margin](#verification-results-on-combined-margin).
 
 **`2018.02.13`**: We achieved state-of-the-art performance on [MegaFace-Challenge](http://megaface.cs.washington.edu/results/facescrub.html). Please check our paper and code for implementation details.
 
