@@ -178,7 +178,7 @@ Performance:
 
 ### Verification Results on Combined Margin
 
-A combined margin method was proposed as a function of target logits value and orignal `θ`:
+A combined margin method was proposed as a function of target logits value and original `θ`:
 
 ```
 COM(θ) = cos(m_1*θ+m_2) - m_3
