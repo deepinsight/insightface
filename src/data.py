@@ -1,3 +1,4 @@
+# THIS FILE IS FOR EXPERIMENTS, USE image_iter.py FOR NORMAL IMAGE LOADING.
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
