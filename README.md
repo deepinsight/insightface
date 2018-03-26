@@ -9,6 +9,8 @@ The code of InsightFace is released under the MIT License.
 
 ## Recent Update
 
+**`2018.03.26`**: We can training with combined margin, see [Verification Results On Combined Margin](#verification-results-on-combined-margin).
+
 **`2018.02.13`**: We achieved state-of-the-art performance on [MegaFace-Challenge](http://megaface.cs.washington.edu/results/facescrub.html). Please check our paper and code for implementation details.
 
 ## Contents
@@ -17,6 +19,7 @@ The code of InsightFace is released under the MIT License.
 - [Training Data](#training-Data)
 - [Train](#train)
 - [Pretrained Models](#pretrained-models)
+- [Verification Results On Combined Margin](#verification-results-on-combined-margin)
 - [Test on MegaFace](#test-on-megaface)
 - [512-D Feature Embedding](#512-d-feature-embedding)
 - [Third-party Re-implementation](#third-party-re-implementation)
@@ -40,7 +43,8 @@ The loss functions include Softmax, SphereFace, CosineFace, ArcFace and Triplet 
 * loss-type=0:  Softmax
 * loss-type=1:  SphereFace
 * loss-type=2:  CosineFace
-* loss-type=4:  ArcFace (Our Method)
+* loss-type=4:  ArcFace
+* loss-type=5:  Combined Margin
 * loss-type=12: TripletLoss
 
 ![margin penalty for target logit](https://github.com/deepinsight/insightface/raw/master/resources/arcface.png)
@@ -171,6 +175,30 @@ Performance:
 | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
 | ------- | ------ | --------- | --------- | ----------- | ------------- |
 |  Ours   | 99.46  | 99.60     | 87.75     | 96.00       | 93.29         |
+
+### Verification Results on Combined Margin
+
+A combined margin method was proposed as a function of target logits value and orignal `θ`:
+
+```
+COM(θ) = cos(m_1*θ+m_2) - m_3
+```
+
+For training with `m1=0.9, m2=0.4, m3=0.15`, run following command:
+```
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss-type 5 --margin-a 0.9 --margin-m 0.4 --margin-b 0.15 --data-dir ../datasets/faces_ms1m_112x112  --prefix ../model-r100
+```
+
+| Method           | m1   | m2   | m3   | LFW   | CFP-FP | AgeDB-30 |
+| ---------------- | ---- | ---- | ---- | ----- | ------ | -------- |
+| W&F Norm Softmax | 1    | 0    | 0    | 99.28 | 88.50  | 95.13    |
+| SphereFace       | 1.5  | 0    | 0    | 99.76 | 94.17  | 97.30    |
+| CosineFace       | 1    | 0    | 0.35 | 99.80 | 94.4   | 97.91    |
+| ArcFace          | 1    | 0.5  | 0    | 99.83 | 94.04  | 98.08    |
+| Combined Margin  | 1.2  | 0.4  | 0    | 99.80 | 94.08  | 98.05    |
+| Combined Margin  | 1.1  | 0    | 0.35 | 99.81 | 94.50  | 98.08    |
+| Combined Margin  | 1    | 0.3  | 0.2  | 99.83 | 94.51  | 98.13    |
+| Combined Margin  | 0.9  | 0.4  | 0.15 | 99.83 | 94.20  | 98.16    |
 
 ### Test on MegaFace
 
