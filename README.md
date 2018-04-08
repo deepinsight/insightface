@@ -169,12 +169,14 @@ Performance:
 | ------- | ------ | --------- | --------- | ----------- | ------------- |
 |  Ours   | 99.65  | 99.77     | 92.12     | 97.70       | 96.70         |
 
-*`Caffe`* [LResNet34E-IR@BaiduDrive](https://pan.baidu.com/s/1bpRsvYR), converted by the above MXNet model.
+
+*`Caffe`* [LResNet50E-IR@BaiduDrive](https://pan.baidu.com/s/1ENjcACInLfBGHZ8e7Fc-XA), converted by above MXNet model.
 Performance:
 
 | Method  | LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | MegaFace1M(%) |
 | ------- | ------ | --------- | --------- | ----------- | ------------- |
-|  Ours   | 99.46  | 99.60     | 87.75     | 96.00       | 93.29         |
+|  Ours   | 99.74  | -TBD-     | -TBD-     | -TBD-       | -TBD-         |
+
 
 ### Verification Results on Combined Margin
 
