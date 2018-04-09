@@ -40,19 +40,26 @@ logger.setLevel(logging.INFO)
 
 args = None
 
+AGE = 100
+
+USE_FR = False
+USE_GENDER = False
+USE_AGE = True
+
 
 class AccMetric(mx.metric.EvalMetric):
-  def __init__(self):
+  def __init__(self, pred_idx = 1, name='acc'):
     self.axis = 1
+    self.pred_idx = pred_idx
     super(AccMetric, self).__init__(
-        'acc', axis=self.axis,
+        'name', axis=self.axis,
         output_names=None, label_names=None)
     self.losses = []
     self.count = 0
 
   def update(self, labels, preds):
     self.count+=1
-    preds = [preds[1]] #use softmax output
+    preds = [preds[self.pred_idx]] #use softmax output
     for label, pred_label in zip(labels, preds):
         if pred_label.shape != label.shape:
             pred_label = mx.ndarray.argmax(pred_label, axis=self.axis)
@@ -64,6 +71,29 @@ class AccMetric(mx.metric.EvalMetric):
         assert label.shape==pred_label.shape
         self.sum_metric += (pred_label.flat == label.flat).sum()
         self.num_inst += len(pred_label.flat)
+
+class AgeMetric(mx.metric.EvalMetric):
+  def __init__(self):
+    self.axis = 1
+    super(AgeMetric, self).__init__(
+        'MAE', axis=self.axis,
+        output_names=None, label_names=None)
+    self.losses = []
+    self.count = 0
+
+  def update(self, labels, preds):
+    self.count+=1
+    label = labels[0].asnumpy()
+    label = label[:,(AGE*-1):]
+    label_age = np.count_nonzero(label, axis=1)
+    pred_age = np.zeros( label_age.shape, dtype=np.int)
+    for i in xrange(-1*AGE, -1):
+        pred = preds[i]
+        pred = np.argmax(pred, axis=1)
+        pred_age += pred
+    mae = np.mean(np.abs(label_age - pred_age))
+    self.sum_metric += mae
+    self.num_inst += 1.0
 
 class LossValueMetric(mx.metric.EvalMetric):
   def __init__(self):
@@ -117,18 +147,18 @@ def parse_args():
   return args
 
 
-def get_softmax(args, embedding, nembedding, gt_label, num_classes, name):
+def get_softmax(args, embedding, nembedding, gt_label, name):
     s = args.margin_s
     m = args.margin_m
     assert s>0.0
     if args.margin_a==0.0:
-        _weight = mx.symbol.Variable(name+"_weight", shape=(num_classes, args.emb_size), lr_mult=1.0)
+        _weight = mx.symbol.Variable(name+"_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
         _bias = mx.symbol.Variable(name+'_bias', lr_mult=2.0, wd_mult=0.0)
-        fc = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=num_classes, name=name)
+        fc = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name=name)
     else:
-        _weight = mx.symbol.Variable(name+"_weight", shape=(num_classes, args.emb_size), lr_mult=1.0)
+        _weight = mx.symbol.Variable(name+"_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
         _weight = mx.symbol.L2Normalization(_weight, mode='instance')
-        fc = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=num_classes, name=name)
+        fc = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name=name)
         if args.margin_a!=1.0 or args.margin_m!=0.0 or args.margin_b!=0.0:
           if args.margin_a==1.0 and args.margin_m==0.0:
             s_m = s*args.margin_b
@@ -152,9 +182,9 @@ def get_softmax(args, embedding, nembedding, gt_label, num_classes, name):
             body = mx.sym.broadcast_mul(gt_one_hot, diff)
             fc = fc+body
     if args.ignore_label==0:
-        softmax = mx.symbol.SoftmaxOutput(data=fc, label = gt_label, name=name+'_softmax', normalization='valid')
+        softmax = mx.symbol.SoftmaxOutput(data=fc, label = gt_label, name=name+'_softmax', normalization='valid', grad_scale = args.grad_scale)
     else:
-        softmax = mx.symbol.SoftmaxOutput(data=fc, label = gt_label, name=name+'_softmax', normalization='valid', use_ignore=True, ignore_label=args.ignore_label)
+        softmax = mx.symbol.SoftmaxOutput(data=fc, label = gt_label, name=name+'_softmax', normalization='valid', use_ignore=True, ignore_label=args.ignore_label, grad_scale = args.grad_scale)
     return softmax
 
 def get_symbol(args, arg_params, aux_params):
@@ -209,23 +239,33 @@ def get_symbol(args, arg_params, aux_params):
   nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
   out_list = [mx.symbol.BlockGrad(embedding)]
 
-  fr_label = mx.symbol.slice_axis(all_label, axis=1, begin=0, end=1)
-  fr_label = mx.symbol.reshape(fr_label, (args.per_batch_size,))
-  fr_softmax = get_softmax(args, embedding, nembedding, fr_label, args.num_classes, 'fc7')
-  out_list.append(fr_softmax)
-
   _args = copy.deepcopy(args)
-  _args.margin_a = 0.0
-  gender_label = mx.symbol.slice_axis(all_label, axis=1, begin=1, end=2)
-  gender_label = mx.symbol.reshape(gender_label, (args.per_batch_size,))
-  gender_softmax = get_softmax(args, embedding, nembedding, gender_label, 2, 'fc8')
-  out_list.append(gender_softmax)
 
-  for i in xrange(100):
-      age_label = mx.symbol.slice_axis(all_label, axis=1, begin=2+i, end=3+i)
-      age_label = mx.symbol.reshape(age_label, (args.per_batch_size,))
-      age_softmax = get_softmax(args, embedding, nembedding, age_label, 2, 'fc9_%d'%(i))
-      out_list.append(age_softmax)
+  if USE_FR:
+      _args.grad_scale = 1.0
+      fr_label = mx.symbol.slice_axis(all_label, axis=1, begin=0, end=1)
+      fr_label = mx.symbol.reshape(fr_label, (args.per_batch_size,))
+      fr_softmax = get_softmax(_args, embedding, nembedding, fr_label, args.num_classes, 'fc7')
+      out_list.append(fr_softmax)
+
+  if USE_GENDER:
+      _args.grad_scale = 0.2
+      _args.margin_a = 0.0
+      _args.num_classes = 2
+      gender_label = mx.symbol.slice_axis(all_label, axis=1, begin=1, end=2)
+      gender_label = mx.symbol.reshape(gender_label, (args.per_batch_size,))
+      gender_softmax = get_softmax(_args, embedding, nembedding, gender_label, 2, 'fc8')
+      out_list.append(gender_softmax)
+
+  if USE_AGE:
+      _args.grad_scale = 0.01
+      _args.margin_a = 0.0
+      _args.num_classes = 2
+      for i in xrange(AGE):
+          age_label = mx.symbol.slice_axis(all_label, axis=1, begin=2+i, end=3+i)
+          age_label = mx.symbol.reshape(age_label, (args.per_batch_size,))
+          age_softmax = get_softmax(_args, embedding, nembedding, age_label, 2, 'fc9_%d'%(i))
+          out_list.append(age_softmax)
 
   out = mx.symbol.Group(out_list)
   return (out, arg_params, aux_params)
@@ -301,7 +341,6 @@ def train_net(args):
         context       = ctx,
         symbol        = sym,
     )
-    val_dataiter = None
 
     train_dataiter = FaceImageIter(
         batch_size           = args.batch_size,
@@ -312,12 +351,35 @@ def train_net(args):
         mean                 = mean,
         cutoff               = args.cutoff,
     )
+    val_rec = os.path.join(data_dir, "val.rec")
+    val_iter = None
+    if os.path.exists(val_rec):
+        val_iter = FaceImageIter(
+            batch_size           = args.batch_size,
+            data_shape           = data_shape,
+            path_imgrec          = val_rec,
+            shuffle              = False,
+            rand_mirror          = False,
+            mean                 = mean,
+        )
 
     if args.loss_type<10:
       _metric = AccMetric()
     else:
       _metric = LossValueMetric()
-    eval_metrics = [mx.metric.create(_metric)]
+    eval_metrics = []
+    if USE_FR:
+      _metric = AccMetric(pred_idx=1)
+      eval_metrics.append(_metric)
+      if USE_GENDER:
+          _metric = AccMetric(pred_idx=2, name='gender')
+          eval_metrics.append(_metric)
+    elif USE_GENDER:
+      _metric = AccMetric(pred_idx=1, name='gender')
+      eval_metrics.append(_metric)
+    if USE_AGE:
+      _metric = AgeMetric()
+      eval_metrics.append(_metric)
 
     if args.network[0]=='r':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
@@ -352,6 +414,16 @@ def train_net(args):
         results.append(acc2)
       return results
 
+    def val_test():
+      _metric = AgeMetric()
+      val_metric = mx.metric.create(_metric)
+      val_metric.reset()
+      val_iter.reset()
+      for i, eval_batch in enumerate(val_iter):
+        model.forward(eval_batch, is_train=False)
+        model.update_metric(val_metric, eval_batch.label)
+      _value = val_metric.get_name_value()[0][1]
+      print('VAL: %f'%(_value))
 
 
     highest_acc = [0.0, 0.0]  #lfw and target
@@ -403,6 +475,8 @@ def train_net(args):
         elif args.ckpt>1:
           do_save = True
         if do_save:
+          if val_iter is not None:
+            val_test()
           print('saving', msave)
           arg, aux = model.get_params()
           mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
