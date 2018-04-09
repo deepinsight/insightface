@@ -6,6 +6,7 @@ import os
 import sys
 import math
 import random
+import copy
 import logging
 import pickle
 import numpy as np
@@ -72,10 +73,10 @@ class AccMetric(mx.metric.EvalMetric):
         self.sum_metric += (pred_label.flat == label.flat).sum()
         self.num_inst += len(pred_label.flat)
 
-class AgeMetric(mx.metric.EvalMetric):
+class MAEMetric(mx.metric.EvalMetric):
   def __init__(self):
     self.axis = 1
-    super(AgeMetric, self).__init__(
+    super(MAEMetric, self).__init__(
         'MAE', axis=self.axis,
         output_names=None, label_names=None)
     self.losses = []
@@ -88,12 +89,38 @@ class AgeMetric(mx.metric.EvalMetric):
     label_age = np.count_nonzero(label, axis=1)
     pred_age = np.zeros( label_age.shape, dtype=np.int)
     for i in xrange(-1*AGE, -1):
-        pred = preds[i]
+        pred = preds[i].asnumpy()
         pred = np.argmax(pred, axis=1)
         pred_age += pred
     mae = np.mean(np.abs(label_age - pred_age))
     self.sum_metric += mae
     self.num_inst += 1.0
+
+class CUMMetric(mx.metric.EvalMetric):
+  def __init__(self, n=5):
+    self.axis = 1
+    self.n = n
+    super(CUMMetric, self).__init__(
+        'CUM_%d'%n, axis=self.axis,
+        output_names=None, label_names=None)
+    self.losses = []
+    self.count = 0
+
+  def update(self, labels, preds):
+    self.count+=1
+    label = labels[0].asnumpy()
+    label = label[:,(AGE*-1):]
+    label_age = np.count_nonzero(label, axis=1)
+    pred_age = np.zeros( label_age.shape, dtype=np.int)
+    for i in xrange(-1*AGE, -1):
+        pred = preds[i].asnumpy()
+        pred = np.argmax(pred, axis=1)
+        pred_age += pred
+    diff = np.abs(label_age - pred_age)
+    cum = np.sum( (diff<self.n) )
+
+    self.sum_metric += cum
+    self.num_inst += len(label_age)
 
 class LossValueMetric(mx.metric.EvalMetric):
   def __init__(self):
@@ -245,7 +272,7 @@ def get_symbol(args, arg_params, aux_params):
       _args.grad_scale = 1.0
       fr_label = mx.symbol.slice_axis(all_label, axis=1, begin=0, end=1)
       fr_label = mx.symbol.reshape(fr_label, (args.per_batch_size,))
-      fr_softmax = get_softmax(_args, embedding, nembedding, fr_label, args.num_classes, 'fc7')
+      fr_softmax = get_softmax(_args, embedding, nembedding, fr_label, 'fc7')
       out_list.append(fr_softmax)
 
   if USE_GENDER:
@@ -254,7 +281,7 @@ def get_symbol(args, arg_params, aux_params):
       _args.num_classes = 2
       gender_label = mx.symbol.slice_axis(all_label, axis=1, begin=1, end=2)
       gender_label = mx.symbol.reshape(gender_label, (args.per_batch_size,))
-      gender_softmax = get_softmax(_args, embedding, nembedding, gender_label, 2, 'fc8')
+      gender_softmax = get_softmax(_args, embedding, nembedding, gender_label, 'fc8')
       out_list.append(gender_softmax)
 
   if USE_AGE:
@@ -264,7 +291,7 @@ def get_symbol(args, arg_params, aux_params):
       for i in xrange(AGE):
           age_label = mx.symbol.slice_axis(all_label, axis=1, begin=2+i, end=3+i)
           age_label = mx.symbol.reshape(age_label, (args.per_batch_size,))
-          age_softmax = get_softmax(_args, embedding, nembedding, age_label, 2, 'fc9_%d'%(i))
+          age_softmax = get_softmax(_args, embedding, nembedding, age_label, 'fc9_%d'%(i))
           out_list.append(age_softmax)
 
   out = mx.symbol.Group(out_list)
@@ -309,10 +336,6 @@ def train_net(args):
     assert(args.num_classes>0)
     print('num_classes', args.num_classes)
     path_imgrec = os.path.join(data_dir, "train.rec")
-
-    if args.loss_type==1 and args.num_classes>20000:
-      args.beta_freeze = 5000
-      args.gamma = 0.06
 
     print('Called with argument:', args)
     data_shape = (args.image_channel,image_size[0],image_size[1])
@@ -378,7 +401,9 @@ def train_net(args):
       _metric = AccMetric(pred_idx=1, name='gender')
       eval_metrics.append(_metric)
     if USE_AGE:
-      _metric = AgeMetric()
+      _metric = MAEMetric()
+      eval_metrics.append(_metric)
+      _metric = CUMMetric()
       eval_metrics.append(_metric)
 
     if args.network[0]=='r':
@@ -415,15 +440,21 @@ def train_net(args):
       return results
 
     def val_test():
-      _metric = AgeMetric()
+      _metric = MAEMetric()
       val_metric = mx.metric.create(_metric)
       val_metric.reset()
+      _metric2 = CUMMetric()
+      val_metric2 = mx.metric.create(_metric2)
+      val_metric2.reset()
       val_iter.reset()
       for i, eval_batch in enumerate(val_iter):
         model.forward(eval_batch, is_train=False)
         model.update_metric(val_metric, eval_batch.label)
+        model.update_metric(val_metric2, eval_batch.label)
       _value = val_metric.get_name_value()[0][1]
-      print('VAL: %f'%(_value))
+      print('MAE: %f'%(_value))
+      _value = val_metric2.get_name_value()[0][1]
+      print('CUM: %f'%(_value))
 
 
     highest_acc = [0.0, 0.0]  #lfw and target
@@ -446,7 +477,7 @@ def train_net(args):
       global_step[0]+=1
       mbatch = global_step[0]
       for _lr in lr_steps:
-        if mbatch==args.beta_freeze+_lr:
+        if mbatch==_lr:
           opt.lr *= 0.1
           print('lr change to', opt.lr)
           break
@@ -456,6 +487,8 @@ def train_net(args):
         print('lr-batch-epoch:',opt.lr,param.nbatch,param.epoch)
 
       if mbatch>=0 and mbatch%args.verbose==0:
+        if val_iter is not None:
+            val_test()
         acc_list = ver_test(mbatch)
         save_step[0]+=1
         msave = save_step[0]
@@ -475,8 +508,6 @@ def train_net(args):
         elif args.ckpt>1:
           do_save = True
         if do_save:
-          if val_iter is not None:
-            val_test()
           print('saving', msave)
           arg, aux = model.get_params()
           mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
@@ -489,7 +520,7 @@ def train_net(args):
     model.fit(train_dataiter,
         begin_epoch        = begin_epoch,
         num_epoch          = end_epoch,
-        eval_data          = val_dataiter,
+        eval_data          = None,
         eval_metric        = eval_metrics,
         kvstore            = 'device',
         optimizer          = opt,
