@@ -36,7 +36,7 @@ def main(args):
             path = os.path.join(ds, '%s.rec'%n)
             if not os.path.exists(path):
                 continue
-            imgrec = mx.recordio.MXIndexedRecordIO(path[-3:]+'idx', path, 'r')  # pylint: disable=redefined-variable-type
+            imgrec = mx.recordio.MXIndexedRecordIO(path[:-3]+'idx', path, 'r')  # pylint: disable=redefined-variable-type
             if ds=='ms1m':
                 s = imgrec.read_idx(0)
                 header, _ = mx.recordio.unpack(s)
@@ -56,16 +56,18 @@ def main(args):
                 elif ds=='megaage':
                     nlabel = [-1, -1]
                     age_label = [0]*100
-                    age = int(_label.label[0])
+                    age = int(_header.label[0])
                     age = max(0, min(100, age))
+                    print('age', age)
+
                     for a in xrange(0, age):
                         age_label[a] = 1
                     nlabel += age_label
                 elif ds=='imdb':
-                    gender = int(_label.label[1])
+                    gender = int(_header.label[1])
                     nlabel = [-1, gender]
                     age_label = [0]*100
-                    age = int(_label.label[0])
+                    age = int(_header.label[0])
                     age = max(0, min(100, age))
                     for a in xrange(0, age):
                         age_label[a] = 1
