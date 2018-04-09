@@ -21,6 +21,7 @@ def main(args):
     val_writer = mx.recordio.MXIndexedRecordIO(os.path.join(args.output, 'val.idx'), os.path.join(args.output, 'val.rec'), 'w')
     train_widx = [0]
     val_widx = [0]
+    stat = [0,0]
     for ds in ['ms1m', 'megaage', 'imdb']:
         for n in ['train', 'val']:
             repeat = 1
@@ -50,6 +51,14 @@ def main(args):
             for idx in imgidx:
                 s = imgrec.read_idx(idx)
                 _header, _content = mx.recordio.unpack(s)
+                stat[0]+=1
+                try:
+                    img = mx.image.imdecode(_content)
+                except:
+                    stat[1]+=1
+                    print('error', ds, n, idx)
+                    continue
+                #print(img.shape)
                 if ds=='ms1m':
                     nlabel = [_header.label]
                     nlabel += [-1]*101
@@ -57,8 +66,10 @@ def main(args):
                     nlabel = [-1, -1]
                     age_label = [0]*100
                     age = int(_header.label[0])
+                    if age>100 or age<0:
+                        continue
                     age = max(0, min(100, age))
-                    print('age', age)
+                    #print('age', age)
 
                     for a in xrange(0, age):
                         age_label[a] = 1
@@ -77,6 +88,7 @@ def main(args):
                     s = mx.recordio.pack(nheader, _content)
                     writer.write_idx(widx[0], s)
                     widx[0]+=1
+    print('stat', stat)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='do dataset merge')
