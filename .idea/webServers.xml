@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="cd0b1fc8-6c1d-4a46-96d6-3603633d2327" name="InsightFace" url="http://172.17.195.41">
+        <fileTransfer host="172.17.195.41" port="12050" rootFolder="/data/victor/insightface" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="12050" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
