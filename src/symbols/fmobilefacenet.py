@@ -1,19 +1,3 @@
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
 
 import mxnet as mx
 import symbol_utils
@@ -74,9 +58,6 @@ def get_symbol(num_classes):
     _weight = mx.symbol.Variable("fc1_weight", shape=(num_classes, 512), lr_mult=1.0, wd_mult=10.0)
 
     conv_6_f = mx.sym.FullyConnected(data=conv_6_dw, weight=_weight, num_hidden=num_classes, name='pre_fc1')
-    #conv_6_f = ConvOnly(conv_6_dw, num_filter=128, num_group=1, kernel=(1,1), pad=(0, 0), stride=(1, 1), name="conv_6f")  
-    conv_6_f = mx.sym.BatchNorm(data=conv_6_f, fix_gamma=True, eps=2e-5, momentum=0.9997, name='fc1')
-    #fc1 = mx.sym.Flatten(conv_6_f)
-    fc1 = conv_6_f
+    fc1 = mx.sym.BatchNorm(data=conv_6_f, fix_gamma=True, eps=2e-5, momentum=0.9997, name='fc1')
     return fc1
 
