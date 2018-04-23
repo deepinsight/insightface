@@ -23,6 +23,7 @@ import fresnet
 import finception_resnet_v2
 import fmobilenet 
 import fmobilenetv2
+import fmobilefacenet
 import fxception
 import fdensenet
 import fdpn
@@ -101,6 +102,7 @@ def parse_args():
   parser.add_argument('--lr', type=float, default=0.1, help='start learning rate')
   parser.add_argument('--lr-steps', type=str, default='', help='steps of lr changing')
   parser.add_argument('--wd', type=float, default=0.0005, help='weight decay')
+  parser.add_argument('--fc7-wd-mult', type=float, default=1.0, help='weight decay mult for fc7')
   parser.add_argument('--mom', type=float, default=0.9, help='momentum')
   parser.add_argument('--emb-size', type=int, default=512, help='embedding length')
   parser.add_argument('--per-batch-size', type=int, default=128, help='batch size in each context')
@@ -160,6 +162,9 @@ def get_symbol(args, arg_params, aux_params):
   elif args.network[0]=='s':
     print('init spherenet', args.num_layers)
     embedding = spherenet.get_symbol(args.emb_size, args.num_layers)
+  elif args.network[0]=='y':
+    print('init mobilefacenet', args.num_layers)
+    embedding = fmobilefacenet.get_symbol(args.emb_size)
   else:
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
@@ -169,12 +174,11 @@ def get_symbol(args, arg_params, aux_params):
   all_label = mx.symbol.Variable('softmax_label')
   gt_label = all_label
   extra_loss = None
+  _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0, wd_mult=args.fc7_wd_mult)
   if args.loss_type==0: #softmax
-    _weight = mx.symbol.Variable('fc7_weight')
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
     fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
   elif args.loss_type==1: #sphere
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     fc7 = mx.sym.LSoftmax(data=embedding, label=gt_label, num_hidden=args.num_classes,
                           weight = _weight,
@@ -185,7 +189,6 @@ def get_symbol(args, arg_params, aux_params):
     m = args.margin_m
     assert(s>0.0)
     assert(m>0.0)
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
@@ -198,7 +201,6 @@ def get_symbol(args, arg_params, aux_params):
     assert s>0.0
     assert m>=0.0
     assert m<(math.pi/2)
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
@@ -236,7 +238,6 @@ def get_symbol(args, arg_params, aux_params):
     s = args.margin_s
     m = args.margin_m
     assert s>0.0
-    _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')

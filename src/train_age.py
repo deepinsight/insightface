@@ -24,6 +24,7 @@ import fresnet
 import finception_resnet_v2
 import fmobilenet 
 import fmobilenetv2
+import fmobilefacenet
 import fxception
 import fdensenet
 import fdpn
@@ -251,6 +252,9 @@ def get_symbol(args, arg_params, aux_params):
   elif args.network[0]=='s':
     print('init spherenet', args.num_layers)
     embedding = spherenet.get_symbol(args.emb_size, args.num_layers)
+  elif args.network[0]=='y':
+    print('init mobilefacenet', args.num_layers)
+    embedding = fmobilefacenet.get_symbol(args.emb_size)
   else:
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
@@ -386,10 +390,6 @@ def train_net(args):
             mean                 = mean,
         )
 
-    if args.loss_type<10:
-      _metric = AccMetric()
-    else:
-      _metric = LossValueMetric()
     eval_metrics = []
     if USE_FR:
       _metric = AccMetric(pred_idx=1)
@@ -413,7 +413,8 @@ def train_net(args):
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
     _rescale = 1.0/args.ctx_num
-    opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
+    #opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
+    opt = optimizer.Nadam(learning_rate=base_lr, wd=base_wd, rescale_grad=_rescale)
     som = 20
     _cb = mx.callback.Speedometer(args.batch_size, som)
 
