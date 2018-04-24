@@ -12,6 +12,7 @@ def parse_lst_line(line):
   bbox = None
   landmark = None
   #print(vec)
+
   if len(vec)>3:
     bbox = np.zeros( (4,), dtype=np.int32)
     for i in xrange(3,7):

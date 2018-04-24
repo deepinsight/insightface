@@ -119,6 +119,7 @@ def parse_args():
   parser.add_argument('--rand-mirror', type=int, default=1, help='if do random mirror in training')
   parser.add_argument('--cutoff', type=int, default=0, help='cut off aug')
   parser.add_argument('--target', type=str, default='lfw,cfp_fp,agedb_30', help='verification targets')
+  parser.add_argument('--finetune', type=bool, default=False, help='if finetuning from trained model')
   args = parser.parse_args()
   return args
 
@@ -199,6 +200,9 @@ def get_symbol(args, arg_params, aux_params):
     assert m>=0.0
     assert m<(math.pi/2)
     _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0)
+    if args.finetune:
+        print("{}finetuning from trained model".format('-'*10))
+        _weight = mx.symbol.Variable("finetune_weight", shape=(args.num_classes, args.emb_size), lr_mult=10.0)
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
     fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.num_classes, name='fc7')
@@ -330,6 +334,27 @@ def train_net(args):
       print('loading', vec)
       _, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
+      # if args.finetune:
+      #     def get_fine_tune_model(symbol, arg_params, num_classes, layer_name='flatten0'):
+      #         """
+      #         symbol: the pretrained network symbol
+      #         arg_params: the argument parameters of the pretrained model
+      #         num_classes: the number of classes for the fine-tune datasets
+      #         layer_name: the layer name before the last fully-connected layer
+      #         """
+      #         all_layers = symbol.get_internals()
+      #         # print(all_layers);exit(0)
+      #         for k in arg_params:
+      #             if k.startswith('fc'):
+      #               print(k)
+      #         exit(0)
+      #         net = all_layers[layer_name + '_output']
+      #         net = mx.symbol.FullyConnected(data=net, num_hidden=num_classes, name='fc1')
+      #         net = mx.symbol.SoftmaxOutput(data=net, name='softmax')
+      #         new_args = dict({k: arg_params[k] for k in arg_params if 'fc1' not in k})
+      #         return (net, new_args)
+      #     sym, arg_params = get_fine_tune_model(sym, arg_params, args.num_classes)
+
     if args.network[0]=='s':
       data_shape_dict = {'data' : (args.per_batch_size,)+data_shape}
       spherenet.init_weights(sym, data_shape_dict, args.num_layers)

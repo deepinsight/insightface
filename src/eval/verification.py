@@ -229,6 +229,7 @@ def test(data_set, mx_model, batch_size, nfolds=10, data_extra = None, label_sha
         db = mx.io.DataBatch(data=(_data,_data_extra), label=(_label,))
       model.forward(db, is_train=False)
       net_out = model.get_outputs()
+      # print(net_out);exit(0)
       #_arg, _aux = model.get_params()
       #__arg = {}
       #for k,v in _arg.iteritems():
@@ -242,6 +243,7 @@ def test(data_set, mx_model, batch_size, nfolds=10, data_extra = None, label_sha
       #exe.forward(is_train=False)
       #net_out = exe.outputs
       _embeddings = net_out[0].asnumpy()
+      # print(_embeddings.shape); exit(0)
       time_now = datetime.datetime.now()
       diff = time_now - time0
       time_consumed+=diff.total_seconds()
