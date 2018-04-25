@@ -9,7 +9,7 @@ The code of InsightFace is released under the MIT License.
 
 ## Recent Update
 
-**`2018.04.23`**: Our implementation of [MobileFaceNets](https://arxiv.org/abs/1804.07573) is now available. Please check [Training](#train) section for more detail on how to use this lightweight but powerful network backbone.
+**`2018.04.23`**: Our implementation of [MobileFaceNet](https://arxiv.org/abs/1804.07573) is now available. Please set `--network y1` to use this lightweight but powerful backbone.
 
 **`2018.03.26`**: We can train with combined margin(loss-type=5), see [Verification Results On Combined Margin](#verification-results-on-combined-margin).
 
@@ -132,11 +132,6 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss-ty
 CUDA_VISIBLE_DEVICES='0,1,2,3,4,5,6,7' python -u train_softmax.py --network p107 --loss-type 0 --per-batch-size 64 --data-dir ../datasets/faces_vgg_112x112 --prefix ../model-p107-softmax
 ```
 
-(6). Train MobileFaceNet network with ArcFace on MS1M dataset.
-
-```Shell
-CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network y1 --loss-type 4 --margin-s 128 --margin-m 0.5 --per-batch-size 128 --emb-size 128 --data-dir ../datasets/faces_ms1m_112x112 --wd 0.00004 --fc7-wd-mult 10.0 --prefix ../model-mobilefacenet-128
-```
 5. Verification results.
 
 *LResNet100E-IR* network trained on *MS1M* dataset with ArcFace loss:
