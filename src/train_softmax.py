@@ -103,6 +103,7 @@ def parse_args():
   parser.add_argument('--lr-steps', type=str, default='', help='steps of lr changing')
   parser.add_argument('--wd', type=float, default=0.0005, help='weight decay')
   parser.add_argument('--fc7-wd-mult', type=float, default=1.0, help='weight decay mult for fc7')
+  parser.add_argument('--bn-mom', type=float, default=0.9, help='bn mom')
   parser.add_argument('--mom', type=float, default=0.9, help='momentum')
   parser.add_argument('--emb-size', type=int, default=512, help='embedding length')
   parser.add_argument('--per-batch-size', type=int, default=128, help='batch size in each context')
@@ -164,7 +165,7 @@ def get_symbol(args, arg_params, aux_params):
     embedding = spherenet.get_symbol(args.emb_size, args.num_layers)
   elif args.network[0]=='y':
     print('init mobilefacenet', args.num_layers)
-    embedding = fmobilefacenet.get_symbol(args.emb_size)
+    embedding = fmobilefacenet.get_symbol(args.emb_size, bn_mom = args.bn_mom, wd_mult = args.fc7_wd_mult)
   else:
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
@@ -359,7 +360,7 @@ def train_net(args):
       _metric = LossValueMetric()
     eval_metrics = [mx.metric.create(_metric)]
 
-    if args.network[0]=='r':
+    if args.network[0]=='r' or args.network[0]=='y':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
     elif args.network[0]=='i' or args.network[0]=='x':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2) #inception

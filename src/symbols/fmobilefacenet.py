@@ -2,6 +2,9 @@
 import mxnet as mx
 import symbol_utils
 
+bn_mom = 0.9
+#bn_mom = 0.9997
+
 def Act(data, act_type, name):
     #ignore param act_type, set it in this function 
     body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
@@ -10,13 +13,13 @@ def Act(data, act_type, name):
 
 def Conv(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
     conv = mx.sym.Convolution(data=data, num_filter=num_filter, kernel=kernel, num_group=num_group, stride=stride, pad=pad, no_bias=True, name='%s%s_conv2d' %(name, suffix))
-    bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=False,momentum=0.9997)
+    bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=False,momentum=bn_mom)
     act = Act(data=bn, act_type='relu', name='%s%s_relu' %(name, suffix))
     return act
     
 def Linear(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
     conv = mx.sym.Convolution(data=data, num_filter=num_filter, kernel=kernel, num_group=num_group, stride=stride, pad=pad, no_bias=True, name='%s%s_conv2d' %(name, suffix))
-    bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=False,momentum=0.9997)    
+    bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=False,momentum=bn_mom)    
     return bn
 
 def ConvOnly(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
@@ -39,7 +42,10 @@ def Residual(data, num_block=1, num_out=1, kernel=(3, 3), stride=(1, 1), pad=(1,
     return identity
         
 
-def get_symbol(num_classes):
+def get_symbol(num_classes, **kwargs):
+    global bn_mom
+    bn_mom = kwargs.get('bn_mom', 0.9)
+    wd_mult = kwargs.get('wd_mult', 1.)
     data = mx.symbol.Variable(name="data")
     data = data-127.5
     data = data*0.0078125
@@ -55,9 +61,9 @@ def get_symbol(num_classes):
     conv_6_sep = Conv(conv_5, num_filter=512, kernel=(1, 1), pad=(0, 0), stride=(1, 1), name="conv_6sep")
     conv_6_dw = Linear(conv_6_sep, num_filter=512, num_group=512, kernel=(7,7), pad=(0, 0), stride=(1, 1), name="conv_6dw7_7")  
     #conv_6_dw = mx.symbol.Dropout(data=conv_6_dw, p=0.4)
-    _weight = mx.symbol.Variable("fc1_weight", shape=(num_classes, 512), lr_mult=1.0, wd_mult=10.0)
+    _weight = mx.symbol.Variable("fc1_weight", shape=(num_classes, 512), lr_mult=1.0, wd_mult=wd_mult)
 
     conv_6_f = mx.sym.FullyConnected(data=conv_6_dw, weight=_weight, num_hidden=num_classes, name='pre_fc1')
-    fc1 = mx.sym.BatchNorm(data=conv_6_f, fix_gamma=True, eps=2e-5, momentum=0.9997, name='fc1')
+    fc1 = mx.sym.BatchNorm(data=conv_6_f, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
     return fc1
 
