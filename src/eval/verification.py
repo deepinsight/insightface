@@ -263,8 +263,8 @@ def test(data_set, mx_model, batch_size, nfolds=10, data_extra = None, label_sha
       _xnorm_cnt+=1
   _xnorm /= _xnorm_cnt
 
-  embeddings = embeddings_list[0].copy()
-  embeddings = sklearn.preprocessing.normalize(embeddings)
+  #embeddings = embeddings_list[0].copy()
+  #embeddings = sklearn.preprocessing.normalize(embeddings) ## It make exceptions for mobilenet training.
   acc1 = 0.0
   std1 = 0.0
   #_, _, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=10)
