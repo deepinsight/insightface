@@ -42,6 +42,7 @@ class FaceImageIter(io.DataIter):
             header, _ = recordio.unpack(s)
             if header.flag>0:
               print('header0 label', header.label)
+              # print(header); exit(0)
               self.header0 = (int(header.label[0]), int(header.label[1]))
               #assert(header.flag==1)
               self.imgidx = range(1, int(header.label[0]))
@@ -56,6 +57,8 @@ class FaceImageIter(io.DataIter):
               print('id2range', len(self.id2range))
             else:
               self.imgidx = list(self.imgrec.keys)
+              # print('header.flag = ', header.flag)
+              # print(self.imgidx); exit(0)
             if shuffle:
               self.seq = self.imgidx
               self.oseq = self.imgidx

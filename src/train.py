@@ -128,6 +128,7 @@ def parse_args():
   parser.add_argument('--prefix', default='../model/model', help='directory to save model.')
   parser.add_argument('--pretrained', default='', help='pretrained model to load')
   parser.add_argument('--ckpt', type=int, default=1, help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
+  parser.add_argument('--save-score', type=float, default=0.99, help='')
   parser.add_argument('--network', default='r50', help='specify network')
   parser.add_argument('--version-se', type=int, default=0, help='whether to use se in network')
   parser.add_argument('--version-input', type=int, default=1, help='network input config')
@@ -993,7 +994,8 @@ def train_net(args):
               do_save = True
           if acc_list[-1]>=highest_acc[-1]:
             highest_acc[-1] = acc_list[-1]
-            if lfw_score>=0.99:
+            # if lfw_score>=0.99:
+            if lfw_score >= args.save_score:  # save model if test accu is higher than args.save_score
               do_save = True
         if args.ckpt==0:
           do_save = False

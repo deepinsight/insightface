@@ -24,6 +24,7 @@ import sys
 #sys.path.append(os.path.join(curr_path, "../python"))
 import mxnet as mx
 import random
+import numpy as np
 import argparse
 import cv2
 import time
@@ -83,11 +84,13 @@ def read_list(path_in):
 
 def image_encode(args, i, item, q_out):
     oitem = [item.id]
-    #print('flag', item.flag)
+    # print('flag', item.flag);exit(0)
     if item.flag==0:
       fullpath = item.image_path
-      header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
-      #print('write', item.flag, item.id, item.label)
+      if len(np.array(item.label).flatten()) > 1:
+        item.label = item.label[0]
+      header = mx.recordio.IRHeader(flag=item.flag, label=item.label, id=item.id, id2=0)
+      # print('write', item.flag, item.id, item.label)
       if item.aligned:
         with open(fullpath, 'rb') as fin:
             img = fin.read()
@@ -101,9 +104,10 @@ def image_encode(args, i, item, q_out):
         q_out.put((i, s, oitem))
     else: 
       header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
-      #print('write', item.flag, item.id, item.label)
+      # print('write', item.flag, item.id, item.label)
       s = mx.recordio.pack(header, '')
       q_out.put((i, s, oitem))
+    # print(header)
 
 
 def read_worker(args, q_in, q_out):
@@ -250,12 +254,16 @@ if __name__ == '__main__':
                     cnt = 0
                     pre_time = time.time()
                     for i, item in enumerate(image_list):
+                        # print(i, item)
+                        # if i > 4680: exit(0)
                         image_encode(args, i, item, q_out)
                         if q_out.empty():
                             continue
                         _, s, item = q_out.get()
-                        #header, _ = mx.recordio.unpack(s)
-                        #print('write header label', header.label)
+                        # header, _ = mx.recordio.unpack(s)
+                        # print('write header', header)
+                        # print(item)
+                        # print('item[0]={}'.format(item[0])); exit(0)
                         record.write_idx(item[0], s)
                         if cnt % 1000 == 0:
                             cur_time = time.time()

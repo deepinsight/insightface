@@ -72,8 +72,16 @@ class FaceImageIter(io.DataIter):
                          path_imgrec)
             path_imgidx = path_imgrec[0:-4]+".idx"
             self.imgrec = recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, 'r')  # pylint: disable=redefined-variable-type
+            '''
+            for index in range(0,40):
+                s_ = self.imgrec.read_idx(index)
+                header_, img_ = recordio.unpack(s_)
+                print(index, header_)
+            exit(0)
+            '''
             s = self.imgrec.read_idx(0)
             header, _ = recordio.unpack(s)
+            # print("header", header, header.label, header.flag)
             self.idx2cos = {}
             self.idx2flag = {}
             self.idx2meancos = {}
@@ -93,7 +101,10 @@ class FaceImageIter(io.DataIter):
             #    self.c2c_auto = True
             #    self.c2c_step = 10000
             if header.flag>0:
-              print('header0 label', header.label)
+              # print('header0 label', header.label)
+              # print(header);
+              # print(s)
+              # exit(0)
               self.header0 = (int(header.label[0]), int(header.label[1]))
               #assert(header.flag==1)
               self.imgidx = range(1, int(header.label[0]))
@@ -167,6 +178,7 @@ class FaceImageIter(io.DataIter):
               for identity in self.seq_identity:
                 s = self.imgrec.read_idx(identity)
                 header, _ = recordio.unpack(s)
+                # print("header", header, header.label, header.flag)
                 a,b = int(header.label[0]), int(header.label[1])
                 self.id2range[identity] = (a,b)
                 count = b-a
@@ -196,6 +208,7 @@ class FaceImageIter(io.DataIter):
                 for identity in self.seq_identity:
                   s = self.imgrec.read_idx(identity)
                   header, _ = recordio.unpack(s)
+                  # print("header", header, header.label, header.flag)
                   a,b = int(header.label[0]), int(header.label[1])
                   found = False
                   for _idx in xrange(a,b):
@@ -211,10 +224,14 @@ class FaceImageIter(io.DataIter):
                 #self.imgidx = self.imgidx[0:limit]
             else:
               self.imgidx = list(self.imgrec.keys)
+              # print('header.flag = ', header.flag)
+              # print(self.imgidx);
+              # exit(0)
             if shuffle:
               self.seq = self.imgidx
               self.oseq = self.imgidx
-              print(len(self.seq))
+              print(len(self.seq), len(self.oseq))
+              # print(self.seq); exit(0)
             else:
               self.seq = None
 
@@ -372,6 +389,7 @@ class FaceImageIter(io.DataIter):
       people_per_batch = len(nrof_images_per_class)
       #self.time_reset()
       pdists = self.pairwise_dists(embeddings)
+      # print("len(pdist)=",len(pdists), pdists[0].shape, pdists[1]); exit()
       #self.times[3] += self.time_elapsed()
 
       for i in xrange(people_per_batch):
@@ -520,11 +538,18 @@ class FaceImageIter(io.DataIter):
           #data[ba:bb,:,:,:] = _data
           #label[ba:bb] = _label
           for i in xrange(ba, bb):
+            # print('ba={},bb={},triplet_oseq_cur={},len(oseq)={},idx={}'.format(
+            #     ba,bb,self.triplet_oseq_cur,len(self.oseq),i+self.triplet_oseq_cur))
             _idx = self.oseq[i+self.triplet_oseq_cur]
+            # print('_idx=', _idx)
             s = self.imgrec.read_idx(_idx)
             header, img = recordio.unpack(s)
+            # print("header_{}".format(_idx), header, header.label, header.flag)
             img = self.imdecode(img)
             data[i-ba][:] = self.postprocess_data(img)
+
+            assert header.flag == 0
+
             label[i-ba][:] = header.label
             tag.append( ( int(header.label), _idx) )
             #idx[i] = _idx
@@ -541,6 +566,7 @@ class FaceImageIter(io.DataIter):
           #print('net_out', net_out.shape)
           if embeddings is None:
             embeddings = np.zeros( (bag_size, net_out.shape[1]))
+          # print('ba={},bb={}'.format(ba,bb))
           embeddings[ba:bb,:] = net_out
           ba = bb
         assert len(tag)==bag_size
@@ -593,6 +619,7 @@ class FaceImageIter(io.DataIter):
           idx = self.oseq[i+ba]
           s = self.imgrec.read_idx(idx)
           header, img = recordio.unpack(s)
+          # print("header", header, header.label, header.flag)
           img = self.imdecode(img)
           data[i][:] = self.postprocess_data(img)
           label[i][:] = header.label
@@ -769,6 +796,7 @@ class FaceImageIter(io.DataIter):
             if self.imgrec is not None:
               s = self.imgrec.read_idx(idx)
               header, img = recordio.unpack(s)
+              # print("header", header, header.label, header.flag)
               label = header.label
               if self.output_c2c:
                 count = self.idx2flag[idx]
@@ -812,6 +840,7 @@ class FaceImageIter(io.DataIter):
             if s is None:
                 raise StopIteration
             header, img = recordio.unpack(s)
+            # print("header", header, header.label, header.flag)
             return header.label, img, None, None
 
     def brightness_aug(self, src, x):
