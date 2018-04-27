@@ -163,6 +163,8 @@ class FaceImageIter(io.DataIter):
         try:
             while i < batch_size:
                 label, s, bbox, landmark = self.next_sample()
+                #if label[1]>=0.0 or label[2]>=0.0:
+                #  print(label[0:10])
                 _data = self.imdecode(s)
                 if self.rand_mirror:
                   _rd = random.randint(0,1)
