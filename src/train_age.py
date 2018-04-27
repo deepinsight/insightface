@@ -421,8 +421,8 @@ def train_net(args):
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
     _rescale = 1.0/args.ctx_num
-    #opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
-    opt = optimizer.Nadam(learning_rate=base_lr, wd=base_wd, rescale_grad=_rescale)
+    opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
+    #opt = optimizer.Nadam(learning_rate=base_lr, wd=base_wd, rescale_grad=_rescale)
     som = 20
     _cb = mx.callback.Speedometer(args.batch_size, som)
 
