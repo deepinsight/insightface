@@ -50,17 +50,21 @@ USE_AGE = True
 
 
 class AccMetric(mx.metric.EvalMetric):
-  def __init__(self, pred_idx = 1, name='acc'):
+  def __init__(self, pred_idx = 1, label_idx = 0, name='acc'):
     self.axis = 1
     self.pred_idx = pred_idx
+    self.label_idx = label_idx
     super(AccMetric, self).__init__(
-        'name', axis=self.axis,
+        name, axis=self.axis,
         output_names=None, label_names=None)
+    self.name = name
     self.losses = []
     self.count = 0
 
   def update(self, labels, preds):
     self.count+=1
+
+    #print('label num', len(labels))
     preds = [preds[self.pred_idx]] #use softmax output
     for label, pred_label in zip(labels, preds):
         if pred_label.shape != label.shape:
@@ -68,8 +72,9 @@ class AccMetric(mx.metric.EvalMetric):
         pred_label = pred_label.asnumpy().astype('int32').flatten()
         label = label.asnumpy()
         if label.ndim==2:
-          label = label[:,0]
+          label = label[:,self.label_idx]
         label = label.astype('int32').flatten()
+        print(self.name, label)
         assert label.shape==pred_label.shape
         self.sum_metric += (pred_label.flat == label.flat).sum()
         self.num_inst += len(pred_label.flat)
@@ -331,14 +336,17 @@ def train_net(args):
     data_dir = data_dir_list[0]
     path_imgrec = None
     path_imglist = None
-    prop = face_image.load_property(data_dir)
-    args.num_classes = prop.num_classes
-    image_size = prop.image_size
+    args.num_classes = 0
+    image_size = (112,112)
+    if os.path.exists(os.path.join(data_dir, 'property')):
+      prop = face_image.load_property(data_dir)
+      args.num_classes = prop.num_classes
+      image_size = prop.image_size
+      assert(args.num_classes>0)
+      print('num_classes', args.num_classes)
     args.image_h = image_size[0]
     args.image_w = image_size[1]
     print('image_size', image_size)
-    assert(args.num_classes>0)
-    print('num_classes', args.num_classes)
     path_imgrec = os.path.join(data_dir, "train.rec")
 
     print('Called with argument:', args)
@@ -392,13 +400,13 @@ def train_net(args):
 
     eval_metrics = []
     if USE_FR:
-      _metric = AccMetric(pred_idx=1)
+      _metric = AccMetric(pred_idx=1, label_idx=0)
       eval_metrics.append(_metric)
       if USE_GENDER:
-          _metric = AccMetric(pred_idx=2, name='gender')
+          _metric = AccMetric(pred_idx=2, label_idx=1, name='gender')
           eval_metrics.append(_metric)
     elif USE_GENDER:
-      _metric = AccMetric(pred_idx=1, name='gender')
+      _metric = AccMetric(pred_idx=1, label_idx=1, name='gender')
       eval_metrics.append(_metric)
     if USE_AGE:
       _metric = MAEMetric()
@@ -413,8 +421,8 @@ def train_net(args):
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
     _rescale = 1.0/args.ctx_num
-    #opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
-    opt = optimizer.Nadam(learning_rate=base_lr, wd=base_wd, rescale_grad=_rescale)
+    opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
+    #opt = optimizer.Nadam(learning_rate=base_lr, wd=base_wd, rescale_grad=_rescale)
     som = 20
     _cb = mx.callback.Speedometer(args.batch_size, som)
 

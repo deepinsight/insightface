@@ -54,7 +54,7 @@ class MtcnnDetector(object):
             workner_net = mx.model.FeedForward.load(models[0], 1, ctx=ctx)
             self.PNets.append(workner_net)
 
-        self.Pool = Pool(num_worker)
+        #self.Pool = Pool(num_worker)
 
         self.RNet = mx.model.FeedForward.load(models[1], 1, ctx=ctx)
         self.ONet = mx.model.FeedForward.load(models[2], 1, ctx=ctx)
@@ -185,8 +185,122 @@ class MtcnnDetector(object):
         num_list = range(number)
         return list(chunks(num_list, self.num_worker))
         
+    def detect_face_limited(self, img, det_type=2):
+        height, width, _ = img.shape
+        if det_type>=2:
+          total_boxes = np.array( [ [0.0, 0.0, img.shape[1], img.shape[0], 0.9] ] ,dtype=np.float32)
+          num_box = total_boxes.shape[0]
 
-    def detect_face(self, img):
+          # pad the bbox
+          [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(total_boxes, width, height)
+          # (3, 24, 24) is the input shape for RNet
+          input_buf = np.zeros((num_box, 3, 24, 24), dtype=np.float32)
+
+          for i in range(num_box):
+              tmp = np.zeros((tmph[i], tmpw[i], 3), dtype=np.uint8)
+              tmp[dy[i]:edy[i]+1, dx[i]:edx[i]+1, :] = img[y[i]:ey[i]+1, x[i]:ex[i]+1, :]
+              input_buf[i, :, :, :] = adjust_input(cv2.resize(tmp, (24, 24)))
+
+          output = self.RNet.predict(input_buf)
+
+          # filter the total_boxes with threshold
+          passed = np.where(output[1][:, 1] > self.threshold[1])
+          total_boxes = total_boxes[passed]
+
+          if total_boxes.size == 0:
+              return None
+
+          total_boxes[:, 4] = output[1][passed, 1].reshape((-1,))
+          reg = output[0][passed]
+
+          # nms
+          pick = nms(total_boxes, 0.7, 'Union')
+          total_boxes = total_boxes[pick]
+          total_boxes = self.calibrate_box(total_boxes, reg[pick])
+          total_boxes = self.convert_to_square(total_boxes)
+          total_boxes[:, 0:4] = np.round(total_boxes[:, 0:4])
+        else:
+          total_boxes = np.array( [ [0.0, 0.0, img.shape[1], img.shape[0], 0.9] ] ,dtype=np.float32)
+        num_box = total_boxes.shape[0]
+        [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(total_boxes, width, height)
+        # (3, 48, 48) is the input shape for ONet
+        input_buf = np.zeros((num_box, 3, 48, 48), dtype=np.float32)
+
+        for i in range(num_box):
+            tmp = np.zeros((tmph[i], tmpw[i], 3), dtype=np.float32)
+            tmp[dy[i]:edy[i]+1, dx[i]:edx[i]+1, :] = img[y[i]:ey[i]+1, x[i]:ex[i]+1, :]
+            input_buf[i, :, :, :] = adjust_input(cv2.resize(tmp, (48, 48)))
+
+        output = self.ONet.predict(input_buf)
+        #print(output[2])
+
+        # filter the total_boxes with threshold
+        passed = np.where(output[2][:, 1] > self.threshold[2])
+        total_boxes = total_boxes[passed]
+
+        if total_boxes.size == 0:
+            return None
+
+        total_boxes[:, 4] = output[2][passed, 1].reshape((-1,))
+        reg = output[1][passed]
+        points = output[0][passed]
+
+        # compute landmark points
+        bbw = total_boxes[:, 2] - total_boxes[:, 0] + 1
+        bbh = total_boxes[:, 3] - total_boxes[:, 1] + 1
+        points[:, 0:5] = np.expand_dims(total_boxes[:, 0], 1) + np.expand_dims(bbw, 1) * points[:, 0:5]
+        points[:, 5:10] = np.expand_dims(total_boxes[:, 1], 1) + np.expand_dims(bbh, 1) * points[:, 5:10]
+
+        # nms
+        total_boxes = self.calibrate_box(total_boxes, reg)
+        pick = nms(total_boxes, 0.7, 'Min')
+        total_boxes = total_boxes[pick]
+        points = points[pick]
+        
+        if not self.accurate_landmark:
+            return total_boxes, points
+
+        #############################################
+        # extended stage
+        #############################################
+        num_box = total_boxes.shape[0]
+        patchw = np.maximum(total_boxes[:, 2]-total_boxes[:, 0]+1, total_boxes[:, 3]-total_boxes[:, 1]+1)
+        patchw = np.round(patchw*0.25)
+
+        # make it even
+        patchw[np.where(np.mod(patchw,2) == 1)] += 1
+
+        input_buf = np.zeros((num_box, 15, 24, 24), dtype=np.float32)
+        for i in range(5):
+            x, y = points[:, i], points[:, i+5]
+            x, y = np.round(x-0.5*patchw), np.round(y-0.5*patchw)
+            [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(np.vstack([x, y, x+patchw-1, y+patchw-1]).T,
+                                                                    width,
+                                                                    height)
+            for j in range(num_box):
+                tmpim = np.zeros((tmpw[j], tmpw[j], 3), dtype=np.float32)
+                tmpim[dy[j]:edy[j]+1, dx[j]:edx[j]+1, :] = img[y[j]:ey[j]+1, x[j]:ex[j]+1, :]
+                input_buf[j, i*3:i*3+3, :, :] = adjust_input(cv2.resize(tmpim, (24, 24)))
+
+        output = self.LNet.predict(input_buf)
+
+        pointx = np.zeros((num_box, 5))
+        pointy = np.zeros((num_box, 5))
+
+        for k in range(5):
+            # do not make a large movement
+            tmp_index = np.where(np.abs(output[k]-0.5) > 0.35)
+            output[k][tmp_index[0]] = 0.5
+
+            pointx[:, k] = np.round(points[:, k] - 0.5*patchw) + output[k][:, 0]*patchw
+            pointy[:, k] = np.round(points[:, k+5] - 0.5*patchw) + output[k][:, 1]*patchw
+
+        points = np.hstack([pointx, pointy])
+        points = points.astype(np.int32)
+
+        return total_boxes, points
+
+    def detect_face(self, img, det_type=0):
         """
             detect face over img
         Parameters:
@@ -202,75 +316,80 @@ class MtcnnDetector(object):
         """
 
         # check input
-        MIN_DET_SIZE = 12
-
-        if img is None:
-            return None
-
-        # only works for color image
-        if len(img.shape) != 3:
-            return None
-
-        # detected boxes
-        total_boxes = []
-
         height, width, _ = img.shape
-        minl = min( height, width)
+        if det_type==0:
+            MIN_DET_SIZE = 12
 
-        # get all the valid scales
-        scales = []
-        m = MIN_DET_SIZE/self.minsize
-        minl *= m
-        factor_count = 0
-        while minl > MIN_DET_SIZE:
-            scales.append(m*self.factor**factor_count)
-            minl *= self.factor
-            factor_count += 1
+            if img is None:
+                return None
 
-        #############################################
-        # first stage
-        #############################################
-        #for scale in scales:
-        #    return_boxes = self.detect_first_stage(img, scale, 0)
-        #    if return_boxes is not None:
-        #        total_boxes.append(return_boxes)
-        
-        sliced_index = self.slice_index(len(scales))
-        total_boxes = []
-        for batch in sliced_index:
-            local_boxes = self.Pool.map( detect_first_stage_warpper, \
-                    izip(repeat(img), self.PNets[:len(batch)], [scales[i] for i in batch], repeat(self.threshold[0])) )
-            total_boxes.extend(local_boxes)
-        
-        # remove the Nones 
-        total_boxes = [ i for i in total_boxes if i is not None]
+            # only works for color image
+            if len(img.shape) != 3:
+                return None
 
-        if len(total_boxes) == 0:
-            return None
-        
-        total_boxes = np.vstack(total_boxes)
+            # detected boxes
+            total_boxes = []
 
-        if total_boxes.size == 0:
-            return None
+            minl = min( height, width)
 
-        # merge the detection from first stage
-        pick = nms(total_boxes[:, 0:5], 0.7, 'Union')
-        total_boxes = total_boxes[pick]
+            # get all the valid scales
+            scales = []
+            m = MIN_DET_SIZE/self.minsize
+            minl *= m
+            factor_count = 0
+            while minl > MIN_DET_SIZE:
+                scales.append(m*self.factor**factor_count)
+                minl *= self.factor
+                factor_count += 1
 
-        bbw = total_boxes[:, 2] - total_boxes[:, 0] + 1
-        bbh = total_boxes[:, 3] - total_boxes[:, 1] + 1
+            #############################################
+            # first stage
+            #############################################
+            #for scale in scales:
+            #    return_boxes = self.detect_first_stage(img, scale, 0)
+            #    if return_boxes is not None:
+            #        total_boxes.append(return_boxes)
+            
+            sliced_index = self.slice_index(len(scales))
+            total_boxes = []
+            for batch in sliced_index:
+                #local_boxes = self.Pool.map( detect_first_stage_warpper, \
+                #        izip(repeat(img), self.PNets[:len(batch)], [scales[i] for i in batch], repeat(self.threshold[0])) )
+                local_boxes = map( detect_first_stage_warpper, \
+                        izip(repeat(img), self.PNets[:len(batch)], [scales[i] for i in batch], repeat(self.threshold[0])) )
+                total_boxes.extend(local_boxes)
+            
+            # remove the Nones 
+            total_boxes = [ i for i in total_boxes if i is not None]
 
-        # refine the bboxes
-        total_boxes = np.vstack([total_boxes[:, 0]+total_boxes[:, 5] * bbw,
-                                 total_boxes[:, 1]+total_boxes[:, 6] * bbh,
-                                 total_boxes[:, 2]+total_boxes[:, 7] * bbw,
-                                 total_boxes[:, 3]+total_boxes[:, 8] * bbh,
-                                 total_boxes[:, 4]
-                                 ])
+            if len(total_boxes) == 0:
+                return None
+            
+            total_boxes = np.vstack(total_boxes)
 
-        total_boxes = total_boxes.T
-        total_boxes = self.convert_to_square(total_boxes)
-        total_boxes[:, 0:4] = np.round(total_boxes[:, 0:4])
+            if total_boxes.size == 0:
+                return None
+
+            # merge the detection from first stage
+            pick = nms(total_boxes[:, 0:5], 0.7, 'Union')
+            total_boxes = total_boxes[pick]
+
+            bbw = total_boxes[:, 2] - total_boxes[:, 0] + 1
+            bbh = total_boxes[:, 3] - total_boxes[:, 1] + 1
+
+            # refine the bboxes
+            total_boxes = np.vstack([total_boxes[:, 0]+total_boxes[:, 5] * bbw,
+                                     total_boxes[:, 1]+total_boxes[:, 6] * bbh,
+                                     total_boxes[:, 2]+total_boxes[:, 7] * bbw,
+                                     total_boxes[:, 3]+total_boxes[:, 8] * bbh,
+                                     total_boxes[:, 4]
+                                     ])
+
+            total_boxes = total_boxes.T
+            total_boxes = self.convert_to_square(total_boxes)
+            total_boxes[:, 0:4] = np.round(total_boxes[:, 0:4])
+        else:
+            total_boxes = np.array( [ [0.0, 0.0, img.shape[1], img.shape[0], 0.9] ] ,dtype=np.float32)
 
         #############################################
         # second stage
@@ -390,120 +509,6 @@ class MtcnnDetector(object):
         return total_boxes, points
 
 
-    def detect_face_limited(self, img, det_type=2):
-        height, width, _ = img.shape
-        if det_type>=2:
-          total_boxes = np.array( [ [0.0, 0.0, img.shape[1], img.shape[0], 0.9] ] ,dtype=np.float32)
-          num_box = total_boxes.shape[0]
-
-          # pad the bbox
-          [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(total_boxes, width, height)
-          # (3, 24, 24) is the input shape for RNet
-          input_buf = np.zeros((num_box, 3, 24, 24), dtype=np.float32)
-
-          for i in range(num_box):
-              tmp = np.zeros((tmph[i], tmpw[i], 3), dtype=np.uint8)
-              tmp[dy[i]:edy[i]+1, dx[i]:edx[i]+1, :] = img[y[i]:ey[i]+1, x[i]:ex[i]+1, :]
-              input_buf[i, :, :, :] = adjust_input(cv2.resize(tmp, (24, 24)))
-
-          output = self.RNet.predict(input_buf)
-
-          # filter the total_boxes with threshold
-          passed = np.where(output[1][:, 1] > self.threshold[1])
-          total_boxes = total_boxes[passed]
-
-          if total_boxes.size == 0:
-              return None
-
-          total_boxes[:, 4] = output[1][passed, 1].reshape((-1,))
-          reg = output[0][passed]
-
-          # nms
-          pick = nms(total_boxes, 0.7, 'Union')
-          total_boxes = total_boxes[pick]
-          total_boxes = self.calibrate_box(total_boxes, reg[pick])
-          total_boxes = self.convert_to_square(total_boxes)
-          total_boxes[:, 0:4] = np.round(total_boxes[:, 0:4])
-        else:
-          total_boxes = np.array( [ [0.0, 0.0, img.shape[1], img.shape[0], 0.9] ] ,dtype=np.float32)
-        num_box = total_boxes.shape[0]
-        [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(total_boxes, width, height)
-        # (3, 48, 48) is the input shape for ONet
-        input_buf = np.zeros((num_box, 3, 48, 48), dtype=np.float32)
-
-        for i in range(num_box):
-            tmp = np.zeros((tmph[i], tmpw[i], 3), dtype=np.float32)
-            tmp[dy[i]:edy[i]+1, dx[i]:edx[i]+1, :] = img[y[i]:ey[i]+1, x[i]:ex[i]+1, :]
-            input_buf[i, :, :, :] = adjust_input(cv2.resize(tmp, (48, 48)))
-
-        output = self.ONet.predict(input_buf)
-        #print(output[2])
-
-        # filter the total_boxes with threshold
-        passed = np.where(output[2][:, 1] > self.threshold[2])
-        total_boxes = total_boxes[passed]
-
-        if total_boxes.size == 0:
-            return None
-
-        total_boxes[:, 4] = output[2][passed, 1].reshape((-1,))
-        reg = output[1][passed]
-        points = output[0][passed]
-
-        # compute landmark points
-        bbw = total_boxes[:, 2] - total_boxes[:, 0] + 1
-        bbh = total_boxes[:, 3] - total_boxes[:, 1] + 1
-        points[:, 0:5] = np.expand_dims(total_boxes[:, 0], 1) + np.expand_dims(bbw, 1) * points[:, 0:5]
-        points[:, 5:10] = np.expand_dims(total_boxes[:, 1], 1) + np.expand_dims(bbh, 1) * points[:, 5:10]
-
-        # nms
-        total_boxes = self.calibrate_box(total_boxes, reg)
-        pick = nms(total_boxes, 0.7, 'Min')
-        total_boxes = total_boxes[pick]
-        points = points[pick]
-        
-        if not self.accurate_landmark:
-            return total_boxes, points
-
-        #############################################
-        # extended stage
-        #############################################
-        num_box = total_boxes.shape[0]
-        patchw = np.maximum(total_boxes[:, 2]-total_boxes[:, 0]+1, total_boxes[:, 3]-total_boxes[:, 1]+1)
-        patchw = np.round(patchw*0.25)
-
-        # make it even
-        patchw[np.where(np.mod(patchw,2) == 1)] += 1
-
-        input_buf = np.zeros((num_box, 15, 24, 24), dtype=np.float32)
-        for i in range(5):
-            x, y = points[:, i], points[:, i+5]
-            x, y = np.round(x-0.5*patchw), np.round(y-0.5*patchw)
-            [dy, edy, dx, edx, y, ey, x, ex, tmpw, tmph] = self.pad(np.vstack([x, y, x+patchw-1, y+patchw-1]).T,
-                                                                    width,
-                                                                    height)
-            for j in range(num_box):
-                tmpim = np.zeros((tmpw[j], tmpw[j], 3), dtype=np.float32)
-                tmpim[dy[j]:edy[j]+1, dx[j]:edx[j]+1, :] = img[y[j]:ey[j]+1, x[j]:ex[j]+1, :]
-                input_buf[j, i*3:i*3+3, :, :] = adjust_input(cv2.resize(tmpim, (24, 24)))
-
-        output = self.LNet.predict(input_buf)
-
-        pointx = np.zeros((num_box, 5))
-        pointy = np.zeros((num_box, 5))
-
-        for k in range(5):
-            # do not make a large movement
-            tmp_index = np.where(np.abs(output[k]-0.5) > 0.35)
-            output[k][tmp_index[0]] = 0.5
-
-            pointx[:, k] = np.round(points[:, k] - 0.5*patchw) + output[k][:, 0]*patchw
-            pointy[:, k] = np.round(points[:, k+5] - 0.5*patchw) + output[k][:, 1]*patchw
-
-        points = np.hstack([pointx, pointy])
-        points = points.astype(np.int32)
-
-        return total_boxes, points
 
     def list2colmatrix(self, pts_list):
         """
