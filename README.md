@@ -9,6 +9,8 @@ The code of InsightFace is released under the MIT License.
 
 ## Recent Update
 
+**`2018.05.16`**: A new training dataset released [here](https://pan.baidu.com/s/1S6LJZGdqcZRle1vlcMzHOQ) which can easily achieve much better accuracy. See [discussion](https://github.com/deepinsight/insightface/issues/215) for detail.
+
 **`2018.04.23`**: Our implementation of [MobileFaceNet](https://arxiv.org/abs/1804.07573) is now available. Please set `--network y1` to use this lightweight but powerful backbone.
 
 **`2018.03.26`**: We can train with combined margin(loss-type=5), see [Verification Results On Combined Margin](#verification-results-on-combined-margin).
