@@ -29,6 +29,7 @@ from __future__ import print_function
 import mxnet as mx
 import numpy as np
 import symbol_utils
+import sklearn
 
 def Conv(**kwargs):
     #name = kwargs.get('name')
@@ -588,3 +589,4 @@ def get_symbol(num_classes, num_layers, **kwargs):
                   num_classes = num_classes,
                   bottle_neck = bottle_neck,
                   **kwargs)
+

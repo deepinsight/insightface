@@ -6,7 +6,7 @@ from scipy import misc
 import sys
 import os
 import argparse
-import tensorflow as tf
+#import tensorflow as tf
 import numpy as np
 import mxnet as mx
 import random
@@ -47,13 +47,12 @@ class FaceModel:
     _vec = args.image_size.split(',')
     assert len(_vec)==2
     image_size = (int(_vec[0]), int(_vec[1]))
-    self.model = get_model(ctx, image_size, args.model, 'fc1')
-    self.age_model = None
-    self.gender_model = None
-    if len(args.age_model)>0:
-      self.age_model = get_model(ctx, image_size, args.age_model, 'fc9')
-    if len(args.gender_model)>0:
-      self.gender_model = get_model(ctx, image_size, args.gender_model, 'fc8')
+    self.model = None
+    self.ga_model = None
+    if len(args.model)>0:
+      self.model = get_model(ctx, image_size, args.model, 'fc1')
+    if len(args.ga_model)>0:
+      self.ga_model = get_model(ctx, image_size, args.ga_model, 'fc1')
 
     self.threshold = args.threshold
     self.det_minsize = 50
@@ -95,24 +94,19 @@ class FaceModel:
     embedding = sklearn.preprocessing.normalize(embedding).flatten()
     return embedding
 
-  def get_age(self, aligned):
+  def get_ga(self, aligned):
     #face_img is bgr image
     #print(nimg.shape)
     input_blob = np.expand_dims(aligned, axis=0)
     data = mx.nd.array(input_blob)
     db = mx.io.DataBatch(data=(data,))
-    self.age_model.forward(db, is_train=False)
-    ret = self.age_model.get_outputs()[0].asnumpy().reshape( (100,2) )
-    ret = np.argmax(ret, axis=1)
-    ret = sum(ret)
+    self.ga_model.forward(db, is_train=False)
+    ret = self.ga_model.get_outputs()[0].asnumpy()
+    g = ret[:,0:2].flatten()
+    gender = np.argmax(g)
+    a = ret[:,2:202].reshape( (100,2) )
+    a = np.argmax(a, axis=1)
+    age = int(sum(a))
 
-    return int(ret) 
+    return gender, age
 
-  def get_gender(self, aligned):
-    input_blob = np.expand_dims(aligned, axis=0)
-    data = mx.nd.array(input_blob)
-    db = mx.io.DataBatch(data=(data,))
-    self.gender_model.forward(db, is_train=False)
-    ret = self.gender_model.get_outputs()[0].asnumpy().flatten()
-    ret = np.argmax(ret)
-    return ret
