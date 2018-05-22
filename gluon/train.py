@@ -162,7 +162,7 @@ def parse_args():
   parser.add_argument('--network', default='r50', help='specify network')
   parser.add_argument('--version-output', type=str, default='E', help='network embedding output config')
   parser.add_argument('--version-unit', type=int, default=1, help='resnet unit config')
-  parser.add_argument('--version-act', type=str, default='prelu', help='network activation config')
+  parser.add_argument('--version-act', type=str, default='relu', help='network activation config')
   parser.add_argument('--lr', type=float, default=0.1, help='start learning rate')
   parser.add_argument('--lr-steps', type=str, default='', help='steps of lr changing')
   parser.add_argument('--wd', type=float, default=0.0005, help='weight decay')
@@ -179,21 +179,20 @@ def parse_args():
   parser.add_argument('--cutoff', type=int, default=0, help='cut off aug')
   parser.add_argument('--eval', type=str, default='lfw,cfp_fp,agedb_30', help='verification targets')
   parser.add_argument('--task', type=str, default='', help='')
+  parser.add_argument('--mode', type=str, default='gluon', help='')
   args = parser.parse_args()
   return args
 
 def get_model():
   #print('init resnet', args.num_layers)
   if args.task=='':
-    return ArcMarginBlock(args, prefix='')
+    if args.margin_a>0.0:
+      return ArcMarginBlock(args, prefix='')
+    else:
+      return DenseBlock(args, prefix='')
   else:#AGE or GENDER
     return GABlock(args, prefix='')
 
-def get_model_test(net):
-  if args.task=='':
-    return ArcMarginTestBlock(args, prefix='', params=net.collect_params())
-  else:
-    return None
 
 #def get_symbol(args, arg_params, aux_params):
 #  data_shape = (args.image_channel,args.image_h,args.image_w)
@@ -392,27 +391,20 @@ def train_net(args):
     #  test_net = get_model_test(net)
     #print(net.__class__)
     #net = net0[0]
-    if len(args.pretrained)==0:
-      pass
-    else:
-      net.load_params(args.pretrained, allow_missing=True, ignore_extra = True)
     if args.network[0]=='r' or args.network[0]=='y':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
     elif args.network[0]=='i' or args.network[0]=='x':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2) #inception
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
-    net.initialize(initializer)
-    #if args.task=='':
-    #  test_net.initialize(initializer)
-    #net.hybridize()
-    #net.collect_params().initialize(mx.init.Normal())
-    #print(net.collect_params())
-    net.collect_params().reset_ctx(ctx)
-    #if args.task=='age':
-    #  net.collect_params('^gender_').setattr('grad_req', 'null')
-    #elif args.task=='gender':
-    #  net.collect_params('^age_').setattr('grad_req', 'null')
+    net.hybridize()
+    if args.mode=='gluon':
+      if len(args.pretrained)==0:
+        pass
+      else:
+        net.load_params(args.pretrained, allow_missing=True, ignore_extra = True)
+      net.initialize(initializer)
+      net.collect_params().reset_ctx(ctx)
 
     val_iter = None
     if args.task=='':
@@ -547,11 +539,24 @@ def train_net(args):
     #_rescale = 1.0/args.ctx_num
     #opt = optimizer.SGD(learning_rate=args.lr, momentum=args.mom, wd=args.wd, rescale_grad=_rescale)
     #opt = optimizer.SGD(learning_rate=args.lr, momentum=args.mom, wd=args.wd)
-    trainer = gluon.Trainer(net.collect_params(), 'sgd', 
-            {'learning_rate': args.lr, 'wd': args.wd, 'momentum': args.mom, 'multi_precision': True},
-            kvstore=kv)
-    #trainer = gluon.Trainer(net.collect_params(), optimizer = opt,
-    #        kvstore=kv)
+    if args.mode=='gluon':
+      trainer = gluon.Trainer(net.collect_params(), 'sgd', 
+              {'learning_rate': args.lr, 'wd': args.wd, 'momentum': args.mom, 'multi_precision': True},
+              kvstore=kv)
+    else:
+      _rescale = 1.0/args.ctx_num
+      opt = optimizer.SGD(learning_rate=args.lr, momentum=args.mom, wd=args.wd, rescale_grad=_rescale)
+      _cb = mx.callback.Speedometer(args.batch_size, 20)
+      arg_params = None
+      aux_params = None
+      data = mx.sym.var('data')
+      label = mx.sym.var('softmax_label')
+      if args.margin_a>0.0:
+        fc7 = net(data, label)
+      else:
+        fc7 = net(data)
+      softmax = mx.symbol.SoftmaxOutput(data=fc7, label = label, name='softmax', normalization='valid')
+      sym = softmax
 
     def _batch_callback():
       mbatch = global_step[0]
@@ -559,7 +564,10 @@ def train_net(args):
       for _lr in lr_steps:
         if mbatch==_lr:
           args.lr *= 0.1
-          trainer.set_learning_rate(args.lr)
+          if args.mode=='gluon':
+            trainer.set_learning_rate(args.lr)
+          else:
+            opt.lr  = args.lr
           print('lr change to', args.lr)
           break
 
@@ -608,89 +616,116 @@ def train_net(args):
       if args.max_steps>0 and mbatch>args.max_steps:
         sys.exit(0)
 
-    loss_weight = 1.0
-    if args.task=='age':
-      loss_weight = 1.0/AGE
-    loss = gluon.loss.SoftmaxCrossEntropyLoss(weight = loss_weight)
-    #loss = gluon.loss.SoftmaxCrossEntropyLoss()
-    while True:
-        #trainer = update_learning_rate(opt.lr, trainer, epoch, opt.lr_factor, lr_steps)
-        tic = time.time()
-        train_iter.reset()
-        metric.reset()
-        btic = time.time()
-        for i, batch in enumerate(train_iter):
-            _batch_callback()
-            #data = gluon.utils.split_and_load(batch.data[0].astype(opt.dtype), ctx_list=ctx, batch_axis=0)
-            #label = gluon.utils.split_and_load(batch.label[0].astype(opt.dtype), ctx_list=ctx, batch_axis=0)
-            data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
-            label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
-            outputs = []
-            Ls = []
-            with ag.record():
-                for x, y in zip(data, label):
-                    #print(y.asnumpy())
-                    if args.task=='':
-                      z = net(x,y)
-                      #print(z[0].shape, z[1].shape)
-                    else:
-                      z = net(x)
-                    if args.task=='gender':
-                      L = loss(z[1], y)
-                      #L = L/args.per_batch_size
-                      Ls.append(L)
-                      outputs.append(z[1])
-                    elif args.task=='age':
-                      for k in xrange(AGE):
-                        _z = nd.slice_axis(z[2], axis=1, begin=k*2, end=k*2+2)
-                        _y = nd.slice_axis(y, axis=1, begin=k, end=k+1)
-                        _y = nd.flatten(_y)
-                        L = loss(_z, _y)
+    def _batch_callback_sym(param):
+      _cb(param)
+      _batch_callback()
+
+
+    if args.mode!='gluon':
+      model = mx.mod.Module(
+          context       = ctx,
+          symbol        = sym,
+      )
+      model.fit(train_iter,
+          begin_epoch        = 0,
+          num_epoch          = args.end_epoch,
+          eval_data          = None,
+          eval_metric        = metric,
+          kvstore            = 'device',
+          optimizer          = opt,
+          initializer        = initializer,
+          arg_params         = arg_params,
+          aux_params         = aux_params,
+          allow_missing      = True,
+          batch_end_callback = _batch_callback_sym,
+          epoch_end_callback = None )
+    else:
+      loss_weight = 1.0
+      if args.task=='age':
+        loss_weight = 1.0/AGE
+      loss = gluon.loss.SoftmaxCrossEntropyLoss(weight = loss_weight)
+      #loss = gluon.loss.SoftmaxCrossEntropyLoss()
+      while True:
+          #trainer = update_learning_rate(opt.lr, trainer, epoch, opt.lr_factor, lr_steps)
+          tic = time.time()
+          train_iter.reset()
+          metric.reset()
+          btic = time.time()
+          for i, batch in enumerate(train_iter):
+              _batch_callback()
+              #data = gluon.utils.split_and_load(batch.data[0].astype(opt.dtype), ctx_list=ctx, batch_axis=0)
+              #label = gluon.utils.split_and_load(batch.label[0].astype(opt.dtype), ctx_list=ctx, batch_axis=0)
+              data = gluon.utils.split_and_load(batch.data[0], ctx_list=ctx, batch_axis=0)
+              label = gluon.utils.split_and_load(batch.label[0], ctx_list=ctx, batch_axis=0)
+              outputs = []
+              Ls = []
+              with ag.record():
+                  for x, y in zip(data, label):
+                      #print(y.asnumpy())
+                      if args.task=='':
+                        if args.margin_a>0.0:
+                          z = net(x,y)
+                        else:
+                          z = net(x)
+                        #print(z[0].shape, z[1].shape)
+                      else:
+                        z = net(x)
+                      if args.task=='gender':
+                        L = loss(z[1], y)
                         #L = L/args.per_batch_size
-                        #L /= AGE
                         Ls.append(L)
-                      outputs.append(z[2])
-                    else:
-                      L = loss(z[0], y)
-                      #L = L/args.per_batch_size
-                      Ls.append(L)
-                      outputs.append(z[0])
-                    # store the loss and do backward after we have done forward
-                    # on all GPUs for better speed on multiple GPUs.
-                ag.backward(Ls)
-            #trainer.step(batch.data[0].shape[0], ignore_stale_grad=True)
-            #trainer.step(args.ctx_num)
-            trainer.step(batch.data[0].shape[0])
-            metric.update(label, outputs)
-            if i>0 and i%20==0:
-                name, acc = metric.get()
-                if len(name)==2:
-                  logger.info('Epoch[%d] Batch [%d]\tSpeed: %f samples/sec\t%s=%f, %s=%f'%(
-                                 num_epochs, i, args.batch_size/(time.time()-btic), name[0], acc[0], name[1], acc[1]))
-                else:
-                  logger.info('Epoch[%d] Batch [%d]\tSpeed: %f samples/sec\t%s=%f'%(
-                                 num_epochs, i, args.batch_size/(time.time()-btic), name[0], acc[0]))
-                metric.reset()
-            btic = time.time()
+                        outputs.append(z[1])
+                      elif args.task=='age':
+                        for k in xrange(AGE):
+                          _z = nd.slice_axis(z[2], axis=1, begin=k*2, end=k*2+2)
+                          _y = nd.slice_axis(y, axis=1, begin=k, end=k+1)
+                          _y = nd.flatten(_y)
+                          L = loss(_z, _y)
+                          #L = L/args.per_batch_size
+                          #L /= AGE
+                          Ls.append(L)
+                        outputs.append(z[2])
+                      else:
+                        L = loss(z, y)
+                        #L = L/args.per_batch_size
+                        Ls.append(L)
+                        outputs.append(z)
+                      # store the loss and do backward after we have done forward
+                      # on all GPUs for better speed on multiple GPUs.
+                  ag.backward(Ls)
+              #trainer.step(batch.data[0].shape[0], ignore_stale_grad=True)
+              #trainer.step(args.ctx_num)
+              trainer.step(batch.data[0].shape[0])
+              metric.update(label, outputs)
+              if i>0 and i%20==0:
+                  name, acc = metric.get()
+                  if len(name)==2:
+                    logger.info('Epoch[%d] Batch [%d]\tSpeed: %f samples/sec\t%s=%f, %s=%f'%(
+                                   num_epochs, i, args.batch_size/(time.time()-btic), name[0], acc[0], name[1], acc[1]))
+                  else:
+                    logger.info('Epoch[%d] Batch [%d]\tSpeed: %f samples/sec\t%s=%f'%(
+                                   num_epochs, i, args.batch_size/(time.time()-btic), name[0], acc[0]))
+                  metric.reset()
+              btic = time.time()
 
-        epoch_time = time.time()-tic
+          epoch_time = time.time()-tic
 
-        # First epoch will usually be much slower than the subsequent epics,
-        # so don't factor into the average
-        if num_epochs > 0:
-          total_time = total_time + epoch_time
+          # First epoch will usually be much slower than the subsequent epics,
+          # so don't factor into the average
+          if num_epochs > 0:
+            total_time = total_time + epoch_time
 
-        name, acc = metric.get()
-        logger.info('[Epoch %d] training: %s=%f, %s=%f'%(num_epochs, name[0], acc[0], name[1], acc[1]))
-        logger.info('[Epoch %d] time cost: %f'%(num_epochs, epoch_time))
-        num_epochs = num_epochs + 1
-        #name, val_acc = test(ctx, val_data)
-        #logger.info('[Epoch %d] validation: %s=%f, %s=%f'%(epoch, name[0], val_acc[0], name[1], val_acc[1]))
+          #name, acc = metric.get()
+          #logger.info('[Epoch %d] training: %s=%f, %s=%f'%(num_epochs, name[0], acc[0], name[1], acc[1]))
+          logger.info('[Epoch %d] time cost: %f'%(num_epochs, epoch_time))
+          num_epochs = num_epochs + 1
+          #name, val_acc = test(ctx, val_data)
+          #logger.info('[Epoch %d] validation: %s=%f, %s=%f'%(epoch, name[0], val_acc[0], name[1], val_acc[1]))
 
-        # save model if meet requirements
-        #save_checkpoint(epoch, val_acc[0], best_acc)
-    if num_epochs > 1:
-        print('Average epoch time: {}'.format(float(total_time)/(num_epochs - 1)))
+          # save model if meet requirements
+          #save_checkpoint(epoch, val_acc[0], best_acc)
+      if num_epochs > 1:
+          print('Average epoch time: {}'.format(float(total_time)/(num_epochs - 1)))
 
 
 
