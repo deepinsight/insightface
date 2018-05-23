@@ -555,8 +555,12 @@ def train_net(args):
         fc7 = net(data, label)
       else:
         fc7 = net(data)
-      softmax = mx.symbol.SoftmaxOutput(data=fc7, label = label, name='softmax', normalization='valid')
-      sym = softmax
+      #sym = mx.symbol.SoftmaxOutput(data=fc7, label = label, name='softmax', normalization='valid')
+      ceop = gluon.loss.SoftmaxCrossEntropyLoss()
+      loss = ceop(fc7, label) 
+      #loss = loss/args.per_batch_size
+      loss = mx.sym.mean(loss)
+      sym = mx.sym.Group( [mx.symbol.BlockGrad(fc7), mx.symbol.MakeLoss(loss, name='softmax')] )
 
     def _batch_callback():
       mbatch = global_step[0]
@@ -643,7 +647,8 @@ def train_net(args):
       loss_weight = 1.0
       if args.task=='age':
         loss_weight = 1.0/AGE
-      loss = gluon.loss.SoftmaxCrossEntropyLoss(weight = loss_weight)
+      #loss = gluon.loss.SoftmaxCrossEntropyLoss(weight = loss_weight)
+      loss = nd.SoftmaxOutput
       #loss = gluon.loss.SoftmaxCrossEntropyLoss()
       while True:
           #trainer = update_learning_rate(opt.lr, trainer, epoch, opt.lr_factor, lr_steps)
@@ -695,7 +700,9 @@ def train_net(args):
                   ag.backward(Ls)
               #trainer.step(batch.data[0].shape[0], ignore_stale_grad=True)
               #trainer.step(args.ctx_num)
-              trainer.step(batch.data[0].shape[0])
+              n = batch.data[0].shape[0]
+              #print(n,n)
+              trainer.step(n)
               metric.update(label, outputs)
               if i>0 and i%20==0:
                   name, acc = metric.get()
@@ -705,7 +712,7 @@ def train_net(args):
                   else:
                     logger.info('Epoch[%d] Batch [%d]\tSpeed: %f samples/sec\t%s=%f'%(
                                    num_epochs, i, args.batch_size/(time.time()-btic), name[0], acc[0]))
-                  metric.reset()
+                  #metric.reset()
               btic = time.time()
 
           epoch_time = time.time()-tic
