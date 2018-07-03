@@ -459,6 +459,7 @@ def train_net(args):
         sys.exit(0)
 
     epoch_cb = None
+    train_dataiter = mx.io.PrefetchingIter(train_dataiter)
 
     model.fit(train_dataiter,
         begin_epoch        = begin_epoch,
