@@ -5,19 +5,27 @@ import datetime
 #sys.path.append('.')
 from ssh_detector import SSHDetector
 
-long_max = 1200
+scales = [1200, 1600]
 t = 2
 detector = SSHDetector('./model/e2ef', 0)
 
 
-f = '../sample-images/t2.jpg'
+f = '../sample-images/t1.jpg'
 if len(sys.argv)>1:
   f = sys.argv[1]
 img = cv2.imread(f)
-print(img.shape)
-if img.shape[0]>long_max or img.shape[1]>long_max:
-  scale = float(long_max) / max(img.shape[0], img.shape[1])
-  img = cv2.resize(img, (0,0), fx=scale, fy=scale)
+im_shape = img.shape
+print(im_shape)
+target_size = scales[0]
+max_size = scales[1]
+im_size_min = np.min(im_shape[0:2])
+im_size_max = np.max(im_shape[0:2])
+if im_size_min>target_size or im_size_max>max_size:
+  im_scale = float(target_size) / float(im_size_min)
+  # prevent bigger axis from being more than max_size:
+  if np.round(im_scale * im_size_max) > max_size:
+      im_scale = float(max_size) / float(im_size_max)
+  img = cv2.resize(img, None, None, fx=im_scale, fy=im_scale)
   print('resize to', img.shape)
 for i in xrange(t-1): #warmup
   faces = detector.detect(img)
