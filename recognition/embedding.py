@@ -33,14 +33,17 @@ class Embedding:
     self.src = src
   
   def get(self, rimg, landmark):
-    assert landmark.shape[0]==68
+    assert landmark.shape[0]==68 or landmark.shape[0]==5
     assert landmark.shape[1]==2
-    landmark5 = np.zeros( (5,2), dtype=np.float32 )
-    landmark5[0] = (landmark[36]+landmark[39])/2
-    landmark5[1] = (landmark[42]+landmark[45])/2
-    landmark5[2] = landmark[30]
-    landmark5[3] = landmark[48]
-    landmark5[4] = landmark[54]
+    if landmark.shape[0]==68:
+      landmark5 = np.zeros( (5,2), dtype=np.float32 )
+      landmark5[0] = (landmark[36]+landmark[39])/2
+      landmark5[1] = (landmark[42]+landmark[45])/2
+      landmark5[2] = landmark[30]
+      landmark5[3] = landmark[48]
+      landmark5[4] = landmark[54]
+    else:
+      landmark5 = landmark
     tform = trans.SimilarityTransform()
     tform.estimate(landmark5, self.src)
     M = tform.params[0:2,:]
