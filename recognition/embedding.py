@@ -38,7 +38,7 @@ class Embedding:
     landmark5 = np.zeros( (5,2), dtype=np.float32 )
     landmark5[0] = (landmark[36]+landmark[39])/2
     landmark5[1] = (landmark[42]+landmark[45])/2
-    landmark5[2] = landmark[33]
+    landmark5[2] = landmark[30]
     landmark5[3] = landmark[48]
     landmark5[4] = landmark[54]
     tform = trans.SimilarityTransform()
