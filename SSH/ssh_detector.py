@@ -54,7 +54,7 @@ class SSHDetector:
       self.model.set_params(arg_params, aux_params)
 
 
-  def detect(self, img, threshold=0.05, scales=[1.0]):
+  def detect(self, img, threshold=0.5, scales=[1.0]):
     proposals_list = []
     scores_list = []
 
