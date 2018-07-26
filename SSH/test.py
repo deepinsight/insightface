@@ -6,6 +6,7 @@ import datetime
 from ssh_detector import SSHDetector
 
 scales = [1200, 1600]
+#scales = [600, 1200]
 t = 2
 detector = SSHDetector('./model/e2ef', 0)
 
@@ -30,7 +31,7 @@ if im_size_min>target_size or im_size_max>max_size:
 for i in xrange(t-1): #warmup
   faces = detector.detect(img)
 timea = datetime.datetime.now()
-faces = detector.detect(img)
+faces = detector.detect(img, threshold=0.5)
 timeb = datetime.datetime.now()
 diff = timeb - timea
 print('detection uses', diff.total_seconds(), 'seconds')
