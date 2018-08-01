@@ -36,7 +36,7 @@ for ds in targets:
       lmk = np.array([float(x) for x in vec[1:]], dtype=np.float32)
     lmk = lmk.reshape( (5,2) ).T
     lmk_str = "\t".join( [str(x) for x in lmk.flatten()] )
-    print("0\t%s\t%d\t0\t0\t0\t0\t%s"%(image_file, vlabel, lmk_str))
+    print("%s\t%d\t0\t0\t0\t0\t%s\t0"%(image_file, vlabel, lmk_str))
     #if idx>10:
     #  break
 
