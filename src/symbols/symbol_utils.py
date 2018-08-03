@@ -13,6 +13,11 @@ def Act(data, act_type, name):
     body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
     return body
 
+bn_mom = 0.9
+def Linear(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
+    conv = mx.sym.Convolution(data=data, num_filter=num_filter, kernel=kernel, num_group=num_group, stride=stride, pad=pad, no_bias=True, name='%s%s_conv2d' %(name, suffix))
+    bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=False,momentum=bn_mom)    
+    return bn
 
 def get_fc1(last_conv, num_classes, fc_type):
   bn_mom = 0.9
@@ -26,6 +31,42 @@ def get_fc1(last_conv, num_classes, fc_type):
     body = mx.symbol.Dropout(data=body, p=0.4)
     fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
     fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
+  elif fc_type=='GAP':
+    bn1 = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
+    relu1 = Act(data=bn1, act_type='relu', name='relu1')
+    # Although kernel is not used here when global_pool=True, we should put one
+    pool1 = mx.sym.Pooling(data=relu1, global_pool=True, kernel=(7, 7), pool_type='avg', name='pool1')
+    flat = mx.sym.Flatten(data=pool1)
+    fc1 = mx.sym.FullyConnected(data=flat, num_hidden=num_classes, name='pre_fc1')
+    fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
+  elif fc_type=='GNAP': #mobilefacenet++
+    filters_in = 512 # param in mobilefacenet
+    if num_classes>filters_in:
+      body = mx.sym.Convolution(data=last_conv, num_filter=num_classes, kernel=(1,1), stride=(1,1), pad=(0,0), no_bias=True, name='convx')
+      body = Act(data=body, act_type='relu', name='convx_relu')
+      filters_in = num_classes
+    else:
+      body = last_conv
+    conv_6_sep = mx.sym.BatchNorm(data=body, fix_gamma=True, eps=2e-5, momentum=0.9, name='bn6f')  
+    spatial_norm=conv_6_sep*conv_6_sep
+    spatial_norm=mx.sym.sum(data=spatial_norm, axis=1, keepdims=True)
+    spatial_sqrt=mx.sym.sqrt(spatial_norm)
+    spatial_mean=mx.sym.mean(spatial_sqrt)
+    spatial_div_inverse=mx.sym.broadcast_div(spatial_mean, spatial_sqrt)
+    #spatial_attention_inverse=mx.symbol.tile(spatial_div_inverse, reps=(1,filters_in,1,1))
+    #attention_re=body*spatial_attention_inverse
+    body = mx.sym.broadcast_mul(body, spatial_div_inverse)
+    fc1 = mx.sym.Pooling(body, kernel=(7, 7), global_pool=True, pool_type='avg')
+    if num_classes<filters_in:
+      fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=0.9, name='bn6w')
+      fc1 = mx.sym.FullyConnected(data=fc1, num_hidden=num_classes, name='pre_fc1')
+    else:
+      fc1 = mx.sym.Flatten(data=fc1)
+    fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=0.9, name='fc1')
+  elif fc_type=="GDC": #mobilefacenet_v1
+    conv_6_dw = Linear(last_conv, num_filter=512, num_group=512, kernel=(7,7), pad=(0, 0), stride=(1, 1), name="conv_6dw7_7")  
+    conv_6_f = mx.sym.FullyConnected(data=conv_6_dw, num_hidden=num_classes, name='pre_fc1')
+    fc1 = mx.sym.BatchNorm(data=conv_6_f, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
   elif fc_type=='F':
     body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
     body = mx.symbol.Dropout(data=body, p=0.4)
