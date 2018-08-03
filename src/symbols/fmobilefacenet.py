@@ -46,6 +46,9 @@ def get_symbol(num_classes, **kwargs):
     global bn_mom
     bn_mom = kwargs.get('bn_mom', 0.9)
     wd_mult = kwargs.get('wd_mult', 1.)
+    version_output = kwargs.get('version_output', 'GNAP')
+    assert version_output=='GDC' or version_output=='GNAP'
+    fc_type = version_output
     data = mx.symbol.Variable(name="data")
     data = data-127.5
     data = data*0.0078125
@@ -57,13 +60,8 @@ def get_symbol(num_classes, **kwargs):
     conv_4 = Residual(conv_34, num_block=6, num_out=128, kernel=(3, 3), stride=(1, 1), pad=(1, 1), num_group=256, name="res_4")
     conv_45 = DResidual(conv_4, num_out=128, kernel=(3, 3), stride=(2, 2), pad=(1, 1), num_group=512, name="dconv_45")
     conv_5 = Residual(conv_45, num_block=2, num_out=128, kernel=(3, 3), stride=(1, 1), pad=(1, 1), num_group=256, name="res_5")
-    
     conv_6_sep = Conv(conv_5, num_filter=512, kernel=(1, 1), pad=(0, 0), stride=(1, 1), name="conv_6sep")
-    conv_6_dw = Linear(conv_6_sep, num_filter=512, num_group=512, kernel=(7,7), pad=(0, 0), stride=(1, 1), name="conv_6dw7_7")  
-    #conv_6_dw = mx.symbol.Dropout(data=conv_6_dw, p=0.4)
-    _weight = mx.symbol.Variable("fc1_weight", shape=(num_classes, 512), lr_mult=1.0, wd_mult=wd_mult)
 
-    conv_6_f = mx.sym.FullyConnected(data=conv_6_dw, weight=_weight, num_hidden=num_classes, name='pre_fc1')
-    fc1 = mx.sym.BatchNorm(data=conv_6_f, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
+    fc1 = symbol_utils.get_fc1(conv_6_sep, num_classes, fc_type)
     return fc1
 
