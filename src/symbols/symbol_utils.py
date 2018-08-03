@@ -43,6 +43,7 @@ def get_fc1(last_conv, num_classes, fc_type):
     filters_in = 512 # param in mobilefacenet
     if num_classes>filters_in:
       body = mx.sym.Convolution(data=last_conv, num_filter=num_classes, kernel=(1,1), stride=(1,1), pad=(0,0), no_bias=True, name='convx')
+      body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=0.9, name='convx_bn')
       body = Act(data=body, act_type='relu', name='convx_relu')
       filters_in = num_classes
     else:
