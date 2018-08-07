@@ -329,7 +329,7 @@ def train_net(args):
       global_step[0]+=1
       mbatch = global_step[0]
       for _lr in lr_steps:
-        if mbatch==args.beta_freeze+_lr:
+        if mbatch==_lr:
           opt.lr *= 0.1
           print('lr change to', opt.lr)
           break
