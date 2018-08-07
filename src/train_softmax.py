@@ -103,6 +103,7 @@ def parse_args():
   parser.add_argument('--lr-steps', type=str, default='', help='steps of lr changing')
   parser.add_argument('--wd', type=float, default=0.0005, help='weight decay')
   parser.add_argument('--fc7-wd-mult', type=float, default=1.0, help='weight decay mult for fc7')
+  parser.add_argument('--fc7-lr-mult', type=float, default=1.0, help='lr mult for fc7')
   parser.add_argument('--bn-mom', type=float, default=0.9, help='bn mom')
   parser.add_argument('--mom', type=float, default=0.9, help='momentum')
   parser.add_argument('--emb-size', type=int, default=512, help='embedding length')
@@ -165,7 +166,7 @@ def get_symbol(args, arg_params, aux_params):
     embedding = spherenet.get_symbol(args.emb_size, args.num_layers)
   elif args.network[0]=='y':
     print('init mobilefacenet', args.num_layers)
-    embedding = fmobilefacenet.get_symbol(args.emb_size, bn_mom = args.bn_mom, wd_mult = args.fc7_wd_mult)
+    embedding = fmobilefacenet.get_symbol(args.emb_size, bn_mom = args.bn_mom, version_output=args.version_output)
   else:
     print('init resnet', args.num_layers)
     embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
@@ -175,7 +176,7 @@ def get_symbol(args, arg_params, aux_params):
   all_label = mx.symbol.Variable('softmax_label')
   gt_label = all_label
   extra_loss = None
-  _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=1.0, wd_mult=args.fc7_wd_mult)
+  _weight = mx.symbol.Variable("fc7_weight", shape=(args.num_classes, args.emb_size), lr_mult=args.fc7_lr_mult, wd_mult=args.fc7_wd_mult)
   if args.loss_type==0: #softmax
     _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
     fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=args.num_classes, name='fc7')
@@ -459,6 +460,7 @@ def train_net(args):
         sys.exit(0)
 
     epoch_cb = None
+    train_dataiter = mx.io.PrefetchingIter(train_dataiter)
 
     model.fit(train_dataiter,
         begin_epoch        = begin_epoch,

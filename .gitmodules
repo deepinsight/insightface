@@ -1,0 +1,3 @@
+[submodule "alignment/SDUNet"]
+	path = alignment/SDUNet
+	url = https://github.com/deepinsight/SDUNet
