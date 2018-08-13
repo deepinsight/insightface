@@ -514,23 +514,28 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
     num_unit = len(units)
     assert(num_unit == num_stages)
     data = mx.sym.Variable(name='data')
-    data = mx.sym.identity(data=data, name='id')
-    data = data-127.5
-    data = data*0.0078125
-    #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
     if version_input==0:
+      data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
       body = Conv(data=data, num_filter=filter_list[0], kernel=(7, 7), stride=(2,2), pad=(3, 3),
                                 no_bias=True, name="conv0", workspace=workspace)
       body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
       body = Act(data=body, act_type=act_type, name='relu0')
       body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
+    elif version_input==2:
+      data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
+      body = Conv(data=data, num_filter=filter_list[0], kernel=(3,3), stride=(1,1), pad=(1,1),
+                                no_bias=True, name="conv0", workspace=workspace)
+      body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
+      body = Act(data=body, act_type=act_type, name='relu0')
     else:
+      data = mx.sym.identity(data=data, name='id')
+      data = data-127.5
+      data = data*0.0078125
       body = data
       body = Conv(data=body, num_filter=filter_list[0], kernel=(3,3), stride=(1,1), pad=(1, 1),
                                 no_bias=True, name="conv0", workspace=workspace)
       body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
       body = Act(data=body, act_type=act_type, name='relu0')
-      #body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
 
     for i in range(num_stages):
       if version_input==0:
