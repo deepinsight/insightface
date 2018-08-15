@@ -64,7 +64,7 @@ def parse_args():
   parser.add_argument('--data-dir', default='', help='training set directory')
   parser.add_argument('--prefix', default='../model/model', help='directory to save model.')
   parser.add_argument('--pretrained', default='', help='pretrained model to load')
-  parser.add_argument('--ckpt', type=int, default=1, help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
+  parser.add_argument('--ckpt', type=int, default=2, help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
   parser.add_argument('--network', default='r50', help='specify network')
   parser.add_argument('--version-se', type=int, default=0, help='whether to use se in network')
   parser.add_argument('--version-input', type=int, default=1, help='network input config')
@@ -78,7 +78,7 @@ def parse_args():
   parser.add_argument('--mom', type=float, default=0.9, help='momentum')
   parser.add_argument('--emb-size', type=int, default=512, help='embedding length')
   parser.add_argument('--per-batch-size', type=int, default=128, help='batch size in each context')
-  parser.add_argument('--images-per-identity', type=int, default=0, help='')
+  parser.add_argument('--images-per-identity', type=int, default=5, help='')
   parser.add_argument('--triplet-bag-size', type=int, default=3600, help='')
   parser.add_argument('--triplet-alpha', type=float, default=0.3, help='')
   parser.add_argument('--triplet-max-ap', type=float, default=0.0, help='')
@@ -87,7 +87,6 @@ def parse_args():
   parser.add_argument('--use-deformable', type=int, default=0, help='')
   parser.add_argument('--rand-mirror', type=int, default=1, help='')
   parser.add_argument('--cutoff', type=int, default=0, help='')
-  parser.add_argument('--patch', type=str, default='0_0_96_112_0',help='')
   parser.add_argument('--lr-steps', type=str, default='', help='')
   parser.add_argument('--max-steps', type=int, default=0, help='')
   parser.add_argument('--target', type=str, default='lfw,cfp_fp,agedb_30', help='')
@@ -95,49 +94,49 @@ def parse_args():
   return args
 
 
-def get_symbol(args, arg_params, aux_params):
-  data_shape = (args.image_channel,args.image_h,args.image_w)
-  image_shape = ",".join([str(x) for x in data_shape])
-  margin_symbols = []
-  if args.network[0]=='d':
-    embedding = fdensenet.get_symbol(args.emb_size, args.num_layers,
-        version_se=args.version_se, version_input=args.version_input, 
-        version_output=args.version_output, version_unit=args.version_unit)
-  elif args.network[0]=='m':
-    print('init mobilenet', args.num_layers)
-    if args.num_layers==1:
-      embedding = fmobilenet.get_symbol(args.emb_size, 
+def get_symbol(args, arg_params, aux_params, sym_embedding=None):
+  if sym_embedding is None:
+    if args.network[0]=='d':
+      embedding = fdensenet.get_symbol(args.emb_size, args.num_layers,
           version_se=args.version_se, version_input=args.version_input, 
           version_output=args.version_output, version_unit=args.version_unit)
+    elif args.network[0]=='m':
+      print('init mobilenet', args.num_layers)
+      if args.num_layers==1:
+        embedding = fmobilenet.get_symbol(args.emb_size, 
+            version_se=args.version_se, version_input=args.version_input, 
+            version_output=args.version_output, version_unit=args.version_unit)
+      else:
+        embedding = fmobilenetv2.get_symbol(args.emb_size)
+    elif args.network[0]=='i':
+      print('init inception-resnet-v2', args.num_layers)
+      embedding = finception_resnet_v2.get_symbol(args.emb_size,
+          version_se=args.version_se, version_input=args.version_input, 
+          version_output=args.version_output, version_unit=args.version_unit)
+    elif args.network[0]=='x':
+      print('init xception', args.num_layers)
+      embedding = fxception.get_symbol(args.emb_size,
+          version_se=args.version_se, version_input=args.version_input, 
+          version_output=args.version_output, version_unit=args.version_unit)
+    elif args.network[0]=='p':
+      print('init dpn', args.num_layers)
+      embedding = fdpn.get_symbol(args.emb_size, args.num_layers,
+          version_se=args.version_se, version_input=args.version_input, 
+          version_output=args.version_output, version_unit=args.version_unit)
+    elif args.network[0]=='n':
+      print('init nasnet', args.num_layers)
+      embedding = fnasnet.get_symbol(args.emb_size)
+    elif args.network[0]=='s':
+      print('init spherenet', args.num_layers)
+      embedding = spherenet.get_symbol(args.emb_size, args.num_layers)
     else:
-      embedding = fmobilenetv2.get_symbol(args.emb_size)
-  elif args.network[0]=='i':
-    print('init inception-resnet-v2', args.num_layers)
-    embedding = finception_resnet_v2.get_symbol(args.emb_size,
-        version_se=args.version_se, version_input=args.version_input, 
-        version_output=args.version_output, version_unit=args.version_unit)
-  elif args.network[0]=='x':
-    print('init xception', args.num_layers)
-    embedding = fxception.get_symbol(args.emb_size,
-        version_se=args.version_se, version_input=args.version_input, 
-        version_output=args.version_output, version_unit=args.version_unit)
-  elif args.network[0]=='p':
-    print('init dpn', args.num_layers)
-    embedding = fdpn.get_symbol(args.emb_size, args.num_layers,
-        version_se=args.version_se, version_input=args.version_input, 
-        version_output=args.version_output, version_unit=args.version_unit)
-  elif args.network[0]=='n':
-    print('init nasnet', args.num_layers)
-    embedding = fnasnet.get_symbol(args.emb_size)
-  elif args.network[0]=='s':
-    print('init spherenet', args.num_layers)
-    embedding = spherenet.get_symbol(args.emb_size, args.num_layers)
+      print('init resnet', args.num_layers)
+      embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
+          version_se=args.version_se, version_input=args.version_input, 
+          version_output=args.version_output, version_unit=args.version_unit,
+          version_act=args.version_act)
   else:
-    print('init resnet', args.num_layers)
-    embedding = fresnet.get_symbol(args.emb_size, args.num_layers, 
-        version_se=args.version_se, version_input=args.version_input, 
-        version_output=args.version_output, version_unit=args.version_unit,
-        version_act=args.version_act)
+    embedding = sym_embedding
 
   gt_label = mx.symbol.Variable('softmax_label')
   nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
@@ -182,19 +181,14 @@ def train_net(args):
     if args.per_batch_size==0:
       args.per_batch_size = 128
     args.batch_size = args.per_batch_size*args.ctx_num
-    args.rescale_threshold = 0
     args.image_channel = 3
-    ppatch = [int(x) for x in args.patch.split('_')]
-    assert len(ppatch)==5
 
 
     data_dir_list = args.data_dir.split(',')
     assert len(data_dir_list)==1
     data_dir = data_dir_list[0]
-    args.use_val = False
     path_imgrec = None
     path_imglist = None
-    val_rec = None
     prop = face_image.load_property(data_dir)
     args.num_classes = prop.num_classes
     image_size = prop.image_size
@@ -207,13 +201,9 @@ def train_net(args):
 
     #path_imglist = "/raid5data/dplearn/MS-Celeb-Aligned/lst2"
     path_imgrec = os.path.join(data_dir, "train.rec")
-    val_rec = None
 
-    if args.images_per_identity==0:
-      args.images_per_identity = 5
     assert args.images_per_identity>=2
     assert args.triplet_bag_size%args.batch_size==0
-    args.per_identities = int(args.per_batch_size/args.images_per_identity)
 
     print('Called with argument:', args)
 
@@ -234,8 +224,10 @@ def train_net(args):
     else:
       vec = args.pretrained.split(',')
       print('loading', vec)
-      _, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
-      sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
+      sym, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
+      all_layers = sym.get_internals()
+      sym = all_layers['fc1_output']
+      sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params, sym_embedding = sym)
     if args.network[0]=='s':
       data_shape_dict = {'data' : (args.per_batch_size,)+data_shape}
       spherenet.init_weights(sym, data_shape_dict, args.num_layers)
@@ -315,12 +307,7 @@ def train_net(args):
     global_step = [0]
     save_step = [0]
     if len(args.lr_steps)==0:
-      lr_steps = [40000, 60000, 80000]
-      if args.loss_type>=1 and args.loss_type<=7:
-        lr_steps = [100000, 140000, 160000]
-      p = 512.0/args.batch_size
-      for l in xrange(len(lr_steps)):
-        lr_steps[l] = int(lr_steps[l]*p)
+      lr_steps = [1000000000]
     else:
       lr_steps = [int(x) for x in args.lr_steps.split(',')]
     print('lr_steps', lr_steps)
