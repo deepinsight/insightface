@@ -221,6 +221,9 @@ def train_net(args):
       arg_params = None
       aux_params = None
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
+      if args.network[0]=='s':
+        data_shape_dict = {'data' : (args.per_batch_size,)+data_shape}
+        spherenet.init_weights(sym, data_shape_dict, args.num_layers)
     else:
       vec = args.pretrained.split(',')
       print('loading', vec)
@@ -228,9 +231,6 @@ def train_net(args):
       all_layers = sym.get_internals()
       sym = all_layers['fc1_output']
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params, sym_embedding = sym)
-    if args.network[0]=='s':
-      data_shape_dict = {'data' : (args.per_batch_size,)+data_shape}
-      spherenet.init_weights(sym, data_shape_dict, args.num_layers)
 
     data_extra = None
     hard_mining = False
