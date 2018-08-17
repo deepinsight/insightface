@@ -337,9 +337,6 @@ def train_net(args):
       print('loading', vec)
       _, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
       sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
-    if args.network[0]=='s':
-      data_shape_dict = {'data' : (args.per_batch_size,)+data_shape}
-      spherenet.init_weights(sym, data_shape_dict, args.num_layers)
 
     #label_name = 'softmax_label'
     #label_shape = (args.batch_size,)
