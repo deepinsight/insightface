@@ -124,6 +124,7 @@ def parse_args():
   parser.add_argument('--rand-mirror', type=int, default=1, help='if do random mirror in training')
   parser.add_argument('--cutoff', type=int, default=0, help='cut off aug')
   parser.add_argument('--target', type=str, default='lfw,cfp_fp,agedb_30', help='verification targets')
+  parser.add_argument('--ce-loss', default=False, action='store_true', help='if output ce loss')
   args = parser.parse_args()
   return args
 
@@ -272,6 +273,14 @@ def get_symbol(args, arg_params, aux_params):
   out_list = [mx.symbol.BlockGrad(embedding)]
   softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
   out_list.append(softmax)
+  if args.ce_loss:
+    #ce_loss = mx.symbol.softmax_cross_entropy(data=fc7, label = gt_label, name='ce_loss')/args.per_batch_size
+    body = mx.symbol.SoftmaxActivation(data=fc7)
+    body = mx.symbol.log(body)
+    _label = mx.sym.one_hot(gt_label, depth = args.num_classes, on_value = -1.0, off_value = 0.0)
+    body = body*_label
+    ce_loss = mx.symbol.sum(body)/args.per_batch_size
+    out_list.append(mx.symbol.BlockGrad(ce_loss))
   out = mx.symbol.Group(out_list)
   return (out, arg_params, aux_params)
 
@@ -356,11 +365,11 @@ def train_net(args):
         cutoff               = args.cutoff,
     )
 
-    if args.loss_type<10:
-      _metric = AccMetric()
-    else:
-      _metric = LossValueMetric()
-    eval_metrics = [mx.metric.create(_metric)]
+    metric1 = AccMetric()
+    eval_metrics = [mx.metric.create(metric1)]
+    if args.ce_loss:
+      metric2 = LossValueMetric()
+      eval_metrics.append( mx.metric.create(metric2) )
 
     if args.network[0]=='r' or args.network[0]=='y':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
