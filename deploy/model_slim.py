@@ -27,5 +27,5 @@ for k,v in arg_params.iteritems():
     dellist.append(k)
 for d in dellist:
   del arg_params[d]
-mx.model.save_checkpoint(prefix, 0, sym, arg_params, aux_params)
+mx.model.save_checkpoint(prefix+"s", 0, sym, arg_params, aux_params)
 
