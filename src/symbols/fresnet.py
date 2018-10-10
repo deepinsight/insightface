@@ -515,12 +515,15 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
     assert(num_unit == num_stages)
     data = mx.sym.Variable(name='data')
     if version_input==0:
-      data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
+      #data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
+      data = mx.sym.identity(data=data, name='id')
+      data = data-127.5
+      data = data*0.0078125
       body = Conv(data=data, num_filter=filter_list[0], kernel=(7, 7), stride=(2,2), pad=(3, 3),
                                 no_bias=True, name="conv0", workspace=workspace)
       body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn0')
       body = Act(data=body, act_type=act_type, name='relu0')
-      body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
+      #body = mx.sym.Pooling(data=body, kernel=(3, 3), stride=(2,2), pad=(1,1), pool_type='max')
     elif version_input==2:
       data = mx.sym.BatchNorm(data=data, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='bn_data')
       body = Conv(data=data, num_filter=filter_list[0], kernel=(3,3), stride=(1,1), pad=(1,1),
@@ -538,12 +541,14 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
       body = Act(data=body, act_type=act_type, name='relu0')
 
     for i in range(num_stages):
-      if version_input==0:
-        body = residual_unit(body, filter_list[i+1], (1 if i==0 else 2, 1 if i==0 else 2), False,
-                             name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
-      else:
-        body = residual_unit(body, filter_list[i+1], (2, 2), False,
-          name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
+      #if version_input==0:
+      #  body = residual_unit(body, filter_list[i+1], (1 if i==0 else 2, 1 if i==0 else 2), False,
+      #                       name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
+      #else:
+      #  body = residual_unit(body, filter_list[i+1], (2, 2), False,
+      #    name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
+      body = residual_unit(body, filter_list[i+1], (2, 2), False,
+        name='stage%d_unit%d' % (i + 1, 1), bottle_neck=bottle_neck, **kwargs)
       for j in range(units[i]-1):
         body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
           bottle_neck=bottle_neck, **kwargs)
@@ -577,6 +582,8 @@ def get_symbol(num_classes, num_layers, **kwargs):
         units = [3, 8, 30, 3]
     elif num_layers == 100:
         units = [3, 13, 30, 3]
+    elif num_layers == 124:
+        units = [3, 13, 40, 5]
     elif num_layers == 101:
         units = [3, 4, 23, 3]
     elif num_layers == 152:
