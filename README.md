@@ -46,7 +46,7 @@ The code of InsightFace is released under the MIT License.
 
 In this repository, we provide training data, network settings and loss designs for deep face recognition.
 The training data includes the normalised MS1M and VGG2 datasets, which were already packed in the MxNet binary format.
-The network backbones include ResNet, InceptionResNet_v2, DenseNet, DPN and MobiletNet.
+The network backbones include ResNet, InceptionResNet_v2, DenseNet, DPN and MobileNet.
 The loss functions include Softmax, SphereFace, CosineFace, ArcFace and Triplet (Euclidean/Angular) Loss.
 * loss-type=0:  Softmax
 * loss-type=1:  SphereFace
