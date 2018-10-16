@@ -9,7 +9,7 @@ The code of InsightFace is released under the MIT License.
 
 ## Recent Update
 
-**`2018.10.16`**: We got Rank 1st on the [IQIYI_VID](http://challenge.ai.iqiyi.com/detail?raceId=5afc36639689443e8f815f9e)(IQIYI video person identification) competition which in conjunction with PRCV2018, with team name ```_____WitcheR```
+**`2018.10.16`**: We got Rank 1st on the [IQIYI_VID](http://challenge.ai.iqiyi.com/detail?raceId=5afc36639689443e8f815f9e)(IQIYI video person identification) competition which in conjunction with PRCV2018, with team name ```_____WitcheR``` .
 
 **`2018.07.17`**: [Model-Zoo](https://github.com/deepinsight/insightface/wiki/Model-Zoo), [Dataset-Zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo)
 
