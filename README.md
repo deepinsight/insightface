@@ -26,7 +26,7 @@ The code of InsightFace is released under the MIT License.
 ## Contents
 [Deep Face Recognition](#deep-face-recognition)
 - [Introduction](#introduction)
-- [Training Data](#training-Data)
+- [Training Data](#training-data)
 - [Train](#train)
 - [Pretrained Models](#pretrained-models)
 - [Verification Results On Combined Margin](#verification-results-on-combined-margin)
@@ -65,11 +65,16 @@ Our method, ArcFace, was initially described in an [arXiv technical report](http
 
 All face images are aligned by [MTCNN](https://kpzhang93.github.io/MTCNN_face_detection_alignment/index.html) and cropped to 112x112:
 
-* [Refined-MS1M@BaiduDrive](https://pan.baidu.com/s/1nxmSCch), [Refined-MS1M@GoogleDrive](https://drive.google.com/file/d/1XRdCt3xOw7B3saw0xUSzLRub_HI4Jbk3/view)
-* [VGGFace2@BaiduDrive](https://pan.baidu.com/s/1c3KeLzy), [VGGFace2@GoogleDrive](https://drive.google.com/open?id=1KORwx_DWyIScAjD6vbo4CSRu048APoum)
-* Please check *src/data/face2rec2.py* on how to build a binary face dataset. Any public available *MTCNN* can be used to align the faces, and the performance should not change. We will improve the face normalisation step by full pose alignment methods recently.
+Please check [Dataset-Zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo) for detail information and downloading.
 
-**Note:** If you use the refined [MS1M](https://arxiv.org/abs/1607.08221) dataset and the cropped [VGG2](https://arxiv.org/abs/1710.08092) dataset, please cite the original papers.
+
+* ~~[Refined-MS1M@BaiduDrive](https://pan.baidu.com/s/1nxmSCch), [Refined-MS1M@GoogleDrive](https://drive.google.com/file/d/1XRdCt3xOw7B3saw0xUSzLRub_HI4Jbk3/view)~~
+* ~~[VGGFace2@BaiduDrive](https://pan.baidu.com/s/1c3KeLzy), [VGGFace2@GoogleDrive](https://drive.google.com/open?id=1KORwx_DWyIScAjD6vbo4CSRu048APoum)~~
+
+~~**Note:** If you use the refined [MS1M](https://arxiv.org/abs/1607.08221) dataset and the cropped [VGG2](https://arxiv.org/abs/1710.08092) dataset, please cite the original papers.~~
+
+
+* Please check *src/data/face2rec2.py* on how to build a binary face dataset. Any public available *MTCNN* can be used to align the faces, and the performance should not change. We will improve the face normalisation step by full pose alignment methods recently.
 
 ### Train
 
@@ -165,6 +170,8 @@ We report the verification accuracy after removing training set overlaps to stri
 ### Pretrained Models
 
 You can use `$INSIGHTFACE/src/eval/verification.py` to test all the pre-trained models.
+
+**Please check [Model-Zoo](https://github.com/deepinsight/insightface/wiki/Model-Zoo) for more pretrained models.**
 
 1. [LResNet50E-IR@BaiduDrive](https://pan.baidu.com/s/1mj6X7MK), [@GoogleDrive](https://drive.google.com/open?id=1x0-EiYX9jMUKiq-n1Bd9OCK4fVB3a54v)
 Performance:
