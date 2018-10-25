@@ -12,6 +12,8 @@ import sklearn
 import datetime
 import numpy as np
 import cv2
+from PIL import Image
+from io import BytesIO
 
 import mxnet as mx
 from mxnet import ndarray as nd
@@ -29,7 +31,7 @@ class FaceImageIter(io.DataIter):
     def __init__(self, batch_size, data_shape,
                  path_imgrec = None,
                  shuffle=False, aug_list=None, mean = None,
-                 rand_mirror = False, cutoff = 0,
+                 rand_mirror = False, cutoff = 0, color_jittering = 0,
                  data_name='data', label_name='softmax_label', **kwargs):
         super(FaceImageIter, self).__init__()
         assert path_imgrec
@@ -78,6 +80,8 @@ class FaceImageIter(io.DataIter):
         self.rand_mirror = rand_mirror
         print('rand_mirror', rand_mirror)
         self.cutoff = cutoff
+        self.color_jittering = color_jittering
+        self.CJA = mx.image.ColorJitterAug(0.125, 0.125, 0.125)
         self.provide_label = [(label_name, (batch_size,))]
         #print(self.provide_label[0][1])
         self.cur = 0
@@ -130,31 +134,32 @@ class FaceImageIter(io.DataIter):
 
     def contrast_aug(self, src, x):
       alpha = 1.0 + random.uniform(-x, x)
-      coef = np.array([[[0.299, 0.587, 0.114]]])
+      coef = nd.array([[[0.299, 0.587, 0.114]]])
       gray = src * coef
-      gray = (3.0 * (1.0 - alpha) / gray.size) * np.sum(gray)
+      gray = (3.0 * (1.0 - alpha) / gray.size) * nd.sum(gray)
       src *= alpha
       src += gray
       return src
 
     def saturation_aug(self, src, x):
       alpha = 1.0 + random.uniform(-x, x)
-      coef = np.array([[[0.299, 0.587, 0.114]]])
+      coef = nd.array([[[0.299, 0.587, 0.114]]])
       gray = src * coef
-      gray = np.sum(gray, axis=2, keepdims=True)
+      gray = nd.sum(gray, axis=2, keepdims=True)
       gray *= (1.0 - alpha)
       src *= alpha
       src += gray
       return src
 
     def color_aug(self, img, x):
-      augs = [self.brightness_aug, self.contrast_aug, self.saturation_aug]
-      random.shuffle(augs)
-      for aug in augs:
-        #print(img.shape)
-        img = aug(img, x)
-        #print(img.shape)
-      return img
+      #augs = [self.brightness_aug, self.contrast_aug, self.saturation_aug]
+      #random.shuffle(augs)
+      #for aug in augs:
+      #  #print(img.shape)
+      #  img = aug(img, x)
+      #  #print(img.shape)
+      #return img
+      return self.CJA(img)
 
     def mirror_aug(self, img):
       _rd = random.randint(0,1)
@@ -162,6 +167,15 @@ class FaceImageIter(io.DataIter):
         for c in xrange(img.shape[2]):
           img[:,:,c] = np.fliplr(img[:,:,c])
       return img
+
+    def compress_aug(self, img):
+      buf = BytesIO()
+      img = Image.fromarray(img.asnumpy(), 'RGB')
+      q = random.randint(2, 20)
+      img.save(buf, format='JPEG', quality=q)
+      buf = buf.getvalue()
+      img = Image.open(BytesIO(buf))
+      return nd.array(np.asarray(img, 'float32'))
 
 
     def next(self):
@@ -185,21 +199,32 @@ class FaceImageIter(io.DataIter):
                   _rd = random.randint(0,1)
                   if _rd==1:
                     _data = mx.ndarray.flip(data=_data, axis=1)
+                if self.color_jittering>0:
+                  if self.color_jittering>1:
+                    _rd = random.randint(0,1)
+                    if _rd==1:
+                      _data = self.compress_aug(_data)
+                  #print('do color aug')
+                  _data = _data.astype('float32', copy=False)
+                  #print(_data.__class__)
+                  _data = self.color_aug(_data, 0.125)
                 if self.nd_mean is not None:
-                    _data = _data.astype('float32')
-                    _data -= self.nd_mean
-                    _data *= 0.0078125
+                  _data = _data.astype('float32', copy=False)
+                  _data -= self.nd_mean
+                  _data *= 0.0078125
                 if self.cutoff>0:
-                  centerh = random.randint(0, _data.shape[0]-1)
-                  centerw = random.randint(0, _data.shape[1]-1)
-                  half = self.cutoff//2
-                  starth = max(0, centerh-half)
-                  endh = min(_data.shape[0], centerh+half)
-                  startw = max(0, centerw-half)
-                  endw = min(_data.shape[1], centerw+half)
-                  _data = _data.astype('float32')
-                  #print(starth, endh, startw, endw, _data.shape)
-                  _data[starth:endh, startw:endw, :] = 127.5
+                  _rd = random.randint(0,1)
+                  if _rd==1:
+                    #print('do cutoff aug', self.cutoff)
+                    centerh = random.randint(0, _data.shape[0]-1)
+                    centerw = random.randint(0, _data.shape[1]-1)
+                    half = self.cutoff//2
+                    starth = max(0, centerh-half)
+                    endh = min(_data.shape[0], centerh+half)
+                    startw = max(0, centerw-half)
+                    endw = min(_data.shape[1], centerw+half)
+                    #print(starth, endh, startw, endw, _data.shape)
+                    _data[starth:endh, startw:endw, :] = 128
                 data = [_data]
                 try:
                     self.check_valid_image(data)

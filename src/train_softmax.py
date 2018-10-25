@@ -123,6 +123,7 @@ def parse_args():
   parser.add_argument('--scale', type=float, default=0.9993, help='param for sphere')
   parser.add_argument('--rand-mirror', type=int, default=1, help='if do random mirror in training')
   parser.add_argument('--cutoff', type=int, default=0, help='cut off aug')
+  parser.add_argument('--color', type=int, default=0, help='color jittering aug')
   parser.add_argument('--target', type=str, default='lfw,cfp_fp,agedb_30', help='verification targets')
   parser.add_argument('--ce-loss', default=False, action='store_true', help='if output ce loss')
   args = parser.parse_args()
@@ -363,6 +364,7 @@ def train_net(args):
         rand_mirror          = args.rand_mirror,
         mean                 = mean,
         cutoff               = args.cutoff,
+        color_jittering      = args.color,
     )
 
     metric1 = AccMetric()
