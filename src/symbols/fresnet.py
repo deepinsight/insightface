@@ -479,10 +479,7 @@ def residual_unit(data, num_filter, stride, dim_match, name, bottle_neck, **kwar
   elif uv==4:
     return residual_unit_v4(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs)
   else:
-    if version_input<=1:
-      return residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs)
-    else:
-      return residual_unit_v3_x(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs)
+    return residual_unit_v3(data, num_filter, stride, dim_match, name, bottle_neck, **kwargs)
 
 def resnet(units, num_stages, filter_list, num_classes, bottle_neck, **kwargs):
     bn_mom = kwargs.get('bn_mom', 0.9)
