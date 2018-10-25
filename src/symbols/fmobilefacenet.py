@@ -47,7 +47,7 @@ def get_symbol(num_classes, **kwargs):
     bn_mom = kwargs.get('bn_mom', 0.9)
     wd_mult = kwargs.get('wd_mult', 1.)
     version_output = kwargs.get('version_output', 'GNAP')
-    assert version_output=='GDC' or version_output=='GNAP'
+    #assert version_output=='GDC' or version_output=='GNAP'
     fc_type = version_output
     data = mx.symbol.Variable(name="data")
     data = data-127.5
