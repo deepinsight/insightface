@@ -195,6 +195,8 @@ class FaceImageIter(io.DataIter):
             while i < batch_size:
                 label, s, bbox, landmark = self.next_sample()
                 _data = self.imdecode(s)
+                if _data.shape[0]!=self.data_shape[1]:
+                  _data = mx.image.resize_short(_data, self.data_shape[1])
                 if self.rand_mirror:
                   _rd = random.randint(0,1)
                   if _rd==1:
