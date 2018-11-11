@@ -32,6 +32,7 @@ class FaceImageIter(io.DataIter):
                  path_imgrec = None,
                  shuffle=False, aug_list=None, mean = None,
                  rand_mirror = False, cutoff = 0, color_jittering = 0,
+                 images_filter = 0,
                  data_name='data', label_name='softmax_label', **kwargs):
         super(FaceImageIter, self).__init__()
         assert path_imgrec
@@ -46,15 +47,19 @@ class FaceImageIter(io.DataIter):
               print('header0 label', header.label)
               self.header0 = (int(header.label[0]), int(header.label[1]))
               #assert(header.flag==1)
-              self.imgidx = range(1, int(header.label[0]))
+              #self.imgidx = range(1, int(header.label[0]))
+              self.imgidx = []
               self.id2range = {}
               self.seq_identity = range(int(header.label[0]), int(header.label[1]))
               for identity in self.seq_identity:
                 s = self.imgrec.read_idx(identity)
                 header, _ = recordio.unpack(s)
                 a,b = int(header.label[0]), int(header.label[1])
-                self.id2range[identity] = (a,b)
                 count = b-a
+                if count<images_filter:
+                  continue
+                self.id2range[identity] = (a,b)
+                self.imgidx += range(a, b)
               print('id2range', len(self.id2range))
             else:
               self.imgidx = list(self.imgrec.keys)
