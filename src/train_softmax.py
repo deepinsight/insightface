@@ -98,6 +98,7 @@ def parse_args():
   parser.add_argument('--version-input', type=int, default=1, help='network input config')
   parser.add_argument('--version-output', type=str, default='E', help='network embedding output config')
   parser.add_argument('--version-unit', type=int, default=3, help='resnet unit config')
+  parser.add_argument('--version-multiplier', type=float, default=1.0, help='filters multiplier')
   parser.add_argument('--version-act', type=str, default='prelu', help='network activation config')
   parser.add_argument('--use-deformable', type=int, default=0, help='use deformable cnn in network')
   parser.add_argument('--lr', type=float, default=0.1, help='start learning rate')
@@ -144,8 +145,9 @@ def get_symbol(args, arg_params, aux_params):
     print('init mobilenet', args.num_layers)
     if args.num_layers==1:
       embedding = fmobilenet.get_symbol(args.emb_size, 
-          version_se=args.version_se, version_input=args.version_input, 
-          version_output=args.version_output, version_unit=args.version_unit)
+          version_input=args.version_input, 
+          version_output=args.version_output,
+          version_multiplier = args.version_multiplier)
     else:
       embedding = fmobilenetv2.get_symbol(args.emb_size)
   elif args.network[0]=='i':
@@ -450,6 +452,7 @@ def train_net(args):
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="in", magnitude=2) #inception
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
+    #initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
     _rescale = 1.0/args.ctx_num
     opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
     som = 20
