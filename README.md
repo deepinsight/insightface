@@ -11,7 +11,7 @@ The code of InsightFace is released under the MIT License.
 
 **`2018.10.28`**: [Gender-Age](https://github.com/deepinsight/insightface/tree/master/gender-age) created with a lightweight model. About 1MB size, 10ms on single CPU core.  Gender accuracy 96% on validation set and 4.1 age MAE.
 
-**`2018.10.16`**: We got Rank 1st on the [IQIYI_VID](http://challenge.ai.iqiyi.com/detail?raceId=5afc36639689443e8f815f9e)(IQIYI video person identification) competition which in conjunction with PRCV2018, with team name ```_____WitcheR``` .
+**`2018.10.16`**: We got rank 1st on [IQIYI_VID](http://challenge.ai.iqiyi.com/detail?raceId=5afc36639689443e8f815f9e)(IQIYI video person identification) competition which in conjunction with PRCV2018, see [detail](https://github.com/deepinsight/insightface/issues/439).
 
 **`2018.07.17`**: [Model-Zoo](https://github.com/deepinsight/insightface/wiki/Model-Zoo), [Dataset-Zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo)
 
