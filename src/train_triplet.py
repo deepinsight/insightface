@@ -64,7 +64,7 @@ def parse_args():
   parser.add_argument('--data-dir', default='', help='training set directory')
   parser.add_argument('--prefix', default='../model/model', help='directory to save model.')
   parser.add_argument('--pretrained', default='', help='pretrained model to load')
-  parser.add_argument('--ckpt', type=int, default=2, help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
+  parser.add_argument('--ckpt', type=int, default=3, help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
   parser.add_argument('--network', default='r50', help='specify network')
   parser.add_argument('--version-se', type=int, default=0, help='whether to use se in network')
   parser.add_argument('--version-input', type=int, default=1, help='network input config')
@@ -83,7 +83,7 @@ def parse_args():
   parser.add_argument('--triplet-alpha', type=float, default=0.3, help='')
   parser.add_argument('--triplet-max-ap', type=float, default=0.0, help='')
   parser.add_argument('--verbose', type=int, default=2000, help='')
-  parser.add_argument('--loss-type', type=int, default=12, help='')
+  parser.add_argument('--loss-type', type=int, default=1, help='')
   parser.add_argument('--use-deformable', type=int, default=0, help='')
   parser.add_argument('--rand-mirror', type=int, default=1, help='')
   parser.add_argument('--cutoff', type=int, default=0, help='')
@@ -138,19 +138,30 @@ def get_symbol(args, arg_params, aux_params, sym_embedding=None):
   else:
     embedding = sym_embedding
 
+  assert args.loss_type==1 or args.loss_type==2
   gt_label = mx.symbol.Variable('softmax_label')
   nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
   anchor = mx.symbol.slice_axis(nembedding, axis=0, begin=0, end=args.per_batch_size//3)
   positive = mx.symbol.slice_axis(nembedding, axis=0, begin=args.per_batch_size//3, end=2*args.per_batch_size//3)
   negative = mx.symbol.slice_axis(nembedding, axis=0, begin=2*args.per_batch_size//3, end=args.per_batch_size)
-  ap = anchor - positive
-  an = anchor - negative
-  ap = ap*ap
-  an = an*an
-  ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
-  an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
-  triplet_loss = mx.symbol.Activation(data = (ap-an+args.triplet_alpha), act_type='relu')
-  triplet_loss = mx.symbol.mean(triplet_loss)
+  if args.loss_type==1:
+    ap = anchor - positive
+    an = anchor - negative
+    ap = ap*ap
+    an = an*an
+    ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
+    an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
+    triplet_loss = mx.symbol.Activation(data = (ap-an+args.triplet_alpha), act_type='relu')
+    triplet_loss = mx.symbol.mean(triplet_loss)
+  elif args.loss_type==2:
+    ap = anchor*positive
+    an = anchor*negative
+    ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
+    an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
+    ap = mx.sym.arccos(ap)
+    an = mx.sym.arccos(an)
+    triplet_loss = mx.symbol.Activation(data = (ap-an+args.triplet_alpha), act_type='relu')
+    triplet_loss = mx.symbol.mean(triplet_loss)
   #triplet_loss = mx.symbol.sum(triplet_loss)/(args.per_batch_size//3)
   triplet_loss = mx.symbol.MakeLoss(triplet_loss)
   out_list = [mx.symbol.BlockGrad(embedding)]
@@ -327,32 +338,35 @@ def train_net(args):
         save_step[0]+=1
         msave = save_step[0]
         do_save = False
+        is_highest = False
         if len(acc_list)>0:
-          lfw_score = acc_list[0]
-          if lfw_score>highest_acc[0]:
-            highest_acc[0] = lfw_score
-            if lfw_score>=0.998:
-              do_save = True
+          #lfw_score = acc_list[0]
+          #if lfw_score>highest_acc[0]:
+          #  highest_acc[0] = lfw_score
+          #  if lfw_score>=0.998:
+          #    do_save = True
+          score = sum(acc_list)
           if acc_list[-1]>=highest_acc[-1]:
+            if acc_list[-1]>highest_acc[-1]:
+              is_highest = True
+            else:
+              if score>=highest_acc[0]:
+                is_highest = True
+                highest_acc[0] = score
             highest_acc[-1] = acc_list[-1]
-            if lfw_score>=0.99:
-              do_save = True
+            #if lfw_score>=0.99:
+            #  do_save = True
+        if is_highest:
+          do_save = True
         if args.ckpt==0:
           do_save = False
-        elif args.ckpt>1:
+        elif args.ckpt==2:
           do_save = True
-        #for i in xrange(len(acc_list)):
-        #  acc = acc_list[i]
-        #  if acc>=highest_acc[i]:
-        #    highest_acc[i] = acc
-        #    if lfw_score>=0.99:
-        #      do_save = True
-        #if args.loss_type==1 and mbatch>lr_steps[-1] and mbatch%10000==0:
-        #  do_save = True
+        elif args.ckpt==3:
+          msave = 1
+
         if do_save:
           print('saving', msave)
-          if val_dataiter is not None:
-            val_test()
           arg, aux = model.get_params()
           mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
         print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[-1]))
