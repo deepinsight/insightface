@@ -101,3 +101,5 @@ ENV/
 .mypy_cache/
 
 .idea
+
+model-*
