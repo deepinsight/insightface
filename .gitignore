@@ -103,3 +103,7 @@ ENV/
 .idea
 
 model-*
+
+exam/cfp*
+exam/agedb*
+exam/lfw*

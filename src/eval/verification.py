@@ -523,11 +523,11 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='do verification')
     # general
-    parser.add_argument('--data-dir', default='', help='')
-    parser.add_argument('--model', default='../model/softmax,50', help='path to load model.')
-    parser.add_argument('--target', default='lfw,cfp_ff,cfp_fp,agedb_30', help='test targets.')
+    parser.add_argument('--data-dir', default='/home/lijc08/datasets/glintasia/faces_glintasia', help='')
+    parser.add_argument('--model', default='/home/lijc08/insightface/model-r100-ii/model', help='path to load model.')
+    parser.add_argument('--target', default='lfw', help='test targets.')
     parser.add_argument('--gpu', default=0, type=int, help='gpu id')
-    parser.add_argument('--batch-size', default=32, type=int, help='')
+    parser.add_argument('--batch-size', default=8, type=int, help='')
     parser.add_argument('--max', default='', type=str, help='')
     parser.add_argument('--mode', default=0, type=int, help='')
     parser.add_argument('--nfolds', default=10, type=int, help='')
