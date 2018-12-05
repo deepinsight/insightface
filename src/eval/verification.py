@@ -101,7 +101,8 @@ def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_fold
         for threshold_idx, threshold in enumerate(thresholds):
             _, _, acc_train[threshold_idx] = calculate_accuracy(threshold, dist[train_set], actual_issame[train_set])
         best_threshold_index = np.argmax(acc_train)
-        # print('threshold', thresholds[best_threshold_index])
+        print('threshold', thresholds[best_threshold_index])
+        print('acc_train', acc_train[best_threshold_index])
         for threshold_idx, threshold in enumerate(thresholds):
             tprs[fold_idx, threshold_idx], fprs[fold_idx, threshold_idx], _ = calculate_accuracy(threshold,
                                                                                                  dist[test_set],
@@ -264,7 +265,9 @@ def test(data_set, mx_model, batch_size, nfolds=10, data_extra=None, label_shape
 
     _xnorm = 0.0
     _xnorm_cnt = 0
+    print(len(embeddings_list))
     for embed in embeddings_list:
+        print(embed.shape)
         for i in xrange(embed.shape[0]):
             _em = embed[i]
             _norm = np.linalg.norm(_em)
@@ -525,9 +528,9 @@ if __name__ == '__main__':
     # general
     parser.add_argument('--data-dir', default='/home/lijc08/datasets/glintasia/faces_glintasia', help='')
     parser.add_argument('--model', default='/home/lijc08/insightface/model-r100-ii/model', help='path to load model.')
-    parser.add_argument('--target', default='lfw', help='test targets.')
+    parser.add_argument('--target', default='cfp_fp', help='test targets.')
     parser.add_argument('--gpu', default=0, type=int, help='gpu id')
-    parser.add_argument('--batch-size', default=8, type=int, help='')
+    parser.add_argument('--batch-size', default=32, type=int, help='')
     parser.add_argument('--max', default='', type=str, help='')
     parser.add_argument('--mode', default=0, type=int, help='')
     parser.add_argument('--nfolds', default=10, type=int, help='')
@@ -536,7 +539,7 @@ if __name__ == '__main__':
     prop = face_image.load_property(args.data_dir)
     image_size = prop.image_size
     print('image_size', image_size)
-    ctx = mx.gpu(args.gpu)
+    ctx = mx.cpu(0) if args.gpu == -1 else mx.gpu(args.gpu)
     nets = []
     vec = args.model.split(',')
     prefix = args.model.split(',')[0]
