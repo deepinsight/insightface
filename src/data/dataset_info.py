@@ -27,6 +27,6 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='')
     # general
-    parser.add_argument('--input', default='', type=str, help='')
+    parser.add_argument('--input', default='/home/lijc08/datasets/glintasia/faces_glintasia', type=str, help='')
     args = parser.parse_args()
     main(args)

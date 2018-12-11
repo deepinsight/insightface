@@ -28,12 +28,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
 import datetime
 import math
 import os
-import pickle
-import sys
 
 import cv2
 import mxnet as mx
@@ -41,8 +38,8 @@ import numpy as np
 import sklearn
 from mxnet import ndarray as nd
 from scipy import interpolate
-from sklearn.decomposition import PCA
 from sklearn.model_selection import KFold
+
 
 class LFold:
     def __init__(self, n_splits=2, shuffle=False):
@@ -55,6 +52,7 @@ class LFold:
             return self.k_fold.split(indices)
         else:
             return [(indices, indices)]
+
 
 def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_folds=10):
     assert (embeddings1.shape[0] == embeddings2.shape[0])
@@ -93,7 +91,6 @@ def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_fold
     tpr = np.mean(tprs, 0)
     fpr = np.mean(fprs, 0)
     return tpr, fpr, accuracy
-
 
 
 def calculate_accuracy(threshold, dist, actual_issame):
@@ -170,7 +167,10 @@ def calculate_val_all(thresholds, embeddings1, embeddings2, actual_issame):
         val_train[threshold_idx], far_train[threshold_idx] = calculate_val_far(threshold, dist, actual_issame)
     return val_train, far_train
 
+
 USE_SIM = True
+
+
 def compare(similarity, threshold):
     if USE_SIM:
         predict_issame = np.greater(similarity, threshold)
@@ -178,8 +178,8 @@ def compare(similarity, threshold):
         predict_issame = np.less(similarity, threshold)
     return predict_issame
 
-def distance(embeddings1, embeddings2):
 
+def distance(embeddings1, embeddings2):
     dot = np.sum(np.multiply(embeddings1, embeddings2), axis=1)
     norm = np.linalg.norm(embeddings1, axis=1) * np.linalg.norm(embeddings2, axis=1)
     similarity = dot / norm
@@ -190,6 +190,7 @@ def distance(embeddings1, embeddings2):
         return similarity_normal
     else:
         return dist
+
 
 def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label_shape=None):
     print('testing verification badcase..')
@@ -287,10 +288,10 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label
 
             if not asame:
                 violate *= -1.0
-            if violate > 0.0:
+            if (USE_SIM and violate < 0.0) or (not USE_SIM and violate > 0.0):
                 imga = data[ida].asnumpy().transpose((1, 2, 0))[..., ::-1]  # to bgr
                 imgb = data[idb].asnumpy().transpose((1, 2, 0))[..., ::-1]
-                # print(imga.shape, imgb.shape, violate, asame, _dist)
+                print(imga.shape, imgb.shape, violate, asame, _dist)
                 if asame:
                     pouts.append((imga, imgb, _dist, best_threshold, ida))
                 else:
@@ -377,4 +378,3 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label
         k = "threshold: %.3f" % threshold
         cv2.putText(img, k, (img.shape[1] // 2 - 70, img.shape[0] - 5), font, 0.6, text_color, 2)
         cv2.imwrite(filename, img)
-
