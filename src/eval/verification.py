@@ -593,7 +593,7 @@ if __name__ == '__main__':
     parser.add_argument('--gpu', default=0, type=int, help='gpu id')
     parser.add_argument('--batch-size', default=32, type=int, help='')
     parser.add_argument('--max', default='', type=str, help='')
-    parser.add_argument('--mode', default=1, type=int, help='')
+    parser.add_argument('--mode', default=0, type=int, help='')
     parser.add_argument('--nfolds', default=10, type=int, help='')
     args = parser.parse_args()
 
