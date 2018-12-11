@@ -1,4 +1,5 @@
-"""Helper for evaluation on the Labeled Faces in the Wild dataset 
+# coding=utf-8
+"""Helper for evaluation on the Labeled Faces in the Wild dataset
 """
 
 # MIT License
@@ -45,6 +46,7 @@ from sklearn.model_selection import KFold
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import face_image
+import verification_cosine
 
 
 class LFold:
@@ -101,8 +103,8 @@ def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_fold
         for threshold_idx, threshold in enumerate(thresholds):
             _, _, acc_train[threshold_idx] = calculate_accuracy(threshold, dist[train_set], actual_issame[train_set])
         best_threshold_index = np.argmax(acc_train)
-        print('threshold', thresholds[best_threshold_index])
-        print('acc_train', acc_train[best_threshold_index])
+        print("fold_idx %s threshold %s acc_train %s" % (
+        fold_idx, thresholds[best_threshold_index], acc_train[best_threshold_index]))
         for threshold_idx, threshold in enumerate(thresholds):
             tprs[fold_idx, threshold_idx], fprs[fold_idx, threshold_idx], _ = calculate_accuracy(threshold,
                                                                                                  dist[test_set],
@@ -127,6 +129,22 @@ def calculate_accuracy(threshold, dist, actual_issame):
     fpr = 0 if (fp + tn == 0) else float(fp) / float(fp + tn)
     acc = float(tp + tn) / dist.size
     return tpr, fpr, acc
+
+
+def calculate_val_all(thresholds, embeddings1, embeddings2, actual_issame):
+    assert (embeddings1.shape[0] == embeddings2.shape[0])
+    assert (embeddings1.shape[1] == embeddings2.shape[1])
+    nrof_thresholds = len(thresholds)
+
+    diff = np.subtract(embeddings1, embeddings2)
+    dist = np.sum(np.square(diff), 1)
+
+    # Find the threshold that gives FAR = far_target
+    val_train = np.zeros(nrof_thresholds)
+    far_train = np.zeros(nrof_thresholds)
+    for threshold_idx, threshold in enumerate(thresholds):
+        val_train[threshold_idx], far_train[threshold_idx] = calculate_val_far(threshold, dist, actual_issame)
+    return val_train, far_train
 
 
 def calculate_val(thresholds, embeddings1, embeddings2, actual_issame, far_target, nrof_folds=10):
@@ -171,26 +189,40 @@ def calculate_val_far(threshold, dist, actual_issame):
     n_diff = np.sum(np.logical_not(actual_issame))
     # print(true_accept, false_accept)
     # print(n_same, n_diff)
-    val = float(true_accept) / float(n_same)
-    far = float(false_accept) / float(n_diff)
+    val = 0 if n_same == 0 else float(true_accept) / float(n_same)
+    far = 0 if n_diff == 0 else float(false_accept) / float(n_diff)
     return val, far
 
 
-def evaluate(embeddings, actual_issame, nrof_folds=10, pca=0):
+def evaluate(embeddings, actual_issame, nrof_folds=10, pca=0, dis_type=1):
     # Calculate evaluation metrics
-    thresholds = np.arange(0, 4, 0.01)
-    embeddings1 = embeddings[0::2]
-    embeddings2 = embeddings[1::2]
-    tpr, fpr, accuracy = calculate_roc(thresholds, embeddings1, embeddings2,
-                                       np.asarray(actual_issame), nrof_folds=nrof_folds, pca=pca)
-    thresholds = np.arange(0, 4, 0.001)
-    val, val_std, far = calculate_val(thresholds, embeddings1, embeddings2,
-                                      np.asarray(actual_issame), 1e-3, nrof_folds=nrof_folds)
-    return tpr, fpr, accuracy, val, val_std, far
+    # disType=0 euclidean 1 consine
+    if dis_type == 0:
+        thresholds = np.arange(0, 4, 0.01)
+        embeddings1 = embeddings[0::2]
+        embeddings2 = embeddings[1::2]
+        tpr, fpr, accuracy = calculate_roc(thresholds, embeddings1, embeddings2,
+                                           np.asarray(actual_issame), nrof_folds=nrof_folds, pca=pca)
+        thresholds = np.arange(0, 4, 0.001)
+        val, val_std, far = calculate_val(thresholds, embeddings1, embeddings2,
+                                          np.asarray(actual_issame), 1e-3, nrof_folds=nrof_folds)
+        return tpr, fpr, accuracy, val, val_std, far
+    else:
+        thresholds = np.arange(0, 1, 0.001)
+        embeddings1 = embeddings[0::2]
+        embeddings2 = embeddings[1::2]
+        tpr, fpr, accuracy = verification_cosine.calculate_roc(thresholds, embeddings1, embeddings2,
+                                                               np.asarray(actual_issame), nrof_folds=nrof_folds)
+        thresholds = np.arange(0, 1, 0.001)
+        val, val_std, far = verification_cosine.calculate_val(thresholds, embeddings1, embeddings2,
+                                                              np.asarray(actual_issame), 1e-3, nrof_folds=nrof_folds)
+        return tpr, fpr, accuracy, val, val_std, far
 
 
 def load_bin(path, image_size):
     bins, issame_list = pickle.load(open(path, 'rb'))
+    # bins = bins[:2000]
+    # issame_list = issame_list[:1000]
     data_list = []
     for flip in [0, 1]:
         data = nd.empty((len(issame_list) * 2, 3, image_size[0], image_size[1]))
@@ -215,6 +247,8 @@ def test(data_set, mx_model, batch_size, nfolds=10, data_extra=None, label_shape
     print('testing verification..')
     data_list = data_set[0]
     issame_list = data_set[1]
+    print('data_list shape', data_list[0].shape)
+    print('issame_list shape', len(issame_list))
     model = mx_model
     embeddings_list = []
     if data_extra is not None:
@@ -259,8 +293,10 @@ def test(data_set, mx_model, batch_size, nfolds=10, data_extra=None, label_shape
             # print(_embeddings.shape)
             if embeddings is None:
                 embeddings = np.zeros((data.shape[0], _embeddings.shape[1]))
+            # print(ba, bb, (batch_size - count))
             embeddings[ba:bb, :] = _embeddings[(batch_size - count):, :]
             ba = bb
+        print("embeddings shape", embeddings.shape)
         embeddings_list.append(embeddings)
 
     _xnorm = 0.0
@@ -276,21 +312,41 @@ def test(data_set, mx_model, batch_size, nfolds=10, data_extra=None, label_shape
             _xnorm_cnt += 1
     _xnorm /= _xnorm_cnt
 
+    dis_type = 1
+    # 原始
     embeddings = embeddings_list[0].copy()
     embeddings = sklearn.preprocessing.normalize(embeddings)
-    acc1 = 0.0
-    std1 = 0.0
-    # _, _, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=10)
-    # acc1, std1 = np.mean(accuracy), np.std(accuracy)
+    tpr, fpr, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=nfolds, dis_type=dis_type)
+    acc1, std1 = np.mean(accuracy), np.std(accuracy)
+    # print(np.linalg.norm(embeddings, axis=1))
+    print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
 
-    # print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
-    # embeddings = np.concatenate(embeddings_list, axis=1)
+    # 叠加flip
     embeddings = embeddings_list[0] + embeddings_list[1]
     embeddings = sklearn.preprocessing.normalize(embeddings)
     print(embeddings.shape)
     print('infer time', time_consumed)
-    _, _, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=nfolds)
+    tpr, fpr, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=nfolds, dis_type=dis_type)
     acc2, std2 = np.mean(accuracy), np.std(accuracy)
+    print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
+    with open("tpr_fpr.bin", 'wb') as f:
+        pickle.dump((tpr, fpr), f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # 全部的tar-far
+    if dis_type == 0:
+        thresholds = np.arange(0, 4, 0.01)
+        embeddings1 = embeddings[0::2]
+        embeddings2 = embeddings[1::2]
+        val, far = calculate_val_all(thresholds, embeddings1, embeddings2, np.asarray(issame_list))
+    else:
+        thresholds = np.arange(0, 1, 0.001)
+        embeddings1 = embeddings[0::2]
+        embeddings2 = embeddings[1::2]
+        val, far = verification_cosine.calculate_val_all(thresholds, embeddings1, embeddings2, np.asarray(issame_list))
+
+    with open("val_far.bin", 'wb') as f:
+        pickle.dump((val, far), f, protocol=pickle.HIGHEST_PROTOCOL)
+
     return acc1, std1, acc2, std2, _xnorm, embeddings_list
 
 
@@ -424,9 +480,9 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label
         rows = min(rows, _rows)
         hack = {}
 
-        if name.startswith('cfp') and item[1].startswith('pos'):
-            hack = {0: 'manual/238_13.jpg.jpg', 6: 'manual/088_14.jpg.jpg', 10: 'manual/470_14.jpg.jpg',
-                    25: 'manual/238_13.jpg.jpg', 28: 'manual/143_11.jpg.jpg'}
+        # if name.startswith('cfp') and item[1].startswith('pos'):
+        #     hack = {0: 'manual/238_13.jpg.jpg', 6: 'manual/088_14.jpg.jpg', 10: 'manual/470_14.jpg.jpg',
+        #             25: 'manual/238_13.jpg.jpg', 28: 'manual/143_11.jpg.jpg'}
 
         filename = item[1]
         if len(name) > 0:
@@ -528,11 +584,12 @@ if __name__ == '__main__':
     # general
     parser.add_argument('--data-dir', default='/home/lijc08/datasets/glintasia/faces_glintasia', help='')
     parser.add_argument('--model', default='/home/lijc08/insightface/model-r100-ii/model', help='path to load model.')
-    parser.add_argument('--target', default='cfp_fp', help='test targets.')
+    # parser.add_argument('--target', default='lfw', help='test targets.')
+    parser.add_argument('--target', default='agedb_30', help='test targets.')
     parser.add_argument('--gpu', default=0, type=int, help='gpu id')
     parser.add_argument('--batch-size', default=32, type=int, help='')
     parser.add_argument('--max', default='', type=str, help='')
-    parser.add_argument('--mode', default=0, type=int, help='')
+    parser.add_argument('--mode', default=1, type=int, help='')
     parser.add_argument('--nfolds', default=10, type=int, help='')
     args = parser.parse_args()
 
@@ -601,7 +658,8 @@ if __name__ == '__main__':
             print('Max of [%s] is %1.5f' % (ver_name_list[i], np.max(results)))
     elif args.mode == 1:
         model = nets[0]
-        test_badcase(ver_list[0], model, args.batch_size, args.target)
+        # test_badcase(ver_list[0], model, args.batch_size, args.target)
+        verification_cosine.test_badcase(ver_list[0], model, args.batch_size, args.target)
     else:
         model = nets[0]
         dumpR(ver_list[0], model, args.batch_size, args.target)

@@ -108,3 +108,6 @@ exam/cfp*
 exam/agedb*
 exam/lfw*
 exam/face*
+
+src/eval/badcases*
+src/eval/*.bin
