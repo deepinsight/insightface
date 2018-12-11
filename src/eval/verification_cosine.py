@@ -31,6 +31,7 @@ from __future__ import print_function
 import datetime
 import math
 import os
+import random
 
 import cv2
 import mxnet as mx
@@ -255,7 +256,9 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label
     data = data_list[0]
 
     pouts = []
+    pouts_true = []
     nouts = []
+    nouts_true = []
 
     for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
 
@@ -296,6 +299,15 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label
                     pouts.append((imga, imgb, _dist, best_threshold, ida))
                 else:
                     nouts.append((imga, imgb, _dist, best_threshold, ida))
+            else:
+                if random.random() < 0.05:
+                    # 随机保存6000*0.05 = 300条数据查验
+                    imga = data[ida].asnumpy().transpose((1, 2, 0))[..., ::-1]  # to bgr
+                    imgb = data[idb].asnumpy().transpose((1, 2, 0))[..., ::-1]
+                    if asame:
+                        pouts_true.append((imga, imgb, _dist, best_threshold, ida))
+                    else:
+                        nouts_true.append((imga, imgb, _dist, best_threshold, ida))
 
     tpr = np.mean(tprs, 0)
     fpr = np.mean(fprs, 0)
@@ -314,7 +326,7 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label
     else:
         threshold = pouts[-1][3]
 
-    for item in [(pouts, 'positive(false_negative).png'), (nouts, 'negative(false_positive).png')]:
+    for item in [(pouts, 'positive(false_negative).png'), (nouts, 'negative(false_positive).png'), (pouts_true, 'positive(true_positive).png'), (nouts_true, 'negative(true_negative).png')]:
         cols = 4
         rows = 8000
         outs = item[0]

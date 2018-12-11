@@ -48,6 +48,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import face_image
 import verification_cosine
 
+DIS_TYPE = 1
 
 class LFold:
     def __init__(self, n_splits=2, shuffle=False):
@@ -312,11 +313,10 @@ def test(data_set, mx_model, batch_size, nfolds=10, data_extra=None, label_shape
             _xnorm_cnt += 1
     _xnorm /= _xnorm_cnt
 
-    dis_type = 1
     # 原始
     embeddings = embeddings_list[0].copy()
     embeddings = sklearn.preprocessing.normalize(embeddings)
-    tpr, fpr, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=nfolds, dis_type=dis_type)
+    tpr, fpr, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=nfolds, dis_type=DIS_TYPE)
     acc1, std1 = np.mean(accuracy), np.std(accuracy)
     # print(np.linalg.norm(embeddings, axis=1))
     print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
@@ -326,14 +326,14 @@ def test(data_set, mx_model, batch_size, nfolds=10, data_extra=None, label_shape
     embeddings = sklearn.preprocessing.normalize(embeddings)
     print(embeddings.shape)
     print('infer time', time_consumed)
-    tpr, fpr, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=nfolds, dis_type=dis_type)
+    tpr, fpr, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=nfolds, dis_type=DIS_TYPE)
     acc2, std2 = np.mean(accuracy), np.std(accuracy)
     print('Validation rate: %2.5f+-%2.5f @ FAR=%2.5f' % (val, val_std, far))
     with open("tpr_fpr.bin", 'wb') as f:
         pickle.dump((tpr, fpr), f, protocol=pickle.HIGHEST_PROTOCOL)
 
     # 全部的tar-far
-    if dis_type == 0:
+    if DIS_TYPE == 0:
         thresholds = np.arange(0, 4, 0.01)
         embeddings1 = embeddings[0::2]
         embeddings2 = embeddings[1::2]
@@ -411,7 +411,9 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label
     data = data_list[0]
 
     pouts = []
+    pouts_true = []
     nouts = []
+    nouts_true = []
 
     for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
 
@@ -585,7 +587,7 @@ if __name__ == '__main__':
     parser.add_argument('--data-dir', default='/home/lijc08/datasets/glintasia/faces_glintasia', help='')
     parser.add_argument('--model', default='/home/lijc08/insightface/model-r100-ii/model', help='path to load model.')
     # parser.add_argument('--target', default='lfw', help='test targets.')
-    parser.add_argument('--target', default='agedb_30', help='test targets.')
+    parser.add_argument('--target', default='asia', help='test targets.')
     parser.add_argument('--gpu', default=0, type=int, help='gpu id')
     parser.add_argument('--batch-size', default=32, type=int, help='')
     parser.add_argument('--max', default='', type=str, help='')
@@ -658,8 +660,10 @@ if __name__ == '__main__':
             print('Max of [%s] is %1.5f' % (ver_name_list[i], np.max(results)))
     elif args.mode == 1:
         model = nets[0]
-        # test_badcase(ver_list[0], model, args.batch_size, args.target)
-        verification_cosine.test_badcase(ver_list[0], model, args.batch_size, args.target)
+        if DIS_TYPE == 0:
+            test_badcase(ver_list[0], model, args.batch_size, args.target)
+        else:
+            verification_cosine.test_badcase(ver_list[0], model, args.batch_size, args.target)
     else:
         model = nets[0]
         dumpR(ver_list[0], model, args.batch_size, args.target)
