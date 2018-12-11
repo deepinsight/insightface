@@ -17,19 +17,19 @@
 
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+
+import argparse
 import os
 import sys
-
-#curr_path = os.path.abspath(os.path.dirname(__file__))
-#sys.path.append(os.path.join(curr_path, "../python"))
-import mxnet as mx
-import random
-import argparse
-import cv2
 import time
-import traceback
-#from builtins import range
+
+import cv2
+# curr_path = os.path.abspath(os.path.dirname(__file__))
+# sys.path.append(os.path.join(curr_path, "../python"))
+import mxnet as mx
+# from builtins import range
 from easydict import EasyDict as edict
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import face_preprocess
 import face_image
@@ -38,7 +38,6 @@ try:
     import multiprocessing
 except ImportError:
     multiprocessing = None
-
 
 
 def read_list(path_in):
@@ -54,56 +53,55 @@ def read_list(path_in):
             item.flag = 0
             item.image_path, label, item.bbox, item.landmark, item.aligned = face_preprocess.parse_lst_line(line)
             if not item.aligned and item.landmark is None:
-              #print('ignore line', line)
-              continue
+                # print('ignore line', line)
+                continue
             item.id = _id
             item.label = [label, item.aligned]
             yield item
-            if label!=last[0]:
-              if last[1]>=0:
-                identities.append( (last[1], _id) )
-              last[0] = label
-              last[1] = _id
-            _id+=1
-        identities.append( (last[1], _id) )
+            if label != last[0]:
+                if last[1] >= 0:
+                    identities.append((last[1], _id))
+                last[0] = label
+                last[1] = _id
+            _id += 1
+        identities.append((last[1], _id))
         item = edict()
         item.flag = 2
         item.id = 0
-        item.label = [float(_id), float(_id+len(identities))]
+        item.label = [float(_id), float(_id + len(identities))]
         yield item
         for identity in identities:
-          item = edict()
-          item.flag = 2
-          item.id = _id
-          _id+=1
-          item.label = [float(identity[0]), float(identity[1])]
-          yield item
-
+            item = edict()
+            item.flag = 2
+            item.id = _id
+            _id += 1
+            item.label = [float(identity[0]), float(identity[1])]
+            yield item
 
 
 def image_encode(args, i, item, q_out):
     oitem = [item.id]
-    #print('flag', item.flag)
-    if item.flag==0:
-      fullpath = item.image_path
-      header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
-      #print('write', item.flag, item.id, item.label)
-      if item.aligned:
-        with open(fullpath, 'rb') as fin:
-            img = fin.read()
-        s = mx.recordio.pack(header, img)
+    # print('flag', item.flag)
+    if item.flag == 0:
+        fullpath = item.image_path
+        header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
+        # print('write', item.flag, item.id, item.label)
+        if item.aligned:
+            with open(fullpath, 'rb') as fin:
+                img = fin.read()
+            s = mx.recordio.pack(header, img)
+            q_out.put((i, s, oitem))
+        else:
+            img = cv2.imread(fullpath, args.color)
+            assert item.landmark is not None
+            img = face_preprocess.preprocess(img, bbox=item.bbox, landmark=item.landmark, image_size='%d,%d' % (args.image_h, args.image_w))
+            s = mx.recordio.pack_img(header, img, quality=args.quality, img_fmt=args.encoding)
+            q_out.put((i, s, oitem))
+    else:
+        header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
+        # print('write', item.flag, item.id, item.label)
+        s = mx.recordio.pack(header, '')
         q_out.put((i, s, oitem))
-      else:
-        img = cv2.imread(fullpath, args.color)
-        assert item.landmark is not None
-        img = face_preprocess.preprocess(img, bbox = item.bbox, landmark=item.landmark, image_size='%d,%d'%(args.image_h, args.image_w))
-        s = mx.recordio.pack_img(header, img, quality=args.quality, img_fmt=args.encoding)
-        q_out.put((i, s, oitem))
-    else: 
-      header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
-      #print('write', item.flag, item.id, item.label)
-      s = mx.recordio.pack(header, '')
-      q_out.put((i, s, oitem))
 
 
 def read_worker(args, q_in, q_out):
@@ -113,6 +111,7 @@ def read_worker(args, q_in, q_out):
             break
         i, item = deq
         image_encode(args, i, item, q_out)
+
 
 def write_worker(q_out, fname, working_dir):
     pre_time = time.time()
@@ -135,7 +134,7 @@ def write_worker(q_out, fname, working_dir):
             s, item = buf[count]
             del buf[count]
             if s is not None:
-                #print('write idx', item[0])
+                # print('write idx', item[0])
                 record.write_idx(item[0], s)
 
             if count % 1000 == 0:
@@ -144,13 +143,14 @@ def write_worker(q_out, fname, working_dir):
                 pre_time = cur_time
             count += 1
 
+
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Create an image list or \
         make a record database by reading from an image list')
     parser.add_argument('prefix', help='prefix of input/output lst and rec files.')
-    #parser.add_argument('root', help='path to folder containing images.')
+    # parser.add_argument('root', help='path to folder containing images.')
 
     cgroup = parser.add_argument_group('Options for creating image lists')
     cgroup.add_argument('--list', type=bool, default=False,
@@ -186,17 +186,18 @@ def parse_args():
     rgroup.add_argument('--encoding', type=str, default='.jpg', choices=['.jpg', '.png'],
                         help='specify the encoding of the images.')
     rgroup.add_argument('--pack-label', type=bool, default=False,
-        help='Whether to also pack multi dimensional label in the record file')
+                        help='Whether to also pack multi dimensional label in the record file')
     args = parser.parse_args()
     args.prefix = os.path.abspath(args.prefix)
-    #args.root = os.path.abspath(args.root)
+    # args.root = os.path.abspath(args.root)
     return args
+
 
 if __name__ == '__main__':
     args = parse_args()
     if args.list:
         pass
-        #make_list(args)
+        # make_list(args)
     else:
         if os.path.isdir(args.prefix):
             working_dir = args.prefix
@@ -208,7 +209,7 @@ if __name__ == '__main__':
         args.image_h = image_size[0]
         args.image_w = image_size[1]
         files = [os.path.join(working_dir, fname) for fname in os.listdir(working_dir)
-                    if os.path.isfile(os.path.join(working_dir, fname))]
+                 if os.path.isfile(os.path.join(working_dir, fname))]
         count = 0
         for fname in files:
             if fname.startswith(args.prefix) and fname.endswith('.lst'):
@@ -254,8 +255,8 @@ if __name__ == '__main__':
                         if q_out.empty():
                             continue
                         _, s, item = q_out.get()
-                        #header, _ = mx.recordio.unpack(s)
-                        #print('write header label', header.label)
+                        # header, _ = mx.recordio.unpack(s)
+                        # print('write header label', header.label)
                         record.write_idx(item[0], s)
                         if cnt % 1000 == 0:
                             cur_time = time.time()
@@ -263,5 +264,4 @@ if __name__ == '__main__':
                             pre_time = cur_time
                         cnt += 1
         if not count:
-            print('Did not find and list file with prefix %s'%args.prefix)
-
+            print('Did not find and list file with prefix %s' % args.prefix)
