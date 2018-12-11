@@ -586,6 +586,8 @@ if __name__ == '__main__':
     # general
     parser.add_argument('--data-dir', default='/home/lijc08/datasets/glintasia/faces_glintasia', help='')
     parser.add_argument('--model', default='/home/lijc08/insightface/model-r100-ii/model', help='path to load model.')
+    # parser.add_argument('--model', default='/home/lijc08/insightface/model-r50-am-lfw/model', help='path to load model.')
+    # parser.add_argument('--model', default='/home/lijc08/insightface/model-r34-amf/model', help='path to load model.')
     # parser.add_argument('--target', default='lfw', help='test targets.')
     parser.add_argument('--target', default='asia', help='test targets.')
     parser.add_argument('--gpu', default=0, type=int, help='gpu id')
