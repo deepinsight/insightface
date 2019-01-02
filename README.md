@@ -8,7 +8,7 @@ By Jia Guo and [Jiankang Deng](https://jiankangdeng.github.io/)
 The code of InsightFace is released under the MIT License.
 
 ## ArcFace Video Demo
-[![ArcFace Demo](https://img.youtube.com/vi/P6jEzzwoYWs/0.jpg)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
+[![ArcFace Demo](https://github.com/deepinsight/insightface/blob/master/resources/facerecognitionfromvideo.PNG)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
 
 Please click the image to watch the Youtube video. For Bilibili users, click [here](https://www.bilibili.com/video/av38041494?from=search&seid=11501833604850032313).
 
@@ -280,7 +280,7 @@ If you find *InsightFace* useful in your research, please consider to cite the f
 ```
 @article{deng2018arcface,
 title={ArcFace: Additive Angular Margin Loss for Deep Face Recognition},
-author={Deng, Jiankang and Guo, Jia and Zafeiriou, Stefanos},
+author={Deng, Jiankang and Guo, Jia and Niannan, Xue and Zafeiriou, Stefanos},
 journal={arXiv:1801.07698},
 year={2018}
 }
