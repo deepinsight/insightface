@@ -7,6 +7,11 @@ By Jia Guo and [Jiankang Deng](https://jiankangdeng.github.io/)
 
 The code of InsightFace is released under the MIT License.
 
+## ArcFace Video Demo
+[![ArcFace Demo](https://img.youtube.com/vi/P6jEzzwoYWs/0.jpg)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
+
+Please click the image to watch the Youtube video. For Bilibili users, click [here](https://www.bilibili.com/video/av38041494?from=search&seid=11501833604850032313).
+
 ## Recent Update
 
 **`2018.12.13`**: [TVM-Benchmark](https://github.com/deepinsight/insightface/wiki/TVM-Benchmark)
