@@ -111,6 +111,7 @@ exam/face*
 
 src/eval/badcases*
 src/eval/*.bin
+*.bin
 
 src/data/asia*
 src/data/pairs.txt
