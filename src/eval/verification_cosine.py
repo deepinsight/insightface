@@ -326,7 +326,8 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label
     else:
         threshold = pouts[-1][3]
 
-    for item in [(pouts, 'positive(false_negative).png'), (nouts, 'negative(false_positive).png'), (pouts_true, 'positive(true_positive).png'), (nouts_true, 'negative(true_negative).png')]:
+    for item in [(pouts, 'positive(false_negative).png'), (nouts, 'negative(false_positive).png'), (pouts_true, 'positive(true_positive).png'),
+                 (nouts_true, 'negative(true_negative).png')]:
         cols = 4
         rows = 8000
         outs = item[0]
@@ -390,3 +391,68 @@ def test_badcase(data_set, mx_model, batch_size, name='', data_extra=None, label
         k = "threshold: %.3f" % threshold
         cv2.putText(img, k, (img.shape[1] // 2 - 70, img.shape[0] - 5), font, 0.6, text_color, 2)
         cv2.imwrite(filename, img)
+
+
+# ---------------------------分割线---------区分新加方法----------------------
+
+def calculate_global(threshold, dist, actual_issame):
+    print("calculate_global threshold %s" % (threshold))
+    predict_issame = compare(dist, threshold)
+    tp = np.sum(np.logical_and(predict_issame, actual_issame))
+    fp = np.sum(np.logical_and(predict_issame, np.logical_not(actual_issame)))
+    tn = np.sum(np.logical_and(np.logical_not(predict_issame), np.logical_not(actual_issame)))
+    fn = np.sum(np.logical_and(np.logical_not(predict_issame), actual_issame))
+    print("tp %s fp %s tn %s fn %s" % (tp, fp, tn, fn))
+    tpr = 0 if (tp + fn == 0) else float(tp) / float(tp + fn)
+    fpr = 0 if (fp + tn == 0) else float(fp) / float(fp + tn)
+    acc = float(tp + tn) / dist.size
+
+    far = 0 if (fp + tn == 0) else float(fp) / float(fp + tn)
+    frr = 0 if (tp + fn == 0) else float(fn) / float(tp + fn)
+
+    return acc, tpr, fpr, far, frr
+
+
+def cal_global_mode2(data_set, mx_model, threshold, batch_size):
+    print('cal_global_mode2')
+    data_list = data_set[0]
+    issame_list = data_set[1]
+
+    model = mx_model
+    embeddings_list = []
+
+    time_consumed = 0.0
+    _label = nd.ones((batch_size,))
+
+    for i in xrange(len(data_list)):
+        data = data_list[i]
+        embeddings = None
+        ba = 0
+        while ba < data.shape[0]:
+            bb = min(ba + batch_size, data.shape[0])
+            count = bb - ba
+            _data = nd.slice_axis(data, axis=0, begin=bb - batch_size, end=bb)
+            # print(_data.shape, _label.shape)
+            time0 = datetime.datetime.now()
+            db = mx.io.DataBatch(data=(_data,), label=(_label,))
+            model.forward(db, is_train=False)
+            net_out = model.get_outputs()
+            _embeddings = net_out[0].asnumpy()
+            time_now = datetime.datetime.now()
+            diff = time_now - time0
+            time_consumed += diff.total_seconds()
+            if embeddings is None:
+                embeddings = np.zeros((data.shape[0], _embeddings.shape[1]))
+            embeddings[ba:bb, :] = _embeddings[(batch_size - count):, :]
+            ba = bb
+        embeddings_list.append(embeddings)
+    embeddings = embeddings_list[0] + embeddings_list[1]
+    embeddings = sklearn.preprocessing.normalize(embeddings)
+
+    embeddings1 = embeddings[0::2]
+    embeddings2 = embeddings[1::2]
+    assert (embeddings1.shape[0] == embeddings2.shape[0])
+    assert (embeddings1.shape[1] == embeddings2.shape[1])
+    dist = distance(embeddings1, embeddings2)
+    val, tpr, fpr, far, frr = calculate_global(threshold, dist, issame_list)
+    return val, tpr, fpr, far, frr

@@ -50,6 +50,7 @@ import verification_cosine
 
 DIS_TYPE = 1
 
+
 class LFold:
     def __init__(self, n_splits=2, shuffle=False):
         self.n_splits = n_splits
@@ -105,7 +106,7 @@ def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_fold
             _, _, acc_train[threshold_idx] = calculate_accuracy(threshold, dist[train_set], actual_issame[train_set])
         best_threshold_index = np.argmax(acc_train)
         print("fold_idx %s threshold %s acc_train %s" % (
-        fold_idx, thresholds[best_threshold_index], acc_train[best_threshold_index]))
+            fold_idx, thresholds[best_threshold_index], acc_train[best_threshold_index]))
         for threshold_idx, threshold in enumerate(thresholds):
             tprs[fold_idx, threshold_idx], fprs[fold_idx, threshold_idx], _ = calculate_accuracy(threshold,
                                                                                                  dist[test_set],
@@ -593,7 +594,14 @@ if __name__ == '__main__':
     parser.add_argument('--gpu', default=0, type=int, help='gpu id')
     parser.add_argument('--batch-size', default=32, type=int, help='')
     parser.add_argument('--max', default='', type=str, help='')
-    parser.add_argument('--mode', default=0, type=int, help='')
+    # mode 0是默认的计算方式
+    # mode 1是查看识别错误与正确的数据组
+    # mode 2是给定阈值，计算全局的性能，对比6000次，相同和不同各半，给出性能。
+    # mode 3是给定阈值，随机取m个人，共有n张图片；一一对比原有的所有数据，有n张图片，就对比n*n次，给出性能。
+    # mode 4是给定阈值，随机取m个人，共有n张图片；实现某模型识别图片身份，共识别n次，给出性能。这个最能代表真实情况
+    # 其他是导出roc曲线
+    parser.add_argument('--mode', default=2, type=int, help='')
+    parser.add_argument('--threshold', default=0.74, type=int, help='')
     parser.add_argument('--nfolds', default=10, type=int, help='')
     args = parser.parse_args()
 
@@ -640,17 +648,22 @@ if __name__ == '__main__':
     diff = time_now - time0
     print('model loading time', diff.total_seconds())
 
-    ver_list = []
-    ver_name_list = []
-    for name in args.target.split(','):
-        path = os.path.join(args.data_dir, name + ".bin")
-        if os.path.exists(path):
-            print('loading.. ', name)
-            data_set = load_bin(path, image_size)
-            ver_list.append(data_set)
-            ver_name_list.append(name)
+
+    def get_datas():
+        ver_list = []
+        ver_name_list = []
+        for name in args.target.split(','):
+            path = os.path.join(args.data_dir, name + ".bin")
+            if os.path.exists(path):
+                print('loading.. ', name)
+                data_set = load_bin(path, image_size)
+                ver_list.append(data_set)
+                ver_name_list.append(name)
+        return ver_list, ver_name_list
+
 
     if args.mode == 0:
+        ver_list, ver_name_list = get_datas()
         for i in xrange(len(ver_list)):
             results = []
             for model in nets:
@@ -661,11 +674,32 @@ if __name__ == '__main__':
                 results.append(acc2)
             print('Max of [%s] is %1.5f' % (ver_name_list[i], np.max(results)))
     elif args.mode == 1:
+        ver_list, ver_name_list = get_datas()
         model = nets[0]
         if DIS_TYPE == 0:
             test_badcase(ver_list[0], model, args.batch_size, args.target)
         else:
             verification_cosine.test_badcase(ver_list[0], model, args.batch_size, args.target)
+    elif args.mode == 2:
+        # 鉴于计算准确率和误识率的计算都是分段取最优秀阈值的结果，这次统一处理计算一下，拒识率小于0.0001时候的准确率，以及召回率
+        ver_list, ver_name_list = get_datas()
+        model = nets[0]
+        if DIS_TYPE == 0:
+            pass
+        else:
+            # 准确率，召回率，误识别率，拒识率
+            val, tpr, fpr, far, frr = verification_cosine.cal_global_mode2(ver_list[0], model, args.threshold, args.batch_size)
+            print('threshold %s val %1.5f tpr %1.5f fpr %1.5f far %1.5f frr %1.5f' % (args.threshold, val, tpr, fpr, far, frr))
+    elif args.mode == 3:
+        ver_list, ver_name_list = get_datas()
+        model = nets[0]
+        if DIS_TYPE == 0:
+            pass
+        else:
+            # 准确率，召回率，误识别率，拒识率
+            val, tpr, fpr, far, frr = verification_cosine.cal_global_mode2(ver_list[0], model, args.threshold, args.batch_size)
+            print('threshold %s val %1.5f tpr %1.5f fpr %1.5f far %1.5f frr %1.5f' % (args.threshold, val, tpr, fpr, far, frr))
     else:
+        ver_list, ver_name_list = get_datas()
         model = nets[0]
         dumpR(ver_list[0], model, args.batch_size, args.target)
