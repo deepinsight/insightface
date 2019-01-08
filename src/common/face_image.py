@@ -1,5 +1,6 @@
 import json
 import os
+import pickle
 
 import numpy as np
 from easydict import EasyDict as edict
@@ -95,6 +96,10 @@ def get_dataset_megaface(input_dir):
     ret = []
     label = 0
     for prefixdir in os.listdir(input_dir):
+        if len(ret) > 5000:
+            break
+        if prefixdir == "001":
+            print(prefixdir)
         _prefixdir = os.path.join(input_dir, prefixdir)
         for subdir in os.listdir(_prefixdir):
             _subdir = os.path.join(_prefixdir, subdir)
@@ -136,6 +141,8 @@ def get_dataset_megaface(input_dir):
                             # print('lm')
 
                     ret.append(fimage)
+                    if len(ret) % 1000 == 0:
+                        print(len(ret))
             label += 1
     return ret
 

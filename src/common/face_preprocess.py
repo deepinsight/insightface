@@ -32,7 +32,8 @@ def read_image(img_path, **kwargs):
     if mode == 'gray':
         img = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_GRAYSCALE)
     else:
-        img = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_COLOR)
+        # img = cv2.imread(img_path, cv2.CV_LOAD_IMAGE_COLOR)
+        img = cv2.imread(img_path)
         if mode == 'rgb':
             # print('to rgb')
             img = img[..., ::-1]

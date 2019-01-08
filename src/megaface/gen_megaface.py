@@ -20,9 +20,9 @@ import mxnet as mx
 
 # from caffe.proto import caffe_pb2
 
-megaface_out = '/raid5data/dplearn/megaface/MegaFace_Features'
+megaface_out = '/home/lijc08/datasets/megaface_customer_features/MegaFace_Features'
 # facescrub_out = '/raid5data/dplearn/megaface/FaceScrubSubset_Features'
-facescrub_out = '/raid5data/dplearn/megaface/FaceScrub_Features'
+facescrub_out = '/home/lijc08/datasets/megaface_customer_features/FaceScrub_Features'
 
 
 def do_flip(data):
@@ -122,11 +122,11 @@ def main(args):
         nets.append(net)
 
     # megaface_lst = "/raid5data/dplearn/faceinsight_align_megaface.lst"
-    megaface_lst = "/raid5data/dplearn/megaface/megaface_mtcnn_112x112/lst"
+    megaface_lst = "/home/lijc08/datasets/mega/aligned_112/lst"
     # facescrub_lst = "/raid5data/dplearn/faceinsight_align_facescrub.lst"
-    facescrub_lst = "/raid5data/dplearn/megaface/facescrubr/small_lst"
+    facescrub_lst = "/home/lijc08/datasets/mega_facescrub/facescrub_aligned_112/lst"
     if args.fsall > 0:
-        facescrub_lst = "/raid5data/dplearn/megaface/facescrubr/lst"
+        facescrub_lst = "/home/lijc08/datasets/mega_facescrub/facescrub_aligned_112/lst"
 
     if args.skip == 0:
         i = 0
@@ -216,13 +216,13 @@ def parse_arguments(argv):
     parser.add_argument('--concat', type=int, help='', default=0)
     parser.add_argument('--fsall', type=int, help='', default=0)
     parser.add_argument('--mf', type=int, help='', default=1)
-    parser.add_argument('--algo', type=str, help='', default='mxsphereface20c')
+    parser.add_argument('--algo', type=str, help='', default='maysa')
     # parser.add_argument('--model', type=str, help='', default='../model/sphereface-20-p0_0_96_112_0,22|../model/sphereface-20-p0_0_96_95_0,21|../model/sphereface-20-p0_0_80_95_0,21')
     # parser.add_argument('--model', type=str, help='', default='../model/sphereface-s60-p0_0_96_112_0,31|../model/sphereface-s60-p0_0_96_95_0,21|../model/sphereface2-s60-p0_0_96_112_0,21|../model/sphereface3-s60-p0_0_96_95_0,23')
     # parser.add_argument('--model', type=str, help='', default='../model/sphereface-s60-p0_0_96_112_0,31|../model/sphereface-s60-p0_0_96_95_0,21|../model/sphereface2-s60-p0_0_96_112_0,21|../model/sphereface3-s60-p0_0_96_95_0,23|../model/sphereface-20-p0_0_96_112_0,22|../model/sphereface-20-p0_0_96_95_0,21|../model/sphereface-20-p0_0_80_95_0,21')
     # parser.add_argument('--model', type=str, help='', default='../model/spherefacei-s60-p0_0_96_112_0,135')
     # parser.add_argument('--model', type=str, help='', default='../model/spherefacei-s60-p0_0_96_95_0,95')
-    parser.add_argument('--model', type=str, help='', default='/home/lijc08/insightface/model-r100-ii/model')
+    parser.add_argument('--model', type=str, help='', default='/home/lijc08/insightface/model-r100-ii/model,0')
     return parser.parse_args(argv)
 
 
