@@ -485,8 +485,8 @@ def get_symbol(num_classes):
     print('use_N', N)
     print('use_DCN', DCN)
     print('per_batch_size', per_batch_size)
-    assert(label_size==64 or label_size==32)
-    assert(input_size==128 or input_size==256)
+    #assert(label_size==64 or label_size==32)
+    #assert(input_size==128 or input_size==256)
     coherentor = SymCoherent(per_batch_size)
     D = input_size // label_size
     print(input_size, label_size, D)
