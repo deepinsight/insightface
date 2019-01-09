@@ -17,12 +17,12 @@ network.hourglass.net_sta = 0
 network.hourglass.net_n = 3
 network.hourglass.net_dcn = 0
 network.hourglass.net_stacks = 2
-network.hourglass.net_block = 'hpm'
+network.hourglass.net_block = 'resnet'
 network.hourglass.net_binarize = False
 network.hourglass.losstype = 'heatmap'
 
 network.sdu = edict()
-network.sdu.net_coherent = True
+network.sdu.net_coherent = False
 network.sdu.net_sta = 2
 network.sdu.net_n = 3
 network.sdu.net_dcn = 3
