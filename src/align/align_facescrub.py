@@ -159,10 +159,14 @@ def main(args):
                 continue
             img_id = int(body)
             key = (a, img_id)
-            if not key in valid_key:
-                continue
+            #all align
+            # if not key in valid_key:
+            #     continue
             # print(b, img_id)
-            assert key in bbox
+            # assert key in bbox
+            if not bbox.has_key(key):
+                print("bbox has not key ", key)
+                continue
             fimage.bbox = bbox[key]
             try:
                 img = misc.imread(image_path)
@@ -177,6 +181,8 @@ def main(args):
                 if img.ndim == 2:
                     img = to_rgb(img)
                 img = img[:, :, 0:3]
+                if img.shape[0] == 0 or img.shape[1] == 0:
+                    continue
                 tb = bname.replace(' ', '_') + ".png"
                 ta = a.replace(' ', '_')
                 target_dir = os.path.join(args.output_dir, ta)
@@ -193,7 +199,12 @@ def main(args):
                     M = tform.params[0:2, :]
                     warped0 = cv2.warpAffine(img, M, (image_size[1] * 2, image_size[0] * 2), borderValue=0.0)
                     _minsize = image_size[0]
-                    bounding_boxes, points = detect_face.detect_face(warped0, _minsize, pnet, rnet, onet, threshold, factor)
+                    try:
+                        bounding_boxes, points = detect_face.detect_face(warped0, _minsize, pnet, rnet, onet, threshold, factor)
+                    except Exception as e:
+                        print(e)
+                        continue
+
                     if bounding_boxes.shape[0] > 0:
                         bindex = 0
                         det = bounding_boxes[bindex, 0:4]
@@ -207,7 +218,12 @@ def main(args):
                 # assert fimage.bbox is not None
                 if warped is None and fimage.bbox is not None:
                     _minsize = img.shape[0] // 4
-                    bounding_boxes, points = detect_face.detect_face(img, _minsize, pnet, rnet, onet, threshold, factor)
+                    try:
+                        bounding_boxes, points = detect_face.detect_face(img, _minsize, pnet, rnet, onet, threshold, factor)
+                    except Exception as e:
+                        print(e)
+                        continue
+
                     if bounding_boxes.shape[0] > 0:
                         det = bounding_boxes[:, 0:4]
                         bindex = -1
@@ -231,7 +247,12 @@ def main(args):
                 if warped is None and fimage.bbox is not None:
                     bb = fimage.bbox
                     # croped = img[bb[1]:bb[3],bb[0]:bb[2],:]
-                    bounding_boxes, points = detect_face.detect_face_force(img, bb, pnet, rnet, onet)
+                    try:
+                        bounding_boxes, points = detect_face.detect_face_force(img, bb, pnet, rnet, onet)
+                    except Exception as e:
+                        print(e)
+                        continue
+
                     assert bounding_boxes.shape[0] == 1
                     _box = bounding_boxes[0]
                     if _box[4] >= 0.3:
@@ -270,7 +291,12 @@ def main(args):
                     # print('3',target_file)
                     warped = img[roi[1]:roi[3], roi[0]:roi[2], :]
                     # print(warped.shape)
-                    warped = cv2.resize(warped, (image_size[1], image_size[0]))
+                    try:
+                        warped = cv2.resize(warped, (image_size[1], image_size[0]))
+                    except Exception as e:
+                        print(e)
+                        continue
+
                 bgr = warped[..., ::-1]
                 cv2.imwrite(target_file, bgr)
                 oline = '%d\t%s\t%d\n' % (1, target_file, int(fimage.classname))

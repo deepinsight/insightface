@@ -96,8 +96,8 @@ def get_dataset_megaface(input_dir):
     ret = []
     label = 0
     for prefixdir in os.listdir(input_dir):
-        if len(ret) > 5000:
-            break
+        # if len(ret) > 5000:
+        #     break
         if prefixdir == "001":
             print(prefixdir)
         _prefixdir = os.path.join(input_dir, prefixdir)

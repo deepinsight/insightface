@@ -207,7 +207,7 @@ def main(args):
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--batch_size', type=int, help='', default=100)
+    parser.add_argument('--batch_size', type=int, help='', default=32)
     parser.add_argument('--image_size', type=str, help='', default='3,112,112')
     parser.add_argument('--gpu', type=int, help='', default=0)
     parser.add_argument('--mean', type=int, help='', default=0)
@@ -215,13 +215,8 @@ def parse_arguments(argv):
     parser.add_argument('--skip', type=int, help='', default=0)
     parser.add_argument('--concat', type=int, help='', default=0)
     parser.add_argument('--fsall', type=int, help='', default=0)
-    parser.add_argument('--mf', type=int, help='', default=0)
-    parser.add_argument('--algo', type=str, help='', default='maysa')
-    # parser.add_argument('--model', type=str, help='', default='../model/sphereface-20-p0_0_96_112_0,22|../model/sphereface-20-p0_0_96_95_0,21|../model/sphereface-20-p0_0_80_95_0,21')
-    # parser.add_argument('--model', type=str, help='', default='../model/sphereface-s60-p0_0_96_112_0,31|../model/sphereface-s60-p0_0_96_95_0,21|../model/sphereface2-s60-p0_0_96_112_0,21|../model/sphereface3-s60-p0_0_96_95_0,23')
-    # parser.add_argument('--model', type=str, help='', default='../model/sphereface-s60-p0_0_96_112_0,31|../model/sphereface-s60-p0_0_96_95_0,21|../model/sphereface2-s60-p0_0_96_112_0,21|../model/sphereface3-s60-p0_0_96_95_0,23|../model/sphereface-20-p0_0_96_112_0,22|../model/sphereface-20-p0_0_96_95_0,21|../model/sphereface-20-p0_0_80_95_0,21')
-    # parser.add_argument('--model', type=str, help='', default='../model/spherefacei-s60-p0_0_96_112_0,135')
-    # parser.add_argument('--model', type=str, help='', default='../model/spherefacei-s60-p0_0_96_95_0,95')
+    parser.add_argument('--mf', type=int, help='', default=1)
+    parser.add_argument('--algo', type=str, help='', default='arcface')
     parser.add_argument('--model', type=str, help='', default='/home/lijc08/insightface/model-r100-ii/model,0')
     return parser.parse_args(argv)
 
