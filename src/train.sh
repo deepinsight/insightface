@@ -3,8 +3,8 @@ export MXNET_CPU_WORKER_NTHREADS=1
 export MXNET_CUDNN_AUTOTUNE_DEFAULT=0
 export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
 
-DATA_DIR=/home/lijc08/datasets/glintasia/faces_glintasia
-PRETRAINED=/home/lijc08/insightface/model-r100-ii/model,0
+DATA_DIR=~/datasets/glintasia
+PRETRAINED=~/insightface/model-r100-ii/model,0
 
 NETWORK=r100
 JOB=ii
