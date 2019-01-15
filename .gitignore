@@ -108,6 +108,7 @@ exam/cfp*
 exam/agedb*
 exam/lfw*
 exam/face*
+exam/glint*
 
 src/eval/badcases*
 src/eval/*.bin
@@ -115,3 +116,4 @@ src/eval/*.bin
 
 src/data/asia*
 src/data/pairs.txt
+

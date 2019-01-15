@@ -129,7 +129,11 @@ def calculate_val(thresholds, embeddings1, embeddings2, actual_issame, far_targe
             _, far_train[threshold_idx] = calculate_val_far(threshold, dist[train_set], actual_issame[train_set])
         if np.max(far_train) >= far_target:
             f = interpolate.interp1d(far_train, thresholds, kind='slinear')
-            threshold = f(far_target)
+            # Test if cuda could be foun
+            try:
+                threshold = f(far_target)
+            except:
+                threshold = 0.0
         else:
             threshold = 0.0
         print("fold_idx %s threshold %s np.max(far_train) %s" % (

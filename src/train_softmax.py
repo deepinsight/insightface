@@ -85,17 +85,17 @@ class LossValueMetric(mx.metric.EvalMetric):
 def parse_args():
     parser = argparse.ArgumentParser(description='Train face network')
     # general
-    parser.add_argument('--data-dir', default='', help='training set directory')
-    parser.add_argument('--prefix', default='../model/model', help='directory to save model.')
-    parser.add_argument('--pretrained', default='', help='pretrained model to load')
+    parser.add_argument('--data-dir', default='/home/lijc08/datasets/glintasia/faces_glintasia', help='training set directory')
+    parser.add_argument('--prefix', default='../model-r100-ii/model', help='directory to save model.')
+    parser.add_argument('--pretrained', default='/home/lijc08/insightface/model-r100-ii/model,0', help='pretrained model to load')
     parser.add_argument('--ckpt', type=int, default=1,
                         help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
-    parser.add_argument('--loss-type', type=int, default=4, help='loss type')
+    parser.add_argument('--loss-type', type=int, default=5, help='loss type')
     parser.add_argument('--verbose', type=int, default=2000,
                         help='do verification testing and model saving every verbose batches')
     parser.add_argument('--max-steps', type=int, default=0, help='max training batches')
     parser.add_argument('--end-epoch', type=int, default=100000, help='training epoch size.')
-    parser.add_argument('--network', default='r50', help='specify network')
+    parser.add_argument('--network', default='r100', help='specify network')
     parser.add_argument('--image-size', default='112,112', help='specify input image height and width')
     parser.add_argument('--version-se', type=int, default=0, help='whether to use se in network')
     parser.add_argument('--version-input', type=int, default=1, help='network input config')
@@ -113,11 +113,11 @@ def parse_args():
     parser.add_argument('--bn-mom', type=float, default=0.9, help='bn mom')
     parser.add_argument('--mom', type=float, default=0.9, help='momentum')
     parser.add_argument('--emb-size', type=int, default=512, help='embedding length')
-    parser.add_argument('--per-batch-size', type=int, default=128, help='batch size in each context')
-    parser.add_argument('--margin-m', type=float, default=0.5, help='margin for loss')
+    parser.add_argument('--per-batch-size', type=int, default=32, help='batch size in each context')
+    parser.add_argument('--margin-m', type=float, default=0.3, help='margin for loss')
     parser.add_argument('--margin-s', type=float, default=64.0, help='scale for feature')
     parser.add_argument('--margin-a', type=float, default=1.0, help='')
-    parser.add_argument('--margin-b', type=float, default=0.0, help='')
+    parser.add_argument('--margin-b', type=float, default=0.2, help='')
     parser.add_argument('--easy-margin', type=int, default=0, help='')
     parser.add_argument('--margin', type=int, default=4, help='margin for sphere')
     parser.add_argument('--beta', type=float, default=1000., help='param for sphere')
@@ -376,15 +376,20 @@ def get_symbol(args, arg_params, aux_params):
 
 def train_net(args):
     ctx = []
-    cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
-    if len(cvd) > 0:
-        for i in xrange(len(cvd.split(','))):
-            ctx.append(mx.gpu(i))
-    if len(ctx) == 0:
-        ctx = [mx.cpu()]
-        print('use cpu')
+    if os.environ.has_key('CUDA_VISIBLE_DEVICES'):
+        cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
+        if len(cvd) > 0:
+            for i in xrange(len(cvd.split(','))):
+                ctx.append(mx.gpu(i))
+        if len(ctx) == 0:
+            ctx = [mx.cpu()]
+            print('use cpu')
+        else:
+            print('gpu num:', len(ctx))
     else:
-        print('gpu num:', len(ctx))
+        ctx = [mx.gpu()]
+        print('use gpu0')
+
     prefix = args.prefix
     prefix_dir = os.path.dirname(prefix)
     if not os.path.exists(prefix_dir):
