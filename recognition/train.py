@@ -10,8 +10,6 @@ import logging
 import sklearn
 import pickle
 import numpy as np
-from image_iter import FaceImageIter
-from image_iter import FaceImageIterList
 import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
@@ -107,14 +105,16 @@ def get_symbol(args):
   embedding = eval(config.net_name).get_symbol()
   all_label = mx.symbol.Variable('softmax_label')
   gt_label = all_label
-  _weight = mx.symbol.Variable("fc7_weight", shape=(config.num_classes, config.emb_size), lr_mult=args.fc7_lr_mult, wd_mult=args.fc7_wd_mult)
+  is_softmax = True
   if config.loss_name=='softmax': #softmax
+    _weight = mx.symbol.Variable("fc7_weight", shape=(config.num_classes, config.emb_size), lr_mult=args.fc7_lr_mult, wd_mult=args.fc7_wd_mult)
     if args.fc7_no_bias:
       fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, no_bias = True, num_hidden=config.num_classes, name='fc7')
     else:
       _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
       fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=config.num_classes, name='fc7')
-  else:
+  elif config.loss_name=='margin_softmax':
+    _weight = mx.symbol.Variable("fc7_weight", shape=(config.num_classes, config.emb_size), lr_mult=args.fc7_lr_mult, wd_mult=args.fc7_wd_mult)
     s = config.loss_s
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
@@ -141,17 +141,46 @@ def get_symbol(args):
         gt_one_hot = mx.sym.one_hot(gt_label, depth = config.num_classes, on_value = 1.0, off_value = 0.0)
         body = mx.sym.broadcast_mul(gt_one_hot, diff)
         fc7 = fc7+body
+  elif config.loss_name.find('triplet')>=0:
+    is_softmax = False
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
+    anchor = mx.symbol.slice_axis(nembedding, axis=0, begin=0, end=args.per_batch_size//3)
+    positive = mx.symbol.slice_axis(nembedding, axis=0, begin=args.per_batch_size//3, end=2*args.per_batch_size//3)
+    negative = mx.symbol.slice_axis(nembedding, axis=0, begin=2*args.per_batch_size//3, end=args.per_batch_size)
+    if config.loss_name=='triplet':
+      ap = anchor - positive
+      an = anchor - negative
+      ap = ap*ap
+      an = an*an
+      ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
+      an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
+      triplet_loss = mx.symbol.Activation(data = (ap-an+config.triplet_alpha), act_type='relu')
+      triplet_loss = mx.symbol.mean(triplet_loss)
+    else:
+      ap = anchor*positive
+      an = anchor*negative
+      ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
+      an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
+      ap = mx.sym.arccos(ap)
+      an = mx.sym.arccos(an)
+      triplet_loss = mx.symbol.Activation(data = (ap-an+config.triplet_alpha), act_type='relu')
+      triplet_loss = mx.symbol.mean(triplet_loss)
+    triplet_loss = mx.symbol.MakeLoss(triplet_loss)
   out_list = [mx.symbol.BlockGrad(embedding)]
-  softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
-  out_list.append(softmax)
-  if args.ce_loss:
-    #ce_loss = mx.symbol.softmax_cross_entropy(data=fc7, label = gt_label, name='ce_loss')/args.per_batch_size
-    body = mx.symbol.SoftmaxActivation(data=fc7)
-    body = mx.symbol.log(body)
-    _label = mx.sym.one_hot(gt_label, depth = config.num_classes, on_value = -1.0, off_value = 0.0)
-    body = body*_label
-    ce_loss = mx.symbol.sum(body)/args.per_batch_size
-    out_list.append(mx.symbol.BlockGrad(ce_loss))
+  if is_softmax:
+    softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
+    out_list.append(softmax)
+    if args.ce_loss:
+      #ce_loss = mx.symbol.softmax_cross_entropy(data=fc7, label = gt_label, name='ce_loss')/args.per_batch_size
+      body = mx.symbol.SoftmaxActivation(data=fc7)
+      body = mx.symbol.log(body)
+      _label = mx.sym.one_hot(gt_label, depth = config.num_classes, on_value = -1.0, off_value = 0.0)
+      body = body*_label
+      ce_loss = mx.symbol.sum(body)/args.per_batch_size
+      out_list.append(mx.symbol.BlockGrad(ce_loss))
+  else:
+    out_list.append(mx.sym.BlockGrad(gt_label))
+    out_list.append(triplet_loss)
   out = mx.symbol.Group(out_list)
   return out
 
@@ -213,23 +242,42 @@ def train_net(args):
     )
     val_dataiter = None
 
-    train_dataiter = FaceImageIter(
-        batch_size           = args.batch_size,
-        data_shape           = data_shape,
-        path_imgrec          = path_imgrec,
-        shuffle              = True,
-        rand_mirror          = args.rand_mirror,
-        mean                 = mean,
-        cutoff               = args.cutoff,
-        color_jittering      = args.color,
-        images_filter        = args.images_filter,
-    )
-
-    metric1 = AccMetric()
-    eval_metrics = [mx.metric.create(metric1)]
-    if args.ce_loss:
-      metric2 = LossValueMetric()
-      eval_metrics.append( mx.metric.create(metric2) )
+    if config.loss_name.find('triplet')>=0:
+      from triplet_image_iter import FaceImageIter
+      triplet_params = [config.triplet_bag_size, config.triplet_alpha, config.triplet_max_ap]
+      train_dataiter = FaceImageIter(
+          batch_size           = args.batch_size,
+          data_shape           = data_shape,
+          path_imgrec          = path_imgrec,
+          shuffle              = True,
+          rand_mirror          = args.rand_mirror,
+          mean                 = mean,
+          cutoff               = args.cutoff,
+          ctx_num              = args.ctx_num,
+          images_per_identity  = config.images_per_identity,
+          triplet_params       = triplet_params,
+          mx_model             = model,
+      )
+      _metric = LossValueMetric()
+      eval_metrics = [mx.metric.create(_metric)]
+    else:
+      from image_iter import FaceImageIter
+      train_dataiter = FaceImageIter(
+          batch_size           = args.batch_size,
+          data_shape           = data_shape,
+          path_imgrec          = path_imgrec,
+          shuffle              = True,
+          rand_mirror          = args.rand_mirror,
+          mean                 = mean,
+          cutoff               = args.cutoff,
+          color_jittering      = args.color,
+          images_filter        = args.images_filter,
+      )
+      metric1 = AccMetric()
+      eval_metrics = [mx.metric.create(metric1)]
+      if args.ce_loss:
+        metric2 = LossValueMetric()
+        eval_metrics.append( mx.metric.create(metric2) )
 
     if config.net_name=='fresnet' or config.net_name=='fmobilefacenet':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
@@ -326,7 +374,7 @@ def train_net(args):
         sys.exit(0)
 
     epoch_cb = None
-    train_dataiter = mx.io.PrefetchingIter(train_dataiter)
+    #train_dataiter = mx.io.PrefetchingIter(train_dataiter)
 
     model.fit(train_dataiter,
         begin_epoch        = begin_epoch,
