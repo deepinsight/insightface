@@ -99,6 +99,7 @@ loss.triplet.triplet_alpha = 0.3
 loss.triplet.triplet_bag_size = 7200
 loss.triplet.triplet_max_ap = 0.0
 loss.triplet.per_batch_size = 60
+loss.triplet.lr = 0.05
 
 loss.atriplet = edict()
 loss.atriplet.loss_name = 'atriplet'
@@ -107,6 +108,7 @@ loss.atriplet.triplet_alpha = 0.35
 loss.atriplet.triplet_bag_size = 7200
 loss.atriplet.triplet_max_ap = 0.0
 loss.atriplet.per_batch_size = 60
+loss.atriplet.lr = 0.05
 
 # default settings
 default = edict()
