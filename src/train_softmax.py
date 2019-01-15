@@ -85,9 +85,9 @@ class LossValueMetric(mx.metric.EvalMetric):
 def parse_args():
     parser = argparse.ArgumentParser(description='Train face network')
     # general
-    parser.add_argument('--data-dir', default='/home/lijc08/datasets/glintasia/faces_glintasia', help='training set directory')
+    parser.add_argument('--data-dir', default='~/datasets/glintasia/faces_glintasia', help='training set directory')
     parser.add_argument('--prefix', default='../model-r100-ii/model', help='directory to save model.')
-    parser.add_argument('--pretrained', default='/home/lijc08/insightface/model-r100-ii/model,0', help='pretrained model to load')
+    parser.add_argument('--pretrained', default='~/insightface/model-r100-ii/model,0', help='pretrained model to load')
     parser.add_argument('--ckpt', type=int, default=1,
                         help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
     parser.add_argument('--loss-type', type=int, default=5, help='loss type')
