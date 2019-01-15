@@ -65,32 +65,48 @@ loss.softmax.loss_m2 = 0.0
 loss.softmax.loss_m3 = 0.0
 
 loss.nsoftmax = edict()
-loss.nsoftmax.loss_name = 'nsoftmax'
+loss.nsoftmax.loss_name = 'margin_softmax'
 loss.nsoftmax.loss_s = 64.0
 loss.nsoftmax.loss_m1 = 1.0
 loss.nsoftmax.loss_m2 = 0.0
 loss.nsoftmax.loss_m3 = 0.0
 
 loss.arcface = edict()
-loss.arcface.loss_name = 'arcface'
+loss.arcface.loss_name = 'margin_softmax'
 loss.arcface.loss_s = 64.0
 loss.arcface.loss_m1 = 1.0
 loss.arcface.loss_m2 = 0.5
 loss.arcface.loss_m3 = 0.0
 
 loss.cosface = edict()
-loss.cosface.loss_name = 'cosface'
+loss.cosface.loss_name = 'margin_softmax'
 loss.cosface.loss_s = 64.0
 loss.cosface.loss_m1 = 1.0
 loss.cosface.loss_m2 = 0.0
 loss.cosface.loss_m3 = 0.35
 
 loss.combined = edict()
-loss.combined.loss_name = 'combined'
+loss.combined.loss_name = 'margin_softmax'
 loss.combined.loss_s = 64.0
 loss.combined.loss_m1 = 1.0
 loss.combined.loss_m2 = 0.3
 loss.combined.loss_m3 = 0.2
+
+loss.triplet = edict()
+loss.triplet.loss_name = 'triplet'
+loss.triplet.images_per_identity = 5
+loss.triplet.triplet_alpha = 0.3
+loss.triplet.triplet_bag_size = 7200
+loss.triplet.triplet_max_ap = 0.0
+loss.triplet.per_batch_size = 60
+
+loss.atriplet = edict()
+loss.atriplet.loss_name = 'atriplet'
+loss.atriplet.images_per_identity = 5
+loss.atriplet.triplet_alpha = 0.35
+loss.atriplet.triplet_bag_size = 7200
+loss.atriplet.triplet_max_ap = 0.0
+loss.atriplet.per_batch_size = 60
 
 # default settings
 default = edict()
@@ -117,6 +133,10 @@ default.models_root = './models'
 
 
 def generate_config(_network, _dataset, _loss):
+    for k, v in loss[_loss].items():
+      config[k] = v
+      if k in default:
+        default[k] = v
     for k, v in network[_network].items():
       config[k] = v
       if k in default:
@@ -125,11 +145,7 @@ def generate_config(_network, _dataset, _loss):
       config[k] = v
       if k in default:
         default[k] = v
-    for k, v in loss[_loss].items():
-      config[k] = v
-      if k in default:
-        default[k] = v
+    config.loss = _loss
     config.network = _network
     config.dataset = _dataset
-    config.loss = _loss
 
