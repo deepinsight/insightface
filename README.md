@@ -120,7 +120,7 @@ We give some examples below. Our experiments were conducted on the Tesla P40 GPU
 (1). Train ArcFace with LResNet100E-IR.
 
 ```Shell
-CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r100 --loss arcface --dataset emore
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network r100 --loss arcface --dataset emore
 ```
 It will output verification results of *LFW*, *CFP-FP* and *AgeDB-30* every 2000 batches. You can check all command line options in *train\_softmax.py*.
 This model can achieve *LFW 99.80+* and *MegaFace 98.3%+*.
@@ -128,19 +128,19 @@ This model can achieve *LFW 99.80+* and *MegaFace 98.3%+*.
 (2). Train CosineFace with LResNet50E-IR.
 
 ```Shell
-CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network r50 --loss cosface --dataset emore
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network r50 --loss cosface --dataset emore
 ```
 
 (3). Train Softmax with LMobileNet-GAP.
 
 ```Shell
-CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_softmax.py --network m1 --loss softmax --dataset emore
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network m1 --loss softmax --dataset emore
 ```
 
 (4). Fine-turn the above Softmax model with Triplet loss.
 
 ```Shell
-CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_triplet.py --network m1 --lr 0.005 --mom 0.0 --per-batch-size 150 --data-dir ../datasets/faces_ms1m_112x112 --pretrained ../model-m1-softmax,50 --prefix ../model-m1-triplet
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network m1 --loss triplet --lr 0.005 --pretrained ./models/m1-softmax-emore,1
 ```
 
 
