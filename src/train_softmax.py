@@ -538,7 +538,7 @@ def train_net(args):
                 break
 
         _cb(param)
-        if mbatch % 1000 == 0:
+        if mbatch % 100 == 0:
             print('lr-batch-epoch:', opt.lr, param.nbatch, param.epoch, global_step[0])
 
         if mbatch >= 0 and mbatch % args.verbose == 0:
