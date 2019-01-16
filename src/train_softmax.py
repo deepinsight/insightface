@@ -375,6 +375,9 @@ def get_symbol(args, arg_params, aux_params):
 
 
 def train_net(args):
+    args.data_dir = os.path.expanduser(args.data_dir)
+    args.pretrained = os.path.expanduser(args.pretrained)
+
     ctx = []
     if os.environ.has_key('CUDA_VISIBLE_DEVICES'):
         cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
@@ -445,7 +448,7 @@ def train_net(args):
     else:
         vec = args.pretrained.split(',')
         print('loading', vec)
-        _, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
+        sym, arg_params, aux_params = mx.model.load_checkpoint(vec[0], int(vec[1]))
         sym, arg_params, aux_params = get_symbol(args, arg_params, aux_params)
 
     # label_name = 'softmax_label'
@@ -518,7 +521,8 @@ def train_net(args):
             lr_steps = [100000, 140000, 160000]
         p = 512.0 / args.batch_size
         for l in xrange(len(lr_steps)):
-            lr_steps[l] = int(lr_steps[l] * p)
+            lr_steps[l] = int(lr_steps[l])
+            # lr_steps[l] = int(lr_steps[l] * p)
     else:
         lr_steps = [int(x) for x in args.lr_steps.split(',')]
     print('lr_steps', lr_steps)
@@ -535,7 +539,7 @@ def train_net(args):
 
         _cb(param)
         if mbatch % 1000 == 0:
-            print('lr-batch-epoch:', opt.lr, param.nbatch, param.epoch)
+            print('lr-batch-epoch:', opt.lr, param.nbatch, param.epoch, global_step[0])
 
         if mbatch >= 0 and mbatch % args.verbose == 0:
             acc_list = ver_test(mbatch)
