@@ -100,7 +100,7 @@ git clone --recursive https://github.com/deepinsight/insightface.git
        agedb_30.bin
 ```
 
-The first three files are the training dataset while the last four files are verification sets.
+The first three files are the training dataset while the last three files are verification sets.
 
 4. Train deep face recognition models.
 In this part, we assume you are in the directory *`$INSIGHTFACE_ROOT/recognition/`*.
@@ -122,7 +122,7 @@ We give some examples below. Our experiments were conducted on the Tesla P40 GPU
 ```Shell
 CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network r100 --loss arcface --dataset emore
 ```
-It will output verification results of *LFW*, *CFP-FP* and *AgeDB-30* every 2000 batches. You can check all command line options in *train\_softmax.py*.
+It will output verification results of *LFW*, *CFP-FP* and *AgeDB-30* every 2000 batches. You can check all options in *config.py*.
 This model can achieve *LFW 99.80+* and *MegaFace 98.3%+*.
 
 (2). Train CosineFace with LResNet50E-IR.
@@ -146,7 +146,7 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network m1 --loss triplet --
 
 5. Verification results.
 
-*LResNet100E-IR* network trained on *MS1M* dataset with ArcFace loss:
+*LResNet100E-IR* network trained on *MS1M-Arcface* dataset with ArcFace loss:
 
 | Method  | LFW(%) | CFP-FP(%) | AgeDB-30(%) |  
 | ------- | ------ | --------- | ----------- |  
