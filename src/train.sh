@@ -13,5 +13,5 @@ mkdir -p "$MODELDIR"
 PREFIX="$MODELDIR/model"
 LOGFILE="$MODELDIR/log"
 #CUDA_VISIBLE_DEVICES='0' python -u train_softmax.py --verbose 100 --pretrained $PRETRAINED --data-dir $DATA_DIR --network "$NETWORK" --loss-type 5 --prefix "$PREFIX" --per-batch-size 32 > "$LOGFILE" 2>&1
-CUDA_VISIBLE_DEVICES='0,1' python -u train_softmax.py --lr_steps=50000,80000,11000 --verbose 2000 --data-dir $DATA_DIR --network "$NETWORK" --loss-type 5 --prefix "$PREFIX" --per-batch-size 96 > "$LOGFILE" 2>&1
+CUDA_VISIBLE_DEVICES='0,1' python -u train_softmax.py --lr-steps=50000,80000,11000 --verbose 2000 --data-dir $DATA_DIR --network "$NETWORK" --loss-type 5 --prefix "$PREFIX" --per-batch-size 96 > "$LOGFILE" 2>&1
 
