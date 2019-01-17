@@ -88,6 +88,7 @@ def parse_args():
   parser.add_argument('--mom', type=float, default=default.mom, help='momentum')
   parser.add_argument('--frequent', type=int, default=default.frequent, help='')
   parser.add_argument('--per-batch-size', type=int, default=default.per_batch_size, help='batch size in each context')
+  parser.add_argument('--kvstore', type=str, default=default.kvstore, help='kvstore setting')
   args = parser.parse_args()
   return args
 
@@ -372,7 +373,7 @@ def train_net(args):
         num_epoch          = 999999,
         eval_data          = val_dataiter,
         eval_metric        = eval_metrics,
-        kvstore            = 'device',
+        kvstore            = args.kvstore,
         optimizer          = opt,
         #optimizer_params   = optimizer_params,
         initializer        = initializer,
