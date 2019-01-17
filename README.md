@@ -14,21 +14,15 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
+**`2019.01.17`**: Please check [https://github.com/deepinsight/insightface/tree/master/recognition](https://github.com/deepinsight/insightface/tree/master/recognition) for new training code which is much more clean.
+
 **`2018.12.13`**: [TVM-Benchmark](https://github.com/deepinsight/insightface/wiki/TVM-Benchmark)
 
 **`2018.10.28`**: [Gender-Age](https://github.com/deepinsight/insightface/tree/master/gender-age) created with a lightweight model. About 1MB size, 10ms on single CPU core.  Gender accuracy 96% on validation set and 4.1 age MAE.
 
 **`2018.10.16`**: We got rank 1st on [IQIYI_VID](http://challenge.ai.iqiyi.com/detail?raceId=5afc36639689443e8f815f9e)(IQIYI video person identification) competition which in conjunction with PRCV2018, see [detail](https://github.com/deepinsight/insightface/issues/439).
 
-**`2018.07.17`**: [Model-Zoo](https://github.com/deepinsight/insightface/wiki/Model-Zoo), [Dataset-Zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo)
-
 **`2018.06.14`**: There's a large scale Asian training dataset provided by Glint, see this [discussion](https://github.com/deepinsight/insightface/issues/256) for detail.
-
-**`2018.05.16`**: A new training dataset released [here](https://pan.baidu.com/s/1S6LJZGdqcZRle1vlcMzHOQ) which can easily achieve much better accuracy. See [discussion](https://github.com/deepinsight/insightface/issues/215) for detail.
-
-**`2018.04.23`**: Our implementation of [MobileFaceNet](https://arxiv.org/abs/1804.07573) is now available. Please set `--network y1` to use this lightweight but powerful backbone.
-
-**`2018.03.26`**: We can train with combined margin(loss-type=5), see [Verification Results On Combined Margin](#verification-results-on-combined-margin).
 
 **`2018.02.13`**: We achieved state-of-the-art performance on [MegaFace-Challenge](http://megaface.cs.washington.edu/results/facescrub.html). Please check our paper and code for implementation details.
 
