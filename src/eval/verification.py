@@ -585,8 +585,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='do verification')
     # general
-    parser.add_argument('--data-dir', default='/home/lijc08/datasets/glintasia/faces_glintasia', help='')
-    parser.add_argument('--model', default='/home/lijc08/insightface/model-r100-ii/model', help='path to load model.')
+    parser.add_argument('--data-dir', default='~/datasets/glintasia', help='')
+    parser.add_argument('--model', default='~/deeplearning/insightface/model-r100-ii-1-16/model,29', help='path to load model.')
     # parser.add_argument('--model', default='/home/lijc08/insightface/model-r50-am-lfw/model', help='path to load model.')
     # parser.add_argument('--model', default='/home/lijc08/insightface/model-r34-amf/model', help='path to load model.')
     # parser.add_argument('--target', default='lfw', help='test targets.')
@@ -600,10 +600,11 @@ if __name__ == '__main__':
     # mode 3是给定阈值，随机取m个人，共有n张图片；一一对比原有的所有数据，有n张图片，就对比n*n次，给出性能。
     # mode 4是给定阈值，随机取m个人，共有n张图片；实现某模型识别图片身份，共识别n次，给出性能。这个最能代表真实情况
     # 其他是导出roc曲线
-    parser.add_argument('--mode', default=2, type=int, help='')
+    parser.add_argument('--mode', default=1, type=int, help='')
     parser.add_argument('--threshold', default=0.74, type=int, help='')
     parser.add_argument('--nfolds', default=10, type=int, help='')
     args = parser.parse_args()
+    args.data_dir = os.path.expanduser(args.data_dir)
 
     prop = face_image.load_property(args.data_dir)
     image_size = prop.image_size
@@ -612,6 +613,7 @@ if __name__ == '__main__':
     nets = []
     vec = args.model.split(',')
     prefix = args.model.split(',')[0]
+    prefix = os.path.expanduser(prefix)
     epochs = []
     if len(vec) == 1:
         pdir = os.path.dirname(prefix)
