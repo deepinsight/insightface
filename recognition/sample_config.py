@@ -13,6 +13,15 @@ config.net_input = 1
 config.net_output = 'E'
 config.net_multiplier = 1.0
 config.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
+config.ce_loss = False
+config.fc7_lr_mult = 1.0
+config.fc7_wd_mult = 1.0
+config.fc7_no_bias = False
+config.max_steps = 0
+config.data_rand_mirror = True
+config.data_cutoff = False
+config.data_color = 0
+config.data_images_filter = 0
 
 
 # network settings
@@ -51,7 +60,7 @@ dataset = edict()
 
 dataset.emore = edict()
 dataset.emore.dataset = 'emore'
-dataset.emore.dataset_path = './faces_emore'
+dataset.emore.dataset_path = '../datasets/faces_emore'
 dataset.emore.num_classes = 85742
 dataset.emore.image_shape = (112,112,3)
 dataset.emore.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
@@ -59,10 +68,6 @@ dataset.emore.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
 loss = edict()
 loss.softmax = edict()
 loss.softmax.loss_name = 'softmax'
-loss.softmax.loss_s = -1.0
-loss.softmax.loss_m1 = 0.0
-loss.softmax.loss_m2 = 0.0
-loss.softmax.loss_m3 = 0.0
 
 loss.nsoftmax = edict()
 loss.nsoftmax.loss_name = 'margin_softmax'
@@ -116,7 +121,7 @@ default = edict()
 # default network
 default.network = 'r100'
 default.pretrained = ''
-default.pretrained_epoch = 0
+default.pretrained_epoch = 1
 # default dataset
 default.dataset = 'emore'
 default.loss = 'arcface'
