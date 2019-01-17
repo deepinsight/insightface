@@ -130,7 +130,7 @@ def parse_args():
     parser.add_argument('--cutoff', type=int, default=0, help='cut off aug')
     parser.add_argument('--color', type=int, default=0, help='color jittering aug')
     parser.add_argument('--images-filter', type=int, default=0, help='minimum images per identity filter')
-    parser.add_argument('--target', type=str, default='lfw', help='verification targets')
+    parser.add_argument('--target', type=str, default='lfw,cfp_ff,agedb_30', help='verification targets')
     parser.add_argument('--ce-loss', default=False, action='store_true', help='if output ce loss')
     args = parser.parse_args()
     return args
