@@ -6,6 +6,7 @@ config = edict()
 config.bn_mom = 0.9
 config.workspace = 256
 config.emb_size = 512
+config.ckpt_embedding = True
 config.net_se = 0
 config.net_act = 'prelu'
 config.net_unit = 3
@@ -13,7 +14,7 @@ config.net_input = 1
 config.net_output = 'E'
 config.net_multiplier = 1.0
 config.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
-config.ce_loss = False
+config.ce_loss = True
 config.fc7_lr_mult = 1.0
 config.fc7_wd_mult = 1.0
 config.fc7_no_bias = False
@@ -37,23 +38,32 @@ network.r100.num_layers = 100
 
 network.y1 = edict()
 network.y1.net_name = 'fmobilefacenet'
-network.y1.num_layers = 1
 network.y1.emb_size = 128
 network.y1.net_output = 'GDC'
 
 network.m1 = edict()
 network.m1.net_name = 'fmobilenet'
-network.m1.num_layers = 1
 network.m1.emb_size = 256
 network.m1.net_output = 'GAP'
 network.m1.net_multiplier = 1.0
 
 network.m05 = edict()
 network.m05.net_name = 'fmobilenet'
-network.m05.num_layers = 1
 network.m05.emb_size = 256
-network.m05.net_output = 'GAP'
+network.m05.net_output = 'GDC'
 network.m05.net_multiplier = 0.5
+
+network.mnas05 = edict()
+network.mnas05.net_name = 'fmnasnet'
+network.mnas05.emb_size = 256
+network.mnas05.net_output = 'GDC'
+network.mnas05.net_multiplier = 0.5
+
+network.mnas025 = edict()
+network.mnas025.net_name = 'fmnasnet'
+network.mnas025.emb_size = 256
+network.mnas025.net_output = 'GDC'
+network.mnas025.net_multiplier = 0.25
 
 # dataset settings
 dataset = edict()
