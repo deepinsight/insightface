@@ -28,13 +28,19 @@ config.data_images_filter = 0
 # network settings
 network = edict()
 
+network.r100 = edict()
+network.r100.net_name = 'fresnet'
+network.r100.num_layers = 100
+
 network.r50 = edict()
 network.r50.net_name = 'fresnet'
 network.r50.num_layers = 50
 
-network.r100 = edict()
-network.r100.net_name = 'fresnet'
-network.r100.num_layers = 100
+network.r50v1 = edict()
+network.r50v1.net_name = 'fresnet'
+network.r50v1.num_layers = 50
+network.r50v1.net_unit = 1
+
 
 network.y1 = edict()
 network.y1.net_name = 'fmobilefacenet'
