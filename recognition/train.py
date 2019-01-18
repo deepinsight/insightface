@@ -23,6 +23,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'symbol'))
 import fresnet
 import fmobilefacenet
 import fmobilenet
+import fmnasnet
 
 
 logger = logging.getLogger()
@@ -360,7 +361,16 @@ def train_net(args):
         if do_save:
           print('saving', msave)
           arg, aux = model.get_params()
-          mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
+          if config.ckpt_embedding:
+            all_layers = model.symbol.get_internals()
+            _sym = all_layers['fc1_output']
+            _arg = {}
+            for k in arg:
+              if not k.startswith('fc7'):
+                _arg[k] = arg[k]
+            mx.model.save_checkpoint(prefix, msave, _sym, _arg, aux)
+          else:
+            mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
         print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[-1]))
       if config.max_steps>0 and mbatch>config.max_steps:
         sys.exit(0)
