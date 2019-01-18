@@ -51,14 +51,14 @@ This model can achieve *LFW 99.80+* and *MegaFace 98.3%+*.
 CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network r50 --loss cosface --dataset emore
 ```
 
-(3). Train Softmax with MNasNet0.5-GDC.
+(3). Train Softmax with MobileFaceNet.
 
 ```Shell
-CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network mnas05 --loss softmax --dataset emore
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network y1 --loss softmax --dataset emore
 ```
 
 (4). Fine-turn the above Softmax model with Triplet loss.
 
 ```Shell
-CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network mnas05 --loss triplet --lr 0.005 --pretrained ./models/mnas05-softmax-emore,1
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network mnas05 --loss triplet --lr 0.005 --pretrained ./models/y1-softmax-emore,1
 ```
