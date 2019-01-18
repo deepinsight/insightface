@@ -127,7 +127,7 @@ def parse_args():
     parser.add_argument('--data-dir', default='', help='training set directory')
     parser.add_argument('--prefix', default='../model/model', help='directory to save model.')
     parser.add_argument('--pretrained', default='', help='pretrained model to load')
-    parser.add_argument('--ckpt', type=int, default=1,
+    parser.add_argument('--ckpt', type=int, default=2,
                         help='checkpoint saving option. 0: discard saving. 1: save when necessary. 2: always save')
     parser.add_argument('--network', default='r50', help='specify network')
     parser.add_argument('--version-se', type=int, default=0, help='whether to use se in network')
