@@ -3,7 +3,7 @@
 1. Install `MXNet` with GPU support (Python 2.7).
 
 ```
-pip install mxnet-cu90
+pip install mxnet-cu90 #or mxnet-cu100 or mxnet-cu80
 ```
 
 2. Clone the InsightFace repository. We call the directory insightface as *`INSIGHTFACE_ROOT`*.
@@ -28,10 +28,6 @@ The first three files are the training dataset while the last three files are ve
 
 4. Train deep face recognition models.
 In this part, we assume you are in the directory *`$INSIGHTFACE_ROOT/recognition/`*.
-```Shell
-export MXNET_CPU_WORKER_NTHREADS=24
-export MXNET_ENGINE_TYPE=ThreadedEnginePerDevice
-```
 
 Place and edit config file:
 ```Shell
@@ -55,14 +51,14 @@ This model can achieve *LFW 99.80+* and *MegaFace 98.3%+*.
 CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network r50 --loss cosface --dataset emore
 ```
 
-(3). Train Softmax with LMobileNet-GAP.
+(3). Train Softmax with MNasNet0.5-GDC.
 
 ```Shell
-CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network m1 --loss softmax --dataset emore
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network mnas05 --loss softmax --dataset emore
 ```
 
 (4). Fine-turn the above Softmax model with Triplet loss.
 
 ```Shell
-CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network m1 --loss triplet --lr 0.005 --pretrained ./models/m1-softmax-emore,1
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network mnas05 --loss triplet --lr 0.005 --pretrained ./models/mnas05-softmax-emore,1
 ```
