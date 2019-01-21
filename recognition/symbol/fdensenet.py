@@ -135,7 +135,7 @@ densenet_spec = {121: (64, 32, [6, 12, 24, 16]),
 def get_symbol():
     num_layers = config.num_layers
     num_init_features, growth_rate, block_config = densenet_spec[num_layers]
-    net = DenseNet(num_init_features, growth_rate, block_config)
+    net = DenseNet(num_init_features, growth_rate, block_config, dropout = config.densenet_dropout)
     data = mx.sym.Variable(name='data')
     data = data-127.5
     data = data*0.0078125

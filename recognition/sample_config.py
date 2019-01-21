@@ -45,6 +45,13 @@ network.d169 = edict()
 network.d169.net_name = 'fdensenet'
 network.d169.num_layers = 169
 network.d169.per_batch_size = 64
+network.d169.densenet_dropout = 0.0
+
+network.d201 = edict()
+network.d201.net_name = 'fdensenet'
+network.d201.num_layers = 201
+network.d201.per_batch_size = 64
+network.d201.densenet_dropout = 0.0
 
 network.y1 = edict()
 network.y1.net_name = 'fmobilefacenet'
