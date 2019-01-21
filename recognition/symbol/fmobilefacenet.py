@@ -6,8 +6,6 @@ import symbol_utils
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from config import config
 
-bn_mom = 0.9
-#bn_mom = 0.9997
 
 def Act(data, act_type, name):
     #ignore param act_type, set it in this function 
@@ -19,13 +17,13 @@ def Act(data, act_type, name):
 
 def Conv(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
     conv = mx.sym.Convolution(data=data, num_filter=num_filter, kernel=kernel, num_group=num_group, stride=stride, pad=pad, no_bias=True, name='%s%s_conv2d' %(name, suffix))
-    bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=False,momentum=bn_mom)
+    bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=False,momentum=config.bn_mom)
     act = Act(data=bn, act_type=config.net_act, name='%s%s_relu' %(name, suffix))
     return act
     
 def Linear(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
     conv = mx.sym.Convolution(data=data, num_filter=num_filter, kernel=kernel, num_group=num_group, stride=stride, pad=pad, no_bias=True, name='%s%s_conv2d' %(name, suffix))
-    bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=False,momentum=bn_mom)    
+    bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=False,momentum=config.bn_mom)    
     return bn
 
 def ConvOnly(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
@@ -50,17 +48,7 @@ def Residual(data, num_block=1, num_out=1, kernel=(3, 3), stride=(1, 1), pad=(1,
 
 def get_symbol():
     num_classes = config.emb_size
-    bn_mom = config.bn_mom
-    workspace = config.workspace
     print('in_network', config)
-    #kwargs = {'version_se' : config.net_se,
-    #    'version_input': config.net_input,
-    #    'version_output': config.net_output,
-    #    'version_unit': config.net_unit,
-    #    'version_act': config.net_act,
-    #    'bn_mom': bn_mom,
-    #    'workspace': workspace,
-    #    }
     fc_type = config.net_output
     data = mx.symbol.Variable(name="data")
     data = data-127.5

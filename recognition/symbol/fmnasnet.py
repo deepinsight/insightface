@@ -118,10 +118,9 @@ class MNasNet(nn.HybridBlock):
     def __init__(self, m=1.0, **kwargs):
         super(MNasNet, self).__init__(**kwargs)
         
-        m = config.net_multiplier
         self.first_oup = int(32*m)
-        #self.second_oup = int(16*m)
-        self.second_oup = int(32*m)
+        self.second_oup = int(16*m)
+        #self.second_oup = int(32*m)
         self.interverted_residual_setting = [
             # t, c,  n, s, k
             [3, int(24*m),  3, 2, 3, "stage2_"],  # -> 56x56

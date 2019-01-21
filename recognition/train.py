@@ -24,6 +24,7 @@ import fresnet
 import fmobilefacenet
 import fmobilenet
 import fmnasnet
+import fdensenet
 
 
 logger = logging.getLogger()
@@ -394,7 +395,6 @@ def train_net(args):
         epoch_end_callback = epoch_cb )
 
 def main():
-    #time.sleep(3600*6.5)
     global args
     args = parse_args()
     train_net(args)
