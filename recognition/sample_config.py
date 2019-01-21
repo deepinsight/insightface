@@ -41,6 +41,10 @@ network.r50v1.net_name = 'fresnet'
 network.r50v1.num_layers = 50
 network.r50v1.net_unit = 1
 
+network.d169 = edict()
+network.d169.net_name = 'fdensenet'
+network.d169.num_layers = 169
+network.d169.per_batch_size = 64
 
 network.y1 = edict()
 network.y1.net_name = 'fmobilefacenet'
@@ -50,7 +54,7 @@ network.y1.net_output = 'GDC'
 network.m1 = edict()
 network.m1.net_name = 'fmobilenet'
 network.m1.emb_size = 256
-network.m1.net_output = 'GAP'
+network.m1.net_output = 'GDC'
 network.m1.net_multiplier = 1.0
 
 network.m05 = edict()
@@ -58,6 +62,12 @@ network.m05.net_name = 'fmobilenet'
 network.m05.emb_size = 256
 network.m05.net_output = 'GDC'
 network.m05.net_multiplier = 0.5
+
+network.mnas = edict()
+network.mnas.net_name = 'fmnasnet'
+network.mnas.emb_size = 256
+network.mnas.net_output = 'GDC'
+network.mnas.net_multiplier = 1.0
 
 network.mnas05 = edict()
 network.mnas05.net_name = 'fmnasnet'
