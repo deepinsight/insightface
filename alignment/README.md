@@ -4,4 +4,5 @@ We also provide some popular heatmap based approaches like stacked hourglass, et
 
 For example, by default, you can train our approach by ``train.py --network sdu`` or train hourglass network by ``train.py --network hourglass``.
 
-More information and binary training dataset coming soon.
+2D training/validation dataset is now available at [baiducloud](https://pan.baidu.com/s/1kdquiIGTlK7l26SPWO_cmw)
+
