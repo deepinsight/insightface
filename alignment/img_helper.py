@@ -63,3 +63,18 @@ def gaussian(img, pt, sigma):
     return True
     #return img
 
+def estimate_trans_bbox(face, input_size, s = 2.0):
+  w = face[2] - face[0]
+  h = face[3] - face[1]
+  wc = int( (face[2]+face[0])/2 )
+  hc = int( (face[3]+face[1])/2 )
+  im_size = max(w, h)
+  #size = int(im_size*1.2)
+  scale = input_size/(max(w,h)*s)
+  M = [ 
+        [scale, 0, input_size/2-wc*scale],
+        [0, scale, input_size/2-hc*scale],
+      ]
+  M = np.array(M)
+  return M
+
