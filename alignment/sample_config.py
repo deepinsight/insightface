@@ -3,10 +3,18 @@ from easydict import EasyDict as edict
 
 config = edict()
 
+#default training/dataset config
+config.num_classes = 68
+config.record_img_size = 384
+config.base_scale = 256
+config.input_img_size = 128
+config.output_label_size = 64
+config.label_xfirst = False
+config.losstype = 'heatmap'
+config.net_coherent = False
+config.multiplier = 1.0
 
 config.gaussian = 0
-
-
 
 # network settings
 network = edict()
@@ -23,7 +31,7 @@ network.hourglass.losstype = 'heatmap'
 
 network.sdu = edict()
 network.sdu.net_coherent = False
-network.sdu.net_sta = 2
+network.sdu.net_sta = 1
 network.sdu.net_n = 3
 network.sdu.net_dcn = 3
 network.sdu.net_stacks = 2

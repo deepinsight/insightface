@@ -13,7 +13,10 @@ from mtcnn_detector import MtcnnDetector
 class Handler:
   def __init__(self, prefix, epoch, ctx_id=0):
     print('loading',prefix, epoch)
-    ctx = mx.gpu(ctx_id)
+    if ctx_id>=0:
+      ctx = mx.gpu(ctx_id)
+    else:
+      ctx = mx.cpu()
     sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch)
     all_layers = sym.get_internals()
     sym = all_layers['heatmap_output']
@@ -49,7 +52,7 @@ class Handler:
     self.model.forward(db, is_train=False)
     alabel = self.model.get_outputs()[-1].asnumpy()[0]
     tb = datetime.datetime.now()
-    print('time cost', (tb-ta).total_seconds())
+    print('module time cost', (tb-ta).total_seconds())
     ret = np.zeros( (alabel.shape[0], 2), dtype=np.float32)
     for i in xrange(alabel.shape[0]):
       a = cv2.resize(alabel[i], (self.image_size[1], self.image_size[0]))
@@ -65,7 +68,10 @@ img = cv2.imread(img_path)
 
 handler = Handler('./model/HG', 1, ctx_id)
 for _ in range(10):
+  ta = datetime.datetime.now()
   landmark, M = handler.get(img)
+  tb = datetime.datetime.now()
+  print('get time cost', (tb-ta).total_seconds())
 #visualize landmark
 IM = cv2.invertAffineTransform(M)
 for i in range(landmark.shape[0]):
