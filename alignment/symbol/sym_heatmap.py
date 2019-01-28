@@ -465,9 +465,10 @@ def ce_loss(x, y):
   return loss
 
 def get_symbol(num_classes):
-    sFilters = 64
-    mFilters = 128
-    nFilters = 256
+    m = config.multiplier
+    sFilters = max(int(64*m), 32)
+    mFilters = max(int(128*m), 32)
+    nFilters = int(256*m)
 
     nModules = 1
     nStacks = config.net_stacks
