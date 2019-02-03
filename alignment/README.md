@@ -6,3 +6,5 @@ For example, by default, you can train our approach by ``train.py --network sdu`
 
 2D training/validation dataset is now available at [baiducloud](https://pan.baidu.com/s/1kdquiIGTlK7l26SPWO_cmw)
 
+3D training/validation dataset is now available at [baiducloud](https://pan.baidu.com/s/1VjFWm6eEtIqGKk92GE2rgw)
+
