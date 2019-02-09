@@ -1,9 +1,23 @@
-### Train
+## Parallel Acceleration on both x and W
+
+### Memory Consumption and Training Speed
+
+![Memoryspeed](https://github.com/deepinsight/insightface/blob/master/recognition/memoryspeed.png)
+
+Parallel acceleration on both feature x and centre W. Setting: ResNet 50, batch size 8*64, feature dimension 512, float point 32, GPU 8*P40 (24GB).
+
+### Illustration of Main Steps
+
+![Memoryspeed](https://github.com/deepinsight/insightface/blob/master/recognition/mainsteps.png)
+
+Parallel calculation by simple matrix partition. Setting: ResNet 50, batch size 8*64, feature dimension 512, float point 32, identity number 1 Million, GPU 8 * 1080ti (11GB). Communication cost: 1MB (feature x). Training speed: 800 samples/second.
+
+## Train
 
 1. Install `MXNet` with GPU support (Python 2.7).
 
 ```
-pip install mxnet-cu90 #or mxnet-cu100 or mxnet-cu80
+pip install mxnet-cu80 #or mxnet-cu90 or mxnet-cu100
 ```
 
 2. Clone the InsightFace repository. We call the directory insightface as *`INSIGHTFACE_ROOT`*.
@@ -12,7 +26,7 @@ pip install mxnet-cu90 #or mxnet-cu100 or mxnet-cu80
 git clone --recursive https://github.com/deepinsight/insightface.git
 ```
 
-3. Download the training set (`MS1M-Arcface`) and place it in *`$INSIGHTFACE_ROOT/datasets/`*. Each training dataset includes at least following 6 files:
+3. Download the training set (`MS1MV2-Arcface`) and place it in *`$INSIGHTFACE_ROOT/datasets/`*. Each training dataset includes the following 6 files:
 
 ```Shell
     faces_emore/
