@@ -1,3 +1,8 @@
+
+'''
+@author: insightface
+'''
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -7,15 +12,15 @@ import sys
 import math
 import random
 import logging
-import sklearn
 import pickle
+import sklearn
 import numpy as np
+from image_iter import FaceImageIter
 import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
 import mxnet.optimizer as optimizer
 from config import config, default, generate_config
-from metric import *
 sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 import verification
 sys.path.append(os.path.join(os.path.dirname(__file__), 'symbol'))
@@ -35,7 +40,7 @@ args = None
 
 
 def parse_args():
-  parser = argparse.ArgumentParser(description='Train face network')
+  parser = argparse.ArgumentParser(description='Train parall face network')
   # general
   parser.add_argument('--dataset', default=default.dataset, help='dataset config')
   parser.add_argument('--network', default=default.network, help='network config')
@@ -54,96 +59,68 @@ def parse_args():
   parser.add_argument('--frequent', type=int, default=default.frequent, help='')
   parser.add_argument('--per-batch-size', type=int, default=default.per_batch_size, help='batch size in each context')
   parser.add_argument('--kvstore', type=str, default=default.kvstore, help='kvstore setting')
+  parser.add_argument('--worker-id', type=int, default=0, help='worker id for dist training, starts from 0')
   args = parser.parse_args()
   return args
 
 
-def get_symbol(args):
+def get_symbol_embedding():
   embedding = eval(config.net_name).get_symbol()
+  all_label = mx.symbol.Variable('softmax_label')
+  #embedding = mx.symbol.BlockGrad(embedding)
+  all_label = mx.symbol.BlockGrad(all_label)
+  out_list = [embedding, all_label]
+  out = mx.symbol.Group(out_list)
+  return out
+
+def get_symbol_arcface(args):
+  embedding = mx.symbol.Variable('data')
   all_label = mx.symbol.Variable('softmax_label')
   gt_label = all_label
   is_softmax = True
+  #print('call get_sym_arcface with', args, config)
+  _weight = mx.symbol.Variable("fc7_%d_weight"%args._ctxid, shape=(args.ctx_num_classes, config.emb_size), 
+      lr_mult=config.fc7_lr_mult, wd_mult=config.fc7_wd_mult)
   if config.loss_name=='softmax': #softmax
-    _weight = mx.symbol.Variable("fc7_weight", shape=(config.num_classes, config.emb_size), 
-        lr_mult=config.fc7_lr_mult, wd_mult=config.fc7_wd_mult, init=mx.init.Normal(0.01))
-    if config.fc7_no_bias:
-      fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, no_bias = True, num_hidden=config.num_classes, name='fc7')
-    else:
-      _bias = mx.symbol.Variable('fc7_bias', lr_mult=2.0, wd_mult=0.0)
-      fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, bias = _bias, num_hidden=config.num_classes, name='fc7')
+    fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, no_bias = True, num_hidden=args.ctx_num_classes, name='fc7_%d'%args._ctxid)
   elif config.loss_name=='margin_softmax':
-    _weight = mx.symbol.Variable("fc7_weight", shape=(config.num_classes, config.emb_size), 
-        lr_mult=config.fc7_lr_mult, wd_mult=config.fc7_wd_mult, init=mx.init.Normal(0.01))
-    s = config.loss_s
     _weight = mx.symbol.L2Normalization(_weight, mode='instance')
-    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')*s
-    fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=config.num_classes, name='fc7')
+    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n_%d'%args._ctxid)
+    fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.ctx_num_classes, name='fc7_%d'%args._ctxid)
     if config.loss_m1!=1.0 or config.loss_m2!=0.0 or config.loss_m3!=0.0:
+      gt_one_hot = mx.sym.one_hot(gt_label, depth = args.ctx_num_classes, on_value = 1.0, off_value = 0.0)
       if config.loss_m1==1.0 and config.loss_m2==0.0:
-        s_m = s*config.loss_m3
-        gt_one_hot = mx.sym.one_hot(gt_label, depth = config.num_classes, on_value = s_m, off_value = 0.0)
-        fc7 = fc7-gt_one_hot
+        _one_hot = gt_one_hot*args.margin_b
+        fc7 = fc7-_one_hot
       else:
-        zy = mx.sym.pick(fc7, gt_label, axis=1)
-        cos_t = zy/s
+        fc7_onehot = fc7 * gt_one_hot
+        cos_t = fc7_onehot
         t = mx.sym.arccos(cos_t)
         if config.loss_m1!=1.0:
           t = t*config.loss_m1
-        if config.loss_m2>0.0:
+        if config.loss_m2!=0.0:
           t = t+config.loss_m2
-        body = mx.sym.cos(t)
-        if config.loss_m3>0.0:
-          body = body - config.loss_m3
-        new_zy = body*s
-        diff = new_zy - zy
-        diff = mx.sym.expand_dims(diff, 1)
-        gt_one_hot = mx.sym.one_hot(gt_label, depth = config.num_classes, on_value = 1.0, off_value = 0.0)
-        body = mx.sym.broadcast_mul(gt_one_hot, diff)
-        fc7 = fc7+body
-  elif config.loss_name.find('triplet')>=0:
-    is_softmax = False
-    nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
-    anchor = mx.symbol.slice_axis(nembedding, axis=0, begin=0, end=args.per_batch_size//3)
-    positive = mx.symbol.slice_axis(nembedding, axis=0, begin=args.per_batch_size//3, end=2*args.per_batch_size//3)
-    negative = mx.symbol.slice_axis(nembedding, axis=0, begin=2*args.per_batch_size//3, end=args.per_batch_size)
-    if config.loss_name=='triplet':
-      ap = anchor - positive
-      an = anchor - negative
-      ap = ap*ap
-      an = an*an
-      ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
-      an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
-      triplet_loss = mx.symbol.Activation(data = (ap-an+config.triplet_alpha), act_type='relu')
-      triplet_loss = mx.symbol.mean(triplet_loss)
-    else:
-      ap = anchor*positive
-      an = anchor*negative
-      ap = mx.symbol.sum(ap, axis=1, keepdims=1) #(T,1)
-      an = mx.symbol.sum(an, axis=1, keepdims=1) #(T,1)
-      ap = mx.sym.arccos(ap)
-      an = mx.sym.arccos(an)
-      triplet_loss = mx.symbol.Activation(data = (ap-an+config.triplet_alpha), act_type='relu')
-      triplet_loss = mx.symbol.mean(triplet_loss)
-    triplet_loss = mx.symbol.MakeLoss(triplet_loss)
-  out_list = [mx.symbol.BlockGrad(embedding)]
-  if is_softmax:
-    softmax = mx.symbol.SoftmaxOutput(data=fc7, label = gt_label, name='softmax', normalization='valid')
-    out_list.append(softmax)
-    if config.ce_loss:
-      #ce_loss = mx.symbol.softmax_cross_entropy(data=fc7, label = gt_label, name='ce_loss')/args.per_batch_size
-      body = mx.symbol.SoftmaxActivation(data=fc7)
-      body = mx.symbol.log(body)
-      _label = mx.sym.one_hot(gt_label, depth = config.num_classes, on_value = -1.0, off_value = 0.0)
-      body = body*_label
-      ce_loss = mx.symbol.sum(body)/args.per_batch_size
-      out_list.append(mx.symbol.BlockGrad(ce_loss))
-  else:
-    out_list.append(mx.sym.BlockGrad(gt_label))
-    out_list.append(triplet_loss)
+        margin_cos = mx.sym.cos(t)
+        if config.loss_m3!=0.0:
+          margin_cos = margin_cos - config.loss_m3
+        margin_fc7 = margin_cos
+        margin_fc7_onehot = margin_fc7 * gt_one_hot
+        diff = margin_fc7_onehot - fc7_onehot
+        fc7 = fc7+diff
+    fc7 = fc7*config.loss_s
+
+  out_list = []
+  out_list.append(fc7)
+  if config.loss_name=='softmax': #softmax
+    out_list.append(gt_label)
   out = mx.symbol.Group(out_list)
   return out
 
 def train_net(args):
+    #_seed = 727
+    #random.seed(_seed)
+    #np.random.seed(_seed)
+    #mx.random.seed(_seed)
     ctx = []
     cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
     if len(cvd)>0:
@@ -160,10 +137,13 @@ def train_net(args):
     if not os.path.exists(prefix_dir):
       os.makedirs(prefix_dir)
     args.ctx_num = len(ctx)
+    args.num_layers = int(args.network[1:])
+    print('num_layers', args.num_layers)
+    if args.per_batch_size==0:
+      args.per_batch_size = 128
     args.batch_size = args.per_batch_size*args.ctx_num
     args.rescale_threshold = 0
     args.image_channel = config.image_shape[2]
-
     data_dir = config.dataset_path
     path_imgrec = None
     path_imglist = None
@@ -174,76 +154,77 @@ def train_net(args):
     print('num_classes', config.num_classes)
     path_imgrec = os.path.join(data_dir, "train.rec")
 
-    print('Called with argument:', args, config)
     data_shape = (args.image_channel,image_size[0],image_size[1])
+
+    num_workers = config.num_workers
+    global_num_ctx = num_workers * args.ctx_num
+    if config.num_classes%global_num_ctx==0:
+      args.ctx_num_classes = config.num_classes//global_num_ctx
+    else:
+      args.ctx_num_classes = config.num_classes//global_num_ctx+1
+    args.local_num_classes = args.ctx_num_classes * args.ctx_num
+    args.local_class_start = args.local_num_classes * args.worker_id
+
+    #if len(args.partial)==0:
+    #  local_classes_range = (0, args.num_classes)
+    #else:
+    #  _vec = args.partial.split(',')
+    #  local_classes_range = (int(_vec[0]), int(_vec[1]))
+
+    #args.partial_num_classes = local_classes_range[1] - local_classes_range[0]
+    #args.partial_start = local_classes_range[0]
+
+    print('Called with argument:', args, config)
     mean = None
 
     begin_epoch = 0
+    base_lr = args.lr
+    base_wd = args.wd
+    base_mom = args.mom
+    arg_params = None
+    aux_params = None
     if len(args.pretrained)==0:
-      arg_params = None
-      aux_params = None
-      sym = get_symbol(args)
-      if config.net_name=='spherenet':
-        data_shape_dict = {'data' : (args.per_batch_size,)+data_shape}
-        spherenet.init_weights(sym, data_shape_dict, args.num_layers)
+      esym = get_symbol_embedding()
+      asym = get_symbol_arcface
     else:
-      print('loading', args.pretrained, args.pretrained_epoch)
-      _, arg_params, aux_params = mx.model.load_checkpoint(args.pretrained, args.pretrained_epoch)
-      sym = get_symbol(args)
+      assert False
+    if config.num_workers==1:
+      from parall_module_local_v1 import ParallModule
+    else:
+      from parall_module_dist import ParallModule
 
-    #label_name = 'softmax_label'
-    #label_shape = (args.batch_size,)
-    model = mx.mod.Module(
+    model = ParallModule(
         context       = ctx,
-        symbol        = sym,
+        symbol        = esym,
+        data_names    = ['data'],
+        label_names    = ['softmax_label'],
+        asymbol       = asym,
+        args = args,
     )
     val_dataiter = None
+    train_dataiter = FaceImageIter(
+        batch_size           = args.batch_size,
+        data_shape           = data_shape,
+        path_imgrec          = path_imgrec,
+        shuffle              = True,
+        rand_mirror          = config.data_rand_mirror,
+        mean                 = mean,
+        cutoff               = config.data_cutoff,
+        color_jittering      = config.data_color,
+        images_filter        = config.data_images_filter,
+    )
 
-    if config.loss_name.find('triplet')>=0:
-      from triplet_image_iter import FaceImageIter
-      triplet_params = [config.triplet_bag_size, config.triplet_alpha, config.triplet_max_ap]
-      train_dataiter = FaceImageIter(
-          batch_size           = args.batch_size,
-          data_shape           = data_shape,
-          path_imgrec          = path_imgrec,
-          shuffle              = True,
-          rand_mirror          = config.data_rand_mirror,
-          mean                 = mean,
-          cutoff               = config.data_cutoff,
-          ctx_num              = args.ctx_num,
-          images_per_identity  = config.images_per_identity,
-          triplet_params       = triplet_params,
-          mx_model             = model,
-      )
-      _metric = LossValueMetric()
-      eval_metrics = [mx.metric.create(_metric)]
-    else:
-      from image_iter import FaceImageIter
-      train_dataiter = FaceImageIter(
-          batch_size           = args.batch_size,
-          data_shape           = data_shape,
-          path_imgrec          = path_imgrec,
-          shuffle              = True,
-          rand_mirror          = config.data_rand_mirror,
-          mean                 = mean,
-          cutoff               = config.data_cutoff,
-          color_jittering      = config.data_color,
-          images_filter        = config.data_images_filter,
-      )
-      metric1 = AccMetric()
-      eval_metrics = [mx.metric.create(metric1)]
-      if config.ce_loss:
-        metric2 = LossValueMetric()
-        eval_metrics.append( mx.metric.create(metric2) )
 
+    
     if config.net_name=='fresnet' or config.net_name=='fmobilefacenet':
       initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
     else:
       initializer = mx.init.Xavier(rnd_type='uniform', factor_type="in", magnitude=2)
-    #initializer = mx.init.Xavier(rnd_type='gaussian', factor_type="out", magnitude=2) #resnet style
-    _rescale = 1.0/args.ctx_num
-    opt = optimizer.SGD(learning_rate=args.lr, momentum=args.mom, wd=args.wd, rescale_grad=_rescale)
+
+    _rescale = 1.0/args.batch_size
+    opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale)
     _cb = mx.callback.Speedometer(args.batch_size, args.frequent)
+
 
     ver_list = []
     ver_name_list = []
@@ -256,7 +237,6 @@ def train_net(args):
         print('ver', name)
 
 
-
     def ver_test(nbatch):
       results = []
       for i in xrange(len(ver_list)):
@@ -266,7 +246,6 @@ def train_net(args):
         print('[%s][%d]Accuracy-Flip: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc2, std2))
         results.append(acc2)
       return results
-
 
 
     highest_acc = [0.0, 0.0]  #lfw and target
@@ -324,17 +303,10 @@ def train_net(args):
 
         if do_save:
           print('saving', msave)
-          arg, aux = model.get_params()
-          if config.ckpt_embedding:
-            all_layers = model.symbol.get_internals()
-            _sym = all_layers['fc1_output']
-            _arg = {}
-            for k in arg:
-              if not k.startswith('fc7'):
-                _arg[k] = arg[k]
-            mx.model.save_checkpoint(prefix, msave, _sym, _arg, aux)
-          else:
-            mx.model.save_checkpoint(prefix, msave, model.symbol, arg, aux)
+          arg, aux = model.get_export_params()
+          all_layers = model.symbol.get_internals()
+          _sym = all_layers['fc1_output']
+          mx.model.save_checkpoint(prefix, msave, _sym, arg, aux)
         print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[-1]))
       if config.max_steps>0 and mbatch>config.max_steps:
         sys.exit(0)
@@ -346,7 +318,7 @@ def train_net(args):
         begin_epoch        = begin_epoch,
         num_epoch          = 999999,
         eval_data          = val_dataiter,
-        eval_metric        = eval_metrics,
+        #eval_metric        = eval_metrics,
         kvstore            = args.kvstore,
         optimizer          = opt,
         #optimizer_params   = optimizer_params,
