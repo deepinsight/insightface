@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from easydict import EasyDict as edict
 
 config = edict()
@@ -188,4 +189,7 @@ def generate_config(_network, _dataset, _loss):
     config.loss = _loss
     config.network = _network
     config.dataset = _dataset
+    config.num_workers = 1
+    if 'DMLC_NUM_WORKER' in os.environ:
+      config.num_workers = int(os.environ['DMLC_NUM_WORKER'])
 
