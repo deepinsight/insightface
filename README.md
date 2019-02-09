@@ -8,13 +8,14 @@ By Jia Guo and [Jiankang Deng](https://jiankangdeng.github.io/)
 The code of InsightFace is released under the MIT License.
 
 ## ArcFace Video Demo
+
 [![ArcFace Demo](https://github.com/deepinsight/insightface/blob/master/resources/facerecognitionfromvideo.PNG)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
 
 Please click the image to watch the Youtube video. For Bilibili users, click [here](https://www.bilibili.com/video/av38041494?from=search&seid=11501833604850032313).
 
 ## Recent Update
 
-**`2019.01.17`**: Please check [https://github.com/deepinsight/insightface/tree/master/recognition](https://github.com/deepinsight/insightface/tree/master/recognition) for new training code which is much more clean.
+**`2019.02.08`**: Please check [https://github.com/deepinsight/insightface/tree/master/recognition](https://github.com/deepinsight/insightface/tree/master/recognition) for our parallel training code which can easily and efficiently support one million identities on a single machine (8* 1080ti).
 
 **`2018.12.13`**: [TVM-Benchmark](https://github.com/deepinsight/insightface/wiki/TVM-Benchmark)
 
