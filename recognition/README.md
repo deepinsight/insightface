@@ -2,13 +2,13 @@
 
 ### Memory Consumption and Training Speed
 
-![Memoryspeed](https://github.com/deepinsight/insightface/blob/master/recognition/memoryspeed.png)
+![Memoryspeed](https://github.com/deepinsight/insightface/blob/master/resources/memoryspeed.png)
 
 Parallel acceleration on both feature x and centre W. Setting: ResNet 50, batch size 8*64, feature dimension 512, float point 32, GPU 8*P40 (24GB).
 
 ### Illustration of Main Steps
 
-![Memoryspeed](https://github.com/deepinsight/insightface/blob/master/recognition/mainsteps.png)
+![Memoryspeed](https://github.com/deepinsight/insightface/blob/master/resources/mainsteps.png)
 
 Parallel calculation by simple matrix partition. Setting: ResNet 50, batch size 8*64, feature dimension 512, float point 32, identity number 1 Million, GPU 8 * 1080ti (11GB). Communication cost: 1MB (feature x). Training speed: 800 samples/second.
 
