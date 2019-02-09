@@ -90,7 +90,7 @@ year={2018}
 }
 ```
 
-This parallel acceleration for large-scale face recognition is also inspired by following works.
+This parallel acceleration for large-scale face recognition is also inspired by following works:
 ```
 @article{debingzhang,
   title={A distributed training solution for face recognition},
