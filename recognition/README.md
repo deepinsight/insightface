@@ -12,7 +12,7 @@ Parallel acceleration on both feature x and centre W. Setting: ResNet 50, batch 
 
 Parallel calculation by simple matrix partition. Setting: ResNet 50, batch size 8*64, feature dimension 512, float point 32, identity number 1 Million, GPU 8 * 1080ti (11GB). Communication cost: 1MB (feature x). Training speed: 800 samples/second.
 
-## Train
+### Model Training
 
 1. Install `MXNet` with GPU support (Python 2.7).
 
@@ -75,4 +75,34 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network y1 --loss softmax --
 
 ```Shell
 CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network mnas05 --loss triplet --lr 0.005 --pretrained ./models/y1-softmax-emore,1
+```
+
+### Citation
+
+If you find *ArcFace* useful in your research, please consider to cite the following related papers:
+
+```
+@article{deng2018arcface,
+title={ArcFace: Additive Angular Margin Loss for Deep Face Recognition},
+author={Deng, Jiankang and Guo, Jia and Niannan, Xue and Zafeiriou, Stefanos},
+journal={arXiv:1801.07698},
+year={2018}
+}
+```
+
+This parallel acceleration for large-scale face recognition is also inspired by following works.
+```
+@article{debingzhang,
+  title={A distributed training solution for face recognition},
+  author={Zhang, Debing},
+  journal={DeepGlint},
+  year={2018}
+}
+
+@inproceedings{zhang2018accelerated,
+  title={Accelerated training for massive classification via dynamic class selection},
+  author={Zhang, Xingcheng and Yang, Lei and Yan, Junjie and Lin, Dahua},
+  booktitle={AAAI},
+  year={2018}
+}
 ```
