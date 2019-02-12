@@ -1,3 +1,5 @@
+import numpy as np
+import mxnet as mx
 
 class AccMetric(mx.metric.EvalMetric):
   def __init__(self):
