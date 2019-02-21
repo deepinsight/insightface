@@ -137,8 +137,6 @@ def train_net(args):
     if not os.path.exists(prefix_dir):
       os.makedirs(prefix_dir)
     args.ctx_num = len(ctx)
-    args.num_layers = int(args.network[1:])
-    print('num_layers', args.num_layers)
     if args.per_batch_size==0:
       args.per_batch_size = 128
     args.batch_size = args.per_batch_size*args.ctx_num
