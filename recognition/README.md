@@ -87,8 +87,8 @@ If you find *ArcFace* useful in your research, please consider to cite the follo
 @article{deng2018arcface,
 title={ArcFace: Additive Angular Margin Loss for Deep Face Recognition},
 author={Deng, Jiankang and Guo, Jia and Niannan, Xue and Zafeiriou, Stefanos},
-journal={arXiv:1801.07698},
-year={2018}
+journal={CVPR},
+year={2019}
 }
 ```
 
