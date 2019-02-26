@@ -222,10 +222,10 @@ Todo
 If you find *InsightFace* useful in your research, please consider to cite the following related papers:
 
 ```
-@article{deng2018arcface,
+@inproceedings{deng2018arcface,
 title={ArcFace: Additive Angular Margin Loss for Deep Face Recognition},
 author={Deng, Jiankang and Guo, Jia and Niannan, Xue and Zafeiriou, Stefanos},
-journal={CVPR},
+booktitle={CVPR},
 year={2019}
 }
 ```
