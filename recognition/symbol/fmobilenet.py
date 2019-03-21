@@ -15,38 +15,41 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import sys
+import os
 import mxnet as mx
 import symbol_utils
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from config import config
 
 def Act(data, act_type, name):
     #ignore param act_type, set it in this function 
-    body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
-    #act = mx.sym.Activation(data=bn, act_type='relu', name='%s%s_relu' %(name, suffix))
+    if act_type=='prelu':
+      body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
+    else:
+      body = mx.sym.Activation(data=data, act_type=act_type, name=name)
     return body
 
 def Conv(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
     conv = mx.sym.Convolution(data=data, num_filter=num_filter, kernel=kernel, num_group=num_group, stride=stride, pad=pad, no_bias=True, name='%s%s_conv2d' %(name, suffix))
     bn = mx.sym.BatchNorm(data=conv, name='%s%s_batchnorm' %(name, suffix), fix_gamma=True)
-    act = Act(data=bn, act_type='relu', name='%s%s_relu' %(name, suffix))
+    act = Act(data=bn, act_type=config.net_act, name='%s%s_relu' %(name, suffix))
     return act
 
 def ConvOnly(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
     conv = mx.sym.Convolution(data=data, num_filter=num_filter, kernel=kernel, num_group=num_group, stride=stride, pad=pad, no_bias=True, name='%s%s_conv2d' %(name, suffix))
     return conv
 
-def get_symbol(num_classes, **kwargs):
+def get_symbol():
+    num_classes = config.emb_size
+    bn_mom = config.bn_mom
+    workspace = config.workspace
     data = mx.symbol.Variable(name="data") # 224
     data = data-127.5
     data = data*0.0078125
-    version_input = kwargs.get('version_input', 1)
-    assert version_input>=0
-    version_output = kwargs.get('version_output', 'E')
-    fc_type = version_output
-    #version_unit = kwargs.get('version_unit', 3)
-    version_multiplier = kwargs.get('version_multiplier', 1.0)
-    bf = int(32*version_multiplier)
-    print(version_input, version_output, version_multiplier, bf)
-    if version_input==0:
+    fc_type = config.net_output
+    bf = int(32*config.net_multiplier)
+    if config.net_input==0:
       conv_1 = Conv(data, num_filter=bf, kernel=(3, 3), pad=(1, 1), stride=(2, 2), name="conv_1") # 224/112
     else:
       conv_1 = Conv(data, num_filter=bf, kernel=(3, 3), pad=(1, 1), stride=(1, 1), name="conv_1") # 224/112

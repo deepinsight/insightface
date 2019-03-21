@@ -20,8 +20,8 @@ import symbol_utils
 
 def Act(data, act_type, name):
     #ignore param act_type, set it in this function 
-    body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
-    #act = mx.sym.Activation(data=bn, act_type='relu', name='%s%s_relu' %(name, suffix))
+    #body = mx.sym.LeakyReLU(data = data, act_type='prelu', name = name)
+    body = mx.sym.Activation(data=data, act_type='relu', name=name)
     return body
 
 def Conv(data, num_filter=1, kernel=(1, 1), stride=(1, 1), pad=(0, 0), num_group=1, name=None, suffix=''):
@@ -41,11 +41,12 @@ def get_symbol(num_classes, **kwargs):
     version_input = kwargs.get('version_input', 1)
     assert version_input>=0
     version_output = kwargs.get('version_output', 'E')
+    multiplier = kwargs.get('multiplier', 1.0)
     fc_type = version_output
-    #version_unit = kwargs.get('version_unit', 3)
-    version_multiplier = kwargs.get('version_multiplier', 1.0)
-    bf = int(32*version_multiplier)
-    print(version_input, version_output, version_multiplier, bf)
+    base_filter = int(32*multiplier)
+    bf = base_filter
+    print(version_input, version_output, base_filter)
+
     if version_input==0:
       conv_1 = Conv(data, num_filter=bf, kernel=(3, 3), pad=(1, 1), stride=(2, 2), name="conv_1") # 224/112
     else:

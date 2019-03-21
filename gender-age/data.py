@@ -19,9 +19,6 @@ import mxnet as mx
 from mxnet import ndarray as nd
 from mxnet import io
 from mxnet import recordio
-sys.path.append(os.path.join(os.path.dirname(__file__), 'common'))
-import face_preprocess
-import multiprocessing
 
 logger = logging.getLogger()
 
@@ -32,43 +29,17 @@ class FaceImageIter(io.DataIter):
                  path_imgrec = None,
                  shuffle=False, aug_list=None, mean = None,
                  rand_mirror = False, cutoff = 0, color_jittering = 0,
-                 images_filter = 0,
                  data_name='data', label_name='softmax_label', **kwargs):
         super(FaceImageIter, self).__init__()
         assert path_imgrec
-        if path_imgrec:
-            logging.info('loading recordio %s...',
-                         path_imgrec)
-            path_imgidx = path_imgrec[0:-4]+".idx"
-            self.imgrec = recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, 'r')  # pylint: disable=redefined-variable-type
-            s = self.imgrec.read_idx(0)
-            header, _ = recordio.unpack(s)
-            if header.flag>0:
-              print('header0 label', header.label)
-              self.header0 = (int(header.label[0]), int(header.label[1]))
-              #assert(header.flag==1)
-              #self.imgidx = range(1, int(header.label[0]))
-              self.imgidx = []
-              self.id2range = {}
-              self.seq_identity = range(int(header.label[0]), int(header.label[1]))
-              for identity in self.seq_identity:
-                s = self.imgrec.read_idx(identity)
-                header, _ = recordio.unpack(s)
-                a,b = int(header.label[0]), int(header.label[1])
-                count = b-a
-                if count<images_filter:
-                  continue
-                self.id2range[identity] = (a,b)
-                self.imgidx += range(a, b)
-              print('id2range', len(self.id2range))
-            else:
-              self.imgidx = list(self.imgrec.keys)
-            if shuffle:
-              self.seq = self.imgidx
-              self.oseq = self.imgidx
-              print(len(self.seq))
-            else:
-              self.seq = None
+        logging.info('loading recordio %s...',
+                     path_imgrec)
+        path_imgidx = path_imgrec[0:-4]+".idx"
+        self.imgrec = recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, 'r')  # pylint: disable=redefined-variable-type
+        s = self.imgrec.read_idx(0)
+        header, _ = recordio.unpack(s)
+        self.imgidx = list(self.imgrec.keys)
+        self.seq = self.imgidx
 
         self.mean = mean
         self.nd_mean = None
@@ -87,7 +58,7 @@ class FaceImageIter(io.DataIter):
         self.cutoff = cutoff
         self.color_jittering = color_jittering
         self.CJA = mx.image.ColorJitterAug(0.125, 0.125, 0.125)
-        self.provide_label = [(label_name, (batch_size,))]
+        self.provide_label = [(label_name, (batch_size,101))]
         #print(self.provide_label[0][1])
         self.cur = 0
         self.nbatch = 0
@@ -107,30 +78,14 @@ class FaceImageIter(io.DataIter):
       return len(self.seq)
 
     def next_sample(self):
-        """Helper function for reading in next sample."""
-        #set total batch size, for example, 1800, and maximum size for each people, for example 45
-        if self.seq is not None:
-          while True:
-            if self.cur >= len(self.seq):
-                raise StopIteration
-            idx = self.seq[self.cur]
-            self.cur += 1
-            if self.imgrec is not None:
-              s = self.imgrec.read_idx(idx)
-              header, img = recordio.unpack(s)
-              label = header.label
-              if not isinstance(label, numbers.Number):
-                label = label[0]
-              return label, img, None, None
-            else:
-              label, fname, bbox, landmark = self.imglist[idx]
-              return label, self.read_image(fname), bbox, landmark
-        else:
-            s = self.imgrec.read()
-            if s is None:
-                raise StopIteration
-            header, img = recordio.unpack(s)
-            return header.label, img, None, None
+        if self.cur >= len(self.seq):
+            raise StopIteration
+        idx = self.seq[self.cur]
+        self.cur += 1
+        s = self.imgrec.read_idx(idx)
+        header, img = recordio.unpack(s)
+        label = header.label
+        return label, img, None, None
 
     def brightness_aug(self, src, x):
       alpha = 1.0 + random.uniform(-x, x)
@@ -198,7 +153,20 @@ class FaceImageIter(io.DataIter):
         i = 0
         try:
             while i < batch_size:
+                #print('XXXX', i)
                 label, s, bbox, landmark = self.next_sample()
+                gender = int(label[0])
+                age = int(label[1])
+                assert age>=0
+                #assert gender==0 or gender==1
+                plabel = np.zeros(shape=(101,), dtype=np.float32)
+                plabel[0] = gender
+                if age==0:
+                  age = 1
+                if age>100:
+                  age = 100
+                plabel[1:age+1] = 1
+                label = plabel
                 _data = self.imdecode(s)
                 if _data.shape[0]!=self.data_shape[1]:
                   _data = mx.image.resize_short(_data, self.data_shape[1])
@@ -233,14 +201,6 @@ class FaceImageIter(io.DataIter):
                     #print(starth, endh, startw, endw, _data.shape)
                     _data[starth:endh, startw:endw, :] = 128
                 data = [_data]
-                try:
-                    self.check_valid_image(data)
-                except RuntimeError as e:
-                    logging.debug('Invalid image, skipping:  %s', str(e))
-                    continue
-                #print('aa',data[0].shape)
-                #data = self.augmentation_transform(data)
-                #print('bb',data[0].shape)
                 for datum in data:
                     assert i < batch_size, 'Batch size must be multiples of augmenter output length'
                     #print(datum.shape)

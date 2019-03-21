@@ -26,8 +26,9 @@ from mxnet import ndarray as nd
 image_shape = None
 net = None
 data_size = 1862120
-emb_size = 512
+emb_size = 0
 use_flip = True
+
 
 
 def do_flip(data):
@@ -35,7 +36,7 @@ def do_flip(data):
     data[idx,:,:] = np.fliplr(data[idx,:,:])
 
 def get_feature(buffer):
-  embedding = np.zeros( (len(buffer), emb_size), dtype=np.float32 )
+  global emb_size
   if use_flip:
     input_blob = np.zeros( (len(buffer)*2, 3, image_shape[1], image_shape[2] ) )
   else:
@@ -56,6 +57,10 @@ def get_feature(buffer):
   db = mx.io.DataBatch(data=(data,))
   net.model.forward(db, is_train=False)
   _embedding = net.model.get_outputs()[0].asnumpy()
+  if emb_size==0:
+    emb_size = _embedding.shape[1]
+    print('set emb_size to ', emb_size)
+  embedding = np.zeros( (len(buffer), emb_size), dtype=np.float32 )
   if use_flip:
     embedding1 = _embedding[0::2]
     embedding2 = _embedding[1::2]
@@ -104,9 +109,9 @@ def main(args):
   net.model.bind(data_shapes=[('data', (args.batch_size, 3, image_shape[1], image_shape[2]))])
   net.model.set_params(net.arg_params, net.aux_params)
 
+  features_all = None
 
   i = 0
-  features_all = np.zeros( (data_size, emb_size), dtype=np.float32 )
   fstart = 0
   buffer = []
   for line in open(args.input, 'r'):
@@ -119,6 +124,8 @@ def main(args):
       embedding = get_feature(buffer)
       buffer = []
       fend = fstart+embedding.shape[0]
+      if features_all is None:
+        features_all = np.zeros( (data_size, emb_size), dtype=np.float32 )
       #print('writing', fstart, fend)
       features_all[fstart:fend,:] = embedding
       fstart = fend
@@ -128,7 +135,7 @@ def main(args):
     print('writing', fstart, fend)
     features_all[fstart:fend,:] = embedding
   write_bin(args.output, features_all)
-  os.system("bypy upload %s"%args.output)
+  #os.system("bypy upload %s"%args.output)
 
 
 
