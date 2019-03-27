@@ -21,7 +21,10 @@ from mxnet import ndarray as nd
 
 
 def read_img(image_path):
-  img = cv2.imread(image_path, cv2.CV_LOAD_IMAGE_COLOR)
+  
+  # change of namespace in cv3
+  # img = cv2.imread(image_path, cv2.CV_LOAD_IMAGE_COLOR)
+  img = cv2.imread(image_path, cv2.IMREAD_COLOR)
   return img
 
 def get_feature(imgs, nets):
