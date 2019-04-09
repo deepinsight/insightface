@@ -12,6 +12,7 @@ config.net_se = 0
 config.net_act = 'prelu'
 config.net_unit = 3
 config.net_input = 1
+config.net_blocks = [1,4,6,2]
 config.net_output = 'E'
 config.net_multiplier = 1.0
 config.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
@@ -58,6 +59,12 @@ network.y1 = edict()
 network.y1.net_name = 'fmobilefacenet'
 network.y1.emb_size = 128
 network.y1.net_output = 'GDC'
+
+network.y2 = edict()
+network.y2.net_name = 'fmobilefacenet'
+network.y2.emb_size = 256
+network.y2.net_output = 'GDC'
+network.y2.net_blocks = [2,8,16,4]
 
 network.m1 = edict()
 network.m1.net_name = 'fmobilenet'
