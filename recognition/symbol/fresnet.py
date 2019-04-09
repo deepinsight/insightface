@@ -562,6 +562,12 @@ def resnet(units, num_stages, filter_list, num_classes, bottle_neck):
         body = residual_unit(body, filter_list[i+1], (1,1), True, name='stage%d_unit%d' % (i+1, j+2),
           bottle_neck=bottle_neck, **kwargs)
 
+    if bottle_neck:
+      body = Conv(data=body, num_filter=512, kernel=(1,1), stride=(1,1), pad=(0,0),
+                                no_bias=True, name="convd", workspace=workspace)
+      body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bnd')
+      body = Act(data=body, act_type=act_type, name='relud')
+
     fc1 = symbol_utils.get_fc1(body, num_classes, fc_type)
     return fc1
 
@@ -572,7 +578,7 @@ def get_symbol():
     """
     num_classes = config.emb_size
     num_layers = config.num_layers
-    if num_layers >= 101:
+    if num_layers >= 500:
         filter_list = [64, 256, 512, 1024, 2048]
         bottle_neck = True
     else:
@@ -591,10 +597,16 @@ def get_symbol():
         units = [3, 6, 24, 3]
     elif num_layers == 90:
         units = [3, 8, 30, 3]
+    elif num_layers == 98:
+        units = [3, 4, 38, 3]
+    elif num_layers == 99:
+        units = [3, 8, 35, 3]
     elif num_layers == 100:
         units = [3, 13, 30, 3]
     elif num_layers == 124:
         units = [3, 13, 40, 5]
+    elif num_layers == 160:
+        units = [3, 24, 49, 3]
     elif num_layers == 101:
         units = [3, 4, 23, 3]
     elif num_layers == 152:
@@ -611,4 +623,6 @@ def get_symbol():
                   filter_list = filter_list,
                   num_classes = num_classes,
                   bottle_neck = bottle_neck)
+
+
 
