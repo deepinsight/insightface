@@ -37,6 +37,10 @@ def get_fc1(last_conv, num_classes, fc_type, input_channel=512):
     body = mx.symbol.Dropout(data=body, p=0.4)
     fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
     fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
+  elif fc_type=='FC':
+    body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
+    fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
+    fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
   elif fc_type=='GAP':
     bn1 = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
     relu1 = Act(data=bn1, act_type=config.net_act, name='relu1')
