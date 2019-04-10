@@ -43,7 +43,7 @@ def get_model(ctx, image_size, model_str, layer):
 class FaceModel:
   def __init__(self, args):
     self.args = args
-    if args.gpu>=0:
+    if args.gpu>0:
       ctx = mx.gpu(args.gpu)
     else:
       ctx = mx.cpu()
@@ -71,12 +71,14 @@ class FaceModel:
     if ret is None:
       return None
     bbox, points = ret
+    # print(bbox)
+    # print(points)
     if bbox.shape[0]==0:
       return None
     bbox = bbox[0,0:4]
     points = points[0,:].reshape((2,5)).T
-    #print(bbox)
-    #print(points)
+    # print(bbox)
+    # print(points)
     nimg = face_preprocess.preprocess(face_img, bbox, points, image_size='112,112')
     nimg = cv2.cvtColor(nimg, cv2.COLOR_BGR2RGB)
     aligned = np.transpose(nimg, (2,0,1))
@@ -84,6 +86,14 @@ class FaceModel:
     data = mx.nd.array(input_blob)
     db = mx.io.DataBatch(data=(data,))
     return db
+
+
+  def get_bbox_and_landmarks(self, face_img):
+    ret = self.detector.detect_face(face_img, det_type = self.args.det)
+    if ret is None:
+      return None
+
+    return ret
 
 
   def get_ga(self, data):
