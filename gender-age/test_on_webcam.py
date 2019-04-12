@@ -30,60 +30,53 @@ cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 while(True):
 	# Capture frame-by-frame
-	ret, frame = cap.read()
+        
+        ret, frame = cap.read()
+        
+        if not ret:
+            continue
+        
+        results = model.get_bbox_and_landmarks(frame)
 
-
-	bboxes, points = model.get_bbox_and_landmarks(frame)
-
-	if bboxes.shape[0]==0:
-		continue
-
-
-	# print(bboxes)
-	# print(points)
-
-	#number of detected faces in the frame
-	num_faces = bboxes.shape[0]
-
-	for face in range(num_faces):
-		bbox = bboxes[face,0:4]
-		conf = bboxes[face,-1]
-		xmin=int(bbox[0])
-		ymin=int(bbox[1])
-		xmax=int(bbox[2])
-		ymax=int(bbox[3])
-		try:
-			point = points[face,:].reshape((2,5)).T
-			nimg = face_preprocess.preprocess(frame, bbox, point, image_size='112,112')
-			nimg = cv2.cvtColor(nimg, cv2.COLOR_BGR2RGB)
-			aligned = np.transpose(nimg, (2,0,1))
-			input_blob = np.expand_dims(aligned, axis=0)
-			data = mx.nd.array(input_blob)
-			img = mx.io.DataBatch(data=(data,))
-			gender, age = model.get_ga(img)
-			cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0,255,0),3)
-			font = cv2.FONT_HERSHEY_SIMPLEX
-			if gender==0:
-				sex='Female'
-			elif gender==1:
-				sex='Male'
-			text = sex +' '+ str(age)
-			cv2.putText(frame, text,(xmin, ymax-ymin), font, 1,(255,255,255),2,cv2.LINE_AA)
-			
-		except ValueError:
-			pass
-
-
-
-
-		
-
-
-	# Display the resulting frame
-	cv2.imshow('wecam',frame)
-	if cv2.waitKey(1) & 0xFF == ord('q'):
-		break
-
+        if results is None:
+            continue
+        else:
+            bboxes, points = results
+        
+        #number of detected faces in the frame
+        num_faces = bboxes.shape[0]
+        for face in range(num_faces):
+            bbox = bboxes[face,0:4]
+            conf = bboxes[face,-1]
+            xmin=int(bbox[0])
+            ymin=int(bbox[1])
+            xmax=int(bbox[2])
+            ymax=int(bbox[3])
+            
+            try:
+                point = points[face,:].reshape((2,5)).T
+                nimg = face_preprocess.preprocess(frame, bbox, point, image_size='112,112')
+                nimg = cv2.cvtColor(nimg, cv2.COLOR_BGR2RGB)
+                aligned = np.transpose(nimg, (2,0,1))
+                input_blob = np.expand_dims(aligned, axis=0)
+                data = mx.nd.array(input_blob)
+                img = mx.io.DataBatch(data=(data,))
+                gender, age = model.get_ga(img)
+                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0,255,0),3)
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                if gender==0:
+                    sex='Female'
+                elif gender==1:
+                    sex='Male'
+                    text = sex +' '+ str(age)
+                    cv2.putText(frame, text,(xmin, ymax-ymin), font, 1,(255,255,255),2,cv2.LINE_AA)
+            except ValueError:
+                pass
+            
+        # Display the resulting frame
+        cv2.imshow('wecam',frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 # When everything done, release the capture
 cap.release()
 cv2.destroyAllWindows()
