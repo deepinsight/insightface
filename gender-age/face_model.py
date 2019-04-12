@@ -43,9 +43,9 @@ def get_model(ctx, image_size, model_str, layer):
 class FaceModel:
   def __init__(self, args):
     self.args = args
-    if args.gpu>0:
+    if args.gpu>=0:
       ctx = mx.gpu(args.gpu)
-    else:
+    elif args.gpu==-1:
       ctx = mx.cpu()
     _vec = args.image_size.split(',')
     assert len(_vec)==2

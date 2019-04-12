@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(description='face model test')
 parser.add_argument('--image-size', default='112,112', help='')
 parser.add_argument('--image', default='Tom_Hanks_54745.png', help='')
 parser.add_argument('--model', default='model/model,0', help='path to load model.')
-parser.add_argument('--gpu', default=0, type=int, help='gpu id')
+parser.add_argument('--gpu', default=0, type=int, help='gpu id') # pass -1 to run with CPU
 parser.add_argument('--det', default=0, type=int, help='mtcnn option, 1 means using R+O, 0 means detect from begining')
 args = parser.parse_args()
 
