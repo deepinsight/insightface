@@ -20,6 +20,8 @@ import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
 import mxnet.optimizer as optimizer
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
+import flops_counter
 from config import config, default, generate_config
 sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 import verification
@@ -186,6 +188,13 @@ def train_net(args):
       asym = get_symbol_arcface
     else:
       assert False
+
+    if config.count_flops:
+      all_layers = esym.get_internals()
+      _sym = all_layers['fc1_output']
+      FLOPs = flops_counter.count_flops(_sym, data=(1,3,image_size[0],image_size[1]))
+      print('Network FLOPs: %d'%FLOPs)
+
     if config.num_workers==1:
       from parall_module_local_v1 import ParallModule
     else:

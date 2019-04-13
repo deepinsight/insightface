@@ -16,6 +16,8 @@ import argparse
 import mxnet.optimizer as optimizer
 from config import config, default, generate_config
 from metric import *
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
+import flops_counter
 sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 import verification
 sys.path.append(os.path.join(os.path.dirname(__file__), 'symbol'))
@@ -190,6 +192,12 @@ def train_net(args):
       print('loading', args.pretrained, args.pretrained_epoch)
       _, arg_params, aux_params = mx.model.load_checkpoint(args.pretrained, args.pretrained_epoch)
       sym = get_symbol(args)
+
+    if config.count_flops:
+      all_layers = sym.get_internals()
+      _sym = all_layers['fc1_output']
+      FLOPs = flops_counter.count_flops(_sym, data=(1,3,image_size[0],image_size[1]))
+      print('Network FLOPs: %d'%FLOPs)
 
     #label_name = 'softmax_label'
     #label_shape = (args.batch_size,)
