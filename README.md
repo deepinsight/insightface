@@ -15,17 +15,18 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
+**`2019.04.14`**: We will launch a Light-weight Face Recognition challenge/workshop on ICCV 2019.
+
+**`2019.04.04`**: Arcface achieved state-of-the-art performance (5/109) on the NIST Face Recognition Vendor Test (FRVT) (1:1 verification)
+[report](https://www.nist.gov/sites/default/files/documents/2019/04/04/frvt_report_2019_04_04.pdf) (name: Imperial-000). Our solution is based on [MS1MV2+DeepGlintAsian, ResNet100, ArcFace loss]. 
+
 **`2019.02.08`**: Please check [https://github.com/deepinsight/insightface/tree/master/recognition](https://github.com/deepinsight/insightface/tree/master/recognition) for our parallel training code which can easily and efficiently support one million identities on a single machine (8* 1080ti).
 
-**`2018.12.13`**: [TVM-Benchmark](https://github.com/deepinsight/insightface/wiki/TVM-Benchmark)
+**`2018.12.13`**: Inference acceleration [TVM-Benchmark](https://github.com/deepinsight/insightface/wiki/TVM-Benchmark).
 
-**`2018.10.28`**: [Gender-Age](https://github.com/deepinsight/insightface/tree/master/gender-age) created with a lightweight model. About 1MB size, 10ms on single CPU core.  Gender accuracy 96% on validation set and 4.1 age MAE.
+**`2018.10.28`**: Light-weight attribute model [Gender-Age](https://github.com/deepinsight/insightface/tree/master/gender-age). About 1MB, 10ms on single CPU core. Gender accuracy 96% on validation set and 4.1 age MAE.
 
-**`2018.10.16`**: We got rank 1st on [IQIYI_VID](http://challenge.ai.iqiyi.com/detail?raceId=5afc36639689443e8f815f9e)(IQIYI video person identification) competition which in conjunction with PRCV2018, see [detail](https://github.com/deepinsight/insightface/issues/439).
-
-**`2018.06.14`**: There's a large scale Asian training dataset provided by Glint, see this [discussion](https://github.com/deepinsight/insightface/issues/256) for detail.
-
-**`2018.02.13`**: We achieved state-of-the-art performance on [MegaFace-Challenge](http://megaface.cs.washington.edu/results/facescrub.html). Please check our paper and code for implementation details.
+**`2018.10.16`**: We achieved state-of-the-art performance on [Trillionpairs](http://trillionpairs.deepglint.com/results) (name: nttstar) and [IQIYI_VID](http://challenge.ai.iqiyi.com/detail?raceId=5afc36639689443e8f815f9e) (name: WitcheR). 
 
 ## Contents
 [Deep Face Recognition](#deep-face-recognition)
@@ -222,6 +223,12 @@ Todo
 If you find *InsightFace* useful in your research, please consider to cite the following related papers:
 
 ```
+@inproceedings{guo2018stacked,
+  title={Stacked Dense U-Nets with Dual Transformers for Robust Face Alignment},
+  author={Guo, Jia and Deng, Jiankang and Xue, Niannan and Zafeiriou, Stefanos},
+  booktitle={BMVC},
+  year={2018}
+}
 @inproceedings{deng2018arcface,
 title={ArcFace: Additive Angular Margin Loss for Deep Face Recognition},
 author={Deng, Jiankang and Guo, Jia and Niannan, Xue and Zafeiriou, Stefanos},
