@@ -26,6 +26,7 @@ config.data_cutoff = False
 config.data_color = 0
 config.data_images_filter = 0
 config.count_flops = True
+config.memonger = False #not work now
 
 
 # network settings
@@ -34,6 +35,11 @@ network = edict()
 network.r100 = edict()
 network.r100.net_name = 'fresnet'
 network.r100.num_layers = 100
+
+network.r100fc = edict()
+network.r100fc.net_name = 'fresnet'
+network.r100fc.num_layers = 100
+network.r100fc.net_output = 'FC'
 
 network.r50 = edict()
 network.r50.net_name = 'fresnet'
@@ -106,6 +112,13 @@ dataset.emore.dataset_path = '../datasets/faces_emore'
 dataset.emore.num_classes = 85742
 dataset.emore.image_shape = (112,112,3)
 dataset.emore.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
+
+dataset.retina = edict()
+dataset.retina.dataset = 'retina'
+dataset.retina.dataset_path = '../datasets/ms1m-retinaface-t1'
+dataset.retina.num_classes = 93431
+dataset.retina.image_shape = (112,112,3)
+dataset.retina.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
 
 loss = edict()
 loss.softmax = edict()
