@@ -2,6 +2,6 @@
 
 Please check ``test_widerface.py`` for model usage.
 
-Pretrained Model: [RetinaFace-R50](https://pan.baidu.com/s/1I8WireS-loq-PdWVstbz-A) is a medium size model with ResNet50 backbone. WiderFace validation mAP: Easy 96.4, Medium 95.4, Hard 90.7. It can output face bounding boxes and five landmarks in a single forward pass.
+Pretrained Model: [RetinaFace-R50](https://pan.baidu.com/s/1C6nKq122gJxRhb37vK0_LQ) is a medium size model with ResNet50 backbone. WiderFace validation mAP: Easy 96.5, Medium 95.6, Hard 90.4. It can output face bounding boxes and five landmarks in a single forward pass.
 
 Light weight and large models will be released soon.
