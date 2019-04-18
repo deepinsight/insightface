@@ -6,7 +6,7 @@ import sys
 from builtins import range
 import numpy as np
 from ..cython.anchors import anchors_cython
-from ..config import config
+#from ..config import config
 
 
 def anchors_plane(feat_h, feat_w, stride, base_anchor):
@@ -55,6 +55,7 @@ def generate_anchors_fpn(dense_anchor=False, cfg = None):
     scales wrt a reference (0, 0, 15, 15) window.
     """
     if cfg is None:
+      from ..config import config
       cfg = config.RPN_ANCHOR_CFG
     RPN_FEAT_STRIDE = []
     for k in cfg:
