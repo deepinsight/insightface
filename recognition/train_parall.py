@@ -144,6 +144,8 @@ def train_net(args):
     args.batch_size = args.per_batch_size*args.ctx_num
     args.rescale_threshold = 0
     args.image_channel = config.image_shape[2]
+    config.batch_size = args.batch_size
+    config.per_batch_size = args.per_batch_size
     data_dir = config.dataset_path
     path_imgrec = None
     path_imglist = None
@@ -193,7 +195,8 @@ def train_net(args):
       all_layers = esym.get_internals()
       _sym = all_layers['fc1_output']
       FLOPs = flops_counter.count_flops(_sym, data=(1,3,image_size[0],image_size[1]))
-      print('Network FLOPs: %d'%FLOPs)
+      _str = flops_counter.flops_str(FLOPs)
+      print('Network FLOPs: %s'%_str)
 
     if config.num_workers==1:
       from parall_module_local_v1 import ParallModule

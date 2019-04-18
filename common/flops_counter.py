@@ -83,6 +83,17 @@ def count_flops(sym, **data_shapes):
 
   return FLOPs
 
+def flops_str(FLOPs):
+  preset = [ (1e12, 'T'), (1e9, 'G'), (1e6, 'M'), (1e3, 'K') ]
+
+  for p in preset:
+    if FLOPs//p[0]>0:
+      N = FLOPs/p[0]
+      ret = "%.1f%s"%(N, p[1])
+      return ret
+  ret = "%.1f"%(FLOPs)
+  return ret
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='flops counter')
   # general
