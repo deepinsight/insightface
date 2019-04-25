@@ -28,10 +28,10 @@ Test Submission Server[TODO]
 1. testdata-image from [baiducloud](https://pan.baidu.com/s/1UKUYsRfVTSzj1tfU3BVFrw) or dropbox. These face images are all pre-processed and aligned so no need to do further modification.
 2. To download testdata-video from iQIYI, please visit <http://challenge.ai.iqiyi.com/data-cluster>. You must download iQIYI-VID-FACE.z01, iQIYI-VID-FACE.z02 and iQIYI-VID-FACE.zip after signin. These face images are all pre-processed and aligned so no need to do further modification.
    1. To unzip: ``zip iQIYI_VID_FACE.zip -s=0 --out iQIYI_VID_FACE_ALL.zip; unzip iQIYI_VID_FACE_ALL.zip``
-   2. We can get a directory named ``iQIYI_VID_FACE`` after decompression. Then we have to move ``video_filelist.txt`` in testdata-image package to ``iQIYI_VID_FACE/filelist.txt``, to indicate the order of videos in our submission feature files.
-3. To generate image feature file: check ``gen_image_feature.py``
-4. To generate video feature file: check ``gen_video_feature.py``
-5. Submit feature binary file to the right section on test server.
+   2. We can get a directory named ``iQIYI_VID_FACE`` after decompression. Then we have to move ``video_filelist.txt`` in testdata-image package to ``iQIYI_VID_FACE/filelist.txt``, to indicate the order of videos in our submission feature file.
+3. To generate image feature submission file: check ``gen_image_feature.py``
+4. To generate video feature submission file: check ``gen_video_feature.py``
+5. Submit binary feature to the right section on test server.
 
 You can also check the verification performance during training time on LFW,CFP_FP,AgeDB_30 datasets.
 
