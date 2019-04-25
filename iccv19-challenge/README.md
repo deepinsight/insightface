@@ -27,9 +27,13 @@ Test Submission Server[TODO]
    2. We can get a directory named ``iQIYI_VID_FACE`` after decompression. Then we have to move ``video_filelist.txt`` in testdata-image package to ``iQIYI_VID_FACE/filelist.txt``, to indicate the order of videos in our submission feature files.
 3. To generate image feature file: check ``gen_image_feature.py``
 4. To generate video feature file: check ``gen_video_feature.py``
-5. Submit feature binary file here
+5. Submit feature binary file to the right section on test server.
 
 You can also check the verification performance during training time on LFW,CFP_FP,AgeDB_30 datasets.
+
+**Evaluation:**
+
+Final ranking is determined by accuracy only, for all valid submissions. For example, score of track-1 will be calculated by ``TAR_glint-light+TAR_iqiyi-light`` while ``TAR_glint-large+TAR_iqiyi-large`` for track-2.
 
 **Baseline:**
 
