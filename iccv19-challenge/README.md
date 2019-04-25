@@ -35,6 +35,10 @@ You can also check the verification performance during training time on LFW,CFP_
 
 Final ranking is determined by accuracy only, for all valid submissions. For example, score of track-1 will be calculated by ``TAR_glint-light+TAR_iqiyi-light`` while ``TAR_glint-large+TAR_iqiyi-large`` for track-2.
 
+**Discussion:**
+
+[https://github.com/deepinsight/insightface/issues/632](https://github.com/deepinsight/insightface/issues/632)
+
 **Baseline:**
 
 1. Network y2(a deeper mobilefacenet): 933M FLOPs. TAR_image: [TODO], TAR_video: [TODO]
