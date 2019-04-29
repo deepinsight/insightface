@@ -25,7 +25,7 @@ Test Submission Server[TODO]
 
 **Testing:**
 
-1. testdata-image from [baiducloud](https://pan.baidu.com/s/1UKUYsRfVTSzj1tfU3BVFrw) or dropbox. These face images are all pre-processed and aligned so no need to do further modification.
+1. testdata-image from [baiducloud](https://pan.baidu.com/s/1UKUYsRfVTSzj1tfU3BVFrw) or [dropbox](https://www.dropbox.com/s/r5y6xt754m36rh8/iccv19-challenge-data-v1.zip?dl=0). These face images are all pre-processed and aligned so no need to do further modification.
 2. To download testdata-video from iQIYI, please visit <http://challenge.ai.iqiyi.com/data-cluster>. You must download iQIYI-VID-FACE.z01, iQIYI-VID-FACE.z02 and iQIYI-VID-FACE.zip after signin. These face images are all pre-processed and aligned so no need to do further modification.
    1. To unzip: ``zip iQIYI_VID_FACE.zip -s=0 --out iQIYI_VID_FACE_ALL.zip; unzip iQIYI_VID_FACE_ALL.zip``
    2. We can get a directory named ``iQIYI_VID_FACE`` after decompression. Then we have to move ``video_filelist.txt`` in testdata-image package to ``iQIYI_VID_FACE/filelist.txt``, to indicate the order of videos in our submission feature file.
