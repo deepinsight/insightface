@@ -4,6 +4,8 @@
 
 RetinaFace is a robust single stage face detector which initially described as an [arXiv technical report](https://arxiv.org/abs/1905.00641)
 
+![demoimg](https://github.com/deepinsight/insightface/blob/master/resources/11513D05.jpg)
+
 
 ## Training
 
