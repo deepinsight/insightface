@@ -1,14 +1,6 @@
+[The Lightweight Face Recognition Challenge & Workshop](https://ibug.doc.ic.ac.uk/resources/lightweight-face-recognition-challenge-workshop/) will be held in conjunction with the International Conference on Computer Vision (ICCV) 2019, Seoul Korea. 
 
-
-The Lightweight Face Recognition Challenge & Workshop will be held in conjunction with the International Conference on Computer Vision (ICCV) 2019, Seoul Korea. 
-
-
-
-Firstly please read the workshop [homepage](https://ibug.doc.ic.ac.uk/resources/lightweight-face-recognition-challenge-workshop/) carefully about the training and testing rules.
-
-
-
-Test Submission Server[TODO]
+[Test Server](http://39.104.128.76/overview)   
 
 ==================
 
@@ -62,3 +54,4 @@ Final ranking is determined by accuracy only, for all valid submissions. For exa
 2. Try different training methods/losses than straightforward arcface.
 3. [OctConv](https://arxiv.org/abs/1904.05049), to reduce FLOPs.
 4. [HRNet](https://arxiv.org/abs/1904.04514), for large FLOPs track.
+and so on
