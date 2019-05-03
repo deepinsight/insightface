@@ -185,10 +185,9 @@ def test(args):
 def main():
     global args
     args = parse_args()
-    if args.mode==0:
-      args.pyramid = False
-      args.bbox_vote = False
-    else:
+    args.pyramid = False
+    args.bbox_vote = False
+    if args.mode==1:
       args.pyramid = True
       args.bbox_vote = True
     logger.info('Called with argument: %s' % args)
