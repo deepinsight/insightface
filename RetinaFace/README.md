@@ -49,6 +49,22 @@ WiderFace validation mAP: Easy 96.5, Medium 95.6, Hard 90.4.
 
 To avoid the confliction with the WiderFace Challenge (ICCV 2019), we postpone the release time of our best model.
 
+## References
 
+```
+@inproceedings{yang2016wider,
+title = {WIDER FACE: A Face Detection Benchmark},
+author = {Yang, Shuo and Luo, Ping and Loy, Chen Change and Tang, Xiaoou},
+booktitle = {CVPR},
+year = {2016}
+}
+  
+@inproceedings{deng2019retinaface,
+title={RetinaFace: Single-stage Dense Face Localisation in the Wild},
+author={Deng, Jiankang and Guo, Jia and Yuxiang, Zhou and Jinke Yu and Irene Kotsia and Zafeiriou, Stefanos},
+booktitle={arxiv},
+year={2019}
+}
+```
 
 
