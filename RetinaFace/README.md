@@ -34,7 +34,7 @@ RetinaFace is a practical single-stage face detector which is initially describe
 Please check ``train.py`` for training.
 1. Copy ``rcnn/sample_config.py`` to ``rcnn/config.py``
 2. Download pretrained models and put them into ``model/``. TODO_LINK
-3. Start training with ``CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --prefix ./model/retina --network resnet``. You may need to check the ``resnet`` network configuration in ``rcnn/config.py`` before start training, like pretrained model, anchor setting, learning rate lolicy etc..
+3. Start training with ``CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --prefix ./model/retina --network resnet``.  You may want to check the ``resnet`` network configuration in ``rcnn/config.py`` before starting, like pretrained model path, anchor setting and learning rate policy etc..
 4. Basically we have two predefined network settings called ``resnet``(for medium and large size models) and ``mnet``(for lightweight models).
 
 ## Testing
