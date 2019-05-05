@@ -56,6 +56,8 @@ def parse_args():
   parser.add_argument('--frequent', type=int, default=default.frequent, help='')
   parser.add_argument('--per-batch-size', type=int, default=default.per_batch_size, help='batch size in each context')
   parser.add_argument('--kvstore', type=str, default=default.kvstore, help='kvstore setting')
+  parser.add_argument('--using-svx', default=False, action='store_true', help='if using svx')
+  parser.add_argument('--sxt', type=float, default=1.2, help='super parameter for svx')
   args = parser.parse_args()
   return args
 
@@ -102,6 +104,15 @@ def get_symbol(args):
         gt_one_hot = mx.sym.one_hot(gt_label, depth = config.num_classes, on_value = 1.0, off_value = 0.0)
         body = mx.sym.broadcast_mul(gt_one_hot, diff)
         fc7 = fc7+body
+    if args.using_svx:
+      gt_logits = mx.sym.pick(fc7, gt_label, axis=1)
+      # print(gt_logits.infer_shape(data=(128, 3, 112, 112), softmax_label=(128,)))
+      gt_logits = mx.sym.expand_dims(gt_logits, 1)
+      sdiff = mx.sym.broadcast_add(fc7, -gt_logits)
+      scond = mx.symbol.Activation(data=sdiff, act_type='relu')
+      new_cosT = fc7 / s
+      snew_cosT = new_cosT * args.sxt + args.sxt - 1
+      fc7 = mx.sym.where(scond, snew_cosT * s, fc7)
   elif config.loss_name.find('triplet')>=0:
     is_softmax = False
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n')
