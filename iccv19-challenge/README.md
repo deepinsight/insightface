@@ -31,7 +31,7 @@ You can also check the verification performance during training time on LFW,CFP_
 
 **Evaluation:**
 
-Final ranking is determined by accuracy only, for all valid submissions. For example, score of track-1 will be calculated by ``TAR_glint-light+TAR_iqiyi-light`` while ``TAR_glint-large+TAR_iqiyi-large`` for track-2.
+Final ranking is determined by accuracy only, for all valid submissions. For example, score of track-1 will be calculated by ``TAR_glint-light + TAR_iqiyi-light`` while ``TAR_glint-large + TAR_iqiyi-large`` for track-2.
 
 ------------------
 
@@ -43,8 +43,8 @@ Final ranking is determined by accuracy only, for all valid submissions. For exa
 
 **Baseline:**
 
-1. Network y2(a deeper mobilefacenet): 933M FLOPs. TAR_image: [TODO], TAR_video: [TODO]
-2. Network r100fc(ResNet100FC-IR): 24G FLOPs. TAR_image: [TODO], TAR_video: [TODO]
+1. Network y2(a deeper mobilefacenet): 933M FLOPs. TAR_image: 0.64691, TAR_video: [TODO]
+2. Network r100fc(ResNet100FC-IR): 24G FLOPs. TAR_image: 0.80312, TAR_video: [TODO]
 
 ------------------
 
