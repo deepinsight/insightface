@@ -31,7 +31,14 @@ You can also check the verification performance during training time on LFW,CFP_
 
 **Evaluation:**
 
-Final ranking is determined by accuracy only, for all valid submissions. For example, score of track-1 will be calculated by ``TAR_glint-light + TAR_iqiyi-light`` while ``TAR_glint-large + TAR_iqiyi-large`` for track-2.
+Final ranking is determined by the TAR under 1:1 protocal only, for all valid submissions. 
+
+For image testset, we evaluate the TAR under FAR@e-8 while we choose the TAR under FAR@e-4 for video testset.
+
+For track-1, we will rank all players as following formula: ``TAR(glint-light)+TAR(iqiyi-light)``
+
+For track-2, we will rank all players as following formula: ``TAR(glint-large)+TAR(iqiyi-large)``
+
 
 ------------------
 
