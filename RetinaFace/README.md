@@ -29,11 +29,17 @@ RetinaFace is a practical single-stage face detector which is initially describe
       label.txt
 ```
 
+## Install
+
+1. Install MXNet with GPU support.
+2. Install Deformable Convolution V2 operator from [Deformable-ConvNets](https://github.com/msracver/Deformable-ConvNets) if you need the DCN based backbone.
+3. Type ``make`` to build cxx tools.
+
 ## Training
 
 Please check ``train.py`` for training.
 1. Copy ``rcnn/sample_config.py`` to ``rcnn/config.py``
-2. Download pretrained models and put them into ``model/``. TODO_LINK
+2. Download pretrained models and put them into ``model/``. ImageNet ResNet50 from [baiducloud](https://pan.baidu.com/s/1WAkU9ZA_j-OmzO-sdk9whA) and dropbox. ImageNet ResNet152 from [baiducloud](https://pan.baidu.com/s/1nzQ6CzmdKFzg8bM8ChZFQg) and dropbox.
 3. Start training with ``CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --prefix ./model/retina --network resnet``.  You may want to check the ``resnet`` network configuration in ``rcnn/config.py`` before starting, like pretrained model path, anchor setting and learning rate policy etc..
 4. Basically we have two predefined network settings called ``resnet``(for medium and large size models) and ``mnet``(for lightweight models).
 
