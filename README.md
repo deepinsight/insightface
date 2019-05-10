@@ -15,7 +15,7 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
-**`2019.04.30`**: Our Face detector (RetinaFace) obtains state-of-the-art results on [the WiderFace dataset](http://shuoyang1213.me/WIDERFACE/WiderFace_Results.html).
+**`2019.04.30`**: Our Face detector ([RetinaFace](https://github.com/deepinsight/insightface/tree/master/RetinaFace)) obtains state-of-the-art results on [the WiderFace dataset](http://shuoyang1213.me/WIDERFACE/WiderFace_Results.html).
 
 **`2019.04.14`**: We will launch a [Light-weight Face Recognition challenge/workshop](https://ibug.doc.ic.ac.uk/resources/lightweight-face-recognition-challenge-workshop/) on ICCV 2019.
 
