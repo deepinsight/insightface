@@ -65,7 +65,7 @@ To avoid the confliction with the WiderFace Challenge (ICCV 2019), we postpone t
 
 ## Third-party Re-implementation
 
-[yangfly] (https://github.com/yangfly): RetinaFace-MobileNet0.25 ([baidu cloud] (https://pan.baidu.com/s/1P1ypO7VYUbNAezdvLm2m9w)
+[yangfly](https://github.com/yangfly): RetinaFace-MobileNet0.25 ([baidu cloud](https://pan.baidu.com/s/1P1ypO7VYUbNAezdvLm2m9w)
 
 WiderFace validation mAP: Hard 82.5. (model size: 1.67Mb) 
 
