@@ -2,7 +2,7 @@
 
 ## Introduction
 
-RetinaFace is a practical single-stage face detector which is initially described in [arXiv technical report](https://arxiv.org/abs/1905.00641)
+RetinaFace is a practical single-stage [SOA](http://shuoyang1213.me/WIDERFACE/WiderFace_Results.html) face detector which is initially described in [arXiv technical report](https://arxiv.org/abs/1905.00641)
 
 ![demoimg1](https://github.com/deepinsight/insightface/blob/master/resources/11513D05.jpg)
 
@@ -62,6 +62,12 @@ It can output face bounding boxes and five facial landmarks in a single forward 
 WiderFace validation mAP: Easy 96.5, Medium 95.6, Hard 90.4. 
 
 To avoid the confliction with the WiderFace Challenge (ICCV 2019), we postpone the release time of our best model.
+
+## Third-party Re-implementation
+
+[yangfly] (https://github.com/yangfly): RetinaFace-MobileNet0.25 ([baidu cloud] (https://pan.baidu.com/s/1P1ypO7VYUbNAezdvLm2m9w)
+
+WiderFace validation mAP: Hard 82.5. (model size: 1.67Mb) 
 
 ## References
 
