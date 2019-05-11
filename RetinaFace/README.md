@@ -2,7 +2,7 @@
 
 ## Introduction
 
-RetinaFace is a practical single-stage [SOA](http://shuoyang1213.me/WIDERFACE/WiderFace_Results.html) face detector which is initially described in [arXiv technical report](https://arxiv.org/abs/1905.00641)
+RetinaFace is a practical single-stage [SOTA](http://shuoyang1213.me/WIDERFACE/WiderFace_Results.html) face detector which is initially described in [arXiv technical report](https://arxiv.org/abs/1905.00641)
 
 ![demoimg1](https://github.com/deepinsight/insightface/blob/master/resources/11513D05.jpg)
 
