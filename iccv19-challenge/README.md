@@ -1,6 +1,14 @@
 [The Lightweight Face Recognition Challenge & Workshop](https://ibug.doc.ic.ac.uk/resources/lightweight-face-recognition-challenge-workshop/) will be held in conjunction with the International Conference on Computer Vision (ICCV) 2019, Seoul Korea. 
 
-[Test Server](http://39.104.128.76/overview)   
+Please read carefully and strictly follow the rules.
+
+[Test Server](http://39.104.128.76/overview) 
+
+**NEWS**
+
+``2019.05.11`` We updated the groundtruth of iQIYI video testset to v0.2. Please re-summit the feature set for iQIYI sections.
+
+
 
 ==================
 
@@ -50,8 +58,8 @@ For track-2, we will rank all players as following formula: ``TAR(glint-large)+T
 
 **Baseline:**
 
-1. Network y2(a deeper mobilefacenet): 933M FLOPs. TAR_image: 0.64691, TAR_video: [TODO]
-2. Network r100fc(ResNet100FC-IR): 24G FLOPs. TAR_image: 0.80312, TAR_video: [TODO]
+1. Network y2(a deeper mobilefacenet): 933M FLOPs. TAR_image: 0.64691, TAR_video: 0.47191
+2. Network r100fc(ResNet100FC-IR): 24G FLOPs. TAR_image: 0.80312, TAR_video: 0.64894
 
 ------------------
 
