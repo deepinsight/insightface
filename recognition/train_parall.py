@@ -20,6 +20,7 @@ import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
 import mxnet.optimizer as optimizer
+from mxnet import filestream as fs
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import flops_counter
 from config import config, default, generate_config
@@ -130,12 +131,12 @@ def train_net(args):
         ctx.append(mx.gpu(i))
     if len(ctx)==0:
       ctx = [mx.cpu()]
-      print('use cpu')
+      logging.info('use cpu')
     else:
-      print('gpu num:', len(ctx))
+      logging.info('gpu num {}'.format(len(ctx)))
     prefix = os.path.join(args.models_root, '%s-%s-%s'%(args.network, args.loss, args.dataset), 'model')
     prefix_dir = os.path.dirname(prefix)
-    print('prefix', prefix)
+    logging.info('prefix {}'.format(prefix))
     if not os.path.exists(prefix_dir):
       os.makedirs(prefix_dir)
     args.ctx_num = len(ctx)
@@ -152,8 +153,8 @@ def train_net(args):
     image_size = config.image_shape[0:2]
     assert len(image_size)==2
     assert image_size[0]==image_size[1]
-    print('image_size', image_size)
-    print('num_classes', config.num_classes)
+    logging.info('image_size {}'.format(image_size))
+    logging.info('num_classes {}'.format(config.num_classes))
     path_imgrec = os.path.join(data_dir, "train.rec")
 
     data_shape = (args.image_channel,image_size[0],image_size[1])
@@ -176,7 +177,7 @@ def train_net(args):
     #args.partial_num_classes = local_classes_range[1] - local_classes_range[0]
     #args.partial_start = local_classes_range[0]
 
-    print('Called with argument:', args, config)
+    logging.info('Called with argument: {} {}'.format(args,config))
     mean = None
 
     begin_epoch = 0
@@ -240,20 +241,20 @@ def train_net(args):
     ver_name_list = []
     for name in config.val_targets:
       path = os.path.join(data_dir,name+".bin")
-      if os.path.exists(path):
+      if fs.exists(path):
         data_set = verification.load_bin(path, image_size)
         ver_list.append(data_set)
         ver_name_list.append(name)
-        print('ver', name)
+        logging.info('ver {}'.format(name))
 
 
     def ver_test(nbatch):
       results = []
       for i in xrange(len(ver_list)):
         acc1, std1, acc2, std2, xnorm, embeddings_list = verification.test(ver_list[i], model, args.batch_size, 10, None, None)
-        print('[%s][%d]XNorm: %f' % (ver_name_list[i], nbatch, xnorm))
+        logging.info('{}{}XNorm: {}'.format(ver_name_list[i], nbatch, xnorm))
         #print('[%s][%d]Accuracy: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc1, std1))
-        print('[%s][%d]Accuracy-Flip: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc2, std2))
+        logging.info('{}{}Accuracy-Flip: {}+-{}'.format(ver_name_list[i], nbatch, acc2, std2))
         results.append(acc2)
       return results
 
@@ -264,7 +265,7 @@ def train_net(args):
     global_step = [0]
     save_step = [0]
     lr_steps = [int(x) for x in args.lr_steps.split(',')]
-    print('lr_steps', lr_steps)
+    logging.info('lr_steps {}'.format(lr_steps))
     def _batch_callback(param):
       #global global_step
       global_step[0]+=1
@@ -272,12 +273,12 @@ def train_net(args):
       for step in lr_steps:
         if mbatch==step:
           opt.lr *= 0.1
-          print('lr change to', opt.lr)
+          logging.info('lr change to {}'.format(opt.lr))
           break
 
       _cb(param)
       if mbatch%1000==0:
-        print('lr-batch-epoch:',opt.lr,param.nbatch,param.epoch)
+        logging.info('lr-batch-epoch:{}'.format(opt.lr,param.nbatch,param.epoch))
 
       if mbatch>=0 and mbatch%args.verbose==0:
         acc_list = ver_test(mbatch)
@@ -312,12 +313,12 @@ def train_net(args):
           msave = 1
 
         if do_save:
-          print('saving', msave)
+          logging.info('saving {}'.format(msave))
           arg, aux = model.get_export_params()
           all_layers = model.symbol.get_internals()
           _sym = all_layers['fc1_output']
           mx.model.save_checkpoint(prefix, msave, _sym, arg, aux)
-        print('[%d]Accuracy-Highest: %1.5f'%(mbatch, highest_acc[-1]))
+        logging.info('{}Accuracy-Highest: {}'.format(mbatch, highest_acc[-1]))
       if config.max_steps>0 and mbatch>config.max_steps:
         sys.exit(0)
 
