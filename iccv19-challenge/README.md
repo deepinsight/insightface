@@ -2,7 +2,7 @@
 
 Please read carefully and strictly follow the rules.
 
-[Test Server](http://39.104.128.76/overview) 
+[Test Submission Server](http://www.insightface-challenge.com/overview) 
 
 **NEWS**
 
