@@ -43,10 +43,6 @@ Final ranking is determined by the TAR under 1:1 protocal only, for all valid su
 
 For image testset, we evaluate the TAR under FAR@e-8 while we choose the TAR under FAR@e-4 for video testset.
 
-For track-1, we will rank all players as following formula: ``TAR(glint-light)+TAR(iqiyi-light)``
-
-For track-2, we will rank all players as following formula: ``TAR(glint-large)+TAR(iqiyi-large)``
-
 
 ------------------
 
