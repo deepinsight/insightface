@@ -7,6 +7,8 @@ By Jia Guo and [Jiankang Deng](https://jiankangdeng.github.io/)
 
 The code of InsightFace is released under the MIT License. There is no limitation for both acadmic and commercial usage.
 
+The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only.
+
 ## ArcFace Video Demo
 
 [![ArcFace Demo](https://github.com/deepinsight/insightface/blob/master/resources/facerecognitionfromvideo.PNG)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
