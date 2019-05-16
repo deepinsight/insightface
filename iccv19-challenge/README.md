@@ -6,6 +6,8 @@ Please read carefully and strictly follow the rules.
 
 **NEWS**
 
+``2019.05.16`` The four sections(glint-large, glint-light, iqiyi-large, iqiyi-light) will share the price pool for 1/4 each respectively. From each section, the top 3 players share the section price pool for 50%, 30% and 20% respectively.
+
 ``2019.05.11`` We updated the groundtruth of iQIYI video testset to v0.2. Please re-summit the feature set for iQIYI sections.
 
 
@@ -20,6 +22,7 @@ Please read carefully and strictly follow the rules.
 2. Go into `$INSIGHTFACE_ROOT/recognition/`
 3. Refer to the `retina` dataset config section in `sample_config.py` and copy it to your own`config.py`.
 4. Start training with `CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --dataset retina --network [your-network] --loss arcface`. It will output the accuracy of lfw, cfp_fp and agedb_30 every 2000 batches by default.
+5. It is better to put the training dataset on SSD hard disk, to obtain good training performance.
 
 ------------------
 
