@@ -56,6 +56,7 @@ For image testset, we evaluate the TAR under FAR@e-8 while we choose the TAR und
 2. Network r100fc(ResNet100FC-IR): 24G FLOPs. TAR_image: 0.80312, TAR_video: 0.64894
 
 Baseline models download link: [baidu cloud](https://pan.baidu.com/s/1Em0ZFnefSoTsZoTd-9m8Nw)
+
 Training logs: [baidu cloud](https://pan.baidu.com/s/12rsp-oMzsjTeU6nugEvA9g)
 
 ------------------
