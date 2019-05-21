@@ -1,10 +1,12 @@
 [The Lightweight Face Recognition Challenge & Workshop](https://ibug.doc.ic.ac.uk/resources/lightweight-face-recognition-challenge-workshop/) will be held in conjunction with the International Conference on Computer Vision (ICCV) 2019, Seoul Korea. 
 
-Please read carefully and strictly follow the rules.
+Please read carefully and strictly follow the rules. For example, you should use the same [method](https://github.com/deepinsight/insightface/blob/master/common/flops_counter.py) with us for calculating FLOPs.
 
 [Test Submission Server](http://www.insightface-challenge.com/overview) 
 
 **NEWS**
+
+``2019.05.21`` Baseline models available.
 
 ``2019.05.16`` The four sections(glint-large, glint-light, iqiyi-large, iqiyi-light) will share the price pool for 1/4 each respectively. From each section, the top 3 players share the section price pool for 50%, 30% and 20% respectively.
 
@@ -46,6 +48,14 @@ Final ranking is determined by the TAR under 1:1 protocal only, for all valid su
 
 For image testset, we evaluate the TAR under FAR@e-8 while we choose the TAR under FAR@e-4 for video testset.
 
+------------------
+
+**Baseline:**
+
+1. Network y2(a deeper mobilefacenet): 933M FLOPs. TAR_image: 0.64691, TAR_video: 0.47191
+2. Network r100fc(ResNet100FC-IR): 24G FLOPs. TAR_image: 0.80312, TAR_video: 0.64894
+
+Baseline models download link: [baidu cloud](https://pan.baidu.com/s/1Em0ZFnefSoTsZoTd-9m8Nw)
 
 ------------------
 
@@ -53,12 +63,7 @@ For image testset, we evaluate the TAR under FAR@e-8 while we choose the TAR und
 
 [https://github.com/deepinsight/insightface/issues/632](https://github.com/deepinsight/insightface/issues/632)
 
-------------------
 
-**Baseline:**
-
-1. Network y2(a deeper mobilefacenet): 933M FLOPs. TAR_image: 0.64691, TAR_video: 0.47191
-2. Network r100fc(ResNet100FC-IR): 24G FLOPs. TAR_image: 0.80312, TAR_video: 0.64894
 
 ------------------
 
