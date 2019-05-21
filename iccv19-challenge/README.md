@@ -6,7 +6,7 @@ Please read carefully and strictly follow the rules. For example, you should use
 
 **NEWS**
 
-``2019.05.21`` Baseline models available.
+``2019.05.21`` Baseline models and training logs available.
 
 ``2019.05.16`` The four sections(glint-large, glint-light, iqiyi-large, iqiyi-light) will share the price pool for 1/4 each respectively. From each section, the top 3 players share the section price pool for 50%, 30% and 20% respectively.
 
@@ -56,6 +56,7 @@ For image testset, we evaluate the TAR under FAR@e-8 while we choose the TAR und
 2. Network r100fc(ResNet100FC-IR): 24G FLOPs. TAR_image: 0.80312, TAR_video: 0.64894
 
 Baseline models download link: [baidu cloud](https://pan.baidu.com/s/1Em0ZFnefSoTsZoTd-9m8Nw)
+Training logs: [baidu cloud](https://pan.baidu.com/s/12rsp-oMzsjTeU6nugEvA9g)
 
 ------------------
 
