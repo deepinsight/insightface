@@ -1,6 +1,6 @@
 [The Lightweight Face Recognition Challenge & Workshop](https://ibug.doc.ic.ac.uk/resources/lightweight-face-recognition-challenge-workshop/) will be held in conjunction with the International Conference on Computer Vision (ICCV) 2019, Seoul Korea. 
 
-Please strictly follow the rules. For example, please use the same [method](https://github.com/deepinsight/insightface/blob/master/common/flops_counter.py) for the FLOPs calculation.
+Please strictly follow the rules. For example, please use the same [method](https://github.com/deepinsight/insightface/blob/master/common/flops_counter.py) for the FLOPs calculation regardless of your training framework is insightface or not.
 
 [Test Server](http://www.insightface-challenge.com/overview) 
 
