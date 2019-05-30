@@ -11,15 +11,8 @@ The training data containing the annotation (and the models trained with these d
 
 ## CVer Presentation 
 
-Topic: ArcFace 
-
-Time: 8:00 pm (GMT+8) 30th May 2019
-
-[Link](http://live.bilibili.com/3344545)
-
 [Slides](https://pan.baidu.com/s/1v9fFHBJ8Q9Kl9Z6GwhbY6A)
  
-
 ## ArcFace Video Demo
 
 [![ArcFace Demo](https://github.com/deepinsight/insightface/blob/master/resources/facerecognitionfromvideo.PNG)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
