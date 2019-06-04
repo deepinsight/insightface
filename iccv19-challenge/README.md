@@ -6,6 +6,8 @@ Please strictly follow the rules. For example, please use the same [method](http
 
 **NEWS**
 
+``2019.06.04`` We will update the deepglint(image testset) evaluation metric from FPR=e-8 to FPR=e-6, to get a more stable accuracy. This is the final decision.
+
 ``2019.05.21`` Baseline models and training logs available.
 
 ``2019.05.16`` The four tracks (deepglint-light, deepglint-large, iQIYI-light, iQIYI-large) will equally share the dynamic funding pool (14000$). From each track, the top 3 players will share the funding pool for 50%, 30% and 20% respectively.
