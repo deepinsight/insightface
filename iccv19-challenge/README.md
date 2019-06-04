@@ -12,6 +12,7 @@ Please strictly follow the rules. For example, please use the same [method](http
 
 *For English:*
 
+(in #lfr2019 channel)
 https://join.slack.com/t/insightface/shared_invite/enQtNjU0NDk2MjYyMTMzLTIzNDEwNmIxMjU5OGYzYzFhMjlkNjlhMTBkNWFiNjU4MTVhNTgzYjQ5ZTZiMGM3MzUyNzQ3OTBhZTg3MzM5M2I
 
 
