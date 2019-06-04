@@ -4,6 +4,17 @@ Please strictly follow the rules. For example, please use the same [method](http
 
 [Test Server](http://www.insightface-challenge.com/overview) 
 
+**Discussion Group**
+
+*For Chinese:*
+
+![wechat](https://github.com/deepinsight/insightface/blob/master/resources/lfr19_wechat1.jpg)
+
+*For English:*
+
+TODO
+
+
 **NEWS**
 
 ``2019.06.04`` We will update the deepglint(image testset) evaluation metric from FPR=e-8 to FPR=e-6, to get a more stable accuracy. This is the final decision.
