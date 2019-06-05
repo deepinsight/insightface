@@ -19,7 +19,7 @@ model = face_embedding.FaceModel(args)
 img = cv2.imread('/raid5data/dplearn/megaface/facescrubr/112x112/Tom_Hanks/Tom_Hanks_54745.png')
 
 time_now = datetime.datetime.now()
-for i in xrange(3000):
+for i in range(3000):
   f1 = model.get_feature(img)
 time_now2 = datetime.datetime.now()
 diff = time_now2 - time_now

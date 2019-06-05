@@ -35,7 +35,7 @@ def main(args):
   ctx = []
   cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
   if len(cvd)>0:
-    for i in xrange(len(cvd.split(','))):
+    for i in range(len(cvd.split(','))):
       ctx.append(mx.gpu(i))
   if len(ctx)==0:
     ctx = [mx.cpu()]

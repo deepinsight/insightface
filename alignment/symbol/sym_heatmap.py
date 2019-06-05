@@ -313,19 +313,19 @@ def hourglass(data, nFilters, nModules, n, workspace, name, binarize, dcn):
   s = 2
   _dcn = False
   up1 = data
-  for i in xrange(nModules):
+  for i in range(nModules):
     up1 = conv_block(up1, nFilters, (1,1), True, "%s_up1_%d"%(name,i), binarize, _dcn, 1)
   low1 = mx.sym.Pooling(data=data, kernel=(s, s), stride=(s,s), pad=(0,0), pool_type='max')
-  for i in xrange(nModules):
+  for i in range(nModules):
     low1 = conv_block(low1, nFilters, (1,1), True, "%s_low1_%d"%(name,i), binarize, _dcn, 1)
   if n>1:
     low2 = hourglass(low1, nFilters, nModules, n-1, workspace, "%s_%d"%(name, n-1), binarize, dcn)
   else:
     low2 = low1
-    for i in xrange(nModules):
+    for i in range(nModules):
       low2 = conv_block(low2, nFilters, (1,1), True, "%s_low2_%d"%(name,i), binarize, _dcn, 1) #TODO
   low3 = low2
-  for i in xrange(nModules):
+  for i in range(nModules):
     low3 = conv_block(low3, nFilters, (1,1), True, "%s_low3_%d"%(name,i), binarize, _dcn, 1)
   up2 = mx.symbol.UpSampling(low3, scale=s, sample_type='nearest', workspace=512, name='%s_upsampling_%s'%(name,n), num_args=1)
   return mx.symbol.add_n(up1, up2)
@@ -517,14 +517,14 @@ def get_symbol(num_classes):
 
     heatmap = None
 
-    for i in xrange(nStacks):
+    for i in range(nStacks):
       shortcut = body
       if config.net_sta>0:
         sta = STA(body, nFilters, nModules, config.net_n+1, workspace, 'sta%d'%(i))
         body = sta.get()
       else:
         body = hourglass(body, nFilters, nModules, config.net_n, workspace, 'stack%d_hg'%(i), binarize, dcn)
-      for j in xrange(nModules):
+      for j in range(nModules):
         body = conv_block(body, nFilters, (1,1), True, 'stack%d_unit%d'%(i,j), binarize, dcn, 1)
       _dcn = True if config.net_dcn>=2 else False
       ll = ConvFactory(body, nFilters, (1,1), dcn = _dcn, name='stack%d_ll'%(i))
