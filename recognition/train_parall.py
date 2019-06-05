@@ -62,6 +62,7 @@ def parse_args():
   parser.add_argument('--per-batch-size', type=int, default=default.per_batch_size, help='batch size in each context')
   parser.add_argument('--kvstore', type=str, default=default.kvstore, help='kvstore setting')
   parser.add_argument('--worker-id', type=int, default=0, help='worker id for dist training, starts from 0')
+  parser.add_argument('--extra-model-name', type=str, default='', help='extra model name')
   args = parser.parse_args()
   return args
 
@@ -126,14 +127,17 @@ def train_net(args):
     ctx = []
     cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
     if len(cvd)>0:
-      for i in xrange(len(cvd.split(','))):
+      for i in range(len(cvd.split(','))):
         ctx.append(mx.gpu(i))
     if len(ctx)==0:
       ctx = [mx.cpu()]
       print('use cpu')
     else:
       print('gpu num:', len(ctx))
-    prefix = os.path.join(args.models_root, '%s-%s-%s'%(args.network, args.loss, args.dataset), 'model')
+    if len(args.extra_model_name)==0:
+      prefix = os.path.join(args.models_root, '%s-%s-%s'%(args.network, args.loss, args.dataset), 'model')
+    else:
+      prefix = os.path.join(args.models_root, '%s-%s-%s-%s'%(args.network, args.loss, args.dataset, args.extra_model_name), 'model')
     prefix_dir = os.path.dirname(prefix)
     print('prefix', prefix)
     if not os.path.exists(prefix_dir):
@@ -249,7 +253,7 @@ def train_net(args):
 
     def ver_test(nbatch):
       results = []
-      for i in xrange(len(ver_list)):
+      for i in range(len(ver_list)):
         acc1, std1, acc2, std2, xnorm, embeddings_list = verification.test(ver_list[i], model, args.batch_size, 10, None, None)
         print('[%s][%d]XNorm: %f' % (ver_name_list[i], nbatch, xnorm))
         #print('[%s][%d]Accuracy: %1.5f+-%1.5f' % (ver_name_list[i], nbatch, acc1, std1))
@@ -259,7 +263,7 @@ def train_net(args):
 
 
     highest_acc = [0.0, 0.0]  #lfw and target
-    #for i in xrange(len(ver_list)):
+    #for i in range(len(ver_list)):
     #  highest_acc.append(0.0)
     global_step = [0]
     save_step = [0]

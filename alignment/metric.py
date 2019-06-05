@@ -28,7 +28,7 @@ class NMEMetric(mx.metric.EvalMetric):
 
   def cal_nme(self, label, pred_label):
     nme = []
-    for b in xrange(pred_label.shape[0]):
+    for b in range(pred_label.shape[0]):
       record = [None]*6
       item = []
       if label.ndim==4:
@@ -39,7 +39,7 @@ class NMEMetric(mx.metric.EvalMetric):
           #print(label[b])
           if np.count_nonzero(label[b])==0:
               continue
-      for p in xrange(pred_label.shape[1]):
+      for p in range(pred_label.shape[1]):
         if label.ndim==4:
             heatmap_gt = label[b][p]
             ind_gt = np.unravel_index(np.argmax(heatmap_gt, axis=None), heatmap_gt.shape)
