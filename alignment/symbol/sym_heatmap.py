@@ -596,7 +596,8 @@ def init_weights(sym, data_shape_dict):
     #print(arg_shape_dict)
     arg_params = {}
     aux_params = {}
-    for k,v in arg_shape_dict.iteritems():
+    for k in arg_shape_dict:
+      v = arg_shape_dict[k]
       #print(k,v)
       if k.endswith('offset_weight') or k.endswith('offset_bias'):
         print('initializing',k)

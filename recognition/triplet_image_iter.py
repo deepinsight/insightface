@@ -391,7 +391,8 @@ class FaceImageIter(io.DataIter):
           elif not self.hard_mining:
             self.seq = []
             idlist = []
-            for _id,v in self.id2range.iteritems():
+            for _id in self.id2range:
+              v = self.id2range[_id]
               idlist.append((_id,range(*v)))
             for r in range(self.repeat):
               if r%10==0:
