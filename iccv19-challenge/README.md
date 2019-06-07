@@ -18,7 +18,7 @@ https://join.slack.com/t/insightface/shared_invite/enQtNjU0NDk2MjYyMTMzLTIzNDEwN
 
 **NEWS**
 
-``2019.06.04`` We will update the deepglint(image testset) evaluation metric from FPR=e-8 to FPR=e-6, to get a more stable accuracy. This is the final decision.
+``2019.06.04`` We will clean the groundtruth on deepglint testset.
 
 ``2019.05.21`` Baseline models and training logs available.
 
