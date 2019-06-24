@@ -2,24 +2,32 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import argparse
 import os
-import os.path
-import struct
-import sys
 
-import numpy as np
+from datetime import datetime
+import os.path
 from easydict import EasyDict as edict
+import time
+import json
+import sys
+import numpy as np
+import importlib
+import itertools
+import argparse
+import struct
+import cv2
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import face_preprocess
 import sklearn
+from sklearn.preprocessing import normalize
 import mxnet as mx
+from mxnet import ndarray as nd
 
 image_shape = None
 net = None
 data_size = 1862120
-emb_size = 512
+emb_size = 0
 use_flip = True
 
 
@@ -29,7 +37,7 @@ def do_flip(data):
 
 
 def get_feature(buffer):
-    embedding = np.zeros((len(buffer), emb_size), dtype=np.float32)
+    global emb_size
     if use_flip:
         input_blob = np.zeros((len(buffer) * 2, 3, image_shape[1], image_shape[2]))
     else:
@@ -37,8 +45,7 @@ def get_feature(buffer):
     idx = 0
     for item in buffer:
         img = face_preprocess.read_image(item[0], mode='rgb')
-        img = face_preprocess.preprocess(img, bbox=None, landmark=item[1],
-                                         image_size='%d,%d' % (image_shape[1], image_shape[2]))
+        img = face_preprocess.preprocess(img, bbox=None, landmark=item[1], image_size='%d,%d' % (image_shape[1], image_shape[2]))
         img = np.transpose(img, (2, 0, 1))
         attempts = [0, 1] if use_flip else [0]
         for flipid in attempts:
@@ -51,6 +58,10 @@ def get_feature(buffer):
     db = mx.io.DataBatch(data=(data,))
     net.model.forward(db, is_train=False)
     _embedding = net.model.get_outputs()[0].asnumpy()
+    if emb_size == 0:
+        emb_size = _embedding.shape[1]
+        print('set emb_size to ', emb_size)
+    embedding = np.zeros((len(buffer), emb_size), dtype=np.float32)
     if use_flip:
         embedding1 = _embedding[0::2]
         embedding2 = _embedding[1::2]
@@ -99,8 +110,9 @@ def main(args):
     net.model.bind(data_shapes=[('data', (args.batch_size, 3, image_shape[1], image_shape[2]))])
     net.model.set_params(net.arg_params, net.aux_params)
 
+    features_all = None
+
     i = 0
-    features_all = np.zeros((data_size, emb_size), dtype=np.float32)
     fstart = 0
     buffer = []
     for line in open(args.input, 'r'):
@@ -113,6 +125,8 @@ def main(args):
             embedding = get_feature(buffer)
             buffer = []
             fend = fstart + embedding.shape[0]
+            if features_all is None:
+                features_all = np.zeros((data_size, emb_size), dtype=np.float32)
             # print('writing', fstart, fend)
             features_all[fstart:fend, :] = embedding
             fstart = fend
@@ -122,7 +136,7 @@ def main(args):
         print('writing', fstart, fend)
         features_all[fstart:fend, :] = embedding
     write_bin(args.output, features_all)
-    os.system("bypy upload %s" % args.output)
+    # os.system("bypy upload %s"%args.output)
 
 
 def parse_arguments(argv):
