@@ -11,10 +11,15 @@ The Lightweight Face Recognition Challenge has been supported by
 EPSRC project FACER2VM (EP/N007743/1)
 
 Huawei (5000$)
+
 DeepGlint (3000$)
+
 iQIYI (3000$)
+
 Kingsoft Cloud (3000$)
+
 Pensees (3000$)
+
 Dynamic funding pool: (17000$)
 
 Cash sponsors and gift donations are welcome.
