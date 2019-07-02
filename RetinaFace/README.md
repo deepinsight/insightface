@@ -40,7 +40,7 @@ RetinaFace is a practical single-stage [SOTA](http://shuoyang1213.me/WIDERFACE/W
 Please check ``train.py`` for training.
 
 1. Copy ``rcnn/sample_config.py`` to ``rcnn/config.py``
-2. Download pretrained models and put them into ``model/``. 
+2. Download ImageNet pretrained models and put them into ``model/``(these models are not for detection testing/inferencing but training and parameters initialization). 
 
     ImageNet ResNet50 ([baidu cloud](https://pan.baidu.com/s/1WAkU9ZA_j-OmzO-sdk9whA) and [dropbox](https://www.dropbox.com/s/48b850vmnaaasfl/imagenet-resnet-50.zip?dl=0)). 
 
@@ -54,7 +54,7 @@ Before training, you can check the ``resnet`` network configuration (e.g. pretra
 
 Please check ``test.py`` for testing.
 
-## Models
+## RetinaFace Pretrained Models
 
 Pretrained Model: RetinaFace-R50 ([baidu cloud](https://pan.baidu.com/s/1C6nKq122gJxRhb37vK0_LQ) or [dropbox](https://www.dropbox.com/s/53ftnlarhyrpkg2/retinaface-R50.zip?dl=0)) is a medium size model with ResNet50 backbone.
 It can output face bounding boxes and five facial landmarks in a single forward pass.
