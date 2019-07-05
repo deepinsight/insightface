@@ -215,7 +215,7 @@ def train_net(args):
         symbol        = sym,
     )
     # model.bind() for triplet loss fine-tuning to fix the AssertionError: assert self.binded and self.params_initialized
-    # model.bind([("data", (args.batch_size, args.image_channel, image_size[0], image_size[1]))], [("softmax_label", (args.batch_size,))])
+    model.bind([("data", (args.batch_size, args.image_channel, image_size[0], image_size[1]))], [("softmax_label", (args.batch_size,))])
     val_dataiter = None
 
     if config.loss_name.find('triplet')>=0:

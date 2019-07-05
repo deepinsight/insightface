@@ -120,6 +120,20 @@ dataset.retina.num_classes = 93431
 dataset.retina.image_shape = (112,112,3)
 dataset.retina.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
 
+dataset.glintasia = edict()
+dataset.glintasia.dataset = 'glintasia'
+dataset.glintasia.dataset_path = '../datasets/faces_glintasia'
+dataset.glintasia.num_classes = 93979
+dataset.glintasia.image_shape = (112,112,3)
+dataset.glintasia.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
+
+dataset.glint = edict()
+dataset.glint.dataset = 'glint'
+dataset.glint.dataset_path = '../datasets/faces_glint'
+dataset.glint.num_classes = 180855
+dataset.glint.image_shape = (112,112,3)
+dataset.glint.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
+
 loss = edict()
 loss.softmax = edict()
 loss.softmax.loss_name = 'softmax'
@@ -192,6 +206,7 @@ default.per_batch_size = 128
 default.ckpt = 3
 default.lr_steps = '100000,160000,220000'
 default.models_root = './models'
+default.log_dir = './models/'
 
 
 def generate_config(_network, _dataset, _loss):
