@@ -1,0 +1,13 @@
+matplotlib
+scipy
+tqdm
+opencv-python
+pillow
+torch
+torchvision
+numpy
+scikit-image
+torchsummary
+tensorboardX
+imgaug
+gap-stat
