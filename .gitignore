@@ -102,3 +102,4 @@ ENV/
 *.tar
 .DS_Store
 model_data/
+data/msceleb_retina_crop
