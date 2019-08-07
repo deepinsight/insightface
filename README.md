@@ -211,6 +211,7 @@ For single cropped face image(112x112), total inference time is only 17ms on our
 
 - TensorFlow: [InsightFace_TF](https://github.com/auroua/InsightFace_TF)
 - TensorFlow: [tf-insightface](https://github.com/AIInAi/tf-insightface)
+- TensorFlow:[insightface](https://github.com/Fei-Wang/insightface)
 - PyTorch: [InsightFace_Pytorch](https://github.com/TreB1eN/InsightFace_Pytorch)
 - PyTorch: [arcface-pytorch](https://github.com/ronghuaiyang/arcface-pytorch)
 - Caffe: [arcface-caffe](https://github.com/xialuxi/arcface-caffe)
