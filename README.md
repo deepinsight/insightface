@@ -17,7 +17,7 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
-**`2019.08.10`**: We achieved 2nd place at [WIDER Face Detection Challenge 2019](http://wider-challenge.org/2019.html).
+**`2019.08.10`**: We achieved 2nd place at [WIDER Face Detection Challenge 2019](http://wider-challenge.org/2019.html), see *Final Accuracy Test* results at [link](https://competitions.codalab.org/competitions/20146#results) 
 
 **`2019.05.30`**: [Presentation at cvmart](https://pan.baidu.com/s/1v9fFHBJ8Q9Kl9Z6GwhbY6A)
 
