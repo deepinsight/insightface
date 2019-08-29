@@ -1,4 +1,7 @@
-"""Model store which provides pretrained models."""
+
+"""
+This code file mainly comes from https://github.com/dmlc/gluon-cv/blob/master/gluoncv/model_zoo/model_store.py
+"""
 from __future__ import print_function
 
 __all__ = ['get_model_file']

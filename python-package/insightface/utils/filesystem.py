@@ -1,4 +1,6 @@
-"""Filesystem utility functions."""
+"""
+This code file mainly comes from https://github.com/dmlc/gluon-cv/blob/master/gluoncv/utils/filesystem.py
+"""
 import os
 import errno
 
