@@ -1,6 +1,6 @@
 # pylint: disable=wildcard-import, unused-wildcard-import
-"""Model store which handles pretrained models from both
-mxnet.gluon.model_zoo.vision and gluoncv.models
+"""
+This code file mainly comes from https://github.com/dmlc/gluon-cv/blob/master/gluoncv/model_zoo/model_zoo.py
 """
 from .face_recognition import *
 from .face_detection import *

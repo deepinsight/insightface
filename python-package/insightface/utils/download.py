@@ -1,4 +1,6 @@
-"""Download files with progress bar."""
+"""
+This code file mainly comes from https://github.com/dmlc/gluon-cv/blob/master/gluoncv/utils/download.py
+"""
 import os
 import hashlib
 import requests
