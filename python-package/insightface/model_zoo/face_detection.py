@@ -6,6 +6,7 @@ import mxnet.ndarray as nd
 __all__ = ['FaceDetector',
            'retinaface_r50_v1',
            'retinaface_mnet025_v1',
+           'retinaface_mnet025_v2',
            'get_retinaface']
 
 def _whctrs(anchor):
@@ -222,10 +223,14 @@ class FaceDetector:
         self.model = model
         self.nms_threshold = nms
 
+        self.landmark_std = 1.0
         _ratio = (1.,)
         fmc = 3
         if self.rac=='net3':
             _ratio = (1.,)
+        elif self.rac=='net3l':
+            _ratio = (1.,)
+            self.landmark_std = 0.2
         elif network=='net5': #retinaface
             fmc = 5
         else:
@@ -268,8 +273,6 @@ class FaceDetector:
             v = self._anchors_fpn[k].astype(np.float32)
             self._anchors_fpn[k] = v
         self.anchor_plane_cache = {}
-        if fix_image_size is None:
-            self.anchor_plane_cache = None
 
         self._num_anchors = dict(zip(self.fpn_keys, [anchors.shape[0] for anchors in self._anchors_fpn.values()]))
 
@@ -304,19 +307,15 @@ class FaceDetector:
             height, width = bbox_deltas.shape[2], bbox_deltas.shape[3]
             A = self._num_anchors['stride%s'%s]
             K = height * width
-            if self.anchor_plane_cache is not None:
-                key = (height, width, stride)
-                if key in self.anchor_plane_cache:
-                    anchors = self.anchor_plane_cache[key]
-                else:
-                    anchors_fpn = self._anchors_fpn['stride%s'%s]
-                    anchors = anchors_plane(height, width, stride, anchors_fpn)
-                    anchors = anchors.reshape((K * A, 4))
-                    self.anchor_plane_cache[key] = anchors
+            key = (height, width, stride)
+            if key in self.anchor_plane_cache:
+                anchors = self.anchor_plane_cache[key]
             else:
                 anchors_fpn = self._anchors_fpn['stride%s'%s]
                 anchors = anchors_plane(height, width, stride, anchors_fpn)
                 anchors = anchors.reshape((K * A, 4))
+                if len(self.anchor_plane_cache)<100:
+                    self.anchor_plane_cache[key] = anchors
 
             scores = clip_pad(scores, (height, width))
             scores = scores.transpose((0, 2, 3, 1)).reshape((-1, 1))
@@ -346,6 +345,7 @@ class FaceDetector:
                 landmark_deltas = clip_pad(landmark_deltas, (height, width))
                 landmark_pred_len = landmark_deltas.shape[1]//A
                 landmark_deltas = landmark_deltas.transpose((0, 2, 3, 1)).reshape((-1, 5, landmark_pred_len//5))
+                landmark_deltas *= self.landmark_std
                 #print(landmark_deltas.shape, landmark_deltas)
                 landmarks = landmark_pred(anchors, landmark_deltas)
                 landmarks = landmarks[order, :]
@@ -419,4 +419,7 @@ def retinaface_r50_v1(**kwargs):
 
 def retinaface_mnet025_v1(**kwargs):
     return get_retinaface("mnet025_v1", rac='net3', **kwargs)
+
+def retinaface_mnet025_v2(**kwargs):
+    return get_retinaface("mnet025_v2", rac='net3l', **kwargs)
 

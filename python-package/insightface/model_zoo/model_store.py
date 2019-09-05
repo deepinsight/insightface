@@ -16,6 +16,8 @@ _model_sha1 = {name: checksum for checksum, name in [
     ('', 'arcface_mfn_v1'),
     ('39fd1e087a2a2ed70a154ac01fecaa86c315d01b', 'retinaface_r50_v1'),
     ('2c9de8116d1f448fd1d4661f90308faae34c990a', 'retinaface_mnet025_v1'),
+    ('0db1d07921d005e6c9a5b38e059452fc5645e5a4', 'retinaface_mnet025_v2'),
+    ('7dd8111652b7aac2490c5dcddeb268e53ac643e6', 'genderage_v1'),
 ]}
 
 base_repo_url = 'http://insightface.ai/files/'
