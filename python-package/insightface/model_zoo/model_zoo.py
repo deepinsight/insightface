@@ -4,6 +4,7 @@ This code file mainly comes from https://github.com/dmlc/gluon-cv/blob/master/gl
 """
 from .face_recognition import *
 from .face_detection import *
+from .face_genderage import *
 #from .face_alignment import *
 
 __all__ = ['get_model', 'get_model_list']
@@ -14,6 +15,8 @@ _models = {
     #'arcface_outofreach_v1': arcface_outofreach_v1,
     'retinaface_r50_v1': retinaface_r50_v1,
     'retinaface_mnet025_v1': retinaface_mnet025_v1,
+    'retinaface_mnet025_v2': retinaface_mnet025_v2,
+    'genderage_v1': genderage_v1,
 }
 
 
