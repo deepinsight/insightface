@@ -6,7 +6,7 @@ import mxnet.autograd as ag
 import numpy as np
 from rcnn.config import config
 from rcnn.PY_OP import rpn_fpn_ohem3
-from symbol_common import get_sym_train
+from rcnn.symbol.symbol_common import get_sym_train
 
 def conv_only(from_layer, name, num_filter, kernel=(1,1), pad=(0,0), \
     stride=(1,1), bias_wd_mult=0.0):
