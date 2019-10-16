@@ -30,7 +30,7 @@ use_flip = True
 
 
 def do_flip(data):
-  for idx in xrange(data.shape[0]):
+  for idx in range(data.shape[0]):
     data[idx,:,:] = np.fliplr(data[idx,:,:])
 
 def get_feature(buffer):
@@ -83,7 +83,7 @@ def main(args):
   ctx = []
   cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
   if len(cvd)>0:
-    for i in xrange(len(cvd.split(','))):
+    for i in range(len(cvd.split(','))):
       ctx.append(mx.gpu(i))
   if len(ctx)==0:
     ctx = [mx.cpu()]

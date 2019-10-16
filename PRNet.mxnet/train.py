@@ -35,7 +35,7 @@ def main(args):
   ctx = []
   cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
   if len(cvd)>0:
-    for i in range(len(cvd.split(','))):
+    for i in xrange(len(cvd.split(','))):
       ctx.append(mx.gpu(i))
   if len(ctx)==0:
     ctx = [mx.cpu()]
@@ -51,7 +51,7 @@ def main(args):
 
 
   print('Call with', args, config)
-  train_iter = FaceSegIter(path_imgrec = os.path.join(config.dataset_path, 'train.rec'),
+  train_iter = FaceSegIter(path = config.dataset_path,
       batch_size = args.batch_size,
       per_batch_size = args.per_batch_size,
       aug_level = 1,
@@ -79,8 +79,8 @@ def main(args):
   )
   #lr = 1.0e-3
   #lr = 2.5e-4
-  _rescale_grad = 1.0/args.ctx_num
-  #_rescale_grad = 1.0/args.batch_size
+  #_rescale_grad = 1.0/args.ctx_num
+  _rescale_grad = 1.0/args.batch_size
   #lr = args.lr
   #opt = optimizer.Nadam(learning_rate=args.lr, wd=args.wd, rescale_grad=_rescale_grad, clip_gradient=5.0)
   if args.optimizer=='onadam':
@@ -122,17 +122,26 @@ def main(args):
           aug_level = 0,
           args = args,
           )
-        _metric = NMEMetric()
+        _metric = LossValueMetric()
         val_metric = mx.metric.create(_metric)
         val_metric.reset()
         val_iter.reset()
+        diffs = []
         for i, eval_batch in enumerate(val_iter):
           #print(eval_batch.data[0].shape, eval_batch.label[0].shape)
           batch_data = mx.io.DataBatch(eval_batch.data)
           model.forward(batch_data, is_train=False)
+          _label = eval_batch.label[0].asnumpy()
+          _pred = model.get_outputs()[-1].asnumpy()
+          _diff = np.abs(_pred-_label)
+          _diff = np.mean(_diff)*config.input_img_size
+          #print('pred', _pred.shape, _label.shape)
+          #print('diff', _diff)
+          diffs.append(_diff)
           model.update_metric(val_metric, eval_batch.label)
         nme_value = val_metric.get_name_value()[0][1]
-        print('[%d][%s]NME: %f'%(global_step[0], target, nme_value))
+        print('[%d][%s]LOSS: %f'%(global_step[0], target, nme_value))
+        print('avg diff', np.mean(diffs))
   
   def _batch_callback(param):
     _cb(param)
@@ -140,7 +149,10 @@ def main(args):
     mbatch = global_step[0]
     for _lr in lr_steps:
       if mbatch==_lr:
-        opt.lr *= 0.2
+        if args.optimizer=='sgd':
+          opt.lr *= 0.1
+        else:
+          opt.lr *= 0.5
         print('lr change to', opt.lr)
         break
     if mbatch%1000==0:

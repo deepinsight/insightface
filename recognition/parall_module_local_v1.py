@@ -122,7 +122,8 @@ class ParallModule(BaseModule):
       #ag = {}
       #ax = {}
       rk = []
-      for k,v in g.iteritems():
+      for k in g:
+        v = g[k]
         if k.startswith('fc7'):
           p1 = k.find('_')
           p2 = k.rfind('_')
@@ -131,10 +132,6 @@ class ParallModule(BaseModule):
           rk.append(k)
       for k in rk:
         del g[k]
-      #for k,v in g.iteritems():
-      #  print('g', k, v.shape)
-      #for k,v in ag.iteritems():
-      #  print('ag', k, v.shape)
       self._curr_module.set_params(g, x)
       #self._arcface_module.set_params(ag, ax)
 

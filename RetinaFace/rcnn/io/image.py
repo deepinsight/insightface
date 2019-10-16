@@ -82,7 +82,7 @@ def get_image(roidb, scale=False):
           im = im.astype(np.float32)
           boxes_mask = roi_rec['boxes_mask'].copy() * im_scale
           boxes_mask = boxes_mask.astype(np.int)
-          for j in xrange(boxes_mask.shape[0]):
+          for j in range(boxes_mask.shape[0]):
             m = boxes_mask[j]
             im_tensor[:,:,m[1]:m[3],m[0]:m[2]] = 0.0
             #print('find mask', m, file=sys.stderr)
@@ -131,7 +131,7 @@ def __get_crop_image(roidb):
           #im = im.astype(np.float32)
           boxes_mask = roi_rec['boxes_mask'].copy()
           boxes_mask = boxes_mask.astype(np.int)
-          for j in xrange(boxes_mask.shape[0]):
+          for j in range(boxes_mask.shape[0]):
             m = boxes_mask[j]
             im[m[1]:m[3],m[0]:m[2],:] = 0
             #print('find mask', m, file=sys.stderr)
@@ -143,7 +143,7 @@ def __get_crop_image(roidb):
         TARGET_BOX_SCALES = np.array([16,32,64,128,256,512])
         assert roi_rec['boxes'].shape[0]>0
         candidates = []
-        for i in xrange(roi_rec['boxes'].shape[0]):
+        for i in range(roi_rec['boxes'].shape[0]):
           box = roi_rec['boxes'][i]
           box_size = max(box[2]-box[0], box[3]-box[1])
           if box_size<config.TRAIN.MIN_BOX_SIZE:
@@ -181,7 +181,7 @@ def __get_crop_image(roidb):
         im = cv2.warpAffine(im, M, (SIZE, SIZE), borderValue = tuple(config.PIXEL_MEANS))
         #tbox = np.array([left, left+SIZE, up, up+SIZE], dtype=np.int)
         #im_new = np.zeros( (SIZE, SIZE,3), dtype=im.dtype)
-        #for i in xrange(3):
+        #for i in range(3):
         #  im_new[:,:,i] = config.PIXEL_MEANS[i]
         new_rec['boxes'][:,0] -= left
         new_rec['boxes'][:,2] -= left
@@ -192,7 +192,7 @@ def __get_crop_image(roidb):
         #print('before', new_rec['boxes'].shape[0])
         boxes_new = []
         classes_new = []
-        for i in xrange(new_rec['boxes'].shape[0]):
+        for i in range(new_rec['boxes'].shape[0]):
           box = new_rec['boxes'][i]
           box_size = max(box[2]-box[0], box[3]-box[1])
           center = np.array(([box[0], box[1]]+[box[2], box[3]]))/2
@@ -211,7 +211,7 @@ def __get_crop_image(roidb):
           global TMP_ID
           if TMP_ID<10:
             tim = im.copy()
-            for i in xrange(new_rec['boxes'].shape[0]):
+            for i in range(new_rec['boxes'].shape[0]):
               box = new_rec['boxes'][i].copy().astype(np.int)
               cv2.rectangle(tim, (box[0], box[1]), (box[2], box[3]), (255, 0, 0), 1)
             filename = './trainimages/train%d.png' % TMP_ID
@@ -279,7 +279,7 @@ def get_crop_image1(roidb):
           #im = im.astype(np.float32)
           boxes_mask = roi_rec['boxes_mask'].copy()
           boxes_mask = boxes_mask.astype(np.int)
-          for j in xrange(boxes_mask.shape[0]):
+          for j in range(boxes_mask.shape[0]):
             m = boxes_mask[j]
             im[m[1]:m[3],m[0]:m[2],:] = 127
             #print('find mask', m, file=sys.stderr)
@@ -342,7 +342,7 @@ def get_crop_image1(roidb):
           #print(origin_shape, im_new.shape, im_scale)
           valid = []
           valid_boxes = []
-          for i in xrange(boxes_new.shape[0]):
+          for i in range(boxes_new.shape[0]):
             box = boxes_new[i]
             #center = np.array(([box[0], box[1]]+[box[2], box[3]]))/2
             centerx = (box[0]+box[2])/2
@@ -385,12 +385,12 @@ def get_crop_image1(roidb):
         global TMP_ID
         if TMP_ID>=0 and TMP_ID<10:
           tim = im.copy().astype(np.uint8)
-          for i in xrange(new_rec['boxes'].shape[0]):
+          for i in range(new_rec['boxes'].shape[0]):
             box = new_rec['boxes'][i].copy().astype(np.int)
             cv2.rectangle(tim, (box[0], box[1]), (box[2], box[3]), (255, 0, 0), 1)
             print('draw box:', box)
           if config.FACE_LANDMARK:
-            for i in xrange(new_rec['landmarks'].shape[0]):
+            for i in range(new_rec['landmarks'].shape[0]):
               landmark = new_rec['landmarks'][i].copy()
               if landmark[0][2]<0:
                 print('zero', landmark)
@@ -444,14 +444,14 @@ def get_crop_image2(roidb):
           #im = im.astype(np.float32)
           boxes_mask = roi_rec['boxes_mask'].copy()
           boxes_mask = boxes_mask.astype(np.int)
-          for j in xrange(boxes_mask.shape[0]):
+          for j in range(boxes_mask.shape[0]):
             m = boxes_mask[j]
             im[m[1]:m[3],m[0]:m[2],:] = 0
             #print('find mask', m, file=sys.stderr)
         SIZE = config.SCALES[0][0]
         scale_array = np.array([16,32,64,128,256,512], dtype=np.float32)
         candidates = []
-        for i in xrange(roi_rec['boxes'].shape[0]):
+        for i in range(roi_rec['boxes'].shape[0]):
           box = roi_rec['boxes'][i]
           box_size = max(box[2]-box[0], box[3]-box[1])
           if box_size<config.TRAIN.MIN_BOX_SIZE:
@@ -594,7 +594,7 @@ def get_crop_image2(roidb):
           #print(origin_shape, im_new.shape, im_scale)
           valid = []
           valid_boxes = []
-          for i in xrange(boxes_new.shape[0]):
+          for i in range(boxes_new.shape[0]):
             box = boxes_new[i]
             #center = np.array(([box[0], box[1]]+[box[2], box[3]]))/2
             centerx = (box[0]+box[2])/2
@@ -633,12 +633,12 @@ def get_crop_image2(roidb):
         global TMP_ID
         if TMP_ID>=0 and TMP_ID<10:
           tim = im.copy().astype(np.uint8)
-          for i in xrange(new_rec['boxes'].shape[0]):
+          for i in range(new_rec['boxes'].shape[0]):
             box = new_rec['boxes'][i].copy().astype(np.int)
             cv2.rectangle(tim, (box[0], box[1]), (box[2], box[3]), (255, 0, 0), 1)
             print('draw box:', box)
           if config.FACE_LANDMARK:
-            for i in xrange(new_rec['landmarks'].shape[0]):
+            for i in range(new_rec['landmarks'].shape[0]):
               landmark = new_rec['landmarks'][i].copy()
               if landmark[10]==0.0:
                 print('zero', landmark)

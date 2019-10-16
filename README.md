@@ -5,8 +5,10 @@ By Jia Guo and [Jiankang Deng](https://jiankangdeng.github.io/)
 
 ## License
 
-The code of InsightFace is released under the MIT License.
+The code of InsightFace is released under the MIT License. There is no limitation for both acadmic and commercial usage.
 
+The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only.
+ 
 ## ArcFace Video Demo
 
 [![ArcFace Demo](https://github.com/deepinsight/insightface/blob/master/resources/facerecognitionfromvideo.PNG)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
@@ -15,10 +17,16 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
-**`2019.04.14`**: We will launch a Light-weight Face Recognition challenge/workshop on ICCV 2019.
+**`2019.08.10`**: We achieved 2nd place at [WIDER Face Detection Challenge 2019](http://wider-challenge.org/2019.html).
 
-**`2019.04.04`**: Arcface achieved state-of-the-art performance (5/109) on the NIST Face Recognition Vendor Test (FRVT) (1:1 verification)
-[report](https://www.nist.gov/sites/default/files/documents/2019/04/04/frvt_report_2019_04_04.pdf) (name: Imperial-000). Our solution is based on [MS1MV2+DeepGlintAsian, ResNet100, ArcFace loss]. 
+**`2019.05.30`**: [Presentation at cvmart](https://pan.baidu.com/s/1v9fFHBJ8Q9Kl9Z6GwhbY6A)
+
+**`2019.04.30`**: Our Face detector ([RetinaFace](https://github.com/deepinsight/insightface/tree/master/RetinaFace)) obtains state-of-the-art results on [the WiderFace dataset](http://shuoyang1213.me/WIDERFACE/WiderFace_Results.html).
+
+**`2019.04.14`**: We will launch a [Light-weight Face Recognition challenge/workshop](https://github.com/deepinsight/insightface/tree/master/iccv19-challenge) on ICCV 2019.
+
+**`2019.04.04`**: Arcface achieved state-of-the-art performance (7/109) on the NIST Face Recognition Vendor Test (FRVT) (1:1 verification)
+[report](https://www.nist.gov/sites/default/files/documents/2019/04/04/frvt_report_2019_04_04.pdf) (name: Imperial-000 and Imperial-001). Our solution is based on [MS1MV2+DeepGlintAsian, ResNet100, ArcFace loss]. 
 
 **`2019.02.08`**: Please check [https://github.com/deepinsight/insightface/tree/master/recognition](https://github.com/deepinsight/insightface/tree/master/recognition) for our parallel training code which can easily and efficiently support one million identities on a single machine (8* 1080ti).
 
@@ -203,6 +211,7 @@ For single cropped face image(112x112), total inference time is only 17ms on our
 
 - TensorFlow: [InsightFace_TF](https://github.com/auroua/InsightFace_TF)
 - TensorFlow: [tf-insightface](https://github.com/AIInAi/tf-insightface)
+- TensorFlow:[insightface](https://github.com/Fei-Wang/insightface)
 - PyTorch: [InsightFace_Pytorch](https://github.com/TreB1eN/InsightFace_Pytorch)
 - PyTorch: [arcface-pytorch](https://github.com/ronghuaiyang/arcface-pytorch)
 - Caffe: [arcface-caffe](https://github.com/xialuxi/arcface-caffe)
@@ -212,23 +221,38 @@ For single cropped face image(112x112), total inference time is only 17ms on our
 
 ## Face Alignment
 
-Todo
+Please check the [Menpo](https://github.com/jiankangdeng/MenpoBenchmark) Benchmark and [Dense U-Net](https://github.com/deepinsight/insightface/tree/master/alignment) for more details.
 
 ## Face Detection
 
-Todo
+Please check [RetinaFace](https://github.com/deepinsight/insightface/tree/master/RetinaFace) for more details.
 
 ## Citation
 
 If you find *InsightFace* useful in your research, please consider to cite the following related papers:
 
 ```
+@inproceedings{deng2019retinaface,
+title={RetinaFace: Single-stage Dense Face Localisation in the Wild},
+author={Deng, Jiankang and Guo, Jia and Yuxiang, Zhou and Jinke Yu and Irene Kotsia and Zafeiriou, Stefanos},
+booktitle={arxiv},
+year={2019}
+}
+
 @inproceedings{guo2018stacked,
   title={Stacked Dense U-Nets with Dual Transformers for Robust Face Alignment},
   author={Guo, Jia and Deng, Jiankang and Xue, Niannan and Zafeiriou, Stefanos},
   booktitle={BMVC},
   year={2018}
 }
+
+@article{deng2018menpo,
+  title={The Menpo benchmark for multi-pose 2D and 3D facial landmark localisation and tracking},
+  author={Deng, Jiankang and Roussos, Anastasios and Chrysos, Grigorios and Ververas, Evangelos and Kotsia, Irene and Shen, Jie and Zafeiriou, Stefanos},
+  journal={IJCV},
+  year={2018}
+}
+
 @inproceedings{deng2018arcface,
 title={ArcFace: Additive Angular Margin Loss for Deep Face Recognition},
 author={Deng, Jiankang and Guo, Jia and Niannan, Xue and Zafeiriou, Stefanos},

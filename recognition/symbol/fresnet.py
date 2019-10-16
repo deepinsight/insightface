@@ -606,6 +606,12 @@ def get_symbol():
         units = [3, 8, 35, 3]
     elif num_layers == 100:
         units = [3, 13, 30, 3]
+    elif num_layers == 134:
+        units = [3, 10, 50, 3]
+    elif num_layers == 136:
+        units = [3, 13, 48, 3]
+    elif num_layers == 140:
+        units = [3, 15, 48, 3]
     elif num_layers == 124:
         units = [3, 13, 40, 5]
     elif num_layers == 160:
