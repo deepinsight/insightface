@@ -41,6 +41,17 @@ def get_fc1(last_conv, num_classes, fc_type, input_channel=512):
     body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
     fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
     fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
+  elif fc_type=='SFC':
+    body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
+    body = Conv(data=body, num_filter=input_channel, kernel=(3,3), stride=(2,2), pad=(1,1),
+                              no_bias=True, name="convf", num_group = input_channel)
+    body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bnf')
+    body = Act(data=body, act_type=config.net_act, name='reluf')
+    body = Conv(data=body, num_filter=input_channel, kernel=(1, 1), pad=(0, 0), stride=(1, 1), name="convf2")
+    body = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bnf2')
+    body = Act(data=body, act_type=config.net_act, name='reluf2')
+    fc1 = mx.sym.FullyConnected(data=body, num_hidden=num_classes, name='pre_fc1')
+    fc1 = mx.sym.BatchNorm(data=fc1, fix_gamma=True, eps=2e-5, momentum=bn_mom, name='fc1')
   elif fc_type=='GAP':
     bn1 = mx.sym.BatchNorm(data=body, fix_gamma=False, eps=2e-5, momentum=bn_mom, name='bn1')
     relu1 = Act(data=bn1, act_type=config.net_act, name='relu1')
