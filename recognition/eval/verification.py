@@ -514,11 +514,11 @@ if __name__ == '__main__':
   parser.add_argument('--mode', default=0, type=int, help='')
   parser.add_argument('--nfolds', default=10, type=int, help='')
   args = parser.parse_args()
-  sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
-  import face_image
-
-  prop = face_image.load_property(args.data_dir)
-  image_size = prop.image_size
+  #sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
+  #import face_image
+  #prop = face_image.load_property(args.data_dir)
+  #image_size = prop.image_size
+  image_size = [112,112]
   print('image_size', image_size)
   ctx = mx.gpu(args.gpu)
   nets = []
