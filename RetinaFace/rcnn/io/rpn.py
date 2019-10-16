@@ -674,6 +674,13 @@ class AA:
       landmark_weights = AA._unmap(landmark_weights, total_anchors, inds_inside, fill=0)
     #print('CC', anchors.shape, len(inds_inside))
 
+    bbox_targets[:, 0::4] = bbox_targets[:,0::4] / config.TRAIN.BBOX_STDS[0]
+    bbox_targets[:, 1::4] = bbox_targets[:,1::4] / config.TRAIN.BBOX_STDS[1]
+    bbox_targets[:, 2::4] = bbox_targets[:,2::4] / config.TRAIN.BBOX_STDS[2]
+    bbox_targets[:, 3::4] = bbox_targets[:,3::4] / config.TRAIN.BBOX_STDS[3]
+    landmark_targets /= config.TRAIN.LANDMARK_STD
+    #print('applied STD')
+
     #if DEBUG:
     #    if gt_boxes.size > 0:
     #        print 'rpn: max max_overlaps', np.max(max_overlaps)

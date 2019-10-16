@@ -16,11 +16,7 @@ class RPNFPNOHEM3Operator(mx.operator.CustomOp):
         self.stride = int(stride)
         self.prefix = prefix
         generate_config(network, dataset)
-        self.mode = 0
-        if self.prefix!='face':
-          self.mode = 0
-        if network=='pbox':
-          self.mode = 2
+        self.mode = config.TRAIN.OHEM_MODE #0 for random 10:245, 1 for 10:246, 2 for 10:30, mode 1 for default
         global STAT
         for k in config.RPN_FEAT_STRIDE:
           STAT[k] = [0,0,0]
@@ -43,7 +39,7 @@ class RPNFPNOHEM3Operator(mx.operator.CustomOp):
         #print('bbox_weight 0', bbox_weight.shape, file=sys.stderr)
         #bbox_weight = np.zeros( (labels_raw.shape[0], labels_raw.shape[1], 4), dtype=np.float32)
         _stat = [0,0,0]
-        for ibatch in xrange(labels_raw.shape[0]):
+        for ibatch in range(labels_raw.shape[0]):
           _anchor_weight = np.zeros( (labels_raw.shape[1],1), dtype=np.float32)
           labels = labels_raw[ibatch]
           fg_score = cls_score[ibatch,1,:] - cls_score[ibatch,0,:]
@@ -55,7 +51,7 @@ class RPNFPNOHEM3Operator(mx.operator.CustomOp):
           origin_num_fg = len(fg_inds)
           #print(len(fg_inds), num_fg, file=sys.stderr)
           if len(fg_inds) > num_fg:
-            if self.mode>=1:
+            if self.mode==0:
               disable_inds = np.random.choice(fg_inds, size=(len(fg_inds) - num_fg), replace=False)
               labels[disable_inds] = -1
             else:
@@ -68,9 +64,8 @@ class RPNFPNOHEM3Operator(mx.operator.CustomOp):
           n_fg = np.sum(labels>0)
           fg_inds = np.where(labels>0)[0]
           num_bg = config.TRAIN.RPN_BATCH_SIZE - n_fg
-          #num_bg = max(10, num_fg*int(1.0/config.TRAIN.RPN_FG_FRACTION-1))
-          #if self.mode==2:
-          #  num_bg = num_fg*int(1.0/config.TRAIN.RPN_FG_FRACTION-1)
+          if self.mode==2:
+            num_bg = max(48, n_fg*int(1.0/config.TRAIN.RPN_FG_FRACTION-1))
 
           bg_inds = np.where(labels == 0)[0]
           origin_num_bg = len(bg_inds)
@@ -79,7 +74,7 @@ class RPNFPNOHEM3Operator(mx.operator.CustomOp):
           elif len(bg_inds) > num_bg:
             # sort ohem scores
 
-            if self.mode>=1:
+            if self.mode==0:
               disable_inds = np.random.choice(bg_inds, size=(len(bg_inds) - num_bg), replace=False)
               labels[disable_inds] = -1
             else:
@@ -98,30 +93,30 @@ class RPNFPNOHEM3Operator(mx.operator.CustomOp):
           anchor_weight[ibatch] = _anchor_weight
           valid_count[ibatch][0] = n_fg
 
-          if self.prefix=='face':
-            #print('fg-bg', self.stride, n_fg, num_bg)
-            STAT[0]+=1
-            STAT[self.stride][0] += config.TRAIN.RPN_BATCH_SIZE
-            STAT[self.stride][1] += n_fg
-            STAT[self.stride][2] += np.sum(fg_score[fg_inds]>=0)
-            #_stat[0] += config.TRAIN.RPN_BATCH_SIZE
-            #_stat[1] += n_fg
-            #_stat[2] += np.sum(fg_score[fg_inds]>=0)
-            #print('stride num_fg', self.stride, n_fg, file=sys.stderr)
-            #ACC[self.stride] += np.sum(fg_score[fg_inds]>=0)
-            #x = float(labels_raw.shape[0]*len(config.RPN_FEAT_STRIDE))
-            x = 1.0
-            if STAT[0]%STEP==0:
-              _str = ['STAT']
-              STAT[0] = 0
-              for k in config.RPN_FEAT_STRIDE:
-                acc = float(STAT[k][2])/STAT[k][1]
-                acc0 = float(STAT[k][1])/STAT[k][0]
-                #_str.append("%d: all-fg(%d, %d, %.4f), fg-fgcorrect(%d, %d, %.4f)"%(k,STAT[k][0], STAT[k][1], acc0, STAT[k][1], STAT[k][2], acc))
-                _str.append("%d: (%d, %d, %.4f)"%(k, STAT[k][1], STAT[k][2], acc))
-                STAT[k] = [0,0,0]
-              _str = ' | '.join(_str)
-              print(_str, file=sys.stderr)
+          #if self.prefix=='face':
+          #  #print('fg-bg', self.stride, n_fg, num_bg)
+          #  STAT[0]+=1
+          #  STAT[self.stride][0] += config.TRAIN.RPN_BATCH_SIZE
+          #  STAT[self.stride][1] += n_fg
+          #  STAT[self.stride][2] += np.sum(fg_score[fg_inds]>=0)
+          #  #_stat[0] += config.TRAIN.RPN_BATCH_SIZE
+          #  #_stat[1] += n_fg
+          #  #_stat[2] += np.sum(fg_score[fg_inds]>=0)
+          #  #print('stride num_fg', self.stride, n_fg, file=sys.stderr)
+          #  #ACC[self.stride] += np.sum(fg_score[fg_inds]>=0)
+          #  #x = float(labels_raw.shape[0]*len(config.RPN_FEAT_STRIDE))
+          #  x = 1.0
+          #  if STAT[0]%STEP==0:
+          #    _str = ['STAT']
+          #    STAT[0] = 0
+          #    for k in config.RPN_FEAT_STRIDE:
+          #      acc = float(STAT[k][2])/STAT[k][1]
+          #      acc0 = float(STAT[k][1])/STAT[k][0]
+          #      #_str.append("%d: all-fg(%d, %d, %.4f), fg-fgcorrect(%d, %d, %.4f)"%(k,STAT[k][0], STAT[k][1], acc0, STAT[k][1], STAT[k][2], acc))
+          #      _str.append("%d: (%d, %d, %.4f)"%(k, STAT[k][1], STAT[k][2], acc))
+          #      STAT[k] = [0,0,0]
+          #    _str = ' | '.join(_str)
+          #    print(_str, file=sys.stderr)
           #if self.stride==4 and num_fg>0:
           #  print('_stat_', self.stride, num_fg, num_bg, file=sys.stderr)
 

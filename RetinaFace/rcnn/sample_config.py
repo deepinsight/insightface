@@ -74,6 +74,14 @@ config.MORE_SMALL_BOX = True
 
 config.LAYER_FIX = False
 
+config.CASCADE = 0
+config.CASCADE_MODE = 1
+#config.CASCADE_CLS_STRIDES = [16,8,4]
+#config.CASCADE_BBOX_STRIDES = [64,32]
+config.CASCADE_CLS_STRIDES = [64,32,16,8,4]
+config.CASCADE_BBOX_STRIDES = [64,32,16,8,4]
+#config.CASCADE_BBOX_STRIDES = [64,32,16,8]
+
 config.HEAD_BOX = False
 config.DENSE_ANCHOR = False
 config.USE_MAXOUT = 0
@@ -113,24 +121,15 @@ config.TRAIN.RPN_BATCH_SIZE = 256
 config.TRAIN.RPN_FG_FRACTION = 0.25
 config.TRAIN.RPN_POSITIVE_OVERLAP = 0.5
 config.TRAIN.RPN_NEGATIVE_OVERLAP = 0.3
+if config.CASCADE>0:
+    config.TRAIN.RPN_POSITIVE_OVERLAP = 0.7
+config.TRAIN.CASCADE_OVERLAP = [0.4, 0.5]
 config.TRAIN.RPN_CLOBBER_POSITIVES = False
 config.TRAIN.RPN_FORCE_POSITIVE = False
 # rpn bounding box regression params
-#config.TRAIN.RPN_BBOX_WEIGHTS = (1.0, 1.0, 1.0, 1.0)
-#config.TRAIN.RPN_POSITIVE_WEIGHT = -1.0
-#config.TRAIN.RPN_LANDMARK_WEIGHTS = (1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0)
-#config.TRAIN.RPN_INVALID_LANDMARK_WEIGHTS = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+config.TRAIN.BBOX_STDS = (1.0, 1.0, 1.0, 1.0)
+config.TRAIN.LANDMARK_STD = 1.0
 
-# used for end2end training
-# RPN proposal
-#config.TRAIN.CXX_PROPOSAL = True
-#config.TRAIN.RPN_NMS_THRESH = 0.7
-#config.TRAIN.RPN_PRE_NMS_TOP_N = 12000
-#config.TRAIN.RPN_POST_NMS_TOP_N = 2000
-#config.TRAIN.RPN_MIN_SIZE = config.RPN_FEAT_STRIDE
-#config.TRAIN.BBOX_NORMALIZATION_PRECOMPUTED = True
-#config.TRAIN.BBOX_MEANS = (0.0, 0.0, 0.0, 0.0)
-#config.TRAIN.BBOX_STDS = (0.1, 0.1, 0.2, 0.2)
 
 config.TEST = edict()
 
