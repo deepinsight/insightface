@@ -81,7 +81,7 @@ class MAEMetric(mx.metric.EvalMetric):
     pred_age = np.zeros( label_age.shape, dtype=np.int)
     #pred_age = np.zeros( label_age.shape, dtype=np.float32)
     pred = preds[-1].asnumpy()
-    for i in xrange(AGE):
+    for i in range(AGE):
       _pred = pred[:,2+i*2:4+i*2]
       _pred = np.argmax(_pred, axis=1)
       #pred = pred[:,1]
@@ -107,7 +107,7 @@ class CUMMetric(mx.metric.EvalMetric):
     label_age = np.count_nonzero(label[:,1:], axis=1)
     pred_age = np.zeros( label_age.shape, dtype=np.int)
     pred = preds[-1].asnumpy()
-    for i in xrange(AGE):
+    for i in range(AGE):
       _pred = pred[:,2+i*2:4+i*2]
       _pred = np.argmax(_pred, axis=1)
       #pred = pred[:,1]
@@ -184,7 +184,7 @@ def train_net(args):
     ctx = []
     cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
     if len(cvd)>0:
-      for i in xrange(len(cvd.split(','))):
+      for i in range(len(cvd.split(','))):
         ctx.append(mx.gpu(i))
     if len(ctx)==0:
       ctx = [mx.cpu()]

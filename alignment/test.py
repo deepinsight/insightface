@@ -54,7 +54,7 @@ class Handler:
     tb = datetime.datetime.now()
     print('module time cost', (tb-ta).total_seconds())
     ret = np.zeros( (alabel.shape[0], 2), dtype=np.float32)
-    for i in xrange(alabel.shape[0]):
+    for i in range(alabel.shape[0]):
       a = cv2.resize(alabel[i], (self.image_size[1], self.image_size[0]))
       ind = np.unravel_index(np.argmax(a, axis=None), a.shape)
       #ret[i] = (ind[0], ind[1]) #h, w

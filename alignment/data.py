@@ -159,7 +159,7 @@ class FaceSegIter(DataIter):
 
       #ul = np.array( (50000,50000), dtype=np.int32)
       #br = np.array( (0,0), dtype=np.int32)
-      #for i in xrange(hlabel.shape[0]):
+      #for i in range(hlabel.shape[0]):
       #  h = int(hlabel[i][0])
       #  w = int(hlabel[i][1])
       #  key = np.array((h,w))
@@ -171,9 +171,9 @@ class FaceSegIter(DataIter):
     def get_flip(self, data, label):
       data_flip = np.zeros_like(data)
       label_flip = np.zeros_like(label)
-      for k in xrange(data_flip.shape[2]):
+      for k in range(data_flip.shape[2]):
           data_flip[:,:,k] = np.fliplr(data[:,:,k])
-      for k in xrange(label_flip.shape[0]):
+      for k in range(label_flip.shape[0]):
           label_flip[k,:] = np.fliplr(label[k,:])
       #print(label[0,:].shape)
       label_flip = label_flip[self.flip_order,:]
@@ -186,7 +186,7 @@ class FaceSegIter(DataIter):
         #  filename = './vis/raw_%d.jpg' % (self.img_num)
         #  print('save', filename)
         #  draw = data.copy()
-        #  for i in xrange(label.shape[0]):
+        #  for i in range(label.shape[0]):
         #    cv2.circle(draw, (label[i][1], label[i][0]), 1, (0, 0, 255), 2)
         #  scipy.misc.imsave(filename, draw)
 
@@ -223,7 +223,7 @@ class FaceSegIter(DataIter):
           #data_out = img_helper.crop2(data, center, _scale, (self.input_img_size, self.input_img_size), rot=rotate)
           label_out = np.zeros(self.label_shape, dtype=np.float32)
           #print('out shapes', data_out.shape, label_out.shape)
-          for i in xrange(label.shape[0]):
+          for i in range(label.shape[0]):
             pt = label[i].copy()
             #pt = pt[::-1]
             npt = img_helper.transform_pt(pt, trans)
@@ -277,7 +277,7 @@ class FaceSegIter(DataIter):
         print('save', filename)
         draw = data_out.copy()
         alabel = label_out.copy()
-        for i in xrange(label.shape[0]):
+        for i in range(label.shape[0]):
           a = cv2.resize(alabel[i], (self.input_img_size, self.input_img_size))
           ind = np.unravel_index(np.argmax(a, axis=None), a.shape)
           cv2.circle(draw, (ind[1], ind[0]), 1, (0, 0, 255), 2)
