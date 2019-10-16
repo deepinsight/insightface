@@ -72,6 +72,9 @@ class CropLoader(mx.io.DataIter):
           for n in names:
             k = "%s_stride%d"%(n,stride)
             self.label_name.append(k)
+        if config.CASCADE>0:
+          self.label_name.append('gt_boxes')
+
         # status variable for synchronization between get_data and get_label
         self.cur = 0
         self.batch = None
@@ -155,6 +158,8 @@ class CropLoader(mx.io.DataIter):
           dummy_label['gt_landmarks'] = dummy_landmarks
         face_label_dict = self.aa.assign_anchor_fpn(dummy_label, dummy_info, config.FACE_LANDMARK, prefix='face')
         label_dict.update(face_label_dict)
+        if config.CASCADE>0:
+          label_dict['gt_boxes'] = np.zeros((0, config.TRAIN.MAX_BBOX_PER_IMAGE, 5), dtype=np.float32)
 
         label_list = []
         for k in self.label_name:
@@ -238,6 +243,14 @@ class CropLoader(mx.io.DataIter):
             #tb = datetime.datetime.now()
             #self._times[0] += (tb-ta).total_seconds()
             label_dict.update(face_label_dict)
+            #for k in label_dict:
+            #  print(k, label_dict[k].shape)
+
+            if config.CASCADE>0:
+              pad_gt_boxes = np.empty( (1, config.TRAIN.MAX_BBOX_PER_IMAGE, 5), dtype=np.float32)
+              pad_gt_boxes.fill(-1)
+              pad_gt_boxes[0, 0:gt_boxes.shape[0],:] = gt_boxes
+              label_dict['gt_boxes'] = pad_gt_boxes
             #print('im_info', im_info.shape)
             #print(gt_boxes.shape)
             for k in self.label_name:
@@ -255,6 +268,8 @@ class CropLoader(mx.io.DataIter):
 
         self.data = [mx.nd.array(all_data[key]) for key in self.data_name]
         self.label = [mx.nd.array(all_label[key]) for key in self.label_name]
+        #for _label in self.label:
+        #  print('LABEL SHAPE', _label.shape)
         #print(self._times)
 
 class CropLoader2(mx.io.DataIter):

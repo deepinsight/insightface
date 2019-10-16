@@ -67,7 +67,7 @@ class RPNAccMetric(mx.metric.EvalMetric):
 
         # filter with keep_inds
         keep_inds = np.where(label != -1)[0]
-        #print('in_metric', pred_label.shape, label.shape, len(keep_inds), file=sys.stderr)
+        #print('in_metric acc', pred_label.shape, label.shape, len(keep_inds), file=sys.stderr)
         #print(keep_inds, file=sys.stderr)
         _pred_label = pred_label[keep_inds]
         _label = label[keep_inds]
@@ -156,7 +156,10 @@ class RPNL1LossMetric(mx.metric.EvalMetric):
         #print('in_metric', self.name, bbox_weight.shape, bbox_loss.shape)
 
         # calculate num_inst (average on those fg anchors)
-        num_inst = np.sum(bbox_weight > 0) / (bbox_weight.shape[1]/config.NUM_ANCHORS)
+        if config.LR_MODE==0:
+          num_inst = np.sum(bbox_weight > 0) / (bbox_weight.shape[1]/config.NUM_ANCHORS)
+        else:
+          num_inst = 1
         #print('in_metric log', bbox_loss.shape, num_inst, file=sys.stderr)
 
         self.sum_metric += np.sum(bbox_loss)

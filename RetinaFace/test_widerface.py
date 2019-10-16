@@ -85,13 +85,13 @@ def get_boxes(roi, pyramid):
   #print(boxes.shape, landmarks.shape)
   if imgid>=0 and imgid<100:
     font = cv2.FONT_HERSHEY_SIMPLEX
-    for i in xrange(boxes.shape[0]):
+    for i in range(boxes.shape[0]):
       box = boxes[i]
       ibox = box[0:4].copy().astype(np.int)
       cv2.rectangle(im, (ibox[0], ibox[1]), (ibox[2], ibox[3]), (255, 0, 0), 2)
       #print('box', ibox)
       #if len(ibox)>5:
-      #  for l in xrange(5):
+      #  for l in range(5):
       #    pp = (ibox[5+l*2], ibox[6+l*2])
       #    cv2.circle(im, (pp[0], pp[1]), 1, (0, 0, 255), 1)
       blur = box[5]
@@ -99,7 +99,7 @@ def get_boxes(roi, pyramid):
       cv2.putText(im,k,(ibox[0]+2,ibox[1]+14), font, 0.6, (0,255,0), 2)
       #landmarks = box[6:21].reshape( (5,3) )
       if landmarks is not None:
-        for l in xrange(5):
+        for l in range(5):
           color = (0,255,0)
           landmark = landmarks[i][l]
           pp = (int(landmark[0]), int(landmark[1]))
@@ -129,7 +129,7 @@ def test(args):
   num_pos = 0
   print('roidb size', len(roidb))
 
-  for i in xrange(len(roidb)):
+  for i in range(len(roidb)):
     if i%args.parts!=args.part:
       continue
     #if i%10==0:
@@ -190,6 +190,9 @@ def main():
     if args.mode==1:
       args.pyramid = True
       args.bbox_vote = True
+    elif args.mode==2:
+      args.pyramid = True
+      args.bbox_vote = False
     logger.info('Called with argument: %s' % args)
     test(args)
 
