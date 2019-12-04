@@ -103,6 +103,12 @@ network.mnas025.emb_size = 256
 network.mnas025.net_output = 'GDC'
 network.mnas025.net_multiplier = 0.25
 
+network.vargfacenet = edict()
+network.vargfacenet.net_name = 'vargfacenet'
+network.vargfacenet.net_multiplier = 1.25
+network.vargfacenet.emb_size = 512
+network.vargfacenet.net_output='J'
+
 # dataset settings
 dataset = edict()
 
