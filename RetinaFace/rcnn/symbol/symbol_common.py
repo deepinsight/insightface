@@ -236,6 +236,21 @@ def get_sym_conv(data, sym):
     c1 = stride2layer[8]
     c2 = stride2layer[16]
     c3 = stride2layer[32]
+    if not config.USE_FPN:
+      assert len(config.RPN_ANCHOR_CFG)==3
+      c3 = conv_act_layer(c3, 'rf_c3_lateral',
+          F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
+      c2_lateral = conv_act_layer(c2, 'rf_c2_lateral',
+          F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
+      c2 = c2_lateral
+      c1_lateral = conv_act_layer(c1, 'rf_c1_red_conv',
+          F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
+      c1 = c1_lateral
+      ret = {8: c1, 16:c2, 32: c3}
+      return ret
+
+
+
     c3 = conv_act_layer(c3, 'rf_c3_lateral',
         F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
     #c3_up = mx.symbol.UpSampling(c3, scale=2, sample_type='nearest', workspace=512, name='ssh_c3_up', num_args=1)
