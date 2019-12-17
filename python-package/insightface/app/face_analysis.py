@@ -44,7 +44,8 @@ class FaceAnalysis:
             img_center = img.shape[0]//2, img.shape[1]//2
             offsets = np.vstack([ (bboxes[:,0]+bboxes[:,2])/2-img_center[1], (bboxes[:,1]+bboxes[:,3])/2-img_center[0] ])
             offset_dist_squared = np.sum(np.power(offsets,2.0),0)
-            bindex = np.argmax(area-offset_dist_squared*2.0) # some extra weight on the centering
+            values = area-offset_dist_squared*2.0 # some extra weight on the centering
+            bindex = np.argsort(values)[::-1] # some extra weight on the centering
             bindex = bindex[0:max_num]
             bboxes = bboxes[bindex, :]
             landmarks = landmarks[bindex, :]

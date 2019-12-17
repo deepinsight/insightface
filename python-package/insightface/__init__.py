@@ -20,7 +20,7 @@ except ImportError:
         "Unable to import dependency mxnet. "
         "A quick tip is to install via `pip install mxnet-mkl/mxnet-cu90mkl --pre`. ")
 
-__version__ = '0.1.3'
+__version__ = '0.1.5'
 
 from . import model_zoo
 from . import utils
