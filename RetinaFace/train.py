@@ -118,7 +118,8 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch,
     logger.info('output shape %s' % pprint.pformat(out_shape_dict))
 
 
-    for k,v in arg_shape_dict.iteritems():
+    for k in arg_shape_dict:
+      v = arg_shape_dict[k]
       if k.find('upsampling')>=0:
         print('initializing upsampling_weight', k)
         arg_params[k] = mx.nd.zeros(shape=v)
@@ -201,6 +202,7 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch,
     lr_epoch = [int(epoch) for epoch in lr_step.split(',')]
     lr_epoch_diff = [epoch - begin_epoch for epoch in lr_epoch if epoch > begin_epoch]
     lr_iters = [int(epoch * len(roidb) / input_batch_size) for epoch in lr_epoch_diff]
+    iter_per_epoch = int(len(roidb)/input_batch_size)
 
     lr_steps = []
     if len(lr_iters)==5:
@@ -300,6 +302,9 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch,
           print('lr change to', opt.lr,' in batch', mbatch, file=sys.stderr)
           break
 
+      if mbatch%iter_per_epoch==0:
+        print('saving checkpoint', mbatch, file=sys.stderr)
+        save_model(0)
       if mbatch==lr_steps[-1][0]:
         print('saving final checkpoint', mbatch, file=sys.stderr)
         save_model(0)

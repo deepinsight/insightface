@@ -66,6 +66,7 @@ config.CONTEXT_FILTER_RATIO = 1
 config.max_feat_channel = 9999
 
 config.USE_CROP = True
+config.USE_FPN = True
 config.USE_DCN = 0
 config.FACE_LANDMARK = True
 config.USE_OCCLUSION = False

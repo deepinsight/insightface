@@ -7,7 +7,7 @@ import cv2
 import os
 import numpy as np
 import json
-from PIL import Image
+#from PIL import Image
 
 from ..logger import logger
 from .imdb import IMDB
@@ -64,7 +64,11 @@ class retinaface(IMDB):
         nonattr_box_num = 0
         landmark_num = 0
 
+        pp = 0
         for fp in self._fp_bbox_map:
+            pp += 1
+            if pp%1000==0:
+              print('loading', pp)
             if self._split=='test':
               image_path = os.path.join(self._imgs_path, fp)
               roi = {'image': image_path}
@@ -78,10 +82,11 @@ class retinaface(IMDB):
             gt_classes = np.ones([len(self._fp_bbox_map[fp])], np.int32)
             overlaps = np.zeros([len(self._fp_bbox_map[fp]), 2], np.float)
 
+            imsize = cv2.imread(os.path.join(self._imgs_path, fp)).shape[0:2][::-1]
             ix = 0
 
             for aline in self._fp_bbox_map[fp]:
-                imsize = Image.open(os.path.join(self._imgs_path, fp)).size
+                #imsize = Image.open(os.path.join(self._imgs_path, fp)).size
                 values = [float(x) for x in aline.strip().split()]
                 bbox = [values[0], values[1], values[0]+values[2], values[1]+values[3]]
 
@@ -100,7 +105,7 @@ class retinaface(IMDB):
                     continue
 
                 boxes[ix, :] = np.array([x1, y1, x2, y2], np.float)
-                if self._split.startswith('train'):
+                if self._split=='train':
                   landmark = np.array( values[4:19], dtype=np.float32 ).reshape((5,3))
                   for li in range(5):
                     #print(landmark)
@@ -129,7 +134,7 @@ class retinaface(IMDB):
                 ix += 1
             max_num_boxes = max(max_num_boxes, ix)
             #overlaps = scipy.sparse.csr_matrix(overlaps)
-            if self._split.startswith('train') and ix==0:
+            if self._split=='train' and ix==0:
               continue
             boxes = boxes[:ix,:]
             landmarks = landmarks[:ix,:,:]
