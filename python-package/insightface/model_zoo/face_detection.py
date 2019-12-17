@@ -2,6 +2,7 @@ from __future__ import division
 import mxnet as mx
 import numpy as np
 import mxnet.ndarray as nd
+import cv2
 
 __all__ = ['FaceDetector',
            'retinaface_r50_v1',
