@@ -237,6 +237,8 @@ def get_dataset_common(input_dir, min_images = 1):
       continue
     _ret = []
     for img in os.listdir(_subdir):
+      if not img.endswith('.jpg') and not img.endswith('.png'):
+          continue
       fimage = edict()
       fimage.id = os.path.join(person_name, img)
       fimage.classname = str(label)

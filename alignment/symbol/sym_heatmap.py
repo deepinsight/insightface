@@ -460,8 +460,8 @@ def ce_loss(x, y):
   body = mx.sym.broadcast_div(body, sums)
   loss = mx.sym.log(body)
   loss = loss*y*-1.0
-  #loss = mx.symbol.mean(loss, axis=[1,2,3])
-  loss = mx.symbol.mean(loss)
+  loss = mx.symbol.mean(loss, axis=[1,2,3])
+  #loss = mx.symbol.mean(loss)
   return loss
 
 def get_symbol(num_classes):
