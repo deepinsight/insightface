@@ -15,6 +15,8 @@ Please check ``test.py`` for testing.
 
 MobileNet0.25 ([baidu cloud](https://pan.baidu.com/s/1p8n4R2W-9WmmBWxYQEFcWg) code: fmfm) 
 
+Better models coming soon.
+
 
 
 ## References
