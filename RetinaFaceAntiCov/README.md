@@ -13,9 +13,10 @@ Please check ``test.py`` for testing.
 
 ## Pretrained Models
 
-MobileNet0.25 ([baidu cloud](https://pan.baidu.com/s/1p8n4R2W-9WmmBWxYQEFcWg) code: fmfm) 
+~~MobileNet0.25([baidu cloud](https://pan.baidu.com/s/1p8n4R2W-9WmmBWxYQEFcWg),code: fmfm)~~
 
-Better models coming soon.
+Better: MobileNet0.25 ([baidu cloud](https://pan.baidu.com/s/16ihzPxjTObdbv0D6P6LmEQ), code: j3b6)
+
 
 
 
