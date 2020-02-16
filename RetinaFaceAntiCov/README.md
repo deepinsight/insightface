@@ -2,7 +2,7 @@
 
 ## Introduction
 
-RetinaFace-Anti-Cov is a customized face detector to help people protect themselves from CovID-19.
+RetinaFace-Anti-Cov is a customized one stage face detector to help people protect themselves from CovID-19.
 
 ![demoimg1](https://github.com/deepinsight/insightface/blob/master/resources/cov_test.jpg)
 
@@ -10,6 +10,8 @@ RetinaFace-Anti-Cov is a customized face detector to help people protect themsel
 ## Testing
 
 Please check ``test.py`` for testing.
+
+Make sure that you set ``network='net3l'`` instead of ``'net3'`` for 'mnet_cov2' model, otherwise you will get incorrect landmarks.
 
 ## Pretrained Models
 
