@@ -15,12 +15,10 @@ from rcnn.processing.nms import gpu_nms_wrapper, cpu_nms_wrapper
 from rcnn.processing.bbox_transform import bbox_overlaps
 
 class RetinaFaceCoV:
-  def __init__(self, prefix, epoch, ctx_id=0, network='net3', nms=0.4, nocrop=False, decay4 = 0.5, vote=False):
+  def __init__(self, prefix, epoch, ctx_id=0, network='net3', nms=0.4, nocrop=False):
     self.ctx_id = ctx_id
     self.network = network
-    self.decay4 = decay4
     self.nms_threshold = nms
-    self.vote = vote
     self.nocrop = nocrop
     self.debug = False
     self.fpn_keys = []
@@ -28,6 +26,8 @@ class RetinaFaceCoV:
     pixel_means=[0.0, 0.0, 0.0]
     pixel_stds=[1.0, 1.0, 1.0]
     pixel_scale = 1.0
+    self.bbox_stds = [1.0, 1.0, 1.0, 1.0]
+    self.landmark_std = 1.0
     self.preprocess = False
     _ratio = (1.,)
     fmc = 3
@@ -36,6 +36,9 @@ class RetinaFaceCoV:
       self.preprocess = True
     elif network=='net3':
       _ratio = (1.,)
+    elif network=='net3l':
+      _ratio = (1.,)
+      self.landmark_std = 0.2
     elif network=='net3a':
       _ratio = (1.,1.5)
     elif network=='net6': #like pyramidbox or s3fd
@@ -136,11 +139,6 @@ class RetinaFaceCoV:
     self.use_landmarks = True
     #print('use_landmarks', self.use_landmarks)
     self.cascade = 0
-    #print('cascade', self.cascade)
-    #self.bbox_stds = [0.1, 0.1, 0.2, 0.2]
-    #self.landmark_std = 0.1
-    self.bbox_stds = [1.0, 1.0, 1.0, 1.0]
-    self.landmark_std = 1.0
 
     if self.debug:
       c = len(sym)//len(self._feat_stride_fpn)
@@ -591,7 +589,7 @@ class RetinaFaceCoV:
       #preds = np.vstack(preds).transpose()
       #return preds
 
-  def bbox_vote(self, det):
+  def vote(self, det):
       #order = det[:, 4].ravel().argsort()[::-1]
       #det = det[order, :]
       if det.shape[0] == 0:

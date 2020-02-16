@@ -13,9 +13,10 @@ scales = [640, 1080]
 count = 1
 
 gpuid = 0
-detector = RetinaFaceCoV('./model/mnet_cov1', 0, gpuid, 'net3')
+#detector = RetinaFaceCoV('./model/mnet_cov1', 0, gpuid, 'net3')
+detector = RetinaFaceCoV('./model/mnet_cov2', 0, gpuid, 'net3l')
 
-img = cv2.imread('n2.jpg')
+img = cv2.imread('n1.jpg')
 print(img.shape)
 im_shape = img.shape
 target_size = scales[0]
@@ -52,6 +53,11 @@ if faces is not None:
     else:
       color = (0,255,0)
     cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), color, 2)
+    landmark5 = landmarks[i].astype(np.int)
+    #print(landmark.shape)
+    for l in range(landmark5.shape[0]):
+      color = (255,0,0)
+      cv2.circle(img, (landmark5[l][0], landmark5[l][1]), 1, color, 2)
 
   filename = './cov_test.jpg'
   print('writing', filename)
