@@ -17,7 +17,7 @@ Make sure that you set ``network='net3l'`` instead of ``'net3'`` for 'mnet_cov2'
 
 ~~MobileNet0.25([baidu cloud](https://pan.baidu.com/s/1p8n4R2W-9WmmBWxYQEFcWg),code: fmfm)~~
 
-Better: MobileNet0.25 ([baidu cloud](https://pan.baidu.com/s/16ihzPxjTObdbv0D6P6LmEQ), code: j3b6)
+Better: MobileNet0.25 ([baidu cloud](https://pan.baidu.com/s/16ihzPxjTObdbv0D6P6LmEQ), code: j3b6, [dropbox](https://www.dropbox.com/s/6rhhxsbh2qik65k/cov2.zip?dl=0))
 
 
 
