@@ -17,6 +17,8 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
+**`2020.02.21`**: Instant discussion group created on QQ, group id: 711302608. For Engligh developers, see install tutorial [here](https://github.com/deepinsight/insightface/issues/1069).
+
 **`2020.02.16`**: RetinaFace now can detect faces with mask, for anti-CoVID19, see detail [here](https://github.com/deepinsight/insightface/tree/master/RetinaFaceAntiCov)
 
 **`2019.08.10`**: We achieved 2nd place at [WIDER Face Detection Challenge 2019](http://wider-challenge.org/2019.html).
