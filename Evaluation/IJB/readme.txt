@@ -7,7 +7,8 @@ Please apply for the IJB-B and IJB-C by yourself and strictly follow their distr
 
 Aknowledgement
 Great thanks for Weidi Xie's instruction [2,3,4,5] to evaluate ArcFace [1] on IJB-B[6] and IJB-C[7] (1:1 protocol).
-Great thanks for Yuge Huang's code [8] to evaluate ArcFace [1] on IJB-B[6] and IJB-C[7] (1:N protocol).
+Great thanks for Yuge Huang's code [8] to evaluate ArcFace [1] on IJB-B[6] and IJB-C[7] (1:N protocol). 
+
 
 [1] Jiankang Deng, Jia Guo, Niannan Xue, Stefanos Zafeiriou. Arcface: Additive angular margin loss for deep face recognition[J]. arXiv:1801.07698, 2018.
 [2] https://github.com/ox-vgg/vgg_face2.
