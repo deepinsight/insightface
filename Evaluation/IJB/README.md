@@ -3,7 +3,7 @@ To reproduce the figures and tables in the notebook, please download everything 
 or
 [Baidu Cloud](https://pan.baidu.com/s/1oer0p4_mcOrs4cfdeWfbFg)
 
-Updated Meta data including (1:1 and 1:N):
+Updated Meta data (1:1 and 1:N):
 [IJB-B Dropbox](https://www.dropbox.com/s/5n2ehrsucmu7vsd/IJBB_meta.tar?dl=0) 
 and
 [IJB-C Dropbox](https://www.dropbox.com/s/pgju50f2gcgqkc2/IJBC_meta.tar?dl=0)
