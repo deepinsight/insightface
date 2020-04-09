@@ -4,6 +4,11 @@ import numpy as np
 from rcnn.config import config
 from rcnn.PY_OP import rpn_fpn_ohem3, cascade_refine
 
+PREFIX = 'RF'
+F1 = 0
+F2 = 0
+_bwm = 1.0
+
 def conv_only(from_layer, name, num_filter, kernel=(1,1), pad=(0,0), \
     stride=(1,1), bias_wd_mult=0.0, shared_weight=None, shared_bias = None):
   if shared_weight is None:
@@ -168,6 +173,44 @@ def upsampling(data, num_filter, name):
     ret = mx.symbol.UpSampling(data, scale=2, sample_type='nearest', workspace=512, name=name, num_args=1)
     return ret
 
+def get_sym_by_name(name, sym_buffer):
+  if name in sym_buffer:
+    return sym_buffer[name]
+  ret = None
+  name_key = name[0:1]
+  name_num = int(name[1:])
+  #print('getting', name, name_key, name_num)
+  if name_key=='C':
+    assert name_num%2==0
+    bottom = get_sym_by_name('C%d'%(name_num//2), sym_buffer)
+    ret = conv_act_layer(bottom, '%s_C%d'(PREFIX, name_num), 
+        F1, kernel=(3, 3), pad=(1, 1), stride=(2, 2), act_type='relu', bias_wd_mult=_bwm)
+  elif name_key=='P':
+    assert name_num%2==0
+    assert name_num<=max(config.RPN_FEAT_STRIDE)
+    lateral = get_sym_by_name('L%d'%(name_num), sym_buffer)
+    if name_num==max(config.RPN_FEAT_STRIDE) or name_num>32:
+      ret = mx.sym.identity(lateral, name='%s_P%d'%(PREFIX, name_num))
+    else:
+      bottom = get_sym_by_name('L%d'%(name_num*2), sym_buffer)
+      bottom_up = upsampling(bottom, F1, '%s_U%d'%(PREFIX, name_num))
+      if config.USE_CROP:
+        bottom_up = mx.symbol.Crop(*[bottom_up, lateral])
+      aggr = lateral + bottom_up
+      aggr = conv_act_layer(aggr, '%s_A%d'%(PREFIX, name_num),
+          F1, kernel=(3, 3), pad=(1, 1), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
+      ret = mx.sym.identity(aggr, name='%s_P%d'%(PREFIX, name_num))
+  elif name_key=='L':
+    c = get_sym_by_name('C%d'%(name_num), sym_buffer)
+    #print('L', name, F1)
+    ret = conv_act_layer(c, '%s_L%d'%(PREFIX, name_num),
+        F1, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
+  else:
+    raise RuntimeError('%s is not a valid sym key name'%name)
+  sym_buffer[name] = ret
+  return ret
+
+
 def get_sym_conv(data, sym):
     all_layers = sym.get_internals()
 
@@ -206,137 +249,26 @@ def get_sym_conv(data, sym):
       stride2name[stride] = name
       stride2layer[stride] = all_layers[name]
       stride2shape[stride] = shape
-      #print(name, shape)
-      #if c1 is None and shape[2]==isize//16:
-      #  cname = last_entry[0]
-      #  #print('c1', last_entry)
-      #  c1 = all_layers[cname]
-      #  c1_name = cname
-      #if c2 is None and shape[2]==isize//32:
-      #  cname = last_entry[0]
-      #  #print('c2', last_entry)
-      #  c2 = all_layers[cname]
-      #  c2_name = cname
-      #if shape[2]==isize//32:
-      #  c3 = all_layers[name]
-      #  #print('c3', name, shape)
-      #  c3_name = name
 
-      #last_entry = (name, shape)
-
-    F1 = config.HEAD_FILTER_NUM
-    F2 = F1
     strides = sorted(stride2name.keys())
     for stride in strides:
       print('stride', stride, stride2name[stride], stride2shape[stride])
     print('F1_F2', F1, F2)
     #print('cnames', c1_name, c2_name, c3_name, F1, F2)
     _bwm = 1.0
-    c0 = stride2layer[4]
-    c1 = stride2layer[8]
-    c2 = stride2layer[16]
-    c3 = stride2layer[32]
+    ret = {}
+    sym_buffer = {}
+    for stride in [4,8,16,32]:
+      sym_buffer['C%d'%stride] = stride2layer[stride]
     if not config.USE_FPN:
-      assert len(config.RPN_ANCHOR_CFG)==3
-      c3 = conv_act_layer(c3, 'rf_c3_lateral',
-          F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-      c2_lateral = conv_act_layer(c2, 'rf_c2_lateral',
-          F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-      c2 = c2_lateral
-      c1_lateral = conv_act_layer(c1, 'rf_c1_red_conv',
-          F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-      c1 = c1_lateral
-      ret = {8: c1, 16:c2, 32: c3}
-      return ret
+      for stride in config.RPN_FEAT_STRIDE:
+        name = 'L%d'%stride
+        ret[stride] = get_sym_by_name(name, sym_buffer)
+    else:
+      for stride in config.RPN_FEAT_STRIDE:
+        name = 'P%d'%stride
+        ret[stride] = get_sym_by_name(name, sym_buffer)
 
-
-
-    c3 = conv_act_layer(c3, 'rf_c3_lateral',
-        F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-    #c3_up = mx.symbol.UpSampling(c3, scale=2, sample_type='nearest', workspace=512, name='ssh_c3_up', num_args=1)
-    c3_up = upsampling(c3, F2, 'rf_c3_upsampling')
-    c2_lateral = conv_act_layer(c2, 'rf_c2_lateral',
-        F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-    if config.USE_CROP:
-      c3_up = mx.symbol.Crop(*[c3_up, c2_lateral])
-    c2 = c2_lateral+c3_up
-    c2 = conv_act_layer(c2, 'rf_c2_aggr',
-        F2, kernel=(3, 3), pad=(1, 1), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-    c1_lateral = conv_act_layer(c1, 'rf_c1_red_conv',
-        F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-    #c2_up = mx.symbol.UpSampling(c2, scale=2, sample_type='nearest', workspace=512, name='ssh_m2_red_up', num_args=1)
-    c2_up = upsampling(c2, F2, 'rf_c2_upsampling')
-    #conv4_128 = mx.symbol.Crop(*[conv4_128, conv5_128_up])
-    if config.USE_CROP:
-      c2_up = mx.symbol.Crop(*[c2_up, c1_lateral])
-    c1 = c1_lateral+c2_up
-    c1 = conv_act_layer(c1, 'rf_c1_aggr',
-        F2, kernel=(3, 3), pad=(1, 1), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-    #m1 = head_module(c1, F2*config.CONTEXT_FILTER_RATIO, F2, 'rf_c1_det')
-    #m2 = head_module(c2, F1*config.CONTEXT_FILTER_RATIO, F2, 'rf_c2_det')
-    #m3 = head_module(c3, F1*config.CONTEXT_FILTER_RATIO, F2, 'rf_c3_det')
-    m1 = c1
-    m2 = c2
-    m3 = c3
-    if len(config.RPN_ANCHOR_CFG)==3:
-      ret = {8: m1, 16:m2, 32: m3}
-    elif len(config.RPN_ANCHOR_CFG)==1:
-      ret = {16:m2}
-    elif len(config.RPN_ANCHOR_CFG)==2:
-      ret = {8: m1, 16:m2}
-    elif len(config.RPN_ANCHOR_CFG)==4:
-      c0_lateral = conv_act_layer(c0, 'rf_c0_lateral',
-          F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-      c1_up = upsampling(c1, F2, 'rf_c1_upsampling')
-      if config.USE_CROP:
-        c1_up = mx.symbol.Crop(*[c1_up, c0_lateral])
-      c0 = c0_lateral+c1_up
-      c0 = conv_act_layer(c0, 'rf_c0_aggr',
-          F2, kernel=(3, 3), pad=(1, 1), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-
-      #m0 = head_module(c0, F2*config.CONTEXT_FILTER_RATIO, F2, 'rf_c0_det') 
-      m0 = c0
-      ret = {4: m0, 8: m1, 16:m2, 32: m3}
-    elif len(config.RPN_ANCHOR_CFG)==5:
-      c0_lateral = conv_act_layer(c0, 'rf_c0_lateral',
-          F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-      c1_up = upsampling(c1, F2, 'rf_c1_upsampling')
-      if config.USE_CROP:
-        c1_up = mx.symbol.Crop(*[c1_up, c0_lateral])
-      c0 = c0_lateral+c1_up
-      c0 = conv_act_layer(c0, 'rf_c0_aggr',
-          F2, kernel=(3, 3), pad=(1, 1), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-
-      c4 = conv_act_layer(c3, 'rf_c4',
-          F2, kernel=(3, 3), pad=(1, 1), stride=(2, 2), act_type='relu', bias_wd_mult=_bwm)
-      #m0 = head_module(c0, F2*config.CONTEXT_FILTER_RATIO, F2, 'rf_c0_det')
-      #m4 = head_module(c4, F1*config.CONTEXT_FILTER_RATIO, F2, 'rf_c4_det')
-      m0 = c0
-      m4 = c4
-      ret = {4: m0, 8: m1, 16:m2, 32: m3, 64: m4}
-    elif len(config.RPN_ANCHOR_CFG)==6:
-      c0_lateral = conv_act_layer(c0, 'rf_c0_lateral',
-          F2, kernel=(1, 1), pad=(0, 0), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-      c1_up = upsampling(c1, F2, 'rf_c1_upsampling')
-      if config.USE_CROP:
-        c1_up = mx.symbol.Crop(*[c1_up, c0_lateral])
-      c0 = c0_lateral+c1_up
-      c0 = conv_act_layer(c0, 'rf_c0_aggr',
-          F2, kernel=(3, 3), pad=(1, 1), stride=(1, 1), act_type='relu', bias_wd_mult=_bwm)
-
-      c4 = conv_act_layer(c3, 'rf_c4',
-          F2, kernel=(3, 3), pad=(1, 1), stride=(2, 2), act_type='relu', bias_wd_mult=_bwm)
-      c5 = conv_act_layer(c4, 'rf_c5',
-          F2, kernel=(3, 3), pad=(1, 1), stride=(2, 2), act_type='relu', bias_wd_mult=_bwm)
-      #m0 = head_module(c0, F2*config.CONTEXT_FILTER_RATIO, F2, 'rf_c0_det')
-      #m4 = head_module(c4, F1*config.CONTEXT_FILTER_RATIO, F2, 'rf_c4_det')
-      #m5 = head_module(c5, F1*config.CONTEXT_FILTER_RATIO, F2, 'rf_c5_det')
-      m0 = c0
-      m4 = c4
-      m5 = c5
-      ret = {4: m0, 8: m1, 16:m2, 32: m3, 64: m4, 128: m5}
-
-    #return {8: m1, 16:m2, 32: m3}
     return ret
 
 def get_out(conv_fpn_feat, prefix, stride, landmark=False, lr_mult=1.0, gt_boxes=None):
@@ -356,9 +288,7 @@ def get_out(conv_fpn_feat, prefix, stride, landmark=False, lr_mult=1.0, gt_boxes
       landmark_target = mx.symbol.Variable(name='%s_landmark_target_stride%d'%(prefix,stride))
       landmark_weight = mx.symbol.Variable(name='%s_landmark_weight_stride%d'%(prefix,stride))
     conv_feat = conv_fpn_feat[stride]
-    F1 = config.HEAD_FILTER_NUM
-    F2 = F1
-    rpn_relu = head_module(conv_feat, F1*config.CONTEXT_FILTER_RATIO, F2, 'rf_head_stride%d'%stride)
+    rpn_relu = head_module(conv_feat, F2*config.CONTEXT_FILTER_RATIO, F1, 'rf_head_stride%d'%stride)
 
     rpn_cls_score = conv_only(rpn_relu, '%s_rpn_cls_score_stride%d'%(prefix, stride), 2*num_anchors,
         kernel=(1,1), pad=(0,0), stride=(1, 1))
@@ -444,12 +374,12 @@ def get_out(conv_fpn_feat, prefix, stride, landmark=False, lr_mult=1.0, gt_boxes
       if config.CASCADE_MODE==0:
         body = rpn_relu
       elif config.CASCADE_MODE==1:
-        body = head_module(conv_feat, F1*config.CONTEXT_FILTER_RATIO, F2, 'rf_head_stride%d_cas'%stride)
+        body = head_module(conv_feat, F2*config.CONTEXT_FILTER_RATIO, F1, '%s_head_stride%d_cas'%(PREFIX, stride))
       elif config.CASCADE_MODE==2:
         body = conv_feat + rpn_relu
-        body = head_module(body, F1*config.CONTEXT_FILTER_RATIO, F2, 'rf_head_stride%d_cas'%stride)
+        body = head_module(body, F2*config.CONTEXT_FILTER_RATIO, F1, '%s_head_stride%d_cas'%(PREFIX,stride))
       else:
-        body = head_module(conv_feat, F1*config.CONTEXT_FILTER_RATIO, F2, 'rf_head_stride%d_cas'%stride)
+        body = head_module(conv_feat, F2*config.CONTEXT_FILTER_RATIO, F1, '%s_head_stride%d_cas'%(PREFIX, stride))
         body = mx.sym.concat(body, rpn_cls_score, rpn_bbox_pred, rpn_landmark_pred, dim=1)
 
       #cls_pred = rpn_cls_prob
@@ -521,6 +451,9 @@ def get_out(conv_fpn_feat, prefix, stride, landmark=False, lr_mult=1.0, gt_boxes
 
 def get_sym_train(sym):
     data = mx.symbol.Variable(name="data")
+    global F1, F2
+    F1 = config.HEAD_FILTER_NUM
+    F2 = F1
 
     # shared convolutional layers
     conv_fpn_feat = get_sym_conv(data, sym)

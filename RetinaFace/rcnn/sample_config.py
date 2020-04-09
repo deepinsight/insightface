@@ -117,6 +117,7 @@ config.TRAIN.ASPECT_GROUPING = False
 # RPN anchor loader
 # rpn anchors batch size
 config.TRAIN.RPN_ENABLE_OHEM = 2
+config.TRAIN.OHEM_MODE = 1
 config.TRAIN.RPN_BATCH_SIZE = 256
 # rpn anchors sampling params
 config.TRAIN.RPN_FG_FRACTION = 0.25
