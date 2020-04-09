@@ -269,6 +269,7 @@ default.prefix = 'model/retinaface'
 default.end_epoch = 10000
 default.lr_step = '55,68,80'
 default.lr = 0.01
+default.wd = 0.0005
 
 def generate_config(_network, _dataset):
     for k, v in network[_network].items():
