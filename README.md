@@ -17,6 +17,8 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
+**`2020-04-27`**: InsightFace pretrained models and MS1M-Arcface are now specified as the only external training dataset, for iQIYI iCartoonFace challenge, see detail [here](http://challenge.ai.iqiyi.com/detail?raceId=5def71b4e9fcf68aef76a75e).
+
 **`2020.02.21`**: Instant discussion group created on QQ with group-id: 711302608. For English developers, see install tutorial [here](https://github.com/deepinsight/insightface/issues/1069).
 
 **`2020.02.16`**: RetinaFace now can detect faces with mask, for anti-CoVID19, see detail [here](https://github.com/deepinsight/insightface/tree/master/RetinaFaceAntiCov)
