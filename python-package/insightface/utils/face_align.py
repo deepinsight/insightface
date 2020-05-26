@@ -69,7 +69,6 @@ def estimate_norm(lmk, image_size = 112, mode='arcface'):
     src = arcface_src
   else:
     src = src_map[image_size]
-    src.reshape(-1, 5, 2)
   for i in np.arange(src.shape[0]):
     tform.estimate(lmk, src[i])
     M = tform.params[0:2,:]
