@@ -70,6 +70,8 @@ WiderFace validation mAP: Hard 82.5. (model size: 1.68Mb)
 
 [clancylian](https://github.com/clancylian/retinaface): C++ version
 
+[biubug6](https://github.com/biubug6/Pytorch_Retinaface): A PyTorch version with a MobileNet backbone and custom postprocessing
+
 ## References
 
 ```
