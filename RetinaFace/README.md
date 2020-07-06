@@ -72,19 +72,12 @@ WiderFace validation mAP: Hard 82.5. (model size: 1.68Mb)
 
 ## References
 
-```
-@inproceedings{yang2016wider,
-title = {WIDER FACE: A Face Detection Benchmark},
-author = {Yang, Shuo and Luo, Ping and Loy, Chen Change and Tang, Xiaoou},
+```  
+@inproceedings{Deng2020CVPR,
+title = {RetinaFace: Single-Shot Multi-Level Face Localisation in the Wild},
+author = {Deng, Jiankang and Guo, Jia and Ververas, Evangelos and Kotsia, Irene and Zafeiriou, Stefanos},
 booktitle = {CVPR},
-year = {2016}
-}
-  
-@inproceedings{deng2019retinaface,
-title={RetinaFace: Single-stage Dense Face Localisation in the Wild},
-author={Deng, Jiankang and Guo, Jia and Yuxiang, Zhou and Jinke Yu and Irene Kotsia and Zafeiriou, Stefanos},
-booktitle={arxiv},
-year={2019}
+year = {2020}
 }
 ```
 
