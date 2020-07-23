@@ -1,12 +1,24 @@
-Two 2D-106 pretrained models are provided to predict landmarks by given loose crop face images.
+### Introduction
 
-Model ``2d106det``: Given face detection bounding box, predict landmarks.
-
-Model ``2d106track``: Given landmarks bounding box, predict landmarks.
-
-Model ``2d106det`` is usually used for static image inference, while model ``2d106track`` can be used for video landmarks tracking.
-
-Visualization: TODO
+ Here we provide some landmark prediction models with fast coordinate regression comparing with heatmap based methods. 
+ The input of these models is usually loose cropped face image, and the output is the direct landmark coordinates. 
 
 
-Download:  TODO
+### Pretrained Models
+
+- **Model 2d106det**
+
+  Given face detection bounding box, predict landmarks. Mainly used for static image inference. Please check ``image_infer.py`` for detail.
+  Download link: TODO
+
+- **Model 2d106track** 
+
+  Given landmarks bounding box, predict landmarks. Used for video landmarks tracking.
+  Download link: TODO
+
+### Visualization
+
+TODO
+
+
+
