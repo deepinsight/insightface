@@ -9,16 +9,18 @@
 - **Model ``2d106det``**
 
   Given face detection bounding box, predict 2d-106 landmarks. Mainly used for static image inference. Please check ``image_infer.py`` for detail.
-  Download link: TODO
+  
+  Download link: [baiducloud](https://pan.baidu.com/s/10m5GmtNV5snynDrq3KqIdg) (code: ``lqvv``)
 
 - **Model ``2d106track``** 
 
   Given landmarks bounding box, predict 2d-106 landmarks. Used for video landmarks tracking.
-  Download link: TODO
+  
+  Download link: coming soon
 
 ### Visualization
 
-TODO
+![demoimg1](https://github.com/nttstar/insightface-resources/blob/master/alignment/images/t1_out.jpg)
 
 ### FAQ
 
