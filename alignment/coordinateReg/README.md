@@ -23,21 +23,21 @@
 ### Visualization
 
 
-<p align="center">Points mark-up(ordered by point names)</p>
+<p align="center">Points mark-up(ordered by point names):</p>
 
 <div align="center">
 	<img src="https://github.com/nttstar/insightface-resources/blob/master/alignment/images/2d106markup.jpg" alt="markup" width="320">
 </div>
 
 
-<p align="center">Image Result</p>
+<p align="center">Image result:</p>
 
 <div align="center">
 	<img src="https://github.com/nttstar/insightface-resources/blob/master/alignment/images/t1_out.jpg" alt="imagevis" width="800">
 </div>
 
 
-<p align="center">Video Result</p>
+<p align="center">Video result:</p>
 
 <div align="center">
 	<img src="https://github.com/nttstar/insightface-resources/blob/master/alignment/images/C_jiaguo.gif" alt="videovis" width="240">
