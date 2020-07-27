@@ -20,7 +20,20 @@
 
 ### Visualization
 
+Points mark-up(ordered by point names)
+
+<div align="center">
+	<img src="https://github.com/nttstar/insightface-resources/blob/master/alignment/images/2d106markup.jpg" alt="markup" width="320">
+</div>
+
+
+Image result:
+
 ![demoimg1](https://github.com/nttstar/insightface-resources/blob/master/alignment/images/t1_out.jpg)
+
+Video result:
+
+![demogif1](https://github.com/nttstar/insightface-resources/blob/master/alignment/images/C_jiaguo.gif)
 
 ### FAQ
 
