@@ -10,6 +10,8 @@
 
   Given face detection bounding box, predict 2d-106 landmarks. Mainly used for static image inference. Please check ``image_infer.py`` for detail.
   
+  Backbone: MobileNet-0.5, size 5MB.
+  
   Download link: [baiducloud](https://pan.baidu.com/s/10m5GmtNV5snynDrq3KqIdg) (code: ``lqvv``)
 
 - **Model ``2d106track``** 
