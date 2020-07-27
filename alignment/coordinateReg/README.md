@@ -29,11 +29,17 @@ Points mark-up(ordered by point names)
 
 Image result:
 
-![demoimg1](https://github.com/nttstar/insightface-resources/blob/master/alignment/images/t1_out.jpg)
+<div align="center">
+	<img src="https://github.com/nttstar/insightface-resources/blob/master/alignment/images/t1_out.jpg" alt="imagevis" width="800">
+</div>
+
 
 Video result:
 
-![demogif1](https://github.com/nttstar/insightface-resources/blob/master/alignment/images/C_jiaguo.gif)
+<div align="center">
+	<img src="https://github.com/nttstar/insightface-resources/blob/master/alignment/images/C_jiaguo.gif" alt="videovis" width="800">
+</div>
+
 
 ### FAQ
 
