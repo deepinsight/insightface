@@ -12,7 +12,11 @@
   
   Backbone: MobileNet-0.5, size 5MB.
   
-  Download link: [baiducloud](https://pan.baidu.com/s/10m5GmtNV5snynDrq3KqIdg) (code: ``lqvv``)
+  Download link:
+  
+  [baidu cloud](https://pan.baidu.com/s/10m5GmtNV5snynDrq3KqIdg) (code: ``lqvv``)
+  
+  [google drive](https://drive.google.com/file/d/1MBWbTEYRhZFzj_O2f2Dc6fWGXFWtbMFw/view?usp=sharing)
 
 - **Model ``2d106track``** 
 
