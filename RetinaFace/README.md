@@ -72,6 +72,10 @@ WiderFace validation mAP: Hard 82.5. (model size: 1.68Mb)
 
 [biubug6](https://github.com/biubug6/Pytorch_Retinaface): A PyTorch version with a MobileNet backbone and custom postprocessing
 
+[StanislasBertrand](https://github.com/StanislasBertrand/RetinaFace-tf2) A Tensorflow version
+
+[wang-xinyu](https://github.com/wang-xinyu/tensorrtx/tree/master/retinaface) A TensorRT version
+
 ## References
 
 ```
