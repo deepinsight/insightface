@@ -12,6 +12,8 @@
   
   Backbone: MobileNet-0.5, size 5MB.
   
+  Input: size 192x192, loose cropped detection bounding-box.
+  
   Download link:
   
   [baidu cloud](https://pan.baidu.com/s/10m5GmtNV5snynDrq3KqIdg) (code: ``lqvv``)
