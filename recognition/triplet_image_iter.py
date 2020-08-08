@@ -180,7 +180,7 @@ class FaceImageIter(io.DataIter):
       self.triplet_seq = []
       for _id in ids:
         v = self.id2range[_id]
-        _list = range(*v)
+        _list = list(range(*v))
         random.shuffle(_list)
         if len(_list)>self.images_per_identity:
           _list = _list[0:self.images_per_identity]
