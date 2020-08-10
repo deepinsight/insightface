@@ -85,10 +85,11 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network mnas05 --loss triple
 If you find *ArcFace* useful in your research, please consider to cite the following related papers:
 
 ```
-@article{deng2019arcface,
-title={ArcFace: Additive Angular Margin Loss for Deep Face Recognition},
-author={Deng, Jiankang and Guo, Jia and Niannan, Xue and Zafeiriou, Stefanos},
-journal={CVPR},
-year={2019}
+@inproceedings{deng2019arcface,
+  title={Arcface: Additive angular margin loss for deep face recognition},
+  author={Deng, Jiankang and Guo, Jia and Xue, Niannan and Zafeiriou, Stefanos},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={4690--4699},
+  year={2019}
 }
 ```
