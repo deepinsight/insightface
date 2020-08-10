@@ -1,19 +1,24 @@
 
 ## Subcenter ArcFace
 
-### 1. Main Contribution
+### 1. Motivation
 
-The training process of Subcenter ArcFace is almost same as [ArcFace](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace), except for one extra hyperparameter (subcenter number `loss_K`) to relax the intra-class compactness constraint. In our experiments, we find ``loss_K=3`` can achieve a good balance between accuracy and robustness.
+We introduce one extra hyperparameter (subcenter number `loss_K`) to ArcFace to relax the intra-class compactness constraint. In our experiments, we find ``loss_K=3`` can achieve a good balance between accuracy and robustness.
 
 ![difference](https://github.com/deepinsight/insightface/blob/master/resources/subcenterarcfacediff.png)
 
+### 2. Implementation
+
+The training process of Subcenter ArcFace is almost same as [ArcFace](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace)
+The increased GPU memory consumption can be easily alleviated by our parallel framework.
+
 ![framework](https://github.com/deepinsight/insightface/blob/master/resources/subcenterarcfaceframework.png)
 
-### 2. Training Dataset
+### 3. Training Dataset
 
 1. MS1MV0 (The noise rate is around 50%), download link ([baidulink](https://pan.baidu.com/s/1bSamN5CLiSrxOuGi-Lx7tw), code ``8ql0``)  ([googledrive](TODO))
 
-### 3. Training Steps
+### 4. Training Steps
 
 1). Train Sub-center ArcFace (``loss_K=3``) on MS1MV0.
 
