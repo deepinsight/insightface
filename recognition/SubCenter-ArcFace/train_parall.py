@@ -3,9 +3,6 @@
 @author: insightface
 '''
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 
 import os
 import sys
@@ -20,8 +17,6 @@ import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
 import mxnet.optimizer as optimizer
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
-import flops_counter
 from config import config, default, generate_config
 sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 import verification
@@ -83,42 +78,48 @@ def get_symbol_arcface(args):
   gt_label = all_label
   is_softmax = True
   #print('call get_sym_arcface with', args, config)
-  _weight = mx.symbol.Variable("fc7_%d_weight"%args._ctxid, shape=(args.ctx_num_classes, config.emb_size), 
-      lr_mult=config.fc7_lr_mult, wd_mult=config.fc7_wd_mult)
-  if config.loss_name=='softmax': #softmax
-    fc7 = mx.sym.FullyConnected(data=embedding, weight = _weight, no_bias = True, num_hidden=args.ctx_num_classes, name='fc7_%d'%args._ctxid)
-  elif config.loss_name=='margin_softmax':
-    _weight = mx.symbol.L2Normalization(_weight, mode='instance')
+  if config.loss_name=='margin_softmax':
+    _weight = mx.symbol.Variable("fc7_%d_weight"%args._ctxid, shape=(args.ctx_num_classes*config.loss_K, config.emb_size), 
+        lr_mult=config.fc7_lr_mult, wd_mult=config.fc7_wd_mult)
+    nweight = mx.symbol.L2Normalization(_weight, mode='instance')
     nembedding = mx.symbol.L2Normalization(embedding, mode='instance', name='fc1n_%d'%args._ctxid)
-    fc7 = mx.sym.FullyConnected(data=nembedding, weight = _weight, no_bias = True, num_hidden=args.ctx_num_classes, name='fc7_%d'%args._ctxid)
-    if config.loss_m1!=1.0 or config.loss_m2!=0.0 or config.loss_m3!=0.0:
-      gt_one_hot = mx.sym.one_hot(gt_label, depth = args.ctx_num_classes, on_value = 1.0, off_value = 0.0)
-      if config.loss_m1==1.0 and config.loss_m2==0.0:
-        _one_hot = gt_one_hot*args.margin_b
-        fc7 = fc7-_one_hot
-      else:
-        fc7_onehot = fc7 * gt_one_hot
-        cos_t = fc7_onehot
-        t = mx.sym.arccos(cos_t)
-        if config.loss_m1!=1.0:
-          t = t*config.loss_m1
-        if config.loss_m2!=0.0:
-          t = t+config.loss_m2
-        margin_cos = mx.sym.cos(t)
-        if config.loss_m3!=0.0:
-          margin_cos = margin_cos - config.loss_m3
-        margin_fc7 = margin_cos
-        margin_fc7_onehot = margin_fc7 * gt_one_hot
-        diff = margin_fc7_onehot - fc7_onehot
-        fc7 = fc7+diff
-    fc7 = fc7*config.loss_s
+    fc7 = mx.sym.FullyConnected(data=nembedding, weight = nweight, no_bias = True, num_hidden=args.ctx_num_classes*config.loss_K, name='fc7_%d'%args._ctxid)
+    if config.loss_K>1:
+        sim_s3 = mx.symbol.reshape(fc7, (-1, args.ctx_num_classes, config.loss_K))
 
+        sim = mx.symbol.max(sim_s3, axis=2)
+        fc7 = sim
+
+
+
+  if config.loss_m1!=1.0 or config.loss_m2!=0.0 or config.loss_m3!=0.0:
+    gt_one_hot = mx.sym.one_hot(gt_label, depth = args.ctx_num_classes, on_value = 1.0, off_value = 0.0)
+    if config.loss_m1==1.0 and config.loss_m2==0.0:
+      _one_hot = gt_one_hot*args.margin_b
+      fc7 = fc7-_one_hot
+    else:
+      fc7_onehot = fc7 * gt_one_hot
+      cos_t = fc7_onehot
+      t = mx.sym.arccos(cos_t)
+      if config.loss_m1!=1.0:
+        t = t*config.loss_m1
+      if config.loss_m2!=0.0:
+        t = t+config.loss_m2
+      margin_cos = mx.sym.cos(t)
+      if config.loss_m3!=0.0:
+        margin_cos = margin_cos - config.loss_m3
+      margin_fc7 = margin_cos
+      margin_fc7_onehot = margin_fc7 * gt_one_hot
+      diff = margin_fc7_onehot - fc7_onehot
+      fc7 = fc7+diff
+  fc7 = fc7*config.loss_s
   out_list = []
   out_list.append(fc7)
   if config.loss_name=='softmax': #softmax
-    out_list.append(gt_label)
+      out_list.append(gt_label)
   out = mx.symbol.Group(out_list)
   return out
+
 
 def train_net(args):
     #_seed = 727
@@ -195,13 +196,6 @@ def train_net(args):
       asym = get_symbol_arcface
     else:
       assert False
-
-    if config.count_flops:
-      all_layers = esym.get_internals()
-      _sym = all_layers['fc1_output']
-      FLOPs = flops_counter.count_flops(_sym, data=(1,3,image_size[0],image_size[1]))
-      _str = flops_counter.flops_str(FLOPs)
-      print('Network FLOPs: %s'%_str)
 
     if config.num_workers==1:
       from parall_module_local_v1 import ParallModule
@@ -318,7 +312,10 @@ def train_net(args):
 
         if do_save:
           print('saving', msave)
-          arg, aux = model.get_export_params()
+          if config.ckpt_embedding:
+              arg, aux = model.get_export_params()
+          else:
+              arg, aux = model.get_params()
           all_layers = model.symbol.get_internals()
           _sym = all_layers['fc1_output']
           mx.model.save_checkpoint(prefix, msave, _sym, arg, aux)
