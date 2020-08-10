@@ -1,4 +1,4 @@
-## ArcFace with Parallel Acceleration on both x and W
+## ArcFace with Parallel Acceleration on both Features and Centers
 
 ### Memory Consumption and Training Speed
 
