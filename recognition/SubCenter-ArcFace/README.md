@@ -1,19 +1,19 @@
 
-## SubCenter ArcFace
+## Subcenter ArcFace
 
 ### 1. Training Configuration
 
-The training process of SubCenter-ArcFace is almost the same with [ArcFace](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace), except for one extra configuration item `loss_K` which is commonly set as ``3``.
+The training process of Subcenter ArcFace is almost same as [ArcFace](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace), except for one extra hyperparameter (subcenter number `loss_K`) which we find ``loss_K=3`` can achieve a good balance between accuracy and robustness.
 
 ### 2. Dataset
 
-1. MS1MV0(Full MS1M), download link ([baidulink](https://pan.baidu.com/s/1bSamN5CLiSrxOuGi-Lx7tw), code ``8ql0``)  ([googledrive](TODO))
+1. MS1MV0 (The noise rate is around 50%), download link ([baidulink](https://pan.baidu.com/s/1bSamN5CLiSrxOuGi-Lx7tw), code ``8ql0``)  ([googledrive](TODO))
 
 ### 3. Training Steps
 
-1). Train SubCenter-ArcFace with ``loss_K==3`` on MS1MV0.
+1). Train Sub-center ArcFace (``loss_K=3``) on MS1MV0.
 
-2). Drop MS1MV0 on ``>75 degrees`` samples. 
+2). Drop non-dominant subcenters and high-confident noisy data (``>75 degrees``). 
 
   ``
   python drop.py --data <ms1mv0-path> --model <step-1-pretrained-model> --threshold 75 --k 3 --output <ms1mv0-drop75-path>
@@ -24,4 +24,14 @@ The training process of SubCenter-ArcFace is almost the same with [ArcFace](http
 
 ### Citation
 
+If you find *Sub-center ArcFace* useful in your research, please consider to cite the following related papers:
+
+```
+@inproceedings{deng2020subcenter,
+  title={Sub-center ArcFace: Boosting Face Recognition by Large-scale Noisy Web Faces},
+  author={Deng, Jiankang and Guo, Jia and Liu, Tongliang and Gong, Mingming and Zafeiriou, Stefanos},
+  booktitle={Proceedings of the IEEE Conference on European Conference on Computer Vision},
+  year={2020}
+}
+```
 
