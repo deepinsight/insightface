@@ -5,9 +5,7 @@
 
 The training process of Subcenter ArcFace is almost same as [ArcFace](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace), except for one extra hyperparameter (subcenter number `loss_K`) to relax the intra-class compactness constraint. In our experiments, we find ``loss_K=3`` can achieve a good balance between accuracy and robustness.
 
-![diff](https://github.com/deepinsight/insightface/blob/master/resources/subcenterarcface.png)
-
-![results](https://github.com/deepinsight/insightface/blob/master/resources/subcenterarcfacemulticenter.png)
+![diff](https://github.com/deepinsight/insightface/blob/master/resources/subcenterarcface.png)![results](https://github.com/deepinsight/insightface/blob/master/resources/subcenterarcfacemulticenter.png)
 
 ![framework](https://github.com/deepinsight/insightface/blob/master/resources/subcenterarcfaceframework.png)
 
