@@ -15,6 +15,7 @@ from mxnet import ndarray as nd
 import argparse
 import mxnet.optimizer as optimizer
 from config import config, default, generate_config
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'SubCenter-ArcFace'))
 from metric import *
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import flops_counter
