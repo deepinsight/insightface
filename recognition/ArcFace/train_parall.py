@@ -23,9 +23,8 @@ import mxnet.optimizer as optimizer
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import flops_counter
 from config import config, default, generate_config
-sys.path.append(os.path.join(os.path.dirname(__file__), 'eval'))
 import verification
-sys.path.append(os.path.join(os.path.dirname(__file__), 'symbol'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'symbol'))
 import fresnet
 import fmobilefacenet
 import fmobilenet
