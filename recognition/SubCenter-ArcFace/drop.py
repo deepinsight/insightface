@@ -37,15 +37,12 @@ def get_embedding(args, imgrec, a, b, image_size, model):
     _batch_size2 = _batch_size
     if _batch_size%args.ctx_num!=0:
         _batch_size2 = ((_batch_size//args.ctx_num)+1) * args.ctx_num
-    #print(_batch_size, _batch_size2)
     data = np.zeros( (_batch_size2,3, image_size[0], image_size[1]) )
-    #data = nd.zeros( (_batch_size2,3, image_size[0], image_size[1]) )
     count = bb-ba
     ii=0
     for i in range(ba, bb):
       header, img = mx.recordio.unpack(ocontents[i])
       contents.append(img)
-      #print(header.label)
       label = header.label
       if not isinstance(label, numbers.Number):
         label = label[0]
@@ -57,7 +54,6 @@ def get_embedding(args, imgrec, a, b, image_size, model):
       bgr = rgb[:,:,::-1]
       imgs.append(bgr)
       img = rgb.transpose( (2,0,1) )
-      #img = nd.transpose(img, axes=(2, 0, 1))
       data[ii] = img
       ii+=1
     while ii<_batch_size2:
@@ -73,7 +69,6 @@ def get_embedding(args, imgrec, a, b, image_size, model):
     embeddings[ba:bb,:] = net_out[0:_batch_size,:]
     ba = bb
   embeddings = sklearn.preprocessing.normalize(embeddings)
-  #return embeddings, rlabel, imgs
   return embeddings, rlabel, contents
 
 def main(args):
@@ -116,7 +111,6 @@ def main(args):
   all_layers = sym.get_internals()
   sym = all_layers['fc1_output']
   model = mx.mod.Module(symbol=sym, context=ctx, label_names = None)
-  #model.bind(data_shapes=[('data', (args.batch_size, 3, image_size[0], image_size[1]))], label_shapes=[('softmax_label', (args.batch_size,))])
   model.bind(data_shapes=[('data', (args.ctx_num, 3, image_size[0], image_size[1]))])
   model.set_params(arg_params, aux_params)
   print('W:',W.shape)
@@ -144,22 +138,11 @@ def main(args):
     contents = []
     a,b = int(header.label[0]), int(header.label[1])
     _count = b-a
-    #print(identity, b-a)
     id_list.append( (wid, a, b, _count) )
     image_count += _count
-
-
-  #print(id_list[-1])
-  #outf.write("inter_min,%.3f\n"%(np.mean(inters)))
-
-  #id_list = sorted(id_list, key = lambda x : x[-1], reverse=True)
-  #id_list = sorted(id_list, key = lambda x : x[-1], reverse=False)
-  #print('id_list', len(id_list))
   pp = 0
   if not os.path.exists(args.output):
     os.makedirs(args.output)
-  #for id_item in id_list:
-  #  print(id_item)
   ret = np.zeros( (image_count, K+1), dtype=np.float32 )
   output_dir = args.output
   builder = SeqRecBuilder(output_dir)
@@ -170,43 +153,27 @@ def main(args):
   num_images = 0
   cos_thresh = np.cos(np.pi*args.threshold / 180.0)
   for id_item in id_list:
-    #if id_item[3]<50:
-    #  continue
     wid = id_item[0]
-    #if wid!=553:
-    #    continue
-    #print(id_item)
     pp+=1
     if pp%40==0:
       db = datetime.datetime.now()
       print('processing id', pp, (db-da).total_seconds())
       da = db
     x, _, contents = get_embedding(args, imgrec, id_item[1], id_item[2], image_size, model)
-    #center = np.mean(x, axis=0, keepdims=True)
-    #center = sklearn.preprocessing.normalize(center).flatten()
     subcenters = W[wid]
     K_stat = np.zeros( (K, ), dtype=np.int)
-    #w_norm = W_norm[wid]
     for i in range(x.shape[0]):
         _x = x[i]
         sim = np.dot(subcenters, _x) # len(sim)==K
         mc = np.argmax(sim)
         K_stat[mc] += 1
-        #ret[imid,0] = wid
-        #ret[imid,1:] = sim
-        #imid+=1
-        #print(wid, i, sim)
-        #print('sim shape:', sim.shape)
-        #idx = np.argmax(sim)
-    #print(wid, K_stat)
-    dc = np.argmax(K_stat)
-    dc = subcenters[dc]
-    sim = np.dot(x, dc) # len(sim)==K
+    dominant_index = np.argmax(K_stat)
+    dominant_center = subcenters[dominant_index]
+    sim = np.dot(x, dominant_center) 
     idx = np.where(sim>cos_thresh)[0]
     num_drop = x.shape[0] - len(idx)
     if len(idx)==0:
         continue
-    #assert len(idx)>0
     #print("labelid %d dropped %d, from %d to %d"% (wid, num_drop, x.shape[0], len(idx)))
     num_images += len(idx)
     for _idx in idx:
