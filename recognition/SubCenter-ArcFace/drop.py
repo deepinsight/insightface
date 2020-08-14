@@ -202,7 +202,7 @@ def main(args):
     dc = np.argmax(K_stat)
     dc = subcenters[dc]
     sim = np.dot(x, dc) # len(sim)==K
-    idx = np.where(cos_thresh)[0]
+    idx = np.where(sim>cos_thresh)[0]
     num_drop = x.shape[0] - len(idx)
     if len(idx)==0:
         continue
