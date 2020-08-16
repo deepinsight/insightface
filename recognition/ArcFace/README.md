@@ -28,7 +28,7 @@ pip install mxnet-cu100 # mxnet-cu102
 git clone --recursive https://github.com/deepinsight/insightface.git
 ```
 
-3. Download the training set (`MS1MV2-Arcface`) and place it in *`$INSIGHTFACE_ROOT/datasets/`*. Each training dataset includes the following 6 files:
+3. Download the training set (`MS1MV2-Arcface`) and place it in *`$INSIGHTFACE_ROOT/recognition/datasets/`*. Each training dataset includes the following 6 files:
 
 ```Shell
     faces_emore/
