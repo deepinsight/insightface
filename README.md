@@ -11,7 +11,7 @@ The training data containing the annotation (and the models trained with these d
 
 ## Introduction
 
-InsightFace is an open source face analysis toolbox, mainly based on MXNet. 
+InsightFace is an open source 2D&3D deep face analysis toolbox, mainly based on MXNet. 
 
 The master branch works with **MXNet 1.2 to 1.6**, with **Python 3.x**.
 
