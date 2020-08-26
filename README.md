@@ -43,7 +43,7 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 **`2019.04.04`**: Arcface achieved state-of-the-art performance (7/109) on the NIST Face Recognition Vendor Test (FRVT) (1:1 verification)
 [report](https://www.nist.gov/sites/default/files/documents/2019/04/04/frvt_report_2019_04_04.pdf) (name: Imperial-000 and Imperial-001). Our solution is based on [MS1MV2+DeepGlintAsian, ResNet100, ArcFace loss]. 
 
-**`2019.02.08`**: Please check [https://github.com/deepinsight/insightface/tree/master/recognition](https://github.com/deepinsight/insightface/tree/master/recognition) for our parallel training code which can easily and efficiently support one million identities on a single machine (8* 1080ti).
+**`2019.02.08`**: Please check [https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace) for our parallel training code which can easily and efficiently support one million identities on a single machine (8* 1080ti).
 
 **`2018.12.13`**: Inference acceleration [TVM-Benchmark](https://github.com/deepinsight/insightface/wiki/TVM-Benchmark).
 
@@ -165,6 +165,11 @@ CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network m1 --loss softmax --
 CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --network m1 --loss triplet --lr 0.005 --pretrained ./models/m1-softmax-emore,1
 ```
 
+(5). Training in model parallel acceleration.
+
+```Shell
+CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train_parall.py --network r100 --loss arcface --dataset emore
+```
 
 5. Verification results.
 
