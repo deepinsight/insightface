@@ -8,8 +8,15 @@ By Jia Guo and [Jiankang Deng](https://jiankangdeng.github.io/)
 The code of InsightFace is released under the MIT License. There is no limitation for both acadmic and commercial usage.
 
 The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only.
- 
-## ArcFace Video Demo
+
+## Introduction
+
+InsightFace is an open source face analysis toolbox, mainly based on MXNet. 
+
+The master branch works with **MXNet 1.2 to 1.6**, with **Python 3.x**.
+
+
+ ## ArcFace Video Demo
 
 [![ArcFace Demo](https://github.com/deepinsight/insightface/blob/master/resources/facerecognitionfromvideo.PNG)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
 
@@ -41,6 +48,37 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 **`2018.10.28`**: Light-weight attribute model [Gender-Age](https://github.com/deepinsight/insightface/tree/master/gender-age). About 1MB, 10ms on single CPU core. Gender accuracy 96% on validation set and 4.1 age MAE.
 
 **`2018.10.16`**: We achieved state-of-the-art performance on [Trillionpairs](http://trillionpairs.deepglint.com/results) (name: nttstar) and [IQIYI_VID](http://challenge.ai.iqiyi.com/detail?raceId=5afc36639689443e8f815f9e) (name: WitcheR). 
+
+
+### Major Modules
+
+- **Deep Face Recognition**
+
+  In this module, we provide training data, network settings and loss designs for deep face recognition.
+The training data includes, but not limited to the cleaned MS1M, VGG2 and CASIA-Webface datasets, which were already packed in MXNet binary format.
+The network backbones include ResNet, MobilefaceNet, MobileNet, InceptionResNet_v2, DenseNet, etc..
+The loss functions include Softmax, SphereFace, CosineFace, ArcFace, Sub-Center ArcFace and Triplet (Euclidean/Angular) Loss.
+Training and validation can be started with a single command. 
+
+  Please check the detail page of [ArcFace](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace)(which accepted in CVPR-2019) and [SubCenter-ArcFace](https://github.com/deepinsight/insightface/tree/master/recognition/SubCenter-ArcFace)(which accepted in ECCV-2020).
+
+
+- **Face Detection**
+
+  RetinaFace is a practical single-stage [SOTA](http://shuoyang1213.me/WIDERFACE/WiderFace_Results.html) face detector which is initially introduced in [arXiv technical report](https://arxiv.org/abs/1905.00641) and then accepted by [CVPR 2020](https://openaccess.thecvf.com/content_CVPR_2020/html/Deng_RetinaFace_Single-Shot_Multi-Level_Face_Localisation_in_the_Wild_CVPR_2020_paper.html). We provide training code, training dataset, pretrained models and evaluation scripts. 
+  
+  Please check the detail page of [RetinaFace](https://github.com/deepinsight/insightface/tree/master/RetinaFace).
+  
+  RetinaFaceAntiCov is an experimental module to identify face boxes with masks. Please check the detail page of [RetinaFaceAntiCov](https://github.com/deepinsight/insightface/tree/master/RetinaFaceAntiCov)
+
+
+- **Face Alignment**
+
+  SDUNet(short for ``Stacked Dense U-Nets with Dual Transformers for Robust Face Alignment``) which accepted by BMVC-2018 was introducted in [alignment-heatmapReg](https://github.com/deepinsight/insightface/tree/master/alignment/heatmapReg) page. We also provide other network settings such as classic hourglass. You can find all of training code, training dataset and evaluation scripts.
+  
+  On the other hand, in contrast to heatmap based approaches, we provide some lightweight facial landmark models with fast coordinate regression. The input of these models is loose cropped face image while the output is the direct landmark coordinates. See detail at [alignment-coordinateReg](https://github.com/deepinsight/insightface/tree/master/alignment/coordinateReg) page. Only pretrained models available in this module.
+
+
 
 ## Contents
 [Deep Face Recognition](#deep-face-recognition)
