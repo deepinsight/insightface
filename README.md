@@ -241,11 +241,16 @@ For single cropped face image(112x112), total inference time is only 17ms on our
 
   RetinaFace is a practical single-stage [SOTA](http://shuoyang1213.me/WIDERFACE/WiderFace_Results.html) face detector which is initially introduced in [arXiv technical report](https://arxiv.org/abs/1905.00641) and then accepted by [CVPR 2020](https://openaccess.thecvf.com/content_CVPR_2020/html/Deng_RetinaFace_Single-Shot_Multi-Level_Face_Localisation_in_the_Wild_CVPR_2020_paper.html). We provide training code, training dataset, pretrained models and evaluation scripts. 
   
-  Please check the detail page of [RetinaFace](https://github.com/deepinsight/insightface/tree/master/RetinaFace).
+  ![demoimg1](https://github.com/deepinsight/insightface/blob/master/resources/11513D05.jpg)
+  
+  Please check [RetinaFace](https://github.com/deepinsight/insightface/tree/master/RetinaFace) for detail.
   
 ### RetinaFaceAntiCov 
  
-  RetinaFaceAntiCov is an experimental module to identify face boxes with masks. Please check the detail page of [RetinaFaceAntiCov](https://github.com/deepinsight/insightface/tree/master/RetinaFaceAntiCov)
+  RetinaFaceAntiCov is an experimental module to identify face boxes with masks. Please check [RetinaFaceAntiCov](https://github.com/deepinsight/insightface/tree/master/RetinaFaceAntiCov) for detail.
+  
+  ![demoimg1](https://github.com/deepinsight/insightface/blob/master/resources/cov_test.jpg)
+
 
 ## Face Alignment
 
@@ -255,7 +260,16 @@ For single cropped face image(112x112), total inference time is only 17ms on our
   
 ### CoordinateReg
 
-  On the other hand, in contrast to heatmap based approaches, we provide some lightweight facial landmark models with fast coordinate regression. The input of these models is loose cropped face image while the output is the direct landmark coordinates. See detail at [alignment-coordinateReg](https://github.com/deepinsight/insightface/tree/master/alignment/coordinateReg) page. Only pretrained models available in this module.
+  On the other hand, in contrast to heatmap based approaches, we provide some lightweight facial landmark models with fast coordinate regression. The input of these models is loose cropped face image while the output is the direct landmark coordinates. See detail at [alignment-coordinateReg](https://github.com/deepinsight/insightface/tree/master/alignment/coordinateReg). Now only pretrained models available.
+  
+ <div align="center">
+	<img src="https://github.com/nttstar/insightface-resources/blob/master/alignment/images/t1_out.jpg" alt="imagevis" width="800">
+</div>
+
+
+<div align="center">
+	<img src="https://github.com/nttstar/insightface-resources/blob/master/alignment/images/C_jiaguo.gif" alt="videovis" width="240">
+</div>
 
 
 ## Citation
