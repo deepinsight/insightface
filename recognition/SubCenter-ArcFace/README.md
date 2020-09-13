@@ -16,7 +16,7 @@ The increased GPU memory consumption can be easily alleviated by our parallel fr
 
 ### 3. Training Dataset
 
-1. MS1MV0 (The noise rate is around 50%), download link ([baidulink](https://pan.baidu.com/s/1bSamN5CLiSrxOuGi-Lx7tw), code ``8ql0``)  ([googledrive](TODO))
+1. MS1MV0 (The noise rate is around 50%), download link ([baidu drive](https://pan.baidu.com/s/1bSamN5CLiSrxOuGi-Lx7tw), code ``8ql0``)  ([google drive](TODO))
 
 ### 4. Training Steps
 
@@ -31,7 +31,7 @@ The increased GPU memory consumption can be easily alleviated by our parallel fr
 3). Train ArcFace on the new ``MS1MV0-Drop75`` dataset.
 
 ### 5. Pretrained Models and Logs
-  [baidu drive](https://pan.baidu.com/s/1yikOW1Xzm1XIHu0uv0RdRw) code ``3jsh``.
+  [baidu drive](https://pan.baidu.com/s/1yikOW1Xzm1XIHu0uv0RdRw) code ``3jsh``. [google drive](https://drive.google.com/file/d/1hzOmWXRSKkMLmg_Id5-SteBjohit3yK4/view?usp=sharing)
 
 ### Citation
 
