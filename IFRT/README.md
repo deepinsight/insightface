@@ -1,4 +1,4 @@
-# InsightFace Recognition Test
+# InsightFace Recognition Test (IFRT)
 **IFRT** is a globalised fair benchmark for face recognition algorithms. IFRT evaluates the algorithm performance on worldwide web pictures which contain various sex, age and race groups, but no identification photos.
 
 **IFRT** testset consists of non-celebrities so we can ensure that it contains very few overlap with public available face recognition training set, such as MS1M and CASIA as they mostly come from online celebrities' photo. As the result, we can evaluate the `fair` performance for different algorithms.
