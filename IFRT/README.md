@@ -5,4 +5,12 @@ Similar to [FRVT](https://www.nist.gov/programs-projects/face-recognition-vendor
 
 Submitting features is also allowed, you can send an e-mail to us to request the test image set, with a promise not to redistribute it.
 
+## How to Participate
+
+Send an e-mail to [..] after preparing your black-box feature extractor or image binary features. With your name, organization and submission comments.
+
+## Leaderboard
+
+[Leaderboard](http://insightface.ai/IFRT) on insightface.ai. (TODO)
+
 TODO
