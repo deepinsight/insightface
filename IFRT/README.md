@@ -17,7 +17,7 @@ IFRT testset contains 242143 identities and 1624305 images.
 | Caucasian   | 103,293    | 697,245     |
 | Indian  | 35,086     | 237,080     |
 | Asian   | 59,890     | 391,970     |
-| **ALL** | **242143** | **1624305** |
+| **ALL** | **242,143** | **1,624,305** |
 
 ## Evaluation Metric
 
