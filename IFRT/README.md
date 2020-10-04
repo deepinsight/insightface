@@ -33,6 +33,7 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 | Backbone     | Dataset     | Loss    | African | Caucasian | Indian | Asian | ALL   |
 | ------------ | ----------- | ------- | ----- | ----- | ------ | ----- | ----- |
 | R100         | CASIA       | ArcFace | 39.67 | 53.93 | 47.81  | 16.17 | 37.53 |
+| R50          | VGG2        | ArcFace | 49.20 | 65.93 | 56.22  | 27.15 | 47.13 |
 | R50          | MS1M-V2     | ArcFace | 71.97 | 83.24 | 79.66  | 22.94 | 56.20 |
 | R50          | MS1M-V3     | ArcFace | 76.24 | 86.21 | 84.44  | 37.43 | 71.02 |
 | R124         | MS1M-V3     | ArcFace | 81.08 | 89.06 | 87.53  | 38.40 | 74.76 |
