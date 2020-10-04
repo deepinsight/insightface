@@ -11,12 +11,12 @@ Similar to [FRVT](https://www.nist.gov/programs-projects/face-recognition-vendor
 
 IFRT testset contains 242143 identities and 1624305 images.
 
-| Set     | Identities | Images      |
+| Race-Set     | Identities | Images      |
 | ------- | ---------- | ----------- |
-| BLACK   | 43,874     | 298,010     |
-| WHITE   | 103,293    | 697,245     |
-| INDIAN  | 35,086     | 237,080     |
-| ASIAN   | 59,890     | 391,970     |
+| African   | 43,874     | 298,010     |
+| Caucasian   | 103,293    | 697,245     |
+| Indian  | 35,086     | 237,080     |
+| Asian   | 59,890     | 391,970     |
 | **ALL** | **242143** | **1624305** |
 
 ## Evaluation Metric
@@ -25,7 +25,7 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
 ## Baselines
 
-| Backbone     | Dataset     | Loss    | BLACK | WHITE | INDIAN | ASIAN | ALL   |
+| Backbone     | Dataset     | Loss    | African | Caucasian | Indian | Asian | ALL   |
 | ------------ | ----------- | ------- | ----- | ----- | ------ | ----- | ----- |
 | R100         | CASIA       | ArcFace | 39.67 | 53.93 | 47.81  | 16.17 | 37.53 |
 | R50          | MS1M-V2     | ArcFace | 71.97 | 83.24 | 79.66  | 22.94 | 56.20 |
@@ -35,7 +35,7 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
 (MS1M-V2 means MS1M-ArcFace, MS1M-V3 means MS1M-RetinaFace)
 
-(We only consider *BLACK* to *BLACK* comparisons in *BLACK* subset, so others like *BLACK* to *WHITE* will be ignored)
+(We only consider *African* to *African* comparisons in *African* subset, so others like *African* to *Caucasian* will be ignored)
 
 ## How to Participate
 
