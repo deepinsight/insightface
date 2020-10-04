@@ -25,6 +25,8 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 | R124         | MS1M_Retina | ArcFace | -     | -     | -      | -     | -     |
 | *NIST-Level* | *Private*   | ArcFace | 92.26 | 95.73 | 93.97  | 91.67 | 94.76 |
 
+(eg. We only consider *BLACK* to *BLACK* comparisons in *BLACK* subset, so others like *BLACK* to *WHITE* will be ignored)
+
 ## How to Participate
 
 Send an e-mail to guojia(AT)gmail.com after preparing your black-box feature extractor or your trained academic model file(without commercial risk), with your name, organization and submission comments.
