@@ -20,12 +20,14 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 | Backbone     | Dataset     | Loss    | BLACK | WHITE | INDIAN | ASIAN | ALL   |
 | ------------ | ----------- | ------- | ----- | ----- | ------ | ----- | ----- |
 | R100         | CASIA       | ArcFace | 39.67 | 53.93 | 47.81  | 16.17 | 37.53 |
-| R50          | MS1M_V2     | ArcFace | 71.97 | 83.24 | 79.66  | 22.94 | 56.20 |
-| R50          | MS1M_Retina | ArcFace | 76.24 | 86.21 | 84.44  | 37.43 | 71.02 |
-| R124         | MS1M_Retina | ArcFace | -     | -     | -      | -     | -     |
+| R50          | MS1M-V2     | ArcFace | 71.97 | 83.24 | 79.66  | 22.94 | 56.20 |
+| R50          | MS1M-V3     | ArcFace | 76.24 | 86.21 | 84.44  | 37.43 | 71.02 |
+| R124         | MS1M-V3     | ArcFace | -     | -     | -      | -     | -     |
 | *NIST-Level* | *Private*   | ArcFace | 92.26 | 95.73 | 93.97  | 91.67 | 94.76 |
 
-(eg. We only consider *BLACK* to *BLACK* comparisons in *BLACK* subset, so others like *BLACK* to *WHITE* will be ignored)
+(MS1M-V2 means MS1M-ArcFace, MS1M-V3 means MS1M-RetinaFace)
+
+(We only consider *BLACK* to *BLACK* comparisons in *BLACK* subset, so others like *BLACK* to *WHITE* will be ignored)
 
 ## How to Participate
 
