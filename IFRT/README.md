@@ -19,6 +19,11 @@ IFRT testset contains 242143 identities and 1624305 images.
 | Asian   | 59,890     | 391,970     |
 | **ALL** | **242,143** | **1,624,305** |
 
+<details>
+  <summary>Click to check the sample images(we manually blur it to protect privacy) </summary>
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrtsample_blur.jpg" alt="ifrtsample" width="640">
+</details>
+
 ## Evaluation Metric
 
 TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
