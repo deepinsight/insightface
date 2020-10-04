@@ -44,7 +44,7 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
 ## How to Participate
 
-Send an e-mail to **guojia(AT)gmail.com** after preparing your black-box feature extractor or your academic model file(without commercial risk), with your name, organization and submission comments.
+Send an e-mail to **insightface.challenge(AT)gmail.com** after preparing your black-box feature extractor or your academic model file(without commercial risk), with your name, organization and submission comments.
 
 There are some ways to submit:
 
