@@ -11,6 +11,14 @@ Similar to [FRVT](https://www.nist.gov/programs-projects/face-recognition-vendor
 
 IFRT testset contains 242143 identities and 1624305 images.
 
+| Set     | Identities | Images      |
+| ------- | ---------- | ----------- |
+| BLACK   | 43,874     | 298,010     |
+| WHITE   | 103,293    | 697,245     |
+| INDIAN  | 35,086     | 237,080     |
+| ASIAN   | 59,890     | 391,970     |
+| **ALL** | **242143** | **1624305** |
+
 ## Evaluation Metric
 
 TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
