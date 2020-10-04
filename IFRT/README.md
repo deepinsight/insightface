@@ -20,7 +20,7 @@ IFRT testset contains 242143 identities and 1624305 images.
 | **ALL** | **242,143** | **1,624,305** |
 
 <details>
-  <summary>Click to check the sample images(we manually blur it to protect privacy) </summary>
+  <summary>Click to check the sample images(here we manually blur it to protect privacy) </summary>
   <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrtsample_blur.jpg" alt="ifrtsample" width="640">
 </details>
 
