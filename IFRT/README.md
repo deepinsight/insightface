@@ -11,13 +11,13 @@ Similar to [FRVT](https://www.nist.gov/programs-projects/face-recognition-vendor
 
 IFRT testset contains 242143 identities and 1624305 images.
 
-| Race-Set     | Identities  | Images        |  Positive Pairs   | Negative Pairs      |
-| -------      | ----------  | -----------   |  -----------      | -----------         |
-| African      | 43,874      | 298,010       |  870,091          | 88,808,791,999      |
-| Caucasian    | 103,293     | 697,245       |  2,024,609        | 486,147,868,171     |
-| Indian       | 35,086      | 237,080       |  688,259          | 56,206,001,061      |
-| Asian        | 59,890      | 391,970       |  1,106,078        | 153,638,982,852     |
-| **ALL**      | **242,143** | **1,624,305** |  **4,689,037**    | **784,801,644,083** |
+| Race-Set     | Identities  | Images        |  Positive Pairs   | Negative Pairs        |
+| -------      | ----------  | -----------   |  -----------      | -----------           |
+| African      | 43,874      | 298,010       |  870,091          | 88,808,791,999        |
+| Caucasian    | 103,293     | 697,245       |  2,024,609        | 486,147,868,171       |
+| Indian       | 35,086      | 237,080       |  688,259          | 56,206,001,061        |
+| Asian        | 59,890      | 391,970       |  1,106,078        | 153,638,982,852       |
+| **ALL**      | **242,143** | **1,624,305** |  **4,689,037**    | **2,638,360,419,683** |
 
 <details>
   <summary>Click to check the sample images(here we manually blur it to protect privacy) </summary>
