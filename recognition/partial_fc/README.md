@@ -8,16 +8,25 @@ and can train more identities.
 
 ## Contents
 [Partial FC](#Partial)
-- [Largest Face Recognition Dataset: Celeb-DeepGlint](#Celeb-DeepGlint)
+- [Largest Face Recognition Dataset: **Glint360k**](#Glint360k)
 - [Distributed Training Performance](#Performance)
 - [Citation](#Citation)
 
 
-## Celeb-DeepGlint
-We clean, merge, and release the **largest** and **cleanest** face recognition dataset **Celeb-DeepGlint**. 
-Baseline models trained on Celeb-DeepGlint with our proposed training strategy can easily achieve state-of-the-art. 
-The released dataset contains 18 million images of 360K individuals. The performance of Celeb-DeepGlint eval on large-scale 
-test set IJB-C and Megaface are as follows:
+## Glint360k
+We clean, merge, and release the **largest** and **cleanest** face recognition dataset **Glint360k**. 
+Baseline models trained on Glint360k with our proposed training strategy can easily achieve state-of-the-art. 
+The released dataset contains 18 million images of 360K individuals. The performance of Glint360k eval on large-scale 
+test set IFRT, IJB-C and Megaface are as follows:
+
+#### Evaluation on IFRT       
+r means the negative class centers sampling rate.
+| Backbone     | Dataset            | African | Caucasian | Indian | Asian | ALL   |
+| ------------ | -----------        | ----- | ----- | ------ | ----- | ----- |
+| R50          | MS1M-V3            | 76.24 | 86.21 | 84.44  | 37.43 | 71.02 |
+| R124         | MS1M-V3            | 81.08 | 89.06 | 87.53  | 38.40 | 74.76 |
+| R100         | **Glint360k**(r=1.0)   | 89.50 | 94.23 | 93.54  | **65.07** | **88.67** |
+| R100         | **Glint360k**(r=0.1)   | **90.45** | **94.60** | **93.96**  | 63.91 | 88.23 |
 
 #### Evaluation on IJB-C and Megaface  
 
@@ -26,10 +35,9 @@ TAR@FAR=1e-4 is reported on the IJB-C datasets, TAR@FAR=1e-6 is reported on Mega
 |Test Dataset        | IJB-C     | Megaface_Id  | Megaface_Ver |
 | :---               | :---:     | :---:        | :---:        |
 | MS1MV2             | 96.4      | 98.3         | 98.6         |
-|**Celeb-DeepGlint** | **97.3**  | **99.1**     | **99.1**     |
+|**Glint360k** | **97.3**  | **99.1**     | **99.1**     |
 
-#### Evaluation on IFRT
-Coming soon.
+
 
 ## Performance
 We remove the influence of IO, all experiments use mixed precision training, backbone is ResNet50.
