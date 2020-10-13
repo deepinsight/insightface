@@ -104,7 +104,7 @@ def generate_config(loss_name, dataset, network):
 
     elif dataset == '10000w':
         config.debug = 1
-        config.num_classes = 1000 * 10000
+        config.num_classes = 10000 * 10000
         config.lr_steps = '20000,28000'
         config.max_update = 32000
 
