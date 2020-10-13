@@ -24,6 +24,10 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
+**`2020-10-13`**: A new training method and one large training set(360K IDs) were released [here](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc) by DeepGlint.
+
+**`2020-10-09`**: We opened a large scale recognition test benchmark [IFRT](https://github.com/deepinsight/insightface/tree/master/IFRT)
+
 **`2020-08-01`**: We released lightweight facial landmark models with fast coordinate regression(106 points). See detail [here](https://github.com/deepinsight/insightface/tree/master/alignment/coordinateReg).
 
 **`2020-04-27`**: InsightFace pretrained models and MS1M-Arcface are now specified as the only external training dataset, for iQIYI iCartoonFace challenge, see detail [here](http://challenge.ai.iqiyi.com/detail?raceId=5def71b4e9fcf68aef76a75e).
