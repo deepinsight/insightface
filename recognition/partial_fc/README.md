@@ -73,9 +73,11 @@ We remove the influence of IO, all experiments use mixed precision training, bac
 ## Citation
 If you find Partical-FC or Glint360k useful in your research, please consider to cite the following related papers:
 ```
+https://arxiv.org/abs/2010.05222
 @inproceedings{an2020partical_fc,
   title={Partial FC: Training 10 Million Identities on a Single Machine},
-  author={Xiang An},
+  author={An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and
+  Zhang, Debing and Fu Ying},
   booktitle={Arxiv},
   year={2020}
 }
