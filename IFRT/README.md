@@ -30,13 +30,14 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
 ## Baselines
 
-| Backbone     | Dataset     | Loss    | African | Caucasian | Indian | Asian | ALL   |
+| Backbone     | Dataset     | DESC.   | African | Caucasian | Indian | Asian | ALL   |
 | ------------ | ----------- | ------- | ----- | ----- | ------ | ----- | ----- |
 | R100         | CASIA       | ArcFace | 39.67 | 53.93 | 47.81  | 16.17 | 37.53 |
 | R50          | VGG2        | ArcFace | 49.20 | 65.93 | 56.22  | 27.15 | 47.13 |
 | R50          | MS1M-V2     | ArcFace | 71.97 | 83.24 | 79.66  | 22.94 | 56.20 |
 | R50          | MS1M-V3     | ArcFace | 76.24 | 86.21 | 84.44  | 37.43 | 71.02 |
 | R124         | MS1M-V3     | ArcFace | 81.08 | 89.06 | 87.53  | 38.40 | 74.76 |
+| R100	       | Glint360k   | PartialFC(r=0.1)| 90.45 | 94.60	| 93.96	| 63.91	| 88.23 |
 | *NIST-Level* | *Private*   | ArcFace | 92.26 | 95.73 | 93.97  | 91.67 | 94.76 |
 
 (MS1M-V2 means MS1M-ArcFace, MS1M-V3 means MS1M-RetinaFace)
