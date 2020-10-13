@@ -71,7 +71,8 @@ We remove the influence of IO, all experiments use mixed precision training, bac
 
 
 ## Citation
-If you find Partical-FC or Glint360k useful in your research, please consider to cite the following related papers:
+If you find Partical-FC or Glint360k useful in your research, please consider to cite the following related papers:  
+
 [Partial FC](https://arxiv.org/abs/2010.05222)
 ```
 @inproceedings{an2020partical_fc,
