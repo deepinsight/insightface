@@ -9,6 +9,8 @@ and can train more identities.
 ## Contents
 [Partial FC](#Partial)
 - [Largest Face Recognition Dataset: **Glint360k**](#Glint360k)
+- [Installtion](./docs/installtion.md)
+- [How to run](./docs/how_to_run.md)
 - [Distributed Training Performance](#Performance)
 - [Citation](#Citation)
 
@@ -20,7 +22,7 @@ The released dataset contains 18 million images of 360K individuals. The perform
 test set IFRT, IJB-C and Megaface are as follows:
 
 #### Evaluation on IFRT       
-r means the negative class centers sampling rate.
+**`r`** means the negative class centers sampling rate.
 | Backbone     | Dataset            | African | Caucasian | Indian | Asian | ALL   |
 | ------------ | -----------        | ----- | ----- | ------ | ----- | ----- |
 | R50          | MS1M-V3            | 76.24 | 86.21 | 84.44  | 37.43 | 71.02 |
@@ -37,6 +39,18 @@ TAR@FAR=1e-4 is reported on the IJB-C datasets, TAR@FAR=1e-6 is reported on Mega
 | MS1MV2             | 96.4      | 98.3         | 98.6         |
 |**Glint360k** | **97.3**  | **99.1**     | **99.1**     |
 
+#### Download
+[**Baidu Pan**](https://pan.baidu.com/s/1aHC_nJGKzKgwJKoVb2Q_Gg) (code:i1al)  
+Google Drive  coming soon
+
+Refer to the following command to unzip.
+```
+cat glint360k* > glint360k.tar
+tar -xvf glint360k.tar
+# md5sum:
+# train.rec 2a74c71c4d20e770273f103eda97e878
+# train.idx f7a3e98d3533ac481bdf3dc03a5416e8
+```
 
 
 ## Performance
@@ -57,8 +71,17 @@ We remove the influence of IO, all experiments use mixed precision training, bac
 
 
 ## Citation
-Coming soon.
+If you find Partical-FC or Glint360k useful in your research, please consider to cite the following related papers:
 
+```
+@inproceedings{an2020partical_fc,
+  title={Partial FC: Training 10 Million Identities on a Single Machine},
+  author={An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and
+  Zhang, Debing and Fu Ying},
+  booktitle={Arxiv},
+  year={2020}
+}
+```
 
 
 
