@@ -37,6 +37,7 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 | R50          | MS1M-V2     | ArcFace | 71.97 | 83.24 | 79.66  | 22.94 | 56.20 |
 | R50          | MS1M-V3     | ArcFace | 76.24 | 86.21 | 84.44  | 37.43 | 71.02 |
 | R124         | MS1M-V3     | ArcFace | 81.08 | 89.06 | 87.53  | 38.40 | 74.76 |
+| R124         | MS1M-V3     | +FlipTest | 83.22 | 90.43 | 89.22  | 39.61 | 75.69 |
 | R100	       | Glint360k   | PartialFC(r=0.1)| 90.45 | 94.60	| 93.96	| 63.91	| 88.23 |
 | *NIST-Level* | *Private*   | ArcFace | 92.26 | 95.73 | 93.97  | 91.67 | 94.76 |
 
