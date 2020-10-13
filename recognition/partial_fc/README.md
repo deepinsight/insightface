@@ -7,7 +7,7 @@ and can train more identities.
 
 
 ## Contents
-[Partial FC](#Partial)
+[Partial FC](https://arxiv.org/abs/2010.05222)
 - [Largest Face Recognition Dataset: **Glint360k**](#Glint360k)
 - [Installtion](./docs/installtion.md)
 - [How to run](./docs/how_to_run.md)
@@ -72,8 +72,8 @@ We remove the influence of IO, all experiments use mixed precision training, bac
 
 ## Citation
 If you find Partical-FC or Glint360k useful in your research, please consider to cite the following related papers:
+[Partial FC](https://arxiv.org/abs/2010.05222)
 ```
-https://arxiv.org/abs/2010.05222
 @inproceedings{an2020partical_fc,
   title={Partial FC: Training 10 Million Identities on a Single Machine},
   author={An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and
