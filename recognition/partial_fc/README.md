@@ -47,7 +47,7 @@ tar -xvf glint360k.tar
 # train.rec 2a74c71c4d20e770273f103eda97e878
 # train.idx f7a3e98d3533ac481bdf3dc03a5416e8
 ```
-
+Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
 
 ## Performance
 We neglect the influence of IO. All experiments use mixed-precision training, and the backbone is ResNet50.
