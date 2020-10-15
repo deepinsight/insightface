@@ -37,7 +37,6 @@ TAR@FAR=1e-4 is reported on the IJB-C datasets, and TAR@FAR=1e-6 is reported on 
 
 #### Download
 [**Baidu Drive**](https://pan.baidu.com/s/1aHC_nJGKzKgwJKoVb2Q_Gg) (code:i1al)  
-[**Dropbox**](https://www.dropbox.com/sh/gdix4jabzlwtk72/AAAXEItN1zwdo_tzOx5-QqHWa?dl=0)
 
 Refer to the following command to unzip.
 ```
