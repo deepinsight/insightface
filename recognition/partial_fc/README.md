@@ -59,7 +59,7 @@ easydict
 mxboard
 opencv-python   
 tqdm  
-[nccl](https://docs.nvidia.com/deeplearning/nccl/install-guide/index.html)
+[nccl](https://docs.nvidia.com/deeplearning/nccl/install-guide/index.html)  
 [openmpi](./setup-utils/install-mpi.sh)==4.0.0  
 [horovod](./setup-utils/install-horovod.sh)==0.19.2  
 
