@@ -55,10 +55,7 @@ python==3.6
 cuda==10.1    
 cudnn==765    
 mxnet-cu101==1.6.0.post0  
-easydict      
-mxboard
-opencv-python   
-tqdm  
+pip install easydict mxboard opencv-python tqdm    
 [nccl](https://docs.nvidia.com/deeplearning/nccl/install-guide/index.html)  
 [openmpi](./setup-utils/install-mpi.sh)==4.0.0  
 [horovod](./setup-utils/install-horovod.sh)==0.19.2  
