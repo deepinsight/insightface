@@ -22,11 +22,6 @@ config.backbone_lr = 0.1
 config.memory_bank_lr = config.backbone_lr
 config.sample_ratio = 1.0
 
-# make training faster
-# our RAM is 256G
-# mount -t tmpfs -o size=140G  tmpfs /train_tmp
-
-
 def generate_config(loss_name, dataset, network):
 
     # loss
@@ -50,10 +45,15 @@ def generate_config(loss_name, dataset, network):
         config.num_classes = 10575
         config.max_update = 32000
 
-    # glint360k 17507706
+    # glint360k 17091657
     # md5sum:
     # train.rec 2a74c71c4d20e770273f103eda97e878
     # train.idx f7a3e98d3533ac481bdf3dc03a5416e8
+
+    # make training faster
+    # our RAM is 256G
+    # mount -t tmpfs -o size=140G  tmpfs /train_tmp
+
     elif dataset == 'glint360k_8GPU':
         config.lr_steps = '200000,400000,500000,550000'
         config.val_targets = ['agedb_30', 'calfw', 'cfp_ff',  'cfp_fp', 'cplfw', 'lfw', 'vgg2_fp']
