@@ -30,7 +30,7 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
 ## Baselines
 
-| Backbone     | Dataset     | DESC.   | African | Caucasian | Indian | Asian | ALL   |
+| Backbone     | Dataset     | DESC.   | African | Caucasian | South Asian | East Asian | ALL   |
 | ------------ | ----------- | ------- | ----- | ----- | ------ | ----- | ----- |
 | R100         | CASIA       | ArcFace | 39.67 | 53.93 | 47.81  | 16.17 | 37.53 |
 | R50          | VGG2        | ArcFace | 49.20 | 65.93 | 56.22  | 27.15 | 47.13 |
