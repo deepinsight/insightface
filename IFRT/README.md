@@ -53,7 +53,7 @@ Send an e-mail to **insightface.challenge(AT)gmail.com** after preparing your bl
 There are some ways to submit:
 
 1. (Recommended) Submit black-box face feature extracting tool.
-    * Use python binding to provide python interface: `get_feature(image, bbox, landmark)`, where shape(image)==(*,*,3), shape(bbox)==(4,) and shape(landmark)==(5,2). You can either use our provided landmark or detect them by yourself.
+    * Use python binding to provide python interface: `feat = get_feature(image, bbox, landmark)`, where shape(image)==(H,W,3), shape(bbox)==(4,), shape(landmark)==(5,2) and shape(feat)==(K,). You can either use the provided landmark or detect them by yourself.
     * In current stage, it should be better to not encrypt your feature embeddings, for fast GPU N:N matrix calculation.
     * You can add some restrictions on your tool. Such as number of api calls and time constraints.
 2. (Simplest) Submit your recognition model.
