@@ -9,7 +9,7 @@ Similar to [FRVT](https://www.nist.gov/programs-projects/face-recognition-vendor
 
 ## Dataset Statistics and Visualization
 
-IFRT testset contains 242143 identities and 1624305 images.
+IFRT testset contains 242,143 identities and 1,624,305 images.
 
 | Race-Set     | Identities  | Images        |  Positive Pairs   | Negative Pairs        |
 | -------      | ----------  | -----------   |  -----------      | -----------           |
