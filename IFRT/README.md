@@ -39,8 +39,8 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 | R124         | MS1M-V3     | ArcFace | 81.08 | 89.06 | 87.53  | 38.40 | 74.76 |
 | R124         | MS1M-V3     | +FlipTest | 83.22 | 90.43 | 89.22  | 39.61 | 75.69 |
 | R100	       | Glint360k   | PartialFC(r=0.1)| 90.45 | 94.60	| 93.96	| 63.91	| 88.23 |
-| *R180* | *InsightFace-Private*   | ArcFace | 94.45 | 96.98 | 96.02  | 91.67 | 96.26 |
-| *R180* | *Private*   | block-box | 97.54 | 98.67 | 98.35  | 83.83 | 96.93 |
+| R180 | *InsightFace-Private*   | ArcFace | 94.45 | 96.98 | 96.02  | 91.67 | 96.26 |
+| R180 | *Private*   | block-box | 97.54 | 98.67 | 98.35  | 83.83 | 96.93 |
 
 (MS1M-V2 means MS1M-ArcFace, MS1M-V3 means MS1M-RetinaFace)
 
@@ -53,6 +53,9 @@ Send an e-mail to **insightface.challenge(AT)gmail.com** after preparing your bl
 There are some ways to submit:
 
 1. (Recommended) Submit black-box face feature extracting tool.
+    * Use python binding to provide python interface: `get_feature(image, bbox, landmark)`, where shape(image)==(*,*,3), shape(bbox)==(4,) and shape(landmark)==(5,2). You can either use our provided landmark or detect them by yourself.
+    * In current stage, it should be better to not encrypt your feature embeddings, for fast GPU N:N matrix calculation.
+    * You can add some restrictions on your tool. Such as number of api calls and time constraints.
 2. (Simplest) Submit your recognition model.
     * Submit MXNet ArcFace model with the same face alignment. In this case, you can just submit the single model file.
     * In other case, such as PyTorch/TF models or ArcFace models with different face alignment method, please give us an example on how to generate feature embeddings. (eg. provide a function `get_feature(image, bbox, landmark)`)
