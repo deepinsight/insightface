@@ -34,7 +34,7 @@ from symbol import symbol_utils
 # import memonger
 # import sklearn
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from default import config
 
 

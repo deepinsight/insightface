@@ -2,7 +2,7 @@ import sys
 import os
 import mxnet as mx
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from default import config
 
 
