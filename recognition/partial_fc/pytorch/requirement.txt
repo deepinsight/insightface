@@ -1,0 +1,3 @@
+tensorboard
+easydict
+mxnet==1.6.0
