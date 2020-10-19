@@ -1,3 +1,10 @@
+"""
+Author: {Yang Xiao, Xiang An, XuHan Zhu} in DeepGlint,
+Partial FC: Training 10 Million Identities on a Single Machine
+See the original paper:
+https://arxiv.org/abs/2010.05222
+"""
+
 import math
 from typing import Any
 
@@ -55,20 +62,20 @@ class DistSampleClassifier(Module):
                 index = index[start:]
             else:
                 index = positive
-                
+
             index = torch.sort(index)[0].long()
             self.index = index
             total_label[P] = torch.searchsorted(index, total_label[P])
             self.sub_weight = Parameter(self.weight[index])
             self.sub_weight_mom = self.weight_mom[index]
-    
+
     def forward(self, total_features, norm_weight):
         torch.cuda.current_stream().wait_stream(self.stream)
         logits = F.linear(total_features, norm_weight)
         return logits
-        
+
     @torch.no_grad()
-    def update(self,):
+    def update(self, ):
         self.weight_mom[self.index] = self.sub_weight_mom
         self.weight[self.index] = self.sub_weight
 
