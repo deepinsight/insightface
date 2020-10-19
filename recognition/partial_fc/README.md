@@ -38,6 +38,14 @@ TAR@FAR=1e-4 is reported on the IJB-C datasets, and TAR@FAR=1e-6 is reported on 
 
 Refer to the following command to unzip.
 ```
+8b469dabd959b51f5ae63f1113fa9a7e  glint360k00
+25449911e03766bf773b12abcc5789cd  glint360k01
+bbd236acb4b561def6071f94b423d85e  glint360k02
+bd392b1506dddc5cead1b9de1e7b6e52  glint360k03
+163aec95c3e258a79df7f1cb563fd5ef  glint360k04
+41bbf8314e24f98405ecbad8e9c89dfd  glint360k05
+dcc2f021aa2a9463ff1b2a8021ef87b6  glint360k06
+
 cat glint360k* > glint360k.tar
 tar -xvf glint360k.tar
 # md5sum:
