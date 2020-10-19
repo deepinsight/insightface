@@ -3,7 +3,7 @@ from easydict import EasyDict as edict
 config = edict()
 config.dataset = "emore"
 config.embedding_size = 512
-config.sample_rate = 0.1
+config.sample_rate = 1.0
 config.fp16 = False
 config.momentum = 0.9
 config.weight_decay = 5e-4
