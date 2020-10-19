@@ -15,6 +15,7 @@ pip install -r requirement.txt
 ```shell
 bash run.sh
 ```
+使用 `bash run.sh` 这个命令运行。
 
 ## Citation
 If you find Partial-FC or Glint360K useful in your research, please consider to cite the following related paper: 
