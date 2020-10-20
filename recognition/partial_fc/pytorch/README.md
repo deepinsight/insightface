@@ -5,7 +5,7 @@ Pytorch is currently still a preview version. There is a 5 thousandth difference
 All experiments in the paper are done by mxnet.
 
 Pytorch 目前是还是预览版本，目前0.1的采样和论文中有5个千分点的差距，
-**如果要复现论文中的精度，强烈建议优先使用mxnet**，所有论文的实验均是mxnet完成的，
+**如果要复现论文中的精度，强烈建议优先使用mxnet, 所有论文的实验均是mxnet完成的**。
 
 Insightface 社区需要大家一起贡献才会变得更好，欢迎大家提交Pull Request.  
 
