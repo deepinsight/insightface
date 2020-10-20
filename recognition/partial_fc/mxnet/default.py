@@ -16,7 +16,7 @@ config.image_size = 112
 config.memonger = False
 
 config.debug = 0
-config.fp16 = True
+config.fp16 = False
 config.batch_size = 64
 config.backbone_lr = 0.1
 config.memory_bank_lr = config.backbone_lr
