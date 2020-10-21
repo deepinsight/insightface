@@ -2,7 +2,7 @@
 
 mpirun -np 8 \
 -hostfile hosts/host_8 \
--x HOROVOD_CACHE_CAPACITY=8096 \
+-x HOROVOD_CACHE_CAPACITY=1024 \
 -bind-to none -map-by slot \
 -x LD_LIBRARY_PATH -x PATH \
 -mca pml ob1 -mca btl ^openib \
