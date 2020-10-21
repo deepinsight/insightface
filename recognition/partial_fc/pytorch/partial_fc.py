@@ -132,7 +132,7 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
 
                 # Calculate grad
                 grad[index] -= one_hot
-                grad.div_(grad.size()[0])
+                grad.div_(features.size()[0])
 
             logits.backward(grad)
             if total_features.grad is not None:
