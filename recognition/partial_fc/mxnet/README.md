@@ -41,6 +41,8 @@ You can turn on the debug mode to check whether your slow training speed is the 
 If you find that your training speed is the io bottleneck, you can mount dataset to RAM, 
 using the following command.
 ```shell script
+# If your RAM has 256G
+sudo mkdir /train_tmp
 mount -t tmpfs -o size=140G  tmpfs /train_tmp
 ```
 
