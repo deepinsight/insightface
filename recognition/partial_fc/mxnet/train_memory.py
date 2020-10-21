@@ -1,3 +1,10 @@
+"""
+Author: {Xiang An, XuHan Zhu, Yang Xiao} in DeepGlint,
+Partial FC: Training 10 Million Identities on a Single Machine
+See the original paper:
+https://arxiv.org/abs/2010.05222
+"""
+
 import argparse
 import logging
 import os
