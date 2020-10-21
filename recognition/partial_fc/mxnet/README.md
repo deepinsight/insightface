@@ -30,3 +30,19 @@ horovodrun -np 16 -H ip1:8,ip2:8 bash config.sh
 ```shell script
 bash run.sh
 ```
+
+
+## Troubleshooting
+
+### Block IO
+You can turn on the debug mode to check whether your slow training speed is the cause of IO.
+
+### Training Speed.
+If you find that your training speed is the io bottleneck, you can mount dataset to RAM, 
+using the following command.
+```shell script
+mount -t tmpfs -o size=140G  tmpfs /train_tmp
+```
+
+
+
