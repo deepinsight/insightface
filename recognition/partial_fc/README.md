@@ -12,7 +12,8 @@ Partial FC is a distributed deep learning training framework for face recognitio
 
 
 ## Glint360K
-We clean, merge, and release the **largest** and **cleanest** face recognition dataset **Glint360K**, which contains 18 million images of 360K individuals. 
+We clean, merge, and release the largest and cleanest face recognition dataset Glint360K, 
+which contains **`17091657`** images of **`360232`** individuals. 
 By employing the Patial FC training strategy, baseline models trained on Glint360K can easily achieve state-of-the-art performance. 
 Detailed evaluation results on the large-scale test set (e.g. IFRT, IJB-C and Megaface) are as follows:
 
