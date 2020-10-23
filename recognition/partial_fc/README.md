@@ -70,8 +70,8 @@ We neglect the influence of IO. All experiments use mixed-precision training, an
 | Model Parallel            | 64          | 2048          | 9684          | 4483               | GPU   |
 | **Partial FC(Ours)**      | **64**      | **4096**      | **6722**      | **12600**          | GPU   |
 
-## Q & A
-#### [Glint360K's Face Alignment Settings](https://github.com/deepinsight/insightface/issues/1286)
+## Question and Answer
+#### [Glint360K's Face Alignment Settings? ](https://github.com/deepinsight/insightface/issues/1286)
 
 
 ## Citation
