@@ -55,6 +55,26 @@ tar -xvf glint360k.tar
 ```
 Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
 
+#### Align method
+Glint360K is aligned by follow method.
+
+```python3
+import cv2
+from skimage import transform as trans
+dst = np.array([
+   [30.2946, 51.6963],
+   [65.5318, 51.5014],
+   [48.0252, 71.7366],
+   [33.5493, 92.3655],
+   [62.7299, 92.2041]], dtype=np.float32 )
+dst[:,0] += 8.0
+src = landmark.astype(np.float32)
+tform = trans.SimilarityTransform()
+tform.estimate(src, dst)
+M = tform.params[0:2, :]
+img = cv2.warpAffine(img, M, (112,112), borderValue=0.0)
+```
+
 
 ## Performance
 We neglect the influence of IO. All experiments use mixed-precision training, and the backbone is ResNet50.
