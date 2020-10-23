@@ -55,27 +55,6 @@ tar -xvf glint360k.tar
 ```
 Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
 
-#### Align method
-Glint360K is aligned by follow method.
-
-```python3
-import cv2
-from skimage import transform as trans
-dst = np.array([
-   [30.2946, 51.6963],
-   [65.5318, 51.5014],
-   [48.0252, 71.7366],
-   [33.5493, 92.3655],
-   [62.7299, 92.2041]], dtype=np.float32 )
-dst[:,0] += 8.0
-src = landmark.astype(np.float32)
-tform = trans.SimilarityTransform()
-tform.estimate(src, dst)
-M = tform.params[0:2, :]
-img = cv2.warpAffine(img, M, (112,112), borderValue=0.0)
-```
-
-
 ## Performance
 We neglect the influence of IO. All experiments use mixed-precision training, and the backbone is ResNet50.
 #### 1 Million Identities On 8 RTX2080Ti  
@@ -91,7 +70,10 @@ We neglect the influence of IO. All experiments use mixed-precision training, an
 | Model Parallel            | 64          | 2048          | 9684          | 4483               | GPU   |
 | **Partial FC(Ours)**      | **64**      | **4096**      | **6722**      | **12600**          | GPU   |
 
+## Troubleshooting
 
+### Glint360K's Face Alignment Settings
+https://github.com/deepinsight/insightface/issues/1286
 
 ## Citation
 If you find Partial-FC or Glint360K useful in your research, please consider to cite the following related paper: 
