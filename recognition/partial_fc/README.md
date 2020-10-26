@@ -74,6 +74,10 @@ We neglect the influence of IO. All experiments use mixed-precision training, an
 #### Glint360K's Face Alignment Settings?
 We use a same alignment setting with MS1MV2, code is [here](https://github.com/deepinsight/insightface/issues/1286).
 
+#### Why update Glint360K, is there a bug in the previous version?  
+In the previous version of Glint360K, there is no bug when using softmax training, but there is a bug in triplet training. 
+In the latest Glint360k, this bug has been fixed.
+
 
 ## Citation
 If you find Partial-FC or Glint360K useful in your research, please consider to cite the following related paper: 
