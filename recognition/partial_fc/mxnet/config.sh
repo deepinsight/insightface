@@ -9,6 +9,6 @@ export MXNET_CPU_WORKER_NTHREADS=3
 PYTHON_EXEC=/home/face/miniconda3/envs/nist_pf/bin/python
 ${PYTHON_EXEC} train_memory.py \
 --dataset glint360k_8GPU \
---loss arcface \
+--loss cosface \
 --network r100 \
---models-root /data/anxiang/opensource/glint360k_8GPU_r100FC_1.0_fp16_arcface
+--models-root /data/anxiang/opensource/glint360k_8GPU_r100FC_1.0_fp16_cosface
