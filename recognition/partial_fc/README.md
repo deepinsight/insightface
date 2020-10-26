@@ -8,6 +8,7 @@ Partial FC is a distributed deep learning training framework for face recognitio
 [Partial FC](https://arxiv.org/abs/2010.05222)
 - [Largest Face Recognition Dataset: **Glint360k**](#Glint360k)
 - [Distributed Training Performance](#Performance)
+- [FAQ](#FAQ)
 - [Citation](#Citation)
 
 
