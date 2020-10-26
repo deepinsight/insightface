@@ -78,6 +78,9 @@ We use a same alignment setting with MS1MV2, code is [here](https://github.com/d
 In the previous version of Glint360K, there is no bug when using softmax training, but there is a bug in triplet training. 
 In the latest Glint360k, this bug has been fixed.
 
+#### Dataset in Google Drive or Dropbox?
+The torrent will be release soon.
+
 
 ## Citation
 If you find Partial-FC or Glint360K useful in your research, please consider to cite the following related paper: 
