@@ -37,7 +37,7 @@ TAR@FAR=1e-4 is reported on the IJB-C datasets, and TAR@FAR=1e-6 is reported on 
 
 #### Download
 [**Baidu Drive**](https://pan.baidu.com/s/1GsYqTTt7_Dn8BfxxsLFN0w) (code:o3az)    
-**Magnet URI:**  
+[**Magnet URI:**](magnet:?xt=urn:btih:E5F46EE502B9E76DA8CC3A0E4F7C17E4000C7B1E&dn=glint360k) 
 ```
 magnet:?xt=urn:btih:E5F46EE502B9E76DA8CC3A0E4F7C17E4000C7B1E&dn=glint360k
 ```
