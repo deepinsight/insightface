@@ -34,6 +34,10 @@ bash run.sh
 
 ## Troubleshooting
 
+### Mxnet Version!
+Some versions of horovod and mxnet will have bugs.   
+It is recommended to try version **1.5 or 1.6**.
+
 ### Check CUDA version!
 ```shell script
 # Make sure your cuda version is same as mxnet, such as mxnet-cu101 (CUDA 10.1)
