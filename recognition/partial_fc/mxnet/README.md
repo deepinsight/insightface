@@ -34,6 +34,17 @@ bash run.sh
 
 ## Troubleshooting
 
+### Check CUDA version!
+```shell script
+# Make sure your cuda version is same as mxnet, such as mxnet-cu101 (CUDA 10.1)
+
+/usr/local/cuda/bin/nvcc -V
+# nvcc: NVIDIA (R) Cuda compiler driver
+# Copyright (c) 2005-2019 NVIDIA Corporation
+# Built on Wed_Apr_24_19:10:27_PDT_2019
+# Cuda compilation tools, release 10.1, V10.1.168
+```
+
 ### Block IO
 You can turn on the debug mode to check whether your slow training speed is the cause of IO.
 
