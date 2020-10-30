@@ -35,7 +35,7 @@ bash run.sh
 ## Troubleshooting
 
 ### Mxnet Version!
-Some versions of horovod and mxnet will have bugs.   
+Some versions of mxnet with horovod have bug.   
 It is recommended to try version **1.5 or 1.6**.
 
 ### Check CUDA version!
