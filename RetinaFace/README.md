@@ -65,7 +65,7 @@ To avoid the confliction with the WiderFace Challenge (ICCV 2019), we postpone t
 
 ## Third-party Models
 
-[yangfly](https://github.com/yangfly): RetinaFace-MobileNet0.25 ([baidu cloud](https://pan.baidu.com/s/1P1ypO7VYUbNAezdvLm2m9w)).
+[yangfly](https://github.com/yangfly): RetinaFace-MobileNet0.25 ([baidu cloud](https://pan.baidu.com/s/1P1ypO7VYUbNAezdvLm2m9w):nzof).
 WiderFace validation mAP: Hard 82.5. (model size: 1.68Mb) 
 
 [clancylian](https://github.com/clancylian/retinaface): C++ version
