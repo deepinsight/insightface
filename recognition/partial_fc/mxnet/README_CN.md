@@ -1,4 +1,4 @@
-## [中文版本请点击这里](README_CN.md)
+## [中文版本请点击这里](./README_CN.md)
 
 ## Train
 #### Requirements
