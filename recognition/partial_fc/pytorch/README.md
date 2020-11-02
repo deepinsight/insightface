@@ -5,7 +5,7 @@ Pytorch is currently still a preview version. There is a 5 thousandth difference
 All experiments in the paper are done by mxnet.
 
 Pytorch 目前是还是预览版本，模型并行是没问题的，但是0.1的采样**暂时无法使用**，  
-**如果要使用采样(复现论文中的精度)，强烈建议优先使用mxnet, 所有论文的实验均是mxnet完成的**。
+**如果要使用采样(复现论文中的精度)，强烈建议优先使用mxnet, 所有论文的实验均是mxnet完成的**。  
 我们会马上修复这个bug。
 
 Insightface 社区需要大家一起贡献才会变得更好，欢迎大家提交Pull Request.  
