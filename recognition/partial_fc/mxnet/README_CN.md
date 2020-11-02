@@ -5,6 +5,17 @@
 python==3.6  
 cuda==10.1    
 cudnn==765    
+有一些mxnet版本是无法安装horovod
+
+| mxnet |horovod  |  cuda        | 
+| :---: | :---    |  :---:       | 
+| 1.4.0 | 无法安装 |  -           | 
+| 1.5.0 | 可以安装 | cuda10.0     | 
+| 1.5.1 | 无法安装 | -            | 
+| 1.6.0 | 可以安装 | cuda10.1     | 
+| 1.7.0 | 无法安装 | -            | 
+
+
 mxnet-cu101==1.6.0.post0  
 pip install easydict mxboard opencv-python tqdm    
 [nccl](https://docs.nvidia.com/deeplearning/nccl/install-guide/index.html)  
