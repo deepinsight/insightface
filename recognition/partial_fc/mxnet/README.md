@@ -61,7 +61,7 @@ Run `horovodrun --check` to check the installation of horovod.
 Some versions of mxnet with horovod have bug.   
 It is recommended to try version **1.5 or 1.6**.
 
-** The community has found that mxnet1.5.1 cannot install horovod.**
+**The community has found that mxnet1.5.1 cannot install horovod.**
 
 ### Check CUDA version!
 ```shell script
