@@ -30,6 +30,27 @@ openmpi必须安装，必须采纳我的脚本编译源码安装：
 horovod 安装方法如下:
 [horovod](mxnet/setup-utils/install-horovod.sh)==0.19.2  
 
+horovod 安装完成后使用下面的命令检查horovod是否安装成功，(nccl有没有都可以，有nccl会更快)：
+```shell script
+# Horovod v0.19.2:
+# Available Frameworks:
+#     [ ] TensorFlow
+#     [ ] PyTorch
+#     [X] MXNet
+# 
+# Available Controllers:
+#     [X] MPI
+#     [X] Gloo
+# 
+# Available Tensor Operations:
+#     [X] NCCL
+#     [ ] DDL
+#     [ ] CCL
+#     [X] MPI
+#     [X] Gloo
+```
+
+
 #### 5. ssh无密登录
 
 使用多机分布式训练的时候，每台机器都需要设置无密登录，包括自己与自己，无密码登录具体可见：  
@@ -73,25 +94,7 @@ The host where horovodrun is executed must be able to SSH to all other hosts wit
 ### Horovod installed successfully?  
 
 Run `horovodrun --check` to check the installation of horovod.
-```shell script
-# Horovod v0.19.2:
-# 
-# Available Frameworks:
-#     [ ] TensorFlow
-#     [X] PyTorch
-#     [X] MXNet
-# 
-# Available Controllers:
-#     [X] MPI
-#     [X] Gloo
-# 
-# Available Tensor Operations:
-#     [X] NCCL
-#     [ ] DDL
-#     [ ] CCL
-#     [X] MPI
-#     [X] Gloo
-```
+
 
 ### Mxnet Version!
 Some versions of mxnet with horovod have bug.   
