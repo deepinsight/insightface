@@ -1,25 +1,31 @@
 ## [中文版本请点击这里](./README_CN.md)
 
 ## 如何安装
-#### 依赖
-python==3.6  
-cuda==10.1    
-cudnn==765    
-有一些mxnet版本是无法安装horovod
+ 
+#### python依赖
+pip install easydict mxboard opencv-python tqdm     
+
+#### nccl  
+nccl可以不用装，但是装上速度更快，nccl安装需要对应cuda版本，安装方法参考下边链接:  
+[nccl](https://docs.nvidia.com/deeplearning/nccl/install-guide/index.html)  
+
+#### openmpi  
+openmpi必须安装，必须采纳我的脚本编译源码安装：  
+[openmpi](mxnet/setup-utils/install-mpi.sh)==4.0.0    
+
+#### horovod与mxnet
+有些版本的mxnethorovod无法安装，参考下方表格，强烈建议使用mxnet1.6.0和cuda10.1
 
 | mxnet |horovod  |  cuda        | 
 | :---: | :---    |  :---:       | 
-| 1.4.0 | 无法安装 |  -           | 
+| 1.4.0 | x       |  x           | 
 | 1.5.0 | 可以安装 | cuda10.0     | 
-| 1.5.1 | 无法安装 | -            | 
+| 1.5.1 | x       | x            | 
 | 1.6.0 | 可以安装 | cuda10.1     | 
-| 1.7.0 | 无法安装 | -            | 
+| 1.7.0 | x       | x            | 
 
+horovod 安装方法如下:
 
-mxnet-cu101==1.6.0.post0  
-pip install easydict mxboard opencv-python tqdm    
-[nccl](https://docs.nvidia.com/deeplearning/nccl/install-guide/index.html)  
-[openmpi](mxnet/setup-utils/install-mpi.sh)==4.0.0  
 [horovod](mxnet/setup-utils/install-horovod.sh)==0.19.2  
 
 #### ssh无密登录
