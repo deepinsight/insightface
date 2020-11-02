@@ -20,6 +20,7 @@ import detect_face
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'common'))
 import face_image
 import face_preprocess
+from six.moves import xrange
 
 def ch_dev(arg_params, aux_params, ctx):
   new_args = dict()
@@ -58,7 +59,10 @@ class FaceModel:
     epoch = int(_vec[1])
     print('loading',prefix, epoch)
     self.model = edict()
-    self.model.ctx = mx.gpu(args.gpu)
+    if args.gpu is None:
+      self.model.ctx = mx.cpu()
+    else:
+      self.model.ctx = mx.gpu(args.gpu)
     self.model.sym, self.model.arg_params, self.model.aux_params = mx.model.load_checkpoint(prefix, epoch)
     self.model.arg_params, self.model.aux_params = ch_dev(self.model.arg_params, self.model.aux_params, self.model.ctx)
     all_layers = self.model.sym.get_internals()
