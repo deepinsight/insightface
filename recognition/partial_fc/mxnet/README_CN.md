@@ -13,22 +13,20 @@ pip install easydict mxboard opencv-python tqdm
 
 ## 如何运行  
 `horovod`底层调用的还是`mpi`，mpi的概念是，你有多少块GPU，就要启动多少个进程，有两种方法启动训练，使用`horovodrun`或者`mpirun`。  
-#### 使用`horovodrun`运行  
+#### 1. 使用`horovodrun`运行  
 
-Typically one GPU will be allocated per process, so if a server has 8 GPUs, you will run 8 processes. 
-In horovodrun, the number of processes is specified with the -np flag.
-
-To run on a machine with 8 GPUs:
+运行8卡(单机)：
 ```shell script
 horovodrun -np 8 -H localhost:8 bash config.sh
 ```
 
-To run on two machine with 16 GPUs:
+运行16卡(两台机器)
 ```shell script
 horovodrun -np 16 -H ip1:8,ip2:8 bash config.sh
 ```
 
-#### Run with mpi
+#### 2. 使用`mpirun`运行  
+
 ```shell script
 bash run.sh
 ```
