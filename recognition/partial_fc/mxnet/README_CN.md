@@ -1,5 +1,7 @@
-## Train
-#### Requirements
+## [中文版本请点击这里](./README_CN.md)
+
+## 如何安装
+#### 依赖
 python==3.6  
 cuda==10.1    
 cudnn==765    
@@ -9,10 +11,10 @@ pip install easydict mxboard opencv-python tqdm
 [openmpi](mxnet/setup-utils/install-mpi.sh)==4.0.0  
 [horovod](mxnet/setup-utils/install-horovod.sh)==0.19.2  
 
-#### Failures due to SSH issues
-The host where horovodrun is executed must be able to SSH to all other hosts without any prompts.
+## 如何运行  
+`horovod`底层调用的还是`mpi`，mpi的概念是，你有多少块GPU，就要启动多少个进程，有两种方法启动训练，使用`horovodrun`或者`mpirun`。  
+#### 使用`horovodrun`运行  
 
-#### Run with horovodrun
 Typically one GPU will be allocated per process, so if a server has 8 GPUs, you will run 8 processes. 
 In horovodrun, the number of processes is specified with the -np flag.
 
@@ -30,6 +32,16 @@ horovodrun -np 16 -H ip1:8,ip2:8 bash config.sh
 ```shell script
 bash run.sh
 ```
+
+#### ssh无密登录
+
+
+
+
+#### Failures due to SSH issues
+The host where horovodrun is executed must be able to SSH to all other hosts without any prompts.
+
+
 
 
 ## Troubleshooting
