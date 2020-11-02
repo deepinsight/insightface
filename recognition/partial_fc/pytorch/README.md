@@ -21,6 +21,17 @@ bash run.sh
 ```
 使用 `bash run.sh` 这个命令运行。
 
+## Results
+### MS1MV2-IJBC
+```shell script
++--------------+-------+-------+--------+-------+-------+-------+
+|   Methods    | 1e-06 | 1e-05 | 0.0001 | 0.001 |  0.01 |  0.1  |
++--------------+-------+-------+--------+-------+-------+-------+
+| cosface-IJBC | 86.63 | 94.22 | 96.27  | 97.61 | 98.34 | 99.08 |
++--------------+-------+-------+--------+-------+-------+-------+
+```
+
+
 ## Citation
 If you find Partial-FC or Glint360K useful in your research, please consider to cite the following related paper: 
 
