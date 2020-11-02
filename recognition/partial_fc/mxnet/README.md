@@ -34,9 +34,34 @@ bash run.sh
 
 ## Troubleshooting
 
+### Horovod installed successfully?  
+
+Run `horovodrun --check` to check the installation of horovod.
+```shell script
+# Horovod v0.19.2:
+# 
+# Available Frameworks:
+#     [ ] TensorFlow
+#     [X] PyTorch
+#     [X] MXNet
+# 
+# Available Controllers:
+#     [X] MPI
+#     [X] Gloo
+# 
+# Available Tensor Operations:
+#     [X] NCCL
+#     [ ] DDL
+#     [ ] CCL
+#     [X] MPI
+#     [X] Gloo
+```
+
 ### Mxnet Version!
 Some versions of mxnet with horovod have bug.   
 It is recommended to try version **1.5 or 1.6**.
+
+** The community has found that mxnet1.5.1 cannot install horovod.**
 
 ### Check CUDA version!
 ```shell script
