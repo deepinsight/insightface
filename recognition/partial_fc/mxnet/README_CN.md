@@ -13,7 +13,7 @@ pip install easydict mxboard opencv-python tqdm
 
 ## 如何运行  
 `horovod`底层调用的还是`mpi`，mpi的概念是，你有多少块GPU，就要启动多少个进程，有两种方法启动训练，使用`horovodrun`或者`mpirun`。  
-#### 1. 使用`horovodrun`运行  
+#### 1. 使用 horovodrun 运行  
 
 运行8卡(单机)：
 ```shell script
@@ -25,7 +25,7 @@ horovodrun -np 8 -H localhost:8 bash config.sh
 horovodrun -np 16 -H ip1:8,ip2:8 bash config.sh
 ```
 
-#### 2. 使用`mpirun`运行  
+#### 2. 使用 mpirun 运行  
 
 ```shell script
 bash run.sh
@@ -33,7 +33,11 @@ bash run.sh
 
 #### ssh无密登录
 
-
+使用多机分布式训练的时候，每台机器都需要设置无密登录，包括自己与自己，无密码登录具体可见：  
+这里推荐一个简单的命令：  
+```shell script
+ssh-copy-id user@ip
+```
 
 
 #### Failures due to SSH issues
