@@ -47,18 +47,20 @@ The Glint360K dataset (and the models trained with this dataset) are available f
 
 Refer to the following command to unzip.
 ```
-cf7433cbb915ac422230ba33176f4625  glint360k_00
-589a5ea3ab59f283d2b5dd3242bc027a  glint360k_01
-8d54fdd5b1e4cd55e1b9a714d76d1075  glint360k_02
-cd7f008579dbed9c5af4d1275915d95e  glint360k_03
-64666b324911b47334cc824f5f836d4c  glint360k_04
-a318e4d32493dd5be6b94dd48f9943ac  glint360k_05
-c3ae1dcbecea360d2ec2a43a7b6f1d94  glint360k_06
-
 cat glint360k_* | tar -xzvf -
+
+# Don't forget the last '-'!
+
+# cf7433cbb915ac422230ba33176f4625  glint360k_00
+# 589a5ea3ab59f283d2b5dd3242bc027a  glint360k_01
+# 8d54fdd5b1e4cd55e1b9a714d76d1075  glint360k_02
+# cd7f008579dbed9c5af4d1275915d95e  glint360k_03
+# 64666b324911b47334cc824f5f836d4c  glint360k_04
+# a318e4d32493dd5be6b94dd48f9943ac  glint360k_05
+# c3ae1dcbecea360d2ec2a43a7b6f1d94  glint360k_06
 # md5sum:
-5d9cd9f262ec87a5ca2eac5e703f7cdf train.idx
-8483be5af6f9906e19f85dee49132f8e train.rec
+# 5d9cd9f262ec87a5ca2eac5e703f7cdf train.idx
+# 8483be5af6f9906e19f85dee49132f8e train.rec
 ```
 Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
 
