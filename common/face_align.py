@@ -65,7 +65,7 @@ def estimate_norm(lmk, image_size = 112, mode='arcface'):
   min_error = float('inf') 
   if mode=='arcface':
     assert image_size==112
-    src = arcface_src
+    src = np.array([arcface_src])
   else:
     src = src_map[image_size]
   for i in np.arange(src.shape[0]):
