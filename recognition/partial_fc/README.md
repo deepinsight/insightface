@@ -8,11 +8,13 @@ Partial FC is a distributed deep learning training framework for face recognitio
 [Partial FC](https://arxiv.org/abs/2010.05222)
 - [Largest Face Recognition Dataset: **Glint360k**](#Glint360k)
 - [Distributed Training Performance](#Performance)
+- [FAQ](#FAQ)
 - [Citation](#Citation)
 
 
 ## Glint360K
-We clean, merge, and release the **largest** and **cleanest** face recognition dataset **Glint360K**, which contains 18 million images of 360K individuals. 
+We clean, merge, and release the largest and cleanest face recognition dataset Glint360K, 
+which contains **`17091657`** images of **`360232`** individuals. 
 By employing the Patial FC training strategy, baseline models trained on Glint360K can easily achieve state-of-the-art performance. 
 Detailed evaluation results on the large-scale test set (e.g. IFRT, IJB-C and Megaface) are as follows:
 
@@ -33,27 +35,34 @@ TAR@FAR=1e-4 is reported on the IJB-C datasets, and TAR@FAR=1e-6 is reported on 
 | MS1MV2             | 96.4      | 98.3         | 98.6         |
 |**Glint360k** | **97.3**  | **99.1**     | **99.1**     |
 
+#### License 
+
+The Glint360K dataset (and the models trained with this dataset) are available for non-commercial research purposes only.
+
+
 #### Download
-[**Baidu Drive**](https://pan.baidu.com/s/1aHC_nJGKzKgwJKoVb2Q_Gg) (code:i1al)  
+- [x] [**Baidu Drive**](https://pan.baidu.com/s/1GsYqTTt7_Dn8BfxxsLFN0w) (code:o3az)    
+- [x] **Magnet URI**: `magnet:?xt=urn:btih:E5F46EE502B9E76DA8CC3A0E4F7C17E4000C7B1E&dn=glint360k`
+
 
 Refer to the following command to unzip.
 ```
-8b469dabd959b51f5ae63f1113fa9a7e  glint360k00
-25449911e03766bf773b12abcc5789cd  glint360k01
-bbd236acb4b561def6071f94b423d85e  glint360k02
-bd392b1506dddc5cead1b9de1e7b6e52  glint360k03
-163aec95c3e258a79df7f1cb563fd5ef  glint360k04
-41bbf8314e24f98405ecbad8e9c89dfd  glint360k05
-dcc2f021aa2a9463ff1b2a8021ef87b6  glint360k06
+cat glint360k_* | tar -xzvf -
 
-cat glint360k* > glint360k.tar
-tar -xvf glint360k.tar
+# Don't forget the last '-'!
+
+# cf7433cbb915ac422230ba33176f4625  glint360k_00
+# 589a5ea3ab59f283d2b5dd3242bc027a  glint360k_01
+# 8d54fdd5b1e4cd55e1b9a714d76d1075  glint360k_02
+# cd7f008579dbed9c5af4d1275915d95e  glint360k_03
+# 64666b324911b47334cc824f5f836d4c  glint360k_04
+# a318e4d32493dd5be6b94dd48f9943ac  glint360k_05
+# c3ae1dcbecea360d2ec2a43a7b6f1d94  glint360k_06
 # md5sum:
-# train.rec 2a74c71c4d20e770273f103eda97e878
-# train.idx f7a3e98d3533ac481bdf3dc03a5416e8
+# 5d9cd9f262ec87a5ca2eac5e703f7cdf train.idx
+# 8483be5af6f9906e19f85dee49132f8e train.rec
 ```
 Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
-
 
 ## Performance
 We neglect the influence of IO. All experiments use mixed-precision training, and the backbone is ResNet50.
@@ -70,6 +79,16 @@ We neglect the influence of IO. All experiments use mixed-precision training, an
 | Model Parallel            | 64          | 2048          | 9684          | 4483               | GPU   |
 | **Partial FC(Ours)**      | **64**      | **4096**      | **6722**      | **12600**          | GPU   |
 
+## FAQ
+#### Glint360K's Face Alignment Settings?
+We use a same alignment setting with MS1MV2, code is [here](https://github.com/deepinsight/insightface/issues/1286).
+
+#### Why update Glint360K, is there a bug in the previous version?  
+In the previous version of Glint360K, there is no bug when using softmax training, but there is a bug in triplet training. 
+In the latest Glint360k, this bug has been fixed.
+
+#### Dataset in Google Drive or Dropbox?
+The torrent will be release soon.
 
 
 ## Citation

@@ -16,7 +16,7 @@ config.image_size = 112
 config.memonger = False
 
 config.debug = 0
-config.fp16 = True
+config.fp16 = False
 config.batch_size = 64
 config.backbone_lr = 0.1
 config.memory_bank_lr = config.backbone_lr
@@ -47,8 +47,8 @@ def generate_config(loss_name, dataset, network):
 
     # glint360k 17091657
     # md5sum:
-    # train.rec 2a74c71c4d20e770273f103eda97e878
-    # train.idx f7a3e98d3533ac481bdf3dc03a5416e8
+    # 5d9cd9f262ec87a5ca2eac5e703f7cdf train.idx
+    # 8483be5af6f9906e19f85dee49132f8e train.rec
 
     # make training faster
     # our RAM is 256G
