@@ -59,7 +59,7 @@ ssh-copy-id user@ip
 
 ## 如何运行  
 `horovod`底层调用的还是`mpi`，mpi的概念是，你有多少块GPU，就要启动多少个进程，有两种方法启动训练，使用`horovodrun`或者`mpirun`。  
-#### 1. 使用 horovodrun 运行  
+### 1. 使用 horovodrun 运行  
 
 运行8卡(单机)：
 ```shell script
