@@ -1,20 +1,20 @@
 ## 如何安装
  
-#### 1. python依赖  
+### 1. python依赖  
 使用以下命令
 ```shell script
 pip install easydict mxboard opencv-python tqdm     
 ```
 
-#### 2. nccl  
+### 2. nccl  
 nccl可以不用装，但是装上速度更快，nccl安装需要对应cuda版本，安装方法参考下边链接:  
 [**NCCL**](https://docs.nvidia.com/deeplearning/nccl/install-guide/index.html)  
 
-#### 3. openmpi  
+### 3. openmpi  
 openmpi必须安装，必须采纳我的脚本编译源码安装：  
 [**OpenMPI**](setup-utils/install-mpi.sh)    
 
-#### 4. horovod, mxnet
+### 4. horovod, mxnet
 有些版本的mxnet的horovod无法安装，参考下方表格，强烈建议使用**mxnet==1.6.0**和**cuda==10.1**
 
 | mxnet |horovod  |  cuda        | 
@@ -49,7 +49,7 @@ horovod 安装完成后使用下面的命令检查horovod是否安装成功，(n
 ```
 
 
-#### 5. ssh无密登录
+### 5. ssh无密登录
 
 使用多机分布式训练的时候，每台机器都需要设置无密登录，包括自己与自己，无密码登录具体可见：  
 这里推荐一个简单的命令：  
@@ -71,7 +71,7 @@ horovodrun -np 8 -H localhost:8 bash config.sh
 horovodrun -np 16 -H ip1:8,ip2:8 bash config.sh
 ```
 
-#### 2. 使用 mpirun 运行  
+### 2. 使用 mpirun 运行  
 
 ```shell script
 bash run.sh
