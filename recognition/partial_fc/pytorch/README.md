@@ -12,12 +12,12 @@ Insightface 社区需要大家一起贡献才会变得更好，欢迎大家提�
 
 ## TODO
 
--[ ] **No BUG** Sampling  
--[ ] Mixed precision training  
--[ ] Pipeline Parallel  
--[ ] Checkpoint  
--[ ] Docker  
--[ ] A Wonderful Documents  
+- [ ] **No BUG** Sampling  
+- [ ] Mixed precision training  
+- [ ] Pipeline Parallel  
+- [ ] Checkpoint  
+- [ ] Docker  
+- [ ] A Wonderful Documents  
 
 ## How to run
 cuda=10.1  
