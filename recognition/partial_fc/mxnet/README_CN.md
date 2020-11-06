@@ -12,7 +12,7 @@ nccl可以不用装，但是装上速度更快，nccl安装需要对应cuda版�
 
 #### 3. openmpi  
 openmpi必须安装，必须采纳我的脚本编译源码安装：  
-[**OpenMPI**](mxnet/setup-utils/install-mpi.sh)    
+[**OpenMPI**](setup-utils/install-mpi.sh)    
 
 #### 4. horovod, mxnet
 有些版本的mxnet的horovod无法安装，参考下方表格，强烈建议使用**mxnet==1.6.0**和**cuda==10.1**
@@ -26,7 +26,7 @@ openmpi必须安装，必须采纳我的脚本编译源码安装：
 | 1.7.0 | x       | x            | 
 
 horovod 安装方法如下:  
-[**Horovod**](mxnet/setup-utils/install-horovod.sh)
+[**Horovod**](setup-utils/install-horovod.sh)
 
 horovod 安装完成后使用下面的命令检查horovod是否安装成功，(nccl有没有都可以，有nccl会更快)：
 ```shell script
