@@ -8,7 +8,14 @@ from memory_samplers import WeightIndexSampler
 
 
 class MemoryBank(object):
-    def __init__(self, num_sample, num_local, rank, local_rank, embedding_size, prefix, gpu=True):
+    def __init__(self,
+                 num_sample,
+                 num_local,
+                 rank,
+                 local_rank,
+                 embedding_size,
+                 prefix,
+                 gpu=True):
         """
         Parameters
         ----------
@@ -40,13 +47,16 @@ class MemoryBank(object):
             context = mx.cpu()
 
         # In order to apply update, weight and momentum should be storage.
-        self.weight = nd.random_normal(
-            loc=0, scale=0.01, shape=(self.num_local, self.embedding_size),
-            ctx=context)
+        self.weight = nd.random_normal(loc=0,
+                                       scale=0.01,
+                                       shape=(self.num_local,
+                                              self.embedding_size),
+                                       ctx=context)
         self.weight_mom = nd.zeros_like(self.weight)
 
         # Sampler object
-        self.weight_index_sampler = WeightIndexSampler(num_sample, num_local,  rank)
+        self.weight_index_sampler = WeightIndexSampler(num_sample, num_local,
+                                                       rank)
 
     def sample(self, global_label):
         """
@@ -99,5 +109,9 @@ class MemoryBank(object):
         self.weight_mom[index] = updated_weight_mom
 
     def save(self):
-        nd.save(fname=os.path.join(self.prefix, "%d_centers.param" % self.rank), data=self.weight)
-        nd.save(fname=os.path.join(self.prefix, "%d_centers_mom.param" % self.rank), data=self.weight_mom)
+        nd.save(fname=os.path.join(self.prefix,
+                                   "%d_centers.param" % self.rank),
+                data=self.weight)
+        nd.save(fname=os.path.join(self.prefix,
+                                   "%d_centers_mom.param" % self.rank),
+                data=self.weight_mom)

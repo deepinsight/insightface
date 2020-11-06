@@ -4,12 +4,9 @@ import cv2
 import numpy as np
 from skimage import transform as trans
 
-src = np.array([
-    [30.2946, 51.6963],
-    [65.5318, 51.5014],
-    [48.0252, 71.7366],
-    [33.5493, 92.3655],
-    [62.7299, 92.2041]], dtype=np.float32)
+src = np.array([[30.2946, 51.6963], [65.5318, 51.5014], [48.0252, 71.7366],
+                [33.5493, 92.3655], [62.7299, 92.2041]],
+               dtype=np.float32)
 src[:, 0] += 8.0
 
 img_path = '/data/anxiang/datasets/IJB_release/IJBC/loose_crop'
@@ -25,7 +22,8 @@ for img_index, each_line in enumerate(files):
     name_lmk_score = each_line.strip().split(' ')
     img_name = os.path.join(img_path, name_lmk_score[0])
     img = cv2.imread(img_name)
-    landmark = np.array([float(x) for x in name_lmk_score[1:-1]], dtype=np.float32)
+    landmark = np.array([float(x) for x in name_lmk_score[1:-1]],
+                        dtype=np.float32)
     landmark = landmark.reshape((5, 2))
 
     if landmark.shape[0] == 68:

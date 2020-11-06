@@ -54,4 +54,3 @@ def get_model_list():
 
     """
     return sorted(_models.keys())
-

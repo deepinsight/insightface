@@ -1,6 +1,7 @@
 import mxnet as mx
 import math
 
+
 def prod(shape):
     """Get product of the shape.
     """
@@ -138,7 +139,10 @@ def search_plan(sym, ntrial=6, type_dict=None, **kwargs):
 
     for k in range(nbegin):
         info = {}
-        sym = make_mirror_plan(sym, threshold=threshold, plan_info=info, **kwargs)
+        sym = make_mirror_plan(sym,
+                               threshold=threshold,
+                               plan_info=info,
+                               **kwargs)
         cost = get_cost(sym, type_dict, **kwargs)
         save_size = info['save_size'] >> 20
         local_size = info['max_size'] >> 20
@@ -147,7 +151,7 @@ def search_plan(sym, ntrial=6, type_dict=None, **kwargs):
             min_cost = cost
         if min_threshold is None or local_size < min_threshold:
             min_threshold = local_size
-        print ("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
+        print("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
         history.append((cost, threshold, sym))
         threshold = guess
 
@@ -156,13 +160,16 @@ def search_plan(sym, ntrial=6, type_dict=None, **kwargs):
     threshold = min_threshold + step
     if step > 0:
         for k in range(ntrial):
-            sym = make_mirror_plan(sym, threshold=threshold, plan_info=info, **kwargs)
+            sym = make_mirror_plan(sym,
+                                   threshold=threshold,
+                                   plan_info=info,
+                                   **kwargs)
             cost = get_cost(sym, type_dict, **kwargs)
-            print ("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
+            print("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
             history.append((cost, threshold, sym))
             threshold += step
 
-    history.sort(key = lambda x: x[0])
+    history.sort(key=lambda x: x[0])
     cost, threshold, sym = history[0]
     print('Find best plan with threshold=%d, cost=%d MB' % (threshold, cost))
     return sym

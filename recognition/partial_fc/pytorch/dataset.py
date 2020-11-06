@@ -56,7 +56,8 @@ class DataLoaderX(DataLoader):
             return None
         with torch.cuda.stream(self.stream):
             for k in range(len(self.batch)):
-                self.batch[k] = self.batch[k].to(device=self.local_rank, non_blocking=True)
+                self.batch[k] = self.batch[k].to(device=self.local_rank,
+                                                 non_blocking=True)
 
     def __next__(self):
         torch.cuda.current_stream().wait_stream(self.stream)
@@ -83,8 +84,8 @@ class MXFaceDataset(Dataset):
         self.local_rank = local_rank
         path_imgrec = os.path.join(root_dir, 'train.rec')
         path_imgidx = os.path.join(root_dir, 'train.idx')
-        self.imgrec = mx.recordio.MXIndexedRecordIO(
-            path_imgidx, path_imgrec, 'r')
+        self.imgrec = mx.recordio.MXIndexedRecordIO(path_imgidx, path_imgrec,
+                                                    'r')
         s = self.imgrec.read_idx(0)
         header, _ = mx.recordio.unpack(s)
         if header.flag > 0:
@@ -111,4 +112,3 @@ class MXFaceDataset(Dataset):
 
     def __len__(self):
         return len(self.imgidx)
-

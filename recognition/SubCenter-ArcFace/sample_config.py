@@ -12,7 +12,7 @@ config.net_se = 0
 config.net_act = 'prelu'
 config.net_unit = 3
 config.net_input = 1
-config.net_blocks = [1,4,6,2]
+config.net_blocks = [1, 4, 6, 2]
 config.net_output = 'E'
 config.net_multiplier = 1.0
 config.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
@@ -26,7 +26,7 @@ config.data_cutoff = False
 config.data_color = 0
 config.data_images_filter = 0
 config.count_flops = True
-config.memonger = False #not work now
+config.memonger = False  #not work now
 
 config.loss_K = 3
 
@@ -74,7 +74,7 @@ network.y2 = edict()
 network.y2.net_name = 'fmobilefacenet'
 network.y2.emb_size = 256
 network.y2.net_output = 'GDC'
-network.y2.net_blocks = [2,8,16,4]
+network.y2.net_blocks = [2, 8, 16, 4]
 
 network.m1 = edict()
 network.m1.net_name = 'fmobilenet'
@@ -110,7 +110,7 @@ network.vargfacenet = edict()
 network.vargfacenet.net_name = 'vargfacenet'
 network.vargfacenet.net_multiplier = 1.25
 network.vargfacenet.emb_size = 512
-network.vargfacenet.net_output='J'
+network.vargfacenet.net_output = 'J'
 
 # dataset settings
 dataset = edict()
@@ -119,14 +119,14 @@ dataset.emore = edict()
 dataset.emore.dataset = 'emore'
 dataset.emore.dataset_path = '../datasets/faces_emore'
 dataset.emore.num_classes = 85742
-dataset.emore.image_shape = (112,112,3)
+dataset.emore.image_shape = (112, 112, 3)
 dataset.emore.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
 
 dataset.retina = edict()
 dataset.retina.dataset = 'retina'
 dataset.retina.dataset_path = '../datasets/ms1m-retinaface-t1'
 dataset.retina.num_classes = 93431
-dataset.retina.image_shape = (112,112,3)
+dataset.retina.image_shape = (112, 112, 3)
 dataset.retina.val_targets = ['lfw', 'cfp_fp', 'agedb_30']
 
 loss = edict()
@@ -205,21 +205,20 @@ default.models_root = './models'
 
 def generate_config(_network, _dataset, _loss):
     for k, v in loss[_loss].items():
-      config[k] = v
-      if k in default:
-        default[k] = v
+        config[k] = v
+        if k in default:
+            default[k] = v
     for k, v in network[_network].items():
-      config[k] = v
-      if k in default:
-        default[k] = v
+        config[k] = v
+        if k in default:
+            default[k] = v
     for k, v in dataset[_dataset].items():
-      config[k] = v
-      if k in default:
-        default[k] = v
+        config[k] = v
+        if k in default:
+            default[k] = v
     config.loss = _loss
     config.network = _network
     config.dataset = _dataset
     config.num_workers = 1
     if 'DMLC_NUM_WORKER' in os.environ:
-      config.num_workers = int(os.environ['DMLC_NUM_WORKER'])
-
+        config.num_workers = int(os.environ['DMLC_NUM_WORKER'])

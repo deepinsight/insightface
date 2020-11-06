@@ -33,24 +33,33 @@ class SampleDistributeModule(object):
         The updater of memory bank, default is sgd optimizer.
     logger:
     """
-    def __init__(self, symbol, fc7_model, memory_bank, memory_optimizer,
-                 logger=logging, ):
+    def __init__(
+        self,
+        symbol,
+        fc7_model,
+        memory_bank,
+        memory_optimizer,
+        logger=logging,
+    ):
         self.size = hvd.size()
         self.rank = hvd.rank()
         self.local_rank = hvd.local_rank()
         self.gpu = mx.gpu(self.local_rank)
-        self.cpu = mx.cpu()                                     # `device_id` is not needed for CPU.
+        self.cpu = mx.cpu()  # `device_id` is not needed for CPU.
         self.nd_cache = {}
         self.embedding_size = config.embedding_size
         self.batch_size = config.batch_size
         self.num_update = 0
-        self.batch_end_param = namedtuple('batch_end_param', ['loss', 'num_epoch', 'num_update'])
+        self.batch_end_param = namedtuple('batch_end_param',
+                                          ['loss', 'num_epoch', 'num_update'])
 
         self.fc7_model = fc7_model
         self.symbol = symbol
         self.logger = logger
-        self.backbone_module = mx.module.Module(
-            self.symbol, ['data'], ['softmax_label'], logger=self.logger, context=self.gpu)
+        self.backbone_module = mx.module.Module(self.symbol, ['data'],
+                                                ['softmax_label'],
+                                                logger=self.logger,
+                                                context=self.gpu)
 
         self.memory_bank = memory_bank
         self.memory_optimizer = memory_optimizer
@@ -78,8 +87,13 @@ class SampleDistributeModule(object):
             rank_0_dict[key] = hvd.broadcast(tensor, 0, key)
         return rank_0_dict
 
-    def fit(self, train_data, optimizer_params, batch_end_callback,
-            initializer, arg_params=None, aux_params=None):
+    def fit(self,
+            train_data,
+            optimizer_params,
+            batch_end_callback,
+            initializer,
+            arg_params=None,
+            aux_params=None):
 
         # Bind -> Init_params -> Init_optimizers
         self.bind(train_data.provide_data, train_data.provide_label, True)
@@ -115,7 +129,9 @@ class SampleDistributeModule(object):
 
                 if batch_end_callback is not None:
                     batch_end_params = self.batch_end_param(
-                        loss=self.loss_cache, num_epoch=num_epoch, num_update=self.num_update)
+                        loss=self.loss_cache,
+                        num_epoch=num_epoch,
+                        num_update=self.num_update)
                     batch_end_callback(batch_end_params)
 
     def get_export_params(self):
@@ -143,8 +159,13 @@ class SampleDistributeModule(object):
             v = self.nd_cache[key]
         return v
 
-    def init_params(self, initializer, arg_params=None, aux_params=None,
-                    allow_missing=False, force_init=False, allow_extra=False):
+    def init_params(self,
+                    initializer,
+                    arg_params=None,
+                    aux_params=None,
+                    allow_missing=False,
+                    force_init=False,
+                    allow_extra=False):
         """Initializes the parameters and auxiliary states.
 
         Parameters
@@ -168,29 +189,34 @@ class SampleDistributeModule(object):
             contain extra parameters that is not needed by the executor.
         """
         # backbone
-        self.backbone_module.init_params(
-            initializer=initializer, arg_params=arg_params,
-            aux_params=aux_params, allow_missing=allow_missing,
-            force_init=force_init, allow_extra=allow_extra)
+        self.backbone_module.init_params(initializer=initializer,
+                                         arg_params=arg_params,
+                                         aux_params=aux_params,
+                                         allow_missing=allow_missing,
+                                         force_init=force_init,
+                                         allow_extra=allow_extra)
 
     def prepare(self, data_batch, sparse_row_id_fn=None):
         if sparse_row_id_fn is not None:
-            warnings.warn(UserWarning("sparse_row_id_fn is not invoked for BaseModule."))
+            warnings.warn(
+                UserWarning("sparse_row_id_fn is not invoked for BaseModule."))
 
     def allgather(self, tensor, name, shape, dtype, context):
         """ Implement in-place AllGather using AllReduce
         """
-        assert isinstance(tensor, nd.NDArray),          type(tensor)
-        assert isinstance(name, str),                   type(name)
-        assert isinstance(shape, tuple),                type(shape)
-        assert isinstance(dtype, str),                  type(dtype)
+        assert isinstance(tensor, nd.NDArray), type(tensor)
+        assert isinstance(name, str), type(name)
+        assert isinstance(shape, tuple), type(shape)
+        assert isinstance(dtype, str), type(dtype)
         assert isinstance(context, mx.context.Context), type(context)
-        total_tensor = self.get_ndarray(
-            context=context, name=name, shape=shape, dtype=dtype)
-        total_tensor[:] = 0                                      # reset array before all-reduce is very important
-        total_tensor[self.rank * self.batch_size:
-                     self.rank * self.batch_size + self.batch_size] = tensor
-        hvd.allreduce_(total_tensor, average=False)              # all-reduce in-place
+        total_tensor = self.get_ndarray(context=context,
+                                        name=name,
+                                        shape=shape,
+                                        dtype=dtype)
+        total_tensor[:] = 0  # reset array before all-reduce is very important
+        total_tensor[self.rank * self.batch_size:self.rank * self.batch_size +
+                     self.batch_size] = tensor
+        hvd.allreduce_(total_tensor, average=False)  # all-reduce in-place
         return total_tensor
 
     def forward(self, data_batch, is_train=None):
@@ -200,29 +226,32 @@ class SampleDistributeModule(object):
             fc1 = self.backbone_module.get_outputs()[0]
             label = data_batch.label[0]
 
-            total_features = self.allgather(
-                tensor=fc1,
-                name='total_feature',
-                shape=(self.batch_size * self.size, self.embedding_size),
-                dtype='float32',
-                context=self.gpu
-            )
-            total_labels = self.allgather(
-                tensor=label,
-                name='total_label',
-                shape=(self.batch_size * self.size,),
-                dtype='int32',
-                context=self.cpu
-            )
+            total_features = self.allgather(tensor=fc1,
+                                            name='total_feature',
+                                            shape=(self.batch_size * self.size,
+                                                   self.embedding_size),
+                                            dtype='float32',
+                                            context=self.gpu)
+            total_labels = self.allgather(tensor=label,
+                                          name='total_label',
+                                          shape=(self.batch_size *
+                                                 self.size, ),
+                                          dtype='int32',
+                                          context=self.cpu)
             return total_features, total_labels
         else:
             return None
 
-    def backward_all(self, total_feature, total_label, ):
+    def backward_all(
+        self,
+        total_feature,
+        total_label,
+    ):
         # get memory bank learning rate
         self.memory_lr = self.memory_optimizer.lr_scheduler(self.num_update)
 
-        self.grad_cache = self.get_ndarray(self.gpu, 'grad_cache', total_feature.shape)
+        self.grad_cache = self.get_ndarray(self.gpu, 'grad_cache',
+                                           total_feature.shape)
         self.loss_cache = self.get_ndarray(self.gpu, 'loss_cache', [1])
 
         self.grad_cache[:] = 0
@@ -238,10 +267,9 @@ class SampleDistributeModule(object):
         total_feature_grad = grad
         total_feature_grad = hvd.allreduce(total_feature_grad, average=False)
 
-        fc1_grad = total_feature_grad[
-            self.batch_size * self.rank:
-            self.batch_size * self.rank + self.batch_size
-        ]
+        fc1_grad = total_feature_grad[self.batch_size *
+                                      self.rank:self.batch_size * self.rank +
+                                      self.batch_size]
         self.backbone_module.backward(out_grads=[fc1_grad / self.size])
 
     def get_outputs(self, merge_multi_context=True):
@@ -253,7 +281,8 @@ class SampleDistributeModule(object):
         list of NDArray or list of list of NDArray
             Output.
         """
-        return self.backbone_module.get_outputs(merge_multi_context=merge_multi_context)
+        return self.backbone_module.get_outputs(
+            merge_multi_context=merge_multi_context)
 
     def update(self):
         """
@@ -264,7 +293,9 @@ class SampleDistributeModule(object):
         mx.nd.waitall()
 
     def bind(self, data_shapes, label_shapes=None, for_training=True):
-        self.backbone_module.bind(data_shapes, label_shapes, for_training=for_training)
+        self.backbone_module.bind(data_shapes,
+                                  label_shapes,
+                                  for_training=for_training)
 
     def init_optimizer(self, optimizer_params, force_init=False):
         """
@@ -279,14 +310,18 @@ class SampleDistributeModule(object):
             Default ``False``, indicating whether we should force re-initializing the
             optimizer in the case an optimizer is already installed.
         """
-        optimizer_backbone = DistributedOptimizer(mx.optimizer.SGD(**optimizer_params))
-        self.backbone_module.init_optimizer('local', optimizer_backbone, force_init=force_init)
+        optimizer_backbone = DistributedOptimizer(
+            mx.optimizer.SGD(**optimizer_params))
+        self.backbone_module.init_optimizer('local',
+                                            optimizer_backbone,
+                                            force_init=force_init)
 
     def backward(self, total_feature, label):
         memory_bank = self.memory_bank
         assert memory_bank.num_local == memory_bank.num_sample, "pass"
 
-        _data = self.get_ndarray2(self.gpu, "data_%d" % self.rank, total_feature)
+        _data = self.get_ndarray2(self.gpu, "data_%d" % self.rank,
+                                  total_feature)
         # Attach grad
         _data.attach_grad()
         memory_bank.weight.attach_grad()
@@ -294,23 +329,27 @@ class SampleDistributeModule(object):
         # Convert label
         _label = self.get_ndarray2(self.gpu, 'label_%d' % self.rank, label)
         _label = _label - int(self.rank * memory_bank.num_local)
-        _fc7, _one_hot = self.fc7_model.forward(
-            _data, memory_bank.weight, mapping_label=_label, depth=memory_bank.num_local)
+        _fc7, _one_hot = self.fc7_model.forward(_data,
+                                                memory_bank.weight,
+                                                mapping_label=_label,
+                                                depth=memory_bank.num_local)
 
         # Sync max
         max_fc7 = nd.max(_fc7, axis=1, keepdims=True)
         max_fc7 = nd.reshape(max_fc7, -1)
 
-        total_max_fc7 = self.get_ndarray(
-            context=self.gpu, name='total_max_fc7',
-            shape=(max_fc7.shape[0], self.size), dtype='float32')
+        total_max_fc7 = self.get_ndarray(context=self.gpu,
+                                         name='total_max_fc7',
+                                         shape=(max_fc7.shape[0], self.size),
+                                         dtype='float32')
         total_max_fc7[:] = 0
         total_max_fc7[:, self.rank] = max_fc7
         hvd.allreduce_(total_max_fc7, average=False)
 
-        global_max_fc7 = self.get_ndarray(
-            context=self.gpu, name='global_max_fc7',
-            shape=(max_fc7.shape[0], 1), dtype='float32')
+        global_max_fc7 = self.get_ndarray(context=self.gpu,
+                                          name='global_max_fc7',
+                                          shape=(max_fc7.shape[0], 1),
+                                          dtype='float32')
         nd.max(total_max_fc7, axis=1, keepdims=True, out=global_max_fc7)
 
         # Calculate exp(logits)
@@ -339,17 +378,17 @@ class SampleDistributeModule(object):
 
         # Update center
         _weight_grad = memory_bank.weight.grad
-        self.memory_optimizer.update(
-            weight=memory_bank.weight,
-            grad=_weight_grad,
-            state=memory_bank.weight_mom,
-            learning_rate=self.memory_lr)
+        self.memory_optimizer.update(weight=memory_bank.weight,
+                                     grad=_weight_grad,
+                                     state=memory_bank.weight_mom,
+                                     learning_rate=self.memory_lr)
 
         return _data.grad, global_loss
 
     def backward_sample(self, total_feature, label):
         this_rank_classes = int(self.memory_bank.num_sample)
-        local_index, unique_sorted_global_label = self.memory_bank.sample(label)
+        local_index, unique_sorted_global_label = self.memory_bank.sample(
+            label)
 
         # Get local index
         _mapping_dict = {}
@@ -357,7 +396,8 @@ class SampleDistributeModule(object):
         global_label_set = set(unique_sorted_global_label)
         for idx, absolute_label in enumerate(local_sampled_class):
             if absolute_label in global_label_set:
-                _mapping_dict[absolute_label] = idx + self.rank * self.memory_bank.num_sample
+                _mapping_dict[
+                    absolute_label] = idx + self.rank * self.memory_bank.num_sample
 
         label_list = list(label.asnumpy())
         mapping_label = []
@@ -377,37 +417,51 @@ class SampleDistributeModule(object):
 
         # Sync to gpu
         if self.memory_bank.gpu:
-            _data = self.get_ndarray2(self.gpu, "data_%d" % self.rank, total_feature)
-            _weight = self.get_ndarray2(self.gpu, 'weight_%d' % self.rank, sample_weight)
-            _weight_mom = self.get_ndarray2(self.gpu, 'weight_mom_%d' % self.rank, sample_weight_mom)
+            _data = self.get_ndarray2(self.gpu, "data_%d" % self.rank,
+                                      total_feature)
+            _weight = self.get_ndarray2(self.gpu, 'weight_%d' % self.rank,
+                                        sample_weight)
+            _weight_mom = self.get_ndarray2(self.gpu,
+                                            'weight_mom_%d' % self.rank,
+                                            sample_weight_mom)
         else:
-            _data = self.get_ndarray2(self.gpu, "data_%d" % self.rank, total_feature)
-            _weight = self.get_ndarray2(self.gpu, 'weight_%d' % self.rank, sample_weight)
-            _weight_mom = self.get_ndarray2(self.gpu, 'weight_mom_%d' % self.rank, sample_weight_mom)
+            _data = self.get_ndarray2(self.gpu, "data_%d" % self.rank,
+                                      total_feature)
+            _weight = self.get_ndarray2(self.gpu, 'weight_%d' % self.rank,
+                                        sample_weight)
+            _weight_mom = self.get_ndarray2(self.gpu,
+                                            'weight_mom_%d' % self.rank,
+                                            sample_weight_mom)
 
         # Attach grad
         _data.attach_grad()
         _weight.attach_grad()
 
         # Convert label
-        _label = self.get_ndarray2(self.gpu, 'mapping_label_%d' % self.rank, mapping_label)
+        _label = self.get_ndarray2(self.gpu, 'mapping_label_%d' % self.rank,
+                                   mapping_label)
         _label = _label - int(self.rank * self.memory_bank.num_sample)
-        _fc7, _one_hot = self.fc7_model.forward(_data, _weight, mapping_label=_label, depth=this_rank_classes)
+        _fc7, _one_hot = self.fc7_model.forward(_data,
+                                                _weight,
+                                                mapping_label=_label,
+                                                depth=this_rank_classes)
 
         # Sync max
         max_fc7 = nd.max(_fc7, axis=1, keepdims=True)
         max_fc7 = nd.reshape(max_fc7, -1)
 
-        total_max_fc7 = self.get_ndarray(
-            context=self.gpu, name='total_max_fc7',
-            shape=(max_fc7.shape[0], self.size), dtype='float32')
+        total_max_fc7 = self.get_ndarray(context=self.gpu,
+                                         name='total_max_fc7',
+                                         shape=(max_fc7.shape[0], self.size),
+                                         dtype='float32')
         total_max_fc7[:] = 0
         total_max_fc7[:, self.rank] = max_fc7
         hvd.allreduce_(total_max_fc7, average=False)
 
-        global_max_fc7 = self.get_ndarray(
-            context=self.gpu, name='global_max_fc7',
-            shape=(max_fc7.shape[0], 1), dtype='float32')
+        global_max_fc7 = self.get_ndarray(context=self.gpu,
+                                          name='global_max_fc7',
+                                          shape=(max_fc7.shape[0], 1),
+                                          dtype='float32')
         nd.max(total_max_fc7, axis=1, keepdims=True, out=global_max_fc7)
 
         # Calculate exp(logits)
@@ -435,15 +489,20 @@ class SampleDistributeModule(object):
 
         # Update center
         _weight_grad = _weight.grad
-        self.memory_optimizer.update(weight=_weight, grad=_weight_grad, state=_weight_mom, learning_rate=self.memory_lr)
+        self.memory_optimizer.update(weight=_weight,
+                                     grad=_weight_grad,
+                                     state=_weight_mom,
+                                     learning_rate=self.memory_lr)
         if self.memory_bank.gpu:
-            self.memory_bank.set(
-                index=local_index,
-                updated_weight=_weight,
-                updated_weight_mom=_weight_mom)
+            self.memory_bank.set(index=local_index,
+                                 updated_weight=_weight,
+                                 updated_weight_mom=_weight_mom)
         else:
-            self.memory_bank.set(
-                index=local_index,
-                updated_weight=self.get_ndarray2(mx.cpu(), "cpu_weight_%d" % self.rank, _weight),
-                updated_weight_mom=self.get_ndarray2(mx.cpu(), "cpu_weight_mom_%d" % self.rank, _weight_mom))
+            self.memory_bank.set(index=local_index,
+                                 updated_weight=self.get_ndarray2(
+                                     mx.cpu(), "cpu_weight_%d" % self.rank,
+                                     _weight),
+                                 updated_weight_mom=self.get_ndarray2(
+                                     mx.cpu(), "cpu_weight_mom_%d" % self.rank,
+                                     _weight_mom))
         return _data.grad, global_loss

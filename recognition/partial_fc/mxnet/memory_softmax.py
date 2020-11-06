@@ -25,9 +25,10 @@ class MarginLoss(object):
             #
             fc7 = nd.dot(norm_data, norm_weight, transpose_b=True)
             #
-            mapping_label_onehot = mx.nd.one_hot(
-                indices=mapping_label, depth=depth,
-                on_value=1.0, off_value=0.0)
+            mapping_label_onehot = mx.nd.one_hot(indices=mapping_label,
+                                                 depth=depth,
+                                                 on_value=1.0,
+                                                 off_value=0.0)
             # cosface
             if self.loss_m1 == 1.0 and self.loss_m2 == 0.0:
                 _one_hot = mapping_label_onehot * self.loss_m3

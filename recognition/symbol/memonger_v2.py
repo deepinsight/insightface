@@ -1,6 +1,7 @@
 import mxnet as mx
 import math
 
+
 def prod(shape):
     """Get product of the shape.
     """
@@ -138,7 +139,10 @@ def search_plan(sym, ntrial=6, type_dict=None, **kwargs):
 
     for k in range(nbegin):
         info = {}
-        sym = make_mirror_plan(sym, threshold=threshold, plan_info=info, **kwargs)
+        sym = make_mirror_plan(sym,
+                               threshold=threshold,
+                               plan_info=info,
+                               **kwargs)
         cost = get_cost(sym, type_dict, **kwargs)
         save_size = info['save_size'] >> 20
         local_size = info['max_size'] >> 20
@@ -147,7 +151,7 @@ def search_plan(sym, ntrial=6, type_dict=None, **kwargs):
             min_cost = cost
         if min_threshold is None or local_size < min_threshold:
             min_threshold = local_size
-        print ("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
+        print("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
         history.append((cost, threshold, sym))
         threshold = guess
 
@@ -156,19 +160,26 @@ def search_plan(sym, ntrial=6, type_dict=None, **kwargs):
     threshold = min_threshold + step
     if step > 0:
         for k in range(ntrial):
-            sym = make_mirror_plan(sym, threshold=threshold, plan_info=info, **kwargs)
+            sym = make_mirror_plan(sym,
+                                   threshold=threshold,
+                                   plan_info=info,
+                                   **kwargs)
             cost = get_cost(sym, type_dict, **kwargs)
-            print ("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
+            print("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
             history.append((cost, threshold, sym))
             threshold += step
 
-    history.sort(key = lambda x: x[0])
+    history.sort(key=lambda x: x[0])
     cost, threshold, sym = history[0]
     print('Find best plan with threshold=%d, cost=%d MB' % (threshold, cost))
     return sym
 
 
-def make_mirror_plan_to_layer(sym,layer_name,threshold, plan_info=None, **kwargs):
+def make_mirror_plan_to_layer(sym,
+                              layer_name,
+                              threshold,
+                              plan_info=None,
+                              **kwargs):
     """
     sym is the original symbal
     layer_name is a name to which layer of the network should be set as mirror
@@ -186,8 +197,8 @@ def make_mirror_plan_to_layer(sym,layer_name,threshold, plan_info=None, **kwargs
     max_size = 0
     last_stage = ''
     stage_decision = ''
-    switch=True
-    
+    switch = True
+
     for idx, item in enumerate(shape_dict):
         sb = internals[idx]
         name, shape = item
@@ -200,7 +211,7 @@ def make_mirror_plan_to_layer(sym,layer_name,threshold, plan_info=None, **kwargs
             local_size += prod(shape) * 4
             sb._set_attr(force_mirroring='True')
             print('set force_mirroring', name, total_size, local_size)
-        if layer_name!='' and layer_name in name:
+        if layer_name != '' and layer_name in name:
             switch = False
 
         if sb.attr('mirror_stage') is not None:
@@ -226,7 +237,13 @@ def make_mirror_plan_to_layer(sym,layer_name,threshold, plan_info=None, **kwargs
         plan_info['save_size'] = save_size
     return sym
 
-def search_plan_to_layer(sym,layer_name=None,threshold=500, ntrial=6, type_dict=None, **kwargs):
+
+def search_plan_to_layer(sym,
+                         layer_name=None,
+                         threshold=500,
+                         ntrial=6,
+                         type_dict=None,
+                         **kwargs):
     """Quickly heurestic search over possible plans to find good memory plan.
 
     Parameters
@@ -244,7 +261,11 @@ def search_plan_to_layer(sym,layer_name=None,threshold=500, ntrial=6, type_dict=
 
     for k in range(nbegin):
         info = {}
-        sym = make_mirror_plan_to_layer(sym,layer_name=layer_name,threshold=threshold, plan_info=info, **kwargs)
+        sym = make_mirror_plan_to_layer(sym,
+                                        layer_name=layer_name,
+                                        threshold=threshold,
+                                        plan_info=info,
+                                        **kwargs)
         cost = get_cost(sym, type_dict, **kwargs)
         save_size = info['save_size'] >> 20
         local_size = info['max_size'] >> 20
@@ -253,7 +274,7 @@ def search_plan_to_layer(sym,layer_name=None,threshold=500, ntrial=6, type_dict=
             min_cost = cost
         if min_threshold is None or local_size < min_threshold:
             min_threshold = local_size
-        print ("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
+        print("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
         history.append((cost, threshold, sym))
         threshold = guess
 
@@ -263,13 +284,17 @@ def search_plan_to_layer(sym,layer_name=None,threshold=500, ntrial=6, type_dict=
     threshold = min_threshold + step
     if step > 0:
         for k in range(ntrial):
-            sym = make_mirror_plan_to_layer(sym,layer_name=layer_name, threshold=threshold, plan_info=info, **kwargs)
+            sym = make_mirror_plan_to_layer(sym,
+                                            layer_name=layer_name,
+                                            threshold=threshold,
+                                            plan_info=info,
+                                            **kwargs)
             cost = get_cost(sym, type_dict, **kwargs)
-            print ("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
+            print("Search threshold=%d MB, cost=%d MB" % (threshold, cost))
             history.append((cost, threshold, sym))
             threshold += step
 
-    history.sort(key = lambda x: x[0])
+    history.sort(key=lambda x: x[0])
     cost, threshold, sym = history[0]
     print('Find best plan with threshold=%d, cost=%d MB' % (threshold, cost))
     return sym

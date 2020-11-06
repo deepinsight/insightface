@@ -38,14 +38,18 @@ def parse_args():
 
     args, rest = parser.parse_known_args()
     default.generate_config(args.loss, args.dataset, args.network)
-    parser.add_argument('--models-root', default="./test", help='root directory to save model.')
+    parser.add_argument('--models-root',
+                        default="./test",
+                        help='root directory to save model.')
     args = parser.parse_args()
     return args
 
 
 def set_logger(logger, rank, models_root):
-    formatter = logging.Formatter("rank-id:" + str(rank) + ":%(asctime)s-%(message)s")
-    file_handler = logging.FileHandler(os.path.join(models_root, "%d_hist.log" % rank))
+    formatter = logging.Formatter("rank-id:" + str(rank) +
+                                  ":%(asctime)s-%(message)s")
+    file_handler = logging.FileHandler(
+        os.path.join(models_root, "%d_hist.log" % rank))
     stream_handler = logging.StreamHandler(sys.stdout)
     file_handler.setFormatter(formatter)
     stream_handler.setFormatter(formatter)
@@ -89,17 +93,24 @@ def train_net():
     # We equally store the class centers (softmax linear transformation matrix) on all GPUs in order.
     num_local = (config.num_classes + size - 1) // size
     num_sample = int(num_local * config.sample_ratio)
-    memory_bank = MemoryBank(
-        num_sample=num_sample, num_local=num_local, rank=rank,
-        local_rank=local_rank, embedding_size=config.embedding_size,
-        prefix=prefix_dir, gpu=True)
+    memory_bank = MemoryBank(num_sample=num_sample,
+                             num_local=num_local,
+                             rank=rank,
+                             local_rank=local_rank,
+                             embedding_size=config.embedding_size,
+                             prefix=prefix_dir,
+                             gpu=True)
 
     if config.debug:
         train_iter = DummyIter(config.batch_size, data_shape, 1000 * 10000)
     else:
-        train_iter = FaceImageIter(
-            batch_size=config.batch_size, data_shape=data_shape, path_imgrec=config.rec,
-            shuffle=True, rand_mirror=True, context=rank, context_num=size)
+        train_iter = FaceImageIter(batch_size=config.batch_size,
+                                   data_shape=data_shape,
+                                   path_imgrec=config.rec,
+                                   shuffle=True,
+                                   rand_mirror=True,
+                                   context=rank,
+                                   context_num=size)
     train_data_iter = mx.io.PrefetchingIter(train_iter)
 
     esym, save_symbol = get_symbol_embedding()
@@ -132,9 +143,9 @@ def train_net():
         memory_optimizer=memory_bank_optimizer)
     #
     if not config.debug and local_rank == 0:
-        cb_vert        = CallBackVertification(esym, train_module)
-    cb_speed       = CallBackLogging(rank, size, prefix_dir)
-    cb_save        = CallBackModelSave(save_symbol, train_module, prefix, rank)
+        cb_vert = CallBackVertification(esym, train_module)
+    cb_speed = CallBackLogging(rank, size, prefix_dir)
+    cb_save = CallBackModelSave(save_symbol, train_module, prefix, rank)
     cb_center_save = CallBackCenterSave(memory_bank)
 
     def call_back_fn(params):
@@ -144,11 +155,10 @@ def train_net():
         cb_center_save(params)
         cb_save(params)
 
-    train_module.fit(
-        train_data_iter,
-        optimizer_params=backbone_kwargs,
-        initializer=mx.init.Normal(0.1),
-        batch_end_callback=call_back_fn)
+    train_module.fit(train_data_iter,
+                     optimizer_params=backbone_kwargs,
+                     initializer=mx.init.Normal(0.1),
+                     batch_end_callback=call_back_fn)
 
 
 if __name__ == '__main__':

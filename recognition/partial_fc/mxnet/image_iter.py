@@ -21,12 +21,22 @@ logger = logging.getLogger()
 
 
 class FaceImageIter(io.DataIter):
-
-    def __init__(self, batch_size, data_shape, path_imgrec=None,
-                 shuffle=False, aug_list=None, mean=None,
-                 rand_mirror=False, cutoff=0, color_jittering=0,
+    def __init__(self,
+                 batch_size,
+                 data_shape,
+                 path_imgrec=None,
+                 shuffle=False,
+                 aug_list=None,
+                 mean=None,
+                 rand_mirror=False,
+                 cutoff=0,
+                 color_jittering=0,
                  images_filter=0,
-                 data_name='data', label_name='softmax_label', context=0, context_num=1, **kwargs):
+                 data_name='data',
+                 label_name='softmax_label',
+                 context=0,
+                 context_num=1,
+                 **kwargs):
         super(FaceImageIter, self).__init__()
         assert path_imgrec
         self.context = context
@@ -34,14 +44,16 @@ class FaceImageIter(io.DataIter):
         if path_imgrec:
             logging.info('loading recordio %s...', path_imgrec)
             path_imgidx = path_imgrec[0:-4] + ".idx"
-            self.imgrec = recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, 'r')
+            self.imgrec = recordio.MXIndexedRecordIO(path_imgidx, path_imgrec,
+                                                     'r')
             s = self.imgrec.read_idx(0)
             header, _ = recordio.unpack(s)
             if header.flag > 0:
                 self.header0 = (int(header.label[0]), int(header.label[1]))
                 self.imgidx = []
                 self.id2range = {}
-                self.seq_identity = range(int(header.label[0]), int(header.label[1]))
+                self.seq_identity = range(int(header.label[0]),
+                                          int(header.label[1]))
                 for identity in self.seq_identity:
                     s = self.imgrec.read_idx(identity)
                     header, _ = recordio.unpack(s)
@@ -69,7 +81,7 @@ class FaceImageIter(io.DataIter):
             self.nd_mean = mx.nd.array(self.mean).reshape((1, 1, 3))
 
         self.check_data_shape(data_shape)
-        self.provide_data = [(data_name, (batch_size,) + data_shape)]
+        self.provide_data = [(data_name, (batch_size, ) + data_shape)]
         self.batch_size = batch_size
         self.data_shape = data_shape
         self.shuffle = shuffle
@@ -79,12 +91,13 @@ class FaceImageIter(io.DataIter):
         self.cutoff = cutoff
         self.color_jittering = color_jittering
         self.CJA = mx.image.ColorJitterAug(0.125, 0.125, 0.125)
-        self.provide_label = [(label_name, (batch_size,))]
+        self.provide_label = [(label_name, (batch_size, ))]
 
         self.cur = 0
         self.nbatch = 0
         self.is_init = False
-        self.num_samples_per_gpu = int(math.floor(len(self.seq) * 1.0 / self.context_num))
+        self.num_samples_per_gpu = int(
+            math.floor(len(self.seq) * 1.0 / self.context_num))
 
     def reset(self):
         """Resets the iterator to the beginning of the data."""
@@ -104,7 +117,8 @@ class FaceImageIter(io.DataIter):
             while True:
                 if self.cur >= self.num_samples_per_gpu:
                     raise StopIteration
-                idx = self.seq[self.num_samples_per_gpu * self.context + self.cur]
+                idx = self.seq[self.num_samples_per_gpu * self.context +
+                               self.cur]
                 self.cur += 1
                 if self.imgrec is not None:
                     s = self.imgrec.read_idx(idx)
@@ -242,9 +256,11 @@ class FaceImageIter(io.DataIter):
     def check_data_shape(self, data_shape):
         """Checks if the input data shape is valid"""
         if not len(data_shape) == 3:
-            raise ValueError('data_shape should have length 3, with dimensions CxHxW')
+            raise ValueError(
+                'data_shape should have length 3, with dimensions CxHxW')
         if not data_shape[0] == 3:
-            raise ValueError('This iterator expects inputs to have 3 channels.')
+            raise ValueError(
+                'This iterator expects inputs to have 3 channels.')
 
     def check_valid_image(self, data):
         """Checks if the input data is valid"""
@@ -303,17 +319,23 @@ class FaceImageIterList(io.DataIter):
 
 # dummy
 class DummyIter(mx.io.DataIter):
-    def __init__(self, batch_size, data_shape, batches=1000, mode='', dtype='float32'):
+    def __init__(self,
+                 batch_size,
+                 data_shape,
+                 batches=1000,
+                 mode='',
+                 dtype='float32'):
         super(DummyIter, self).__init__(batch_size)
-        self.data_shape = (batch_size,) + data_shape
-        self.label_shape = (batch_size,)
+        self.data_shape = (batch_size, ) + data_shape
+        self.label_shape = (batch_size, )
         self.provide_data = [('data', self.data_shape)]
         self.provide_label = [('softmax_label', self.label_shape)]
         # self.provide_label = [('label', self.label_shape)]
         # if mode == 'perseus':
         #    self.provide_label = []
-        self.batch = mx.io.DataBatch(data=[mx.nd.zeros(self.data_shape, dtype=dtype)],
-                                     label=[mx.nd.zeros(self.label_shape, dtype=dtype)])
+        self.batch = mx.io.DataBatch(
+            data=[mx.nd.zeros(self.data_shape, dtype=dtype)],
+            label=[mx.nd.zeros(self.label_shape, dtype=dtype)])
         self._batches = 0
         self.batches = batches
 
@@ -324,4 +346,3 @@ class DummyIter(mx.io.DataIter):
         else:
             self._batches = 0
             raise StopIteration
-

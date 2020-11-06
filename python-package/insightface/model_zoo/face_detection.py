@@ -4,11 +4,11 @@ import numpy as np
 import mxnet.ndarray as nd
 import cv2
 
-__all__ = ['FaceDetector',
-           'retinaface_r50_v1',
-           'retinaface_mnet025_v1',
-           'retinaface_mnet025_v2',
-           'get_retinaface']
+__all__ = [
+    'FaceDetector', 'retinaface_r50_v1', 'retinaface_mnet025_v1',
+    'retinaface_mnet025_v2', 'get_retinaface'
+]
+
 
 def _whctrs(anchor):
     """
@@ -30,11 +30,10 @@ def _mkanchors(ws, hs, x_ctr, y_ctr):
 
     ws = ws[:, np.newaxis]
     hs = hs[:, np.newaxis]
-    anchors = np.hstack((x_ctr - 0.5 * (ws - 1),
-                         y_ctr - 0.5 * (hs - 1),
-                         x_ctr + 0.5 * (ws - 1),
-                         y_ctr + 0.5 * (hs - 1)))
+    anchors = np.hstack((x_ctr - 0.5 * (ws - 1), y_ctr - 0.5 * (hs - 1),
+                         x_ctr + 0.5 * (ws - 1), y_ctr + 0.5 * (hs - 1)))
     return anchors
+
 
 def _ratio_enum(anchor, ratios):
     """
@@ -61,6 +60,7 @@ def _scale_enum(anchor, scales):
     anchors = _mkanchors(ws, hs, x_ctr, y_ctr)
     return anchors
 
+
 def anchors_plane(height, width, stride, base_anchors):
     """
     Parameters
@@ -86,8 +86,11 @@ def anchors_plane(height, width, stride, base_anchors):
                 all_anchors[ih, iw, k, 3] = base_anchors[k, 3] + sh
     return all_anchors
 
-def generate_anchors(base_size=16, ratios=[0.5, 1, 2],
-                     scales=2 ** np.arange(3, 6), stride=16):
+
+def generate_anchors(base_size=16,
+                     ratios=[0.5, 1, 2],
+                     scales=2**np.arange(3, 6),
+                     stride=16):
     """
     Generate anchor (reference) windows by enumerating aspect ratios X
     scales wrt a reference (0, 0, 15, 15) window.
@@ -95,9 +98,12 @@ def generate_anchors(base_size=16, ratios=[0.5, 1, 2],
 
     base_anchor = np.array([1, 1, base_size, base_size]) - 1
     ratio_anchors = _ratio_enum(base_anchor, ratios)
-    anchors = np.vstack([_scale_enum(ratio_anchors[i, :], scales)
-                         for i in range(ratio_anchors.shape[0])])
+    anchors = np.vstack([
+        _scale_enum(ratio_anchors[i, :], scales)
+        for i in range(ratio_anchors.shape[0])
+    ])
     return anchors
+
 
 def generate_anchors_fpn(cfg):
     """
@@ -106,21 +112,22 @@ def generate_anchors_fpn(cfg):
     """
     RPN_FEAT_STRIDE = []
     for k in cfg:
-      RPN_FEAT_STRIDE.append( int(k) )
+        RPN_FEAT_STRIDE.append(int(k))
     RPN_FEAT_STRIDE = sorted(RPN_FEAT_STRIDE, reverse=True)
     anchors = []
     for k in RPN_FEAT_STRIDE:
-      v = cfg[str(k)]
-      bs = v['BASE_SIZE']
-      __ratios = np.array(v['RATIOS'])
-      __scales = np.array(v['SCALES'])
-      stride = int(k)
-      #print('anchors_fpn', bs, __ratios, __scales, file=sys.stderr)
-      r = generate_anchors(bs, __ratios, __scales, stride)
-      #print('anchors_fpn', r.shape, file=sys.stderr)
-      anchors.append(r)
+        v = cfg[str(k)]
+        bs = v['BASE_SIZE']
+        __ratios = np.array(v['RATIOS'])
+        __scales = np.array(v['SCALES'])
+        stride = int(k)
+        #print('anchors_fpn', bs, __ratios, __scales, file=sys.stderr)
+        r = generate_anchors(bs, __ratios, __scales, stride)
+        #print('anchors_fpn', r.shape, file=sys.stderr)
+        anchors.append(r)
 
     return anchors
+
 
 def clip_pad(tensor, pad_shape):
     """
@@ -133,9 +140,10 @@ def clip_pad(tensor, pad_shape):
     h, w = pad_shape
 
     if h < H or w < W:
-      tensor = tensor[:, :, :h, :w].copy()
+        tensor = tensor[:, :, :h, :w].copy()
 
     return tensor
+
 
 def bbox_pred(boxes, box_deltas):
     """
@@ -174,10 +182,11 @@ def bbox_pred(boxes, box_deltas):
     # y2
     pred_boxes[:, 3:4] = pred_ctr_y + 0.5 * (pred_h - 1.0)
 
-    if box_deltas.shape[1]>4:
-      pred_boxes[:,4:] = box_deltas[:,4:]
+    if box_deltas.shape[1] > 4:
+        pred_boxes[:, 4:] = box_deltas[:, 4:]
 
     return pred_boxes
+
 
 def landmark_pred(boxes, landmark_deltas):
     if boxes.shape[0] == 0:
@@ -189,9 +198,10 @@ def landmark_pred(boxes, landmark_deltas):
     ctr_y = boxes[:, 1] + 0.5 * (heights - 1.0)
     pred = landmark_deltas.copy()
     for i in range(5):
-        pred[:,i,0] = landmark_deltas[:,i,0]*widths + ctr_x
-        pred[:,i,1] = landmark_deltas[:,i,1]*heights + ctr_y
+        pred[:, i, 0] = landmark_deltas[:, i, 0] * widths + ctr_x
+        pred[:, i, 1] = landmark_deltas[:, i, 1] * heights + ctr_y
     return pred
+
 
 class FaceDetector:
     def __init__(self, param_file, rac):
@@ -203,55 +213,74 @@ class FaceDetector:
         pos = self.param_file.rfind('-')
         prefix = self.param_file[0:pos]
         pos2 = self.param_file.rfind('.')
-        epoch = int(self.param_file[pos+1:pos2])
+        epoch = int(self.param_file[pos + 1:pos2])
         sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch)
-        if ctx_id>=0:
+        if ctx_id >= 0:
             ctx = mx.gpu(ctx_id)
         else:
             ctx = mx.cpu()
-        model = mx.mod.Module(symbol=sym, context=ctx, label_names = None)
+        model = mx.mod.Module(symbol=sym, context=ctx, label_names=None)
         if fix_image_size is not None:
-            data_shape = (1,3)+fix_image_size
+            data_shape = (1, 3) + fix_image_size
         else:
-            data_shape = (1,3)+self.default_image_size
+            data_shape = (1, 3) + self.default_image_size
         model.bind(data_shapes=[('data', data_shape)])
         model.set_params(arg_params, aux_params)
         #warmup
         data = mx.nd.zeros(shape=data_shape)
-        db = mx.io.DataBatch(data=(data,))
+        db = mx.io.DataBatch(data=(data, ))
         model.forward(db, is_train=False)
         out = model.get_outputs()[0].asnumpy()
         self.model = model
         self.nms_threshold = nms
 
         self.landmark_std = 1.0
-        _ratio = (1.,)
+        _ratio = (1., )
         fmc = 3
-        if self.rac=='net3':
-            _ratio = (1.,)
-        elif self.rac=='net3l':
-            _ratio = (1.,)
+        if self.rac == 'net3':
+            _ratio = (1., )
+        elif self.rac == 'net3l':
+            _ratio = (1., )
             self.landmark_std = 0.2
-        elif network=='net5': #retinaface
+        elif network == 'net5':  #retinaface
             fmc = 5
         else:
-            assert False, 'rac setting error %s'%self.rac
+            assert False, 'rac setting error %s' % self.rac
 
-        if fmc==3:
+        if fmc == 3:
             self._feat_stride_fpn = [32, 16, 8]
             self.anchor_cfg = {
-                  '32': {'SCALES': (32,16), 'BASE_SIZE': 16, 'RATIOS': _ratio, 'ALLOWED_BORDER': 9999},
-                  '16': {'SCALES': (8,4), 'BASE_SIZE': 16, 'RATIOS': _ratio, 'ALLOWED_BORDER': 9999},
-                  '8': {'SCALES': (2,1), 'BASE_SIZE': 16, 'RATIOS': _ratio, 'ALLOWED_BORDER': 9999},
-                  }
-        elif fmc==5:
+                '32': {
+                    'SCALES': (32, 16),
+                    'BASE_SIZE': 16,
+                    'RATIOS': _ratio,
+                    'ALLOWED_BORDER': 9999
+                },
+                '16': {
+                    'SCALES': (8, 4),
+                    'BASE_SIZE': 16,
+                    'RATIOS': _ratio,
+                    'ALLOWED_BORDER': 9999
+                },
+                '8': {
+                    'SCALES': (2, 1),
+                    'BASE_SIZE': 16,
+                    'RATIOS': _ratio,
+                    'ALLOWED_BORDER': 9999
+                },
+            }
+        elif fmc == 5:
             self._feat_stride_fpn = [64, 32, 16, 8, 4]
             self.anchor_cfg = {}
-            _ass = 2.0**(1.0/3)
+            _ass = 2.0**(1.0 / 3)
             _basescale = 1.0
             for _stride in [4, 8, 16, 32, 64]:
                 key = str(_stride)
-                value = {'BASE_SIZE': 16, 'RATIOS': _ratio, 'ALLOWED_BORDER': 9999}
+                value = {
+                    'BASE_SIZE': 16,
+                    'RATIOS': _ratio,
+                    'ALLOWED_BORDER': 9999
+                }
                 scales = []
                 for _ in range(3):
                     scales.append(_basescale)
@@ -261,61 +290,70 @@ class FaceDetector:
 
         print(self._feat_stride_fpn, self.anchor_cfg)
         self.use_landmarks = False
-        if len(sym)//len(self._feat_stride_fpn)==3:
+        if len(sym) // len(self._feat_stride_fpn) == 3:
             self.use_landmarks = True
         print('use_landmarks', self.use_landmarks)
         self.fpn_keys = []
 
         for s in self._feat_stride_fpn:
-            self.fpn_keys.append('stride%s'%s)
+            self.fpn_keys.append('stride%s' % s)
 
-        self._anchors_fpn = dict(zip(self.fpn_keys, generate_anchors_fpn(cfg=self.anchor_cfg)))
+        self._anchors_fpn = dict(
+            zip(self.fpn_keys, generate_anchors_fpn(cfg=self.anchor_cfg)))
         for k in self._anchors_fpn:
             v = self._anchors_fpn[k].astype(np.float32)
             self._anchors_fpn[k] = v
         self.anchor_plane_cache = {}
 
-        self._num_anchors = dict(zip(self.fpn_keys, [anchors.shape[0] for anchors in self._anchors_fpn.values()]))
+        self._num_anchors = dict(
+            zip(self.fpn_keys,
+                [anchors.shape[0] for anchors in self._anchors_fpn.values()]))
 
     def detect(self, img, threshold=0.5, scale=1.0):
         proposals_list = []
         scores_list = []
         landmarks_list = []
-        if scale==1.0:
+        if scale == 1.0:
             im = img
         else:
-            im = cv2.resize(img, None, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
+            im = cv2.resize(img,
+                            None,
+                            None,
+                            fx=scale,
+                            fy=scale,
+                            interpolation=cv2.INTER_LINEAR)
         im_info = [im.shape[0], im.shape[1]]
         im_tensor = np.zeros((1, 3, im.shape[0], im.shape[1]))
         for i in range(3):
             im_tensor[0, i, :, :] = im[:, :, 2 - i]
         data = nd.array(im_tensor)
-        db = mx.io.DataBatch(data=(data,), provide_data=[('data', data.shape)])
+        db = mx.io.DataBatch(data=(data, ),
+                             provide_data=[('data', data.shape)])
         self.model.forward(db, is_train=False)
         net_out = self.model.get_outputs()
-        for _idx,s in enumerate(self._feat_stride_fpn):
-            _key = 'stride%s'%s
+        for _idx, s in enumerate(self._feat_stride_fpn):
+            _key = 'stride%s' % s
             stride = int(s)
             if self.use_landmarks:
-              idx = _idx*3
+                idx = _idx * 3
             else:
-              idx = _idx*2
+                idx = _idx * 2
             scores = net_out[idx].asnumpy()
-            scores = scores[:, self._num_anchors['stride%s'%s]:, :, :]
-            idx+=1
+            scores = scores[:, self._num_anchors['stride%s' % s]:, :, :]
+            idx += 1
             bbox_deltas = net_out[idx].asnumpy()
 
             height, width = bbox_deltas.shape[2], bbox_deltas.shape[3]
-            A = self._num_anchors['stride%s'%s]
+            A = self._num_anchors['stride%s' % s]
             K = height * width
             key = (height, width, stride)
             if key in self.anchor_plane_cache:
                 anchors = self.anchor_plane_cache[key]
             else:
-                anchors_fpn = self._anchors_fpn['stride%s'%s]
+                anchors_fpn = self._anchors_fpn['stride%s' % s]
                 anchors = anchors_plane(height, width, stride, anchors_fpn)
                 anchors = anchors.reshape((K * A, 4))
-                if len(self.anchor_plane_cache)<100:
+                if len(self.anchor_plane_cache) < 100:
                     self.anchor_plane_cache[key] = anchors
 
             scores = clip_pad(scores, (height, width))
@@ -323,43 +361,43 @@ class FaceDetector:
 
             bbox_deltas = clip_pad(bbox_deltas, (height, width))
             bbox_deltas = bbox_deltas.transpose((0, 2, 3, 1))
-            bbox_pred_len = bbox_deltas.shape[3]//A
+            bbox_pred_len = bbox_deltas.shape[3] // A
             bbox_deltas = bbox_deltas.reshape((-1, bbox_pred_len))
 
             proposals = bbox_pred(anchors, bbox_deltas)
             #proposals = clip_boxes(proposals, im_info[:2])
 
-
             scores_ravel = scores.ravel()
-            order = np.where(scores_ravel>=threshold)[0]
+            order = np.where(scores_ravel >= threshold)[0]
             proposals = proposals[order, :]
             scores = scores[order]
 
-            proposals[:,0:4] /= scale
+            proposals[:, 0:4] /= scale
 
             proposals_list.append(proposals)
             scores_list.append(scores)
 
             if self.use_landmarks:
-                idx+=1
+                idx += 1
                 landmark_deltas = net_out[idx].asnumpy()
                 landmark_deltas = clip_pad(landmark_deltas, (height, width))
-                landmark_pred_len = landmark_deltas.shape[1]//A
-                landmark_deltas = landmark_deltas.transpose((0, 2, 3, 1)).reshape((-1, 5, landmark_pred_len//5))
+                landmark_pred_len = landmark_deltas.shape[1] // A
+                landmark_deltas = landmark_deltas.transpose(
+                    (0, 2, 3, 1)).reshape((-1, 5, landmark_pred_len // 5))
                 landmark_deltas *= self.landmark_std
                 #print(landmark_deltas.shape, landmark_deltas)
                 landmarks = landmark_pred(anchors, landmark_deltas)
                 landmarks = landmarks[order, :]
 
-                landmarks[:,:,0:2] /= scale
+                landmarks[:, :, 0:2] /= scale
                 landmarks_list.append(landmarks)
 
         proposals = np.vstack(proposals_list)
         landmarks = None
-        if proposals.shape[0]==0:
+        if proposals.shape[0] == 0:
             if self.use_landmarks:
-                landmarks = np.zeros( (0,5,2) )
-            return np.zeros( (0,5) ), landmarks
+                landmarks = np.zeros((0, 5, 2))
+            return np.zeros((0, 5)), landmarks
         scores = np.vstack(scores_list)
         scores_ravel = scores.ravel()
         order = scores_ravel.argsort()[::-1]
@@ -369,9 +407,10 @@ class FaceDetector:
             landmarks = np.vstack(landmarks_list)
             landmarks = landmarks[order].astype(np.float32, copy=False)
 
-        pre_det = np.hstack((proposals[:,0:4], scores)).astype(np.float32, copy=False)
+        pre_det = np.hstack((proposals[:, 0:4], scores)).astype(np.float32,
+                                                                copy=False)
         keep = self.nms(pre_det)
-        det = np.hstack( (pre_det, proposals[:,4:]) )
+        det = np.hstack((pre_det, proposals[:, 4:]))
         det = det[keep, :]
         if self.use_landmarks:
             landmarks = landmarks[keep]
@@ -409,18 +448,19 @@ class FaceDetector:
         return keep
 
 
-def get_retinaface(name, rac='net3',
-               root='~/.insightface/models', **kwargs):
+def get_retinaface(name, rac='net3', root='~/.insightface/models', **kwargs):
     from .model_store import get_model_file
-    _file = get_model_file("retinaface_%s"%name, root=root)
+    _file = get_model_file("retinaface_%s" % name, root=root)
     return FaceDetector(_file, rac)
+
 
 def retinaface_r50_v1(**kwargs):
     return get_retinaface("r50_v1", rac='net3', **kwargs)
 
+
 def retinaface_mnet025_v1(**kwargs):
     return get_retinaface("mnet025_v1", rac='net3', **kwargs)
 
+
 def retinaface_mnet025_v2(**kwargs):
     return get_retinaface("mnet025_v2", rac='net3l', **kwargs)
-
