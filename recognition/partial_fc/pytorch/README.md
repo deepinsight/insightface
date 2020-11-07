@@ -10,6 +10,14 @@ Pytorch 目前是还是预览版本，模型并行是没问题的，但是0.1的
 
 Insightface 社区需要大家一起贡献才会变得更好，欢迎大家提交Pull Request.  
 
+## TODO
+
+- [ ] **No BUG** Sampling  
+- [ ] Mixed precision training  
+- [ ] Pipeline Parallel  
+- [ ] Checkpoint  
+- [ ] Docker  
+- [ ] A Wonderful Documents  
 
 ## How to run
 cuda=10.1  

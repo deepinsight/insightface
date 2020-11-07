@@ -254,11 +254,11 @@ For single cropped face image(112x112), total inference time is only 17ms on our
   
   ![demoimg1](https://github.com/deepinsight/insightface/blob/master/resources/11513D05.jpg)
   
-  Please check [RetinaFace](https://github.com/deepinsight/insightface/tree/master/RetinaFace) for detail.
+  Please check [RetinaFace](https://github.com/deepinsight/insightface/tree/master/detection/RetinaFace) for detail.
   
 ### RetinaFaceAntiCov 
  
-  RetinaFaceAntiCov is an experimental module to identify face boxes with masks. Please check [RetinaFaceAntiCov](https://github.com/deepinsight/insightface/tree/master/RetinaFaceAntiCov) for detail.
+  RetinaFaceAntiCov is an experimental module to identify face boxes with masks. Please check [RetinaFaceAntiCov](https://github.com/deepinsight/insightface/tree/master/detection/RetinaFaceAntiCov) for detail.
   
   ![demoimg1](https://github.com/deepinsight/insightface/blob/master/resources/cov_test.jpg)
 
