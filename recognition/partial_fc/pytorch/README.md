@@ -1,7 +1,10 @@
 # Parital FC
 
-Pytorch is currently still a preview version. There is a 5 thousandth difference between the sampling of 0.1 and the paper.
-**If you want to reproduce the accuracy in the paper, it is strongly recommended to use mxnet first. ** 
+**The sampled version of pytorch is still being improved, 
+and there is still a large margin to reach the accuracy of the mxnet version,
+ but you can use the unsampled version of pytorch first.**
+ 
+If you want to reproduce the accuracy in the paper, it is strongly recommended to use mxnet first. 
 All experiments in the paper are done by mxnet.
 
 Pytorch 目前是还是预览版本，模型并行是没问题的，但是0.1的采样**暂时无法使用**，  
