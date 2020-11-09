@@ -1,8 +1,8 @@
 # Parital FC
 
 **The sampled version of pytorch is still being improved, 
-and there is still a large margin to reach the accuracy of the mxnet version,
- but you can use the unsampled version of pytorch first.**
+and there is a bug which the accuracy can not reach mxnet version,
+but you can use the unsampled version of pytorch first.**
  
 If you want to reproduce the accuracy in the paper, it is strongly recommended to use mxnet first. 
 All experiments in the paper are done by mxnet.
