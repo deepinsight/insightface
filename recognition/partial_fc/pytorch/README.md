@@ -24,6 +24,11 @@ bash run.sh
 There is a loss of accuracy in MS1MV2 with sampling, 
 but it has the same good accuracy in Glint360k.  
 
+This is what we found.
+
+**The more identities in the training set, the closer 
+the results from the sampling training are to those from Full Softmax training!**
+
 
 ### IJBC-Glint360K (mxnet)
 ```shell script
