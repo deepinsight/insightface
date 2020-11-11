@@ -56,18 +56,14 @@ class DistSampleClassifier(Module):
         total_label[~P] = -1
         total_label[P] -= self.class_start
         if int(self.sample_rate) != 1:
-            positive = torch.unique(total_label[P], sorted=False)
-            if self.num_sample - positive.size(0) > 0:
-                torch.randperm(self.num_local, out=self.perm)
-                start = self.num_local - self.num_sample
-                index = torch.cat((positive, self.perm[start:]))
-                index = torch.unique(index, sorted=False)
-                start = index.size()[0] - self.num_sample
-                index = index[start:]
+            positive = torch.unique(total_label[P], sorted=True)
+            if self.num_sample - positive.size(0) >= 0:
+                perm = torch.rand(self.num_local,device=cfg.local_rank)
+                perm[positive] = 2.0
+                index = torch.topk(perm,k=self.num_sample)[1]
+                index = index.sort()[0]
             else:
                 index = positive
-
-            index = torch.sort(index)[0].long()
             self.index = index
             total_label[P] = torch.searchsorted(index, total_label[P])
             self.sub_weight = Parameter(self.weight[index])
