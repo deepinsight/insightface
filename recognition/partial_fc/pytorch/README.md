@@ -20,6 +20,9 @@ bash run.sh
 使用 `bash run.sh` 这个命令运行。
 
 ## Results
+There is a loss of accuracy in MS1MV2 with sampling, 
+but it has the same good accuracy in Glint360k.  
+
 
 ### IJBC-Glint360K (mxnet)
 ```shell script
