@@ -133,7 +133,7 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
                 dist.all_reduce(logits_sum_exp, dist.ReduceOp.SUM)
 
                 # Calculate prob
-                logits_exp.div_(logits_sum_exp.clamp_min(1e-20))
+                logits_exp.div_(logits_sum_exp)
 
                 # Get one-hot
                 grad = logits_exp
@@ -147,7 +147,7 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
                 loss = torch.zeros(grad.size()[0], 1, device=grad.device)
                 loss[index] = grad[index].gather(1, total_label[index, None])
                 dist.all_reduce(loss, dist.ReduceOp.SUM)
-                loss_v = loss.clamp_min_(1e-20).log_().mean() * (-1)
+                loss_v = loss.clamp_min_(1e-30).log_().mean() * (-1)
 
                 # Calculate grad
                 grad[index] -= one_hot
