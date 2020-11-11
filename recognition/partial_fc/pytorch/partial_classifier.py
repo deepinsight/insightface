@@ -47,7 +47,7 @@ class DistSampleClassifier(Module):
             self.sub_weight_mom = self.weight_mom
         else:
             self.sub_weight = Parameter(torch.empty((0, 0)).cuda(local_rank))
-            self.perm = torch.LongTensor(self.num_local).cuda(local_rank)
+
 
     @torch.no_grad()
     def sample(self, total_label):
