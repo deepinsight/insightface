@@ -3,6 +3,7 @@
 ## TODO
 
 - [x] **No BUG** Sampling  
+- [ ] Pytorch Experiments (Glint360k, 1.0/0.1)   
 - [ ] Mixed precision training  
 - [ ] Pipeline Parallel  
 - [ ] Checkpoint  
