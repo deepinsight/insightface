@@ -151,7 +151,7 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
 
                 # Calculate grad
                 grad[index] -= one_hot
-                grad.div_(grad.size()[0])
+                grad.div_(features.size()[0])
 
             logits.backward(grad)
             if total_features.grad is not None:
@@ -161,7 +161,7 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
             # Feature gradient all-reduce
             dist.reduce_scatter(
                 x_grad, list(total_features.grad.chunk(world_size, dim=0)))
-
+            x_grad.mul_(world_size)
             # Backward backbone
             features.backward(x_grad)
             optimizer.step()
