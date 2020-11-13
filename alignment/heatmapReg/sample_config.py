@@ -39,7 +39,6 @@ network.sdu.net_block = 'cab'
 network.sdu.net_binarize = False
 network.sdu.losstype = 'heatmap'
 
-
 # dataset settings
 dataset = edict()
 
@@ -67,7 +66,6 @@ dataset.i3d.output_label_size = 64
 dataset.i3d.label_xfirst = False
 dataset.i3d.val_targets = ['AFLW2000-3D']
 
-
 # default settings
 default = edict()
 
@@ -88,13 +86,13 @@ default.wd = 0.0
 default.per_batch_size = 20
 default.lr_step = '16000,24000,30000'
 
+
 def generate_config(_network, _dataset):
     for k, v in network[_network].items():
-      config[k] = v
-      default[k] = v
+        config[k] = v
+        default[k] = v
     for k, v in dataset[_dataset].items():
-      config[k] = v
-      default[k] = v
+        config[k] = v
+        default[k] = v
     config.network = _network
     config.dataset = _dataset
-

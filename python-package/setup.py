@@ -6,11 +6,10 @@ import shutil
 import sys
 from setuptools import setup, find_packages
 
+
 def read(*names, **kwargs):
-    with io.open(
-        os.path.join(os.path.dirname(__file__), *names),
-        encoding=kwargs.get("encoding", "utf8")
-    ) as fp:
+    with io.open(os.path.join(os.path.dirname(__file__), *names),
+                 encoding=kwargs.get("encoding", "utf8")) as fp:
         return fp.read()
 
 
@@ -22,10 +21,11 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+
 try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
-except(IOError, ImportError):
+except (IOError, ImportError):
     long_description = open('README.md').read()
 
 VERSION = find_version('insightface', '__init__.py')
@@ -58,4 +58,3 @@ setup(
     include_package_data=True,
     install_requires=requirements,
 )
-

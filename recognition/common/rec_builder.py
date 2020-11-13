@@ -18,10 +18,12 @@ class SeqRecBuilder():
         self.widx = 0
         if not os.path.exists(path):
             os.makedirs(path)
-        self.writer = mx.recordio.MXIndexedRecordIO(os.path.join(path, 'train.idx'), os.path.join(path, 'train.rec'), 'w')
+        self.writer = mx.recordio.MXIndexedRecordIO(
+            os.path.join(path, 'train.idx'), os.path.join(path, 'train.rec'),
+            'w')
         self.label_stat = [-1, -1]
 
-    def add(self, label, img, is_image = True):
+    def add(self, label, img, is_image=True):
         #img should be BGR
         #if self.sis:
         #    assert label>=self.last_label
@@ -33,16 +35,16 @@ class SeqRecBuilder():
         else:
             s = mx.recordio.pack(header, img)
         self.writer.write_idx(idx, s)
-        if self.label_stat[0]<0:
+        if self.label_stat[0] < 0:
             self.label_stat = [label, label]
         else:
             self.label_stat[0] = min(self.label_stat[0], label)
             self.label_stat[1] = max(self.label_stat[1], label)
 
-
     def close(self):
         with open(os.path.join(self.path, 'property'), 'w') as f:
-            f.write("%d,%d,%d\n"%(self.label_stat[1]+1, self.image_size[0], self.image_size[1]))
+            f.write("%d,%d,%d\n" % (self.label_stat[1] + 1, self.image_size[0],
+                                    self.image_size[1]))
 
 
 class RecBuilder():
@@ -53,28 +55,33 @@ class RecBuilder():
         self.widx = 1
         if not os.path.exists(path):
             os.makedirs(path)
-        self.writer = mx.recordio.MXIndexedRecordIO(os.path.join(path, 'train.idx'), os.path.join(path, 'train.rec'), 'w')
+        self.writer = mx.recordio.MXIndexedRecordIO(
+            os.path.join(path, 'train.idx'), os.path.join(path, 'train.rec'),
+            'w')
         self.label_stat = [-1, -1]
         self.identities = []
 
     def add(self, label, imgs):
         #img should be BGR
-        assert label>=0
-        assert label>self.last_label
-        assert len(imgs)>0
+        assert label >= 0
+        assert label > self.last_label
+        assert len(imgs) > 0
         idflag = [self.widx, -1]
         for img in imgs:
             idx = self.widx
             self.widx += 1
             header = mx.recordio.IRHeader(0, label, idx, 0)
             if isinstance(img, np.ndarray):
-                s = mx.recordio.pack_img(header, img, quality=95, img_fmt='.jpg')
+                s = mx.recordio.pack_img(header,
+                                         img,
+                                         quality=95,
+                                         img_fmt='.jpg')
             else:
                 s = mx.recordio.pack(header, img)
             self.writer.write_idx(idx, s)
         idflag[1] = self.widx
         self.identities.append(idflag)
-        if self.label_stat[0]<0:
+        if self.label_stat[0] < 0:
             self.label_stat = [label, label]
         else:
             self.label_stat[0] = min(self.label_stat[0], label)
@@ -98,5 +105,5 @@ class RecBuilder():
         print('label stat:', self.label_stat)
 
         with open(os.path.join(self.path, 'property'), 'w') as f:
-            f.write("%d,%d,%d\n"%(self.label_stat[1]+1, self.image_size[0], self.image_size[1]))
-
+            f.write("%d,%d,%d\n" % (self.label_stat[1] + 1, self.image_size[0],
+                                    self.image_size[1]))

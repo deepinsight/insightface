@@ -1,0 +1,7 @@
+easydict==1.9
+horovod==0.19.2
+mxboard==0.1.0
+opencv-python==4.2.0.34
+tqdm==4.48.2
+scipy
+sklearn
