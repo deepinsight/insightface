@@ -39,10 +39,11 @@ def main(args):
                 class_path = os.path.join(args.output, "id_%d" % label)
                 if not os.path.exists(class_path):
                     os.makedirs(class_path)
-                _img = mx.image.imdecode(_img).asnumpy()[:, :, ::-1]  # to bgr
-                image_path = os.path.join(class_path,
-                                          "%d_%d.jpg" % (label, imgid))
-                cv2.imwrite(image_path, _img)
+
+                image_path = os.path.join(class_path, "%d_%d.jpg" % (label, imgid))
+                with open(image_path, "wb") as ff:
+                    ff.write(_img)
+
                 imgid += 1
                 if imgid % 10000 == 0:
                     print(imgid)
