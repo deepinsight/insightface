@@ -42,15 +42,12 @@ class MarginSoftmax(nn.Module):
 
 
 # .......
-def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
-    dist.init_process_group(backend='nccl',
-                            init_method=init_method,
-                            rank=local_rank,
-                            world_size=world_size)
+def main(local_rank):
+    dist.init_process_group(backend='nccl', init_method='env://')
     cfg.local_rank = local_rank
     torch.cuda.set_device(local_rank)
     cfg.rank = dist.get_rank()
-    cfg.world_size = world_size
+    cfg.world_size = dist.get_world_size()
     trainset = MXFaceDataset(root_dir=cfg.rec, local_rank=local_rank)
     train_sampler = torch.utils.data.distributed.DistributedSampler(
         trainset, shuffle=True)
@@ -71,13 +68,13 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
 
     # DDP
     backbone = torch.nn.parallel.DistributedDataParallel(
-        module=backbone, broadcast_buffers=False, device_ids=[dist.get_rank()])
+        module=backbone, broadcast_buffers=False, device_ids=[cfg.local_rank])
     backbone.train()
 
     # Memory classifer
     dist_sample_classifer = DistSampleClassifier(rank=dist.get_rank(),
                                                  local_rank=local_rank,
-                                                 world_size=world_size)
+                                                 world_size=cfg.world_size)
 
     # Margin softmax
     margin_softmax = MarginSoftmax(s=64.0, m=0.4)
@@ -91,7 +88,7 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
                     lr=0.1,
                     momentum=0.9,
                     weight_decay=cfg.weight_decay,
-                    rescale=world_size)
+                    rescale=cfg.world_size)
 
     # Lr scheduler
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer,
@@ -112,10 +109,10 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
             features = F.normalize(backbone(img))
 
             # Features all-gather
-            total_features = torch.zeros(features.size()[0] * world_size,
+            total_features = torch.zeros(features.size()[0] * cfg.world_size,
                                          cfg.embedding_size,
                                          device=local_rank)
-            dist.all_gather(list(total_features.chunk(world_size, dim=0)),
+            dist.all_gather(list(total_features.chunk(cfg.world_size, dim=0)),
                             features.data)
             total_features.requires_grad = True
 
@@ -160,8 +157,8 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
 
             # Feature gradient all-reduce
             dist.reduce_scatter(
-                x_grad, list(total_features.grad.chunk(world_size, dim=0)))
-            x_grad.mul_(world_size)
+                x_grad, list(total_features.grad.chunk(cfg.world_size, dim=0)))
+            x_grad.mul_(cfg.world_size)
             # Backward backbone
             features.backward(x_grad)
             optimizer.step()
@@ -170,11 +167,11 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
             dist_sample_classifer.update()
             optimizer.zero_grad()
 
-            if cfg.rank == 0:
+            if cfg.local_rank == 0:
                 writer.add_scalar('loss', loss_v, global_step)
                 print(
                     "Speed %d samples/sec   Loss %.4f   Epoch: %d   Global Step: %d"
-                    % ((cfg.batch_size / (time.time() - start) * world_size),
+                    % ((cfg.batch_size / (time.time() - start) * cfg.world_size),
                        loss_v, epoch, global_step))
 
             global_step += 1
@@ -191,6 +188,5 @@ def main(local_rank, world_size, init_method='tcp://127.0.0.1:23499'):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
     parser.add_argument('--local_rank', type=int, default=0, help='local_rank')
-    parser.add_argument('--world_size', type=int, default=8, help='world_size')
     args = parser.parse_args()
-    main(args.local_rank, args.world_size)
+    main(args.local_rank)
