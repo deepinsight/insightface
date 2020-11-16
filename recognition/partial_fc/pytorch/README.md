@@ -21,7 +21,7 @@ We employ ResNet100 as the backbone and CosFace (m=0.4) as the loss function.
 
 ## Training Speed
 |   GPU                   | FP16  | GPUs/it  | Backbone | Sample/sec | Time/hours |
-| :---:                   | :---  | :---     | :---     | :---       | :---       | 
+| :---                    | :---  | :---     | :---     | :---       | :---       | 
 | Tesla V100-SXM2-32GB    | False | 8        | R100     | 1658       | 15         |
 | Tesla V100-SXM2-32GB    | True  | 8        | R100     |            |            |
 | RTX2080Ti               |       | 8        | R100     | 1200       |            | 
