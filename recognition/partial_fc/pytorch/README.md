@@ -31,7 +31,7 @@ We employ **ResNet100** as the backbone.
 | :---                        | :---  |   :---         | :---                 | :---         | 
 | 8 * Tesla V100-SXM2-32GB    | False |   64           | 1658                 | 15           |
 | 8 * Tesla V100-SXM2-32GB    | False |   128          | 1800                 | 14           |    
-| 8 * Tesla V100-SXM2-32GB    | True  |   64           | 2198                 | 12           |
+| 8 * Tesla V100-SXM2-32GB    | True  |   64           | 2241                 | 12           |
 | 8 * Tesla V100-SXM2-32GB    | True  |   128          | 3337                 | 7            |     
 | 8 * RTX2080Ti               | False |                | 1200                 |              | 
 | 8 * RTX2080Ti               |       |                |                      |              | 
