@@ -27,8 +27,8 @@ TODO
 ## Training Speed Benchmark
 ### 1. Train MS1MV2
 We employ **ResNet100** as the backbone.   
-|   GPU                   | FP16  | BatchSize / it | Throughput img / sec | Time / hours |
-| :---                    | :---  |   :---         | :---                 | :---         | 
+|   GPU                       | FP16  | BatchSize / it | Throughput img / sec | Time / hours |
+| :---                        | :---  |   :---         | :---                 | :---         | 
 | 8 * Tesla V100-SXM2-32GB    | False |   64           | 1658                 | 15           |
 | 8 * Tesla V100-SXM2-32GB    | False |   128          | 1800                 | 14           |    
 | 8 * Tesla V100-SXM2-32GB    | True  |   64           | 2198                 | 12           |
