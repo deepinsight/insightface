@@ -26,12 +26,12 @@ TODO
 
 ## Training Speed Benchmark
 ### 1. Train MS1MV2
-|   GPU                   | FP16  | GPUs/it  | Backbone | Sample/sec | Time/hours |
-| :---                    | :---  | :---     | :---     | :---       | :---       | 
-| Tesla V100-SXM2-32GB    | False | 8        | R100     | 1658       | 15         |
-| Tesla V100-SXM2-32GB    | True  | 8        | R100     |            |            |
-| RTX2080Ti               | False | 8        | R100     | 1200       |            | 
-| RTX2080Ti               |       | 8        | R100     |            |            | 
+|   GPU                   | FP16  | GPUs/it  | Backbone | Throughput img/sec | Time/hours |
+| :---                    | :---  | :---     | :---     | :---               | :---       | 
+| Tesla V100-SXM2-32GB    | False | 8        | R100     | 1658               | 15         |
+| Tesla V100-SXM2-32GB    | True  | 8        | R100     |                    |            |
+| RTX2080Ti               | False | 8        | R100     | 1200               |            | 
+| RTX2080Ti               |       | 8        | R100     |                    |            | 
 
 ### 2. Train millions classes
 TODO
