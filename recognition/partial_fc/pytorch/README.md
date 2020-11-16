@@ -11,7 +11,7 @@
 - [ ] A Wonderful Documents  
 
 ## Results
-We employ ResNet100 as the backbone and CosFace (m=0.4) as the loss function.
+We employ ResNet100 as the backbone.
 
 ### 1. IJB-C results
 
