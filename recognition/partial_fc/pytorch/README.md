@@ -1,13 +1,5 @@
 # Parital FC
 
-
-## Results
-
-|   Datasets   | 1e-05 | 1e-04 | 1e-03 | 1e-02 | 1e-01 |
-| :---:        | :---  | :---  | :---  | :---  | :---  | 
-| Glint360K    | 95.92 | 97.30 | 98.13 | 98.78 | 99.28 |
-| MS1MV2       | 94.22 | 96.27 | 97.61 | 98.34 | 99.08 |
-
 ## TODO
 
 - [x] **No BUG** Sampling  
@@ -17,6 +9,23 @@
 - [ ] Checkpoint  
 - [ ] Docker  
 - [ ] A Wonderful Documents  
+
+## Results
+
+We employ ResNet100 as the backbone and CosFace (m=0.4) as the loss function.
+
+|   Datasets   | 1e-05 | 1e-04 | 1e-03 | 1e-02 | 1e-01 |
+| :---:        | :---  | :---  | :---  | :---  | :---  | 
+| Glint360K    | 95.92 | 97.30 | 98.13 | 98.78 | 99.28 |
+| MS1MV2       | 94.22 | 96.27 | 97.61 | 98.34 | 99.08 |
+
+## Training Speed
+|   GPU                   | FP16  | GPUs/it  | Backbone | Sample/sec | Time/hours |
+| :---:                   | :---  | :---     | :---     | :---       | :---       | 
+| Tesla V100-SXM2-32GB    | False | 8        | R100     | 1658       | 15         |
+| Tesla V100-SXM2-32GB    | True  | 8        | R100     |            |            |
+| RTX2080Ti               |       | 8        | R100     | 1200       |            | 
+| RTX2080Ti               |       | 8        | R100     | 1200       |            | 
 
 ## How to run
 cuda=10.1  
