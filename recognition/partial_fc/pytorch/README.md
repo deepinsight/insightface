@@ -27,14 +27,14 @@ TODO
 ## Training Speed Benchmark
 ### 1. Train MS1MV2
 We employ **ResNet100** as the backbone.   
-|   GPU                   | FP16  | BatchSize / it | GPUs / it  | Throughput img / sec | Time / hours |
-| :---                    | :---  |   :---         | :---       | :---                 | :---         | 
-| Tesla V100-SXM2-32GB    | False |   64           | 8          | 1658                 | 15           |
-| Tesla V100-SXM2-32GB    | False |   128          | 8          | 1800                 | 14           |    
-| Tesla V100-SXM2-32GB    | True  |   64           | 8          | 2198                 | 12           |
-| Tesla V100-SXM2-32GB    | True  |   128          | 8          | 3337                 | 7            |     
-| RTX2080Ti               | False |                | 8          | 1200                 |              | 
-| RTX2080Ti               |       |                | 8          |                      |              | 
+|   GPU                   | FP16  | BatchSize / it | Throughput img / sec | Time / hours |
+| :---                    | :---  |   :---         | :---                 | :---         | 
+| 8 * Tesla V100-SXM2-32GB    | False |   64           | 1658                 | 15           |
+| 8 * Tesla V100-SXM2-32GB    | False |   128          | 1800                 | 14           |    
+| 8 * Tesla V100-SXM2-32GB    | True  |   64           | 2198                 | 12           |
+| 8 * Tesla V100-SXM2-32GB    | True  |   128          | 3337                 | 7            |     
+| 8 * RTX2080Ti               | False |                | 1200                 |              | 
+| 8 * RTX2080Ti               |       |                |                      |              | 
 
 ### 2. Train millions classes
 TODO
