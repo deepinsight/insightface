@@ -11,13 +11,18 @@
 - [ ] A Wonderful Documents  
 
 ## Results
-
 We employ ResNet100 as the backbone and CosFace (m=0.4) as the loss function.
+
+### 1. IJB-C results
 
 |   Datasets   | 1e-05 | 1e-04 | 1e-03 | 1e-02 | 1e-01 |
 | :---:        | :---  | :---  | :---  | :---  | :---  | 
 | Glint360K    | 95.92 | 97.30 | 98.13 | 98.78 | 99.28 |
 | MS1MV2       | 94.22 | 96.27 | 97.61 | 98.34 | 99.08 |
+
+### 2. IFRT results
+
+TODO
 
 ## Training Speed Benchmark
 ### 1. Train MS1MV2
