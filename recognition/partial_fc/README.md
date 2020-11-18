@@ -64,11 +64,11 @@ cat glint360k_* | tar -xzvf -
 ```
 Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
     
-## Training Speed Benchmark (MXNET)
-### 1. Train Glint360K
+## Training Speed Benchmark
+### 1. Train Glint360K Using MXNET
  
 | Backbone    |   GPU                       | FP16  | BatchSize / it | Throughput img / sec |
-|             | :---                        | :---  |   :---         | :---                 | 
+|  :---       | :---                        | :---  |   :---         | :---                 | 
 |  R100       | 8 * Tesla V100-SXM2-32GB    | False |   64           | 1748                 |
 |  R100       | 8 * Tesla V100-SXM2-32GB    | True  |   64           | 3357                 |
 |  R100       | 8 * Tesla V100-SXM2-32GB    | False |   128          | 1847                 |    
