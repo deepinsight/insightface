@@ -60,7 +60,7 @@ class HybridTrainPipe(Pipeline):
         self.jpegs, self.labels = self.input(name = "Reader")
         # TODO: 这部分是问题最大的地方，原始的.rec开始和结尾都记录着其他信息，
         # 一旦读到空图像会 raise RuntimeError，并提示 'pipline broken'，无法 reset pipline，
-        # 尝试了加 try 啥的都不行，大佬懒看有没有啥办法
+        # 尝试了加 try 啥的都不行，大佬看看有没有啥解决方案
         images = self.decode(self.jpegs)
         images = self.res(images)
         output = self.cmnp(images, mirror = rng)
