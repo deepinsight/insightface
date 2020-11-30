@@ -27,6 +27,19 @@ from symbol import resnet
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'symbol'))
 os.environ['MXNET_BACKWARD_DO_MIRROR'] = '0'
+os.environ['MXNET_UPDATE_ON_KVSTORE'] = "0"
+os.environ['MXNET_EXEC_ENABLE_ADDTO'] = "1"
+os.environ['MXNET_USE_TENSORRT'] = "0"
+os.environ['MXNET_GPU_WORKER_NTHREADS'] = "2"
+os.environ['MXNET_GPU_COPY_NTHREADS'] = "1"
+os.environ['MXNET_OPTIMIZER_AGGREGATION_SIZE'] = "54"
+os.environ['HOROVOD_CYCLE_TIME'] = "0.1"
+os.environ['HOROVOD_FUSION_THRESHOLD'] = "67108864"
+os.environ['HOROVOD_NUM_NCCL_STREAMS'] = "2"
+os.environ['MXNET_HOROVOD_NUM_GROUPS'] = "16"
+os.environ['MXNET_EXEC_BULK_EXEC_MAX_NODE_TRAIN_FWD'] = "999"
+os.environ['MXNET_EXEC_BULK_EXEC_MAX_NODE_TRAIN_BWD'] = "25"
+
 
 
 def parse_args():

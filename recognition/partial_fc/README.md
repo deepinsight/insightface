@@ -63,8 +63,27 @@ cat glint360k_* | tar -xzvf -
 # 8483be5af6f9906e19f85dee49132f8e train.rec
 ```
 Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
+    
+## Docker
 
-## Performance
+Coming soon. 
+   
+## Training Speed Benchmark
+### 1. Train Glint360K Using MXNET
+ 
+| Backbone    |   GPU                       | FP16  | BatchSize / it | Throughput img / sec |
+|  :---       | :---                        | :---  |   :---         | :---                 | 
+|  R100       | 8 * Tesla V100-SXM2-32GB    | False |   64           | 1748                 |
+|  R100       | 8 * Tesla V100-SXM2-32GB    | True  |   64           | 3357                 |
+|  R100       | 8 * Tesla V100-SXM2-32GB    | False |   128          | 1847                 |    
+|  R100       | 8 * Tesla V100-SXM2-32GB    | True  |   128          | 3867                 |   
+|  R50        | 8 * Tesla V100-SXM2-32GB    | False |   64           | 2921                 |
+|  R50        | 8 * Tesla V100-SXM2-32GB    | True  |   64           | 5428                 |
+|  R50        | 8 * Tesla V100-SXM2-32GB    | False |   128          | 3045                 |    
+|  R50        | 8 * Tesla V100-SXM2-32GB    | True  |   128          | 6112                 |  
+
+
+## Performance On Million Identities
 We neglect the influence of IO. All experiments use mixed-precision training, and the backbone is ResNet50.
 #### 1 Million Identities On 8 RTX2080Ti  
 

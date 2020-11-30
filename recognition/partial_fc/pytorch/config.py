@@ -9,14 +9,17 @@ config.momentum = 0.9
 config.weight_decay = 5e-4
 config.batch_size = 64
 config.lr = 0.1
+config.output = "tmp_models"
 
 if config.dataset == "emore":
     config.rec = "/train_tmp/faces_emore"
     config.num_classes = 85742
-    config.num_epoch = 20
+    config.num_epoch = 16
+
 
     def lr_step_func(epoch):
-        return ((epoch + 1) / (4 + 1))**2 if epoch < -1 else 0.1**len(
-            [m for m in [8, 16, 18] if m - 1 <= epoch])
+        return ((epoch + 1) / (4 + 1)) ** 2 if epoch < -1 else 0.1 ** len(
+            [m for m in [8, 14] if m - 1 <= epoch])
+
 
     config.lr_func = lr_step_func
