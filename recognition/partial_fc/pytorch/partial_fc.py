@@ -87,13 +87,16 @@ def main(local_rank):
 
     # DDP
     backbone = torch.nn.parallel.DistributedDataParallel(
-        module=backbone, broadcast_buffers=False, device_ids=[cfg.local_rank])
+        module=backbone,
+        broadcast_buffers=False,
+        device_ids=[cfg.local_rank])
     backbone.train()
 
     # Memory classifer
-    dist_sample_classifer = DistSampleClassifier(rank=dist.get_rank(),
-                                                 local_rank=local_rank,
-                                                 world_size=cfg.world_size)
+    dist_sample_classifer = DistSampleClassifier(
+        rank=dist.get_rank(),
+        local_rank=local_rank,
+        world_size=cfg.world_size)
 
     # Margin softmax
     margin_softmax = MarginSoftmax(s=64.0, m=0.4)
@@ -104,14 +107,15 @@ def main(local_rank):
     }, {
         'params': dist_sample_classifer.parameters()
     }],
-        lr=0.1,
+        lr=cfg.lr,
         momentum=0.9,
         weight_decay=cfg.weight_decay,
         rescale=cfg.world_size)
 
     # Lr scheduler
-    scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer,
-                                                  lr_lambda=cfg.lr_func)
+    scheduler = torch.optim.lr_scheduler.LambdaLR(
+        optimizer=optimizer,
+        lr_lambda=cfg.lr_func)
     n_epochs = cfg.num_epoch
     start_epoch = 0
 
