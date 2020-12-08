@@ -32,6 +32,7 @@ parser.add_argument('--result-dir', default='.', type=str, help='')
 parser.add_argument('--gpu', default='0', type=str, help='gpu id')
 parser.add_argument('--batch-size', default=128, type=int, help='')
 parser.add_argument('--job', default='insightface', type=str, help='job name')
+parser.add_argument('-es', '--emb-size', type=int, help='embedding size')
 parser.add_argument('--target',
                     default='IJBC',
                     type=str,
@@ -123,6 +124,8 @@ def extract_parallel(prefix, epoch, dataset, batch_size, size):
                              batchify_fn=batchify_fn)
     symbol, arg_params, aux_params = mx.module.module.load_checkpoint(
         prefix, epoch)
+    all_layers = symbol.get_internals()
+    symbol = all_layers['fc1_output']
 
     # init model list
     for i in range(num_ctx):
@@ -325,7 +328,7 @@ img_feats = extract_parallel(args.model_prefix,
                              args.model_epoch,
                              dataset,
                              args.batch_size,
-                             size=512)
+                             size=args.emb_size)
 
 faceness_scores = []
 for each_line in files:
