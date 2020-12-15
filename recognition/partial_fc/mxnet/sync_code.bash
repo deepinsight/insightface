@@ -7,5 +7,5 @@ hosts=$( cat $file | cut -d " " -f 1 )
 
 for host in $hosts
 do
-	rsync -az ~/insightface_branch/* $host:~/insightface_branch
+	rsync -az ~/insightface* $host:~/insightface
 done
