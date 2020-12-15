@@ -92,19 +92,20 @@ class CallBackCenterSave(object):
 
 
 class CallBackModelSave(object):
-    def __init__(self, symbol, model, prefix, rank):
+    def __init__(self, symbol, model, prefix, rank, save_interval=10000):
         self.symbol = symbol
         self.model = model
         self.prefix = prefix
         self.max_step = config.max_update
         self.rank = rank
+        self.save_interval = save_interval
 
     def __call__(self, param):
         num_update = param.num_update
 
         if num_update in [
                 self.max_step - 10,
-        ] or (num_update % 10000 == 0 and num_update > 0):
+        ] or (num_update % self.save_interval == 0 and num_update > 0):
 
             # params
             arg, aux = self.model.get_export_params()
