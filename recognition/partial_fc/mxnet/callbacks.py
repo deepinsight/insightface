@@ -122,12 +122,12 @@ class CallBackModelSave(object):
 
             if self.rank == 0:
                 mx.model.save_checkpoint(prefix=self.prefix + "_average",
-                                         epoch=0,
+                                         epoch=num_update / self.save_interval,
                                          symbol=_sym,
                                          arg_params=new_arg,
                                          aux_params=new_aux)
                 mx.model.save_checkpoint(prefix=self.prefix,
-                                         epoch=0,
+                                         epoch=num_update / self.save_interval,
                                          symbol=_sym,
                                          arg_params=arg,
                                          aux_params=aux)
