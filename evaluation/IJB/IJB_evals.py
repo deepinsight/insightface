@@ -63,8 +63,9 @@ def face_align_landmark(img, landmark, image_size=(112, 112), method="similar"):
     return ndimage
 
 
-def read_IJB_meta_columns_to_int(file_path, columns, dtype=str, skiprows=0, delimiter=None):
-    meta = np.loadtxt(file_path, dtype=dtype, skiprows=skiprows, delimiter=delimiter)
+def read_IJB_meta_columns_to_int(file_path, columns, sep=" ", skiprows=0, header=None):
+    # meta = np.loadtxt(file_path, skiprows=skiprows, delimiter=sep)
+    meta = pd.read_csv(file_path, sep=sep, skiprows=skiprows, header=header).values
     return (meta[:, ii].astype("int") for ii in columns)
 
 
@@ -163,8 +164,8 @@ def extract_gallery_prob_data(data_path, subset, save_path=None, force_reload=Fa
         probe_mixed_record = os.path.join(meta_dir, "ijbb_1N_probe_mixed.csv")
 
     print(">>>> Loading gallery feature...")
-    s1_templates, s1_subject_ids = read_IJB_meta_columns_to_int(gallery_s1_record, columns=[0, 1], skiprows=1, delimiter=",")
-    s2_templates, s2_subject_ids = read_IJB_meta_columns_to_int(gallery_s2_record, columns=[0, 1], skiprows=1, delimiter=",")
+    s1_templates, s1_subject_ids = read_IJB_meta_columns_to_int(gallery_s1_record, columns=[0, 1], skiprows=1, sep=",")
+    s2_templates, s2_subject_ids = read_IJB_meta_columns_to_int(gallery_s2_record, columns=[0, 1], skiprows=1, sep=",")
     gallery_templates = np.concatenate([s1_templates, s2_templates])
     gallery_subject_ids = np.concatenate([s1_subject_ids, s2_subject_ids])
     print("s1 gallery: %s, ids: %s, unique: %s" % (s1_templates.shape, s1_subject_ids.shape, np.unique(s1_templates).shape))
@@ -176,7 +177,7 @@ def extract_gallery_prob_data(data_path, subset, save_path=None, force_reload=Fa
 
     print(">>>> Loading prope feature...")
     probe_mixed_templates, probe_mixed_subject_ids = read_IJB_meta_columns_to_int(
-        probe_mixed_record, columns=[0, 1], skiprows=1, delimiter=","
+        probe_mixed_record, columns=[0, 1], skiprows=1, sep=","
     )
     print("probe_mixed_templates: %s, unique: %s" % (probe_mixed_templates.shape, np.unique(probe_mixed_templates).shape))
     print("probe_mixed_subject_ids: %s, unique: %s" % (probe_mixed_subject_ids.shape, np.unique(probe_mixed_subject_ids).shape))
@@ -347,14 +348,14 @@ class IJB_test:
         return score
 
     def run_model_test_bunch(self):
+        from itertools import product
+
         scores, names = [], []
-        for use_norm_score in [True, False]:
-            for use_detector_score in [True, False]:
-                for use_flip_test in [True, False]:
-                    name = "N{:d}D{:d}F{:d}".format(use_norm_score, use_detector_score, use_flip_test)
-                    print(">>>>", name, use_norm_score, use_detector_score, use_flip_test)
-                    names.append(name)
-                    scores.append(self.run_model_test_single(use_flip_test, use_norm_score, use_detector_score))
+        for use_norm_score, use_detector_score, use_flip_test in product([True, False], [True, False], [True, False]):
+            name = "N{:d}D{:d}F{:d}".format(use_norm_score, use_detector_score, use_flip_test)
+            print(">>>>", name, use_norm_score, use_detector_score, use_flip_test)
+            names.append(name)
+            scores.append(self.run_model_test_single(use_flip_test, use_norm_score, use_detector_score))
         return scores, names
 
     def run_model_test_1N(self):
@@ -387,6 +388,7 @@ class IJB_test:
 
 
 def plot_roc_and_calculate_tpr(scores, names=None, label=None):
+    print(">>>> plot roc and calculate tpr...")
     score_dict = {}
     for id, score in enumerate(scores):
         name = None if names is None else names[id]
@@ -467,7 +469,7 @@ def parse_arguments(argv):
     parser.add_argument("-B", "--is_bunch", action="store_true", help="Run all 8 tests N{0,1}D{0,1}F{0,1}")
     parser.add_argument("-N", "--is_one_2_N", action="store_true", help="Run 1:N test instead of 1:1")
     parser.add_argument("-F", "--force_reload", action="store_true", help="Force reload, instead of using cache")
-    parser.add_argument("-p", "--plot_only", nargs="*", type=str, help="Plot saved results, Format 1 2 3 or 1, 2, 3 or *.npy")
+    parser.add_argument("-P", "--plot_only", nargs="*", type=str, help="Plot saved results, Format 1 2 3 or 1, 2, 3 or *.npy")
     args = parser.parse_known_args(argv)[0]
 
     if args.plot_only != None and len(args.plot_only) != 0:
