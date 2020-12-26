@@ -20,3 +20,15 @@ if config.dataset == "emore":
         return ((epoch + 1) / (4 + 1)) ** 2 if epoch < -1 else 0.1 ** len(
             [m for m in [8, 14] if m - 1 <= epoch])
     config.lr_func = lr_step_func
+
+elif config.dataset == "glint360k":
+    config.rec = "/train_tmp/glint360k"
+    config.num_classes = 360232
+    config.num_image = 17091657
+    config.num_epoch = 17
+    config.warmup_epoch = -1
+
+    def lr_step_func(epoch):
+        return ((epoch + 1) / (4 + 1)) ** 2 if epoch < config.warmup_epoch else 0.1 ** len(
+            [m for m in [6, 10, 14] if m - 1 <= epoch])
+    config.lr_func = lr_step_func
