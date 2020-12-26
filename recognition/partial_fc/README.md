@@ -114,7 +114,7 @@ In the previous version of Glint360K, there is no bug when using softmax trainin
 In the latest Glint360k, this bug has been fixed.
 
 #### Dataset in Google Drive or Dropbox?
-The torrent will be release soon.
+The torrent has been released.
 
 
 ## Citation
