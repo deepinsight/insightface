@@ -120,7 +120,7 @@ def extract_parallel(prefix, epoch, dataset, batch_size, size):
                              last_batch='keep',
                              num_workers=8,
                              thread_pool=True,
-                             prefetch=64,
+                             prefetch=16,
                              batchify_fn=batchify_fn)
     symbol, arg_params, aux_params = mx.module.module.load_checkpoint(
         prefix, epoch)
@@ -147,8 +147,8 @@ def extract_parallel(prefix, epoch, dataset, batch_size, size):
         feat_mat[batch_size * num_iter:batch_size * num_iter +
                  feat.shape[0], :] = feat.as_in_context(mx.cpu())
         num_iter += 1
-        # if num_iter % 20 == 0:
-        #     mx.nd.waitall()
+        #if num_iter % 20 == 0:
+        #    mx.nd.waitall()
     return feat_mat.asnumpy()
 
 
