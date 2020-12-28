@@ -65,6 +65,13 @@ Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
 #### Pretrain models
 - [x] [**Baidu Drive**](https://pan.baidu.com/s/1sd9ZRsV2c_dWHW84kz1P1Q) (code:befi)
 - [x] [**Google Drive**](https://drive.google.com/drive/folders/1WLjDzEs1wC1K1jxDHNJ7dhEmQ3rOOILl?usp=sharing)
+
+| Framework       |  backbone                      | sample_rate  | IJBC@e4 | IFRT@e6 |
+|  :---           | :---                           | :---         |  :---   |  :---   | 
+|  mxnet   | [R100](https://drive.google.com/drive/folders/1YPqIkOZWrmbli4GWfMJO2b0yiiZ7UCsP?usp=sharing) |1.0|97.3|-|
+|  mxnet   | [R100](https://drive.google.com/drive/folders/1-gF5sDwNoRcjwmpPSTNLpaZJi5N91BvL?usp=sharing) |0.1|97.3|-|
+|  pytorch | [R50](https://drive.google.com/drive/folders/16hjOGRJpwsJCRjIBbO13z3SrSgvPTaMV?usp=sharing) |1.0|97.0|-|    
+|  pytorch | [R100](https://drive.google.com/drive/folders/19EHffHN0Yn8DjYm5ofrgVOf_xfkrVgqc?usp=sharing) |1.0|97.4|-|
     
 ## Docker
 
