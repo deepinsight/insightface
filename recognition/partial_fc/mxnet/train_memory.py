@@ -158,7 +158,7 @@ def train_net():
     if not config.debug and local_rank == 0:
         cb_vert = CallBackVertification(esym, train_module)
     cb_speed = CallBackLogging(rank, size, prefix_dir)
-    cb_save = CallBackModelSave(save_symbol, train_module, prefix, rank)
+    cb_save = CallBackModelSave(save_symbol, train_module, prefix, rank, save_interval=config.verbose)
     cb_center_save = CallBackCenterSave(memory_bank)
 
     def call_back_fn(params):
