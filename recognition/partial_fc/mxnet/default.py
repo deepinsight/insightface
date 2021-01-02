@@ -60,7 +60,7 @@ def generate_config(loss_name, dataset, network):
         config.val_targets = [
             'agedb_30', 'calfw', 'cfp_ff', 'cfp_fp', 'cplfw', 'lfw', 'vgg2_fp'
         ]
-        config.rec = '/train_tmp/celeb_deepglint/train.rec'
+        config.rec = '/train_tmp/glint360k/train.rec'
         config.num_classes = 360232
         config.batch_size = 64
         config.max_update = 600000
@@ -68,7 +68,7 @@ def generate_config(loss_name, dataset, network):
     elif dataset == 'glint360k_16GPU':
         config.lr_steps = '200000,280000,360000'
         config.val_targets = ['agedb_30', 'cfp_fp', 'lfw']
-        config.rec = '/train_tmp/celeb_deepglint/train.rec'
+        config.rec = '/train_tmp/glint360k/train.rec'
         config.num_classes = 360232
         config.max_update = 400000
 

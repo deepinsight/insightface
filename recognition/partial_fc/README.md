@@ -73,10 +73,14 @@ Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
 |  pytorch | [R50](https://drive.google.com/drive/folders/16hjOGRJpwsJCRjIBbO13z3SrSgvPTaMV?usp=sharing) |1.0|97.0|-|    
 |  pytorch | [R100](https://drive.google.com/drive/folders/19EHffHN0Yn8DjYm5ofrgVOf_xfkrVgqc?usp=sharing) |1.0|97.4|-|
     
-## Docker
+## Docker For Partial-FC
+Make sure you have installed the NVIDIA driver and Docker engine for your Linux distribution Note that you do not need to 
+install the CUDA Toolkit and other independence on the host system, but the NVIDIA driver needs to be installed
 
-Coming soon. 
-   
+### 1. Docker Getting Started
+
+
+
 ## Training Speed Benchmark
 ### 1. Train Glint360K Using MXNET
  

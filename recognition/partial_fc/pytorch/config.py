@@ -1,7 +1,7 @@
 from easydict import EasyDict as edict
 
 config = edict()
-config.dataset = "emore"
+config.dataset = "glint360k"
 config.embedding_size = 512
 config.sample_rate = 1.0
 config.fp16 = False
