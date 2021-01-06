@@ -75,11 +75,27 @@ Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
     
 ## Docker For Partial-FC
 Make sure you have installed the NVIDIA driver and Docker engine for your Linux distribution Note that you do not need to 
-install the CUDA Toolkit and other independence on the host system, but the NVIDIA driver needs to be installed
+install the CUDA Toolkit and other independence on the host system, but the NVIDIA driver needs to be installed.  
+Because the CUDA version used in the image is 10.1, 
+the graphics driver version on the physical machine must be greater than 418.
 
 ### 1. Docker Getting Started
+You can use dockerhub or offline docker.tar to get the image of the Partial-fc.
+1. dockerhub
+```shell
+docker pull insightface/partial_fc:v1
+```  
 
+2. offline images  
+coming soon!
 
+### 2. Getting Started
+```shell
+sudo docker run -it -v /train_tmp:/train_tmp --net=host --privileged --gpus 8 --shm-size=1g insightface/partial_fc:v1 /bin/bash
+```
+
+`/train_tmp` is where you put your training set (if you have enough RAM memory, 
+you can turn it into `tmpfs` first).
 
 ## Training Speed Benchmark
 ### 1. Train Glint360K Using MXNET
