@@ -10,6 +10,8 @@ config.weight_decay = 5e-4
 config.batch_size = 64
 config.lr = 0.1
 config.output = "tmp_models"
+config.pf_preload='./models'#reload pf class
+config.preload='./models/23backbone.pth' #reload backedone
 
 if config.dataset == "emore":
     config.rec = "/train_tmp/faces_emore"
