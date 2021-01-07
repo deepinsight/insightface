@@ -112,7 +112,7 @@ def main(local_rank):
                                     
 
     # Margin softmax
-    margin_softmax = MarginSoftmax(s=64.0, m=0.2)
+    margin_softmax = MarginSoftmax(s=64.0, m=0.4)
 
     # Optimizer for backbone and classifer
     optimizer = SGD([{
