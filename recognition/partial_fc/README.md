@@ -6,8 +6,9 @@ Partial FC is a distributed deep learning training framework for face recognitio
 
 ## Contents
 [Partial FC](https://arxiv.org/abs/2010.05222)
-- [Largest Face Recognition Dataset: **Glint360k**](#Glint360k)
-- [Distributed Training Performance](#Performance)
+- [Largest Face Recognition Dataset: **Glint360k**](#Glint360K)
+- [Docker](#Docker)
+- [Performance On Million Identities](#Benchmark)  
 - [FAQ](#FAQ)
 - [Citation](#Citation)
 
@@ -18,7 +19,7 @@ which contains **`17091657`** images of **`360232`** individuals.
 By employing the Patial FC training strategy, baseline models trained on Glint360K can easily achieve state-of-the-art performance. 
 Detailed evaluation results on the large-scale test set (e.g. IFRT, IJB-C and Megaface) are as follows:
 
-#### Evaluation on IFRT       
+### 1. Evaluation on IFRT       
 **`r`** denotes the sampling rate of negative class centers.
 | Backbone     | Dataset            | African | Caucasian | Indian | Asian | ALL   |
 | ------------ | -----------        | ----- | ----- | ------ | ----- | ----- |
@@ -27,7 +28,7 @@ Detailed evaluation results on the large-scale test set (e.g. IFRT, IJB-C and Me
 | R100         | **Glint360k**(r=1.0)   | 89.50 | 94.23 | 93.54  | **65.07** | **88.67** |
 | R100         | **Glint360k**(r=0.1)   | **90.45** | **94.60** | **93.96**  | 63.91 | 88.23 |
 
-#### Evaluation on IJB-C and Megaface  
+### 2. Evaluation on IJB-C and Megaface  
 We employ ResNet100 as the backbone and CosFace (m=0.4) as the loss function.
 TAR@FAR=1e-4 is reported on the IJB-C datasets, and TAR@FAR=1e-6 is reported on the Megaface dataset.
 |Test Dataset        | IJB-C     | Megaface_Id  | Megaface_Ver |
@@ -35,11 +36,11 @@ TAR@FAR=1e-4 is reported on the IJB-C datasets, and TAR@FAR=1e-6 is reported on 
 | MS1MV2             | 96.4      | 98.3         | 98.6         |
 |**Glint360k** | **97.3**  | **99.1**     | **99.1**     |
 
-#### License 
+### 3. License 
 
 The Glint360K dataset (and the models trained with this dataset) are available for non-commercial research purposes only.
 
-#### Download
+### 4. Download
 - [x] [**Baidu Drive**](https://pan.baidu.com/s/1GsYqTTt7_Dn8BfxxsLFN0w) (code:o3az)    
 - [x] **Magnet URI**: `magnet:?xt=urn:btih:E5F46EE502B9E76DA8CC3A0E4F7C17E4000C7B1E&dn=glint360k`
 
@@ -62,7 +63,7 @@ cat glint360k_* | tar -xzvf -
 ```
 Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
 
-#### Pretrain models
+### 5. Pretrain models
 - [x] [**Baidu Drive**](https://pan.baidu.com/s/1sd9ZRsV2c_dWHW84kz1P1Q) (code:befi)
 - [x] [**Google Drive**](https://drive.google.com/drive/folders/1WLjDzEs1wC1K1jxDHNJ7dhEmQ3rOOILl?usp=sharing)
 
@@ -73,7 +74,7 @@ Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
 |  pytorch | [R50](https://drive.google.com/drive/folders/16hjOGRJpwsJCRjIBbO13z3SrSgvPTaMV?usp=sharing) |1.0|97.0|-|    
 |  pytorch | [R100](https://drive.google.com/drive/folders/19EHffHN0Yn8DjYm5ofrgVOf_xfkrVgqc?usp=sharing) |1.0|97.4|-|
     
-## Docker For Partial-FC
+## Docker
 Make sure you have installed the NVIDIA driver and Docker engine for your Linux distribution Note that you do not need to 
 install the CUDA Toolkit and other independence on the host system, but the NVIDIA driver needs to be installed.  
 Because the CUDA version used in the image is 10.1, 
@@ -97,7 +98,7 @@ sudo docker run -it -v /train_tmp:/train_tmp --net=host --privileged --gpus 8 --
 `/train_tmp` is where you put your training set (if you have enough RAM memory, 
 you can turn it into `tmpfs` first).
 
-## Training Speed Benchmark
+## Benchmark
 ### 1. Train Glint360K Using MXNET
  
 | Backbone    |   GPU                       | FP16  | BatchSize / it | Throughput img / sec |
@@ -112,7 +113,7 @@ you can turn it into `tmpfs` first).
 |  R50        | 8 * Tesla V100-SXM2-32GB    | True  |   128          | 6112                 |  
 
 
-## Performance On Million Identities
+### 2. Performance On Million Identities
 We neglect the influence of IO. All experiments use mixed-precision training, and the backbone is ResNet50.
 #### 1 Million Identities On 8 RTX2080Ti  
 
@@ -127,11 +128,6 @@ We neglect the influence of IO. All experiments use mixed-precision training, an
 | Model Parallel            | 64          | 2048          | 9684          | 4483               | GPU   |
 | **Partial FC(Ours)**      | **64**      | **4096**      | **6722**      | **12600**          | GPU   |
 
-## TODO
-- [ ] Mixed precision training (pytorch)
-- [ ] Pipeline Parallel (pytorch)
-- [ ] Docker (include mxnet and pytorch)  
-- [ ] A Wonderful Documents 
 
 ## FAQ
 #### Glint360K's Face Alignment Settings?

@@ -1,7 +1,7 @@
 ## [中文版本请点击这里](./README_CN.md)
 
 ## Train
-#### Requirements
+### 1.Requirements
 python==3.6  
 cuda==10.1    
 cudnn==765    
@@ -11,10 +11,7 @@ pip install easydict mxboard opencv-python tqdm
 [openmpi](mxnet/setup-utils/install-mpi.sh)==4.0.0  
 [horovod](mxnet/setup-utils/install-horovod.sh)==0.19.2  
 
-#### Failures due to SSH issues
-The host where horovodrun is executed must be able to SSH to all other hosts without any prompts.
-
-#### Run with horovodrun
+### 2.Run with horovodrun
 Typically one GPU will be allocated per process, so if a server has 8 GPUs, you will run 8 processes. 
 In horovodrun, the number of processes is specified with the -np flag.
 
@@ -28,15 +25,20 @@ To run on two machine with 16 GPUs:
 horovodrun -np 16 -H ip1:8,ip2:8 bash config.sh
 ```
 
-#### Run with mpi
+### 3.Run with mpi
 ```shell script
 bash run.sh
 ```
 
+### Failures due to SSH issues
+The host where horovodrun is executed must be able to SSH to all other hosts without any prompts.
+
+
+
 
 ## Troubleshooting
 
-### Horovod installed successfully?  
+### 1. Horovod installed successfully?  
 
 Run `horovodrun --check` to check the installation of horovod.
 ```shell script
@@ -59,13 +61,13 @@ Run `horovodrun --check` to check the installation of horovod.
 #     [X] Gloo
 ```
 
-### Mxnet Version!
+### 2. Mxnet Version!
 Some versions of mxnet with horovod have bug.   
 It is recommended to try version **1.5 or 1.6**.
 
 **The community has found that mxnet1.5.1 cannot install horovod.**
 
-### Check CUDA version!
+### 3. Check CUDA version!
 ```shell script
 # Make sure your cuda version is same as mxnet, such as mxnet-cu101 (CUDA 10.1)
 
@@ -76,10 +78,10 @@ It is recommended to try version **1.5 or 1.6**.
 # Cuda compilation tools, release 10.1, V10.1.168
 ```
 
-### Block IO
+### 4. Block IO
 You can turn on the debug mode to check whether your slow training speed is the cause of IO.
 
-### Training Speed.
+### 5. Training Speed.
 If you find that your training speed is the io bottleneck, you can mount dataset to RAM, 
 using the following command.
 ```shell script
