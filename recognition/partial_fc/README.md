@@ -8,7 +8,7 @@ Partial FC is a distributed deep learning training framework for face recognitio
 [Partial FC](https://arxiv.org/abs/2010.05222)
 - [Largest Face Recognition Dataset: **Glint360k**](#Glint360K)
 - [Docker](#Docker)
-- [Performance On Million Identities](#Benchmark)  
+- [Performance On Million Identities](#Benchmark)
 - [FAQ](#FAQ)
 - [Citation](#Citation)
 
@@ -67,7 +67,7 @@ Use [unpack_glint360k.py](./unpack_glint360k.py) to unpack.
 - [x] [**Baidu Drive**](https://pan.baidu.com/s/1sd9ZRsV2c_dWHW84kz1P1Q) (code:befi)
 - [x] [**Google Drive**](https://drive.google.com/drive/folders/1WLjDzEs1wC1K1jxDHNJ7dhEmQ3rOOILl?usp=sharing)
 
-| Framework       |  backbone                      | sample_rate  | IJBC@e4 | IFRT@e6 |
+| Framework       |  backbone                      | negative class centers sample_rate  | IJBC@e4 | IFRT@e6 |
 |  :---           | :---                           | :---         |  :---   |  :---   | 
 |  mxnet   | [R100](https://drive.google.com/drive/folders/1YPqIkOZWrmbli4GWfMJO2b0yiiZ7UCsP?usp=sharing) |1.0|97.3|-|
 |  mxnet   | [R100](https://drive.google.com/drive/folders/1-gF5sDwNoRcjwmpPSTNLpaZJi5N91BvL?usp=sharing) |0.1|97.3|-|

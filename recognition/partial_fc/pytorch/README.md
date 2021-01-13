@@ -1,15 +1,5 @@
 # Parital FC
 
-## TODO
-
-- [x] **No BUG** Sampling  
-- [ ] Pytorch Experiments (Glint360k, 1.0/0.1)   
-- [ ] Mixed precision training  
-- [ ] Pipeline Parallel  
-- [ ] Checkpoint  
-- [ ] Docker  
-- [ ] A Wonderful Documents  
-
 ## Results
 We employ ResNet100 as the backbone.
 

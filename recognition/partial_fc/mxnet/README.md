@@ -1,6 +1,4 @@
-## [中文版本请点击这里](./README_CN.md)
-
-## Train
+## Training
 ### 1.Requirements
 python==3.6  
 cuda==10.1    
@@ -90,5 +88,32 @@ sudo mkdir /train_tmp
 mount -t tmpfs -o size=140G  tmpfs /train_tmp
 ```
 
+## Our Method
+![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/partial_fc.png)
+
+### 1. The classification layer model is parallel
+Class centers are evenly distributed across different GPUs. It only takes three communications to complete 
+loss-free Softmax calculations.
+
+#### 1. Synchronization of features
+Make sure each GPU has all the GPU features on it, as is shown in `AllGather(x_i)`.
+
+#### 2. Synchronization of denominator of the softmax function
+We can first calculate the local sum of each GPU, and then compute the global sum through communication, as is shown
+in `Allreduce(sum(exp(logits_i)))`
+
+#### 3. Synchronization the gradients of feature
+The gradient of logits can be calculated independently, so is the gradient of the feature. finally, we collect all the 
+gradients on GPU and send them back to backbone, as is shown in `Allreduce(deta(X))`
+
+### 2. Softmax approximate
+
+Just a subset of class centers can approximate softmax's computation(positive class centers must in these class centers),
+this can be done with the following code:
+```python
+centers_p = func_positive(label)                 # select the positive class centers by the label of the sample
+centers_n = func_negative(centers_p)             # negative class centers are randomly sampled after excluding positive classes
+centers_final = concat(centers_n, centers_p)     # class centers that participate in softmax calculations
+```
 
 
