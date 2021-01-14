@@ -319,9 +319,10 @@ def evaluation_1N(query_feats, gallery_feats, query_ids, reg_ids, Fars=[0.01, 0.
 
     neg_sims_sorted = np.sort(neg_sims.flatten())[::-1]
     threshes, recalls = [], []
+    correct_pos_cond = pos_sims > neg_sims.max(1)
     for far in Fars:
         thresh = neg_sims_sorted[int(np.ceil(neg_sims_sorted.shape[0] * far)) - 1]
-        recall = np.sum(pos_sims > thresh) / pos_sims.shape[0]
+        recall = np.logical_and(correct_pos_cond, pos_sims > thresh).sum() / pos_sims.shape[0]
         threshes.append(thresh)
         recalls.append(recall)
         print("far = {:.10f} pr = {:.10f} thresh = {:.10f}".format(far, recall, thresh))
@@ -500,32 +501,32 @@ def plot_roc_and_calculate_tpr(scores, names=None, label=None):
 
 
 def plot_dir_far_cmc_scores(g1_cmc_scores, g2_cmc_scores=None, name=""):
-    # try:
-    import matplotlib.pyplot as plt
-    import bob.measure
+    try:
+        import matplotlib.pyplot as plt
+        import bob.measure
 
-    fig = plt.figure()
-    if g2_cmc_scores is not None:
-        axes = bob.measure.plot.detection_identification_curve(g1_cmc_scores, rank=1, logx=True)
-        axes[0].set_label(name + "Gallery 1")
-        axes = bob.measure.plot.detection_identification_curve(g2_cmc_scores, rank=1, logx=True)
-        axes[0].set_label(name + "Gallery 2")
-        axes = bob.measure.plot.detection_identification_curve(g1_cmc_scores + g2_cmc_scores, rank=1, logx=True)
-        axes[0].set_label(name + "Gallery 1 + Gallery 2")
-    else:
-        axes = bob.measure.plot.detection_identification_curve(g1_cmc_scores, rank=1, logx=True)
-        axes[0].set_label(name)
-    plt.xlabel("False Alarm Rate")
-    plt.xlim([0.0001, 1])
-    plt.ylabel("Detection & Identification Rate (%)")
-    plt.ylim([0, 1])
-    plt.grid()
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
-    # except:
-    #     print("matplotlib plot failed")
-    #     fig = None
+        fig = plt.figure()
+        if g2_cmc_scores is not None:
+            axes = bob.measure.plot.detection_identification_curve(g1_cmc_scores, rank=1, logx=True)
+            axes[0].set_label(name + " Gallery 1")
+            axes = bob.measure.plot.detection_identification_curve(g2_cmc_scores, rank=1, logx=True)
+            axes[0].set_label(name + " Gallery 2")
+            axes = bob.measure.plot.detection_identification_curve(g1_cmc_scores + g2_cmc_scores, rank=1, logx=True)
+            axes[0].set_label(name + " Gallery 1 + Gallery 2")
+        else:
+            axes = bob.measure.plot.detection_identification_curve(g1_cmc_scores, rank=1, logx=True)
+            axes[0].set_label(name)
+        plt.xlabel("False Alarm Rate")
+        plt.xlim([0.0001, 1])
+        plt.ylabel("Detection & Identification Rate (%)")
+        plt.ylim([0, 1])
+        plt.grid()
+        plt.legend()
+        plt.tight_layout()
+        plt.show()
+    except:
+        print("matplotlib plot failed")
+        fig = None
     return fig
 
 
