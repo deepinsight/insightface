@@ -321,7 +321,8 @@ def evaluation_1N(query_feats, gallery_feats, query_ids, reg_ids, fars=[0.01, 0.
     non_gallery_sims_sorted = np.sort(non_gallery_sims.max(1))[::-1]
     threshes, recalls = [], []
     for far in fars:
-        thresh = non_gallery_sims_sorted[int(np.ceil(non_gallery_sims_sorted.shape[0] * far)) - 1]
+        # thresh = non_gallery_sims_sorted[int(np.ceil(non_gallery_sims_sorted.shape[0] * far)) - 1]
+        thresh = non_gallery_sims_sorted[max(int((non_gallery_sims_sorted.shape[0]) * far) - 1, 0)]
         recall = np.logical_and(correct_pos_cond, pos_sims > thresh).sum() / pos_sims.shape[0]
         threshes.append(thresh)
         recalls.append(recall)
@@ -382,9 +383,7 @@ class IJB_test:
 
     def run_model_test_1N(self, npoints=100):
         fars_cal = [10 ** ii for ii in np.arange(-4, 0, 4 / npoints)] + [1]  # plot in range [10-4, 1]
-        fars_show_idx = np.arange(len(fars_cal))[
-            :: npoints // 4
-        ]  # in case npoints=100, fars_show=[0.0001, 0.001, 0.01, 0.1, 1.0]
+        fars_show_idx = np.arange(len(fars_cal))[:: npoints // 4]  # npoints=100, fars_show=[0.0001, 0.001, 0.01, 0.1, 1.0]
 
         g1_templates, g1_ids, g2_templates, g2_ids, probe_mixed_templates, probe_mixed_ids = extract_gallery_prob_data(
             self.data_path, self.subset, force_reload=self.force_reload
