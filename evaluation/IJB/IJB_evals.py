@@ -293,7 +293,7 @@ def verification_11(template_norm_feats=None, unique_templates=None, p1=None, p2
     return np.array(score)
 
 
-def evaluation_1N(query_feats, gallery_feats, query_ids, reg_ids, Fars=[0.01, 0.1]):
+def evaluation_1N(query_feats, gallery_feats, query_ids, reg_ids, fars=[0.01, 0.1]):
     print("query_feats: %s, gallery_feats: %s" % (query_feats.shape, gallery_feats.shape))
     similarity = np.dot(query_feats, gallery_feats.T)  # (19593, 3531)
 
@@ -311,23 +311,23 @@ def evaluation_1N(query_feats, gallery_feats, query_ids, reg_ids, Fars=[0.01, 0.
             pos_sims.append(similarity[index][reg_ids == query_id][0])
             neg_sims.append(similarity[index][reg_ids != query_id])
         else:
-            non_gallery_sims.append((similarity[index], None))
+            non_gallery_sims.append(similarity[index])
     total_pos = len(pos_sims)
-    pos_sims, neg_sims = np.array(pos_sims), np.array(neg_sims)
-    print("pos_sims: %s, neg_sims: %s, non_gallery_sims: %s" % (pos_sims.shape, neg_sims.shape, len(non_gallery_sims)))
+    pos_sims, neg_sims, non_gallery_sims = np.array(pos_sims), np.array(neg_sims), np.array(non_gallery_sims)
+    print("pos_sims: %s, neg_sims: %s, non_gallery_sims: %s" % (pos_sims.shape, neg_sims.shape, non_gallery_sims.shape))
     print("top1: %f, top5: %f, top10: %f" % (top_1_count / total_pos, top_5_count / total_pos, top_10_count / total_pos))
 
-    neg_sims_sorted = np.sort(neg_sims.flatten())[::-1]
-    threshes, recalls = [], []
     correct_pos_cond = pos_sims > neg_sims.max(1)
-    for far in Fars:
-        thresh = neg_sims_sorted[int(np.ceil(neg_sims_sorted.shape[0] * far)) - 1]
+    non_gallery_sims_sorted = np.sort(non_gallery_sims.max(1))[::-1]
+    threshes, recalls = [], []
+    for far in fars:
+        thresh = non_gallery_sims_sorted[int(np.ceil(non_gallery_sims_sorted.shape[0] * far)) - 1]
         recall = np.logical_and(correct_pos_cond, pos_sims > thresh).sum() / pos_sims.shape[0]
         threshes.append(thresh)
         recalls.append(recall)
-        print("far = {:.10f} pr = {:.10f} thresh = {:.10f}".format(far, recall, thresh))
-    cmc_scores = list(zip(neg_sims, np.expand_dims(pos_sims, -1))) + non_gallery_sims
-    return cmc_scores, top_1_count, top_5_count, top_10_count, threshes, recalls
+        # print("FAR = {:.10f} TPIR = {:.10f} th = {:.10f}".format(far, recall, thresh))
+
+    return top_1_count, top_5_count, top_10_count, threshes, recalls
 
 
 class IJB_test:
@@ -380,7 +380,12 @@ class IJB_test:
             scores.append(self.run_model_test_single(use_flip_test, use_norm_score, use_detector_score))
         return scores, names
 
-    def run_model_test_1N(self, separate_gallery=False, Fars=[0.01, 0.1]):
+    def run_model_test_1N(self, npoints=100):
+        fars_cal = [10 ** ii for ii in np.arange(-4, 0, 4 / npoints)] + [1]  # plot in range [10-4, 1]
+        fars_show_idx = np.arange(len(fars_cal))[
+            :: npoints // 4
+        ]  # in case npoints=100, fars_show=[0.0001, 0.001, 0.01, 0.1, 1.0]
+
         g1_templates, g1_ids, g2_templates, g2_ids, probe_mixed_templates, probe_mixed_ids = extract_gallery_prob_data(
             self.data_path, self.subset, force_reload=self.force_reload
         )
@@ -407,31 +412,36 @@ class IJB_test:
         print("probe_mixed_templates_feature:", probe_mixed_templates_feature.shape)  # (19593, 512)
         print("probe_mixed_unique_subject_ids:", probe_mixed_unique_subject_ids.shape)  # (19593,)
 
-        if separate_gallery:
-            print(">>>> Gallery 1")
-            g1_cmc_scores, g1_top_1_count, g1_top_5_count, g1_top_10_count, g1_threshes, g1_recalls = evaluation_1N(
-                probe_mixed_templates_feature, g1_templates_feature, probe_mixed_unique_subject_ids, g1_unique_ids
-            )
-            print(">>>> Gallery 2")
-            g2_cmc_scores, g2_top_1_count, g2_top_5_count, g2_top_10_count, g2_threshes, g2_recalls = evaluation_1N(
-                probe_mixed_templates_feature, g2_templates_feature, probe_mixed_unique_subject_ids, g2_unique_ids
-            )
-            print(">>>> Mean")
-            query_num = probe_mixed_templates_feature.shape[0]
-            top_1 = (g1_top_1_count + g2_top_1_count) / query_num
-            top_5 = (g1_top_5_count + g2_top_5_count) / query_num
-            top_10 = (g1_top_10_count + g2_top_10_count) / query_num
-            print("[Mean] top1: %f, top5: %f, top10: %f" % (top_1, top_5, top_10))
-            for far, g1_recall, g2_recall in zip(Fars, g1_recalls, g2_recalls):
-                print("[Mean] far = {:.10f} pr = {:.10f}".format(far, (g1_recall + g2_recall) / 2))
-            return g1_cmc_scores, g2_cmc_scores
-        else:
-            gallery_templates_feature = np.concatenate([g1_templates_feature, g2_templates_feature])
-            gallery_unique_ids = np.concatenate([g1_unique_ids, g2_unique_ids])
-            cmc_scores, top_1_count, top_5_count, top_10_count, threshes, recalls = evaluation_1N(
-                probe_mixed_templates_feature, gallery_templates_feature, probe_mixed_unique_subject_ids, gallery_unique_ids
-            )
-            return cmc_scores
+        print(">>>> Gallery 1")
+        g1_top_1_count, g1_top_5_count, g1_top_10_count, g1_threshes, g1_recalls = evaluation_1N(
+            probe_mixed_templates_feature, g1_templates_feature, probe_mixed_unique_subject_ids, g1_unique_ids, fars_cal
+        )
+        print(">>>> Gallery 2")
+        g2_top_1_count, g2_top_5_count, g2_top_10_count, g2_threshes, g2_recalls = evaluation_1N(
+            probe_mixed_templates_feature, g2_templates_feature, probe_mixed_unique_subject_ids, g2_unique_ids, fars_cal
+        )
+        print(">>>> Mean")
+        query_num = probe_mixed_templates_feature.shape[0]
+        top_1 = (g1_top_1_count + g2_top_1_count) / query_num
+        top_5 = (g1_top_5_count + g2_top_5_count) / query_num
+        top_10 = (g1_top_10_count + g2_top_10_count) / query_num
+        print("[Mean] top1: %f, top5: %f, top10: %f" % (top_1, top_5, top_10))
+
+        tpirs, show_result = [], {}
+        for id, far in enumerate(fars_cal):  # , g1_recalls, g1_threshes, g2_recalls, g2_threshes):
+            tpir = (g1_recalls[id] + g2_recalls[id]) / 2
+            tpirs.append(tpir)
+            if id in fars_show_idx:
+                show_result.setdefault("far", []).append(far)
+                show_result.setdefault("g1_tpir", []).append(g1_recalls[id])
+                show_result.setdefault("g1_thresh", []).append(g1_threshes[id])
+                show_result.setdefault("g2_tpir", []).append(g2_recalls[id])
+                show_result.setdefault("g2_thresh", []).append(g2_threshes[id])
+                show_result.setdefault("mean_tpir", []).append(tpir)
+                # print("[Mean] FAR:" far, "TPIR:", tpir)
+        tpir_result_df = pd.DataFrame(show_result).set_index("far")
+        print(tpir_result_df.to_markdown())
+        return fars_cal, tpirs
 
 
 def plot_roc_and_calculate_tpr(scores, names=None, label=None):
@@ -500,33 +510,29 @@ def plot_roc_and_calculate_tpr(scores, names=None, label=None):
     return tpr_result_df, fig
 
 
-def plot_dir_far_cmc_scores(g1_cmc_scores, g2_cmc_scores=None, name=""):
+def plot_dir_far_cmc_scores(fars, tpirs, name=None):
     try:
         import matplotlib.pyplot as plt
-        import bob.measure
+
+        auc_value = auc(fars, tpirs)
+        label = "[%s (AUC = %0.4f%%)]" % (name, auc_value * 100)
 
         fig = plt.figure()
-        if g2_cmc_scores is not None:
-            axes = bob.measure.plot.detection_identification_curve(g1_cmc_scores, rank=1, logx=True)
-            axes[0].set_label(name + " Gallery 1")
-            axes = bob.measure.plot.detection_identification_curve(g2_cmc_scores, rank=1, logx=True)
-            axes[0].set_label(name + " Gallery 2")
-            axes = bob.measure.plot.detection_identification_curve(g1_cmc_scores + g2_cmc_scores, rank=1, logx=True)
-            axes[0].set_label(name + " Gallery 1 + Gallery 2")
-        else:
-            axes = bob.measure.plot.detection_identification_curve(g1_cmc_scores, rank=1, logx=True)
-            axes[0].set_label(name)
+        plt.plot(fars, tpirs, lw=1, label=label)
         plt.xlabel("False Alarm Rate")
         plt.xlim([0.0001, 1])
+        plt.xscale("log")
         plt.ylabel("Detection & Identification Rate (%)")
         plt.ylim([0, 1])
-        plt.grid()
+
+        plt.grid(linestyle="--", linewidth=1)
         plt.legend()
         plt.tight_layout()
         plt.show()
     except:
         print("matplotlib plot failed")
         fig = None
+
     return fig
 
 
@@ -546,7 +552,6 @@ def parse_arguments(argv):
     parser.add_argument("-E", "--save_embeddings", action="store_true", help="Save embeddings data")
     parser.add_argument("-B", "--is_bunch", action="store_true", help="Run all 8 tests N{0,1}D{0,1}F{0,1}")
     parser.add_argument("-N", "--is_one_2_N", action="store_true", help="Run 1:N test instead of 1:1")
-    parser.add_argument("-S", "--is_one_2_N_separate", action="store_true", help="Run 1:N test, separated gallery")
     parser.add_argument("-F", "--force_reload", action="store_true", help="Force reload, instead of using cache")
     parser.add_argument("-P", "--plot_only", nargs="*", type=str, help="Plot saved results, Format 1 2 3 or 1, 2, 3 or *.npy")
     args = parser.parse_known_args(argv)[0]
@@ -594,9 +599,9 @@ if __name__ == "__main__":
             np.savez(args.save_result, embs=tt.embs, embs_f=tt.embs_f)
 
         if args.is_one_2_N:  # 1:N test
-            scores = tt.run_model_test_1N(separate_gallery=args.is_one_2_N_separate)
-            names = [save_name]
-            save_items.update({"scores": scores, "names": names})
+            fars, tpirs = tt.run_model_test_1N()
+            names = save_name
+            save_items.update({"fars": fars, "tpirs": tpirs, "names": names})
         elif args.is_bunch:  # All 8 tests N{0,1}D{0,1}F{0,1}
             scores, names = tt.run_model_test_bunch()
             names = [save_name + "_" + ii for ii in names]
@@ -615,9 +620,7 @@ if __name__ == "__main__":
         if args.model_file != None or args.save_embeddings:  # embeddings not restored from file or should save_embeddings again
             np.savez(args.save_result, **save_items)
 
-        if not args.is_one_2_N:
-            plot_roc_and_calculate_tpr(scores, names=names, label=label)
-        elif args.is_one_2_N_separate:
-            plot_dir_far_cmc_scores(g1_cmc_scores=scores[0], g2_cmc_scores=scores[1], name=save_name)
+        if args.is_one_2_N:
+            plot_dir_far_cmc_scores(fars, tpirs, name=names[0])
         else:
-            plot_dir_far_cmc_scores(scores + [(ii[0], None) for ii in scores], name=save_name)
+            plot_roc_and_calculate_tpr(scores, names=names, label=label)
