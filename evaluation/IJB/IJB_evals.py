@@ -426,21 +426,18 @@ class IJB_test:
         top_10 = (g1_top_10_count + g2_top_10_count) / query_num
         print("[Mean] top1: %f, top5: %f, top10: %f" % (top_1, top_5, top_10))
 
-        tpirs, show_result = [], {}
+        mean_tpirs = (np.array(g1_recalls) + np.array(g2_recalls)) / 2
+        show_result = {}
         for id, far in enumerate(fars_cal):
-            tpir = (g1_recalls[id] + g2_recalls[id]) / 2
-            tpirs.append(tpir)
             if id in fars_show_idx:
                 show_result.setdefault("far", []).append(far)
                 show_result.setdefault("g1_tpir", []).append(g1_recalls[id])
                 show_result.setdefault("g1_thresh", []).append(g1_threshes[id])
                 show_result.setdefault("g2_tpir", []).append(g2_recalls[id])
                 show_result.setdefault("g2_thresh", []).append(g2_threshes[id])
-                show_result.setdefault("mean_tpir", []).append(tpir)
-                # print("[Mean] FAR:" far, "TPIR:", tpir)
-        tpir_result_df = pd.DataFrame(show_result).set_index("far")
-        print(tpir_result_df.to_markdown())
-        return fars_cal, tpirs
+                show_result.setdefault("mean_tpir", []).append(mean_tpirs[id])
+        print(pd.DataFrame(show_result).set_index("far").to_markdown())
+        return fars_cal, mean_tpirs
 
 
 def plot_roc_and_calculate_tpr(scores, names=None, label=None):
