@@ -428,7 +428,7 @@ class IJB_test:
         print("[Mean] top1: %f, top5: %f, top10: %f" % (top_1, top_5, top_10))
 
         tpirs, show_result = [], {}
-        for id, far in enumerate(fars_cal):  # , g1_recalls, g1_threshes, g2_recalls, g2_threshes):
+        for id, far in enumerate(fars_cal):
             tpir = (g1_recalls[id] + g2_recalls[id]) / 2
             tpirs.append(tpir)
             if id in fars_show_idx:
@@ -621,6 +621,6 @@ if __name__ == "__main__":
             np.savez(args.save_result, **save_items)
 
         if args.is_one_2_N:
-            plot_dir_far_cmc_scores(fars, tpirs, name=names[0])
+            plot_dir_far_cmc_scores(fars, tpirs, name=names)
         else:
             plot_roc_and_calculate_tpr(scores, names=names, label=label)
