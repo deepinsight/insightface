@@ -629,6 +629,6 @@ if __name__ == "__main__":
             np.savez(args.save_result, **save_items)
 
         if args.is_one_2_N:
-            plot_dir_far_cmc_scores(scores=[(fars, tpirs)], names=names)
+            plot_dir_far_cmc_scores(scores=scores, names=names)
         else:
             plot_roc_and_calculate_tpr(scores, names=names, label=label)
