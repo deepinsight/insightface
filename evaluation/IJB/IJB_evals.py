@@ -327,8 +327,8 @@ def evaluation_1N(query_feats, gallery_feats, query_ids, reg_ids, fars=[0.01, 0.
         threshes.append(thresh)
         recalls.append(recall)
         # print("FAR = {:.10f} TPIR = {:.10f} th = {:.10f}".format(far, recall, thresh))
-
-    return top_1_count, top_5_count, top_10_count, threshes, recalls
+    cmc_scores = list(zip(neg_sims, pos_sims.reshape(-1, 1))) + list(zip(non_gallery_sims, [None] * non_gallery_sims.shape[0]))
+    return top_1_count, top_5_count, top_10_count, threshes, recalls, cmc_scores
 
 
 class IJB_test:
@@ -412,11 +412,11 @@ class IJB_test:
         print("probe_mixed_unique_subject_ids:", probe_mixed_unique_subject_ids.shape)  # (19593,)
 
         print(">>>> Gallery 1")
-        g1_top_1_count, g1_top_5_count, g1_top_10_count, g1_threshes, g1_recalls = evaluation_1N(
+        g1_top_1_count, g1_top_5_count, g1_top_10_count, g1_threshes, g1_recalls, g1_cmc_scores = evaluation_1N(
             probe_mixed_templates_feature, g1_templates_feature, probe_mixed_unique_subject_ids, g1_unique_ids, fars_cal
         )
         print(">>>> Gallery 2")
-        g2_top_1_count, g2_top_5_count, g2_top_10_count, g2_threshes, g2_recalls = evaluation_1N(
+        g2_top_1_count, g2_top_5_count, g2_top_10_count, g2_threshes, g2_recalls, g2_cmc_scores = evaluation_1N(
             probe_mixed_templates_feature, g2_templates_feature, probe_mixed_unique_subject_ids, g2_unique_ids, fars_cal
         )
         print(">>>> Mean")
@@ -437,7 +437,7 @@ class IJB_test:
                 show_result.setdefault("g2_thresh", []).append(g2_threshes[id])
                 show_result.setdefault("mean_tpir", []).append(mean_tpirs[id])
         print(pd.DataFrame(show_result).set_index("far").to_markdown())
-        return fars_cal, mean_tpirs
+        return fars_cal, mean_tpirs, g1_cmc_scores, g2_cmc_scores
 
 
 def plot_roc_and_calculate_tpr(scores, names=None, label=None):
@@ -506,15 +506,23 @@ def plot_roc_and_calculate_tpr(scores, names=None, label=None):
     return tpr_result_df, fig
 
 
-def plot_dir_far_cmc_scores(fars, tpirs, name=None):
+def plot_dir_far_cmc_scores(scores, names=None):
     try:
         import matplotlib.pyplot as plt
 
-        auc_value = auc(fars, tpirs)
-        label = "[%s (AUC = %0.4f%%)]" % (name, auc_value * 100)
-
         fig = plt.figure()
-        plt.plot(fars, tpirs, lw=1, label=label)
+        for id, score in enumerate(scores):
+            name = None if names is None else names[id]
+            if isinstance(score, str) and score.endswith(".npz"):
+                aa = np.load(score)
+                score, name = aa.get("scores")[0], aa.get("names")[0]
+            fars, tpirs = score[0], score[1]
+            name = name if name is not None else str(id)
+
+            auc_value = auc(fars, tpirs)
+            label = "[%s (AUC = %0.4f%%)]" % (name, auc_value * 100)
+            plt.plot(fars, tpirs, lw=1, label=label)
+
         plt.xlabel("False Alarm Rate")
         plt.xlim([0.0001, 1])
         plt.xscale("log")
@@ -582,12 +590,15 @@ if __name__ == "__main__":
 
     args = parse_arguments(sys.argv[1:])
     if args.plot_only != None and len(args.plot_only) != 0:
-        plot_roc_and_calculate_tpr(args.plot_only)
+        if args.is_one_2_N:
+            plot_dir_far_cmc_scores(args.plot_only)
+        else:
+            plot_roc_and_calculate_tpr(args.plot_only)
     else:
         save_name = os.path.splitext(os.path.basename(args.save_result))[0]
         save_items = {}
         save_path = os.path.dirname(args.save_result)
-        if not os.path.exists(save_path):
+        if len(save_path) != 0 and not os.path.exists(save_path):
             os.makedirs(save_path)
 
         tt = IJB_test(args.model_file, args.data_path, args.subset, args.batch_size, args.force_reload, args.save_result)
@@ -595,9 +606,10 @@ if __name__ == "__main__":
             np.savez(args.save_result, embs=tt.embs, embs_f=tt.embs_f)
 
         if args.is_one_2_N:  # 1:N test
-            fars, tpirs = tt.run_model_test_1N()
-            names = save_name
-            save_items.update({"fars": fars, "tpirs": tpirs, "names": names})
+            fars, tpirs, _, _ = tt.run_model_test_1N()
+            scores = [(fars, tpirs)]
+            names = [save_name]
+            save_items.update({"scores": scores, "names": names})
         elif args.is_bunch:  # All 8 tests N{0,1}D{0,1}F{0,1}
             scores, names = tt.run_model_test_bunch()
             names = [save_name + "_" + ii for ii in names]
@@ -617,6 +629,6 @@ if __name__ == "__main__":
             np.savez(args.save_result, **save_items)
 
         if args.is_one_2_N:
-            plot_dir_far_cmc_scores(fars, tpirs, name=names)
+            plot_dir_far_cmc_scores(scores=[(fars, tpirs)], names=names)
         else:
             plot_roc_and_calculate_tpr(scores, names=names, label=label)
