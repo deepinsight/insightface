@@ -24,6 +24,8 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
+**`2021-01-20`**: [OneFlow](https://github.com/Oneflow-Inc/oneflow) based implementation of ArcFace and Partial-FC, [here](https://github.com/deepinsight/insightface/tree/master/recognition/oneflow_face).
+
 **`2020-10-13`**: A new training method and one large training set(360K IDs) were released [here](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc) by DeepGlint.
 
 **`2020-10-09`**: We opened a large scale recognition test benchmark [IFRT](https://github.com/deepinsight/insightface/tree/master/challenges/IFRT)
