@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import numpy as np
 from ._graph import Node, Graph
 
+USE_DECONV_AS_UPSAMPLE = False
+
 def _convert_conv(net, node, graph, err):
     weight_name = node.inputs[1]
     input_name = str(node.inputs[0])
@@ -99,7 +101,12 @@ def _convert_upsample(net, node, graph, err):
         # net.params[node_name][0].data[]
 
 def _convert_resize(net, node, graph, err):
-    pass
+    if USE_DECONV_AS_UPSAMPLE:
+        print('add resize deconv param')
+        node_name = node.name
+        caffe_params = net.params[node_name][0].data
+        weights = np.ones(caffe_params.shape).astype("float32")
+        np.copyto(net.params[node_name][0].data, weights, casting='same_kind')
 
 def _convert_transpose(net, node, graph, err):
     pass

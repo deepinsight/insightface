@@ -15,13 +15,14 @@ from collections import OrderedDict
 from onnx import shape_inference
 import importlib
 
+USE_DECONV_AS_UPSAMPLE = True
+
 transformers = [
     ConstantsToInitializers(),
     ConvAddFuser(),
 ]
 
 def convertToCaffe(graph, prototxt_save_path, caffe_model_save_path):
-
     exist_edges = []
     layers = []
     exist_nodes = []
@@ -92,18 +93,22 @@ def convertToCaffe(graph, prototxt_save_path, caffe_model_save_path):
 
 def getGraph(onnx_path):
     model = onnx.load(onnx_path)
+    output_names = [node.name for node in model.graph.output]
     model = shape_inference.infer_shapes(model)
     model_graph = model.graph
     graph = Graph.from_onnx(model_graph)
     graph = graph.transformed(transformers)
     graph.channel_dims = {}
 
-    return graph
+    return graph, output_names
 
 if __name__ == "__main__":
+    cvt.USE_DECONV_AS_UPSAMPLE = USE_DECONV_AS_UPSAMPLE
+    wlr.USE_DECONV_AS_UPSAMPLE = USE_DECONV_AS_UPSAMPLE
     onnx_path = sys.argv[1]
     prototxt_path = sys.argv[2]
     caffemodel_path = sys.argv[3]
-    graph = getGraph(onnx_path)
+    graph, output_names = getGraph(onnx_path)
     convertToCaffe(graph, prototxt_path, caffemodel_path)
+    print('output_names:', output_names)
 

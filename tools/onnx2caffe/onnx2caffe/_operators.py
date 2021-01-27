@@ -8,6 +8,8 @@ import numpy as np
 from ._graph import Node, Graph
 from MyCaffe import Function as myf
 
+USE_DECONV_AS_UPSAMPLE = False
+
 def _compare(a, b, encoding="utf8"): #type: (Text, Text, Text) -> bool
     if isinstance(a, bytes):
         a = a.decode(encoding)
@@ -331,17 +333,37 @@ def _convert_upsample(node,graph,err):
     return layer
 
 def _convert_resize(node,graph,err):
-    #print(node, graph)
-    node_name = node.name
-    input_name = str(node.inputs[0])
-    output_name = str(node.outputs[0])
-    #print(node.attrs, node_name, input_name, output_name)
-    layer = myf("Upsample", node_name, [input_name], [output_name],
-                upsample_param=dict(
-                    scale = 2
-                ))
+    if not USE_DECONV_AS_UPSAMPLE:
+        #print(node, graph)
+        node_name = node.name
+        input_name = str(node.inputs[0])
+        output_name = str(node.outputs[0])
+        #print(node.attrs, node_name, input_name, output_name)
+        layer = myf("Upsample", node_name, [input_name], [output_name],
+                    upsample_param=dict(
+                        scale = 2
+                    ))
 
-    graph.channel_dims[output_name] = graph.channel_dims[input_name]
+        graph.channel_dims[output_name] = graph.channel_dims[input_name]
+    else:
+        print('add resize deconv operator')
+        factor = 2
+        node_name = node.name
+        input_name = str(node.inputs[0])
+        output_name = str(node.outputs[0])
+        # input_shape = graph.shape_dict[input_name]
+        # channels = input_shape[1]
+        channels = graph.channel_dims[input_name]
+        pad = int(math.ceil((factor - 1) / 2.))
+        layer = myf("Deconvolution", node_name, [input_name], [output_name],
+                    convolution_param=dict(
+                        num_output=channels,
+                        kernel_size=factor,
+                        stride=factor,
+                        group=channels,
+                        bias_term=False,
+                    ))
+        graph.channel_dims[output_name] = graph.channel_dims[input_name]
     return layer
 
 def _convert_transpose(node,graph,err):
