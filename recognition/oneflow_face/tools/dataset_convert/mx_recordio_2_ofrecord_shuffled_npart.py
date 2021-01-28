@@ -2,6 +2,8 @@ import os
 import sys
 import struct
 import argparse
+import numbers
+import random
 
 from mxnet import recordio
 import oneflow.core.record.record_pb2 as of_record
@@ -19,8 +21,14 @@ def parse_arguement(argv):
     parser.add_argument(
         "--output_filepath",
         type=str,
-        default="./output",
+        default="./ofrecord",
         help="Path to output OFRecord.",
+    )
+    parser.add_argument(
+        "--num_part",
+        type=int,
+        default=96,
+        help="num_part of OFRecord to generate.",
     )
     return parser.parse_args(argv)
 
@@ -64,15 +72,6 @@ def load_train_data(data_dir):
 
     else:
         imgidx_list = imgrec.keys
-
-    # print id2range to txt file
-    # with open('id2range.txt', 'w') as f:
-    #   for identity in range(identity_key_start, identity_key_end):
-    #     l = str(identity) \
-    #         + ' ' \
-    #         + str(id2range[identity][0]) \
-    #         + ' ' + str(id2range[identity][1]) + '\n'
-    #     f.write(l)
     return imgrec, imgidx_list
 
 
@@ -121,31 +120,44 @@ def convert_to_ofrecord(img_data):
 def main(args):
     # Convert recordio to ofrecord
     imgrec, imgidx_list = load_train_data(data_dir=args.data_dir)
+    random.shuffle(list(imgidx_list))
 
     output_dir = os.path.join(args.output_filepath, "train")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    output_file = os.path.join(output_dir, "part-0")
-    with open(output_file, "wb") as f:
-        for idx in imgidx_list:
-            if idx % 10000 == 0:
-                print(
-                    "Converting images: {} of {}".format(
-                        idx, len(imgidx_list)
+    num_images = len(imgidx_list)
+    num_images_per_part = (num_images + args.num_part) // args.num_part
+    print("num_images", num_images, "num_images_per_part", num_images_per_part)
+
+    for part_id in range(args.num_part):
+        part_name = "part-" + "{:0>5d}".format(part_id)
+        output_file = os.path.join(output_dir, part_name)
+        file_idx_start = part_id * num_images_per_part
+        file_idx_end = min((part_id + 1) * num_images_per_part, num_images)
+        print("part-"+str(part_id), "start", file_idx_start, "end", file_idx_end)
+        with open(output_file, "wb") as f:
+            for file_idx in range(file_idx_start, file_idx_end):
+                idx = imgidx_list[file_idx]
+                if idx % 10000 == 0:
+                    print(
+                        "Converting images: {} of {}".format(
+                            idx, len(imgidx_list)
+                        )
                     )
-                )
 
-            img_data = {}
-            rec = imgrec.read_idx(idx)
-            header, s = recordio.unpack(rec)
-            img_data["label"] = int(header.label[0])
-            img_data["pixel_data"] = s
+                img_data = {}
+                rec = imgrec.read_idx(idx)
+                header, s = recordio.unpack(rec)
+                label = header.label
+                if not isinstance(label, numbers.Number):
+                    label = label[0]
+                img_data["label"] = int(label)
+                img_data["pixel_data"] = s
 
-            example = convert_to_ofrecord(img_data)
-            print("shape", len(img_data["pixel_data"]))
-            size = example.ByteSize()
-            f.write(struct.pack("q", size))
-            f.write(example.SerializeToString())
+                example = convert_to_ofrecord(img_data)
+                size = example.ByteSize()
+                f.write(struct.pack("q", size))
+                f.write(example.SerializeToString())
 
 
 if __name__ == "__main__":
