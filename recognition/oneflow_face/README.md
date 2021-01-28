@@ -88,7 +88,7 @@ faces_emore/
 运行：
 
 ```
-python tools/dataset_convert/mx_recordio_2_ofrecord.py --data_dir datasets/faces_emore --output_filepath faces_emore/ofrecord/train
+python tools/dataset_convert/mx_recordio_2_ofrecord_shuffled_npart.py --data_dir datasets/faces_emore --output_filepath faces_emore/ofrecord/train
 ```
 
 
