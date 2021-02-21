@@ -1,9 +1,9 @@
 
-## CPP-Align
+## I. CPP-Align
  
   -
 
-## Face Mask Renderer
+## II. Face Mask Renderer
 
 We provide a simple tool to add masks on face images automatically.
 
@@ -25,15 +25,19 @@ We can use this tool to do data augmentation while training our face recognition
   
 - BFM models
 
-   Please follow the tutorial of (https://github.com/YadiraF/face3d/tree/master/examples/Data/BFM)(https://github.com/YadiraF/face3d/tree/master/examples/Data/BFM) to generate `BFM.mat` and `BFM_UV.mat`.
+   Please follow the tutorial of [https://github.com/YadiraF/face3d/tree/master/examples/Data/BFM](https://github.com/YadiraF/face3d/tree/master/examples/Data/BFM) to generate `BFM.mat` and `BFM_UV.mat`.
    
 - 3D68 model
 
    Download our 3D68 pretrained model(if1k3d68-0000.params) from [baiducloud](https://pan.baidu.com/s/1f9UtTpaW4l65DMRZ5wmJew)(passwd:2zmz) and put it under `assets_mask/`. Please also put the above BFM data model into this directory.
    
+- mask images
+
+   You can get example mask images by checking the image url from the table above.
+   
 ### Add Mask to Face Image
 
-Please refer to `make_renderer.py` for detail example. You can get example mask images by checking the image url from the table above.
+Please refer to `make_renderer.py` for detail example. 
 
 (1) init renderer:
 ```
@@ -51,7 +55,7 @@ mask_image  = cv2.imread("masks/mask2.jpg")
 params = tool.build_params(image)
 ```
 
-(4) do mask render, it costs about 10ms on 224x224 UV size, CPU single thread.
+(4) do mask render, it costs about `10ms` on 224x224 UV size, CPU single thread.
 ```
 mask_out = tool.render_mask(image, mask_image, params)
 ```
