@@ -29,7 +29,7 @@ We can use this tool to do data augmentation while training our face recognition
    
 - 3D68 model
 
-   Download our 3D68 pretrained model(if1k3d68-0000.params) from [baiducloud](https://pan.baidu.com/s/1f9UtTpaW4l65DMRZ5wmJew)(passwd:2zmz) and put it under `assets_mask/`. Please also put the above BFM data model into this directory.
+   Download our 3D68 pretrained model(if1k3d68-0000.params) from [baiducloud](https://pan.baidu.com/s/1f9UtTpaW4l65DMRZ5wmJew)(passwd:2zmz) or [googledrive](https://drive.google.com/file/d/1Tv9f6Iqm4423qEDdDwbyjk00plEfeG8a/view?usp=sharing) and put it under `assets_mask/`. Please also put the above BFM data model into this directory.
    
 - mask images
 
