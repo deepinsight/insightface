@@ -24,6 +24,8 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
+**`2021-03-09`**: [Tips](https://github.com/deepinsight/insightface/issues/1426) for training large-scale face recognition model, such as millions of IDs(classes).
+
 **`2021-02-21`**: We provide a simple face mask renderer [here](https://github.com/deepinsight/insightface/tree/master/recognition/tools) which can be used as a data augmentation tool while training face recoginition models.
 
 **`2021-01-20`**: [OneFlow](https://github.com/Oneflow-Inc/oneflow) based implementation of ArcFace and Partial-FC, [here](https://github.com/deepinsight/insightface/tree/master/recognition/oneflow_face).
