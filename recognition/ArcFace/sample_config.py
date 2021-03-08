@@ -27,6 +27,7 @@ config.data_color = 0
 config.data_images_filter = 0
 config.count_flops = True
 config.memonger = False  #not work now
+config.is_shuffled_rec = False
 
 # network settings
 network = edict()

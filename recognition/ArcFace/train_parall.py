@@ -14,7 +14,8 @@ import logging
 import pickle
 import sklearn
 import numpy as np
-from image_iter import FaceImageIter
+#from image_iter import FaceImageIter
+from image_iter import get_face_image_iter
 import mxnet as mx
 from mxnet import ndarray as nd
 import argparse
@@ -107,6 +108,7 @@ def parse_args():
                         type=str,
                         default='',
                         help='extra model name')
+    parser.add_argument('--fp16-scale', type=float, default=0.0, help='')
     args = parser.parse_args()
     return args
 
@@ -186,6 +188,12 @@ def train_net(args):
     #random.seed(_seed)
     #np.random.seed(_seed)
     #mx.random.seed(_seed)
+    config.fp16 = False
+    config.fp16_scale = 0.0
+    if args.fp16_scale>0.0:
+        config.fp16 = True
+        config.fp16_scale = args.fp16_scale
+        print('use fp16, scale=', config.fp16_scale)
     ctx = []
     cvd = os.environ['CUDA_VISIBLE_DEVICES'].strip()
     if len(cvd) > 0:
@@ -290,17 +298,6 @@ def train_net(args):
         args=args,
     )
     val_dataiter = None
-    train_dataiter = FaceImageIter(
-        batch_size=args.batch_size,
-        data_shape=data_shape,
-        path_imgrec=path_imgrec,
-        shuffle=True,
-        rand_mirror=config.data_rand_mirror,
-        mean=mean,
-        cutoff=config.data_cutoff,
-        color_jittering=config.data_color,
-        images_filter=config.data_images_filter,
-    )
 
     if config.net_name == 'fresnet' or config.net_name == 'fmobilefacenet':
         initializer = mx.init.Xavier(rnd_type='gaussian',
@@ -312,10 +309,11 @@ def train_net(args):
                                      magnitude=2)
 
     _rescale = 1.0 / args.batch_size
-    opt = optimizer.SGD(learning_rate=base_lr,
-                        momentum=base_mom,
-                        wd=base_wd,
-                        rescale_grad=_rescale)
+    if config.fp16:
+        opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale, multi_precision=True)
+    else:
+        opt = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale, multi_precision=False)
+    opt_fc7 = optimizer.SGD(learning_rate=base_lr, momentum=base_mom, wd=base_wd, rescale_grad=_rescale, multi_precision=False)
     _cb = mx.callback.Speedometer(args.batch_size, args.frequent)
 
     ver_list = []
@@ -355,12 +353,13 @@ def train_net(args):
         for step in lr_steps:
             if mbatch == step:
                 opt.lr *= 0.1
-                print('lr change to', opt.lr)
+                opt_fc7.lr *= 0.1
+                print('lr change to', opt.lr, opt_fc7.lr)
                 break
 
         _cb(param)
         if mbatch % 1000 == 0:
-            print('lr-batch-epoch:', opt.lr, param.nbatch, param.epoch)
+            print('lr-batch-epoch:', opt.lr, opt_fc7.lr, param.nbatch, param.epoch)
 
         if mbatch >= 0 and mbatch % args.verbose == 0:
             acc_list = ver_test(mbatch)
@@ -402,10 +401,28 @@ def train_net(args):
                 mx.model.save_checkpoint(prefix, msave, _sym, arg, aux)
             print('[%d]Accuracy-Highest: %1.5f' % (mbatch, highest_acc[-1]))
         if config.max_steps > 0 and mbatch > config.max_steps:
+            msave = 0
+            config.fp16 = False
+            print('saving last', msave)
+            arg, aux = model.get_export_params()
+            _sym = eval(config.net_name).get_symbol()
+            mx.model.save_checkpoint(prefix, msave, _sym, arg, aux)
             sys.exit(0)
 
     epoch_cb = None
-    train_dataiter = mx.io.PrefetchingIter(train_dataiter)
+    train_dataiter = get_face_image_iter(config, data_shape, path_imgrec)
+    #train_dataiter = FaceImageIter(
+    #    batch_size=args.batch_size,
+    #    data_shape=data_shape,
+    #    path_imgrec=path_imgrec,
+    #    shuffle=True,
+    #    rand_mirror=config.data_rand_mirror,
+    #    mean=mean,
+    #    cutoff=config.data_cutoff,
+    #    color_jittering=config.data_color,
+    #    images_filter=config.data_images_filter,
+    #)
+    #train_dataiter = mx.io.PrefetchingIter(train_dataiter)
 
     model.fit(
         train_dataiter,
@@ -414,7 +431,7 @@ def train_net(args):
         eval_data=val_dataiter,
         #eval_metric        = eval_metrics,
         kvstore=args.kvstore,
-        optimizer=opt,
+        optimizer=[opt, opt_fc7],
         #optimizer_params   = optimizer_params,
         initializer=initializer,
         arg_params=arg_params,
