@@ -325,18 +325,20 @@ def train_net(args):
         _metric = LossValueMetric()
         eval_metrics = [mx.metric.create(_metric)]
     else:
-        from image_iter import FaceImageIter
-        train_dataiter = FaceImageIter(
-            batch_size=args.batch_size,
-            data_shape=data_shape,
-            path_imgrec=path_imgrec,
-            shuffle=True,
-            rand_mirror=config.data_rand_mirror,
-            mean=mean,
-            cutoff=config.data_cutoff,
-            color_jittering=config.data_color,
-            images_filter=config.data_images_filter,
-        )
+        #from image_iter import FaceImageIter
+        #train_dataiter = FaceImageIter(
+        #    batch_size=args.batch_size,
+        #    data_shape=data_shape,
+        #    path_imgrec=path_imgrec,
+        #    shuffle=True,
+        #    rand_mirror=config.data_rand_mirror,
+        #    mean=mean,
+        #    cutoff=config.data_cutoff,
+        #    color_jittering=config.data_color,
+        #    images_filter=config.data_images_filter,
+        #)
+        from image_iter import get_face_image_iter
+        train_dataiter = get_face_image_iter(config, data_shape, path_imgrec)
         metric1 = AccMetric()
         eval_metrics = [mx.metric.create(metric1)]
         if config.ce_loss:
@@ -454,7 +456,6 @@ def train_net(args):
             sys.exit(0)
 
     epoch_cb = None
-    train_dataiter = mx.io.PrefetchingIter(train_dataiter)
 
     model.fit(
         train_dataiter,

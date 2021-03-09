@@ -234,12 +234,12 @@ class ParallModule(BaseModule):
             return
 
         self._curr_module.init_optimizer(kvstore,
-                                         optimizer,
+                                         optimizer[0],
                                          optimizer_params,
                                          force_init=force_init)
         for _module in self._arcface_modules:
             _module.init_optimizer(kvstore,
-                                   optimizer,
+                                   optimizer[1],
                                    optimizer_params,
                                    force_init=force_init)
         self.optimizer_initialized = True

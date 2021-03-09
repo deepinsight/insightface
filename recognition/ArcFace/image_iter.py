@@ -318,3 +318,50 @@ class FaceImageIterList(io.DataIter):
                 self.cur_iter.reset()
                 continue
             return ret
+
+def get_face_image_iter(cfg, data_shape, path_imgrec):
+    print('loading:', path_imgrec, cfg.is_shuffled_rec)
+    if not cfg.is_shuffled_rec:
+        train_dataiter = FaceImageIter(
+            batch_size=cfg.batch_size,
+            data_shape=data_shape,
+            path_imgrec=path_imgrec,
+            shuffle=True,
+            rand_mirror=config.data_rand_mirror,
+            mean=None,
+            cutoff=config.data_cutoff,
+            color_jittering=config.data_color,
+            images_filter=config.data_images_filter,
+        )
+        train_dataiter = mx.io.PrefetchingIter(train_dataiter)
+    else:
+        train_dataiter = mx.io.ImageRecordIter(
+               path_imgrec         = path_imgrec,
+               data_shape          = data_shape,
+               batch_size          = cfg.batch_size,
+               rand_mirror         = cfg.data_rand_mirror,
+               preprocess_threads  = 2,
+               shuffle             = True,
+               shuffle_chunk_size  = 1024,
+               )
+    return train_dataiter
+
+def test_face_image_iter(path_imgrec):
+    train_dataiter = mx.io.ImageRecordIter(
+           path_imgrec         = path_imgrec,
+           data_shape          = (3,112,112),
+           batch_size          = 512,
+           rand_mirror         = True,
+           preprocess_threads  = 2,
+           shuffle             = True,
+           shuffle_chunk_size  = 1024,
+           )
+    for batch in train_dataiter:
+        data = batch.data[0].asnumpy()
+        print(data.shape)
+        img0 = data[0]
+        print(img0[0,:5,:5])
+
+if __name__ == '__main__':
+    test_face_image_iter('/train_tmp/ms1mv3shuf/train.rec')
+
