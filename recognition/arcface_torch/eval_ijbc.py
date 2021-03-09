@@ -424,13 +424,13 @@ stop = timeit.default_timer()
 print('Time: %.2f s. ' % (stop - start))
 
 # In[ ]:
-
-save_path = result_dir + '/%s_result' % target
+save_path = os.path.join(result_dir, args.job)
+# save_path = result_dir + '/%s_result' % target
 
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 
-score_save_file = os.path.join(save_path, "%s.npy" % job)
+score_save_file = os.path.join(save_path, "%s.npy" % target.lower())
 np.save(score_save_file, score)
 
 # # Step 5: Get ROC Curves and TPR@FPR Table
@@ -479,5 +479,5 @@ plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC on IJB')
 plt.legend(loc="lower right")
-fig.savefig(os.path.join(save_path, '%s.pdf' % job))
+fig.savefig(os.path.join(save_path, '%s.pdf' % target.lower()))
 print(tpr_fpr_table)

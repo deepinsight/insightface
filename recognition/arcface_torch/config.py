@@ -9,7 +9,7 @@ config.momentum = 0.9
 config.weight_decay = 5e-4
 config.batch_size = 64
 config.lr = 0.1  # batch size is 512
-config.output = "ms1mv3_arcface_r50"
+config.output = "ms1mv3_r50_arcface"
 
 if config.dataset == "emore":
     config.rec = "/train_tmp/faces_emore"

@@ -31,11 +31,11 @@ pass
 # result-dir         your result path
 # network            your backbone
 CUDA_VISIBLE_DEVICES=0,1 python eval_ijbc.py \
---model-prefix ms1mv3_r50_arcface/backbone.pth \
+--model-prefix ms1mv3_arcface_r50/backbone.pth \
 --image-path IJB_release/IJBC \
---result-dir ms1mv3_r50_arcface \
+--result-dir ms1mv3_arcface_r50 \
 --batch-size 128 \
---job ms1mv3_r50_arcface \
+--job ms1mv3_arcface_r50 \
 --target IJBC \
 --network iresnet50
 ```
@@ -46,7 +46,7 @@ More details see [eval.md](docs/eval.md) in docs.
 ### MS1MV3
 |   Datasets          | backbone | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
 | :---:               | :---     | :---        | :---        |:---   |:---  |:--- |  
-| MS1MV3-Arcface      | r18      |             |             |       |      |     | 
+| MS1MV3-Arcface      | r18      |   92.08     |  94.68      |97.65  |97.63 |99.73|
 | MS1MV3-Arcface      | r34      |             |             |       |      |     | 
 | MS1MV3-Arcface      | r50      |   94.79     |  96.43      |98.28  |98.89 |99.85| 
 | MS1MV3-Arcface      | r100     |   95.22     |  96.87      |98.45  |99.19 |99.85| 
@@ -55,6 +55,5 @@ More details see [eval.md](docs/eval.md) in docs.
 |   Datasets          | backbone | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
 | :---:               | :---     | :---        | :---        |:---   |:---  |:--- |
 | Glint360k-Cosface   | r100     | -           | -           |-      |-     |-    |
-
 
 More details see [eval.md](docs/modelzoo.md) in docs.
