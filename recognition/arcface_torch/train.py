@@ -16,6 +16,7 @@ from dataset import MXFaceDataset, DataLoaderX
 from partial_fc import PartialFC
 from utils.utils_callbacks import CallBackVerification, CallBackLogging, CallBackModelCheckpoint
 from utils.utils_logging import AverageMeter, init_logging
+from utils.utils_amp import MaxClipGradScaler
 
 torch.backends.cudnn.benchmark = True
 
@@ -42,7 +43,7 @@ def main(args):
         sampler=train_sampler, num_workers=0, pin_memory=True, drop_last=True)
 
     dropout = 0.4 if cfg.dataset is "webface" else 0
-    backbone = eval("backbones.{}".format(args.network))(False, dropout=dropout).to(local_rank)
+    backbone = eval("backbones.{}".format(args.network))(False, dropout=dropout, fp16=cfg.fp16).to(local_rank)
 
     if args.resume:
         try:
@@ -81,8 +82,7 @@ def main(args):
 
     start_epoch = 0
     total_step = int(len(trainset) / cfg.batch_size / world_size * cfg.num_epoch)
-    if rank is 0:
-        logging.info("Total Step is: %d" % total_step)
+    if rank is 0: logging.info("Total Step is: %d" % total_step)
 
     callback_verification = CallBackVerification(2000, rank, cfg.val_targets, cfg.rec)
     callback_logging = CallBackLogging(50, rank, total_step, cfg.batch_size, world_size, None)
@@ -90,21 +90,31 @@ def main(args):
 
     loss = AverageMeter()
     global_step = 0
+    grad_scaler = MaxClipGradScaler(cfg.batch_size, 128 * cfg.batch_size, growth_interval=100) if cfg.fp16 else None
     for epoch in range(start_epoch, cfg.num_epoch):
         train_sampler.set_epoch(epoch)
         for step, (img, label) in enumerate(train_loader):
             global_step += 1
             features = F.normalize(backbone(img))
             x_grad, loss_v = module_partial_fc.forward_backward(label, features, opt_pfc)
-            features.backward(x_grad)
-            clip_grad_norm_(backbone.parameters(), max_norm=5, norm_type=2)
-            opt_backbone.step()
+
+            if cfg.fp16:
+                features.backward(grad_scaler.scale(x_grad))
+                grad_scaler.unscale_(opt_backbone)
+                clip_grad_norm_(backbone.parameters(), max_norm=5, norm_type=2)
+                grad_scaler.step(opt_backbone)
+                grad_scaler.update()
+            else:
+                features.backward(x_grad)
+                clip_grad_norm_(backbone.parameters(), max_norm=5, norm_type=2)
+                opt_backbone.step()
+
             opt_pfc.step()
             module_partial_fc.update()
             opt_backbone.zero_grad()
             opt_pfc.zero_grad()
             loss.update(loss_v, 1)
-            callback_logging(global_step, loss, epoch)
+            callback_logging(global_step, loss, epoch, cfg.fp16, grad_scaler)
             callback_verification(global_step, backbone)
         callback_checkpoint(global_step, backbone, module_partial_fc)
         scheduler_backbone.step()

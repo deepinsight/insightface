@@ -10,7 +10,7 @@ from torch.nn.parameter import Parameter
 
 class PartialFC(Module):
     """
-    Author: {Yang Xiao, Xiang An, XuHan Zhu} in DeepGlint,
+    Author: {Xiang An, Yang Xiao, XuHan Zhu} in DeepGlint,
     Partial FC: Training 10 Million Identities on a Single Machine
     See the original paper:
     https://arxiv.org/abs/2010.05222
