@@ -46,7 +46,7 @@ CUDA_VISIBLE_DEVICES=0,1 python eval_ijbc.py \
 More details see [eval.md](docs/eval.md) in docs.
 
 ## Speed Benchmark
-![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/partial_fc_speed.png)
+![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/arcface_speed.png)
 
 ArcFace_torch can train large-scale face recognition training set efficiently and quickly.  
 When the number of classes in training sets is greater than 300K and the training is sufficient, 
@@ -63,12 +63,12 @@ partial fc sampling strategy will get same accuracy with several times faster tr
 
 2. GPU memory cost of different parallel methods (GB per GPU), Tesla V100 32GB * 8. (Smaller is better)
 
-| Method                 | Bs128-R100-2 Million Identities | Bs128-R50-4 Million Identities | Bs64-R50-8 Million Identities |
-| :---                   |    :---                          | :---                            | :---                     |
-| Data Parallel          |    OOM                           | OOM                             | OOM                      |
-| Model Parallel         |    27382                         | 30322                           | 32182                    |
-| Fp16 + Model Parallel  |    20310                         | 26622                           | 32182                    | 
-| Fp16 + Partial Fc 0.1  |    11987                         | 10890                           | 11108                    | 
+| Method                 | Bs128-R100-2 Million Identities   | Bs128-R50-4 Million Identities   | Bs64-R50-8 Million Identities |
+| :---                   |    :---                           | :---                             | :---                     |
+| Data Parallel          |    OOM                            | OOM                              | OOM                      |
+| Model Parallel         |    27.3                           | 30.3                             | 32.1                      |
+| Fp16 + Model Parallel  |    20.3                           | 26.6                             | 32.1                      | 
+| Fp16 + Partial Fc 0.1  |    11.9                           | 10.8                             | 11.1                      | 
 
 
 ## Model Zoo  
