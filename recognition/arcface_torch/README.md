@@ -45,6 +45,31 @@ CUDA_VISIBLE_DEVICES=0,1 python eval_ijbc.py \
 ```
 More details see [eval.md](docs/eval.md) in docs.
 
+## Speed Benchmark
+![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/partial_fc_speed.png)
+
+ArcFace_torch can train large-scale face recognition training set efficiently and quickly.  
+When the number of classes in training sets is greater than 300K and the training is sufficient, 
+partial fc sampling strategy will get same accuracy with several times faster training performance and smaller GPU memory.
+
+1. Different Parallel Methods Training Speed (Larger is better)
+
+| Method                 | Bs128-R100-2 Million Identities | Bs128-R50-4 Million Identities | Bs64-R50-8 Million Identities |
+| :---                   |    :---                          | :---                            | :---                     |
+| Data Parallel          |    1                             | 1                               | 1                        |
+| Model Parallel         |    1362                          | 1600                            | 482                      |
+| Fp16 + Model Parallel  |    2006                          | 2165                            | 767                      | 
+| Fp16 + Partial Fc 0.1  |    3247                          | 4385                            | 3001                     | 
+
+2. Different Parallel Methods GPU Memory (Smaller is better)
+
+| Method                 | Bs128-R100-2 Million Identities | Bs128-R50-4 Million Identities | Bs64-R50-8 Million Identities |
+| :---                   |    :---                          | :---                            | :---                     |
+| Data Parallel          |    OOM                           | OOM                             | OOM                      |
+| Model Parallel         |    27382                         | 30322                           | 32182                    |
+| Fp16 + Model Parallel  |    20310                         | 26622                           | 32182                    | 
+| Fp16 + Partial Fc 0.1  |    11987                         | 10890                           | 11108                    | 
+
 
 ## Model Zoo  
 
@@ -69,3 +94,23 @@ All Model Can be found in here.
 | Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|r100-fp16-sample-0.1 | 95.95 | 97.35 | 98.57 | 99.30 | 99.85 |
 
 More details see [eval.md](docs/modelzoo.md) in docs.
+
+
+
+## Citation
+```
+@inproceedings{deng2019arcface,
+  title={Arcface: Additive angular margin loss for deep face recognition},
+  author={Deng, Jiankang and Guo, Jia and Xue, Niannan and Zafeiriou, Stefanos},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  pages={4690--4699},
+  year={2019}
+}
+@inproceedings{an2020partical_fc,
+  title={Partial FC: Training 10 Million Identities on a Single Machine},
+  author={An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and
+  Zhang, Debing and Fu Ying},
+  booktitle={Arxiv 2010.05222},
+  year={2020}
+}
+```
