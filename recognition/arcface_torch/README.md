@@ -52,7 +52,7 @@ ArcFace_torch can train large-scale face recognition training set efficiently an
 When the number of classes in training sets is greater than 300K and the training is sufficient, 
 partial fc sampling strategy will get same accuracy with several times faster training performance and smaller GPU memory.
 
-1. Different Parallel Methods Training Speed (Larger is better)
+1. Training speed of different parallel methods (samples/second), Tesla V100 32GB * 8. (Larger is better)
 
 | Method                 | Bs128-R100-2 Million Identities | Bs128-R50-4 Million Identities | Bs64-R50-8 Million Identities |
 | :---                   |    :---                          | :---                            | :---                     |
@@ -61,7 +61,7 @@ partial fc sampling strategy will get same accuracy with several times faster tr
 | Fp16 + Model Parallel  |    2006                          | 2165                            | 767                      | 
 | Fp16 + Partial Fc 0.1  |    3247                          | 4385                            | 3001                     | 
 
-2. Different Parallel Methods GPU Memory (Smaller is better)
+2. GPU memory cost of different parallel methods (GB per GPU), Tesla V100 32GB * 8. (Smaller is better)
 
 | Method                 | Bs128-R100-2 Million Identities | Bs128-R50-4 Million Identities | Bs64-R50-8 Million Identities |
 | :---                   |    :---                          | :---                            | :---                     |
