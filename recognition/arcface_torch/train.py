@@ -97,7 +97,6 @@ def main(args):
             global_step += 1
             features = F.normalize(backbone(img))
             x_grad, loss_v = module_partial_fc.forward_backward(label, features, opt_pfc)
-
             if cfg.fp16:
                 features.backward(grad_scaler.scale(x_grad))
                 grad_scaler.unscale_(opt_backbone)

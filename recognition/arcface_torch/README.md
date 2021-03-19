@@ -81,21 +81,28 @@ All Model Can be found in here.
 ### MS1MV3
 |   Datasets          |    log     | backbone    | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
 | :---:               |    :---    | :---        | :---        | :---        |:---   |:---  |:--- |  
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r18/training.log)             | r18                 | 92.08 | 94.68 | 97.65 | 97.63 | 99.73 |
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r34/training.log)             | r34                 | 94.13 | 95.98 | 98.05 | 98.60 | 99.80 | 
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r50/training.log)             | r50                 | 94.79 | 96.43 | 98.28 | 98.89 | 99.85 | 
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r50_fp16/training.log)        | r50-fp16            | 94.72 | 96.41 | 98.30 | 99.06 | 99.85 | 
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r100/training.log)            | r100                | 95.22 | 96.87 | 98.45 | 99.19 | 99.85 | 
+| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r18_fp16/training.log)  | r18-fp16  | 92.07 | 94.66 | 97.77 | 97.73 | 99.77 |
+| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r34_fp16/training.log)  | r34-fp16  | 94.10 | 95.90 | 98.10 | 98.67 | 99.80 |
+| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r50_fp16/training.log)  | r50-fp16  | 94.79 | 96.46 | 98.35 | 98.96 | 99.83 | 
+| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r100_fp16/training.log) | r100-fp16 | 95.31 | 96.81 | 98.48 | 99.06 | 99.85 | 
    
 ### Glint360k
 |   Datasets          | log   |backbone               | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
 | :---:               | :---  |:---                   | :---        | :---        |:---   |:---  |:--- |
 | Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100/training.log)         |r100                 | 96.19 | 97.39 | 98.52 | 99.26 | 99.83 |
 | Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|r100-fp16-sample-0.1 | 95.95 | 97.35 | 98.57 | 99.30 | 99.85 |
+| Glint360k-Cosface   | - | - | - | - | - | - | - |
+| Glint360k-Cosface   | - | - | - | - | - | - | - |
+| Glint360k-Cosface   | - | - | - | - | - | - | - |
+
+
+
 
 More details see [eval.md](docs/modelzoo.md) in docs.
 
 
+## Test
+We test on PyTorch versions 1.6.0, 1.7.1, and 1.8.0. Please create an issue if you are having trouble.
 
 ## Citation
 ```
