@@ -37,6 +37,9 @@ elif config.dataset == "ms1m-retinaface-t2":
     config.lr_func = lr_step_func
 
 elif config.dataset == "glint360k":
+    # make training faster
+    # our RAM is 256G
+    # mount -t tmpfs -o size=140G  tmpfs /train_tmp
     config.rec = "/train_tmp/glint360k"
     config.num_classes = 360232
     config.num_image = 17091657

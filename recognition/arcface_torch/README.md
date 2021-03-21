@@ -1,48 +1,34 @@
 # Arcface Pytorch (Distributed Version of ArcFace)
 
-
 ## Contents
 
 ## Set Up
 ```shell
 torch >= 1.6.0
-```
+```  
+More details see [eval.md](docs/install.md) in docs.
 
-## Train on a single node 
-If you want to use 8 GPU to train, you should set `--nproc_per_node=8` and set `CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 `  
-If you want to use 4 GPU to train, you should set `--nproc_per_node=4` and set `CUDA_VISIBLE_DEVICES=0,1,2,3`  
-If you want to use 1 GPU to train, you should set `--nproc_per_node=1` ...  
-
+## Training
+### 1. Single node, 1 GPUs:
 ```shell
-export OMP_NUM_THREADS=4
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 
-python -m torch.distributed.launch \ 
---nproc_per_node=8 --nnodes=1 \
---node_rank=0 --master_addr="127.0.0.1" \
---master_port=1234 train.py
-ps -ef | grep "train" | grep -v grep | awk '{print "kill -9 "$2}' | sh
+python -m torch.distributed.launch --nproc_per_node=1 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py
+```
+### 2. Single node, 8 GPUs:
+```shell
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py
+```
+### 3. Multiple nodes, each node 8 GPUs:  
+Node 0:  
+```shell
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=1234 train.py
+```
+Node 1:  
+```shell
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=1234 train.py
 ```
 
-## Train on multi-node
-```shell
-pass
-```
 
-## Evaluation
-```shell
-# model-prefix       your model path
-# image-path         your IJBC path
-# result-dir         your result path
-# network            your backbone
-CUDA_VISIBLE_DEVICES=0,1 python eval_ijbc.py \
---model-prefix ms1mv3_arcface_r50/backbone.pth \
---image-path IJB_release/IJBC \
---result-dir ms1mv3_arcface_r50 \
---batch-size 128 \
---job ms1mv3_arcface_r50 \
---target IJBC \
---network iresnet50
-```
+## Evaluation IJBC
 More details see [eval.md](docs/eval.md) in docs.
 
 ## Speed Benchmark
@@ -89,14 +75,12 @@ All Model Can be found in here.
 ### Glint360k
 |   Datasets          | log   |backbone               | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
 | :---:               | :---  |:---                   | :---        | :---        |:---   |:---  |:--- |
-| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100/training.log)         |r100                 | 96.19 | 97.39 | 98.52 | 99.26 | 99.83 |
-| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|r100-fp16-sample-0.1 | 95.95 | 97.35 | 98.57 | 99.30 | 99.85 |
-| Glint360k-Cosface   | - | - | - | - | - | - | - |
-| Glint360k-Cosface   | - | - | - | - | - | - | - |
-| Glint360k-Cosface   | - | - | - | - | - | - | - |
-
-
-
+| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r18_fp16_0.1/training.log) |r18-fp16-0.1  | 93.16 | 95.33 | 97.72 | 97.73 | 99.77 |
+| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r34_fp16_0.1/training.log) |r34-fp16-0.1  | 95.16 | 96.56 | 98.33 | 98.78 | 99.82 |
+| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r50_fp16_0.1/training.log) |r50-fp16-0.1  | 95.61 | 96.97 | 98.38 | 99.20 | 99.83 |
+| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|r100-fp16-0.1 | 95.88 | 97.32 | 98.48 | 99.29 | 99.82 |
+  
+0.1 means sample rate is 0.1.  
 
 More details see [eval.md](docs/modelzoo.md) in docs.
 

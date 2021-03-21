@@ -22,11 +22,13 @@ torch.backends.cudnn.benchmark = True
 
 
 def main(args):
-    dist.init_process_group(backend='nccl', init_method='env://')
+
+    world_size = int(os.environ['WORLD_SIZE'])
+    rank = int(os.environ['RANK'])
+    dist_url = "tcp://{}:{}".format(os.environ["MASTER_ADDR"], os.environ["MASTER_PORT"])
+    dist.init_process_group(backend='nccl', init_method=dist_url, rank=rank, world_size=world_size)
     local_rank = args.local_rank
     torch.cuda.set_device(local_rank)
-    rank = dist.get_rank()
-    world_size = dist.get_world_size()
 
     if not os.path.exists(cfg.output) and rank is 0:
         os.makedirs(cfg.output)
@@ -124,8 +126,8 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PyTorch ArcFace Training')
     parser.add_argument('--local_rank', type=int, default=0, help='local_rank')
-    parser.add_argument('--network', type=str, default="iresnet50", help="backbone network")
-    parser.add_argument('--loss', type=str, default="ArcFace", help="loss function")
-    parser.add_argument('--resume', type=int, default=0, help="model resuming")
+    parser.add_argument('--network', type=str, default='iresnet50', help='backbone network')
+    parser.add_argument('--loss', type=str, default='ArcFace', help='loss function')
+    parser.add_argument('--resume', type=int, default=0, help='model resuming')
     args_ = parser.parse_args()
     main(args_)
