@@ -29,6 +29,8 @@ config.count_flops = True
 config.memonger = False  #not work now
 config.is_shuffled_rec = False
 
+config.fp16 = False
+
 # network settings
 network = edict()
 
