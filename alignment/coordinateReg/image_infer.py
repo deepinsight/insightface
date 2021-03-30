@@ -1,10 +1,7 @@
-import argparse
 import cv2
-import sys
 import numpy as np
 import os
 import mxnet as mx
-import datetime
 from skimage import transform as trans
 import insightface
 
@@ -149,7 +146,7 @@ class Handler:
 
 
 if __name__ == '__main__':
-    handler = Handler('./model/2d106_det', 0, ctx_id=7, det_size=640)
+    handler = Handler('./model/2d106det', 0, ctx_id=7, det_size=640)
     im = cv2.imread('../../sample-images/t1.jpg')
     tim = im.copy()
     preds = handler.get(im, get_all=True)
