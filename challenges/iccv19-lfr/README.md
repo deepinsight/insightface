@@ -55,7 +55,7 @@ https://join.slack.com/t/insightface/shared_invite/enQtNjU0NDk2MjYyMTMzLTIzNDEwN
 
 **Training:**
 
-1. Download ms1m-retinaface from [baiducloud](https://pan.baidu.com/s/1rQxJ3drqm_071vpxBtp98A) or [dropbox](https://www.dropbox.com/s/ev5ezzcz79p2hge/ms1m-retinaface-t1.zip?dl=0) and unzip it to `$INSIGHTFACE_ROOT/datasets/`
+1. Download ms1m-retinaface from [baiducloud](https://pan.baidu.com/s/14z7qbi0K8aAYDcgT4ArnWg)(code:4ouw) or [dropbox](https://www.dropbox.com/s/ev5ezzcz79p2hge/ms1m-retinaface-t1.zip?dl=0) and unzip it to `$INSIGHTFACE_ROOT/datasets/`
 2. Go into `$INSIGHTFACE_ROOT/recognition/`
 3. Refer to the `retina` dataset configuration section in `sample_config.py` and copy it as your own configuration file `config.py`.
 4. Start training with `CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --dataset retina --network [your-network] --loss arcface`. It will output the accuracy of lfw, cfp_fp and agedb_30 every 2000 batches by default.
