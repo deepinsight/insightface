@@ -327,11 +327,11 @@ def get_face_image_iter(cfg, data_shape, path_imgrec):
             data_shape=data_shape,
             path_imgrec=path_imgrec,
             shuffle=True,
-            rand_mirror=config.data_rand_mirror,
+            rand_mirror=cfg.data_rand_mirror,
             mean=None,
-            cutoff=config.data_cutoff,
-            color_jittering=config.data_color,
-            images_filter=config.data_images_filter,
+            cutoff=cfg.data_cutoff,
+            color_jittering=cfg.data_color,
+            images_filter=cfg.data_images_filter,
         )
         train_dataiter = mx.io.PrefetchingIter(train_dataiter)
     else:
