@@ -24,6 +24,8 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Recent Update
 
+**`2021-04-18`**: We achieved Rank-4th on NIST-FRVT 1:1(and Rank 1-st if we consider all tracks including WILD), see [leaderboard](https://pages.nist.gov/frvt/html/frvt11.html).
+
 **`2021-03-13`**: We have released our official ArcFace PyTorch implementation, see [here](https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch). 
 
 **`2021-03-09`**: [Tips](https://github.com/deepinsight/insightface/issues/1426) for training large-scale face recognition model, such as millions of IDs(classes).
