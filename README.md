@@ -3,6 +3,12 @@
 
 By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) and [Jiankang Deng](https://jiankangdeng.github.io/)
 
+## Top News
+
+**`2021-04-18`**: We achieved Rank-4th on NIST-FRVT 1:1, see [leaderboard](https://pages.nist.gov/frvt/html/frvt11.html).
+
+**`2021-03-13`**: We have released our official ArcFace PyTorch implementation, see [here](https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch). 
+
 ## License
 
 The code of InsightFace is released under the MIT License. There is no limitation for both acadmic and commercial usage.
@@ -23,6 +29,8 @@ The master branch works with **MXNet 1.2 to 1.6**, **PyTorch 1.6+**, with **Pyth
 Please click the image to watch the Youtube video. For Bilibili users, click [here](https://www.bilibili.com/video/av38041494?from=search&seid=11501833604850032313).
 
 ## Recent Update
+
+**`2021-04-18`**: We achieved Rank-4th on NIST-FRVT 1:1, see [leaderboard](https://pages.nist.gov/frvt/html/frvt11.html).
 
 **`2021-03-13`**: We have released our official ArcFace PyTorch implementation, see [here](https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch). 
 
