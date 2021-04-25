@@ -24,7 +24,11 @@ IFRT testset contains 242,143 identities and 1,624,305 images.
 
 ## Evaluation Metric
 
-TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
+For ``Mask`` set, TAR is measured on mask-to-nonmask 1:1 protocal, with FAR less than 0.0001(e-4).
+
+For ``Children`` set, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.0001(e-4).
+
+For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
 ## Baselines
 
