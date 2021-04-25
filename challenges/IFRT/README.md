@@ -32,7 +32,7 @@ For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0
 
 ## Baselines
 
-**``2021.04.25``** We made a clean on Asian subset.
+**``2021.04.25``** We made a clean on East Asian subset, by removing children images.
 
 | Backbone   | Dataset    | Method     | Mask   | Children | African | Caucasian | South Asian | East Asian | All    | size(mb) | infer(ms) |
 |------------|------------|------------|--------|----------|---------|-----------|-------------|------------|--------|----------|-----------|
