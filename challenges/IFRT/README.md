@@ -28,35 +28,40 @@ TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
 ## Baselines
 
-| Backbone     | Dataset     | DESC.   | African | Caucasian | South Asian | East Asian | ALL   |
-| ------------ | ----------- | ------- | ----- | ----- | ------ | ----- | ----- |
-| R100         | CASIA       | ArcFace | 39.67 | 53.93 | 47.81  | 16.17 | 37.53 |
-| R50          | VGG2        | ArcFace | 49.20 | 65.93 | 56.22  | 27.15 | 47.13 |
-| R50          | MS1M-V2     | ArcFace | 71.97 | 83.24 | 79.66  | 22.94 | 56.20 |
-| R50          | MS1M-V3     | ArcFace | 76.24 | 86.21 | 84.44  | 37.43 | 71.02 |
-| R124         | MS1M-V3     | ArcFace | 81.08 | 89.06 | 87.53  | 38.40 | 74.76 |
-| R124         | MS1M-V3     | +FlipTest | 83.22 | 90.43 | 89.22  | 39.61 | 75.69 |
-| R100	       | Glint360k   | PartialFC(r=0.1)| 90.45 | 94.60	| 93.96	| 63.91	| 88.23 |
-| R180 | *InsightFace-Private*   | ArcFace | 94.45 | 96.98 | 96.02  | 91.67 | 96.26 |
-| R180 | *Private*   | block-box | 97.54 | 98.67 | 98.35  | 83.83 | 96.93 |
+**``2021.04.25``** We made a clean on Asian subset.
 
-(MS1M-V2 means MS1M-ArcFace, MS1M-V3 means MS1M-RetinaFace)
+| Backbone   | Dataset    | Method     | Mask   | Children | African | Caucasian | South Asian | East Asian | All    | size(mb) | infer(ms) |
+|------------|------------|------------|--------|----------|---------|-----------|-------------|------------|--------|----------|-----------|
+| R100  | Casia  | ArcFace  | 26.623 | 30.359   | 39.666  | 53.933    | 47.807      | 21.572     | 42.735 | 248.904  | 7.073     |
+| R100  | MS1MV2  | ArcFace  | 65.767 | 60.496   | 79.117  | 87.176    | 85.501      | 55.807     | 80.725 | 248.904  | 7.028     |
+| R18  | MS1MV3  | ArcFace | 47.853 | 41.047   | 62.613  | 75.125    | 70.213      | 43.859     | 68.326 | 91.658   | 1.856     |
+| R34  | MS1MV3  | ArcFace | 58.723 | 55.834   | 71.644  | 83.291    | 80.084      | 53.712     | 77.365 | 130.245  | 3.054     |
+| R50  | MS1MV3  | ArcFace | 63.850 | 60.457   | 75.488  | 86.115    | 84.305      | 57.352     | 80.533 | 166.305  | 4.262     |
+| R100 | MS1MV3 | ArcFace | 69.091 | 66.864   | 81.083  | 89.040    | 88.082      | 62.193     | 84.312 | 248.590  | 7.031     |
+| R18   | Glint360K   | ArcFace | 53.317 | 48.113   | 68.230  | 80.575    | 75.852      | 47.831     | 72.074 | 91.658   | 2.013     |
+| R34   | Glint360K   | ArcFace | 65.106 | 65.454   | 79.907  | 88.620    | 86.815      | 60.604     | 83.015 | 130.245  | 3.044     |
+| R50   | Glint360K   | ArcFace | 70.233 | 69.952   | 85.272  | 91.617    | 90.541      | 66.813     | 87.077 | 166.305  | 4.340     |
+| R100  | Glint360K  | ArcFace | 75.567 | 75.202   | 89.488  | 94.285    | 93.434      | 72.528     | 90.659 | 248.590  | 7.038     |
+| -       | *Private*     | (insightface-000) of frvt  | 97.760 | 93.358   | 98.850  | 99.372    | 99.058      | 87.694     | 97.481 | -  | -    |
 
-(We only consider *African* to *African* comparisons in *African* subset, so others like *African* to *Caucasian* will be ignored)
+
+(MS1M-V2 means MS1M-ArcFace, MS1M-V3 means MS1M-RetinaFace).
+
+Inference time was evaluated on Tesla V100 GPU.
+
+
 
 ## How to Participate
 
-Send an e-mail to **insightface.challenge(AT)gmail.com** after preparing your black-box feature extractor or your academic model file(without commercial risk), with your name, organization and submission comments.
+Send an e-mail to **insightface.challenge(AT)gmail.com** after preparing your onnx model file(without commercial risk), with your name, organization and submission comments.
 
-There are some ways to submit:
+Some other ways to submit:
 
-1. (Recommended) Submit black-box face feature extracting tool.
+1. Submit black-box face feature extracting tool.
     * Use python binding to provide python interface: `feat = get_feature(image, bbox, landmark)`, where shape(image)==(H,W,3), shape(bbox)==(4,), shape(landmark)==(5,2) and shape(feat)==(K,). You can either use the provided landmark or detect them by yourself.
     * In current stage, it should be better to not encrypt your feature embeddings, for fast GPU N:N matrix calculation.
     * You can add some restrictions on your tool. Such as number of api calls and time constraints.
-2. (Simplest) Submit your recognition model.
-    * Submit MXNet ArcFace model with the same face alignment. In this case, you can just submit the single model file.
-    * In other case, such as PyTorch/TF models or ArcFace models with different face alignment method, please give us an example on how to generate feature embeddings. (eg. provide a function `get_feature(image, bbox, landmark)`)
+
 
 ## Leaderboard
 
