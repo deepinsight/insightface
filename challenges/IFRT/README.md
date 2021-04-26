@@ -51,7 +51,7 @@ For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0
 
 (MS1M-V2 means MS1M-ArcFace, MS1M-V3 means MS1M-RetinaFace).
 
-Inference time was evaluated on Tesla V100 GPU.
+Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
 
 
@@ -69,6 +69,4 @@ Some other ways to submit:
 
 ## Leaderboard
 
-[Leaderboard](http://insightface.ai/IFRT) on insightface.ai. (TODO)
-
-TODO
+Coming soon.
