@@ -104,3 +104,21 @@ class FaceAnalysis:
             ret.append(face)
         return ret
 
+    def draw_on(self, img, faces):
+        import cv2
+        for i in range(len(faces)):
+            face = faces[i]
+            box = face.bbox.astype(np.int)
+            color = (0, 0, 255)
+            cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), color, 2)
+            if face.kps is not None:
+                kps = face.kps.astype(np.int)
+                #print(landmark.shape)
+                for l in range(kps.shape[0]):
+                    color = (0, 0, 255)
+                    if l == 0 or l == 3:
+                        color = (0, 255, 0)
+                    cv2.circle(img, (kps[l][0], kps[l][1]), 1, color,
+                               2)
+        return img
+
