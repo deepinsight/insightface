@@ -1,1 +1,3 @@
-from .model_zoo import get_model, get_model_list
+from .model_zoo import get_model
+from .arcface_onnx import ArcFaceONNX
+from .scrfd import SCRFD

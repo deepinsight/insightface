@@ -22,7 +22,7 @@ _model_sha1 = {
     ]
 }
 
-base_repo_url = 'http://insightface.ai/files/'
+base_repo_url = 'https://insightface.ai/files/'
 _url_format = '{repo_url}models/{file_name}.zip'
 
 

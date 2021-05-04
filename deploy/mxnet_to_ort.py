@@ -27,19 +27,54 @@ parser = argparse.ArgumentParser(description='convert arcface models to onnx')
 # general
 parser.add_argument('params', default='./r100a/model-0000.params', help='mxnet params to load.')
 parser.add_argument('output', default='./r100a.onnx', help='path to write onnx model.')
+parser.add_argument('--eps', default=1.0e-8, type=float, help='eps for weights.')
 parser.add_argument('--input-shape', default='3,112,112', help='input shape.')
 args = parser.parse_args()
 input_shape = (1,) + tuple( [int(x) for x in args.input_shape.split(',')] )
-print('input-shape:', input_shape)
 
 params_file = args.params
 pos = params_file.rfind('-')
-sym_file = params_file[:pos] + "-symbol.json"
+prefix = params_file[:pos]
+epoch = int(params_file[pos+1:pos+5])
+sym_file = prefix + "-symbol.json"
 assert os.path.exists(sym_file)
 assert os.path.exists(params_file)
 
-print('exporting from', sym_file, params_file)
-converted_model_path = onnx_mxnet.export_model(sym_file, params_file, [input_shape], np.float32, args.output)
+sym, arg_params, aux_params = mx.model.load_checkpoint(prefix, epoch)
+eps = args.eps
+
+arg = {}
+aux = {}
+invalid = 0
+ac = 0
+for k in arg_params:
+    v = arg_params[k]
+    nv = v.asnumpy()
+    #print(k, nv.dtype)
+    nv = nv.astype(np.float32)
+    ac += nv.size
+    invalid += np.count_nonzero(np.abs(nv)<eps)
+    nv[np.abs(nv) < eps] = 0.0
+    arg[k] = mx.nd.array(nv, dtype='float32')
+print(invalid, ac)
+arg_params = arg
+invalid = 0
+ac = 0
+for k in aux_params:
+    v = aux_params[k]
+    nv = v.asnumpy().astype(np.float32)
+    ac += nv.size
+    invalid += np.count_nonzero(np.abs(nv)<eps)
+    nv[np.abs(nv) < eps] = 0.0
+    aux[k] = mx.nd.array(nv, dtype='float32')
+print(invalid, ac)
+aux_params = aux
+
+all_args = {}
+all_args.update(arg_params)
+all_args.update(aux_params)
+converted_model_path = onnx_mxnet.export_model(sym, all_args, [input_shape], np.float32, args.output, opset_version=11)
+
 model = onnx.load(args.output)
 graph = model.graph
 input_map = create_map(graph.input)

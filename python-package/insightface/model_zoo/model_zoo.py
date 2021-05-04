@@ -1,56 +1,59 @@
-# pylint: disable=wildcard-import, unused-wildcard-import
-"""
-This code file mainly comes from https://github.com/dmlc/gluon-cv/blob/master/gluoncv/model_zoo/model_zoo.py
-"""
-from .face_recognition import *
-from .face_detection import *
-from .face_genderage import *
-#from .face_alignment import *
+# -*- coding: utf-8 -*-
+# @Organization  : insightface.ai
+# @Author        : Jia Guo
+# @Time          : 2021-05-04
+# @Function      : 
 
-__all__ = ['get_model', 'get_model_list']
+import os
+import os.path as osp
+import glob
+import onnxruntime
+from .arcface_onnx import *
+from .scrfd import *
 
-_models = {
-    'arcface_r100_v1': arcface_r100_v1,
-    #'arcface_mfn_v1': arcface_mfn_v1,
-    #'arcface_outofreach_v1': arcface_outofreach_v1,
-    'retinaface_r50_v1': retinaface_r50_v1,
-    'retinaface_mnet025_v1': retinaface_mnet025_v1,
-    'retinaface_mnet025_v2': retinaface_mnet025_v2,
-    'genderage_v1': genderage_v1,
-}
+#__all__ = ['get_model', 'get_model_list', 'get_arcface_onnx', 'get_scrfd']
+__all__ = ['get_model']
 
+
+class ModelRouter:
+    def __init__(self, onnx_file):
+        self.onnx_file = onnx_file
+
+    def get_model(self):
+        session = onnxruntime.InferenceSession(self.onnx_file, None)
+        input_cfg = session.get_inputs()[0]
+        input_shape = input_cfg.shape
+        outputs = session.get_outputs()
+        #print(input_shape)
+        if len(outputs)>=5:
+            return SCRFD(model_file=self.onnx_file, session=session)
+        elif input_shape[2]==112 and input_shape[3]==112:
+            return ArcFaceONNX(model_file=self.onnx_file, session=session)
+        else:
+            raise RuntimeError('error on model routing')
+
+def find_onnx_file(dir_path):
+    if not os.path.exists(dir_path):
+        return None
+    paths = glob.glob("%s/*.onnx" % dir_path)
+    if len(paths) == 0:
+        return None
+    paths = sorted(paths)
+    return paths[-1]
 
 def get_model(name, **kwargs):
-    """Returns a pre-defined model by name
+    root = kwargs.get('root', '~/.insightface/models')
+    root = os.path.expanduser(root)
+    if not name.endswith('.onnx'):
+        model_dir = os.path.join(root, name)
+        model_file = find_onnx_file(model_dir)
+        if model_file is None:
+            return None
+    else:
+        model_file = name
+    assert osp.isfile(model_file), 'model should be file'
+    router = ModelRouter(name)
+    model = router.get_model()
+    #print('get-model for ', name,' : ', model.taskname)
+    return model
 
-    Parameters
-    ----------
-    name : str
-        Name of the model.
-    root : str, default '~/.insightface/models'
-        Location for keeping the model parameters.
-
-    Returns
-    -------
-    Model
-        The model.
-    """
-    name = name.lower()
-    if name not in _models:
-        err_str = '"%s" is not among the following model list:\n\t' % (name)
-        err_str += '%s' % ('\n\t'.join(sorted(_models.keys())))
-        raise ValueError(err_str)
-    net = _models[name](**kwargs)
-    return net
-
-
-def get_model_list():
-    """Get the entire list of model names in model_zoo.
-
-    Returns
-    -------
-    list of str
-        Entire list of model names in model_zoo.
-
-    """
-    return sorted(_models.keys())
