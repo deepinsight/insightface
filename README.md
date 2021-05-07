@@ -11,7 +11,7 @@ By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) a
 
 ## License
 
-The code of InsightFace is released under the MIT License. There is no limitation for both acadmic and commercial usage.
+The code of InsightFace is released under the MIT License. There is no limitation for both academic and commercial usage.
 
 The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only.
 
@@ -36,7 +36,7 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 **`2021-03-09`**: [Tips](https://github.com/deepinsight/insightface/issues/1426) for training large-scale face recognition model, such as millions of IDs(classes).
 
-**`2021-02-21`**: We provide a simple face mask renderer [here](https://github.com/deepinsight/insightface/tree/master/recognition/tools) which can be used as a data augmentation tool while training face recoginition models.
+**`2021-02-21`**: We provide a simple face mask renderer [here](https://github.com/deepinsight/insightface/tree/master/recognition/tools) which can be used as a data augmentation tool while training face recognition models.
 
 **`2021-01-20`**: [OneFlow](https://github.com/Oneflow-Inc/oneflow) based implementation of ArcFace and Partial-FC, [here](https://github.com/deepinsight/insightface/tree/master/recognition/oneflow_face).
 
