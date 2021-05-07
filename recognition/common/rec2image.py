@@ -11,6 +11,7 @@ import cv2
 import time
 import sklearn
 import numpy as np
+from tqdm import tqdm
 
 
 def main(args):
@@ -32,13 +33,9 @@ def main(args):
         print('header0 label', header.label)
         header0 = (int(header.label[0]), int(header.label[1]))
         seq_identity = range(int(header.label[0]), int(header.label[1]))
-        pp = 0
-        for identity in seq_identity:
+        for identity in tqdm(seq_identity):
             id_dir = os.path.join(args.output, "%d_%d" % (ds_id, identity))
             os.makedirs(id_dir)
-            pp += 1
-            if pp % 10 == 0:
-                print('processing id', pp)
             s = imgrec.read_idx(identity)
             header, _ = mx.recordio.unpack(s)
             imgid = 0
@@ -47,7 +44,7 @@ def main(args):
                 _header, _img = mx.recordio.unpack(s)
                 _img = mx.image.imdecode(_img).asnumpy()[:, :, ::-1]  # to bgr
                 image_path = os.path.join(id_dir, "%d.jpg" % imgid)
-                cv2.imwrite(image_path, _img)
+                cv2.imwrite(image_path, _img, [cv2.IMWRITE_JPEG_QUALITY, 100])
                 imgid += 1
 
 
