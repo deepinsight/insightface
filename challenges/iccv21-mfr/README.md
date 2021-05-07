@@ -74,4 +74,12 @@ The final rank will be determined by two columns: **Rank@Mask** and **Rank@All**
 Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
 
+## Challenge Rules
+
+1. We have two tracks, determined by the size of training data size.
+  * Track A: Use MS1M-V3 as training set.
+  * Track B: Use Glint360K as training set.
+2. Training set and testset are both already aligned to 112x112, re-alignment is prohibited.
+3. Mask data-augmentation is allowed, such as [this](https://github.com/deepinsight/insightface/tree/master/recognition/tools). The tool you used should be reproducible. 
+
 ## Submission
