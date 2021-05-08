@@ -88,8 +88,10 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 6. Matching score is measured by cosine similarity.
 7. Model size should be not larger than 1GB.
 8. For Track A: feature length should be not larger than 512, and the inference time should be not larger than 10ms on Tesla V100 GPU.
-9. For Track A: feature length should be not larger than 1024, and the inference time should be not larger than 20ms on Tesla V100 GPU.
+9. For Track B: feature length should be not larger than 1024, and the inference time should be not larger than 20ms on Tesla V100 GPU.
 10. The input size of submission model should be 112x112.
 11. Online evaluation server uses onnxruntime-gpu==1.6, cuda==10.2, cudnn==8.0.5.
 
 ## Submission
+
+Coming soon
