@@ -78,20 +78,32 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
 ## Rules
 
-1. We have two tracks, determined by the size of training dataset.
-  * Track A: Use MS1M-V3 as training set.
-  * Track B: Use Glint360K as training set.
-2. Training set and testing set are both already aligned to 112x112, re-alignment is prohibited.
-3. Mask data-augmentation is allowed, such as [this](https://github.com/deepinsight/insightface/tree/master/recognition/tools). The tool you used should be reproducible. 
+1. We have two tracks, determined by the size of training dataset and inference time limitation.
+  * Track A: Use MS1M-V3 as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/challenges/iccv19-lfr)
+  * Track B: Use Glint360K as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc)
+2. Training set and testing set are both aligned to 112x112, re-alignment is prohibited.
+3. Mask data-augmentation is allowed, such as [this](https://github.com/deepinsight/insightface/tree/master/recognition/tools). The applied mask augmentation tool should be reproducible. 
 4. External dataset and pretrained models are both prohibited.
-5. Participants submit onnx model, then get scores by online evaluation. Test set is invisible.
+5. Participants submit onnx model, then get scores by our online evaluation. Test images are invisible.
 6. Matching score is measured by cosine similarity.
-7. Model size should be not larger than 1GB.
-8. For Track A: feature length should be not larger than 512, and the inference time should be not larger than 10ms on Tesla V100 GPU.
-9. For Track B: feature length should be not larger than 1024, and the inference time should be not larger than 20ms on Tesla V100 GPU.
-10. The input size of submission model should be 112x112.
+7. Model size should not be larger than 1GB.
+8. For Track A: feature length should not be not larger than 512, and the inference time should not be larger than 10ms on Tesla V100 GPU.
+9. For Track B: feature length should not be not larger than 1024, and the inference time should not be larger than 20ms on Tesla V100 GPU.
+10. The input shape of submission model should equal to 3x112x112 (RGB order).
 11. Online evaluation server uses onnxruntime-gpu==1.6, cuda==10.2, cudnn==8.0.5.
+12. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
+
+## Tutorial 
+
+1. ArcFace-PyTorch (with Partial-FC), [link](https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch)
+2. OneFlow, [link](https://github.com/deepinsight/insightface/tree/master/recognition/oneflow_face)
+3. MXNet, [link](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace)
 
 ## Submission
 
-Coming soon
+1. Participants package the onnx model for submission using ``zip`` or ``tar -czf``.
+2. Each participant can submit three times a day.
+3. Please sign-up with the real organization name. You can hide the organization name in our system if you like.
+4. You can decide which submission to be on the leaderboard by clicking the button.
+
+Link coming soon
