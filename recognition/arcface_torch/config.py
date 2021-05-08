@@ -1,7 +1,7 @@
 from easydict import EasyDict as edict
 
 config = edict()
-config.dataset = "ms1m-retinaface-t2"
+config.dataset = "ms1m-retinaface-t1"
 config.embedding_size = 512
 config.sample_rate = 1
 config.fp16 = False
@@ -23,6 +23,20 @@ if config.dataset == "emore":
         return ((epoch + 1) / (4 + 1)) ** 2 if epoch < -1 else 0.1 ** len(
             [m for m in [8, 14] if m - 1 <= epoch])
     config.lr_func = lr_step_func
+
+elif config.dataset == "ms1m-retinaface-t1":
+    config.rec = "/train_tmp/ms1m-retinaface-t1"
+    config.num_classes = 93431
+    config.num_image = 5179510
+    config.num_epoch = 25
+    config.warmup_epoch = -1
+    config.val_targets = ["lfw", "cfp_fp", "agedb_30"]
+
+    def lr_step_func(epoch):
+        return ((epoch + 1) / (4 + 1)) ** 2 if epoch < -1 else 0.1 ** len(
+            [m for m in [11, 17, 22] if m - 1 <= epoch])
+    config.lr_func = lr_step_func
+
 
 elif config.dataset == "ms1m-retinaface-t2":
     config.rec = "/train_tmp/ms1m-retinaface-t2"
