@@ -4,27 +4,29 @@ The Masked Face Recognition Challenge & Workshop(MFR) will be held in conjunctio
 
 [Link](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/)
 
+## Testset
+
 In this challenge, we will evaluate the accuracy of following testsets:
 
-  1. Accuracy between masked and non-masked faces.
-  2. Accuracy among children(2~16 years old).
-  3. Accuracy of globalised multi-racial benchmarks.
+  * Accuracy between masked and non-masked faces.
+  * Accuracy among children(2~16 years old).
+  * Accuracy of globalised multi-racial benchmarks.
 
-We ensure that there's no overlap between our testset and public available training dataset, as they are not collected from celebrities.
+We ensure that there's no overlap between these testsets and public available training dataset, as they are not collected from online celebrities.
 
-## Dataset Statistics and Visualization
+### Testset Statistics
 
 Test dataset mainly comes from [IFRT](https://github.com/deepinsight/insightface/tree/master/challenges/IFRT).
 
-### Mask set
+#### Mask set
 
 Mask testset contains 6,964 identities, 6,964 masked images and 13,928 non-masked images. There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 
-### Children set
+#### Children set
 
 Children testset contains 14,344 identities and 157,280 images. There are totally 1,773,428 positive pairs and 24,735,067,692 negative pairs.
 
-### Multi-racial set
+#### Multi-racial set
 
 The globalised multi-racial testset contains 242,143 identities and 1,624,305 images.
 
@@ -74,12 +76,20 @@ The final rank will be determined by two columns: **Rank@Mask** and **Rank@All**
 Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
 
-## Challenge Rules
+## Rules
 
-1. We have two tracks, determined by the size of training data size.
+1. We have two tracks, determined by the size of training dataset.
   * Track A: Use MS1M-V3 as training set.
   * Track B: Use Glint360K as training set.
-2. Training set and testset are both already aligned to 112x112, re-alignment is prohibited.
+2. Training set and testing set are both already aligned to 112x112, re-alignment is prohibited.
 3. Mask data-augmentation is allowed, such as [this](https://github.com/deepinsight/insightface/tree/master/recognition/tools). The tool you used should be reproducible. 
+4. External dataset and pretrained models are both prohibited.
+5. Participants submit onnx model, then get scores by online evaluation. Test set is invisible.
+6. Matching score is measured by cosine similarity.
+7. Model size should be not larger than 1GB.
+8. For Track A: feature length should be not larger than 512, and the inference time should be not larger than 10ms on Tesla V100 GPU.
+9. For Track A: feature length should be not larger than 1024, and the inference time should be not larger than 20ms on Tesla V100 GPU.
+10. The input size of submission model should be 112x112.
+11. Online evaluation server uses onnxruntime-gpu==1.6, cuda==10.2, cudnn==8.0.5.
 
 ## Submission
