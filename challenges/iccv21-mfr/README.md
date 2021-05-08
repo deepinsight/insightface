@@ -107,3 +107,7 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 4. You can decide which submission to be on the leaderboard by clicking the button.
 
 Link coming soon
+
+## Sponsors
+
+
