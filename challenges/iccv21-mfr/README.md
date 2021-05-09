@@ -86,9 +86,9 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 4. External dataset and pretrained models are both prohibited.
 5. Participants submit onnx model, then get scores by our online evaluation. Test images are invisible.
 6. Matching score is measured by cosine similarity.
-7. Model size should not be larger than 1GB.
-8. For Track A: feature length should not be not larger than 512, and the inference time should not be larger than 10ms on Tesla V100 GPU.
-9. For Track B: feature length should not be not larger than 1024, and the inference time should not be larger than 20ms on Tesla V100 GPU.
+7. Model size must <= 1GB.
+8. For Track A: feature length must <= 512, and the inference time must <= 10ms on Tesla V100 GPU.
+9. For Track B: feature length must <= 1024, and the inference time must <= 20ms on Tesla V100 GPU.
 10. The input shape of submission model should equal to 3x112x112 (RGB order).
 11. Online evaluation server uses onnxruntime-gpu==1.6, cuda==10.2, cudnn==8.0.5.
 12. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
@@ -104,7 +104,7 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 1. Participants package the onnx model for submission using ``zip`` or ``tar -czf``.
 2. Each participant can submit three times a day.
 3. Please sign-up with the real organization name. You can hide the organization name in our system if you like.
-4. You can decide which submission to be on the leaderboard by clicking the button.
+4. You can decide which submission to be on the leaderboard by clicking 'Set Public' button.
 
 Link coming soon
 
