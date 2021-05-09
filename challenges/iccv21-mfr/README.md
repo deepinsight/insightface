@@ -51,7 +51,8 @@ For ``Children`` set, TAR is measured on all-to-all 1:1 protocal, with FAR less 
 
 For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
-The final rank will be determined by two columns: **Rank@Mask** and **Rank@All**.
+Similar to FRVT, participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@All**.
+
 
 ## Baselines
 
@@ -99,14 +100,14 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 2. OneFlow, [link](https://github.com/deepinsight/insightface/tree/master/recognition/oneflow_face)
 3. MXNet, [link](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace)
 
-## Submission
+## Submission Guide
 
-1. Participants package the onnx model for submission using ``zip`` or ``tar -czf``.
-2. Each participant can submit three times a day.
+1. Participants must package the onnx model for submission using ``zip xxx.zip model.onnx`` or ``tar czf xxx.tar.gz model.onnx``.
+2. Each participant can submit three times a day at most.
 3. Please sign-up with the real organization name. You can hide the organization name in our system if you like.
-4. You can decide which submission to be on the leaderboard by clicking 'Set Public' button.
+4. You can decide which submission to be displayed on the leaderboard by clicking 'Set Public' button.
 
-Link coming soon
+Server link coming soon.
 
 ## Sponsors
 
