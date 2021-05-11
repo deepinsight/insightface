@@ -117,3 +117,11 @@ Server link coming soon.
 
 [More]
 
+## Bonus Share
+
+|           | Track A | Track B |
+| --------- | ------- | ------- |
+| 1st place | 30%     | 30%     |
+| 2nd place | 15%     | 15%     |
+| 3rd place | 5%      | 5%      |
+
