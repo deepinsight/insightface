@@ -2,7 +2,7 @@
 
 The Masked Face Recognition Challenge & Workshop(MFR) will be held in conjunction with the International Conference on Computer Vision (ICCV) 2021. 
 
-[Link](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). There're InsightFace track here and Webface260M track(with larger training set) in this workshop.
+[Workshop-Homepage](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). There're InsightFace track here and Webface260M track(with larger training set) in this workshop.
 
 ## Testsets for insightface track
 
