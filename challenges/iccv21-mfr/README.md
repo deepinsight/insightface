@@ -1,10 +1,10 @@
-# ICCV21-MFR
+# Academic-Tracks of ICCV21-MFR
 
 The Masked Face Recognition Challenge & Workshop(MFR) will be held in conjunction with the International Conference on Computer Vision (ICCV) 2021. 
 
-[Link](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/)
+[Link](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). There're academic tracks(here) and industrial tracks(with larger training set).
 
-## Testset
+## Testsets for academic tracks
 
 In this challenge, we will evaluate the accuracy of following testsets:
 
@@ -12,11 +12,11 @@ In this challenge, we will evaluate the accuracy of following testsets:
   * Accuracy among children(2~16 years old).
   * Accuracy of globalised multi-racial benchmarks.
 
-We ensure that there's no overlap between these testsets and public available training dataset, as they are not collected from online celebrities.
+We ensure that there's no overlap between these testsets and public available training datasets, as they are not collected from online celebrities.
 
 ### Testset Statistics
 
-Test dataset mainly comes from [IFRT](https://github.com/deepinsight/insightface/tree/master/challenges/IFRT).
+Test datasets mainly comes from [IFRT](https://github.com/deepinsight/insightface/tree/master/challenges/IFRT).
 
 #### Mask set
 
