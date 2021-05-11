@@ -1,10 +1,10 @@
-# Academic-Tracks of ICCV21-MFR
+# InsightFace Track of ICCV21-MFR
 
 The Masked Face Recognition Challenge & Workshop(MFR) will be held in conjunction with the International Conference on Computer Vision (ICCV) 2021. 
 
 [Link](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). There're academic tracks(here) and industrial tracks(with larger training set).
 
-## Testsets for academic tracks
+## Testsets for insightface track
 
 In this challenge, we will evaluate the accuracy of following testsets:
 
@@ -79,9 +79,9 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
 ## Rules
 
-1. We have two tracks, determined by the size of training dataset and inference time limitation.
-  * Track A: Use MS1M-V3 as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/challenges/iccv19-lfr)
-  * Track B: Use Glint360K as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc)
+1. We have two sub-tracks, determined by the size of training dataset and inference time limitation.
+  * Sub-Track A: Use MS1M-V3 as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/challenges/iccv19-lfr)
+  * Sub-Track B: Use Glint360K as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc)
 2. Training set and testing set are both aligned to 112x112, re-alignment is prohibited.
 3. Mask data-augmentation is allowed, such as [this](https://github.com/deepinsight/insightface/tree/master/recognition/tools). The applied mask augmentation tool should be reproducible. 
 4. External dataset and pretrained models are both prohibited.
@@ -119,7 +119,7 @@ Server link coming soon.
 
 ## Bonus Share
 
-|           | Track A | Track B |
+|           | Sub-Track A | Sub-Track B |
 | --------- | ------- | ------- |
 | 1st place | 30%     | 30%     |
 | 2nd place | 15%     | 15%     |
