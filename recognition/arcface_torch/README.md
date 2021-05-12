@@ -27,10 +27,6 @@ Node 1:
 python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=1234 train.py
 ```
 
-
-## Evaluation IJBC
-More details see [eval.md](docs/eval.md) in docs.
-
 ## Speed Benchmark
 ![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/arcface_speed.png)
 
@@ -56,6 +52,14 @@ partial fc sampling strategy will get same accuracy with several times faster tr
 | Fp16 + Model Parallel  |    20.3                           | 26.6                             | 32.1                      | 
 | Fp16 + Partial Fc 0.1  |    11.9                           | 10.8                             | 11.1                      | 
 
+
+## Evaluation IJBC
+More details see [eval.md](docs/eval.md) in docs.
+
+## Inference
+```shell
+python inference.py --weight ms1mv3_arcface_r50/backbone.pth --network r50
+```
 
 ## Model Zoo  
 
