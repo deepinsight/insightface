@@ -1,0 +1,7 @@
+matplotlib
+mmpycocotools
+numpy
+six
+terminaltables
+tqdm
+autotorch
