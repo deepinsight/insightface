@@ -116,7 +116,6 @@ model = dict(
         type='SCRFDHead',
         num_classes=1,
         in_channels=128,
-        use_ssh=False,
         stacked_convs=2,
         feat_channels=256,
         norm_cfg=dict(type='GN', num_groups=32, requires_grad=True),
