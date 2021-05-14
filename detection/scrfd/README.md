@@ -162,3 +162,8 @@ We provide an example for searching SCRFD-2.5GF in this repo as below.
     python search_tools/generate_configs_2.5g.py --mode 2 --template 10
     ```
 6. Test these new generated configs again and select the top accurate one(s).
+
+
+## Demo
+
+1. [https://github.com/nihui/ncnn-android-scrfd](https://github.com/nihui/ncnn-android-scrfd)
