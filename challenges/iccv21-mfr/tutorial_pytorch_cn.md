@@ -68,9 +68,9 @@ python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 -
 
 ### 提交
 
-1. 提交onnx模型  
+1. 提交onnx模型
 
-竞赛要求模型转换为ONNX模型提交，arcface_torch工程在保存模型时，会自动转换成为onnx，其地址为`${cfg.output}/backbone.onnx`。
+竞赛要求模型转换为`onnx`模型提交，arcface_torch工程在保存模型时，会自动转换成为onnx，其地址为`${cfg.output}/backbone.onnx`。
 
 模型checkpoint介绍：
 ```shell
@@ -84,24 +84,33 @@ python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 -
 └── training.log                          # 训练日志
 ```
 
-2. 检查onnx模型是否与pytorch模型一致
-提交模型前检查一下提交的模型是否规范
-   
-使用例子：
+2. 检查onnx模型是否规范
+
+提交模型前检查一下提交的模型是否规范，并测试模型的推理时间  
+
+
+测试命令：
 ```shell
 python onnx_helper_sample.py --model_root ms1mv3_arcface_r50/
 ```
 
+也可以先测试一下onnx模型在公开测试集IJBC上的性能：
+https://github.com/deepinsight/insightface/blob/master/recognition/arcface_torch/onnx_ijbc.py
+
+测试命令：
+```shell
+CUDA_VISIBLE_DEVICES=0 python onnx_ijbc.py --model-root ms1mv3_arcface_r50 --image-path IJB_release/IJBC --result-dir ms1mv3_arcface_r50
+```
 
 3. 模型大小参考
 
 推理时间是在`Tesla V100 GPU`中测试, 其中 onnxruntime-gpu==1.6。
 
-| 模型名称      | 大小/MB     | 推理时间/ms    |  
+| 模型名称      | 大小/MB     | 推理时间/ms      |  
 | -------      | ----------  | -----------   |
 | R50          | 166         | 4.262         | 
 | R100         | 248         | 7.031         |  
-| R200         | 476         | 13.48             | 
+| R200         | 476         | 13.48         | 
 
 ### 提示与技巧
 
