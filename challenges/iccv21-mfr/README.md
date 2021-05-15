@@ -2,7 +2,9 @@
 
 The Masked Face Recognition Challenge & Workshop(MFR) will be held in conjunction with the International Conference on Computer Vision (ICCV) 2021. 
 
-[Workshop-Homepage](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). There're InsightFace track here and Webface260M track(with larger training set) in this workshop.
+[Workshop-Homepage](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). 
+
+There're InsightFace track here and Webface260M track(with larger training set) in this workshop.
 
 ## Testsets for insightface track
 
@@ -24,7 +26,7 @@ Mask testset contains 6,964 identities, 6,964 masked images and 13,928 non-maske
 
 <details>
   <summary>Click to check the sample images(here we manually blur it to protect privacy) </summary>
-  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_mask_sample.jpg" alt="ifrtsample" width="640">
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_mask_sample.jpg" alt="ifrtsample" width="360">
 </details>
 
 #### Children set
@@ -33,7 +35,7 @@ Children testset contains 14,344 identities and 157,280 images. There are totall
 
 <details>
   <summary>Click to check the sample images(here we manually blur it to protect privacy) </summary>
-  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_children_sample.jpg" alt="ifrtsample" width="640">
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_children_sample.jpg" alt="ifrtsample" width="360">
 </details>
 
 #### Multi-racial set
