@@ -53,7 +53,6 @@ class ArcFaceONNX:
         output_names = []
         for out in outputs:
             output_names.append(out.name)
-        self.session = session
         self.input_name = input_name
         self.output_names = output_names
         assert len(self.output_names)==1
