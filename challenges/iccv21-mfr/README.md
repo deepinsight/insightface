@@ -22,9 +22,19 @@ Test datasets mainly comes from [IFRT](https://github.com/deepinsight/insightfac
 
 Mask testset contains 6,964 identities, 6,964 masked images and 13,928 non-masked images. There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 
+<details>
+  <summary>Click to check the sample images(here we manually blur it to protect privacy) </summary>
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_mask_sample.jpg" alt="ifrtsample" width="640">
+</details>
+
 #### Children set
 
 Children testset contains 14,344 identities and 157,280 images. There are totally 1,773,428 positive pairs and 24,735,067,692 negative pairs.
+
+<details>
+  <summary>Click to check the sample images(here we manually blur it to protect privacy) </summary>
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_children_sample.jpg" alt="ifrtsample" width="640">
+</details>
 
 #### Multi-racial set
 
@@ -96,9 +106,9 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
 ## Tutorial 
 
-1. ArcFace-PyTorch (with Partial-FC), [link](https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch)
-2. OneFlow, [link](https://github.com/deepinsight/insightface/tree/master/recognition/oneflow_face)
-3. MXNet, [link](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace)
+1. ArcFace-PyTorch (with Partial-FC), [code](https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch), [tutorial-cn](https://github.com/deepinsight/insightface/blob/master/challenges/iccv21-mfr/tutorial_pytorch_cn.md)
+2. OneFlow, [code](https://github.com/deepinsight/insightface/tree/master/recognition/oneflow_face)
+3. MXNet, [code](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace)
 
 ## Submission Guide
 
