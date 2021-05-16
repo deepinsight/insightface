@@ -135,31 +135,6 @@ class SCRFD:
                 print('warning: det_size is already set in scrfd model, ignore')
             else:
                 self.input_size = input_size
-            #for keyword in ['_selfgen', '_shape', '.']:
-            #    pos = self.model_file.rfind(keyword)
-            #    if pos>=0:
-            #        break
-            #model_prefix = self.model_file[0:pos]
-            #new_model_file = model_prefix+"_selfgen_shape%dx%d.onnx"%(input_size[1], input_size[0])
-            #if not osp.exists(new_model_file):
-            #    model = onnx.load(self.model_file)
-            #    from onnxsim import simplify
-            #    input = model.graph.input[0]
-            #    #model.graph.input[0].type.tensor_type.elem_type = 0
-            #    #print(input.type.tensor_type.elem_type)
-            #    #print(input.type.tensor_type.shape.dim[0].dim_param.__class__)
-            #    #print(input.type.tensor_type.shape.dim[0])
-            #    #input.type.tensor_type.shape.dim[2].dim_param = input_size[1]
-            #    #input.type.tensor_type.shape.dim[3].dim_param = input_size[0]
-            #    input.type.tensor_type.shape.dim[2].dim_value = input_size[1]
-            #    input.type.tensor_type.shape.dim[3].dim_value = input_size[0]
-            #    model, check = simplify(model)
-            #    assert check, "Simplified ONNX model could not be validated"
-            #    onnx.save(model, new_model_file)
-            #    print('saved new onnx scrfd model:', new_model_file)
-            #self.model_file = new_model_file
-            #self.session = onnxruntime.InferenceSession(self.model_file, None)
-            #self._init_vars()
 
     def forward(self, img, threshold):
         scores_list = []
@@ -272,7 +247,7 @@ class SCRFD:
             bindex = np.argsort(
                 values)[::-1]  # some extra weight on the centering
             bindex = bindex[0:max_num]
-            bboxes = bboxes[bindex, :]
+            det = det[bindex, :]
             if kpss is not None:
                 kpss = kpss[bindex, :]
         return det, kpss
