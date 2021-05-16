@@ -32,6 +32,7 @@ VERSION = find_version('insightface', '__init__.py')
 
 requirements = [
     'numpy',
+    'onnx',
     'tqdm',
     'requests',
     'matplotlib',
@@ -48,6 +49,7 @@ setup(
     name='insightface',
     version=VERSION,
     author='InsightFace Contributors',
+    author_email='contact@insightface.ai',
     url='https://github.com/deepinsight/insightface',
     description='InsightFace Toolkit',
     long_description=long_description,
@@ -58,3 +60,4 @@ setup(
     include_package_data=True,
     install_requires=requirements,
 )
+
