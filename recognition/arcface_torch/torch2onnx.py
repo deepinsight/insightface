@@ -30,7 +30,6 @@ if __name__ == '__main__':
     parser.add_argument('input', type=str, help='input backbone.pth file or path')
     parser.add_argument('--output', type=str, default=None, help='output onnx path')
     parser.add_argument('--network', type=str, default=None, help='backbone network')
-    parser.add_argument('--fp16', type=bool, default=None, help='backbone network')
     args = parser.parse_args()
     input_file = args.input
     if os.path.isdir(input_file):
@@ -41,11 +40,9 @@ if __name__ == '__main__':
     if len(params) >= 3 and params[1] in ('arcface', 'cosface'):
         if args.network is None:
             args.network = params[2]
-        if args.fp16 is None:
-            args.fp16 = len(params) > 3 and params[3] == 'fp16'
-    assert args.network is not None and args.fp16 is not None
+    assert args.network is not None
     print(args)
-    backbone_onnx = get_model(args.network, dropout=0, fp16=args.fp16)
+    backbone_onnx = get_model(args.network, dropout=0)
 
     output_path = args.output
     if output_path is None:
