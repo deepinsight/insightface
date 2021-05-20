@@ -14,7 +14,6 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
 '''
 Author: Horizon Robotics Inc.
 The company is committed to be the global leader of edge AI platform.
@@ -35,6 +34,7 @@ import symbol_utils
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from config import config
+
 
 def Act(data, act_type, name):
     if act_type == 'prelu':
@@ -241,7 +241,9 @@ def vargnet_block(data,
                              name=name)
 
     out_data = sep2_data + short_cut
-    out_data = Act(data=out_data, act_type=act_type, name=name + '_out_data_act')
+    out_data = Act(data=out_data,
+                   act_type=act_type,
+                   name=name + '_out_data_act')
     return out_data
 
 
@@ -309,7 +311,9 @@ def vargnet_branch_merge_block(data,
                                         act_pw_out=False,
                                         name=name + '_sep2_data_branch')
     sep1_data = sep1_data_brach1 + sep1_data_brach2
-    sep1_data = Act(data=sep1_data, act_type=act_type, name=name + '_sep1_data_act')
+    sep1_data = Act(data=sep1_data,
+                    act_type=act_type,
+                    name=name + '_sep1_data_act')
     sep2_data = separable_conv2d(data=sep1_data,
                                  in_channels=out_channels_2,
                                  out_channels=out_channels_3,
@@ -323,7 +327,9 @@ def vargnet_branch_merge_block(data,
                                  act_pw_out=False,
                                  name=name + '_sep2_data')
     out_data = sep2_data + short_cut
-    out_data = Act(data=out_data, act_type=act_type, name=name + '_out_data_act')
+    out_data = Act(data=out_data,
+                   act_type=act_type,
+                   name=name + '_out_data_act')
     return out_data
 
 
@@ -353,7 +359,8 @@ def add_vargnet_conv_block(data,
                                       stride=stride,
                                       dilate=dilate,
                                       with_dilate=with_dilate,
-                                      name=name + '_stage_{}_unit_1'.format(stage))
+                                      name=name +
+                                      '_stage_{}_unit_1'.format(stage))
     for i in range(units - 1):
         data = vargnet_block(data=data,
                              n_out_ch1=out_channels,
@@ -367,7 +374,8 @@ def add_vargnet_conv_block(data,
                              stride=(1, 1),
                              dilate=dilate,
                              with_dilate=with_dilate,
-                             name=name + '_stage_{}_unit_{}'.format(stage, i + 2))
+                             name=name +
+                             '_stage_{}_unit_{}'.format(stage, i + 2))
     return data
 
 
@@ -465,7 +473,8 @@ def add_emb_block(data,
     # depthwise
     convx_depthwise = mx.sym.Convolution(data=data,
                                          num_filter=last_channels,
-                                         num_group=int(last_channels / group_base),
+                                         num_group=int(last_channels /
+                                                       group_base),
                                          kernel=(7, 7),
                                          pad=(0, 0),
                                          stride=(1, 1),
@@ -506,11 +515,12 @@ def get_symbol():
     emb_size = config.emb_size
     fc_type = config.net_output
 
-    kwargs = {'use_se' : config.net_se,
+    kwargs = {
+        'use_se': config.net_se,
         'act_type': config.net_act,
         'bn_mom': config.bn_mom,
         'workspace': config.workspace,
-        }
+    }
 
     setting_params = get_setting_params(**kwargs)
 
