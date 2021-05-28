@@ -127,7 +127,7 @@ Server link coming soon.
 
 **[DeepGlint](http://www.deepglint.com/)**
 
-**[OneFlow-Inc](https://www.oneflow.org)**
+**[OneFlow](https://www.oneflow.org)**
 
 [More]
 
