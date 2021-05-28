@@ -38,7 +38,7 @@ Children testset contains 14,344 identities and 157,280 images. There are totall
   <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_children_sample.jpg" alt="ifrtsample" width="360">
 </details>
 
-#### Multi-racial set
+#### Multi-racial set (MR in short)
 
 The globalised multi-racial testset contains 242,143 identities and 1,624,305 images.
 
@@ -63,13 +63,13 @@ For ``Children`` set, TAR is measured on all-to-all 1:1 protocal, with FAR less 
 
 For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
-Similar to FRVT, participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@All**.
+Similar to FRVT, participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**.
 
 
 ## Baselines
 
 
-| Backbone   | Dataset    | Method     | Mask   | Children | African | Caucasian | South Asian | East Asian | All    | size(mb) | infer(ms) | link |
+| Backbone   | Dataset    | Method     | Mask   | Children | African | Caucasian | South Asian | East Asian | MR-All    | size(mb) | infer(ms) | link |
 |------------|------------|------------|--------|----------|---------|-----------|-------------|------------|--------|----------|-----------|-----------|
 | R100  | Casia  | ArcFace  | 26.623 | 30.359   | 39.666  | 53.933    | 47.807      | 21.572     | 42.735 | 248.904  | 7.073     | [download](https://1drv.ms/u/s!AswpsDO2toNKrUJpk8zC61HVN7Kg?e=zE9JDd) |
 | R100  | MS1MV2  | ArcFace  | 65.767 | 60.496   | 79.117  | 87.176    | 85.501      | 55.807     | 80.725 | 248.904  | 7.028     | [download](https://1drv.ms/u/s!AswpsDO2toNKrUTlYEHJCHg3UYM-?e=ihxMpS) |
@@ -105,6 +105,8 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 10. The input shape of submission model should equal to 3x112x112 (RGB order).
 11. Online evaluation server uses onnxruntime-gpu==1.6, cuda==10.2, cudnn==8.0.5.
 12. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
+13. Participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**.
+
 
 ## Tutorial 
 
