@@ -125,11 +125,14 @@ Server link coming soon.
 
 ## Sponsors
 
+(in alphabetical order)
+
 **[DeepGlint](http://www.deepglint.com/)**
+
+**[Kiwi Tech](http://www.kiwiar.com)**
 
 **[OneFlow](https://www.oneflow.org)**
 
-**[Kiwi Tech](http://www.kiwiar.com)**
 
 [More]
 
