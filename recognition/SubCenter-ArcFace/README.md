@@ -31,7 +31,7 @@ The increased GPU memory consumption can be easily alleviated by our parallel fr
 3). Train ArcFace on the new ``MS1MV0-Drop75`` dataset.
 
 ### 5. Pretrained Models and Logs
-  [baidu drive](https://pan.baidu.com/s/1yikOW1Xzm1XIHu0uv0RdRw) code ``3jsh``. [dropbox](https://www.dropbox.com/s/b866xezre3zhuqy/subcenter-arcface-logs.zip?dl=0)
+  [baidu drive](https://pan.baidu.com/s/1yikOW1Xzm1XIHu0uv0RdRw) code ``3jsh``. [onedrive](https://1drv.ms/u/s!AswpsDO2toNKrjVDrIM-wVusW1XP?e=VvXEEW)
 
 ### Citation
 
