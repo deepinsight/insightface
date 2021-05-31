@@ -1,4 +1,5 @@
 from .iresnet import iresnet18, iresnet34, iresnet50, iresnet100, iresnet200
+from .mobilefacenet import MobileFaceNet
 
 
 def get_model(name, **kwargs):
@@ -12,5 +13,7 @@ def get_model(name, **kwargs):
         return iresnet100(False, **kwargs)
     elif name == "r200":
         return iresnet200(False, **kwargs)
+    elif name == "mbf":
+        return MobileFaceNet((112, 112), **kwargs)
     else:
         raise ValueError()
