@@ -92,21 +92,19 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 ## Rules
 
 1. We have two sub-tracks, determined by the size of training dataset and inference time limitation.
-  * Sub-Track A: Use MS1M-V3 as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/challenges/iccv19-lfr)
-  * Sub-Track B: Use Glint360K as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc)
+  * Sub-Track A: Use MS1M-V3 as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/challenges/iccv19-lfr), feature length must <= 512, and the inference time must <= 10ms on Tesla V100 GPU.
+  * Sub-Track B: Use Glint360K as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc), feature length must <= 1024, and the inference time must <= 20ms on Tesla V100 GPU.
 2. Training set and testing set are both aligned to 112x112, re-alignment is prohibited.
 3. Mask data-augmentation is allowed, such as [this](https://github.com/deepinsight/insightface/tree/master/recognition/tools). The applied mask augmentation tool should be reproducible. 
 4. External dataset and pretrained models are both prohibited.
 5. Participants submit onnx model, then get scores by our online evaluation. Test images are invisible.
 6. Matching score is measured by cosine similarity.
 7. Model size must <= 1GB.
-8. For Track A: feature length must <= 512, and the inference time must <= 10ms on Tesla V100 GPU.
-9. For Track B: feature length must <= 1024, and the inference time must <= 20ms on Tesla V100 GPU.
-10. The input shape of submission model should equal to 3x112x112 (RGB order).
-11. Online evaluation server uses onnxruntime-gpu==1.6, cuda==10.2, cudnn==8.0.5.
-12. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
-13. Please use ``onnx_helper.py`` to check whether the model is valid.
-14. Participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**.
+8. The input shape of submission model should equal to 3x112x112 (RGB order).
+9. Online evaluation server uses onnxruntime-gpu==1.6, cuda==10.2, cudnn==8.0.5.
+10. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
+11. Please use ``onnx_helper.py`` to check whether the model is valid.
+12. Participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**.
 
 
 ## Tutorial 
