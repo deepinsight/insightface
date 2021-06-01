@@ -105,7 +105,8 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 10. The input shape of submission model should equal to 3x112x112 (RGB order).
 11. Online evaluation server uses onnxruntime-gpu==1.6, cuda==10.2, cudnn==8.0.5.
 12. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
-13. Participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**.
+13. Please use ``onnx_helper.py`` to check whether the model is valid.
+14. Participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**.
 
 
 ## Tutorial 
@@ -116,7 +117,7 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
 ## Submission Guide
 
-1. Participants must package the onnx model for submission using ``zip xxx.zip model.onnx`` or ``tar czf xxx.tar.gz model.onnx``.
+1. Participants must package the onnx model for submission using ``zip xxx.zip model.onnx``.
 2. Each participant can submit three times a day at most.
 3. Please sign-up with the real organization name. You can hide the organization name in our system if you like.
 4. You can decide which submission to be displayed on the leaderboard by clicking 'Set Public' button.
