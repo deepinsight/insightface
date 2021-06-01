@@ -105,6 +105,7 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 10. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
 11. Please use ``onnx_helper.py`` to check whether the model is valid.
 12. Participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**.
+13. Top-ranked participants should provide their solutions and codes to ensure their validity after submission closed.
 
 
 ## Tutorial 
