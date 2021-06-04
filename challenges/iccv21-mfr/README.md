@@ -6,6 +6,8 @@ The Masked Face Recognition Challenge & Workshop(MFR) will be held in conjunctio
 
 There're InsightFace track here and [Webface260M](https://www.face-benchmark.org/challenge.html) track(with larger training set) in this workshop.
 
+Submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
+
 ## Testsets for insightface track
 
 In this challenge, we will evaluate the accuracy of following testsets:
@@ -121,7 +123,8 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 3. Please sign-up with the real organization name. You can hide the organization name in our system if you like.
 4. You can decide which submission to be displayed on the leaderboard by clicking 'Set Public' button.
 
-Server link coming soon.
+Server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
+
 
 ## Sponsors
 
