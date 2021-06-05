@@ -24,7 +24,7 @@ We ensure that there's no overlap between these testsets and public available tr
 
 Our test datasets mainly comes from [IFRT](https://github.com/deepinsight/insightface/tree/master/challenges/IFRT).
 
-### ``Mask test-set``
+### ``Mask test-set:``
 
 Mask testset contains 6,964 identities, 6,964 masked images and 13,928 non-masked images. There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 
@@ -33,7 +33,7 @@ Mask testset contains 6,964 identities, 6,964 masked images and 13,928 non-maske
   <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_mask_sample.jpg" alt="ifrtsample" width="360">
 </details>
 
-### ``Children test-set``
+### ``Children test-set:``
 
 Children testset contains 14,344 identities and 157,280 images. There are totally 1,773,428 positive pairs and 24,735,067,692 negative pairs.
 
@@ -42,7 +42,7 @@ Children testset contains 14,344 identities and 157,280 images. There are totall
   <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_children_sample.jpg" alt="ifrtsample" width="360">
 </details>
 
-### ``Multi-racial test-set (MR in short)``
+### ``Multi-racial test-set (MR in short):``
 
 The globalised multi-racial testset contains 242,143 identities and 1,624,305 images.
 
