@@ -126,6 +126,7 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 2. Each participant can submit three times a day at most.
 3. Please sign-up with the real organization name. You can hide the organization name in our system if you like.
 4. You can decide which submission to be displayed on the leaderboard by clicking 'Set Public' button.
+5. Please click 'sign-in' on submission server if find you're not logged in.
 
 Server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
