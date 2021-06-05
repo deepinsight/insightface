@@ -8,6 +8,10 @@ There're InsightFace track here and [Webface260M](https://www.face-benchmark.org
 
 Submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
+### WeChat discussion group:
+
+<img src="https://github.com/nttstar/insightface-resources/blob/master/images/mfr_wechat_group.png" alt="mfr_group" width="360">
+
 ## Testsets for insightface track
 
 In this challenge, we will evaluate the accuracy of following testsets:
