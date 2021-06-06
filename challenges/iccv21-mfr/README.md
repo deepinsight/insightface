@@ -12,6 +12,8 @@ Submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
 <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mfr_wechat_group.png" alt="mfr_group" width="360">
 
+Online issue discussion: [https://github.com/deepinsight/insightface/issues/1564](https://github.com/deepinsight/insightface/issues/1564)
+
 ## Testsets for insightface track
 
 In this challenge, we will evaluate the accuracy of following testsets:
