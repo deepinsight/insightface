@@ -48,8 +48,8 @@ def main(args):
         sampler=train_sampler, num_workers=2, pin_memory=True, drop_last=True)
 
     dropout = 0.4 if cfg.dataset == "webface" else 0
-    backbone = get_model(args.network, dropout=dropout, fp16=cfg.fp16).to(local_rank)
-    backbone_onnx = get_model(args.network, dropout=dropout, fp16=False)
+    backbone = get_model(args.network, dropout=dropout, fp16=cfg.fp16, num_features=cfg.embedding_size).to(local_rank)
+    backbone_onnx = get_model(args.network, dropout=dropout, fp16=False, num_features=cfg.embedding_size)
 
     if args.resume:
         try:
