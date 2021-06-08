@@ -6,7 +6,11 @@
 
 * 下载 MS1MV3 [Link](https://github.com/deepinsight/insightface/tree/master/challenges/iccv19-lfr)
 * 下载 Glint360K [Link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc#4-download)
-  
+
+### 服务器提交地址
+
+http://iccv21-mfr.com/
+
 ### 安装依赖
 
 1. 安装 pytorch 1.7.1
