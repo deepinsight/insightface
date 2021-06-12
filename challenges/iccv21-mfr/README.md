@@ -8,9 +8,13 @@ There're InsightFace track here and [Webface260M](https://www.face-benchmark.org
 
 Submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
-### WeChat discussion group:
+### Discussion group:
+
+WeChat:
 
 <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mfr_wechat_group.png" alt="mfr_group" width="360">
+
+QQ Group: 711302608, *answer: github*
 
 Online issue discussion: [https://github.com/deepinsight/insightface/issues/1564](https://github.com/deepinsight/insightface/issues/1564)
 
