@@ -8,6 +8,10 @@ There're InsightFace track here and [Webface260M](https://www.face-benchmark.org
 
 Submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
+### NEWS
+
+**`2021-06-15`**: Participants are now ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**, by the formula of ``0.51 * Rank@Mask + 0.49 * Rank@MR-All``, to prevent the same ranking score.
+
 ### Discussion group:
 
 WeChat:
@@ -73,7 +77,7 @@ For ``Children`` set, TAR is measured on all-to-all 1:1 protocal, with FAR less 
 
 For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
-Similar to FRVT, participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**.
+Similar to FRVT, participants are now ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**, by the formula of ``0.51 * Rank@Mask + 0.49 * Rank@MR-All`` to prevent the same ranking score.
 
 
 ## Baselines
