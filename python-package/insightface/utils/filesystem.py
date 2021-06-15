@@ -2,8 +2,14 @@
 This code file mainly comes from https://github.com/dmlc/gluon-cv/blob/master/gluoncv/utils/filesystem.py
 """
 import os
+import os.path as osp
 import errno
 
+
+def get_model_dir(name, root='~/.insightface/models'):
+    root = os.path.expanduser(root)
+    model_dir = osp.join(root, name)
+    return model_dir
 
 def makedirs(path):
     """Create directory recursively if not exists.

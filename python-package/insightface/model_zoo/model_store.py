@@ -100,3 +100,4 @@ def get_model_file(name, root=os.path.join('~', '.insightface', 'models')):
     else:
         raise ValueError(
             'Downloaded file has different hash. Please try again.')
+

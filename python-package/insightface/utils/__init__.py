@@ -7,8 +7,9 @@ from __future__ import absolute_import
 #from . import parallel
 
 from .download import download, check_sha1
-from .filesystem import makedirs
-from .filesystem import try_import_dali
+from .filesystem import get_model_dir
+from .filesystem import makedirs, try_import_dali
+from .constant import *
 #from .bbox import bbox_iou
 #from .block import recursive_visit, set_lr_mult, freeze_bn
 #from .lr_scheduler import LRSequential, LRScheduler

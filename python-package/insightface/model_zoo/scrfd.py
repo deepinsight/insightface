@@ -80,7 +80,8 @@ class SCRFD:
             assert osp.exists(self.model_file)
             self.session = onnxruntime.InferenceSession(self.model_file, None)
         self.center_cache = {}
-        self.nms_threshold = 0.4
+        self.nms_thresh = 0.4
+        self.det_thresh = 0.5
         self._init_vars()
 
     def _init_vars(self):
@@ -93,12 +94,15 @@ class SCRFD:
             self.input_size = tuple(input_shape[2:4][::-1])
         #print('image_size:', self.image_size)
         input_name = input_cfg.name
+        self.input_shape = input_shape
         outputs = self.session.get_outputs()
         output_names = []
         for o in outputs:
             output_names.append(o.name)
         self.input_name = input_name
         self.output_names = output_names
+        self.input_mean = 127.5
+        self.input_std = 128.0
         #print(self.output_names)
         #assert len(outputs)==10 or len(outputs)==15
         self.use_kps = False
@@ -126,9 +130,12 @@ class SCRFD:
     def prepare(self, ctx_id, **kwargs):
         if ctx_id<0:
             self.session.set_providers(['CPUExecutionProvider'])
-        nms_threshold = kwargs.get('nms_threshold', None)
-        if nms_threshold is not None:
-            self.nms_threshold = nms_threshold
+        nms_thresh = kwargs.get('nms_thresh', None)
+        if nms_thresh is not None:
+            self.nms_thresh = nms_thresh
+        det_thresh = kwargs.get('det_thresh', None)
+        if det_thresh is not None:
+            self.det_thresh = det_thresh
         input_size = kwargs.get('input_size', None)
         if input_size is not None:
             if self.input_size is not None:
@@ -141,7 +148,7 @@ class SCRFD:
         bboxes_list = []
         kpss_list = []
         input_size = tuple(img.shape[0:2][::-1])
-        blob = cv2.dnn.blobFromImage(img, 1.0/128, input_size, (127.5, 127.5, 127.5), swapRB=True)
+        blob = cv2.dnn.blobFromImage(img, 1.0/self.input_std, input_size, (self.input_mean, self.input_mean, self.input_mean), swapRB=True)
         net_outs = self.session.run(self.output_names, {self.input_name : blob})
 
         input_height = blob.shape[2]
@@ -197,7 +204,7 @@ class SCRFD:
                 kpss_list.append(pos_kpss)
         return scores_list, bboxes_list, kpss_list
 
-    def detect(self, img, threshold=0.5, input_size = None, max_num=0, metric='default'):
+    def detect(self, img, input_size = None, max_num=0, metric='default'):
         assert input_size is not None or self.input_size is not None
         input_size = self.input_size if input_size is None else input_size
             
@@ -214,7 +221,7 @@ class SCRFD:
         det_img = np.zeros( (input_size[1], input_size[0], 3), dtype=np.uint8 )
         det_img[:new_height, :new_width, :] = resized_img
 
-        scores_list, bboxes_list, kpss_list = self.forward(det_img, threshold)
+        scores_list, bboxes_list, kpss_list = self.forward(det_img, self.det_thresh)
 
         scores = np.vstack(scores_list)
         scores_ravel = scores.ravel()
@@ -253,7 +260,7 @@ class SCRFD:
         return det, kpss
 
     def nms(self, dets):
-        thresh = self.nms_threshold
+        thresh = self.nms_thresh
         x1 = dets[:, 0]
         y1 = dets[:, 1]
         x2 = dets[:, 2]

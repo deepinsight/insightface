@@ -11,8 +11,11 @@ except ImportError:
         "Unable to import dependency onnxruntime. "
     )
 
-__version__ = '0.2.1'
+__version__ = '0.3'
 
 from . import model_zoo
 from . import utils
 from . import app
+from . import data
+
+DEFAULT_MP_NAME = 'antelope'
