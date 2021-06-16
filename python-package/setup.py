@@ -40,16 +40,18 @@ requirements = [
     'matplotlib',
     'Pillow',
     'scipy',
-    'opencv-python',
+    #'opencv-python',
     'scikit-learn',
     'scikit-image',
     'easydict',
-    'cython',
+    #'cython',
+    'albumentations',
     'prettytable',
 ]
 
 extensions = [
-        Extension("insightface.thirdparty.face3d.mesh.cython.mesh_core_cython", ["insightface/thirdparty/face3d/mesh/cython/mesh_core_cython.pyx", "insightface/thirdparty/face3d/mesh/cython/mesh_core.cpp"], language='c++'),
+        Extension("insightface.thirdparty.face3d.mesh.cython.mesh_core_cython", 
+            ["insightface/thirdparty/face3d/mesh/cython/mesh_core_cython.pyx", "insightface/thirdparty/face3d/mesh/cython/mesh_core.cpp"], language='c++'),
         ]
 data_images = glob.glob('insightface/data/images/*.jpg')
 
@@ -72,6 +74,7 @@ setup(
     include_package_data=True,
     entry_points={"console_scripts": ["insightface-cli=insightface.commands.insightface_cli:main"]},
     install_requires=requirements,
+    headers=['insightface/thirdparty/face3d/mesh/cython/mesh_core.h'],
     ext_modules=ext_modules,
     include_dirs=numpy.get_include(),
 )

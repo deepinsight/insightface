@@ -20,7 +20,6 @@ from ..utils import DEFAULT_MP_NAME
 
 __all__ = ['FaceAnalysis']
 
-
 class FaceAnalysis:
     def __init__(self, name=DEFAULT_MP_NAME, root='~/.insightface/models', allowed_modules=None):
         self.models = {}
