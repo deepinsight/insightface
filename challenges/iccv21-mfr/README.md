@@ -74,7 +74,7 @@ For ``Children`` set, TAR is measured on all-to-all 1:1 protocal, with FAR less 
 
 For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
-Similar to FRVT, participants are now ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**, by the formula of ``0.51 * Rank@Mask + 0.49 * Rank@MR-All`` to prevent the same ranking score.
+Similar to FRVT, participants are now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
 
 
 ## Baselines
@@ -115,7 +115,7 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 9. Online evaluation server uses onnxruntime-gpu==1.6, cuda==10.2, cudnn==8.0.5.
 10. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
 11. Please use ``onnx_helper.py`` to check whether the model is valid.
-12. Participants are finally ordered in terms of lowest mean rank across two datasets: **Rank@Mask** and **Rank@MR-All**.
+12. Participants are now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
 13. Top-ranked participants should provide their solutions and codes to ensure their validity after submission closed.
 
 
