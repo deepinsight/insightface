@@ -1,6 +1,6 @@
 # A tutorial on how to enable mask augmentation on arcface_torch training.
 
-The python package insightface==0.3 provides utilities to enable mask augmentation within one line:
+The python package insightface==0.3.2 provides utilities to enable mask augmentation within one line:
 
 ```
 transform_list.append(
