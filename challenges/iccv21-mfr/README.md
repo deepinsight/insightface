@@ -1,5 +1,12 @@
 # InsightFace Track of ICCV21-MFR
 
+## NEWS
+
+**``2021-06-17``**  Participants are now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
+
+
+## Introduction
+
 The Masked Face Recognition Challenge & Workshop(MFR) will be held in conjunction with the International Conference on Computer Vision (ICCV) 2021. 
 
 [Workshop-Homepage](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). 
