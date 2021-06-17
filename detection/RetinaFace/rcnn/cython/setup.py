@@ -91,7 +91,10 @@ def customize_compiler_for_nvcc(self):
     self.src_extensions.append('.cu')
 
     # save references to the default compiler_so and _comple methods
-    default_compiler_so = self.compiler_so
+     if os.name =='nt': #window os
+        default_compiler_so = self._compile
+    else:
+        default_compiler_so = self.compiler_so
     super = self._compile
 
     # now redefine the _compile method. This gets executed for each
