@@ -43,7 +43,7 @@ Please refer to `make_renderer.py` for detail example.
 (1) init renderer:
 ```
 import insightface
-from insightface.app import MaskRender
+from insightface.app import MaskRenderer
 tool = MaskRenderer()
 tool.prepare(ctx_id=0, det_size=(128,128)) #use gpu
 ```
