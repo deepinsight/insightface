@@ -14,7 +14,7 @@ import os.path as osp
 from numpy.linalg import norm
 from ..model_zoo import model_zoo
 from ..utils import face_align
-from ..utils import get_model_dir
+from ..utils import ensure_available
 from .common import Face
 from ..utils import DEFAULT_MP_NAME
 
@@ -25,7 +25,8 @@ class FaceAnalysis:
         self.models = {}
         #root = os.path.expanduser(root)
         #self.model_dir = osp.join(root, name)
-        self.model_dir = get_model_dir(name, root)
+        #self.model_dir = get_model_dir(name, root)
+        self.model_dir = ensure_available('models', name)
         onnx_files = glob.glob(osp.join(self.model_dir, '*.onnx'))
         onnx_files = sorted(onnx_files)
         for onnx_file in onnx_files:

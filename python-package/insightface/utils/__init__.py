@@ -6,7 +6,7 @@ from __future__ import absolute_import
 #from . import metrics
 #from . import parallel
 
-from .download import download, check_sha1
+from .storage import download, ensure_available
 from .filesystem import get_model_dir
 from .filesystem import makedirs, try_import_dali
 from .constant import *

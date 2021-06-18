@@ -5,7 +5,8 @@ For insightface pip-package <= 0.1.5, we use MXNet as inference backend, please 
 
 Starting from insightface>=0.2, we use onnxruntime as inference backend.
 
-Please first download our **antelope** model release by command:
+For insightface>=0.3.3, model package will be downloaded automatically. 
+For insightface==0.3.2, you must first download our **antelope** model release by command:
 
 ```
 insightface-cli model.download antelope

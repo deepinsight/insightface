@@ -5,7 +5,7 @@ import os
 import os.path as osp
 import zipfile
 import glob
-from ..utils import download, check_sha1
+from ..utils import download
 
 
 def model_download_command_factory(args):
@@ -27,27 +27,10 @@ class ModelDownloadCommand(BaseInsightFaceCLICommand):
         download_parser.set_defaults(func=model_download_command_factory)
 
     def __init__(self, model: str, root: str, force: bool):
-        self.base_repo_url = 'http://storage.insightface.ai/files/'
         self._model = model
-        self._root = os.path.expanduser(root)
+        self._root = root
         self._force = force
 
     def run(self):
-        if not os.path.exists(self._root):
-            os.makedirs(self._root)
-        dir_path = os.path.join(self._root, 'models', self._model)
-        if osp.exists(dir_path) and not self._force:
-            return
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-        
-        print('dir_path:', dir_path)
-        zip_file_path = os.path.join(self._root, 'models', self._model + '.zip')
-        model_url = "%s/models/%s.zip"%(self.base_repo_url, self._model)
-        download(model_url,
-                 path=zip_file_path,
-                 overwrite=True)
-        with zipfile.ZipFile(zip_file_path) as zf:
-            zf.extractall(dir_path)
-        os.remove(zip_file_path)
+        download('models', self._model, force=self._force, root=self._root)
 

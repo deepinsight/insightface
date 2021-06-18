@@ -33,7 +33,7 @@ def check_sha1(filename, sha1_hash):
     return sha1.hexdigest()[0:l] == sha1_hash[0:l]
 
 
-def download(url, path=None, overwrite=False, sha1_hash=None):
+def download_file(url, path=None, overwrite=False, sha1_hash=None):
     """Download an given URL
     Parameters
     ----------
