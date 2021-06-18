@@ -17,23 +17,24 @@ We can use this tool to do data augmentation while training our face recognition
 
 **F** means FULL while **H** means HALF.
 
-### Data Prepare
+### Prepare
 
-- face3d library
+- insightface package library
 
-   Please copy and install [`face3d`](https://github.com/YadiraF/face3d) library and put it under `face3d/` directory. Then make sure you can `import face3d` in python env.
+   ``pip install -U insightface``
+
+- insightface model pack
+
+  ``bash> insightface-cli model.download antelope``
   
 - BFM models
 
-   Please follow the tutorial of [https://github.com/YadiraF/face3d/tree/master/examples/Data/BFM](https://github.com/YadiraF/face3d/tree/master/examples/Data/BFM) to generate `BFM.mat` and `BFM_UV.mat`.
+   Please follow the tutorial of [https://github.com/YadiraF/face3d/tree/master/examples/Data/BFM](https://github.com/YadiraF/face3d/tree/master/examples/Data/BFM) to generate `BFM.mat` and `BFM_UV.mat`. Put them into the insightface model pack directory, such as ``~/.insightface/models/antelope/``
    
-- 3D68 model
-
-   Download our 3D68 pretrained model(if1k3d68-0000.params) from [baiducloud](https://pan.baidu.com/s/1f9UtTpaW4l65DMRZ5wmJew)(passwd:2zmz) or [googledrive](https://drive.google.com/file/d/1Tv9f6Iqm4423qEDdDwbyjk00plEfeG8a/view?usp=sharing) and put it under `assets_mask/`. Please also put the above BFM data model into this directory.
    
 - mask images
 
-   You can get example mask images by checking the image url from the table above.
+   some mask images are included in insightface package, such as 'mask\_blue', 'mask\_white', 'mask\_black' and 'mask\_green'.
    
 ### Add Mask to Face Image
 
@@ -41,13 +42,16 @@ Please refer to `make_renderer.py` for detail example.
 
 (1) init renderer:
 ```
-tool = MaskRenderer('./assets_mask')
+import insightface
+from insightface.app import MaskRender
+tool = MaskRenderer()
+tool.prepare(ctx_id=0, det_size=(128,128)) #use gpu
 ```
 
 (2) load face and mask images
 ```
 image = cv2.imread("../../deploy/Tom_Hanks_54745.png")
-mask_image  = cv2.imread("masks/mask2.jpg")
+mask_image  = "mask_blue"
 ```
 
 (3) build necessary params for face image, this can be done in offline.
