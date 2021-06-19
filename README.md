@@ -9,13 +9,13 @@ By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) a
 
 ## Top News
 
-**`2021-06-05`**: We launch a [Masked Face Recognition Challenge & Workshop](https://github.com/deepinsight/insightface/tree/master/challenges/iccv21-mfr) on ICCV 2021.
+**`2021-06-05`**: We launch a [Masked Face Recognition Challenge & Workshop](challenges/iccv21-mfr) on ICCV 2021.
 
-**`2021-05-15`**: We released an efficient high accuracy face detection approach called [SCRFD](https://github.com/deepinsight/insightface/tree/master/detection/scrfd).
+**`2021-05-15`**: We released an efficient high accuracy face detection approach called [SCRFD](detection/scrfd).
 
 **`2021-04-18`**: We achieved Rank-4th on NIST-FRVT 1:1, see [leaderboard](https://pages.nist.gov/frvt/html/frvt11.html).
 
-**`2021-03-13`**: We have released our official ArcFace PyTorch implementation, see [here](https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch). 
+**`2021-03-13`**: We have released our official ArcFace PyTorch implementation, see [here](recognition/arcface_torch). 
 
 ## License
 
@@ -34,7 +34,7 @@ InsightFace efficiently implements a rich variety of state of the art algorithms
 
 ### ArcFace Video Demo
 
-[![ArcFace Demo](https://github.com/deepinsight/insightface/blob/master/resources/facerecognitionfromvideo.PNG)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
+[![ArcFace Demo](https://insightface.ai/assets/img/github/facerecognitionfromvideo.PNG)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
 
 Please click the image to watch the Youtube video. For Bilibili users, click [here](https://www.bilibili.com/video/av38041494?from=search&seid=11501833604850032313).
 
