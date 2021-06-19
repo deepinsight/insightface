@@ -53,9 +53,10 @@ extensions = [
         Extension("insightface.thirdparty.face3d.mesh.cython.mesh_core_cython", 
             ["insightface/thirdparty/face3d/mesh/cython/mesh_core_cython.pyx", "insightface/thirdparty/face3d/mesh/cython/mesh_core.cpp"], language='c++'),
         ]
-data_images = glob.glob('insightface/data/images/*.jpg')
+data_images = list(glob.glob('insightface/data/images/*.jpg'))
+data_images += list(glob.glob('insightface/data/images/*.png'))
 
-data_files = [ ('insightface/data/images', list(data_images)) ]
+data_files = [ ('insightface/data/images', data_images) ]
 ext_modules=cythonize(extensions)
 setup(
     # Metadata
