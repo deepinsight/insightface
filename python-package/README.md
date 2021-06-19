@@ -1,4 +1,4 @@
-## Python package of insightface README
+## Python package
 
 
 For insightface pip-package <= 0.1.5, we use MXNet as inference backend, please download all models from [onedrive](https://1drv.ms/u/s!AswpsDO2toNKrUy0VktHTWgIQ0bn?e=UEF7C4), and put them all under `~/.insightface/models/` directory.

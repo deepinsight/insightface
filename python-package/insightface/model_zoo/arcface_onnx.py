@@ -82,4 +82,14 @@ class ArcFaceONNX:
         sim = np.dot(feat1, feat2) / (norm(feat1) * norm(feat2))
         return sim
 
+    def forward(self, imgs):
+        if not isinstance(imgs, list):
+            imgs = [imgs]
+        input_size = self.input_size
+        
+        blob = cv2.dnn.blobFromImages(imgs, 1.0 / self.input_std, input_size,
+                                      (self.input_mean, self.input_mean, self.input_mean), swapRB=True)
+        net_out = self.session.run(self.output_names, {self.input_name: blob})[0]
+        return net_out
+
 

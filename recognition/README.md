@@ -1,24 +1,46 @@
-## Angular Margin Loss for Deep Face Recognition
+## Face Recognition
 
-### Citation
 
-If you find this project useful in your research, please consider to cite the following related papers:
+<div align="left">
+  <img src="https://insightface.ai/assets/img/custom/logo3.jpg" width="240"/>
+</div>
 
-```
 
-@inproceedings{deng2019arcface,
-  title={Arcface: Additive angular margin loss for deep face recognition},
-  author={Deng, Jiankang and Guo, Jia and Xue, Niannan and Zafeiriou, Stefanos},
-  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
-  pages={4690--4699},
-  year={2019}
-}
+## Introduction
 
-@inproceedings{deng2020subcenter,
-  title={Sub-center ArcFace: Boosting Face Recognition by Large-scale Noisy Web Faces},
-  author={Deng, Jiankang and Guo, Jia and Liu, Tongliang and Gong, Mingming and Zafeiriou, Stefanos},
-  booktitle={Proceedings of the IEEE Conference on European Conference on Computer Vision},
-  year={2020}
-}
+These are the face recognition methods of [InsightFace](https://insightface.ai)
 
-```
+
+<div align="left">
+  <img src="https://insightface.ai/assets/img/github/facerecognitionfromvideo.PNG" width="600"/>
+</div>
+
+
+### Datasets
+
+  Please refer to [datasets](_datasets_) page for the details of face recognition datasets used for training and evaluation.
+
+### Evaluation
+
+  Please refer to [evaluation](_evaluation_) page for the details of face recognition evaluation.
+
+
+## Methods
+
+
+Supported methods:
+
+- [x] [ArcFace_mxnet (CVPR'2019)](arcface_mxnet)
+- [x] [ArcFace_torch (CVPR'2019)](arcface_torch)
+- [x] [SubCenter ArcFace (ECCV'2020)](subcenter_arcface)
+- [x] [PartialFC_mxnet (Arxiv'2020)](partial_fc)
+- [x] [PartialFC_torch (Arxiv'2020)](arcface_torch)
+- [x] [VPL (CVPR'2021)](vpl)
+- [x] [OneFlow_face](oneflow_face)
+
+
+## Contributing
+
+We appreciate all contributions to improve the face recognition model zoo of InsightFace. 
+
+

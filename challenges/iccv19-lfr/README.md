@@ -31,7 +31,7 @@ insightface.challenge@gmail.com
 
 *For Chinese:*
 
-![wechat](https://github.com/deepinsight/insightface/blob/master/resources/lfr19_wechat1.jpg)
+![wechat](https://insightface.ai/assets/img/github/lfr19_wechat1.jpg)
 
 *For English:*
 
