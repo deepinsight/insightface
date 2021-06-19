@@ -1,4 +1,4 @@
-## Face Alignment
+## Face Attribute
 
 
 <div align="left">
@@ -16,14 +16,6 @@ These are the face attribute methods of [InsightFace](https://insightface.ai)
 </div>
 
 
-### Datasets
-
-  Please refer to [datasets](_datasets_) page for the details of face attribute datasets used for training and evaluation.
-
-### Evaluation
-
-  Please refer to [evaluation](_evaluation_) page for the details of face attribute evaluation.
-
 
 ## Methods
 
@@ -36,6 +28,6 @@ Supported methods:
 
 ## Contributing
 
-We appreciate all contributions to improve the face attribute model zoo of InsightFace. 
+We appreciate all contributions to improve the face attribute module of InsightFace. 
 
 
