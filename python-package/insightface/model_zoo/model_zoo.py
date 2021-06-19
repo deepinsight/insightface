@@ -36,7 +36,8 @@ class ModelRouter:
         elif input_shape[2]==96 and input_shape[3]==96:
             return Attribute(model_file=self.onnx_file, session=session)
         else:
-            raise RuntimeError('error on model routing')
+            #raise RuntimeError('error on model routing')
+            return None
 
 def find_onnx_file(dir_path):
     if not os.path.exists(dir_path):

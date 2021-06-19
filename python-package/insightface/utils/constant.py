@@ -1,3 +1,3 @@
 
-DEFAULT_MP_NAME = 'antelope'
+DEFAULT_MP_NAME = 'antelopev2'
 

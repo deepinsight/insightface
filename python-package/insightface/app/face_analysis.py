@@ -34,7 +34,9 @@ class FaceAnalysis:
                 #print('ignore:', onnx_file)
                 continue
             model = model_zoo.get_model(onnx_file)
-            if allowed_modules is not None and model.taskname not in allowed_modules:
+            if model is None:
+                print('model not recognized:', onnx_file)
+            elif allowed_modules is not None and model.taskname not in allowed_modules:
                 print('model ignore:', onnx_file, model.taskname)
                 del model
             elif model.taskname not in self.models and (allowed_modules is None or model.taskname in allowed_modules):
