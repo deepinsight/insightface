@@ -11,6 +11,7 @@ import onnxruntime
 from .arcface_onnx import *
 from .scrfd import *
 from .landmark import *
+from .attribute import Attribute
 
 #__all__ = ['get_model', 'get_model_list', 'get_arcface_onnx', 'get_scrfd']
 __all__ = ['get_model']
@@ -32,6 +33,8 @@ class ModelRouter:
             return ArcFaceONNX(model_file=self.onnx_file, session=session)
         elif input_shape[2]==192 and input_shape[3]==192:
             return Landmark(model_file=self.onnx_file, session=session)
+        elif input_shape[2]==96 and input_shape[3]==96:
+            return Attribute(model_file=self.onnx_file, session=session)
         else:
             raise RuntimeError('error on model routing')
 

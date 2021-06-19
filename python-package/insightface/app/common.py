@@ -27,11 +27,23 @@ class Face(dict):
 
     __setitem__ = __setattr__
 
+    def __getattr__(self, name):
+        return None
+
     @property
     def embedding_norm(self):
+        if self.embedding is None:
+            return None
         return l2norm(self.embedding)
 
     @property 
     def normed_embedding(self):
+        if self.embedding is None:
+            return None
         return self.embedding / self.embedding_norm
 
+    @property 
+    def sex(self):
+        if self.gender is None:
+            return None
+        return 'M' if self.gender==1 else 'F'
