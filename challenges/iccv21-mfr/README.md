@@ -36,7 +36,7 @@ In this challenge, we will evaluate the accuracy of following testsets:
 
 We ensure that there's no overlap between these testsets and public available training datasets, as they are not collected from online celebrities.
 
-Our test datasets mainly comes from [IFRT](https://github.com/deepinsight/insightface/tree/master/challenges/IFRT).
+Our test datasets mainly comes from [IFRT](../ifrt).
 
 ### ``Mask test-set:``
 
@@ -113,7 +113,7 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
   * Sub-Track A: Use MS1M-V3 as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/challenges/iccv19-lfr), feature length must <= 512, and the inference time must <= 10ms on Tesla V100 GPU.
   * Sub-Track B: Use Glint360K as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc), feature length must <= 1024, and the inference time must <= 20ms on Tesla V100 GPU.
 2. Training set and testing set are both aligned to 112x112, re-alignment is prohibited.
-3. Mask data-augmentation is allowed, such as [this](https://github.com/deepinsight/insightface/tree/master/recognition/tools). The applied mask augmentation tool should be reproducible. 
+3. Mask data-augmentation is allowed, such as [this](../../recognition/_tools_). The applied mask augmentation tool should be reproducible. 
 4. External dataset and pretrained models are both prohibited.
 5. Participants submit onnx model, then get scores by our online evaluation. Test images are invisible.
 6. Matching score is measured by cosine similarity.
@@ -128,9 +128,9 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
 ## Tutorial 
 
-1. ArcFace-PyTorch (with Partial-FC), [code](https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch), [tutorial-cn](https://github.com/deepinsight/insightface/blob/master/challenges/iccv21-mfr/tutorial_pytorch_cn.md)
-2. OneFlow, [code](https://github.com/deepinsight/insightface/tree/master/recognition/oneflow_face)
-3. MXNet, [code](https://github.com/deepinsight/insightface/tree/master/recognition/ArcFace)
+1. ArcFace-PyTorch (with Partial-FC), [code](../../recognition/arcface_torch), [tutorial-cn](tutorial_pytorch_cn.md)
+2. OneFlow, [code](../../recognition/oneflow_face)
+3. MXNet, [code](../../recognition/arcface_mxnet)
 
 ## Submission Guide
 

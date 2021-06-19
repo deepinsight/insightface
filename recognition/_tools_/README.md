@@ -11,9 +11,9 @@ We can use this tool to do data augmentation while training our face recognition
 
 | Face Image  | OP | Mask Image | Out |  
 | ------- | ------ | --------- | ----------- |  
-|  <img src="https://github.com/deepinsight/insightface/blob/master/deploy/Tom_Hanks_54745.png" alt="face" height="112" /> | +F  | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask1.jpg" alt="mask" height="112" />     | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask_out1.jpg?raw=true" alt="mask" height="112" />      | 
-|  <img src="https://github.com/deepinsight/insightface/blob/master/deploy/Tom_Hanks_54745.png" alt="face" height="112" /> | +F  | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/black-mask.png" alt="mask" height="112" />     | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask_out3.jpg?raw=true" alt="mask" height="112" />      | 
-|  <img src="https://github.com/deepinsight/insightface/blob/master/deploy/Tom_Hanks_54745.png" alt="face" height="112" /> | +H  | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask2.jpg?raw=true" alt="mask" height="112" />     | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask_out2h.jpg?raw=true" alt="mask" height="112" />      | 
+|  <img src="https://github.com/deepinsight/insightface/blob/master/python-package/insightface/data/images/Tom_Hanks_54745.png" alt="face" height="112" /> | +F  | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask1.jpg" alt="mask" height="112" />     | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask_out1.jpg?raw=true" alt="mask" height="112" />      | 
+|  <img src="https://github.com/deepinsight/insightface/blob/master/python-package/insightface/data/images/Tom_Hanks_54745.png" alt="face" height="112" /> | +F  | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/black-mask.png" alt="mask" height="112" />     | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask_out3.jpg?raw=true" alt="mask" height="112" />      | 
+|  <img src="https://github.com/deepinsight/insightface/blob/master/python-package/insightface/data/images/Tom_Hanks_54745.png" alt="face" height="112" /> | +H  | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask2.jpg?raw=true" alt="mask" height="112" />     | <img src="https://github.com/nttstar/insightface-resources/blob/master/images/mask_out2h.jpg?raw=true" alt="mask" height="112" />      | 
 
 **F** means FULL while **H** means HALF.
 
@@ -50,7 +50,8 @@ tool.prepare(ctx_id=0, det_size=(128,128)) #use gpu
 
 (2) load face and mask images
 ```
-image = cv2.imread("../../deploy/Tom_Hanks_54745.png")
+from insightface.data import get_image as ins_get_image
+image = ins_get_image('Tom_Hanks_54745')
 mask_image  = "mask_blue"
 ```
 
