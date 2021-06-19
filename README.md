@@ -34,7 +34,9 @@ InsightFace efficiently implements a rich variety of state of the art algorithms
 
 ### ArcFace Video Demo
 
-[![ArcFace Demo](https://insightface.ai/assets/img/github/facerecognitionfromvideo.PNG)](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
+
+[<img src=https://insightface.ai/assets/img/github/facerecognitionfromvideo.PNG width="760" />](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
+
 
 Please click the image to watch the Youtube video. For Bilibili users, click [here](https://www.bilibili.com/video/av38041494?from=search&seid=11501833604850032313).
 
