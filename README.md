@@ -5,7 +5,9 @@
   <img src="https://insightface.ai/assets/img/custom/logo3.jpg" width="240"/>
 </div>
 
-By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) and [Jiankang Deng](https://jiankangdeng.github.io/)
+InsightFace project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) and [Jiankang Deng](https://jiankangdeng.github.io/). 
+
+For all main contributors, please check [contributing](#contributing).
 
 ## Top News
 
@@ -25,7 +27,9 @@ The training data containing the annotation (and the models trained with these d
 
 ## Introduction
 
-[InsightFace](https://insightface.ai) is an open source 2D&3D deep face analysis toolbox, mainly based on PyTorch and MXNet. Please check our [website](https://insightface.ai) for detail.
+[InsightFace](https://insightface.ai) is an open source 2D&3D deep face analysis toolbox, mainly based on PyTorch and MXNet. 
+
+Please check our [website](https://insightface.ai) for detail.
 
 The master branch works with **PyTorch 1.6+** and/or **MXNet=1.6-1.8**, with **Python 3.x**.
 
@@ -192,9 +196,12 @@ year={2019}
 }
 ```
 
-## Contact
+## Contributing
 
-```
-[Jia Guo](guojia[at]gmail.com)
-[Jiankang Deng](jiankangdeng[at]gmail.com)
-```
+Main contributors:
+
+- [Jia Guo](https://github.com/nttstar), ``guojia[at]gmail.com``
+- [Jiankang Deng](https://github.com/jiankangdeng) ``jiankangdeng[at]gmail.com``
+- [Xiang An](https://github.com/anxiangsir) ``anxiangsir@gmail.com``
+- [Jack Yu](https://github.com/szad670401) ``455501914@qq.com``
+
