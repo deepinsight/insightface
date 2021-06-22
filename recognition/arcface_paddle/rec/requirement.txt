@@ -1,0 +1,8 @@
+paddlepaddle-gpu==2.0.2
+visualdl >= 2.0.0b
+opencv-python
+pillow
+numpy
+easydict
+scipy
+sklearn
