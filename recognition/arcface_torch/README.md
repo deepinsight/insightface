@@ -9,15 +9,11 @@ torch >= 1.6.0
 More details see [eval.md](docs/install.md) in docs.
 
 ## Training
-### 1. Single node, 1 GPUs:
-```shell
-python -m torch.distributed.launch --nproc_per_node=1 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py
-```
-### 2. Single node, 8 GPUs:
+### 1. Single node, 8 GPUs:
 ```shell
 python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py
 ```
-### 3. Multiple nodes, each node 8 GPUs:  
+### 2. Multiple nodes, each node 8 GPUs:  
 Node 0:  
 ```shell
 python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=1234 train.py
@@ -25,6 +21,11 @@ python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 -
 Node 1:  
 ```shell
 python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=1234 train.py
+```
+
+### 3.Training resnet2060 with 8 GPUs:
+```shell
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py --network r2060
 ```
 
 ## Speed Benchmark
