@@ -1,3 +1,11 @@
+## v1.8.1 
+### Linux and Windows  
+```shell
+# CUDA 10.2
+pip3 install torch torchvision torchaudio
+```
+
+
 ## v1.7.1  
 ### Linux and Windows  
 ```shell
