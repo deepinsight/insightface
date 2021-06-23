@@ -12,13 +12,16 @@
   * [6.2 在WIDER-FACE数据集上评估](#评估)
   * [6.3 推理部署](#推理部署)
   * [6.4 推理速度提升](#推理速度提升)
+* [7. 参考文献](#参考文献)
 
 <a name="简介"></a>
 
 ## 1. 简介
 `face_detection`中提供高效、高速的人脸检测解决方案，包括最先进的模型和经典模型。
 
-![](./images/blazeface_result_demo.jpg)
+<div align="center">
+<img src="./images/blazeface_result_demo.jpg"  width = "700" />
+</div>
 
 <a name="模型库"></a>
 
@@ -26,14 +29,16 @@
 
 ### WIDER-FACE数据集上的mAP
 
-| 网络结构 | 输入尺寸 | 图片个数/GPU | 学习率策略 | Easy/Medium/Hard Set  | 预测时延（SD855）| 模型大小(MB) | 下载 | 配置文件 |
+| 网络结构 | 输入尺寸 | 图片个数/GPU | epoch数量 | Easy/Medium/Hard Set  | 预测时延 | 模型大小(MB) | 下载 | 配置文件 |
 |:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:----------:|:---------:|:--------:|
-| BlazeFace  | 640  |    8    | 1000e     | 0.885 / 0.855 / 0.731 | 458ms | 0.472 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_1000e.yml) |
-| BlazeFace-FPN-SSH  | 640  |    8    | 1000e     | 0.907 / 0.883 / 0.793 | 471ms/开启mkldnn 87ms | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| BlazeFace  | 640  |    8    | 1000     | 0.885 / 0.855 / 0.731 | 458ms | 0.472 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_1000e.yml) |
+| BlazeFace-FPN-SSH  | 640  |    8    | 1000    | 0.907 / 0.883 / 0.793 | 87 | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
 **注意:**  
 - 我们使用多尺度评估策略得到`Easy/Medium/Hard Set`里的mAP。具体细节请参考[在WIDER-FACE数据集上评估](#评估)。
-- 测量速度时我们使用640*480的分辨，在 Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz cpu，单线程环境进行
+- 测量速度时我们使用640*480的分辨，在 Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz cpu。
+- 预测时延的具体指标是在CPU环境上，开启mkldnn预测得到。
+
 
 <a name="安装"></a>
 
@@ -205,8 +210,9 @@ unzip eval_tools.zip && rm -f eval_tools.zip
 
 - 步骤三：开始评估
 
-方法一：python评估：
-```
+方法一：python评估。
+
+```bash
 git clone https://github.com/wondervictor/WiderFace-Evaluation.git
 cd WiderFace-Evaluation
 # 编译
@@ -215,8 +221,9 @@ python3 setup.py build_ext --inplace
 python3 evaluation.py -p /path/to/PaddleDetection/output/pred -g /path/to/eval_tools/ground_truth
 ```
 
-方法二：MatLab评估：
-```
+方法二：MatLab评估。
+
+```bash
 # 在`eval_tools/wider_eval.m`中修改保存结果路径和绘制曲线的名称：
 pred_dir = './pred';  
 legend_name = 'Paddle-BlazeFace';
@@ -235,12 +242,14 @@ matlab -nodesktop -nosplash -nojvm -r "run wider_eval.m;quit;"
 python tools/export_model.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml --output_dir=./inference_model \
  -o weights=output/blazeface_fpn_ssh_1000e/best_model
 ```
+
 预测模型会导出到`inference_model/blazeface_fpn_ssh_1000e`目录下，分别为`infer_cfg.yml`, `model.pdiparams`, `model.pdiparams.info`,`model.pdmodel` 如果不指定文件夹，模型则会导出在`output_inference`
 
 * 更多关于模型导出的文档，请参考[模型导出文档](https://github.com/PaddlePaddle/PaddleDetection/deploy/EXPORT_MODEL.md)
 
  PaddleDetection提供了PaddleInference、PaddleServing、PaddleLite多种部署形式，支持服务端、移动端、嵌入式等多种平台，提供了完善的Python和C++部署方案。
 * 在这里，我们以Python为例，说明如何使用PaddleInference进行模型部署
+
 ```bash
 python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_file=demo/road554.png --use_gpu=True
 ```
@@ -255,12 +264,17 @@ python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_10
 如果希望模型在cpu环境下更快推理，可安装[paddlepaddle_gpu-0.0.0](https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl) （mkldnn的依赖）可开启mkldnn加速推理。
 
 ```bash
-#安装paddlepaddle_gpu-0.0.0
+# 下载paddle whl包
+wget https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl
+# 安装paddlepaddle_gpu-0.0.0
 pip install paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl
-
+# 推理
 python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_file=demo/road554.png --enable_mkldnn=True
 ```
-## Citations
+
+<a name="参考文献"></a>
+
+## 7. 参考文献
 
 ```
 @misc{long2020ppyolo,
