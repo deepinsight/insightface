@@ -29,9 +29,9 @@
 
 ### WIDER-FACE数据集上的mAP
 
-| 网络结构 | 输入尺寸 | 图片个数/GPU | epoch数量 | Easy/Medium/Hard Set  | 预测时延 | 模型大小(MB) | 下载 | 配置文件 |
+| 网络结构 | 输入尺寸 | 图片个数/GPU | epoch数量 | Easy/Medium/Hard Set  | 预测时延(ms) | 模型大小(MB) | 下载 | 配置文件 |
 |:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:----------:|:---------:|:--------:|
-| BlazeFace  | 640  |    8    | 1000     | 0.885 / 0.855 / 0.731 | 458ms | 0.472 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_1000e.yml) |
+| BlazeFace  | 640  |    8    | 1000     | 0.885 / 0.855 / 0.731 | 85 | 0.472 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_1000e.yml) |
 | BlazeFace-FPN-SSH  | 640  |    8    | 1000    | 0.907 / 0.883 / 0.793 | 87 | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
 **注意:**  
