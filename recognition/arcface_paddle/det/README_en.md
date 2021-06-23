@@ -17,8 +17,7 @@
 <a name="Introduction"></a>
 
 ## 1. Introduction
-The goal of FaceDetection is to provide efficient and high-speed face detection solutions,
-including cutting-edge and classic models.
+The goal of FaceDetection is to provide efficient and high-speed face detection solutions, including cutting-edge and classic models.
 
 <div align="center">
 <img src="./images/blazeface_result_demo.jpg"  width = "700" />
@@ -70,7 +69,7 @@ cd PaddleDetection
 pip install -r requirements.txt
 ```
 
-For more details of installation, please refer to: [Install tutrial](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL_cn.md)
+For more details of installation, please refer to: [Install tutrial](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL_cn.md).
 
 <a name="Data_Pipline"></a>
 
@@ -115,7 +114,6 @@ cd dataset/wider_face && ./download_wider_face.sh
 
 We use the `configs/face_detection/blazeface_fpn_ssh_1000e.yml` configuration for training. The summary of the configuration file is as follows:
 ```yaml
-
 _BASE_: [
   '../datasets/wider_face.yml',
   '../runtime.yml',
@@ -125,7 +123,6 @@ _BASE_: [
 ]
 weights: output/blazeface_fpn_ssh_1000e/model_final
 multi_scale_eval: True
-
 ```
 
 `blazeface_fpn_ssh_1000e.yml` The configuration needs to rely on other configuration files, in this example it needs to rely on:
@@ -145,7 +142,7 @@ face_reader.yml：It mainly describes the configuration of the data reader, such
 According to the actual situation, modify the above files, such as the data set path, batch size, etc.
 
 For the configuration of the base model, please refer to `configs/face_detection/_base_/blazeface.yml`.
-The improved model adds the neck structure of FPN and SSH. For the configuration file, please refer to `configs/face_detection/_base_/blazeface_fpn.yml`. You can configure FPN and SSH according if needed, which is as follows:
+The improved model adds the neck structure of FPN and SSH. For the configuration file, please refer to `configs/face_detection/_base_/blazeface_fpn.yml`. You can configure FPN and SSH if needed, which is as follows:
 
 ```yaml
 BlazeNet:
@@ -166,7 +163,7 @@ BlazeNeck:
 <a name="Training"></a>
 
 ### 6.1 Training
-PaddleDetection provides a single-GPU/multi-GPU training mode to meet the various training needs of users
+PaddleDetection provides a single-GPU/multi-GPU training mode to meet the various training needs of users.
 * single-GPU training
 ```bash
 export CUDA_VISIBLE_DEVICES=0 # Do not need to execute this command under windows and Mac
@@ -180,7 +177,7 @@ python -m paddle.distributed.launch --gpus 0,1,2,3 tools/train.py -c configs/fac
 ```
 * Resume training from Checkpoint
 
-  In the daily training process, some users interrupted the training due to some reasons, you can use the -r command to resume training:
+  In the daily training process, if the training was be interrupted, using the -r command to resume training:
 
 ```bash
 export CUDA_VISIBLE_DEVICES=0 # Do not need to execute this command under windows and Mac
@@ -191,7 +188,7 @@ python tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml -r o
 `BlazeFace` training is based on each GPU `batch_size=32` training on 4 GPUs (total `batch_size` is 128), the learning rate is 0.002, and the total training epoch is set as 1000.
 
 
-**NOTE:** The face detection model currently does not support evaluation during training process.
+**NOTE:** Not support evaluation during train.
 
 <a name="Evaluation"></a>
 
@@ -211,7 +208,7 @@ wget http://mmlab.ie.cuhk.edu.hk/projects/WIDERFace/support/eval_script/eval_too
 unzip eval_tools.zip && rm -f eval_tools.zip
 ```
 
-- Start evaluation
+- Start evaluation:
 
 Method One: Python evaluation:
 
@@ -224,7 +221,7 @@ python3 setup.py build_ext --inplace
 python3 evaluation.py -p /path/to/PaddleDetection/output/pred -g /path/to/eval_tools/ground_truth
 ```
 
-Method Two: MatLab evaluation.
+Method Two: MatLab evaluation:
 
 ```bash
 # Modify the result path and the name of the curve to be drawn in `eval_tools/wider_eval.m`:
@@ -247,22 +244,22 @@ python tools/export_model.py -c configs/face_detection/blazeface_fpn_ssh_1000e.y
 ```
 The inference model will be exported to the `inference_model/blazeface_fpn_ssh_1000e` directory, which are `infer_cfg.yml`, `model.pdiparams`, `model.pdiparams.info`, `model.pdmodel` If no folder is specified, the model will be exported In `output_inference`.
 
-* For more documentation about model export, please refer to[export doc](https://github.com/PaddlePaddle/PaddleDetection/deploy/EXPORT_MODEL.md)
+* For more documentation about model export, please refer to: [export doc](https://github.com/PaddlePaddle/PaddleDetection/deploy/EXPORT_MODEL.md)
 
  PaddleDetection provides multiple deployment forms of PaddleInference, PaddleServing, and PaddleLite, supports multiple platforms such as server, mobile, and embedded, and provides a complete deployment plan for Python and C++.
 * Here, we take Python as an example to illustrate how to use PaddleInference for model deployment:
 ```bash
 python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_file=demo/road554.png --use_gpu=True
 ```
-* `infer.py` provides a rich interface for users to access video files and cameras for prediction. For more information, please refer to[Python deployment](https://github.com/PaddlePaddle/PaddleDetection/deploy/python.md)
+* `infer.py` provides a rich interface for users to access video files and cameras for prediction. For more information, please refer to: [Python deployment](https://github.com/PaddlePaddle/PaddleDetection/deploy/python.md).
 
-* For more documentation on deployment, please refer to[deploy doc](https://github.com/PaddlePaddle/PaddleDetection/deploy/README.md) 。
+* For more documentation on deployment, please refer to: [deploy doc](https://github.com/PaddlePaddle/PaddleDetection/deploy/README.md).
 
 <a name="Increase_in_inference_speed"></a>
 
 ### 6.4 Improve inference speed
 
-If you want the model to be inferred faster in the cpu environment, you can install it[paddlepaddle_gpu-0.0.0](https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl) (Dependency of mkldnn) mkldnn can be turned on to accelerate inference.
+If you want the model to be inferred faster in the cpu environment, install [paddlepaddle_gpu-0.0.0](https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl) (dependency of mkldnn) and enable_mkldnn is set to True, when predicting acceleration.
 
 ```bash
 # downdoad whl package
