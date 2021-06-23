@@ -11,11 +11,17 @@ import matplotlib.pyplot as plt
 import timeit
 import sklearn
 import argparse
+import cv2
+import numpy as np
+import torch
+from skimage import transform as trans
+from backbones import get_model
 from sklearn.metrics import roc_curve, auc
 
 from menpo.visualize.viewmatplotlib import sample_colours_from_colourmap
 from prettytable import PrettyTable
 from pathlib import Path
+
 import sys
 import warnings
 
@@ -44,19 +50,13 @@ use_flip_test = True  # if Ture, TestMode(F1)
 job = args.job
 batch_size = args.batch_size
 
-import cv2
-import numpy as np
-import torch
-from skimage import transform as trans
-import backbones
-
 
 class Embedding(object):
     def __init__(self, prefix, data_shape, batch_size=1):
         image_size = (112, 112)
         self.image_size = image_size
         weight = torch.load(prefix)
-        resnet = eval("backbones.{}".format(args.network))(False).cuda()
+        resnet = get_model(args.network, dropout=0, fp16=False).cuda()
         resnet.load_state_dict(weight)
         model = torch.nn.DataParallel(resnet)
         self.model = model
