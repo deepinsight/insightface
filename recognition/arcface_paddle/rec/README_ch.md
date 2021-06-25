@@ -1,25 +1,46 @@
-# Arcface-Paddle (Distributed Version of ArcFace)
+# Arcface-Paddle
 
 首先，请参照 [Installation](install_en.md) 配置实验所需环境。
 
-## 1 数据准备
+## 1. 数据准备
 
-- 进入 repo 目录。
+### 1.1 进入 repo 目录。
 
   ```
   cd path_to_Arcface-Paddle
   ```
 
-- 下载并解压 MS1M 数据集。
+### 1.2 下载与解压数据集
 
-  请按照如下格式组织数据集。
+使用下面的命令下载并解压 MS1M 数据集。
+
+```shell
+# 下载数据集
+wget https://paddle-model-ecology.bj.bcebos.com/data/insight-face/MS1M_bin.tar
+# 解压数据集
+tar -xf MS1M_bin.tar
+```
+
+注意：
+* 如果希望在windows环境下安装wget，可以参考：[链接](https://www.cnblogs.com/jeshy/p/10518062.html)；如果希望在windows环境中安装tar命令，可以参考：[链接](https://www.cnblogs.com/chooperman/p/14190107.html)。
+* 如果macOS环境下没有安装wget命令，可以运行下面的命令进行安装。
+
+```shell
+# 安装 homebrew
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";
+# 安装wget
+brew install wget
+```
+
+
+解压完成之后，文件夹目录结构如下。
 
   ```
-  Arcface-Paddle/MSiM_v2
+  Arcface-Paddle/MSiM_bin
   |_ images
-  |  |_ 00000000.jpg
+  |  |_ 00000000.bin
   |  |_ ...
-  |  |_ 05822652.jpg
+  |  |_ 05822652.bin
   |_ label.txt
   |_ agedb_30.bin
   |_ cfp_ff.bin
@@ -32,13 +53,30 @@
   ```
    # delimiter: "\t"
    # the following the content of label.txt
-   images/00000000.jpg 0
+   images/00000000.bin 0
    ...
   ```
 
 如果需要使用自定义数据集，请按照上述格式进行整理，并替换配置文件中的数据集目录。
 
-## 2 模型训练
+注意：
+* 这里为了更加方便`Dataloader`读取数据，将原始的`train.rec`文件转化为很多`bin文件`，每个`bin文件`都唯一对应一张原始图像。如果您采集得到的文件均为原始的图像文件，那么可以参考`1.3节`中的内容完成原始图像文件到bin文件的转换。
+
+### 1.3 原始图像文件与bin文件的转换
+
+如果希望将原始的图像文件转换为本文用于训练的bin文件，那么可以使用下面的命令进行转换。
+
+```shell
+python3.7 tools/convert_image_bin.py --image_path="your/input/image/path" --bin_path="your/output/bin/path" --mode="image2bin"
+```
+
+如果希望将bin文件转化为原始的图像文件，那么可以使用下面的命令进行转换。
+
+```shell
+python3.7 tools/convert_image_bin.py --image_path="your/input/bin/path" --bin_path="your/output/image/path" --mode="bin2image"
+```
+
+## 2. 模型训练
 
 准备好配置文件后，可以通过以下方式开始训练过程。
 
@@ -87,7 +125,7 @@ python3.7 train.py \
 在训练过程中，可以通过  `VisualDL` 实时查看loss变化，更多信息请参考 [VisualDL](https://github.com/PaddlePaddle/VisualDL/)。
 
 
-## 3 模型评估
+## 3. 模型评估
 
 可以通过以下方式开始模型评估过程。
 
@@ -104,14 +142,14 @@ python3.7 valid.py
 
 **注意:** 上面的命令将评估模型文件 `./emore_arcface/MobileFaceNet_128.pdparams` .您也可以通过同时修改 `network` 和 `checkpoint` 来修改要评估的模型文件。
 
-## 4 模型性能
+## 4. 模型精度与速度评估
 
-训练集：MS1M
+在MS1M训练集上进行模型训练，最终得到的模型指标在lfw、cfp_fp、agedb30三个数据集上的精度指标以及CPU、GPU的预测耗时如下。
 
-| Backbone                  | lfw   | cfp_fp | agedb30 | CPU 耗时 | GPU 耗时 |
+| 模型结构                  | lfw   | cfp_fp | agedb30 | CPU 耗时 | GPU 耗时 |
 | ------------------------- | ----- | ------ | ------- | -------- | -------- |
-| MobileFaceNet-Paddle      | 99.45 | 93.43  | 96.13   | 38.84ms  | 2.26ms   |
-| MobileFaceNet-insightface | 99.50 | 88.94  | 95.91   | 7.32ms   | 4.71ms   |
+| MobileFaceNet-Paddle      | 99.45% | 93.43  | 96.13   | 38.84ms  | 2.26ms   |
+| MobileFaceNet-insightface | 99.50% | 88.94  | 95.91   | 7.32ms   | 4.71ms   |
 
 **测试环境：**
 
