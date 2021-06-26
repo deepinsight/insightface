@@ -49,7 +49,6 @@ def main(args):
 
     dropout = 0.4 if cfg.dataset == "webface" else 0
     backbone = get_model(args.network, dropout=dropout, fp16=cfg.fp16, num_features=cfg.embedding_size).to(local_rank)
-    backbone_onnx = get_model(args.network, dropout=dropout, fp16=False, num_features=cfg.embedding_size)
 
     if args.resume:
         try:
@@ -121,7 +120,7 @@ def main(args):
             loss.update(loss_v, 1)
             callback_logging(global_step, loss, epoch, cfg.fp16, grad_amp)
             callback_verification(global_step, backbone)
-        callback_checkpoint(global_step, backbone, module_partial_fc, backbone_onnx)
+        callback_checkpoint(global_step, backbone, module_partial_fc)
         scheduler_backbone.step()
         scheduler_pfc.step()
     dist.destroy_process_group()

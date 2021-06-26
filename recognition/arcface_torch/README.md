@@ -9,15 +9,11 @@ torch >= 1.6.0
 More details see [eval.md](docs/install.md) in docs.
 
 ## Training
-### 1. Single node, 1 GPUs:
-```shell
-python -m torch.distributed.launch --nproc_per_node=1 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py
-```
-### 2. Single node, 8 GPUs:
+### 1. Single node, 8 GPUs:
 ```shell
 python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py
 ```
-### 3. Multiple nodes, each node 8 GPUs:  
+### 2. Multiple nodes, each node 8 GPUs:  
 Node 0:  
 ```shell
 python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=1234 train.py
@@ -25,6 +21,11 @@ python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 -
 Node 1:  
 ```shell
 python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=1234 train.py
+```
+
+### 3.Training resnet2060 with 8 GPUs:
+```shell
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py --network r2060
 ```
 
 ## Speed Benchmark
@@ -36,7 +37,7 @@ partial fc sampling strategy will get same accuracy with several times faster tr
 
 1. Training speed of different parallel methods (samples/second), Tesla V100 32GB * 8. (Larger is better)
 
-| Method                 | Bs128-R100-2 Million Identities | Bs128-R50-4 Million Identities | Bs64-R50-8 Million Identities |
+| Method                 | Bs1024-R100-2 Million Identities | Bs1024-R50-4 Million Identities | Bs512-R50-8 Million Identities |
 | :---                   |    :---                          | :---                            | :---                     |
 | Data Parallel          |    1                             | 1                               | 1                        |
 | Model Parallel         |    1362                          | 1600                            | 482                      |
@@ -45,7 +46,7 @@ partial fc sampling strategy will get same accuracy with several times faster tr
 
 2. GPU memory cost of different parallel methods (GB per GPU), Tesla V100 32GB * 8. (Smaller is better)
 
-| Method                 | Bs128-R100-2 Million Identities   | Bs128-R50-4 Million Identities   | Bs64-R50-8 Million Identities |
+| Method                 | Bs1024-R100-2 Million Identities   | Bs1024-R50-4 Million Identities   | Bs512-R50-8 Million Identities |
 | :---                   |    :---                           | :---                             | :---                     |
 | Data Parallel          |    OOM                            | OOM                              | OOM                      |
 | Model Parallel         |    27.3                           | 30.3                             | 32.1                      |
@@ -72,10 +73,11 @@ All Model Can be found in here.
 ### MS1MV3
 |   Datasets          |    log     | backbone    | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
 | :---:               |    :---    | :---        | :---        | :---        |:---   |:---  |:--- |  
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r18_fp16/training.log)  | r18-fp16  | 92.07 | 94.66 | 97.77 | 97.73 | 99.77 |
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r34_fp16/training.log)  | r34-fp16  | 94.10 | 95.90 | 98.10 | 98.67 | 99.80 |
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r50_fp16/training.log)  | r50-fp16  | 94.79 | 96.46 | 98.35 | 98.96 | 99.83 | 
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r100_fp16/training.log) | r100-fp16 | 95.31 | 96.81 | 98.48 | 99.06 | 99.85 | 
+| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r18_fp16/training.log)  | r18-fp16      | 92.07 | 94.66 | 97.77 | 97.73 | 99.77 |
+| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r34_fp16/training.log)  | r34-fp16      | 94.10 | 95.90 | 98.10 | 98.67 | 99.80 |
+| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r50_fp16/training.log)  | r50-fp16      | 94.79 | 96.46 | 98.35 | 98.96 | 99.83 | 
+| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r100_fp16/training.log) | r100-fp16     | 95.31 | 96.81 | 98.48 | 99.06 | 99.85 | 
+| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r2060_fp16/training.log)| **r2060-fp16**| 95.34 | 97.11 | 98.67 | 99.24 | 99.87 |                 
    
 ### Glint360k
 |   Datasets          | log   |backbone               | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 

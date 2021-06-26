@@ -6,8 +6,6 @@ from typing import List
 import torch
 
 from eval import verification
-from partial_fc import PartialFC
-from torch2onnx import convert_onnx
 from utils.utils_logging import AverageMeter
 
 
@@ -100,14 +98,11 @@ class CallBackModelCheckpoint(object):
         self.rank: int = rank
         self.output: str = output
 
-    def __call__(self, global_step, backbone, partial_fc, backbone_onnx):
+    def __call__(self, global_step, backbone, partial_fc,):
         if global_step > 100 and self.rank is 0:
             path_module = os.path.join(self.output, "backbone.pth")
-            path_onnx = os.path.join(self.output, "backbone.onnx")
             torch.save(backbone.module.state_dict(), path_module)
             logging.info("Pytorch Model Saved in '{}'".format(path_module))
-            convert_onnx(backbone_onnx, path_module, path_onnx)
-            logging.info("Onnx Model Saved in '{}'".format(path_onnx))
 
         if global_step > 100 and partial_fc is not None:
             partial_fc.save_params()
