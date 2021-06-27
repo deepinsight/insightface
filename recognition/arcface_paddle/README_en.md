@@ -4,9 +4,9 @@
 
 This tutorial contains 3 parts: (1) face detection. (2) face recognition (3) end-to-end system inference.
 
-* [1. Face detection using BlazeFace](./det)
-* [2. Face recognition using arcface](./rec)
-* [3. End-to-end inference using PaddlePaddle](./system)
+* [1. Face detection using BlazeFace](./det/README_en.md)
+* [2. Face recognition using arcface](./rec/README_en.md)
+* [3. End-to-end inference using PaddlePaddle](./system/README_en.md)
 
 
 For face detection task, on WiderFace dataset, the following table shows mAP, speed and time cost for BlazeFace.
@@ -35,4 +35,4 @@ For face recognition task, on MSAM dataset, the following table shows precision,
 The recognition results of the light-weight model based on "Friends" can be seen as follows.
 
 
-* comming soon!
+* coming soon!

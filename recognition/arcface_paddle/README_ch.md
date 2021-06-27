@@ -5,9 +5,9 @@
 本部分主要包含人脸检测+人脸识别+系统串联三个部分。整体目录结构如下。
 
 
-* [1. Face detection using BlazeFace](./det)
-* [2. Face recognition using arcface](./rec)
-* [3. End-to-end inference using PaddlePaddle](./system)
+* [1. Face detection using BlazeFace](./det/README_ch.md)
+* [2. Face recognition using arcface](./rec/README_ch.md)
+* [3. End-to-end inference using PaddlePaddle](./system/README_ch.md)
 
 
 在人脸检测任务中，在WiderFace数据集上，BlazeFace的速度与精度指标信息如下。
@@ -31,4 +31,4 @@
 
 基于少量老友记人脸数据库，轻量级模型的识别结果可视化如下。
 
-* todo
+* coming soon!
