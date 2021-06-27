@@ -29,15 +29,16 @@
 
 ### WIDER-FACE数据集上的mAP
 
-| 网络结构 | 输入尺寸 | 图片个数/GPU | epoch数量 | Easy/Medium/Hard Set  | 预测时延(ms) | 模型大小(MB) | 下载 | 配置文件 |
+| 网络结构 | 输入尺寸 | 图片个数/GPU | epoch数量 | Easy/Medium/Hard Set  | GPU 预测时延 | 模型大小(MB) | 下载 | 配置文件 |
 |:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:----------:|:---------:|:--------:|
-| BlazeFace  | 640  |    8    | 1000     | 0.885 / 0.855 / 0.731 | 85 | 0.472 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_1000e.yml) |
-| BlazeFace-FPN-SSH  | 640  |    8    | 1000    | 0.907 / 0.883 / 0.793 | 87 | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| BlazeFace-FPN-SSH  | 640  |    8    | 1000    | 0.907 / 0.883 / 0.793 | 6.2ms | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
 **注意:**  
 - 我们使用多尺度评估策略得到`Easy/Medium/Hard Set`里的mAP。具体细节请参考[在WIDER-FACE数据集上评估](#评估)。
 - 测量速度时我们使用640*480的分辨，在 Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz cpu。
-- 预测时延的具体指标是在CPU环境上，开启mkldnn预测得到。
+- 测试环境为
+  - CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
+  - GPU: a single NVIDIA Tesla V100
 
 
 <a name="安装"></a>

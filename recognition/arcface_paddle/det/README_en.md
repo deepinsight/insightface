@@ -30,15 +30,16 @@ The goal of FaceDetection is to provide efficient and high-speed face detection 
 
 ### mAP in WIDER FACE
 
-| Model | input size | images/GPU | epochs | Easy/Medium/Hard Set  | CPU (ms)| Model Size(MB) | Download | Config |
+| Model | input size | images/GPU | epochs | Easy/Medium/Hard Set  | GPU time cost| Model Size(MB) | Download | Config |
 |:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:----------:|:---------:|:--------:|
-| BlazeFace  | 640  |    8    | 1000     | 0.885 / 0.855 / 0.731 | 85 | 0.472 |[model](https://paddledet.bj.bcebos.com/models/blazeface_1000e.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_1000e.yml) |
-| BlazeFace-FPN-SSH  | 640  |    8    | 1000     | 0.907 / 0.883 / 0.793 | 87 | 0.646 |[model](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| BlazeFace-FPN-SSH  | 640  |    8    | 1000     | 0.907 / 0.883 / 0.793 | 6.2ms | 0.646 |[model](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
 **NOTE:**  
 - Get mAP in `Easy/Medium/Hard Set` by multi-scale evaluation. For details can refer to [Evaluation](#Evaluate-on-the-WIDER-FACE).
 - Measuring the speed, we use the resolution of 640*480, in Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz, single-threaded environment.
-- The CPU time cost is measured with the `enable_mkldnn` flag set as True.
+- The benchmark environment is
+  - CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
+  - GPU: a single NVIDIA Tesla V100
 
 <a name="Installation"></a>
 
