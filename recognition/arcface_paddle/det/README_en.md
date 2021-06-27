@@ -1,3 +1,5 @@
+[简体中文](README_ch.md) | English
+
 # FaceDetection
 
 * [1. Introduction](#Introduction)
@@ -30,9 +32,9 @@ The goal of FaceDetection is to provide efficient and high-speed face detection 
 
 ### mAP in WIDER FACE
 
-| Model | input size | images/GPU | epochs | Easy/Medium/Hard Set  | GPU time cost| Model Size(MB) | Download | Config |
+| Model | input size | images/GPU | epochs | Easy/Medium/Hard Set  | GPU time cost| Model Size(MB) | Pretrained model | Inference model | Config |
 |:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:----------:|:---------:|:--------:|
-| BlazeFace-FPN-SSH  | 640  |    8    | 1000     | 0.907 / 0.883 / 0.793 | 6.2ms | 0.646 |[model](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| BlazeFace-FPN-SSH  | 640  |    8    | 1000     | 0.907 / 0.883 / 0.793 | 6.2ms | 0.646 |[download link](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) |  [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
 **NOTE:**  
 - Get mAP in `Easy/Medium/Hard Set` by multi-scale evaluation. For details can refer to [Evaluation](#Evaluate-on-the-WIDER-FACE).
@@ -70,7 +72,7 @@ cd PaddleDetection
 pip install -r requirements.txt
 ```
 
-For more details of installation, please refer to: [Install tutrial](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL_cn.md).
+For more details of installation, please refer to: [Install tutrial](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL.md).
 
 <a name="Data_Pipline"></a>
 
@@ -114,6 +116,7 @@ cd dataset/wider_face && ./download_wider_face.sh
 ## 5. Configuration file
 
 We use the `configs/face_detection/blazeface_fpn_ssh_1000e.yml` configuration for training. The summary of the configuration file is as follows:
+
 ```yaml
 _BASE_: [
   '../datasets/wider_face.yml',

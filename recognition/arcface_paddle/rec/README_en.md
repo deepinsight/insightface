@@ -1,3 +1,5 @@
+[简体中文](README_ch.md) | English
+
 # Arcface-Paddle (Distributed Version of ArcFace)
 
 Please refer to [Installation](install_en.md) to setup environment at first.

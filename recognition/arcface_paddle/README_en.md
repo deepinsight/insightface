@@ -1,3 +1,5 @@
+[简体中文](README_ch.md) | English
+
 # Arcface-Paddle
 
 This tutorial contains 3 parts: (1) face detection. (2) face recognition (3) end-to-end system inference.
@@ -12,7 +14,7 @@ For face detection task, on WiderFace dataset, the following table shows mAP, sp
 
 | Model structure                  | Model size | WiderFace mAP   | CPU time cost | GPU time cost |
 | ------------------------- | ----- | ----- | -------- | -------- |
-| BlazeFace-FPN-SSH      | 0.65MB | 0.907/0.883/0.793 | 55ms  | 40ms  | 6.2ms |
+| BlazeFace-FPN-SSH      | 0.65MB | 0.907/0.883/0.793 | 55ms  |  6.2ms |
 | RetinaFace      | 1.68MB | -/-/0.825 | 182ms  | 42ms |
 
 

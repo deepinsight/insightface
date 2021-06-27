@@ -1,3 +1,5 @@
+简体中文 | [English](README_en.md)
+
 # Arcface-Paddle
 
 本部分主要包含人脸检测+人脸识别+系统串联三个部分。整体目录结构如下。
@@ -12,7 +14,7 @@
 
 | 模型结构                  | 模型大小 | WiderFace精度   | CPU 耗时 | GPU 耗时 |
 | ------------------------- | ----- | ----- | -------- | -------- |
-| BlazeFace-FPN-SSH      | 0.65MB | 0.907/0.883/0.793 | 55ms  | 40ms  | 6.2ms |
+| BlazeFace-FPN-SSH      | 0.65MB | 0.907/0.883/0.793 | 55ms  |  6.2ms |
 | RetinaFace      | 1.68MB | -/-/0.825 | 182ms  | 42ms |
 
 在人脸识别任务中，基于MS1M训练集，模型指标在lfw、cfp_fp、agedb30上的精度指标以及CPU、GPU的预测耗时如下。

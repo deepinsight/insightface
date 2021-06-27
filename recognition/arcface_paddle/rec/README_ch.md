@@ -1,3 +1,5 @@
+简体中文 | [English](README_en.md)
+
 # Arcface-Paddle
 
 首先，请参照 [Installation](install_en.md) 配置实验所需环境。
