@@ -48,7 +48,6 @@ def writekv(f, k, v, flush=True):
 
 
 def trans_img_to_bin(img_name, output_path):
-    img_name = "../MS1M_v2/images/00000004.jpg"
     with open(img_name, "rb") as fin:
         img = fin.read()
     key = os.path.split(img_name)[-1]
@@ -57,7 +56,7 @@ def trans_img_to_bin(img_name, output_path):
     return
 
 
-def read_img_bin(input_path):
+def read_img_from_bin(input_path):
     # the file can exist many key-vals, but it just save one in fact.
     with open(input_path, "rb") as fin:
         r = readkv(fin)

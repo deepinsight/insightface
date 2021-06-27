@@ -20,7 +20,7 @@ import random
 import paddle
 import numpy as np
 
-from .kv_helper import read_img_bin
+from dataloader.kv_helper import read_img_from_bin
 
 
 class CommonDataset(Dataset):
@@ -54,7 +54,7 @@ class CommonDataset(Dataset):
             label = int(label)
             label = paddle.to_tensor(label, dtype='int64')
             img_path = os.path.join(self.root_dir, img_path)
-            img = read_img_bin(img_path)[:, :, ::-1]
+            img = read_img_from_bin(img_path)[:, :, ::-1]
             img = self.transform(img)
             return img, label
 

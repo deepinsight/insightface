@@ -21,8 +21,6 @@
         files: \.md$
     -   id: remove-crlf
         files: \.md$
-    -   id: forbid-tabs
-        files: \.md$
     -   id: remove-tabs
         files: \.md$
 -   repo: local
