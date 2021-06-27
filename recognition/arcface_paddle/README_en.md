@@ -9,6 +9,9 @@ This tutorial contains 3 parts: (1) face detection. (2) face recognition (3) end
 * [3. End-to-end inference using PaddlePaddle](./system/README_en.md)
 
 
+Note: Many thanks to [GuoQuanhao](https://github.com/GuoQuanhao) for the reproduction of the [Arcface basline using PaddlePaddle](https://github.com/GuoQuanhao/arcface-Paddle).
+
+
 For face detection task, on WiderFace dataset, the following table shows mAP, speed and time cost for BlazeFace.
 
 

@@ -10,6 +10,9 @@
 * [3. End-to-end inference using PaddlePaddle](./system/README_ch.md)
 
 
+Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于PaddlePaddle复现了 [Arcface的基线模型](https://github.com/GuoQuanhao/arcface-Paddle)。
+
+
 在人脸检测任务中，在WiderFace数据集上，BlazeFace的速度与精度指标信息如下。
 
 | 模型结构                  | 模型大小 | WiderFace精度   | CPU 耗时 | GPU 耗时 |
