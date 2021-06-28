@@ -1,17 +1,17 @@
 [简体中文](README_ch.md) | English
 
-# Arcface-Paddle (Distributed Version of ArcFace)
+# Arcface-Paddle
 
-Please refer to [Installation](install_en.md) to setup environment at first.
+Please refer to [Installation](../install_en.md) to setup environment at first.
 
 
 ## 1. Data preparation
 
 ### 1.1 Enter recognition dir.
 
-  ```
-  cd arcface_paddle/rec
-  ```
+```
+cd arcface_paddle/rec
+```
 
 ### 1.2 Download and unzip dataset
 
@@ -159,7 +159,5 @@ Dataset：MS1M
 | MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   | 4.71ms    |
 
 **Envrionment：**
-
-​    **CPU：**  Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
-
-​    **GPU：**  a single NVIDIA Tesla V100
+  * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
+  * GPU: a single NVIDIA Tesla V100

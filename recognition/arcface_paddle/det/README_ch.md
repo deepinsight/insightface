@@ -5,8 +5,6 @@
 * [1. 简介](#简介)
 * [2. 模型库](#模型库)
 * [3. 安装](#安装)
-  * [3.1 环境要求](#环境要求)
-  * [3.1 安装PaddleDetection](#安装PaddleDetection)
 * [4. 数据准备](#数据准备)
 * [5. 参数配置](#参数配置)
 * [6. 训练与评估](#训练与评估)
@@ -48,32 +46,7 @@
 
 ## 3. 安装
 
-<a name="环境要求"></a>
-
-### 3.1 环境要求
-
-- PaddlePaddle 2.1
-- OS 64 bit
-- Python 3(3.5.1+/3.6/3.7/3.8/3.9)，64 bit （推荐python3.7）
-- pip/pip3(9.0.1+), 64 bit
-- CUDA >= 10.1
-- cuDNN >= 7.6
-
-<a name="安装PaddleDetection"></a>
-
-### 3.2 安装PaddleDetection
-
-```bash
-# 克隆PaddleDetection仓库
-cd <path/to/clone/PaddleDetection>
-git clone https://github.com/PaddlePaddle/PaddleDetection.git
-
-cd PaddleDetection
-# 安装其他依赖
-pip install -r requirements.txt
-```
-
-更多安装教程，请参考: [Install doc](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL_cn.md)
+请参考[安装教程](../install_ch.md)安装PaddlePaddle以及PaddleDetection。
 
 <a name="数据准备"></a>
 
@@ -244,12 +217,12 @@ matlab -nodesktop -nosplash -nojvm -r "run wider_eval.m;quit;"
 
 ```bash
 python tools/export_model.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml --output_dir=./inference_model \
- -o weights=output/blazeface_fpn_ssh_1000e/best_model
+ -o weights=output/blazeface_fpn_ssh_1000e/best_model BBoxPostProcess.nms.score_threshold=0.1
 ```
 
 预测模型会导出到`inference_model/blazeface_fpn_ssh_1000e`目录下，分别为`infer_cfg.yml`, `model.pdiparams`, `model.pdiparams.info`,`model.pdmodel` 如果不指定文件夹，模型则会导出在`output_inference`
 
-* 更多关于模型导出的文档，请参考[模型导出文档](https://github.com/PaddlePaddle/PaddleDetection/deploy/EXPORT_MODEL.md)
+* 这里将nms后处理`score_threshold`修改为0.1，因为mAP基本没有影响的情况下，GPU预测速度能够大幅提升。更多关于模型导出的文档，请参考[模型导出文档](https://github.com/PaddlePaddle/PaddleDetection/deploy/EXPORT_MODEL.md)
 
  PaddleDetection提供了PaddleInference、PaddleServing、PaddleLite多种部署形式，支持服务端、移动端、嵌入式等多种平台，提供了完善的Python和C++部署方案。
 * 在这里，我们以Python为例，说明如何使用PaddleInference进行模型部署

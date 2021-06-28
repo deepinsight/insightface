@@ -107,7 +107,7 @@ def main(args):
 
     callback_verification = CallBackVerification(2000, rank, cfg.val_targets,
                                                  cfg.data_dir)
-    callback_logging = CallBackLogging(1, rank, total_step, args.batch_size,
+    callback_logging = CallBackLogging(10, rank, total_step, args.batch_size,
                                        world_size, writer)
     callback_checkpoint = CallBackModelCheckpoint(rank, args.output,
                                                   args.network)
@@ -118,22 +118,18 @@ def main(args):
         for step, (img, label) in enumerate(train_loader):
             label = label.flatten()
             global_step += 1
-            print("===1===")
             sys.stdout.flush()
             features = F.normalize(backbone(img))
             x_grad, loss_v = module_partial_fc.forward_backward(
                 label, features, opt_pfc)
-            print("===2===")
             sys.stdout.flush()
             (features.multiply(x_grad)).backward()
-            print("===3===")
             sys.stdout.flush()
             opt_backbone.step()
             opt_pfc.step()
             module_partial_fc.update()
             opt_backbone.clear_gradients()
             opt_pfc.clear_gradients()
-            print("===4===")
             sys.stdout.flush()
 
             lr_backbone_value = opt_backbone._global_learning_rate().numpy()[0]
@@ -142,7 +138,6 @@ def main(args):
             loss.update(loss_v, 1)
             callback_logging(global_step, loss, epoch, lr_backbone_value,
                              lr_pfc_value)
-            print("===5===")
             sys.stdout.flush()
             callback_verification(global_step, backbone)
         callback_checkpoint(global_step, backbone, module_partial_fc)

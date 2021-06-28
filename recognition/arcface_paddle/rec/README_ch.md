@@ -2,15 +2,15 @@
 
 # Arcface-Paddle
 
-首先，请参照 [Installation](install_en.md) 配置实验所需环境。
+首先，请参照 [Installation](../install_ch.md) 配置实验所需环境。
 
 ## 1. 数据准备
 
 ### 1.1 进入 repo 目录。
 
-  ```
-  cd path_to_Arcface-Paddle
-  ```
+```
+cd arcface_paddle/rec
+```
 
 ### 1.2 下载与解压数据集
 
@@ -154,7 +154,5 @@ python3.7 valid.py
 | MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591 | 4.71ms   |
 
 **测试环境：**
-
-​    **CPU：**  Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
-
-​    **GPU：**  a single NVIDIA Tesla V100
+  * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
+  * GPU: a single NVIDIA Tesla V100

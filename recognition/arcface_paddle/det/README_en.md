@@ -5,8 +5,6 @@
 * [1. Introduction](#Introduction)
 * [2. Model Zoo](#Model_Zoo)
 * [3. Installation](#Installation)
-  * [3.1 Requirements](#Requirements)
-  * [3.1 Install PaddleDetection](#Install_PaddleDetection)
 * [4. Data Pipline](#Data_Pipline)
 * [5. Configuration File](#Configuration_File)
 * [6. Training and Inference](#Training_and_Inference)
@@ -47,32 +45,8 @@ The goal of FaceDetection is to provide efficient and high-speed face detection 
 
 ## 3. Installation
 
-<a name="Requirements"></a>
+Please refer to [installation tutorial](../install_en.md) to install PaddlePaddle and PaddleDetection.
 
-### 3.1 Requirements
-
-- PaddlePaddle 2.1
-- OS 64 bit
-- Python 3(3.5.1+/3.6/3.7/3.8/3.9)，64 bit （recommend python3.7）
-- pip/pip3(9.0.1+), 64 bit
-- CUDA >= 10.1
-- cuDNN >= 7.6
-
-<a name="Install_PaddleDetection"></a>
-
-### 3.2 Install PaddleDetection
-
-```bash
-# Clone PaddleDetection repository
-cd <path/to/clone/PaddleDetection>
-git clone https://github.com/PaddlePaddle/PaddleDetection.git
-
-cd PaddleDetection
-# Install other dependencies
-pip install -r requirements.txt
-```
-
-For more details of installation, please refer to: [Install tutrial](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL.md).
 
 <a name="Data_Pipline"></a>
 
@@ -244,11 +218,11 @@ The `tools/export_model.py` script is provided in PaddleDetection to export the 
 
 ```bash
 python tools/export_model.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml --output_dir=./inference_model \
- -o weights=output/blazeface_fpn_ssh_1000e/best_model
+ -o weights=output/blazeface_fpn_ssh_1000e/best_model BBoxPostProcess.nms.score_threshold=0.1
 ```
 The inference model will be exported to the `inference_model/blazeface_fpn_ssh_1000e` directory, which are `infer_cfg.yml`, `model.pdiparams`, `model.pdiparams.info`, `model.pdmodel` If no folder is specified, the model will be exported In `output_inference`.
 
-* For more documentation about model export, please refer to: [export doc](https://github.com/PaddlePaddle/PaddleDetection/deploy/EXPORT_MODEL.md)
+* `score_threshold` for nms is modified as 0.1 for inference, because it takes great speed performance improvement while has little effect on mAP. For more documentation about model export, please refer to: [export doc](https://github.com/PaddlePaddle/PaddleDetection/deploy/EXPORT_MODEL.md)
 
  PaddleDetection provides multiple deployment forms of PaddleInference, PaddleServing, and PaddleLite, supports multiple platforms such as server, mobile, and embedded, and provides a complete deployment plan for Python and C++.
 * Here, we take Python as an example to illustrate how to use PaddleInference for model deployment:
