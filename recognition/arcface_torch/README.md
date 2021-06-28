@@ -71,6 +71,10 @@ All Model Can be found in here.
 [onedrive](https://1drv.ms/u/s!AswpsDO2toNKq0lWY69vN58GR6mw?e=p9Ov5d)
 
 ### MS1MV3
+
+`config:` batchsize is 128 * 8, using mixed precision training(pytorch1.6+), loss is arcface.  
+
+
 |   Datasets          |    log     | backbone    | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
 | :---:               |    :---    | :---        | :---        | :---        |:---   |:---  |:--- |  
 | MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r18_fp16/training.log)  | r18-fp16      | 92.07 | 94.66 | 97.77 | 97.73 | 99.77 |
@@ -79,15 +83,17 @@ All Model Can be found in here.
 | MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r100_fp16/training.log) | r100-fp16     | 95.31 | 96.81 | 98.48 | 99.06 | 99.85 | 
 | MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r2060_fp16/training.log)| **r2060-fp16**| 95.34 | 97.11 | 98.67 | 99.24 | 99.87 |                 
    
-### Glint360k
+### Glint360k  
+
+
+`config:` batchsize is 128 * 8, using mixed precision training(pytorch1.6+) and partial fc sampling(0.1), loss is cosface.  
+
 |   Datasets          | log   |backbone               | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
 | :---:               | :---  |:---                   | :---        | :---        |:---   |:---  |:--- |
 | Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r18_fp16_0.1/training.log) |r18-fp16-0.1  | 93.16 | 95.33 | 97.72 | 97.73 | 99.77 |
 | Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r34_fp16_0.1/training.log) |r34-fp16-0.1  | 95.16 | 96.56 | 98.33 | 98.78 | 99.82 |
 | Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r50_fp16_0.1/training.log) |r50-fp16-0.1  | 95.61 | 96.97 | 98.38 | 99.20 | 99.83 |
 | Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|r100-fp16-0.1 | 95.88 | 97.32 | 98.48 | 99.29 | 99.82 |
-  
-0.1 means sample rate is 0.1.  
 
 More details see [eval.md](docs/modelzoo.md) in docs.
 
