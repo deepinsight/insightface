@@ -31,8 +31,8 @@ The goal of FaceDetection is to provide efficient and high-speed face detection 
 ### mAP in WIDER FACE
 
 | Model | input size | images/GPU | epochs | Easy/Medium/Hard Set  | CPU time cost | GPU time cost| Model Size(MB) | Pretrained model | Inference model | Config |
-|:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:---------:|:----------:|:---------:|:--------:|
-| BlazeFace-FPN-SSH  | 640  |    8    | 1000     | 0.907 / 0.883 / 0.793 | 25.4ms  |  5.6ms | 0.646 |[download link](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) |  [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+|:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:---------:|:----------:|:---------:|:--------:|:--------:|
+| BlazeFace-FPN-SSH  | 640  |    8    | 1000     | 0.907 / 0.883 / 0.793 | 31.7ms  |  5.6ms | 0.646 |[download link](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) |  [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
 **NOTE:**  
 - Get mAP in `Easy/Medium/Hard Set` by multi-scale evaluation. For details can refer to [Evaluation](#Evaluate-on-the-WIDER-FACE).
