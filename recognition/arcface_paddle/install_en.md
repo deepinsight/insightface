@@ -1,3 +1,5 @@
+[简体中文](install_ch.md) | English
+
 # Installation
 
 ---
