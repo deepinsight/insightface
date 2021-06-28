@@ -8,7 +8,7 @@
 
 ## 1. 安装PaddlePaddle
 
-运行ArcFace-paddle需要`PaddlePaddle 2.0`或更高版本。可以参考下面的步骤安装PaddlePaddle。
+运行ArcFace-paddle需要`PaddlePaddle 2.1`或更高版本。可以参考下面的步骤安装PaddlePaddle。
 
 ### 1.1 环境要求
 
