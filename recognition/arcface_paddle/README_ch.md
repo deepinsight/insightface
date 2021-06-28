@@ -25,7 +25,7 @@ Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于Paddl
 | 模型结构                  | lfw   | cfp_fp | agedb30  | GPU 耗时 |
 | ------------------------- | ----- | ------ | ------- | -------- |
 | MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613  | 2.3ms   |
-| MobileFaceNet-insightface | 0.9950 | 0.8894  | 0.9591  | 4.7ms   |
+| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591  | 4.7ms   |
 
 
 **测试环境：**
