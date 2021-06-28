@@ -33,7 +33,7 @@
 
 | 网络结构 | 输入尺寸 | 图片个数/GPU | epoch数量 | Easy/Medium/Hard Set  | CPU预测时延 | GPU 预测时延 | 模型大小(MB) | 预训练模型地址 | inference模型地址 |  配置文件 |
 |:------------:|:--------:|:----:|:-------:|:-------:|:-------:|:---------:|:----------:|:---------:|:---------:|:--------:|
-| BlazeFace-FPN-SSH  | 640  |    8    | 1000    | 0.907 / 0.883 / 0.793 | 55.0ms | 6.2ms | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [下载链接](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) |  [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| BlazeFace-FPN-SSH  | 640  |    8    | 1000    | 0.907 / 0.883 / 0.793 | 25.4ms  |  5.6ms | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [下载链接](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) |  [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
 
 **注意:**  

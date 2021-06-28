@@ -4,41 +4,84 @@
 
 Please refer to [Installation](install_en.md) to setup environment at first.
 
-## 1 Data preparation
 
-- Enter insatallation dir.
+## 1. Data preparation
 
-  ```
-  cd path_to_Arcface-Paddle
-  ```
-
-- Download and decompress MS1M dataset.
-
-  Please organize data dir as below.
+### 1.1 Enter recognition dir.
 
   ```
-  Arcface-Paddle/MSiM_v2
-  |_ images
-  |  |_ 00000000.jpg
-  |  |_ ...
-  |  |_ 05822652.jpg
-  |_ label.txt
-  |_ agedb_30.bin
-  |_ cfp_ff.bin
-  |_ cfp_fp.bin
-  |_ lfw.bin
+  cd arcface_paddle/rec
   ```
 
-- Data format
+### 1.2 Download and unzip dataset
+
+Use the following command to download and unzip MS1M dataset.
+
+
+```shell
+cd rec
+# download dataset
+wget https://paddle-model-ecology.bj.bcebos.com/data/insight-face/MS1M_bin.tar
+# unzip dataset
+tar -xf MS1M_bin.tar
+```
+
+**Note:**
+* If you want to install `wget` on Windows, please refer to [link](https://www.cnblogs.com/jeshy/p/10518062.html). If you want to install `tar` on Windows. please refer to [link](https://www.cnblogs.com/chooperman/p/14190107.html).
+* If `wget` is not installed on macOS, you can use the following command to install.
+
+```shell
+# install homebrew
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)";
+# install wget
+brew install wget
+```
+
+After finishing unzipping the dataset, the folder structure is as follows.
+
+```
+Arcface-Paddle/MSiM_bin
+|_ images
+|  |_ 00000000.bin
+|  |_ ...
+|  |_ 05822652.bin
+|_ label.txt
+|_ agedb_30.bin
+|_ cfp_ff.bin
+|_ cfp_fp.bin
+|_ lfw.bin
+```
+
+* 标签文件格式：
 
   ```
    # delimiter: "\t"
    # the following the content of label.txt
-   images/00000000.jpg 0
+   images/00000000.bin 0
    ...
   ```
 
-If you need to use a custom dataset, please organize it according to the above format and replace the dataset directory in the config file.
+If you want to use customed dataset, you can arrange your data according to the above format. And should replace data folder in the configuration using yours.
+
+
+
+**Note:**
+* For using `Dataloader` api for reading data, we convert `train.rec` into many little `bin` files, each `bin` file denotes a single image. If your dataset just contains origin image files. You can either rewrite the dataloader file or refer to section 1.3 to convert the original image files to `bin` files.
+
+
+### 1.3 Transform between original image files and bin files
+
+If you want to convert original image files to `bin` files used directly for training process, you can use the following command to finish the conversion.
+
+```shell
+python3.7 tools/convert_image_bin.py --image_path="your/input/image/path" --bin_path="your/output/bin/path" --mode="image2bin"
+```
+
+If you want to convert `bin` files to original image files, you can use the following command to finish the conversion.
+
+```shell
+python3.7 tools/convert_image_bin.py --image_path="your/input/bin/path" --bin_path="your/output/image/path" --mode="bin2image"
+```
 
 ## 2 Model training
 

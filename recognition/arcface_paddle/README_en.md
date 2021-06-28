@@ -17,7 +17,7 @@ For face detection task, on WiderFace dataset, the following table shows mAP, sp
 
 | Model structure                  | Model size | WiderFace mAP   | CPU time cost | GPU time cost |
 | ------------------------- | ----- | ----- | -------- | -------- |
-| BlazeFace-FPN-SSH      | 0.65MB | 0.907/0.883/0.793 | 55.0ms  |  6.2ms |
+| BlazeFace-FPN-SSH      | 0.65MB | 0.907/0.883/0.793 | 25.4ms  |  5.6ms |
 | RetinaFace      | 1.68MB | -/-/0.825 | 182.0ms  | 17.4ms |
 
 

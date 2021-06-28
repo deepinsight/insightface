@@ -37,20 +37,20 @@ brew install wget
 
 解压完成之后，文件夹目录结构如下。
 
-  ```
-  Arcface-Paddle/MSiM_bin
-  |_ images
-  |  |_ 00000000.bin
-  |  |_ ...
-  |  |_ 05822652.bin
-  |_ label.txt
-  |_ agedb_30.bin
-  |_ cfp_ff.bin
-  |_ cfp_fp.bin
-  |_ lfw.bin
-  ```
+```
+Arcface-Paddle/MSiM_bin
+|_ images
+|  |_ 00000000.bin
+|  |_ ...
+|  |_ 05822652.bin
+|_ label.txt
+|_ agedb_30.bin
+|_ cfp_ff.bin
+|_ cfp_fp.bin
+|_ lfw.bin
+```
 
-- 标签文件格式：
+* 标签文件格式：
 
   ```
    # delimiter: "\t"
@@ -69,13 +69,13 @@ brew install wget
 如果希望将原始的图像文件转换为本文用于训练的bin文件，那么可以使用下面的命令进行转换。
 
 ```shell
-python3.7 tools/convert_image_bin.py --image_path="your/input/image/path" --bin_path="your/output/bin/path" --mode="image2bin"
+python3.7 tools/convert_image_bin.py --image_path="your/input/image/path" --bin_path="your/output/bin/path" --mode="image2bin"
 ```
 
 如果希望将bin文件转化为原始的图像文件，那么可以使用下面的命令进行转换。
 
 ```shell
-python3.7 tools/convert_image_bin.py --image_path="your/input/bin/path" --bin_path="your/output/image/path" --mode="bin2image"
+python3.7 tools/convert_image_bin.py --image_path="your/input/bin/path" --bin_path="your/output/image/path" --mode="bin2image"
 ```
 
 ## 2. 模型训练
