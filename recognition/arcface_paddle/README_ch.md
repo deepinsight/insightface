@@ -5,9 +5,10 @@
 本部分主要包含人脸检测+人脸识别+系统串联三个部分。整体目录结构如下。
 
 
-* [1. Face detection using BlazeFace](./det/README_ch.md)
-* [2. Face recognition using arcface](./rec/README_ch.md)
-* [3. End-to-end inference using PaddlePaddle](./system/README_ch.md)
+* [1. 基于BlazeFace的人脸检测](./det/README_ch.md)
+* [2. 基于Arcface的人脸识别](./rec/README_ch.md)
+* [3. 基于PddleInference的预测](./system/README_ch.md)
+* [4. Whl包预测部署](https://github.com/littletomatodonkey/insight-face-paddle)
 
 
 Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于PaddlePaddle复现了 [Arcface的基线模型](https://github.com/GuoQuanhao/arcface-Paddle)。

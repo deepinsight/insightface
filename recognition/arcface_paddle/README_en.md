@@ -7,6 +7,7 @@ This tutorial contains 3 parts: (1) face detection. (2) face recognition (3) end
 * [1. Face detection using BlazeFace](./det/README_en.md)
 * [2. Face recognition using arcface](./rec/README_en.md)
 * [3. End-to-end inference using PaddlePaddle](./system/README_en.md)
+* [4. Whl package inference](https://github.com/littletomatodonkey/insight-face-paddle)
 
 
 Note: Many thanks to [GuoQuanhao](https://github.com/GuoQuanhao) for the reproduction of the [Arcface basline using PaddlePaddle](https://github.com/GuoQuanhao/arcface-Paddle).
