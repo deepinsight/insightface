@@ -17,15 +17,15 @@ Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于Paddl
 
 | 模型结构                  | 模型大小 | WiderFace精度   | CPU 耗时 | GPU 耗时 |
 | ------------------------- | ----- | ----- | -------- | -------- |
-| BlazeFace-FPN-SSH      | 0.65MB | 0.907/0.883/0.793 | 55ms  |  6.2ms |
-| RetinaFace      | 1.68MB | -/-/0.825 | 182ms  | 42ms |
+| BlazeFace-FPN-SSH      | 0.65MB | 0.907/0.883/0.793 | 55.0ms  |  6.2ms |
+| RetinaFace      | 1.68MB | -/-/0.825 | 182.0ms  | 17.4ms |
 
 在人脸识别任务中，基于MS1M训练集，模型指标在lfw、cfp_fp、agedb30上的精度指标以及CPU、GPU的预测耗时如下。
 
 | 模型结构                  | lfw   | cfp_fp | agedb30  | GPU 耗时 |
 | ------------------------- | ----- | ------ | ------- | -------- |
-| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613  | 2.26ms   |
-| MobileFaceNet-insightface | 0.9950 | 0.8894  | 0.9591  | 4.71ms   |
+| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613  | 2.3ms   |
+| MobileFaceNet-insightface | 0.9950 | 0.8894  | 0.9591  | 4.7ms   |
 
 
 **测试环境：**
