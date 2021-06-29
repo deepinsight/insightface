@@ -31,12 +31,12 @@
 
 | 网络结构 | 输入尺寸 | 图片个数/GPU | epoch数量 | Easy/Medium/Hard Set  | CPU预测时延 | GPU 预测时延 | 模型大小(MB) | 预训练模型地址 | inference模型地址 |  配置文件 |
 |:------------:|:--------:|:----:|:-------:|:-------:|:-------:|:---------:|:----------:|:---------:|:---------:|:--------:|
-| BlazeFace-FPN-SSH  | 640  |    8    | 1000    | 0.907 / 0.883 / 0.793 | 31.7ms  |  5.6ms | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [下载链接](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) |  [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| BlazeFace-FPN-SSH  | 640  |    8    | 1000    | 0.9187 / 0.8979 / 0.8168 | 31.7ms  |  5.6ms | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [下载链接](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) |  [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
 
 **注意:**  
 - 我们使用多尺度评估策略得到`Easy/Medium/Hard Set`里的mAP。具体细节请参考[在WIDER-FACE数据集上评估](#评估)。
-- 测量速度时我们使用640*480的分辨，在 Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz cpu。
+- 测量速度时我们使用640*640的分辨，在 Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz cpu，CPU线程数设置为5，更多细节请参考[推理速度提升](#推理速度提升)。
 - 测试环境为
   - CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
   - GPU: a single NVIDIA Tesla V100
@@ -141,17 +141,21 @@ BlazeNeck:
 <a name="训练"></a>
 
 ### 6.1 训练
+首先，下载预训练模型文件：
+```bash
+wget https://paddledet.bj.bcebos.com/models/pretrained/blazenet_pretrain.pdparams
+```
 PaddleDetection提供了单卡/多卡训练模式，满足用户多种训练需求
 * GPU单卡训练
 ```bash
 export CUDA_VISIBLE_DEVICES=0 #windows和Mac下不需要执行该命令
-python tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml
+python tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml -o pretrain_weight=blazenet_pretrain
 ```
 
 * GPU多卡训练
 ```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3 #windows和Mac下不需要执行该命令
-python -m paddle.distributed.launch --gpus 0,1,2,3 tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml
+python -m paddle.distributed.launch --gpus 0,1,2,3 tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml -o pretrain_weight=blazenet_pretrain
 ```
 * 模型恢复训练
 
@@ -175,9 +179,9 @@ python tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml -r o
 ```shell
 python -u tools/eval.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml \
        -o weights=output/blazeface_fpn_ssh_1000e/model_final \
-       multi_scale=True
+       multi_scale_eval=True BBoxPostProcess.nms.score_threshold=0.1
 ```
-设置`multi_scale=True`进行多尺度评估，评估完成后，将在`output/pred`中生成txt格式的测试结果。
+设置`multi_scale_eval=True`进行多尺度评估，评估完成后，将在`output/pred`中生成txt格式的测试结果。
 
 - 步骤二：下载官方评估脚本和Ground Truth文件：
 ```
@@ -237,16 +241,47 @@ python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_10
 <a name="推理速度提升"></a>
 
 ### 6.4 推理速度提升
-
+如果想要复现我们提供的速度指标，请修改预测模型配置文件`./inference_model/blazeface_fpn_ssh_1000e/infer_cfg.yml`中的输入尺寸，如下所示:
+```yaml
+mode: fluid
+draw_threshold: 0.5
+metric: WiderFace
+arch: Face
+min_subgraph_size: 3
+Preprocess:
+- is_scale: false
+  mean:
+  - 123
+  - 117
+  - 104
+  std:
+  - 127.502231
+  - 127.502231
+  - 127.502231
+  type: NormalizeImage
+- interp: 1
+  keep_ratio: false
+  target_size:
+  - 640
+  - 640
+  type: Resize
+- type: Permute
+label_list:
+- face
+```
 如果希望模型在cpu环境下更快推理，可安装[paddlepaddle_gpu-0.0.0](https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl) （mkldnn的依赖）可开启mkldnn加速推理。
 
 ```bash
+# 使用GPU测速：
+python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_dir=./path/images --run_benchmark=True --use_gpu=True
+
+# 使用cpu测速：
 # 下载paddle whl包
 wget https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl
 # 安装paddlepaddle_gpu-0.0.0
 pip install paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl
 # 推理
-python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_file=demo/road554.png --enable_mkldnn=True
+python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_dir=./path/images --enable_mkldnn=True --run_benchmark=True --cpu_threads=5
 ```
 
 <a name="参考文献"></a>

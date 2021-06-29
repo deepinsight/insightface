@@ -11,7 +11,7 @@
   * [6.1 Training](#Training)
   * [6.2 Evaluate on the WIDER FACE](#Evaluation)
   * [6.3 Inference deployment](#Inference_deployment)
-  * [6.4 Increase in inference speed](#Increase_in_inference_speed)
+  * [6.4 Improvement inference speed](#Increase_in_inference_speed)
 * [7. Citations](#Citations)
 
 <a name="Introduction"></a>
@@ -32,11 +32,11 @@ The goal of FaceDetection is to provide efficient and high-speed face detection 
 
 | Model | input size | images/GPU | epochs | Easy/Medium/Hard Set  | CPU time cost | GPU time cost| Model Size(MB) | Pretrained model | Inference model | Config |
 |:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:---------:|:----------:|:---------:|:--------:|:--------:|
-| BlazeFace-FPN-SSH  | 640  |    8    | 1000     | 0.907 / 0.883 / 0.793 | 31.7ms  |  5.6ms | 0.646 |[download link](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) |  [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| BlazeFace-FPN-SSH  | 640×640  |    8    | 1000     | 0.9187 / 0.8979 / 0.8168 | 31.7ms  |  5.6ms | 0.646 |[download link](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams)  |  [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
 
 **NOTE:**  
 - Get mAP in `Easy/Medium/Hard Set` by multi-scale evaluation. For details can refer to [Evaluation](#Evaluate-on-the-WIDER-FACE).
-- Measuring the speed, we use the resolution of 640*480, in Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz, single-threaded environment.
+- Measuring the speed, we use the resolution of `640×640`, in Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz environment, cpu-threads are set as 5. For details can refer to [Improvement inference speed](#Increase_in_inference_speed).
 - The benchmark environment is
   - CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
   - GPU: a single NVIDIA Tesla V100
@@ -141,17 +141,21 @@ BlazeNeck:
 <a name="Training"></a>
 
 ### 6.1 Training
+Firstly, download the pretrained model.
+```bash
+wget https://paddledet.bj.bcebos.com/models/pretrained/blazenet_pretrain.pdparams
+```
 PaddleDetection provides a single-GPU/multi-GPU training mode to meet the various training needs of users.
 * single-GPU training
 ```bash
 export CUDA_VISIBLE_DEVICES=0 # Do not need to execute this command under windows and Mac
-python tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml
+python tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml -o pretrain_weight=blazenet_pretrain
 ```
 
 * multi-GPU training
 ```bash
 export CUDA_VISIBLE_DEVICES=0,1,2,3 # Do not need to execute this command under windows and Mac
-python -m paddle.distributed.launch --gpus 0,1,2,3 tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml
+python -m paddle.distributed.launch --gpus 0,1,2,3 tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml -o pretrain_weight=blazenet_pretrain
 ```
 * Resume training from Checkpoint
 
@@ -175,9 +179,9 @@ python tools/train.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml -r o
 ```shell
 python -u tools/eval.py -c configs/face_detection/blazeface_fpn_ssh_1000e.yml \
        -o weights=output/blazeface_fpn_ssh_1000e/model_final \
-       multi_scale=True
+       multi_scale_eval=True BBoxPostProcess.nms.score_threshold=0.1
 ```
-Set `multi_scale=True` for multi-scale evaluation，after the evaluation is completed, the test result in txt format will be generated in `output/pred`.
+Set `multi_scale_eval=True` for multi-scale evaluation，after the evaluation is completed, the test result in txt format will be generated in `output/pred`.
 
 - Download the official evaluation script to evaluate the AP metrics:
 
@@ -235,17 +239,50 @@ python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_10
 
 <a name="Increase_in_inference_speed"></a>
 
-### 6.4 Improve inference speed
+### 6.4 Improvement inference speed
 
-If you want the model to be inferred faster in the cpu environment, install [paddlepaddle_gpu-0.0.0](https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl) (dependency of mkldnn) and enable_mkldnn is set to True, when predicting acceleration.
+If you want to reproduce our speed indicators, you need to modify the input size of inference model in the `./inference_model/blazeface_fpn_ssh_1000e/infer_cfg.yml` configuration file. As follows:
+```yaml
+mode: fluid
+draw_threshold: 0.5
+metric: WiderFace
+arch: Face
+min_subgraph_size: 3
+Preprocess:
+- is_scale: false
+  mean:
+  - 123
+  - 117
+  - 104
+  std:
+  - 127.502231
+  - 127.502231
+  - 127.502231
+  type: NormalizeImage
+- interp: 1
+  keep_ratio: false
+  target_size:
+  - 640
+  - 640
+  type: Resize
+- type: Permute
+label_list:
+- face
+```
+
+If you want the model to be inferred faster in the CPU environment, install [paddlepaddle_gpu-0.0.0](https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl) (dependency of mkldnn) and enable_mkldnn is set to True, when predicting acceleration. 
 
 ```bash
+# use GPU:
+python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_dir=./path/images --run_benchmark=True --use_gpu=True
+
+# inference with mkldnn use CPU
 # downdoad whl package
 wget https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl
 #install paddlepaddle_gpu-0.0.0
 pip install paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl
-# inference with mkldnn
-python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_file=demo/road554.png --enable_mkldnn=True
+python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_dir=./path/images --enable_mkldnn=True --run_benchmark=True --cpu_threads=5
+
 ```
 
 ## 7. Citations
