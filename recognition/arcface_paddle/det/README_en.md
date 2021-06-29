@@ -11,7 +11,7 @@
   * [6.1 Training](#Training)
   * [6.2 Evaluate on the WIDER FACE](#Evaluation)
   * [6.3 Inference deployment](#Inference_deployment)
-  * [6.4 Improvement inference speed](#Increase_in_inference_speed)
+  * [6.4 Improvement of inference speed](#Increase_in_inference_speed)
 * [7. Citations](#Citations)
 
 <a name="Introduction"></a>
@@ -36,7 +36,7 @@ The goal of FaceDetection is to provide efficient and high-speed face detection 
 
 **NOTE:**  
 - Get mAP in `Easy/Medium/Hard Set` by multi-scale evaluation. For details can refer to [Evaluation](#Evaluate-on-the-WIDER-FACE).
-- Measuring the speed, we use the resolution of `640×640`, in Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz environment, cpu-threads are set as 5. For details can refer to [Improvement inference speed](#Increase_in_inference_speed).
+- Measuring the speed, we use the resolution of `640×640`, in Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz environment, cpu-threads are set as 5. For details can refer to [Improvement of inference speed](#Increase_in_inference_speed).
 - The benchmark environment is
   - CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
   - GPU: a single NVIDIA Tesla V100
@@ -239,7 +239,7 @@ python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_10
 
 <a name="Increase_in_inference_speed"></a>
 
-### 6.4 Improvement inference speed
+### 6.4 Improvement of inference speed
 
 If you want to reproduce our speed indicators, you need to modify the input size of inference model in the `./inference_model/blazeface_fpn_ssh_1000e/infer_cfg.yml` configuration file. As follows:
 ```yaml
