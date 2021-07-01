@@ -202,6 +202,6 @@ Main contributors:
 
 - [Jia Guo](https://github.com/nttstar), ``guojia[at]gmail.com``
 - [Jiankang Deng](https://github.com/jiankangdeng) ``jiankangdeng[at]gmail.com``
-- [Xiang An](https://github.com/anxiangsir) ``anxiangsir@gmail.com``
-- [Jack Yu](https://github.com/szad670401) ``455501914@qq.com``
+- [Xiang An](https://github.com/anxiangsir) ``anxiangsir[at]gmail.com``
+- [Jack Yu](https://github.com/szad670401) ``455501914[at]qq.com``
 
