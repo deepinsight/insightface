@@ -1,0 +1,7 @@
+requests
+prettytable
+tqdm
+Pillow
+scikit-learn==0.23.2
+opencv-python==4.4.0.46
+numpy
