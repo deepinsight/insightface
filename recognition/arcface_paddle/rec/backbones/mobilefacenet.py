@@ -143,7 +143,7 @@ class MobileFaceNet(nn.Layer):
         x = self.conv2(x)
         x = self.linear7(x)
         x = self.linear1(x)
-        x = x.reshape([x.shape[0], -1])
+        x = x.reshape([x.shape[0], x.shape[1] * x.shape[2] * x.shape[3]])
         return x
 
 
