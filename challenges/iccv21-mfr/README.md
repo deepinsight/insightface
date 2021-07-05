@@ -15,6 +15,8 @@ There're InsightFace track here and [Webface260M](https://www.face-benchmark.org
 
 Submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
+An alternative submission server for Non-Chinese users: [http://124.156.136.55/](http://124.156.136.55/)
+
 
 ### Discussion group:
 
