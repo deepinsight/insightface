@@ -35,4 +35,10 @@ Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于Paddl
 
 基于少量老友记人脸数据库，轻量级模型的识别结果可视化如下。
 
-* coming soon!
+<div align="center">
+<img src="./system/demo/friends/output/friends1.jpg"  width = "600" />
+</div>
+
+<div align="center">
+<img src="./system/demo/friends/output/friends2.jpg"  width = "600" />
+</div>
