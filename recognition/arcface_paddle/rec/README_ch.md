@@ -156,3 +156,19 @@ python3.7 valid.py
 **测试环境：**
   * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
   * GPU: a single NVIDIA Tesla V100
+
+
+## 5. 模型导出
+PaddlePaddle支持使用预测引擎进行预测推理，通过导出inference模型将模型固化：
+
+```bash
+python export_inference_model.py --network MobileFaceNet_128 --output ./inference_model/ --pretrained_model ./emore_arcface/MobileFaceNet_128.pdparams
+```
+
+导出模型后，在 `./inference_model/` 目录下有：
+
+```
+./inference_model/
+|_ inference.pdmodel
+|_ inference.pdiparams
+```

@@ -161,3 +161,19 @@ Dataset：MS1M
 **Envrionment：**
   * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
   * GPU: a single NVIDIA Tesla V100
+
+
+## 5. Export model
+PaddlePaddle supports inference using prediction engines. Firstly, you should export inference model.
+
+```bash
+python export_inference_model.py --network MobileFaceNet_128 --output ./inference_model/ --pretrained_model ./emore_arcface/MobileFaceNet_128.pdparams
+```
+
+After that, the inference model files are as follow:
+
+```
+./inference_model/
+|_ inference.pdmodel
+|_ inference.pdiparams
+```
