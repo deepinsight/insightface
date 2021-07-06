@@ -39,9 +39,5 @@ For face recognition task, on MSAM dataset, the following table shows precision,
 The recognition results of the light-weight model based on "Friends" can be seen as follows.
 
 <div align="center">
-<img src="./system/demo/friends/output/friends1.jpg"  width = "600" />
-</div>
-
-<div align="center">
-<img src="./system/demo/friends/output/friends2.jpg"  width = "600" />
+<img src="./system/demo/friends/output/friends2.jpg"  width = "800" />
 </div>
