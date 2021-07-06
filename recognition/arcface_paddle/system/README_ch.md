@@ -75,7 +75,8 @@ args.output = "./output"
 input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path)
+print(next(res))
 ```
 
 检测结果图位于路径 `./output` 下，预测结果的示例图如下所示：
@@ -96,7 +97,8 @@ path = "./demo/friends/query/friends1.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
-predictor.predict(img)
+res = predictor.predict(img)
+print(next(res))
 ```
 
 * Video
@@ -109,7 +111,9 @@ args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+for _ in res:
+    pass
 ```
 
 2. 仅识别
@@ -133,7 +137,8 @@ args.index = "./demo/friends/index.bin"
 input_path = "./demo/friends/query/Rachel.png"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+next(res)
 ```
 
 检测结果输出在终端中：
@@ -154,7 +159,8 @@ path = "./demo/friends/query/Rachel.png"
 img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
-predictor.predict(img)
+res = predictor.predict(img, print_info=True)
+next(res)
 ```
 
 3. 检测+识别系统串联
@@ -180,7 +186,8 @@ args.output = "./output"
 input_path = "./demo/friends/query/friends2.jpg"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+next(res)
 ```
 
 检测结果图位于路径 `./output` 下，预测结果的示例图如下所示：
@@ -204,7 +211,8 @@ path = "./demo/friends/query/friends1.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
-predictor.predict(img)
+res = predictor.predict(img, print_info=True)
+next(res)
 ```
 
 * Video
@@ -219,5 +227,7 @@ args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+for _ in res:
+    pass
 ```

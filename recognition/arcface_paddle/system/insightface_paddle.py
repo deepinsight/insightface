@@ -543,7 +543,7 @@ class Recognizer(BasePredictor):
     def postprocess(self):
         pass
 
-    def match(self, np_feature):
+    def retrieval(self, np_feature):
         labels = []
         for feature in np_feature:
             similarity = cosine_similarity(self.index_feature,
@@ -641,7 +641,6 @@ class InsightFace(object):
     def draw(self, img, box_list, labels):
         self.color_map.update(labels)
         im = Image.fromarray(img)
-        draw_thickness = min(im.size) // 320
         draw = ImageDraw.Draw(im)
 
         for i, dt in enumerate(box_list):
@@ -697,7 +696,20 @@ class InsightFace(object):
                 f"The input data error. Only support path of image or video(.mp4) and dirctory that include images."
             )
 
-    def predict(self, input_data):
+    def predict(self, input_data, print_info=False):
+        """Predict input_data.
+
+        Args:
+            input_data (str | NumPy.array): The path of image, or the derectory including images, or the image data in NumPy.array format.
+            print_info (bool, optional): Wheather to print the prediction results. Defaults to False.
+
+        Yields:
+            dict: {
+                "box_list": The prediction results of detection.
+                "features": The output of recognition.
+                "labels": The results of retrieval.
+                }
+        """
         self.init_reader_writer(input_data)
         for img, file_name in self.input_reader:
             if img is None:
@@ -705,13 +717,19 @@ class InsightFace(object):
                 continue
             box_list, np_feature = self.predict_np_img(img)
             if np_feature is not None:
-                labels = self.rec_predictor.match(np_feature)
+                labels = self.rec_predictor.retrieval(np_feature)
             else:
                 labels = ["face"] * len(box_list)
             if box_list is not None:
                 result = self.draw(img, box_list, labels=labels)
                 self.output_writer.write(result, file_name)
-            logging.info(f"File: {file_name}, predict label(s): {labels}")
+            if print_info:
+                logging.info(f"File: {file_name}, predict label(s): {labels}")
+            yield {
+                "box_list": box_list,
+                "features": np_feature,
+                "labels": labels
+            }
         logging.info(f"Predict complete!")
 
     def build_index(self):
@@ -750,7 +768,9 @@ def main(args=None):
     if args.build_index:
         predictor.build_index()
     else:
-        predictor.predict(args.input)
+        res = predictor.predict(args.input, print_info=True)
+        for _ in res:
+            pass
 
 
 if __name__ == "__main__":

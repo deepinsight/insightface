@@ -75,7 +75,8 @@ args.output = "./output"
 input_path = "./demo/friends/query/friends1.jpg"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path)
+print(next(res))
 ```
 
 The result is under the directory `./output`. The result of demo predicted by us is as follows:
@@ -96,7 +97,8 @@ path = "./demo/friends/query/friends1.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
-predictor.predict(img)
+res = predictor.predict(img)
+print(next(res))
 ```
 
 The prediction result saved as `"./output/tmp.png"`.
@@ -111,7 +113,9 @@ args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+for _ in res:
+    pass
 ```
 
 2. Recognition only
@@ -135,7 +139,8 @@ args.index = "./demo/friends/index.bin"
 input_path = "./demo/friends/query/Rachel.png"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+next(res)
 ```
 
 The result is output in the terminal:
@@ -156,7 +161,8 @@ path = "./demo/friends/query/Rachel.png"
 img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
-predictor.predict(img)
+res = predictor.predict(img, print_info=True)
+next(res)
 ```
 
 3. Detection and recognition
@@ -182,7 +188,8 @@ args.output = "./output"
 input_path = "./demo/friends/query/friends2.jpg"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+next(res)
 ```
 
 The result is under the directory `./output`. The result of demo predicted by us is as follows:
@@ -205,7 +212,8 @@ path = "./demo/friends/query/friends1.jpg"
 img = cv2.imread(path)[:, :, ::-1]
 
 predictor = face.InsightFace(args)
-predictor.predict(img)
+res = predictor.predict(img, print_info=True)
+next(res)
 ```
 
 The prediction result saved as `"./output/tmp.png"`.
@@ -222,5 +230,7 @@ args.output = "./output"
 input_path = "./demo/friends/query/friends.mp4"
 
 predictor = face.InsightFace(args)
-predictor.predict(input_path)
+res = predictor.predict(input_path, print_info=True)
+for _ in res:
+    pass
 ```
