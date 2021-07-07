@@ -154,7 +154,7 @@ def download_with_progressbar(url, save_path):
 
 
 def check_model_file(model):
-    """Check the model files exist and download and untar when no exist. 
+    """Check the model files exist and download and untar when no exist.
     """
     model_map = {
         "ArcFace": "arcface_iresnet50_v1.0_infer",
@@ -602,7 +602,8 @@ class InsightFace(object):
             args.det, args.rec = False, True
 
         self.font_path = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)), "simfang.ttf")
+            os.path.abspath(os.path.dirname(__file__)),
+            "SourceHanSansCN-Medium.otf")
         self.args = args
 
         predictor_config = {
@@ -650,19 +651,22 @@ class InsightFace(object):
 
             xmin, ymin, xmax, ymax = bbox
 
-            font_size = max(int((xmax - xmin) // 10), 10)
+            font_size = max(int((xmax - xmin) // 6), 10)
             font = ImageFont.truetype(self.font_path, font_size)
 
             text = "{} {:.4f}".format(label, score)
-            th = font_size
+            th = sum(font.getmetrics())
             tw = font.getsize(text)[0]
             start_y = max(0, ymin - th)
 
             draw.rectangle(
-                [(xmin + 1, start_y), (xmin + tw + 1, start_y + th)],
-                fill=color)
+                [(xmin, start_y), (xmin + tw + 1, start_y + th)], fill=color)
             draw.text(
-                (xmin + 1, start_y), text, fill=(255, 255, 255), font=font)
+                (xmin + 1, start_y),
+                text,
+                fill=(255, 255, 255),
+                font=font,
+                anchor="la")
             draw.rectangle(
                 [(xmin, ymin), (xmax, ymax)], width=2, outline=color)
         return np.array(im)
