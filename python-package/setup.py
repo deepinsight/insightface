@@ -24,12 +24,14 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-try:
-    import pypandoc
-    long_description = pypandoc.convert('README.md', 'rst')
-except (IOError, ImportError):
-    long_description = open('README.md').read()
+#try:
+#    import pypandoc
+#    long_description = pypandoc.convert('README.md', 'rst')
+#except (IOError, ImportError):
+#    long_description = open('README.md').read()
 
+import pypandoc
+long_description = pypandoc.convert('README.md', 'rst')
 VERSION = find_version('insightface', '__init__.py')
 
 requirements = [
@@ -67,7 +69,7 @@ setup(
     url='https://github.com/deepinsight/insightface',
     description='InsightFace Toolkit',
     long_description=long_description,
-    license='Apache-2.0',
+    license='MIT',
     # Package info
     packages=find_packages(exclude=('docs', 'tests', 'scripts')),
     data_files=data_files,

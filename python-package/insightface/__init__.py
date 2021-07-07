@@ -11,7 +11,7 @@ except ImportError:
         "Unable to import dependency onnxruntime. "
     )
 
-__version__ = '0.3.5'
+__version__ = '0.3.6'
 
 from . import model_zoo
 from . import utils
