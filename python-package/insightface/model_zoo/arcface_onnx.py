@@ -68,7 +68,7 @@ class ArcFaceONNX:
         return face.embedding
 
     def compute_sim(self, feat1, feat2):
-        from np.linalg import norm
+        from numpy.linalg import norm
         feat1 = feat1.ravel()
         feat2 = feat2.ravel()
         sim = np.dot(feat1, feat2) / (norm(feat1) * norm(feat2))

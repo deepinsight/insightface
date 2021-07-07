@@ -12,6 +12,7 @@ import glob
 import os
 import os.path as osp
 from numpy.linalg import norm
+import onnxruntime
 from ..model_zoo import model_zoo
 from ..utils import face_align
 from ..utils import ensure_available
@@ -22,11 +23,12 @@ __all__ = ['FaceAnalysis']
 
 class FaceAnalysis:
     def __init__(self, name=DEFAULT_MP_NAME, root='~/.insightface/models', allowed_modules=None):
+        onnxruntime.set_default_logger_severity(3)
         self.models = {}
         #root = os.path.expanduser(root)
         #self.model_dir = osp.join(root, name)
         #self.model_dir = get_model_dir(name, root)
-        self.model_dir = ensure_available('models', name)
+        self.model_dir = ensure_available('models', name, root=root)
         onnx_files = glob.glob(osp.join(self.model_dir, '*.onnx'))
         onnx_files = sorted(onnx_files)
         for onnx_file in onnx_files:
