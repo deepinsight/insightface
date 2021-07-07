@@ -61,8 +61,14 @@ class CallBackLogging(object):
         self.init = False
         self.tic = 0
 
-    def __call__(self, global_step, loss: AverageMeter, epoch: int, fp16: bool, grad_scaler: torch.cuda.amp.GradScaler):
-        if self.rank is 0 and global_step > 0 and global_step % self.frequent == 0:
+    def __call__(self,
+                 global_step: int,
+                 loss: AverageMeter,
+                 epoch: int,
+                 fp16: bool,
+                 learning_rate: float,
+                 grad_scaler: torch.cuda.amp.GradScaler):
+        if self.rank == 0 and global_step > 0 and global_step % self.frequent == 0:
             if self.init:
                 try:
                     speed: float = self.frequent * self.batch_size / (time.time() - self.tic)
@@ -75,16 +81,19 @@ class CallBackLogging(object):
                 time_for_end = time_total - time_now
                 if self.writer is not None:
                     self.writer.add_scalar('time_for_end', time_for_end, global_step)
+                    self.writer.add_scalar('learning_rate', learning_rate, global_step)
                     self.writer.add_scalar('loss', loss.avg, global_step)
                 if fp16:
-                    msg = "Speed %.2f samples/sec   Loss %.4f   Epoch: %d   Global Step: %d   " \
+                    msg = "Speed %.2f samples/sec   Loss %.4f   LearningRate %.4f   Epoch: %d   Global Step: %d   " \
                           "Fp16 Grad Scale: %2.f   Required: %1.f hours" % (
-                              speed_total, loss.avg, epoch, global_step, grad_scaler.get_scale(), time_for_end
+                              speed_total, loss.avg, learning_rate, epoch, global_step,
+                              grad_scaler.get_scale(), time_for_end
                           )
                 else:
-                    msg = "Speed %.2f samples/sec   Loss %.4f   Epoch: %d   Global Step: %d   Required: %1.f hours" % (
-                        speed_total, loss.avg, epoch, global_step, time_for_end
-                    )
+                    msg = "Speed %.2f samples/sec   Loss %.4f   LearningRate %.4f   Epoch: %d   Global Step: %d   " \
+                          "Required: %1.f hours" % (
+                              speed_total, loss.avg, learning_rate, epoch, global_step, time_for_end
+                          )
                 logging.info(msg)
                 loss.reset()
                 self.tic = time.time()
@@ -98,8 +107,8 @@ class CallBackModelCheckpoint(object):
         self.rank: int = rank
         self.output: str = output
 
-    def __call__(self, global_step, backbone, partial_fc,):
-        if global_step > 100 and self.rank is 0:
+    def __call__(self, global_step, backbone, partial_fc, ):
+        if global_step > 100 and self.rank == 0:
             path_module = os.path.join(self.output, "backbone.pth")
             torch.save(backbone.module.state_dict(), path_module)
             logging.info("Pytorch Model Saved in '{}'".format(path_module))

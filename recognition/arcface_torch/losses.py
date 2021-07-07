@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+
 def get_loss(name):
     if name == "cosface":
         return CosFace()
@@ -8,6 +9,7 @@ def get_loss(name):
         return ArcFace()
     else:
         raise ValueError()
+
 
 class CosFace(nn.Module):
     def __init__(self, s=64.0, m=0.40):
