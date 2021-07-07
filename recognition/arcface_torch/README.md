@@ -11,21 +11,22 @@ More details see [eval.md](docs/install.md) in docs.
 ## Training
 ### 1. Single node, 8 GPUs:
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py configs/ms1mv3_r50
 ```
 ### 2. Multiple nodes, each node 8 GPUs:  
 Node 0:  
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=1234 train.py
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=1234 train.py train.py configs/ms1mv3_r50
 ```
 Node 1:  
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=1234 train.py
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=1234 train.py train.py configs/ms1mv3_r50
 ```
 
 ### 3.Training resnet2060 with 8 GPUs:
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py --network r2060
+# 
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py configs/ms1mv3_r2060.py
 ```
 
 ## Speed Benchmark
@@ -100,6 +101,10 @@ More details see [eval.md](docs/modelzoo.md) in docs.
 
 ## Test
 We test on PyTorch versions 1.6.0, 1.7.1, and 1.8.0. Please create an issue if you are having trouble.
+
+
+## FAQ
+pass
 
 ## Citation
 ```
