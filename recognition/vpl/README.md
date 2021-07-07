@@ -1,7 +1,7 @@
 
 # Variational Prototype Learning for Deep Face Recognition
 
-This is the torch implementation of our paper  [Variational Prototype Learning for Deep Face Recognition](https://openaccess.thecvf.com/content/CVPR2021/papers/Deng_Variational_Prototype_Learning_for_Deep_Face_Recognition_CVPR_2021_paper.pdf) which accepted in CVPR-2021.
+This is the Pytorch implementation of our paper  [Variational Prototype Learning for Deep Face Recognition](https://openaccess.thecvf.com/content/CVPR2021/papers/Deng_Variational_Prototype_Learning_for_Deep_Face_Recognition_CVPR_2021_paper.pdf) which is accepted by CVPR-2021.
 
 ## How to run
 
@@ -13,7 +13,7 @@ bash run.sh configs/example_ms1m.py
 
 ## Results
 
-Results on WebFace600K(subset of WebFace260M), loss is marginal softmax.
+Results on WebFace600K(subset of WebFace260M), loss is margin-based softmax.
 
 | Backbone   | Dataset    | VPL? | Mask   | Children | African | Caucasian | South Asian | East Asian | MR-All    | 
 |------------|------------|------------|--------|----------|---------|-----------|-------------|------------|--------|
