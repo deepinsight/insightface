@@ -22,12 +22,9 @@ from ..utils import DEFAULT_MP_NAME
 __all__ = ['FaceAnalysis']
 
 class FaceAnalysis:
-    def __init__(self, name=DEFAULT_MP_NAME, root='~/.insightface/models', allowed_modules=None):
+    def __init__(self, name=DEFAULT_MP_NAME, root='~/.insightface', allowed_modules=None):
         onnxruntime.set_default_logger_severity(3)
         self.models = {}
-        #root = os.path.expanduser(root)
-        #self.model_dir = osp.join(root, name)
-        #self.model_dir = get_model_dir(name, root)
         self.model_dir = ensure_available('models', name, root=root)
         onnx_files = glob.glob(osp.join(self.model_dir, '*.onnx'))
         onnx_files = sorted(onnx_files)

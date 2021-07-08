@@ -6,9 +6,9 @@ import os.path as osp
 import errno
 
 
-def get_model_dir(name, root='~/.insightface/models'):
+def get_model_dir(name, root='~/.insightface'):
     root = os.path.expanduser(root)
-    model_dir = osp.join(root, name)
+    model_dir = osp.join(root, 'models', name)
     return model_dir
 
 def makedirs(path):

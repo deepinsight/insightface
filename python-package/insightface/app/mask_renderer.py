@@ -11,7 +11,7 @@ from ..utils import DEFAULT_MP_NAME
 import cv2
 
 class MaskRenderer:
-    def __init__(self, name=DEFAULT_MP_NAME, root='~/.insightface/models', insfa=None):
+    def __init__(self, name=DEFAULT_MP_NAME, root='~/.insightface', insfa=None):
         #if insfa is None, enter render_only mode
         self.mp_name = name
         self.root = root
