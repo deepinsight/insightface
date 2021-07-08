@@ -26,15 +26,15 @@ def parse_args():
 
     # general params
     parser = argparse.ArgumentParser()
-    parser.add_argument("--use_gpu", type=str2bool, default=True)
+    parser.add_argument("--use_gpu", type=str2bool, default=False)
+    parser.add_argument("--gpu_mem", type=int, default=1000)
 
     # params for predict
     parser.add_argument("--model_file", type=str)
     parser.add_argument("--params_file", type=str)
     parser.add_argument("-b", "--batch_size", type=int, default=1)
     parser.add_argument("--ir_optim", type=str2bool, default=True)
-    parser.add_argument("--gpu_mem", type=int, default=8000)
-    parser.add_argument("--top_k", type=int, default=1)
+    parser.add_argument("--use_mkldnn", type=str2bool, default=True)
     parser.add_argument("--cpu_num_threads", type=int, default=10)
     parser.add_argument("--model", type=str)
 
@@ -48,7 +48,11 @@ def create_paddle_predictor(args):
         config.enable_use_gpu(args.gpu_mem, 0)
     else:
         config.disable_gpu()
-    config.set_cpu_math_library_num_threads(args.cpu_num_threads)
+
+    if args.use_mkldnn:
+        config.enable_mkldnn()
+        config.set_cpu_math_library_num_threads(args.cpu_num_threads)
+        config.set_mkldnn_cache_capacity(100)
 
     config.disable_glog_info()
     config.switch_ir_optim(args.ir_optim)  # default true

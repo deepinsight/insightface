@@ -148,10 +148,10 @@ python3.7 valid.py
 
 在MS1M训练集上进行模型训练，最终得到的模型指标在lfw、cfp_fp、agedb30三个数据集上的精度指标以及CPU、GPU的预测耗时如下。
 
-| 模型结构                  | lfw   | cfp_fp | agedb30 | GPU 耗时 |
+| 模型结构                  | lfw   | cfp_fp | agedb30  | CPU 耗时 | GPU 耗时 |
 | ------------------------- | ----- | ------ | ------- | -------- |
-| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613 | 2.26ms   |
-| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591 | 4.71ms   |
+| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613  4.3ms | 2.3ms   |
+| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   |  7.3ms | 4.7ms   |
 
 **测试环境：**
   * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz

@@ -25,10 +25,10 @@ For face detection task, on WiderFace dataset, the following table shows mAP, sp
 For face recognition task, on MSAM dataset, the following table shows precision, speed and time cost for MobileFaceNet.
 
 
-| Model structure           | lfw   | cfp_fp | agedb30  | GPU time cost |
+| Model structure           | lfw   | cfp_fp | agedb30  | CPU time cost | GPU time cost |
 | ------------------------- | ----- | ------ | ------- | -------- |
-| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613  | 2.3ms   |
-| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591  | 4.7ms   |
+| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613  4.3ms | 2.3ms   |
+| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   |  7.3ms | 4.7ms   |
 
 
 **Benchmark environment:**

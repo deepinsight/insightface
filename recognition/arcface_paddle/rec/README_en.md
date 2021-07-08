@@ -153,10 +153,10 @@ Among them:
 
 Dataset：MS1M
 
-| Backbone                  | lfw   | cfp_fp | agedb30 | GPU time cost |
-| ------------------------- | ----- | ------ |  ------- | ------------- |
-| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613   | 2.26ms     |
-| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   | 4.71ms    |
+| Model structure           | lfw   | cfp_fp | agedb30  | CPU time cost | GPU time cost |
+| ------------------------- | ----- | ------ | ------- | -------- |
+| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613  4.3ms | 2.3ms   |
+| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   |  7.3ms | 4.7ms   |
 
 **Envrionment：**
   * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
