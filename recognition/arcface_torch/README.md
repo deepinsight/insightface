@@ -65,46 +65,37 @@ python inference.py --weight ms1mv3_arcface_r50/backbone.pth --network r50
 
 ## Model Zoo  
 
-The models are available for non-commercial research purposes only.
-
+The models are available for non-commercial research purposes only.  
 All Model Can be found in here.  
 [Baidu Yun Pan](https://pan.baidu.com/s/1CL-l4zWqsI1oDuEEYVhj-g):   e8pw  
 [onedrive](https://1drv.ms/u/s!AswpsDO2toNKq0lWY69vN58GR6mw?e=p9Ov5d)
 
-### MS1MV3
+### Performance on IJBC
 
-`config:` batchsize is 128 * 8, using mixed precision training(pytorch1.6+), loss is arcface.  
+|   Datasets | backbone      | IJBC(1e-05) | IJBC(1e-04) | agedb30 | cfp_fp | lfw  |  log    |
+| :---:      |    :---       | :---          | :---  | :---  |:---   |:---    |:---     |  
+| MS1MV3     | r18      | 92.07 | 94.66 | 97.77 | 97.73 | 99.77 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r18_fp16/training.log)|         
+| MS1MV3     | r34      | 94.10 | 95.90 | 98.10 | 98.67 | 99.80 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r34_fp16/training.log)|        
+| MS1MV3     | r50      | 94.79 | 96.46 | 98.35 | 98.96 | 99.83 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r50_fp16/training.log)|         
+| MS1MV3     | r100     | 95.31 | 96.81 | 98.48 | 99.06 | 99.85 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r100_fp16/training.log)|        
+| MS1MV3     | **r2060**| 95.34 | 97.11 | 98.67 | 99.24 | 99.87 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r2060_fp16/training.log)|      
+| Glint360k  |r18-0.1   | 93.16 | 95.33 | 97.72 | 97.73 | 99.77 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r18_fp16_0.1/training.log)| 
+| Glint360k  |r34-0.1   | 95.16 | 96.56 | 98.33 | 98.78 | 99.82 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r34_fp16_0.1/training.log)| 
+| Glint360k  |r50-0.1   | 95.61 | 96.97 | 98.38 | 99.20 | 99.83 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r50_fp16_0.1/training.log)| 
+| Glint360k  |r100-0.1  | 95.88 | 97.32 | 98.48 | 99.29 | 99.82 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|
 
 
-|   Datasets          |    log     | backbone    | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
-| :---:               |    :---    | :---        | :---        | :---        |:---   |:---  |:--- |  
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r18_fp16/training.log)  | r18-fp16      | 92.07 | 94.66 | 97.77 | 97.73 | 99.77 |
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r34_fp16/training.log)  | r34-fp16      | 94.10 | 95.90 | 98.10 | 98.67 | 99.80 |
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r50_fp16/training.log)  | r50-fp16      | 94.79 | 96.46 | 98.35 | 98.96 | 99.83 | 
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r100_fp16/training.log) | r100-fp16     | 95.31 | 96.81 | 98.48 | 99.06 | 99.85 | 
-| MS1MV3-Arcface      |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r2060_fp16/training.log)| **r2060-fp16**| 95.34 | 97.11 | 98.67 | 99.24 | 99.87 |                 
-   
-### Glint360k  
+### Performance on [ICCV2021-MFR](http://iccv21-mfr.com/)
+|   Datasets | backbone  | Training throughout | Size / MB | agedb30 | cfp_fp | lfw | **ICCV2021-MFR-MASK** | **ICCV2021-MFR-ALL** | log    |
+| :---:      |    :---   | :---                | :---    | :---    |:---    |:--- |:---               |:---              |:---    |    
+| MS1MV3 | mobilefacenet | 12185 | 4.557 | 96.62 | 96.82 | 99.63 | 36.12 | 59.78 |[log]()|         
 
-
-`config:` batchsize is 128 * 8, using mixed precision training(pytorch1.6+) and partial fc sampling(0.1), loss is cosface.  
-
-|   Datasets          | log   |backbone               | IJBC(1e-05) | IJBC(1e-04) |agedb30|cfp_fp|lfw  | 
-| :---:               | :---  |:---                   | :---        | :---        |:---   |:---  |:--- |
-| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r18_fp16_0.1/training.log) |r18-fp16-0.1  | 93.16 | 95.33 | 97.72 | 97.73 | 99.77 |
-| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r34_fp16_0.1/training.log) |r34-fp16-0.1  | 95.16 | 96.56 | 98.33 | 98.78 | 99.82 |
-| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r50_fp16_0.1/training.log) |r50-fp16-0.1  | 95.61 | 96.97 | 98.38 | 99.20 | 99.83 |
-| Glint360k-Cosface   |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|r100-fp16-0.1 | 95.88 | 97.32 | 98.48 | 99.29 | 99.82 |
 
 More details see [eval.md](docs/modelzoo.md) in docs.
 
 
 ## Test
 We test on PyTorch versions 1.6.0, 1.7.1, and 1.8.0. Please create an issue if you are having trouble.
-
-
-## FAQ
-pass
 
 ## Citation
 ```
