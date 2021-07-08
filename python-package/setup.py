@@ -46,7 +46,7 @@ requirements = [
     'scikit-learn',
     'scikit-image',
     'easydict',
-    #'cython',
+    'cython',
     'albumentations',
     'prettytable',
 ]
@@ -58,7 +58,13 @@ extensions = [
 data_images = list(glob.glob('insightface/data/images/*.jpg'))
 data_images += list(glob.glob('insightface/data/images/*.png'))
 
+data_mesh = list(glob.glob('insightface/thirdparty/face3d/mesh/cython/*.h'))
+data_mesh += list(glob.glob('insightface/thirdparty/face3d/mesh/cython/*.c'))
+data_mesh += list(glob.glob('insightface/thirdparty/face3d/mesh/cython/*.py*'))
+
 data_files = [ ('insightface/data/images', data_images) ]
+data_files += [ ('insightface/thirdparty/face3d/mesh/cython', data_mesh) ]
+
 ext_modules=cythonize(extensions)
 setup(
     # Metadata
@@ -67,7 +73,7 @@ setup(
     author='InsightFace Contributors',
     author_email='contact@insightface.ai',
     url='https://github.com/deepinsight/insightface',
-    description='InsightFace Toolkit',
+    description='InsightFace Python Library',
     long_description=long_description,
     license='MIT',
     # Package info
