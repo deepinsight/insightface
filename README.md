@@ -23,9 +23,9 @@ For all main contributors, please check [contributing](#contributing).
 
 The code of InsightFace is released under the MIT License. There is no limitation for both academic and commercial usage.
 
-The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only
+The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only.
 
-Both manual-downloading models from our repo and auto-downloading models with our [python-library](python-package) follow the above license policy.
+Both manual-downloading models from our github repo and auto-downloading models with our [python-library](python-package) follow the above license policy(which is for non-commercial research purposes only).
 
 
 
