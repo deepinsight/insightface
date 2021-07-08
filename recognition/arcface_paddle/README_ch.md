@@ -24,7 +24,7 @@ Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于Paddl
 在人脸识别任务中，基于MS1M训练集，模型指标在lfw、cfp_fp、agedb30上的精度指标以及CPU、GPU的预测耗时如下。
 
 | 模型结构                  | lfw   | cfp_fp | agedb30  | CPU 耗时 | GPU 耗时 |
-| ------------------------- | ----- | ------ | ------- | -------- |
+| ------------------------- | ----- | ------ | ------- | -------| -------- |
 | MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613  4.3ms | 2.3ms   |
 | MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   |  7.3ms | 4.7ms   |
 
