@@ -80,18 +80,16 @@ class SCRFD:
             assert osp.exists(self.model_file)
             self.session = onnxruntime.InferenceSession(self.model_file, None)
         self.center_cache = {}
-        self.nms_threshold = 0.4
+        self.nms_thresh = 0.4
         self._init_vars()
 
     def _init_vars(self):
         input_cfg = self.session.get_inputs()[0]
         input_shape = input_cfg.shape
-        #print(input_shape)
         if isinstance(input_shape[2], str):
             self.input_size = None
         else:
             self.input_size = tuple(input_shape[2:4][::-1])
-        #print('image_size:', self.image_size)
         input_name = input_cfg.name
         outputs = self.session.get_outputs()
         output_names = []
@@ -99,10 +97,7 @@ class SCRFD:
             output_names.append(o.name)
         self.input_name = input_name
         self.output_names = output_names
-        #print(self.output_names)
-        #assert len(outputs)==10 or len(outputs)==15
         self.use_kps = False
-        self._anchor_ratio = 1.0
         self._num_anchors = 1
         if len(outputs)==6:
             self.fmc = 3
@@ -126,42 +121,17 @@ class SCRFD:
     def prepare(self, ctx_id, **kwargs):
         if ctx_id<0:
             self.session.set_providers(['CPUExecutionProvider'])
-        nms_threshold = kwargs.get('nms_threshold', None)
-        if nms_threshold is not None:
-            self.nms_threshold = nms_threshold
+        nms_thresh = kwargs.get('nms_thresh', None)
+        if nms_thresh is not None:
+            self.nms_thresh = nms_thresh
         input_size = kwargs.get('input_size', None)
         if input_size is not None:
             if self.input_size is not None:
                 print('warning: det_size is already set in scrfd model, ignore')
             else:
                 self.input_size = input_size
-            #for keyword in ['_selfgen', '_shape', '.']:
-            #    pos = self.model_file.rfind(keyword)
-            #    if pos>=0:
-            #        break
-            #model_prefix = self.model_file[0:pos]
-            #new_model_file = model_prefix+"_selfgen_shape%dx%d.onnx"%(input_size[1], input_size[0])
-            #if not osp.exists(new_model_file):
-            #    model = onnx.load(self.model_file)
-            #    from onnxsim import simplify
-            #    input = model.graph.input[0]
-            #    #model.graph.input[0].type.tensor_type.elem_type = 0
-            #    #print(input.type.tensor_type.elem_type)
-            #    #print(input.type.tensor_type.shape.dim[0].dim_param.__class__)
-            #    #print(input.type.tensor_type.shape.dim[0])
-            #    #input.type.tensor_type.shape.dim[2].dim_param = input_size[1]
-            #    #input.type.tensor_type.shape.dim[3].dim_param = input_size[0]
-            #    input.type.tensor_type.shape.dim[2].dim_value = input_size[1]
-            #    input.type.tensor_type.shape.dim[3].dim_value = input_size[0]
-            #    model, check = simplify(model)
-            #    assert check, "Simplified ONNX model could not be validated"
-            #    onnx.save(model, new_model_file)
-            #    print('saved new onnx scrfd model:', new_model_file)
-            #self.model_file = new_model_file
-            #self.session = onnxruntime.InferenceSession(self.model_file, None)
-            #self._init_vars()
 
-    def forward(self, img, threshold):
+    def forward(self, img, thresh):
         scores_list = []
         bboxes_list = []
         kpss_list = []
@@ -208,7 +178,7 @@ class SCRFD:
                 if len(self.center_cache)<100:
                     self.center_cache[key] = anchor_centers
 
-            pos_inds = np.where(scores>=threshold)[0]
+            pos_inds = np.where(scores>=thresh)[0]
             bboxes = distance2bbox(anchor_centers, bbox_preds)
             pos_scores = scores[pos_inds]
             pos_bboxes = bboxes[pos_inds]
@@ -222,7 +192,7 @@ class SCRFD:
                 kpss_list.append(pos_kpss)
         return scores_list, bboxes_list, kpss_list
 
-    def detect(self, img, threshold=0.5, input_size = None, max_num=0, metric='default'):
+    def detect(self, img, thresh=0.5, input_size = None, max_num=0, metric='default'):
         assert input_size is not None or self.input_size is not None
         input_size = self.input_size if input_size is None else input_size
             
@@ -239,7 +209,7 @@ class SCRFD:
         det_img = np.zeros( (input_size[1], input_size[0], 3), dtype=np.uint8 )
         det_img[:new_height, :new_width, :] = resized_img
 
-        scores_list, bboxes_list, kpss_list = self.forward(det_img, threshold)
+        scores_list, bboxes_list, kpss_list = self.forward(det_img, thresh)
 
         scores = np.vstack(scores_list)
         scores_ravel = scores.ravel()
@@ -278,7 +248,7 @@ class SCRFD:
         return det, kpss
 
     def nms(self, dets):
-        thresh = self.nms_threshold
+        thresh = self.nms_thresh
         x1 = dets[:, 0]
         y1 = dets[:, 1]
         x2 = dets[:, 2]
@@ -323,16 +293,17 @@ def scrfd_2p5gkps(**kwargs):
 
 if __name__ == '__main__':
     import glob
+    #detector = SCRFD(model_file='./det.onnx')
     detector = SCRFD(model_file='./det.onnx')
     detector.prepare(-1)
-    img_paths = ['tests/data/t1.jpg']
+    img_paths = ['tests/data/t3.jpg']
     for img_path in img_paths:
         img = cv2.imread(img_path)
 
         for _ in range(1):
             ta = datetime.datetime.now()
-            #bboxes, kpss = detector.detect(img, 0.5, input_size = (640, 640))
-            bboxes, kpss = detector.detect(img, 0.5)
+            bboxes, kpss = detector.detect(img, 0.5, input_size = (640, 640))
+            #bboxes, kpss = detector.detect(img, 0.5)
             tb = datetime.datetime.now()
             print('all cost:', (tb-ta).total_seconds()*1000)
         print(img_path, bboxes.shape)

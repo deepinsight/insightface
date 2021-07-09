@@ -855,17 +855,30 @@ class RandomSquareCrop(object):
                 'Only single img_fields is allowed'
         img = results['img']
         assert 'bbox_fields' in results
-        boxes = [results[key] for key in results['bbox_fields']]
-        boxes = np.concatenate(boxes, 0)
+        assert 'gt_bboxes' in results
+        boxes = results['gt_bboxes']
+        #boxes = [results[key] for key in results['bbox_fields']]
+        #boxes = np.concatenate(boxes, 0)
         h, w, c = img.shape
+        scale_retry = 0
+        if self.crop_ratio_range is not None:
+            max_scale = self.crop_ratio_max
+        else:
+            max_scale = np.amax(self.crop_choice)
+        #max_scale = max(max_scale, float(max(w,h))/min(w,h))
 
         while True:
+            scale_retry += 1
 
-            if self.crop_ratio_range is not None:
-                scale = np.random.uniform(self.crop_ratio_min,
-                                          self.crop_ratio_max)
-            elif self.crop_choice is not None:
-                scale = np.random.choice(self.crop_choice)
+            if scale_retry==1 or max_scale>1.0:
+                if self.crop_ratio_range is not None:
+                    scale = np.random.uniform(self.crop_ratio_min,
+                                              self.crop_ratio_max)
+                elif self.crop_choice is not None:
+                    scale = np.random.choice(self.crop_choice)
+            else:
+                #scale = min(scale*1.2, max_scale)
+                scale = scale*1.2
 
             # print(scale, img.shape[:2], boxes)
             # import cv2

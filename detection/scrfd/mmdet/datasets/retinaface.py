@@ -23,43 +23,53 @@ except AssertionError:
                          'install mmpycocotools to install open-mmlab forked '
                          'pycocotools.')
 
-
 @DATASETS.register_module()
 class RetinaFaceDataset(CustomDataset):
 
     CLASSES = ('FG', )
     def __init__(self, min_size=None, **kwargs):
         self.NK = 5
-        super(RetinaFaceDataset, self).__init__(**kwargs)
         self.cat2label = {cat: i for i, cat in enumerate(self.CLASSES)}
         self.min_size = min_size
         self.gt_path = kwargs.get('gt_path')
+        super(RetinaFaceDataset, self).__init__(**kwargs)
         #print(self.cat2label)
 
     def _parse_ann_line(self, line):
         values = [float(x) for x in line.strip().split()]
         bbox = np.array(values[0:4], dtype=np.float32 )
         kps = np.zeros( (self.NK,3), dtype=np.float32 )
+        ignore = False
+        if self.min_size is not None:
+            assert not self.test_mode
+            w = bbox[2] - bbox[0]
+            h = bbox[3] - bbox[1]
+            if w < self.min_size or h < self.min_size:
+                ignore = True
         if len(values)>4:
-            kps = np.array( values[4:19], dtype=np.float32 ).reshape((self.NK,3))
-            for li in range(kps.shape[0]):
-                if kps[li][0]==-1. and kps[li][1]==-1.: #missing landmark
-                    assert kps[li][2]==-1
-                    kps[li][2] = 0.0 #weight = 0, ignore
-                else:
-                    assert kps[li][2]>=0
-                    kps[li][2] = 1.0 #weight
-                    #if li==0:
-                    #  landmark_num+=1
-                    #if kps[li][2]==0.0:#visible
-                    #  kps[li][2] = 1.0
-                    #else:
-                    #  kps[li][2] = 0.0
+            if len(values)>5:
+                #print(values)
+                kps = np.array( values[4:19], dtype=np.float32 ).reshape((self.NK,3))
+                for li in range(kps.shape[0]):
+                    if (kps[li,:]==-1).all():
+                        #assert kps[li][2]==-1
+                        kps[li][2] = 0.0 #weight = 0, ignore
+                    else:
+                        assert kps[li][2]>=0
+                        kps[li][2] = 1.0 #weight
+                        #if li==0:
+                        #  landmark_num+=1
+                        #if kps[li][2]==0.0:#visible
+                        #  kps[li][2] = 1.0
+                        #else:
+                        #  kps[li][2] = 0.0
+            else: #len(values)==5
+                if not ignore:
+                    ignore = (values[4]==1)
         else:
             assert self.test_mode
 
-        return dict(bbox=bbox, kps=kps, cat='FG')
-
+        return dict(bbox=bbox, kps=kps, ignore=ignore, cat='FG')
 
 
     def load_annotations(self, ann_file):
@@ -105,7 +115,6 @@ class RetinaFaceDataset(CustomDataset):
         return data_infos
 
 
-
     def get_ann_info(self, idx):
         """Get COCO annotation by index.
 
@@ -126,13 +135,7 @@ class RetinaFaceDataset(CustomDataset):
             label = self.cat2label[obj['cat']]
             bbox = obj['bbox']
             keypoints = obj['kps']
-            ignore = False
-            if self.min_size:
-                assert not self.test_mode
-                w = bbox[2] - bbox[0]
-                h = bbox[3] - bbox[1]
-                if w < self.min_size or h < self.min_size:
-                    ignore = True
+            ignore = obj['ignore']
             if ignore:
                 bboxes_ignore.append(bbox)
                 labels_ignore.append(label)
