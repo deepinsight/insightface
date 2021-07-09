@@ -27,3 +27,17 @@ def download(sub_dir, name, force=False, root='~/.insightface'):
 def ensure_available(sub_dir, name, root='~/.insightface'):
     return download(sub_dir, name, force=False, root=root)
 
+def download_onnx(sub_dir, model_file, force=False, root='~/.insightface'):
+    _root = os.path.expanduser(root)
+    model_root = osp.join(_root, sub_dir)
+    new_model_file = osp.join(model_root, model_file)
+    if osp.exists(new_model_file) and not force:
+        return new_model_file
+    if not osp.exists(model_root):
+        os.makedirs(model_root)
+    print('download_path:', new_model_file)
+    model_url = "%s/%s/%s"%(BASE_REPO_URL, sub_dir, model_file)
+    download_file(model_url,
+             path=new_model_file,
+             overwrite=True)
+    return new_model_file
