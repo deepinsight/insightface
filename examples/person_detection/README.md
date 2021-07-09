@@ -27,6 +27,8 @@ Please see [scrfd_person.py](scrfd_person.py) for detail on how to visualize the
 
 The green bounding box shows the full-body while the blue mask indicates the visible region.
 
+(We make tests on the input size of 640)
+
 <img src="https://github.com/nttstar/insightface-resources/blob/master/images/283554,c2d0000d40862ba.jpg" width="640" />
 
 <img src="https://github.com/nttstar/insightface-resources/blob/master/images/283647,18e170005675c161.jpg" width="640" />
