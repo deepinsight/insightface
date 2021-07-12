@@ -86,7 +86,7 @@ class GDC(Module):
 
 
 class MobileFaceNet(Module):
-    def __init__(self, fp16=False, scale=1, num_features=512):
+    def __init__(self, fp16=False, num_features=512):
         super(MobileFaceNet, self).__init__()
         self.fp16 = fp16
         self.layers = nn.Sequential(
