@@ -13,6 +13,7 @@ def inference(weight, name, img):
         img = np.random.randint(0, 255, size=(112, 112, 3), dtype=np.uint8)
     else:
         img = cv2.imread(img)
+        img = cv2.resize(img, (112, 112))
 
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = np.transpose(img, (2, 0, 1))
