@@ -12,7 +12,7 @@
   * [6.2 Evaluate on the WIDER FACE](#Evaluation)
   * [6.3 Inference deployment](#Inference_deployment)
   * [6.4 Improvement of inference speed](#Increase_in_inference_speed)
-  * [6.4Face detection demo](#Face_detection_demo)
+  * [6.4 Face detection demo](#Face_detection_demo)
 * [7. Citations](#Citations)
 
 <a name="Introduction"></a>

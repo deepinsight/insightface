@@ -64,7 +64,7 @@ Arcface-Paddle/MSiM_bin
 |_ lfw.bin
 ```
 
-* 标签文件格式：
+* Label file format is as follows.
 
   ```
    # delimiter: "\t"

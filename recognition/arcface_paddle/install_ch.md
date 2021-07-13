@@ -112,4 +112,4 @@ cd PaddleDetection
 pip3 install -r requirements.txt
 ```
 
-更多安装教程，请参考: [Install doc](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL_cn.md)
+更多安装教程，请参考: [Install tutorial](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL_cn.md)。
