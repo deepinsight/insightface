@@ -19,6 +19,30 @@ class PartialFC(Module):
     @torch.no_grad()
     def __init__(self, rank, local_rank, world_size, batch_size, resume,
                  margin_softmax, num_classes, sample_rate=1.0, embedding_size=512, prefix="./"):
+        """
+        rank: int
+            Unique process(GPU) ID from 0 to world_size - 1.
+        local_rank: int
+            Unique process(GPU) ID within the server from 0 to 7.
+        world_size: int
+            Number of GPU.
+        batch_size: int
+            Batch size on current rank(GPU).
+        resume: bool
+            Select whether to restore the weight of softmax.
+        margin_softmax: callable
+            A function of margin softmax, eg: cosface, arcface.
+        num_classes: int
+            The number of class center storage in current rank(CPU/GPU), usually is total_classes // world_size,
+            required.
+        sample_rate: float
+            The partial fc sampling rate, when the number of classes increases to more than 2 millions, Sampling
+            can greatly speed up training, and reduce a lot of GPU memory, default is 1.0.
+        embedding_size: int
+            The feature dimension, default is 512.
+        prefix: str
+            Path for save checkpoint, default is './'.
+        """
         super(PartialFC, self).__init__()
         #
         self.num_classes: int = num_classes
@@ -67,11 +91,20 @@ class PartialFC(Module):
             self.sub_weight = Parameter(torch.empty((0, 0)).cuda(local_rank))
 
     def save_params(self):
+        """ Save softmax weight for each rank on prefix
+        """
         torch.save(self.weight.data, self.weight_name)
         torch.save(self.weight_mom, self.weight_mom_name)
 
     @torch.no_grad()
     def sample(self, total_label):
+        """
+        Sample all positive class centers in each rank, and random select neg class centers to filling a fixed
+        `num_sample`.
+
+        total_label: tensor
+            Label after all gather, which cross all GPUs.
+        """
         index_positive = (self.class_start <= total_label) & (total_label < self.class_start + self.num_local)
         total_label[~index_positive] = -1
         total_label[index_positive] -= self.class_start
@@ -90,16 +123,28 @@ class PartialFC(Module):
             self.sub_weight_mom = self.weight_mom[index]
 
     def forward(self, total_features, norm_weight):
+        """ Partial fc forward, `logits = X * sample(W)`
+        """
         torch.cuda.current_stream().wait_stream(self.stream)
         logits = linear(total_features, norm_weight)
         return logits
 
     @torch.no_grad()
     def update(self):
+        """ Set updated weight and weight_mom to memory bank.
+        """
         self.weight_mom[self.index] = self.sub_weight_mom
         self.weight[self.index] = self.sub_weight
 
     def prepare(self, label, optimizer):
+        """
+        get sampled class centers for cal softmax.
+
+        label: tensor
+            Label tensor on each rank.
+        optimizer: opt
+            Optimizer for partial fc, which need to get weight mom.
+        """
         with torch.cuda.stream(self.stream):
             total_label = torch.zeros(
                 size=[self.batch_size * self.world_size], device=self.device, dtype=torch.long)
@@ -112,6 +157,23 @@ class PartialFC(Module):
             return total_label, norm_weight
 
     def forward_backward(self, label, features, optimizer):
+        """
+        Partial fc forward and backward with model parallel
+
+        label: tensor
+            Label tensor on each rank(GPU)
+        features: tensor
+            Features tensor on each rank(GPU)
+        optimizer: optimizer
+            Optimizer for partial fc
+
+        Returns:
+        --------
+        x_grad: tensor
+            The gradient of features.
+        loss_v: tensor
+            Loss value for cross entropy.
+        """
         total_label, norm_weight = self.prepare(label, optimizer)
         total_features = torch.zeros(
             size=[self.batch_size * self.world_size, self.embedding_size], device=self.device)
