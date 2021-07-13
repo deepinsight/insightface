@@ -1,0 +1,14 @@
+paddlepaddle-gpu==2.0.2
+visualdl
+opencv-python
+pillow
+numpy
+easydict
+scipy
+sklearn
+requests
+prettytable
+tqdm
+Pillow
+scikit-learn==0.23.2
+opencv-python==4.4.0.46
