@@ -2,18 +2,31 @@
 
 # Arcface-Paddle
 
+## 1. Introduction
+
+`Arcface-Paddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `Arcface-Paddle` provides three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
+
+- This tutorial is mainly about face recognition based on `PaddleDetection`.
+- For face detection task, please refer to: [Face detection tuturial](../../detection/blazeface_paddle/README_en.md).
+- For Whl package inference using PaddleInference, please refer to [whl package inference](https://github.com/littletomatodonkey/insight-face-paddle).
+
+
+Note: Many thanks to [GuoQuanhao](https://github.com/GuoQuanhao) for the reproduction of the [Arcface basline using PaddlePaddle](https://github.com/GuoQuanhao/arcface-Paddle).
+
+## 2. Environment preparation
+
 Please refer to [Installation](../install_en.md) to setup environment at first.
 
 
-## 1. Data preparation
+## 3. Data preparation
 
-### 1.1 Enter recognition dir.
+### 3.1 Enter recognition dir.
 
 ```
 cd arcface_paddle/rec
 ```
 
-### 1.2 Download and unzip dataset
+### 3.2 Download and unzip dataset
 
 Use the following command to download and unzip MS1M dataset.
 
@@ -69,7 +82,7 @@ If you want to use customed dataset, you can arrange your data according to the 
 * For using `Dataloader` api for reading data, we convert `train.rec` into many little `bin` files, each `bin` file denotes a single image. If your dataset just contains origin image files. You can either rewrite the dataloader file or refer to section 1.3 to convert the original image files to `bin` files.
 
 
-### 1.3 Transform between original image files and bin files
+### 3.3 Transform between original image files and bin files
 
 If you want to convert original image files to `bin` files used directly for training process, you can use the following command to finish the conversion.
 
@@ -83,7 +96,7 @@ If you want to convert `bin` files to original image files, you can use the foll
 python3.7 tools/convert_image_bin.py --image_path="your/input/bin/path" --bin_path="your/output/image/path" --mode="bin2image"
 ```
 
-## 2 Model training
+## 4. Model training
 
 After preparing the configuration file, The training process can be started in the following way.
 
@@ -132,7 +145,7 @@ Among them:
 During training, you can view loss changes in real time through `VisualDL`,  For more information, please refer to [VisualDL](https://github.com/PaddlePaddle/VisualDL/).
 
 
-## 3 Model evaluation
+## 5. Model evaluation
 
 The model evaluation process can be started as follows.
 
@@ -147,23 +160,10 @@ Among them:
 + `network`: Model name, such as `MobileFaceNet_128`;
 + `checkpoint`: Directory to save model weights, default by  `emore_arcface`;
 
-**Note:** The above command will evaluate the model `./emore_arcface/MobileFaceNet_128.pdparams` .You can also modify the model to be evaluated by modifying the network name and checkpoint at the same time .
-
-## 4 Model performance
-
-Dataset：MS1M
-
-| Model structure           | lfw   | cfp_fp | agedb30  | CPU time cost | GPU time cost |
-| ------------------------- | ----- | ------ | ------- | -------| -------- |
-| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613 | 4.3ms | 2.3ms   |
-| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   |  7.3ms | 4.7ms   |
-
-**Envrionment：**
-  * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
-  * GPU: a single NVIDIA Tesla V100
+**Note:** The above command will evaluate the model `./emore_arcface/MobileFaceNet_128.pdparams` .You can also modify the model to be evaluated by modifying the network name and checkpoint at the same time.
 
 
-## 5. Export model
+## 6. Export model
 PaddlePaddle supports inference using prediction engines. Firstly, you should export inference model.
 
 ```bash
@@ -177,3 +177,57 @@ After that, the inference model files are as follow:
 |_ inference.pdmodel
 |_ inference.pdiparams
 ```
+
+## 7. Model performance
+
+For Paddle models, we train the models on `MS1M` dataset. Metrics on lfw, cfp_fp and agedb30 of the final models are shown as follows. The CPU/GPU time cost of the final models is as follows.
+
+| Model structure           | lfw   | cfp_fp | agedb30  | CPU time cost | GPU time cost | Inference model |
+| ------------------------- | ----- | ------ | ------- | -------| -------- |---- |
+| MobileFaceNet-Paddle      | 0.9945 | 0.9343  | 0.9613 | 4.3ms | 2.3ms   | [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/mobileface_v1.0_infer.tar) |
+| MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   |  7.3ms | 4.7ms   |
+| ArcFace-Paddle      | 0.9973 | 0.9743  | 0.9788 | - | -   | [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/arcface_iresnet50_v1.0_infer.tar) |
+
+* Note: Backbone of the model `ArcFace-Paddle` is `iResNet50`, which is not suggested to run on CPU or arm device, so the time cost is not listed here.
+
+**Envrionment：**
+  * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
+  * GPU: a single NVIDIA Tesla V100
+
+## 8. Model inference
+
+Combined with face detection model, we can complete the face recognition process.
+
+Firstly, use the following commands to download the index gallery, demo image and font file for visualization.
+
+
+```bash
+# Index library for the recognition process
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/index.bin
+# Demo image
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends2.jpg
+# Font file for visualization
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/SourceHanSansCN-Medium.otf
+```
+
+The demo image is shown as follows.
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends2.jpg"  width = "800" />
+</div>
+
+
+Use the following command to run the whole face recognition demo.
+
+```shell
+# detection + recogniotion process
+python3.7 test_recognition.py --det --rec --index=index.bin --input=friends2.jpg --output="./output"
+```
+
+The final result is save in folder `output/`, which is shown as follows.
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/output/friends2.jpg"  width = "800" />
+</div>
+
+For more details about parameter explanations, index gallery construction and whl package inference, please refer to [Whl package inference tutorial](https://github.com/littletomatodonkey/insight-face-paddle).

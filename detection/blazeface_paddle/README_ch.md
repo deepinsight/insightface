@@ -305,23 +305,20 @@ wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/ma
 示例图像如下所示。
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/littletomatodonkey/
-insight-face-paddle/main/demo/friends/query/friends1.jpg"  width = "800" />
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends1.jpg"  width = "800" />
 </div>
 
 
 检测的示例命令如下。
 
 ```shell
-# 同时使用检测+识别
 python3.7 test_blazeface.py --input=friends1.jpg  --output="./output"
 ```
 
 最终可视化结果保存在`output`目录下，可视化结果如下所示。
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/littletomatodonkey/
-insight-face-paddle/main/demo/friends/output/friends1.jpg"  width = "800" />
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/output/friends1.jpg"  width = "800" />
 </div>
 
 

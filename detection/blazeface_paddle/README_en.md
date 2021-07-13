@@ -12,6 +12,7 @@
   * [6.2 Evaluate on the WIDER FACE](#Evaluation)
   * [6.3 Inference deployment](#Inference_deployment)
   * [6.4 Improvement of inference speed](#Increase_in_inference_speed)
+  * [6.4Face detection demo](#Face_detection_demo)
 * [7. Citations](#Citations)
 
 <a name="Introduction"></a>
@@ -21,7 +22,7 @@
 `Arcface-Paddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `Arcface-Paddle` provides three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
 
 - This tutorial is mainly about face detection based on `PaddleDetection`.
-- For face recognition task, please refer to: [Face recognition tuturial](../../recognition/arcface_paddle/README_ch.md).
+- For face recognition task, please refer to: [Face recognition tuturial](../../recognition/arcface_paddle/README_en.md).
 - For Whl package inference using PaddleInference, please refer to [whl package inference](https://github.com/littletomatodonkey/insight-face-paddle).
 
 <a name="Model_Zoo"></a>
@@ -282,8 +283,46 @@ wget https://paddle-wheel.bj.bcebos.com/develop-cpu-mkl/paddlepaddle-0.0.0-cp37-
 #install paddlepaddle_gpu-0.0.0
 pip install paddlepaddle-0.0.0-cp37-cp37m-linux_x86_64.whl
 python deploy/python/infer.py --model_dir=./inference_model/blazeface_fpn_ssh_1000e --image_dir=./path/images --enable_mkldnn=True --run_benchmark=True --cpu_threads=5
-
 ```
+
+<a name="Face_detection_demo"></a>
+
+### 6.5 Face detection demo
+
+This part talks about how to detect faces using BlazeFace model.
+
+Firstly, use the following commands to download the demo image and font file for visualization.
+
+
+```bash
+# Demo image
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends1.jpg
+# Font file for visualization
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/SourceHanSansCN-Medium.otf
+```
+
+The demo image is shown as follows.
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends1.jpg"  width = "800" />
+</div>
+
+
+Use the following command to run the face detection process.
+
+```shell
+python3.7 test_blazeface.py --input=friends1.jpg  --output="./output"
+```
+
+The final result is save in folder `output/`, which is shown as follows.
+
+<div align="center">
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/output/friends1.jpg"  width = "800" />
+</div>
+
+
+For more details about parameter explanations, face recognition, index gallery construction and whl package inference, please refer to [Whl package inference tutorial](https://github.com/littletomatodonkey/insight-face-paddle).
+
 
 ## 7. Citations
 

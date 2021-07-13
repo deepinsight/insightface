@@ -181,7 +181,7 @@ python export_inference_model.py --network MobileFaceNet_128 --output ./inferenc
 | MobileFaceNet-mxnet | 0.9950 | 0.8894  | 0.9591   |  7.3ms | 4.7ms   | - |
 | ArcFace-Paddle      | 0.9973 | 0.9743  | 0.9788 | - | -   | [下载地址](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/arcface_iresnet50_v1.0_infer.tar) |
 
-* 注：这里`ArcFace-Paddle`的backbone为iResNet50，大小相对较大，在CPU设备或者移动端设备上不推荐使用，因此没有给出具体的预测时间。
+* 注：这里`ArcFace-Paddle`的backbone为iResNet50，模型相对较大，在CPU设备或者移动端设备上不推荐使用，因此没有给出具体的预测时间。
 
 **测试环境：**
   * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
@@ -207,8 +207,7 @@ wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/ma
 示例图像如下所示。
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/littletomatodonkey/
-insight-face-paddle/main/demo/friends/query/friends2.jpg"  width = "800" />
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends2.jpg"  width = "800" />
 </div>
 
 
@@ -222,8 +221,7 @@ python3.7 test_recognition.py --det --rec --index=index.bin --input=friends2.jpg
 最终可视化结果保存在`output`目录下，可视化结果如下所示。
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/littletomatodonkey/
-insight-face-paddle/main/demo/friends/output/friends2.jpg"  width = "800" />
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/output/friends2.jpg"  width = "800" />
 </div>
 
 
