@@ -35,11 +35,13 @@
 | 网络结构 | 输入尺寸 | 图片个数/GPU | epoch数量 | Easy/Medium/Hard Set  | CPU预测时延 | GPU 预测时延 | 模型大小(MB) | 预训练模型地址 | inference模型地址 |  配置文件 |
 |:------------:|:--------:|:----:|:-------:|:-------:|:-------:|:---------:|:----------:|:---------:|:---------:|:--------:|
 | BlazeFace-FPN-SSH  | 640  |    8    | 1000    | 0.9187 / 0.8979 / 0.8168 | 31.7ms  |  5.6ms | 0.646 |[下载链接](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams) | [下载链接](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) |  [配置文件](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| RetinaFace  | 480x640  |    -    | -     | - / - / 0.8250 | 182.0ms  |  17.4ms | 1.680 | -  |  - | - |
 
 
 **注意:**  
 - 我们使用多尺度评估策略得到`Easy/Medium/Hard Set`里的mAP。具体细节请参考[在WIDER-FACE数据集上评估](#评估)。
 - 测量速度时我们使用640*640的分辨，在 Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz cpu，CPU线程数设置为5，更多细节请参考[推理速度提升](#推理速度提升)。
+- `RetinaFace`的速度测试代码参考自：[../retinaface/README.md](../retinaface/README.md).
 - 测试环境为
   - CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
   - GPU: a single NVIDIA Tesla V100

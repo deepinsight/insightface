@@ -34,10 +34,13 @@
 | Model | input size | images/GPU | epochs | Easy/Medium/Hard Set  | CPU time cost | GPU time cost| Model Size(MB) | Pretrained model | Inference model | Config |
 |:------------:|:--------:|:----:|:-------:|:-------:|:---------:|:---------:|:----------:|:---------:|:--------:|:--------:|
 | BlazeFace-FPN-SSH  | 640×640  |    8    | 1000     | 0.9187 / 0.8979 / 0.8168 | 31.7ms  |  5.6ms | 0.646 |[download link](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams)  |  [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) | [config](https://github.com/PaddlePaddle/PaddleDetection/tree/release/2.1/configs/face_detection/blazeface_fpn_ssh_1000e.yml) |
+| RetinaFace  | 480x640  |    -    | -     | - / - / 0.8250 | 182.0ms  |  17.4ms | 1.680 | -  |  - | - |
+
 
 **NOTE:**  
 - Get mAP in `Easy/Medium/Hard Set` by multi-scale evaluation. For details can refer to [Evaluation](#Evaluate-on-the-WIDER-FACE).
-- Measuring the speed, we use the resolution of `640×640`, in Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz environment, cpu-threads are set as 5. For details can refer to [Improvement of inference speed](#Increase_in_inference_speed).
+- Measuring the speed, we use the resolution of `640×640`, in Intel(R) Xeon(R) Gold 6148 CPU @ 2.40GHz environment, cpu-threads are set as 5. For more details, you can refer to [Improvement of inference speed](#Increase_in_inference_speed).
+- Benchmark code for `RetinaFace` is from: [../retinaface/README.md](../retinaface/README.md).
 - The benchmark environment is
   - CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
   - GPU: a single NVIDIA Tesla V100
