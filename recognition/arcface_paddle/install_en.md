@@ -85,11 +85,9 @@ Note:
 
 ## 2. Prepare for the environment of recognition
 
-Enter folder `rec`, run the following command to install `requiremnts`.
-
+Run the following command to install `requiremnts`.
 
 ```shell
-cd rec
 pip3 install -r requirement.txt
 ```
 
@@ -109,12 +107,3 @@ pip3 install -r requirements.txt
 ```
 
 For more installation tutorials, please refer to [Install doc](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL.md)
-
-## 4. Prepare for the environment of InsightFacePaddle (detection & recognition)
-
-`InsightFacePaddle` is a inference system including detection and recognition based PaddlePaddle prediction engine. Please refer to [InsightFacePaddle](./system/README_en.md) for more infomation. The dependency packages of that list in `./system/requirements.txt`. The command is as follows to install.
-
-```bash
-cd ./system
-pip3 install --upgrade -r requirements.txt -i https://mirror.baidu.com/pypi/simple
-```

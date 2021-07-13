@@ -92,10 +92,9 @@ python3 -c "import paddle; print(paddle.__version__)"
 
 ## 2. 准备识别模块的环境
 
-进入`rec`文件夹，安装`requiremnts`，命令如下。
+安装`requiremnts`，命令如下。
 
 ```shell
-cd rec
 pip3 install -r requirement.txt
 ```
 
@@ -114,11 +113,3 @@ pip3 install -r requirements.txt
 ```
 
 更多安装教程，请参考: [Install doc](https://github.com/PaddlePaddle/PaddleDetection/blob/release/2.1/docs/tutorials/INSTALL_cn.md)
-
-## 4. 准备检测+识别推理系统(InsightFacePaddle)环境
-`InsightFacePaddle` 基于 `PaddlePaddle` 预测引擎，提供检测（detection）和识别（recognition）的端到端预测功能，具体请查看[InsightFacePaddle](./system/README_ch.md)。其依赖在 `./system/requirements.txt` 中，可以参考以下命令安装依赖包。
-
-```bash
-cd ./system
-pip3 install --upgrade -r requirements.txt -i https://mirror.baidu.com/pypi/simple
-```

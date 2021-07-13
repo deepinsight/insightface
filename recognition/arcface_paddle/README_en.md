@@ -15,7 +15,7 @@ Note: Many thanks to [GuoQuanhao](https://github.com/GuoQuanhao) for the reprodu
 
 ## 2. Environment preparation
 
-Please refer to [Installation](../install_en.md) to setup environment at first.
+Please refer to [Installation](./install_en.md) to setup environment at first.
 
 
 ## 3. Data preparation
@@ -32,7 +32,6 @@ Use the following command to download and unzip MS1M dataset.
 
 
 ```shell
-cd rec
 # download dataset
 wget https://paddle-model-ecology.bj.bcebos.com/data/insight-face/MS1M_bin.tar
 # unzip dataset

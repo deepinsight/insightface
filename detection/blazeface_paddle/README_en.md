@@ -46,7 +46,7 @@
 
 ## 3. Installation
 
-Please refer to [installation tutorial](../install_en.md) to install PaddlePaddle and PaddleDetection.
+Please refer to [installation tutorial](../../recognition/arcface_paddle/install_en.md) to install PaddlePaddle and PaddleDetection.
 
 
 <a name="Data_Pipline"></a>
