@@ -34,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument('input', type=str, help='input backbone.pth file or path')
     parser.add_argument('--output', type=str, default=None, help='output onnx path')
     parser.add_argument('--network', type=str, default=None, help='backbone network')
-    parser.add_argument('--simplify', type=bool, default=True, help='onnx simplify')
+    parser.add_argument('--simplify', type=bool, default=False, help='onnx simplify')
     args = parser.parse_args()
     input_file = args.input
     if os.path.isdir(input_file):
