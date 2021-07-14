@@ -1,4 +1,4 @@
-# Distributed Arcface training in Pytorch
+# Distributed Arcface Training in Pytorch
 
 This is a deep learning library that makes face recognition efficient, and effective, which can train tens of millions
 identity on a single server.
@@ -65,13 +65,13 @@ There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 | :---:    | :---      | :---                | :---       |:---                   |:---                  |    
 | MS1MV3    | mobilefacenet | 12185 | 4.5  | **36.12** | **59.78** |        
 | MS1MV3    | r18  | -              | 91   | **47.85** | **68.33** |
-| Glint360k | r18  | -              | 91   | **53.32** | **72.07** |
+| Glint360k | r18  | 8536           | 91   | **53.32** | **72.07** |
 | MS1MV3    | r34  | -              | 130  | **58.72** | **77.36** |
-| Glint360k | r34  | -              | 130  | **65.10** | **83.02** |
+| Glint360k | r34  | 6344           | 130  | **65.10** | **83.02** |
 | MS1MV3    | r50  | 5500           | 166  | **63.85** | **80.53** |
-| Glint360k | r50  | -              | 166  | **70.23** | **87.08** |
+| Glint360k | r50  | 5136           | 166  | **70.23** | **87.08** |
 | MS1MV3    | r100 | -              | 248  | **69.09** | **84.31** |
-| Glint360k | r100 | -              | 248  | **75.57** | **90.66** |
+| Glint360k | r100 | 3332           | 248  | **75.57** | **90.66** |
 
 ### Performance on IJB-C and Verification Datasets
 
@@ -88,61 +88,16 @@ There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 | Glint360k  |r100-0.1  | 95.88 | 97.32 | 98.48 | 99.29 | 99.82 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|
 
 [comment]: <> (More details see [model.md]&#40;docs/modelzoo.md&#41; in docs.)
-## Test Training Speed
 
-- Test Commands
 
-You need to use the following two commands to test the Partial FC training performance. 
-The number of identites is **3 millions** (synthetic data), turn mixed precision  training on, backbone is resnet50, 
-batch size is 1024.
-```shell
-# Model Parallel
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py configs/3millions
-# Partial FC 0.1
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py configs/3millions_pfc
-```
-
-- GPU Memory
-
-```
-# (Model Parallel) gpustat -i
-[0] Tesla V100-SXM2-32GB | 65'C,  99 % | 30338 / 32510 MB
-[1] Tesla V100-SXM2-32GB | 61'C, 100 % | 28876 / 32510 MB
-[2] Tesla V100-SXM2-32GB | 60'C,  98 % | 28872 / 32510 MB
-[3] Tesla V100-SXM2-32GB | 70'C,  95 % | 28872 / 32510 MB
-
-# (Partial FC 0.1) gpustat -i
-[0] Tesla V100-SXM2-32GB | 62'C,  95 % | 10488 / 32510 MB                                                                                                                                             │·······················
-[1] Tesla V100-SXM2-32GB | 61'C,  95 % | 10344 / 32510 MB                                                                                                                                             │·······················
-[2] Tesla V100-SXM2-32GB | 61'C,  95 % | 10342 / 32510 MB                                                                                                                                             │·······················
-[3] Tesla V100-SXM2-32GB | 67'C,  95 % | 10342 / 32510 MB                                                                                                                                             │·······················
-```
-
-- Training Speed
-
-```python
-# (Model Parallel) trainging.log
-Training: 2271.33 samples/sec   Loss 1.1624   LearningRate 0.2000   Epoch: 0   Global Step: 100
-Training: 2269.94 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 150
-Training: 2272.67 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 200
-Training: 2266.55 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 250
-# (Partial FC 0.1) trainging.log
-Training: 5277.27 samples/sec   Loss 1.0962   LearningRate 0.2000   Epoch: 0   Global Step: 100 
-Training: 5292.93 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 150 
-Training: 5284.48 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 200 
-Training: 5298.78 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 250
-```
-
-In this test case, Partial FC 0.1 only use1 1/3 of the GPU memory of the model parallel, 
-and the training speed is 2.5 times faster than the parallel model.
-
-## Speed Benchmark
+## [Speed Benchmark](docs/speed_benchmark.md)
 
 ![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/arcface_speed.png)
 
 **Arcface Torch** can train large-scale face recognition training set efficiently and quickly. When the number of
 classes in training sets is greater than 300K and the training is sufficient, partial fc sampling strategy will get same
-accuracy with several times faster training performance and smaller GPU memory.
+accuracy with several times faster training performance and smaller GPU memory. More details see 
+[speed_benchmark.md](docs/speed_benchmark.md) in docs.
 
 1. Training speed of different parallel methods (samples/second), Tesla V100 32GB * 8. (Larger is better)
 
