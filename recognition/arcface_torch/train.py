@@ -69,22 +69,34 @@ def main(args):
         lr=cfg.lr / 512 * cfg.batch_size * world_size,
         momentum=0.9, weight_decay=cfg.weight_decay)
 
-    scheduler_backbone = torch.optim.lr_scheduler.LambdaLR(
-        optimizer=opt_backbone, lr_lambda=cfg.lr_func)
-    scheduler_pfc = torch.optim.lr_scheduler.LambdaLR(
-        optimizer=opt_pfc, lr_lambda=cfg.lr_func)
+    num_image = len(train_set)
+    total_batch_size = cfg.batch_size * world_size
+    cfg.warmup_step = num_image // total_batch_size * cfg.warmup_epoch
+    cfg.total_step = num_image // total_batch_size * cfg.num_epoch
 
-    start_epoch = 0
-    total_step = int(len(train_set) / cfg.batch_size / world_size * cfg.num_epoch)
-    if rank == 0:
-        logging.info("Total Step is: %d" % total_step)
+    def lr_step_func(current_step):
+        cfg.decay_step = [x * num_image // total_batch_size for x in cfg.decay_epoch]
+        if current_step < cfg.warmup_step:
+            return current_step / cfg.warmup_step
+        else:
+            return 0.1 ** len([m for m in cfg.decay_step if m <= current_step])
+
+    scheduler_backbone = torch.optim.lr_scheduler.LambdaLR(
+        optimizer=opt_backbone, lr_lambda=lr_step_func)
+    scheduler_pfc = torch.optim.lr_scheduler.LambdaLR(
+        optimizer=opt_pfc, lr_lambda=lr_step_func)
+
+    for key, value in cfg.items():
+        num_space = 25 - len(key)
+        logging.info(": " + key + " " * num_space + str(value))
 
     val_target = [] if args.debug else cfg.val_targets
     callback_verification = CallBackVerification(2000, rank, val_target, cfg.rec)
-    callback_logging = CallBackLogging(50, rank, total_step, cfg.batch_size, world_size, None)
+    callback_logging = CallBackLogging(50, rank, cfg.total_step, cfg.batch_size, world_size, None)
     callback_checkpoint = CallBackModelCheckpoint(rank, cfg.output)
 
     loss = AverageMeter()
+    start_epoch = 0
     global_step = 0
     grad_amp = MaxClipGradScaler(cfg.batch_size, 128 * cfg.batch_size, growth_interval=100) if cfg.fp16 else None
     for epoch in range(start_epoch, cfg.num_epoch):
@@ -111,9 +123,9 @@ def main(args):
             loss.update(loss_v, 1)
             callback_logging(global_step, loss, epoch, cfg.fp16, scheduler_backbone.get_last_lr()[0], grad_amp)
             callback_verification(global_step, backbone)
+            scheduler_backbone.step()
+            scheduler_pfc.step()
         callback_checkpoint(global_step, backbone, module_partial_fc)
-        scheduler_backbone.step()
-        scheduler_pfc.step()
     dist.destroy_process_group()
 
 
