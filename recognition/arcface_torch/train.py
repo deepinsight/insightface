@@ -10,7 +10,7 @@ from torch.nn.utils import clip_grad_norm_
 
 import losses
 from backbones import get_model
-from dataset import MXFaceDataset, DataLoaderX
+from dataset import MXFaceDataset, SyntheticDataset, DataLoaderX
 from partial_fc import PartialFC
 from utils.utils_amp import MaxClipGradScaler
 from utils.utils_callbacks import CallBackVerification, CallBackLogging, CallBackModelCheckpoint
@@ -34,11 +34,16 @@ def main(args):
     torch.cuda.set_device(local_rank)
     os.makedirs(cfg.output, exist_ok=True)
     init_logging(rank, cfg.output)
-    train_set = MXFaceDataset(root_dir=cfg.rec, local_rank=local_rank)
+
+    if cfg.rec == "synthetic":
+        train_set = SyntheticDataset(local_rank=local_rank)
+    else:
+        train_set = MXFaceDataset(root_dir=cfg.rec, local_rank=local_rank)
+
     train_sampler = torch.utils.data.distributed.DistributedSampler(train_set, shuffle=True)
     train_loader = DataLoaderX(
         local_rank=local_rank, dataset=train_set, batch_size=cfg.batch_size,
-        sampler=train_sampler, num_workers=2, pin_memory=True, drop_last=True, debug=args.debug)
+        sampler=train_sampler, num_workers=2, pin_memory=True, drop_last=True)
     backbone = get_model(cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size).to(local_rank)
 
     if cfg.resume:
@@ -90,7 +95,7 @@ def main(args):
         num_space = 25 - len(key)
         logging.info(": " + key + " " * num_space + str(value))
 
-    val_target = [] if args.debug else cfg.val_targets
+    val_target = cfg.val_targets
     callback_verification = CallBackVerification(2000, rank, val_target, cfg.rec)
     callback_logging = CallBackLogging(50, rank, cfg.total_step, cfg.batch_size, world_size, None)
     callback_checkpoint = CallBackModelCheckpoint(rank, cfg.output)
@@ -134,5 +139,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PyTorch ArcFace Training')
     parser.add_argument('config', type=str, help='py config file')
     parser.add_argument('--local_rank', type=int, default=0, help='local_rank')
-    parser.add_argument('--debug', type=int, default=0)
     main(parser.parse_args())

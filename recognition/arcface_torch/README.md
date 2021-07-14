@@ -41,32 +41,6 @@ python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 -
 python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py configs/ms1mv3_r2060.py
 ```
 
-## Speed Benchmark
-
-![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/arcface_speed.png)
-
-**Arcface Torch** can train large-scale face recognition training set efficiently and quickly. When the number of
-classes in training sets is greater than 300K and the training is sufficient, partial fc sampling strategy will get 
-same accuracy with several times faster training performance and smaller GPU memory.
-
-1. Training speed of different parallel methods (samples/second), Tesla V100 32GB * 8. (Larger is better)
-
-| Method                 | Bs1024-R100-2 Million Identities | Bs1024-R50-4 Million Identities | Bs512-R50-8 Million Identities |
-| :---                   |    :---                          | :---                            | :---          |
-| Data Parallel          |    1                             | 1                               | 1             |
-| Model Parallel         |    1362                          | 1600                            | 482           |
-| Fp16 + Model Parallel  |    2006                          | 2165                            | 767           | 
-| Fp16 + Partial Fc 0.1  |    3247                          | 4385                            | 3001          | 
-
-2. GPU memory cost of different parallel methods (GB per GPU), Tesla V100 32GB * 8. (Smaller is better)
-
-| Method                 | Bs1024-R100-2 Million Identities   | Bs1024-R50-4 Million Identities   | Bs512-R50-8 Million Identities |
-| :---                   |    :---                           | :---                             | :---        |
-| Data Parallel          |    OOM                            | OOM                              | OOM         |
-| Model Parallel         |    27.3                           | 30.3                             | 32.1        |
-| Fp16 + Model Parallel  |    20.3                           | 26.6                             | 32.1        | 
-| Fp16 + Partial Fc 0.1  |    11.9                           | 10.8                             | 11.1        |
-
 ## Model Zoo
 
 - The models are available for non-commercial research purposes only.  
@@ -114,6 +88,79 @@ There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 | Glint360k  |r100-0.1  | 95.88 | 97.32 | 98.48 | 99.29 | 99.82 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|
 
 [comment]: <> (More details see [model.md]&#40;docs/modelzoo.md&#41; in docs.)
+## Test Training Speed
+
+- Test Commands
+
+You need to use the following two commands to test the Partial FC training performance. 
+The number of identites is **3 millions** (synthetic data), turn mixed precision  training on, backbone is resnet50, 
+batch size is 1024.
+```shell
+# Model Parallel
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py configs/3millions
+# Partial FC 0.1
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py configs/3millions_pfc
+```
+
+- GPU Memory
+
+```
+# (Model Parallel) gpustat -i
+[0] Tesla V100-SXM2-32GB | 65'C,  99 % | 30338 / 32510 MB
+[1] Tesla V100-SXM2-32GB | 61'C, 100 % | 28876 / 32510 MB
+[2] Tesla V100-SXM2-32GB | 60'C,  98 % | 28872 / 32510 MB
+[3] Tesla V100-SXM2-32GB | 70'C,  95 % | 28872 / 32510 MB
+
+# (Partial FC 0.1) gpustat -i
+[0] Tesla V100-SXM2-32GB | 62'C,  95 % | 10488 / 32510 MB                                                                                                                                             │·······················
+[1] Tesla V100-SXM2-32GB | 61'C,  95 % | 10344 / 32510 MB                                                                                                                                             │·······················
+[2] Tesla V100-SXM2-32GB | 61'C,  95 % | 10342 / 32510 MB                                                                                                                                             │·······················
+[3] Tesla V100-SXM2-32GB | 67'C,  95 % | 10342 / 32510 MB                                                                                                                                             │·······················
+```
+
+- Training Speed
+
+```python
+# (Model Parallel) trainging.log
+Training: 2271.33 samples/sec   Loss 1.1624   LearningRate 0.2000   Epoch: 0   Global Step: 100
+Training: 2269.94 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 150
+Training: 2272.67 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 200
+Training: 2266.55 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 250
+# (Partial FC 0.1) trainging.log
+Training: 5277.27 samples/sec   Loss 1.0962   LearningRate 0.2000   Epoch: 0   Global Step: 100 
+Training: 5292.93 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 150 
+Training: 5284.48 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 200 
+Training: 5298.78 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch: 0   Global Step: 250
+```
+
+In this test case, Partial FC 0.1 only use1 1/3 of the GPU memory of the model parallel, 
+and the training speed is 2.5 times faster than the parallel model.
+
+## Speed Benchmark
+
+![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/arcface_speed.png)
+
+**Arcface Torch** can train large-scale face recognition training set efficiently and quickly. When the number of
+classes in training sets is greater than 300K and the training is sufficient, partial fc sampling strategy will get same
+accuracy with several times faster training performance and smaller GPU memory.
+
+1. Training speed of different parallel methods (samples/second), Tesla V100 32GB * 8. (Larger is better)
+
+| Method                 | Bs1024-R100-2 Million Identities | Bs1024-R50-4 Million Identities | Bs512-R50-8 Million Identities |
+| :---                   |    :---                          | :---                            | :---          |
+| Data Parallel          |    1                             | 1                               | 1             |
+| Model Parallel         |    1362                          | 1600                            | 482           |
+| Fp16 + Model Parallel  |    2006                          | 2165                            | 767           | 
+| Fp16 + Partial Fc 0.1  |    3247                          | 4385                            | 3001          | 
+
+2. GPU memory cost of different parallel methods (GB per GPU), Tesla V100 32GB * 8. (Smaller is better)
+
+| Method                 | Bs1024-R100-2 Million Identities   | Bs1024-R50-4 Million Identities   | Bs512-R50-8 Million Identities |
+| :---                   |    :---                           | :---                             | :---        |
+| Data Parallel          |    OOM                            | OOM                              | OOM         |
+| Model Parallel         |    27.3                           | 30.3                             | 32.1        |
+| Fp16 + Model Parallel  |    20.3                           | 26.6                             | 32.1        | 
+| Fp16 + Partial Fc 0.1  |    11.9                           | 10.8                             | 11.1        |
 
 ## Evaluation IJB-C, ICCV2021-MFR
 

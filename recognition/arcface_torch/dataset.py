@@ -40,15 +40,10 @@ class BackgroundGenerator(threading.Thread):
 
 class DataLoaderX(DataLoader):
 
-    def __init__(self, local_rank, debug=False, **kwargs):
+    def __init__(self, local_rank, **kwargs):
         super(DataLoaderX, self).__init__(**kwargs)
         self.stream = torch.cuda.Stream(local_rank)
         self.local_rank = local_rank
-        self.debug = debug
-        if self.debug:
-            self.fix_batch = next(super(DataLoaderX, self).__iter__(), None)
-            for k in range(len(self.fix_batch)):
-                self.fix_batch[k] = self.fix_batch[k].to(device=self.local_rank, non_blocking=True)
 
     def __iter__(self):
         self.iter = super(DataLoaderX, self).__iter__()
@@ -65,15 +60,12 @@ class DataLoaderX(DataLoader):
                 self.batch[k] = self.batch[k].to(device=self.local_rank, non_blocking=True)
 
     def __next__(self):
-        if self.debug:
-            return self.fix_batch
-        else:
-            torch.cuda.current_stream().wait_stream(self.stream)
-            batch = self.batch
-            if batch is None:
-                raise StopIteration
-            self.preload()
-            return batch
+        torch.cuda.current_stream().wait_stream(self.stream)
+        batch = self.batch
+        if batch is None:
+            raise StopIteration
+        self.preload()
+        return batch
 
 
 class MXFaceDataset(Dataset):
@@ -113,3 +105,20 @@ class MXFaceDataset(Dataset):
 
     def __len__(self):
         return len(self.imgidx)
+
+
+class SyntheticDataset(Dataset):
+    def __init__(self, local_rank):
+        super(SyntheticDataset, self).__init__()
+        img = np.random.randint(0, 255, size=(112, 112, 3), dtype=np.int32)
+        img = np.transpose(img, (2, 0, 1))
+        img = torch.from_numpy(img).squeeze(0).float()
+        img = ((img / 255) - 0.5) / 0.5
+        self.img = img
+        self.label = torch.ones([1], dtype=torch.long)
+
+    def __getitem__(self, index):
+        return self.img, self.label
+
+    def __len__(self):
+        return 1000000
