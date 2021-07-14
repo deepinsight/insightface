@@ -22,10 +22,5 @@ config.num_classes = 360232
 config.num_image = 17091657
 config.num_epoch = 20
 config.warmup_epoch = -1
+config.decay_epoch = [8, 12, 15, 18]
 config.val_targets = ["lfw", "cfp_fp", "agedb_30"]
-
-def lr_step_func(epoch):
-    return ((epoch + 1) / (4 + 1)) ** 2 if epoch < config.warmup_epoch else 0.1 ** len(
-        [m for m in [8, 12, 15, 18] if m - 1 <= epoch])
-config.lr_func = lr_step_func
-

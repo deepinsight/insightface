@@ -6,7 +6,7 @@ from easydict import EasyDict as edict
 
 config = edict()
 config.loss = "arcface"
-config.network = "r50"
+config.network = "r34"
 config.resume = False
 config.output = None
 config.embedding_size = 512
