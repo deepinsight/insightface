@@ -76,6 +76,17 @@ same accuracy with several times faster training performance and smaller GPU mem
 
 ### Performance on [**ICCV2021-MFR**](http://iccv21-mfr.com/)
 
+ICCV2021-MFR testset consists of non-celebrities so we can ensure that it has very few overlap with public available face 
+recognition training set, such as MS1M and CASIA as they mostly collected from online celebrities. 
+As the result, we can evaluate the FAIR performance for different algorithms.  
+
+For **ICCV2021-MFR-ALL** set, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6). The 
+globalised multi-racial testset contains 242,143 identities and 1,624,305 images. 
+
+For **ICCV2021-MFR-MASK** set, TAR is measured on mask-to-nonmask 1:1 protocal, with FAR less than 0.0001(e-4). 
+Mask testset contains 6,964 identities, 6,964 masked images and 13,928 non-masked images. 
+There are totally 13,928 positive pairs and 96,983,824 negative pairs.
+
 | Datasets | backbone  | Training throughout | Size / MB  | **ICCV2021-MFR-MASK** | **ICCV2021-MFR-ALL** |
 | :---:    | :---      | :---                | :---       |:---                   |:---                  |    
 | MS1MV3    | mobilefacenet | 12185 | 4.5  | **36.12** | **59.78** |        
