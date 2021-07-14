@@ -11,6 +11,8 @@ For all main contributors, please check [contributing](#contributing).
 
 ## Top News
 
+**`2021-07-13`**: We now have [Paddle](https://github.com/PaddlePaddle/Paddle) based implementations: [arcface_paddle](recognition/arcface_paddle) for face recognition and [blazeface_paddle](detection/blazeface_paddle) for face detection.
+
 **`2021-07-09`**: We add a [person_detection](examples/person_detection) example, trained by [SCRFD](detection/scrfd), which can be called directly by our [python-library](python-package).
 
 **`2021-06-05`**: We launch a [Masked Face Recognition Challenge & Workshop](challenges/iccv21-mfr) on ICCV 2021.
