@@ -1,8 +1,15 @@
-## v1.8.1 
+## v1.8.0 
 ### Linux and Windows  
 ```shell
+# CUDA 11.0
+pip --default-timeout=100 install torch==1.8.0+cu111 torchvision==0.9.0+cu111 torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
+
 # CUDA 10.2
-pip3 install torch torchvision torchaudio
+pip --default-timeout=100 install torch==1.8.0 torchvision==0.9.0 torchaudio==0.8.0
+
+# CPU only
+pip --default-timeout=100 install torch==1.8.0+cpu torchvision==0.9.0+cpu torchaudio==0.8.0 -f https://download.pytorch.org/whl/torch_stable.html
+
 ```
 
 
