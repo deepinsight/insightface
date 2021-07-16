@@ -2,6 +2,8 @@
 
 ## NEWS
 
+**``2021-07-16``**  Implicit batch inference is prohibited. For example, inserting some data-related OPs to onnx graph to enable automatic flip-test is not allowed(or similar ideas). We will check it after submission closed, to ensure fairness.
+
 **``2021-06-17``**  Participants are now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
 
 
