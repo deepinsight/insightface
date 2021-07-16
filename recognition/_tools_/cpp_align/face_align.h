@@ -93,9 +93,9 @@ namespace FacePreprocess {
             d.at<float>(dim - 1, 0) = -1;
 
         }
-        Mat T = cv::Mat::eye(dim + 1, dim + 1, CV_32F);
+        cv::Mat T = cv::Mat::eye(dim + 1, dim + 1, CV_32F);
         cv::Mat U, S, V;
-        SVD::compute(A, S,U, V);
+        cv::SVD::compute(A, S,U, V);
 
         // the SVD function in opencv differ from scipy .
 
@@ -108,18 +108,14 @@ namespace FacePreprocess {
             if (cv::determinant(U) * cv::determinant(V) > 0) {
                 T.rowRange(0, dim).colRange(0, dim) = U * V;
             } else {
-//            s = d[dim - 1]
-//            d[dim - 1] = -1
-//            T[:dim, :dim] = np.dot(U, np.dot(np.diag(d), V))
-//            d[dim - 1] = s
                 int s = d.at<float>(dim - 1, 0) = -1;
                 d.at<float>(dim - 1, 0) = -1;
 
                 T.rowRange(0, dim).colRange(0, dim) = U * V;
                 cv::Mat diag_ = cv::Mat::diag(d);
                 cv::Mat twp = diag_*V; //np.dot(np.diag(d), V.T)
-                Mat B = Mat::zeros(3, 3, CV_8UC1);
-                Mat C = B.diag(0);
+                cv::Mat B = cv::Mat::zeros(3, 3, CV_8UC1);
+                cv::Mat C = B.diag(0);
                 T.rowRange(0, dim).colRange(0, dim) = U* twp;
                 d.at<float>(dim - 1, 0) = s;
             }
@@ -128,20 +124,20 @@ namespace FacePreprocess {
             cv::Mat diag_ = cv::Mat::diag(d);
             cv::Mat twp = diag_*V.t(); //np.dot(np.diag(d), V.T)
             cv::Mat res = U* twp; // U
-            T.rowRange(0, dim).colRange(0, dim) = -U.t()* twp;
+            T.rowRange(0, dim).colRange(0, dim) = U *  diag_ * V;
         }
         cv::Mat var_ = varAxis0(src_demean);
         float val = cv::sum(var_).val[0];
         cv::Mat res;
         cv::multiply(d,S,res);
         float scale =  1.0/val*cv::sum(res).val[0];
-        T.rowRange(0, dim).colRange(0, dim) = - T.rowRange(0, dim).colRange(0, dim).t();
-        cv::Mat  temp1 = T.rowRange(0, dim).colRange(0, dim); // T[:dim, :dim]
-        cv::Mat  temp2 = src_mean.t(); //src_mean.T
-        cv::Mat  temp3 = temp1*temp2; // np.dot(T[:dim, :dim], src_mean.T)
-        cv::Mat temp4 = scale*temp3;
-        T.rowRange(0, dim).colRange(dim, dim+1)=  -(temp4 - dst_mean.t()) ;
-        T.rowRange(0, dim).colRange(0, dim) *= scale;
+        cv::Mat  temp1 = T.rowRange(0, dim).colRange(0, dim) * src_mean.t();
+        cv::Mat  temp2 = scale * temp1;
+        cv::Mat  temp3 = dst_mean - temp2.t();
+        T.at<float>(0,2) = temp3.at<float>(0);
+        T.at<float>(1,2) = temp3.at<float>(1);
+        T.rowRange(0, dim).colRange(0, dim) *= scale; // T[:dim, :dim] *= scale
+
         return T;
     }
 
