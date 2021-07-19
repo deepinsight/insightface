@@ -23,7 +23,7 @@ Besides, we can also use A30 to train deep learning models by its FP16 and TF32 
 | Installation | Python 3.7.10                                    |
 | Installation | PyTorch 1.8.1 (conda)                            |
 
-This server is donated by [AMAX](https://www.amax.com/), many thanks!
+This server is donated by [AMAX](https://www.amaxchina.com/), many thanks!
 
 
 
