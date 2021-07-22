@@ -88,18 +88,19 @@ class GDC(Module):
 class MobileFaceNet(Module):
     def __init__(self, fp16=False, num_features=512):
         super(MobileFaceNet, self).__init__()
+        scale = 2
         self.fp16 = fp16
         self.layers = nn.Sequential(
-            ConvBlock(3, 64, kernel=(3, 3), stride=(2, 2), padding=(1, 1)),
-            ConvBlock(64, 64, kernel=(3, 3), stride=(1, 1), padding=(1, 1), groups=64),
-            DepthWise(64, 64, kernel=(3, 3), stride=(2, 2), padding=(1, 1), groups=128),
-            Residual(64, num_block=4, groups=128, kernel=(3, 3), stride=(1, 1), padding=(1, 1)),
-            DepthWise(64, 128, kernel=(3, 3), stride=(2, 2), padding=(1, 1), groups=256),
-            Residual(128, num_block=6, groups=256, kernel=(3, 3), stride=(1, 1), padding=(1, 1)),
-            DepthWise(128, 128, kernel=(3, 3), stride=(2, 2), padding=(1, 1), groups=512),
-            Residual(128, num_block=2, groups=256, kernel=(3, 3), stride=(1, 1), padding=(1, 1)),
+            ConvBlock(3, 64 * scale, kernel=(3, 3), stride=(2, 2), padding=(1, 1)),
+            ConvBlock(64 * scale, 64 * scale, kernel=(3, 3), stride=(1, 1), padding=(1, 1), groups=64),
+            DepthWise(64 * scale, 64 * scale, kernel=(3, 3), stride=(2, 2), padding=(1, 1), groups=128),
+            Residual(64 * scale, num_block=4, groups=128, kernel=(3, 3), stride=(1, 1), padding=(1, 1)),
+            DepthWise(64 * scale, 128 * scale, kernel=(3, 3), stride=(2, 2), padding=(1, 1), groups=256),
+            Residual(128 * scale, num_block=6, groups=256, kernel=(3, 3), stride=(1, 1), padding=(1, 1)),
+            DepthWise(128 * scale, 128 * scale, kernel=(3, 3), stride=(2, 2), padding=(1, 1), groups=512),
+            Residual(128 * scale, num_block=2, groups=256, kernel=(3, 3), stride=(1, 1), padding=(1, 1)),
         )
-        self.conv_sep = ConvBlock(128, 512, kernel=(1, 1), stride=(1, 1), padding=(0, 0))
+        self.conv_sep = ConvBlock(128 * scale, 512, kernel=(1, 1), stride=(1, 1), padding=(0, 0))
         self.features = GDC(num_features)
         self._initialize_weights()
 

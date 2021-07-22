@@ -56,3 +56,38 @@ Training: Speed 5300.10 samples/sec   Loss 0.0000   LearningRate 0.2000   Epoch:
 
 In this test case, Partial FC 0.1 only use1 1/3 of the GPU memory of the model parallel, 
 and the training speed is 2.5 times faster than the model parallel.
+
+
+## Speed Benchmark
+
+1. Training speed of different parallel methods (samples/second), Tesla V100 32GB * 8. (Larger is better)
+
+| Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
+| :---    | :--- | :--- | :--- |
+|125000   | 4681 | 4824 | 5004 |
+|250000   | 4047 | 4521 | 4976 |
+|500000   | 3087 | 4013 | 4900 |
+|1000000  | 2090 | 3449 | 4803 |
+|1400000  | 1672 | 3043 | 4738 |
+|2000000  | -    | 2593 | 4626 |
+|4000000  | -    | 1748 | 4208 |
+|5500000  | -    | 1389 | 3975 |
+|8000000  | -    | -    | 3565 |
+|16000000 | -    | -    | 2679 |
+|29000000 | -    | -    | 1855 |
+
+2. GPU memory cost of different parallel methods (GB per GPU), Tesla V100 32GB * 8. (Smaller is better)
+
+| Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
+| :---    | :---  | :---  | :---  |
+|125000   | 7358  | 5306  | 4868  |
+|250000   | 9940  | 5826  | 5004  |
+|500000   | 14220 | 7114  | 5202  |
+|1000000  | 23708 | 9966  | 5620  |
+|1400000  | 32252 | 11178 | 6056  |
+|2000000  | -     | 13978 | 6472  |
+|4000000  | -     | 23238 | 8284  |
+|5500000  | -     | 32188 | 9854  |
+|8000000  | -     | -     | 12310 |
+|16000000 | -     | -     | 19950 |
+|29000000 | -     | -     | 32324 |

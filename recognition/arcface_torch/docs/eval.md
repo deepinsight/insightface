@@ -1,4 +1,4 @@
-## IFRT
+## Eval on ICCV2021-MFR
 
 coming soon.
 
@@ -23,7 +23,6 @@ CUDA_VISIBLE_DEVICES=0,1 python eval_ijbc.py \
 --target IJBC \
 --network iresnet50
 ```
-
 
 ## Inference
 

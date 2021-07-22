@@ -11,7 +11,7 @@ identity on a single server.
   from [https://github.com/deepinsight/insightface/wiki/Dataset-Zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo)
   .
 
-## Training
+## How to Training
 
 To train a model, run `train.py` with the path to the configs:
 
@@ -62,8 +62,7 @@ Mask testset contains 6,964 identities, 6,964 masked images and 13,928 non-maske
 There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 
 | Datasets | backbone  | Training throughout | Size / MB  | **ICCV2021-MFR-MASK** | **ICCV2021-MFR-ALL** |
-| :---:    | :---      | :---                | :---       |:---                   |:---                  |    
-| MS1MV3    | mobilefacenet | 12185 | 4.5  | **36.12** | **59.78** |        
+| :---:    | :---      | :---                | :---       |:---                   |:---                  |     
 | MS1MV3    | r18  | -              | 91   | **47.85** | **68.33** |
 | Glint360k | r18  | 8536           | 91   | **53.32** | **72.07** |
 | MS1MV3    | r34  | -              | 130  | **58.72** | **77.36** |
@@ -72,6 +71,8 @@ There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 | Glint360k | r50  | 5136           | 166  | **70.23** | **87.08** |
 | MS1MV3    | r100 | -              | 248  | **69.09** | **84.31** |
 | Glint360k | r100 | 3332           | 248  | **75.57** | **90.66** |
+| MS1MV3    | mobilefacenet | 12185 | 7.8  | **41.52** | **65.26** |        
+| Glint360k | mobilefacenet | 11197 | 7.8  | **44.52** | **66.48** |  
 
 ### Performance on IJB-C and Verification Datasets
 
@@ -92,32 +93,45 @@ There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 
 ## [Speed Benchmark](docs/speed_benchmark.md)
 
-![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/arcface_speed.png)
+![Image text](https://github.com/anxiangsir/insightface_arcface_log/blob/master/partial_fc_v2.png)
 
 **Arcface Torch** can train large-scale face recognition training set efficiently and quickly. When the number of
 classes in training sets is greater than 300K and the training is sufficient, partial fc sampling strategy will get same
-accuracy with several times faster training performance and smaller GPU memory. More details see 
+accuracy with several times faster training performance and smaller GPU memory. 
+Partial FC is a sparse variant of the model parallel architecture for large sacle  face recognition. Partial FC use a 
+sparse softmax, where each batch dynamicly sample a subset of class centers for training. In each iteration, only a 
+sparse part of the parameters will be updated, which can reduce a lot of GPU memory and calculations. With Partial FC, 
+we can scale trainset of 29 millions identities, the largest to date. Partial FC also supports multi-machine distributed 
+training and mixed precision training. 
+
+More details see 
 [speed_benchmark.md](docs/speed_benchmark.md) in docs.
 
-1. Training speed of different parallel methods (samples/second), Tesla V100 32GB * 8. (Larger is better)
+### 1. Training speed of different parallel methods (samples / second), Tesla V100 32GB * 8. (Larger is better)
 
-| Method                 | Bs1024-R100-2 Million Identities | Bs1024-R50-4 Million Identities | Bs512-R50-8 Million Identities |
-| :---                   |    :---                          | :---                            | :---          |
-| Data Parallel          |    1                             | 1                               | 1             |
-| Model Parallel         |    1362                          | 1600                            | 482           |
-| Fp16 + Model Parallel  |    2006                          | 2165                            | 767           | 
-| Fp16 + Partial Fc 0.1  |    3247                          | 4385                            | 3001          | 
+`-` means training failed because of gpu memory limitations.
 
-2. GPU memory cost of different parallel methods (GB per GPU), Tesla V100 32GB * 8. (Smaller is better)
+| Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
+| :---    | :--- | :--- | :--- |
+|125000   | 4681     | 4824     | 5004     |
+|1400000  | **1672** | 3043     | 4738     |
+|5500000  | -        | **1389** | 3975     |
+|8000000  | -        | -        | 3565     |
+|16000000 | -        | -        | 2679     |
+|29000000 | -        | -        | **1855** |
 
-| Method                 | Bs1024-R100-2 Million Identities   | Bs1024-R50-4 Million Identities   | Bs512-R50-8 Million Identities |
-| :---                   |    :---                           | :---                             | :---        |
-| Data Parallel          |    OOM                            | OOM                              | OOM         |
-| Model Parallel         |    27.3                           | 30.3                             | 32.1        |
-| Fp16 + Model Parallel  |    20.3                           | 26.6                             | 32.1        | 
-| Fp16 + Partial Fc 0.1  |    11.9                           | 10.8                             | 11.1        |
+### 2. GPU memory cost of different parallel methods (MB per GPU), Tesla V100 32GB * 8. (Smaller is better)
 
-## Evaluation IJB-C, ICCV2021-MFR
+| Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
+| :---    | :---  | :---  | :---  |
+|125000   | 7358  | 5306  | 4868  |
+|1400000  | 32252 | 11178 | 6056  |
+|5500000  | -     | 32188 | 9854  |
+|8000000  | -     | -     | 12310 |
+|16000000 | -     | -     | 19950 |
+|29000000 | -     | -     | 32324 |
+
+## Evaluation ICCV2021-MFR and IJB-C
 
 More details see [eval.md](docs/eval.md) in docs.
 
