@@ -42,7 +42,6 @@ def main(args):
 
     writer = LogWriter(logdir=args.logdir)
 
-    # if you 
     trainset = CommonDataset(root_dir=cfg.data_dir, label_file=cfg.file_list)
     # trainset = BinDataset(root_dir=cfg.data_dir)
     train_loader = DataLoader(
@@ -147,7 +146,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='PyTorch ArcFace Training')
+    parser = argparse.ArgumentParser(description='Paddle ArcFace Training')
     parser.add_argument(
         '--network',
         type=str,

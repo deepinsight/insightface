@@ -78,7 +78,7 @@ If you want to use customed dataset, you can arrange your data according to the 
 
 
 **Note:**
-* For using `Dataloader` api for reading data, we convert `train.rec` into many little `bin` files, each `bin` file denotes a single image. If your dataset just contains origin image files. You can either rewrite the dataloader file or refer to section 1.3 to convert the original image files to `bin` files.
+* For using `Dataloader` api for reading data, we convert `train.rec` into many little `bin` files, each `bin` file denotes a single image. If your dataset just contains origin image files. You can either rewrite the dataloader file or refer to section 3.3 to convert the original image files to `bin` files.
 
 
 ### 3.3 Transform between original image files and bin files
