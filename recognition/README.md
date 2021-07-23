@@ -37,6 +37,7 @@ Supported methods:
 - [x] [PartialFC_torch (Arxiv'2020)](arcface_torch)
 - [x] [VPL (CVPR'2021)](vpl)
 - [x] [OneFlow_face](oneflow_face)
+- [x] [ArcFace_Paddle (CVPR'2019)](arcface_paddle)
 
 
 ## Contributing
