@@ -23,13 +23,12 @@ def main(args):
     try:
         world_size = int(os.environ['WORLD_SIZE'])
         rank = int(os.environ['RANK'])
-        dist_url = "tcp://{}:{}".format(os.environ["MASTER_ADDR"], os.environ["MASTER_PORT"])
+        dist.init_process_group('nccl')
     except KeyError:
         world_size = 1
         rank = 0
-        dist_url = "tcp://127.0.0.1:12584"
+        dist.init_process_group(backend='nccl', init_method="tcp://127.0.0.1:12584", rank=rank, world_size=world_size)
 
-    dist.init_process_group(backend='nccl', init_method=dist_url, rank=rank, world_size=world_size)
     local_rank = args.local_rank
     torch.cuda.set_device(local_rank)
     os.makedirs(cfg.output, exist_ok=True)

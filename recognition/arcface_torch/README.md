@@ -5,7 +5,7 @@ identity on a single server.
 
 ## Requirements
 
-- Install [pytorch](http://pytorch.org) (1.6.0 <= troch < 1.9.0), our doc for [install.md](docs/install.md).
+- Install [pytorch](http://pytorch.org) (torch>=1.6.0), our doc for [install.md](docs/install.md).
 - `pip install -r requirements.txt`.
 - Download the dataset
   from [https://github.com/deepinsight/insightface/wiki/Dataset-Zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo)
@@ -93,8 +93,6 @@ There are totally 13,928 positive pairs and 96,983,824 negative pairs.
 
 ## [Speed Benchmark](docs/speed_benchmark.md)
 
-![Image text](https://github.com/anxiangsir/insightface_arcface_log/blob/master/partial_fc_v2.png)
-
 **Arcface Torch** can train large-scale face recognition training set efficiently and quickly. When the number of
 classes in training sets is greater than 300K and the training is sufficient, partial fc sampling strategy will get same
 accuracy with several times faster training performance and smaller GPU memory. 
@@ -102,7 +100,9 @@ Partial FC is a sparse variant of the model parallel architecture for large sacl
 sparse softmax, where each batch dynamicly sample a subset of class centers for training. In each iteration, only a 
 sparse part of the parameters will be updated, which can reduce a lot of GPU memory and calculations. With Partial FC, 
 we can scale trainset of 29 millions identities, the largest to date. Partial FC also supports multi-machine distributed 
-training and mixed precision training. 
+training and mixed precision training.
+
+![Image text](https://github.com/anxiangsir/insightface_arcface_log/blob/master/partial_fc_v2.png)
 
 More details see 
 [speed_benchmark.md](docs/speed_benchmark.md) in docs.
@@ -113,23 +113,23 @@ More details see
 
 | Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
 | :---    | :--- | :--- | :--- |
-|125000   | 4681     | 4824     | 5004     |
-|1400000  | **1672** | 3043     | 4738     |
-|5500000  | -        | **1389** | 3975     |
-|8000000  | -        | -        | 3565     |
-|16000000 | -        | -        | 2679     |
-|29000000 | -        | -        | **1855** |
+|125000   | 4681         | 4824          | 5004     |
+|1400000  | **1672**     | 3043          | 4738     |
+|5500000  | **-**        | **1389**      | 3975     |
+|8000000  | **-**        | **-**         | 3565     |
+|16000000 | **-**        | **-**         | 2679     |
+|29000000 | **-**        | **-**         | **1855** |
 
 ### 2. GPU memory cost of different parallel methods (MB per GPU), Tesla V100 32GB * 8. (Smaller is better)
 
 | Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
-| :---    | :---  | :---  | :---  |
-|125000   | 7358  | 5306  | 4868  |
-|1400000  | 32252 | 11178 | 6056  |
-|5500000  | -     | 32188 | 9854  |
-|8000000  | -     | -     | 12310 |
-|16000000 | -     | -     | 19950 |
-|29000000 | -     | -     | 32324 |
+| :---    | :---      | :---      | :---  |
+|125000   | 7358      | 5306      | 4868  |
+|1400000  | 32252     | 11178     | 6056  |
+|5500000  | **-**     | 32188     | 9854  |
+|8000000  | **-**     | **-**     | 12310 |
+|16000000 | **-**     | **-**     | 19950 |
+|29000000 | **-**     | **-**     | 32324 |
 
 ## Evaluation ICCV2021-MFR and IJB-C
 
