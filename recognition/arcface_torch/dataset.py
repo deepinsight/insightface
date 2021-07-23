@@ -115,7 +115,7 @@ class SyntheticDataset(Dataset):
         img = torch.from_numpy(img).squeeze(0).float()
         img = ((img / 255) - 0.5) / 0.5
         self.img = img
-        self.label = torch.ones([1], dtype=torch.long)
+        self.label = 1
 
     def __getitem__(self, index):
         return self.img, self.label
