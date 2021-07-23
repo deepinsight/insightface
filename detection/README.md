@@ -32,7 +32,7 @@ Supported methods:
 
 - [x] [RetinaFace (CVPR'2020)](retinaface)
 - [x] [SCRFD (Arxiv'2021)](scrfd)
-
+- [x] [blazeface_paddle](blazeface_paddle)
 
 
 ## Contributing
