@@ -15,18 +15,15 @@
 from easydict import EasyDict as edict
 
 config = edict()
-config.dataset = "emore"
 config.sample_rate = 1
 config.momentum = 0.9
 
 config.data_dir = "./MS1M_bin"
 config.file_list = "MS1M_bin/label.txt"
 config.num_classes = 85742
-config.num_image = 5822653
 config.num_epoch = 32
 config.warmup_epoch = 1
 config.val_targets = ["lfw", "cfp_fp", "agedb_30"]
-
 
 def lr_step_func(epoch):
     return ((epoch + 1) / (4 + 1))**2 if epoch < -1 else 0.1**len(

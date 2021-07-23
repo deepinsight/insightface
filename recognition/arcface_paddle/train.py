@@ -41,9 +41,7 @@ def main(args):
         time.sleep(2)
 
     writer = LogWriter(logdir=args.logdir)
-
-    trainset = CommonDataset(root_dir=cfg.data_dir, label_file=cfg.file_list)
-    # trainset = BinDataset(root_dir=cfg.data_dir)
+    trainset = CommonDataset(root_dir=cfg.data_dir, label_file=cfg.file_list, is_bin=args.is_bin)
     train_loader = DataLoader(
         dataset=trainset,
         batch_size=args.batch_size,
@@ -146,6 +144,9 @@ def main(args):
 
 
 if __name__ == '__main__':
+    def str2bool(v):
+        return v.lower() in ("true", "t", "1")
+    
     parser = argparse.ArgumentParser(description='Paddle ArcFace Training')
     parser.add_argument(
         '--network',
@@ -165,5 +166,6 @@ if __name__ == '__main__':
     parser.add_argument(
         '--output', type=str, default='emore_arcface', help='output dir')
     parser.add_argument('--resume', type=int, default=0, help='model resuming')
+    parser.add_argument('--is_bin', type=str2bool, default=True, help='whether the train data is bin or original image file')
     args = parser.parse_args()
     main(args)
