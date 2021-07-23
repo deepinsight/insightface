@@ -137,7 +137,12 @@ More details see [eval.md](docs/eval.md) in docs.
 
 ## Test
 
-We test on PyTorch versions 1.6.0, 1.7.1, and 1.8.0. Please create an issue if you are having trouble.
+We tested many versions of PyTorch. Please create an issue if you are having trouble.  
+
+- [x] torch 1.6.0
+- [x] torch 1.7.1
+- [x] torch 1.8.0
+- [x] torch 1.9.0
 
 ## Citation
 
