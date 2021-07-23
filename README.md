@@ -77,6 +77,7 @@ The supported methods are as follows:
 - [x] [PartialFC_torch (Arxiv'2020)](recognition/arcface_torch)
 - [x] [VPL (CVPR'2021)](recognition/vpl)
 - [x] [OneFlow_face](recognition/oneflow_face)
+- [x] [ArcFace_Paddle (CVPR'2019)](recognition/arcface_paddle)
 
 Commonly used network backbones are included in most of the methods, such as IResNet, MobilefaceNet, MobileNet, InceptionResNet_v2, DenseNet, etc..
 
@@ -120,6 +121,7 @@ The supported methods are as follows:
 
 - [x] [RetinaFace (CVPR'2020)](detection/retinaface)
 - [x] [SCRFD (Arxiv'2021)](detection/scrfd)
+- [x] [blazeface_paddle](detection/blazeface_paddle)
 
 [RetinaFace](detection/retinaface) is a practical single-stage face detector which is accepted by [CVPR 2020](https://openaccess.thecvf.com/content_CVPR_2020/html/Deng_RetinaFace_Single-Shot_Multi-Level_Face_Localisation_in_the_Wild_CVPR_2020_paper.html). We provide training code, training dataset, pretrained models and evaluation scripts. 
 
