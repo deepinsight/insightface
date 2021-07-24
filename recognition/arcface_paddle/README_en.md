@@ -79,7 +79,7 @@ If you want to use customed dataset, you can arrange your data according to the 
 
 **Note:**
 * For using `Dataloader` api for reading data, we convert `train.rec` into many little `bin` files, each `bin` file denotes a single image. If your dataset just contains origin image files. You can either rewrite the dataloader file or refer to section 3.3 to convert the original image files to `bin` files.
-
+* If you train data is image format rather than `bin` format. For the training process, you just need to set the parameter `is_bin` as `False`. More details can be seen in the following training script.
 
 ### 3.3 Transform between original image files and bin files
 
@@ -100,6 +100,7 @@ python3.7 tools/convert_image_bin.py --image_path="your/input/bin/path" --bin_pa
 After preparing the configuration file, The training process can be started in the following way.
 
 ```bash
+# for the bin format training data
 python3.7 train.py \
     --network 'MobileFaceNet_128' \
     --lr=0.1 \
@@ -109,6 +110,18 @@ python3.7 train.py \
     --logdir="log" \
     --output "emore_arcface" \
     --resume 0
+
+# for the original image format training data
+python3.7 train.py \
+    --network 'MobileFaceNet_128' \
+    --lr=0.1 \
+    --batch_size 512 \
+    --weight_decay 2e-4 \
+    --embedding_size 128 \
+    --logdir="log" \
+    --output "emore_arcface" \
+    --resume 0 \
+    --is_bin False
 ```
 
 Among them:
@@ -121,6 +134,7 @@ Among them:
 + `logdir`: VDL log storage directory, default by `"log"`;
 + `output`: Model stored path, default by: `"emore_arcface"`;
 + `resume`: Restore the classification layer parameters. `1` represents recovery parameters, and `0` represents reinitialization. If you need to resume training, you need to ensure that there are `rank:0_softmax_weight_mom.pkl` and `rank:0_softmax_weight.pkl` in the output directory.
++ `is_bin`: Whether the training data is bin format, default as True.
 
 * The output log examples are as follows:
 

@@ -8,8 +8,9 @@ log_name="log"
 python3.7 train.py \
     --network 'MobileFaceNet_128' \
     --lr=0.1 \
-    --batch_size 512 \
+    --batch_size 16 \
     --weight_decay 2e-4 \
     --embedding_size 128 \
     --logdir="${log_name}" \
-    --output "emore_arcface"
+    --output "emore_arcface" \
+    --is_bin=False

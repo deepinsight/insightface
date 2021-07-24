@@ -75,6 +75,7 @@ Arcface-Paddle/MSiM_bin
 
 注意：
 * 这里为了更加方便`Dataloader`读取数据，将原始的`train.rec`文件转化为很多`bin文件`，每个`bin文件`都唯一对应一张原始图像。如果您采集得到的文件均为原始的图像文件，那么可以参考`3.3节`中的内容完成原始图像文件到bin文件的转换。
+* 如果你的训练数据为原始的图像文件列表格式，那么在训练的时候，只需要将`is_bin`修改为`False`即可，下面的训练脚本中也会有具体的使用说明。
 
 ### 3.3 原始图像文件与bin文件的转换
 
@@ -95,6 +96,7 @@ python3.7 tools/convert_image_bin.py --image_path="your/input/bin/path" --bin_pa
 准备好配置文件后，可以通过以下方式开始训练过程。
 
 ```bash
+# 如果你的训练数据为bin文件格式的图像文件，可以使用下面的命令进行训练
 python3.7 train.py \
     --network 'MobileFaceNet_128' \
     --lr=0.1 \
@@ -104,6 +106,18 @@ python3.7 train.py \
     --logdir="log" \
     --output "emore_arcface" \
     --resume 0
+
+# 如果你的训练数据为原始图像文件，可以将`is_bin`指定为False，进行训练
+python3.7 train.py \
+    --network 'MobileFaceNet_128' \
+    --lr=0.1 \
+    --batch_size 512 \
+    --weight_decay 2e-4 \
+    --embedding_size 128 \
+    --logdir="log" \
+    --output "emore_arcface" \
+    --resume 0 \
+    --is_bin False
 ```
 
 上述命令中，需要传入如下参数:
@@ -116,6 +130,7 @@ python3.7 train.py \
 + `logdir`: VDL 输出 log 的存储路径, 默认值为 `"log"`;
 + `output`: 训练过程中的模型文件存储路径, 默认值为 `"emore_arcface"`;
 + `resume`: 是否恢复分类层的模型权重。 `1` 表示使用之前好的权重文件进行初始化，  `0` 代表重新初始化。 如果想要恢复分类层的模型权重， 需要保证 `output` 目录下包含： `rank:0_softmax_weight_mom.pkl` 和 `rank:0_softmax_weight.pkl` 两个文件。
++ `is_bin`: 训练数据是否为bin文件格式，默认为True。
 
 * 训练过程中的输出 log 示例如下:
 

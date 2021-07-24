@@ -15,6 +15,7 @@
 from paddle.io import Dataset
 from paddle.vision import transforms
 import os
+import cv2
 from PIL import Image
 import random
 import paddle
@@ -24,12 +25,13 @@ from dataloader.kv_helper import read_img_from_bin
 
 
 class CommonDataset(Dataset):
-    def __init__(self, root_dir, label_file):
+    def __init__(self, root_dir, label_file, is_bin=True):
         super(CommonDataset, self).__init__()
         self.root_dir = root_dir
         self.label_file = label_file
         self.full_lines = self.get_file_list(label_file)
         self.delimiter = "\t"
+        self.is_bin = is_bin
         self.transform = transforms.Compose([
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
@@ -54,7 +56,11 @@ class CommonDataset(Dataset):
             label = int(label)
             label = paddle.to_tensor(label, dtype='int64')
             img_path = os.path.join(self.root_dir, img_path)
-            img = read_img_from_bin(img_path)[:, :, ::-1]
+            if self.is_bin:
+                img = read_img_from_bin(img_path)
+            else:
+                img = cv2.imread(img_path)
+            img = img[:, :, ::-1]
             img = self.transform(img)
             return img, label
 
