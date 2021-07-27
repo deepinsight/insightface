@@ -51,10 +51,12 @@ def pytorch2onnx(config_path,
         ori_output_file = output_file.split('.')[0]+"_ori.onnx"
     else:
         ori_output_file = output_file
+    output_names=['score_8','score_16','score_32','bbox_8','bbox_16','bbox_32','kps_8','kps_16','kps_32']
     torch.onnx.export(
         model,
         tensor_data,
         ori_output_file,
+        output_names=output_names,
         keep_initializers_as_inputs=False,
         verbose=False,
         opset_version=opset_version)
