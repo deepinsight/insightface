@@ -8,7 +8,9 @@
 
 - **Model ``2d106det``**
 
-  Given face detection bounding box, predict 2d-106 landmarks. Mainly used for static image inference. Please check ``image_infer.py`` for detail.
+  **2021.07: We now support model inference by our `insightface` python package, please check [image_infer.py](image_infer.py) for detail.**
+
+  Given face detection bounding box, predict 2d-106 landmarks. Mainly used for static image inference. 
   
   Backbone: MobileNet-0.5, size 5MB.
   
@@ -19,6 +21,8 @@
   [baidu cloud](https://pan.baidu.com/s/10m5GmtNV5snynDrq3KqIdg) (code: ``lqvv``)
   
   [google drive](https://drive.google.com/file/d/1MBWbTEYRhZFzj_O2f2Dc6fWGXFWtbMFw/view?usp=sharing)
+  
+  
 
 - **Model ``2d106track``** 
 
