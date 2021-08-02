@@ -13,6 +13,16 @@ To install: ``pip install -U insightface``
 
 ##  1. Face Recognition models.
 
+``MFN``: MobileFaceNet
+
+``MS1MV2``: MS1M-ArcFace
+
+``MS1MV3``: MS1M-RetinaFace
+
+``MegaFace``: MegaFace identification test, with gallery=1e6.
+
+``IJBC``: IJBC 1:1 test, under FAR<=1e-4.
+
 | Backbone | Dataset | Method  | LFW   | CFP-FP | AgeDB-30 | MegaFace | link(mxnet)                                                  |
 | -------- | ------- | ------- | ----- | ------ | -------- | -------- | ------------------------------------------------------------ |
 | R100     | MS1MV2  | ArcFace | 99.77 | 98.27  | 98.28    | 98.47    | [BaiduDrive](https://pan.baidu.com/s/1wuRTf2YIsKt76TxFufsRNA) |
@@ -39,6 +49,8 @@ To install: ``pip install -U insightface``
 
 In RetinaFace, mAP was evaluated with multi-scale testing.
 
+``m025``: means MobileNet-0.25
+
 | Impelmentation           | Easy-Set | Medium-Set | Hard-Set | Link                                                         |
 | ------------------------ | -------- | ---------- | -------- | ------------------------------------------------------------ |
 | RetinaFace-R50           | 96.5     | 95.6       | 90.4     | [BaiduDrive](https://pan.baidu.com/s/1C6nKq122gJxRhb37vK0_LQ) |
@@ -47,6 +59,10 @@ In RetinaFace, mAP was evaluated with multi-scale testing.
 ### 2.2 SCRFD
 
 In SCRFD, mAP was evaluated with single scale testing, VGA resolution.
+
+``2.5G``: means the model cost ``2.5G`` FLOPs while the input image is in VGA(640x480) resolution.
+
+``_KPS``: means this model can detect five facial keypoints.
 
 |      Name      | Easy  | Medium | Hard  | FLOPs | Params(M) | Infer(ms) | Link                                                         |
 | :------------: | ----- | ------ | ----- | ----- | --------- | --------- | ------------------------------------------------------------ |
