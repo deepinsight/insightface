@@ -65,13 +65,25 @@ In SCRFD, mAP was evaluated with single scale testing, VGA resolution.
 
 ### 2.1 2D Face Alignment
 
+| Impelmentation        | Points | Backbone      | Params(M) | Link(onnx)                                                   |
+| --------------------- | ------ | ------------- | --------- | ------------------------------------------------------------ |
+| Coordinate-regression | 106    | MobileNet-0.5 | 1.2       | [download](https://1drv.ms/u/s!AswpsDO2toNKsm8ELLULrzpi3G4A?e=JfhRDO) |
+
 ### 2.2 3D Face Alignment
+
+| Impelmentation | Points | Backbone  | Params(M) | Link(onnx)                                                   |
+| -------------- | ------ | --------- | --------- | ------------------------------------------------------------ |
+| -              | 68     | ResNet-50 | 34.2      | [download](https://1drv.ms/u/s!AswpsDO2toNKsnCDBi4DEZEYvpQW?e=cq11PA) |
 
 ### 2.3 Dense Face Alignment
 
 ## 4. Face Attribute models.
 
 ### 4.1 Gender&Age 
+
+| Training-Set | Backbone       | Params(M) | Link(onnx)                                                   |
+| ------------ | -------------- | --------- | ------------------------------------------------------------ |
+| CelebA       | MobileNet-0.25 | 0.3       | [download](https://1drv.ms/u/s!AswpsDO2toNKsnJMN7443jvS1E6U?e=lumxkD) |
 
 
 ### 4.2 Expression
