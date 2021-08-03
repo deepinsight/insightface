@@ -15,6 +15,8 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# python3 face2rec2.py /path to your train.lst --num-thread 8
+
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
@@ -102,7 +104,7 @@ def image_encode(args, i, item, q_out):
     else: 
       header = mx.recordio.IRHeader(item.flag, item.label, item.id, 0)
       #print('write', item.flag, item.id, item.label)
-      s = mx.recordio.pack(header, '')
+      s = mx.recordio.pack(header, b'')
       q_out.put((i, s, oitem))
 
 
