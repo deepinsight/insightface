@@ -23,10 +23,16 @@ To install: ``pip install -U insightface``
 
 ``IJBC``: IJBC 1:1 test, under FAR<=1e-4.
 
-| Backbone | Dataset | Method  | LFW   | CFP-FP | AgeDB-30 | MegaFace | link(mxnet)                                                  |
+``BDrive``: BaiduDrive
+
+``GDrive``: GoogleDrive
+
+``ODrive``: OneDrive
+
+| Backbone | Dataset | Method  | LFW   | CFP-FP | AgeDB-30 | MegaFace | Link(mxnet)                                                  |
 | -------- | ------- | ------- | ----- | ------ | -------- | -------- | ------------------------------------------------------------ |
-| R100     | MS1MV2  | ArcFace | 99.77 | 98.27  | 98.28    | 98.47    | [BaiduDrive](https://pan.baidu.com/s/1wuRTf2YIsKt76TxFufsRNA) |
-| MFN      | MS1MV1  | ArcFace | 99.50 | 88.94  | 95.91    | -        | [BaiduDrive](https://pan.baidu.com/s/1If28BkHde4fiuweJrbicVA) |
+| R100     | MS1MV2  | ArcFace | 99.77 | 98.27  | 98.28    | 98.47    | [BDrive](https://pan.baidu.com/s/1wuRTf2YIsKt76TxFufsRNA) |
+| MFN      | MS1MV1  | ArcFace | 99.50 | 88.94  | 95.91    | -        | [BDrive](https://pan.baidu.com/s/1If28BkHde4fiuweJrbicVA) |
 
 | Backbone | Dataset   | Method  | LFW  | CFP-FP | AgeDB-30 | African | Caucasian | South Asian | East Asian | MR-All | link(onnx)                                                   |
 | -------- | --------- | ------- | ---- | ------ | -------- | ------- | --------- | ----------- | ---------- | ------ | ------------------------------------------------------------ |
