@@ -1,6 +1,6 @@
 # InsightFace Model Zoo
 
-**ALL models are available for non-commercial research purposes only.**
+:bell:   **ALL models are available for non-commercial research purposes only.**
 
 ## 0. Python Package models
 
