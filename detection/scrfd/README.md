@@ -61,7 +61,7 @@ Please refer to [mmdetection](https://github.com/open-mmlab/mmdetection/blob/mas
 
 ### WIDERFace:
   1. Download WIDERFace datasets and put it under `data/retinaface`.
-  2. Download annotation files from [onedrive](https://1drv.ms/u/s!AswpsDO2toNKrU5PF53RsjTWACnc?e=jbQHnr) and put them under `data/retinaface/`
+  2. Download annotation files from [gdrive](https://drive.google.com/file/d/1UW3KoApOhusyqSHX96yEDRYiNkd3Iv3Z/view?usp=sharing) and put them under `data/retinaface/`
  
    ```
      data/retinaface/
