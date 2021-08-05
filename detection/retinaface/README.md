@@ -10,7 +10,7 @@ RetinaFace is a practical single-stage [SOTA](http://shuoyang1213.me/WIDERFACE/W
 
 ## Data
 
-1. Download our annotations (face bounding boxes & five facial landmarks) from [baidu cloud](https://pan.baidu.com/s/1Laby0EctfuJGgGMgRRgykA) or [onedrive](https://1drv.ms/u/s!AswpsDO2toNKrjOqf9r9HHzG63jJ?e=a3ifuG)
+1. Download our annotations (face bounding boxes & five facial landmarks) from [baidu cloud](https://pan.baidu.com/s/1Laby0EctfuJGgGMgRRgykA) or [gdrive](https://drive.google.com/file/d/1BbXxIiY-F74SumCNG6iwmJJ5K3heoemT/view?usp=sharing)
 
 2. Download the [WIDERFACE](http://shuoyang1213.me/WIDERFACE/WiderFace_Results.html) dataset.
 
