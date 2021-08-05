@@ -15,11 +15,17 @@ Almost all ONNX models in our model_zoo can be called by python library.
 
 ##  1. Face Recognition models.
 
+Method is margin based softmax and backbone is R50 in following tables if not specified.
+
 ``MFN``: MobileFaceNet
 
 ``MS1MV2``: MS1M-ArcFace
 
 ``MS1MV3``: MS1M-RetinaFace
+
+``MS1M_MegaFace``: MS1MV2+MegaFace_train
+
+``_pfc``: using Partial FC, with sample-ratio=0.1
 
 ``MegaFace``: MegaFace identification test, with gallery=1e6.
 
@@ -38,11 +44,6 @@ Almost all ONNX models in our model_zoo can be called by python library.
 
 
 
-Method is margin based softmax and backbone is R50 in following tables if not specified.
-
-``MS1M_MegaFace``: MS1MV2+MegaFace_train
-
-``_pfc``: using Partial FC, with sample-ratio=0.1
 
 
 | Backbone | Dataset   | MR-ALL | African | Caucasian | South Asian | East Asian | Link(onnx)                                                            |
@@ -57,6 +58,8 @@ Method is margin based softmax and backbone is R50 in following tables if not sp
 | R34      | Glint360K | 83.015 | 79.907  | 88.620    | 86.815      | 60.604     | [GDrive](https://drive.google.com/file/d/1G1oeLkp_b3JA_z4wGs62RdLpg-u_Ov2Y/view?usp=sharing) |
 | R50      | Glint360K | 87.077 | 85.272  | 91.617    | 90.541      | 66.813     | [GDrive](https://drive.google.com/file/d/1MpRhM76OQ6cTzpr2ZSpHp2_CP19Er4PI/view?usp=sharing) |
 | R100     | Glint360K | 90.659 | 89.488  | 94.285    | 93.434      | 72.528     | [GDrive](https://drive.google.com/file/d/1Gh8C-bwl2B90RDrvKJkXafvZC3q4_H_z/view?usp=sharing) |
+
+
 
 
 
