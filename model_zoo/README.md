@@ -1,5 +1,7 @@
 # InsightFace Model Zoo
 
+**ALL models are available for non-commercial research purposes only.**
+
 ## 0. Python Package models
 
 To check the detail of insightface python package, please see [here](../python-package).
