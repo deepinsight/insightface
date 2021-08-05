@@ -52,7 +52,10 @@ Method is margin based softmax and backbone is R50 in following tables by defaul
 | R50      | Glint360K | 87.077 | 85.272  | 91.617    | 90.541      | 66.813     | [GDrive](https://drive.google.com/file/d/1MpRhM76OQ6cTzpr2ZSpHp2_CP19Er4PI/view?usp=sharing) |
 | R100     | Glint360K | 90.659 | 89.488  | 94.285    | 93.434      | 72.528     | [GDrive](https://drive.google.com/file/d/1Gh8C-bwl2B90RDrvKJkXafvZC3q4_H_z/view?usp=sharing) |
 
-``+pfc``: using Partial FC
+``MS1M_MegaFace``: MS1MV2+MegaFace_train
+
+``_pfc``: using Partial FC, sample-ratio=0.1
+
 | Dataset           | MR-ALL | African | Caucasian | South Asian | East Asian | LFW   | CFP-FP | AgeDB-30 | IJB-C(E4) | link(onnx) |
 | :--------         | ------ | ------- | ----      | ------      | --------   | ----- | ------ | -------- | --------- | --- |
 | CISIA	            | 36.794 | 42.550  | 55.825    | 49.618      | 19.611     | 99.450| 95.214 | 94.900   | 87.220    | |
