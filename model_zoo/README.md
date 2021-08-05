@@ -42,7 +42,7 @@ Method is margin based softmax and backbone is R50 in following tables if not sp
 
 ``MS1M_MegaFace``: MS1MV2+MegaFace_train
 
-``_pfc``: using Partial FC, sample-ratio=0.1
+``_pfc``: using Partial FC, with sample-ratio=0.1
 
 
 | Backbone | Dataset   | MR-ALL | African | Caucasian | South Asian | East Asian | Link(onnx)                                                            |
@@ -60,26 +60,26 @@ Method is margin based softmax and backbone is R50 in following tables if not sp
 
 
 
-| Dataset           | MR-ALL | African | Caucasian | South Asian | East Asian | LFW   | CFP-FP | AgeDB-30 | IJB-C(E4) | link(onnx) |
+| Dataset           | MR-ALL | African | Caucasian | South Asian | East Asian | LFW   | CFP-FP | AgeDB-30 | IJB-C(E4) | Link(onnx) |
 | :--------         | ------ | ------- | ----      | ------      | --------   | ----- | ------ | -------- | --------- | --- |
-| CISIA	            | 36.794 | 42.550  | 55.825    | 49.618      | 19.611     | 99.450| 95.214 | 94.900   | 87.220    | |
-| CISIA_pfc	        | 37.107 | 38.934  | 53.823    | 48.674      | 19.927     | 99.367| 95.429 | 94.600   | 84.970    | |
-| VGG2	            | 38.578 | 35.259  | 54.304    | 44.081      | 24.095     | 99.550| 97.410 | 95.080   | 91.220    | |
-| VGG2_pfc	        | 40.673 | 36.767  | 60.180    | 49.039      | 24.255     | 99.683| 98.529 | 95.400   | 92.490    | |
-| GlintAsia	        | 62.663 | 49.531  | 64.829    | 57.984      | 61.743     | 99.583| 93.186 | 95.400   | 91.500    | |
-| GlintAsia_pfc	    | 63.149 | 50.366  | 65.227    | 57.936      | 61.820     | 99.650| 93.029 | 95.233   | 91.140    | |
-| MS1MV2	        | 77.696 | 74.596  | 84.126    | 82.041      | 51.105     | 99.833| 98.083 | 98.083   | 96.140    | |
-| MS1MV2_pfc	    | 77.738 | 74.728  | 84.883    | 82.798      | 52.507     | 99.783| 98.071 | 98.017   | 96.080    | |
-| MS1M_MegaFace	    | 78.372 | 74.138  | 82.251    | 77.223      | 60.203     | 99.750| 97.557 | 97.400   | 95.350    | |
-| MS1M_MegaFace_pfc | 78.773 | 73.690  | 82.947    | 78.793      | 57.566     | 99.800| 97.870 | 97.733   | 95.400    | |
-| MS1MV3	        | 82.522 | 77.172  | 87.028    | 86.006      | 60.625     | 99.800| 98.529 | 98.267   | 96.580    | |
-| MS1MV3_pfc	    | 81.683 | 78.126  | 87.286    | 85.542      | 58.925     | 99.800| 98.443 | 98.167   | 96.430    | |
-| Glint360k	        | 86.789 | 84.749  | 91.414    | 90.088      | 66.168     | 99.817| 99.143 | 98.450   | 97.130    | |
-| Glint360k_pfc	    | 87.077 | 85.272  | 91.616    | 90.541      | 66.813     | 99.817| 99.143 | 98.450   | 97.020    | |
-| WebFace12M	    | 90.566 | 89.355  | 94.177    | 92.358      | 73.852     | 99.800| 99.200 | 98.100   | 97.120    | |
-| WebFace12M_pfc    | 89.951 | 89.301  | 94.016    | 92.381      | 73.007     | 99.817| 99.143 | 98.117   | 97.010    | |
-| Average	        | 69.247 | 65.908  | 77.121    | 72.819      | 52.014     | 99.706| 97.374 | 96.962   | 93.925    | |
-| Average_pfc	    | 69.519 | 65.898  | 77.497    | 73.213      | 51.853     | 99.715| 97.457 | 96.965   | 93.818    | |
+| CISIA	            | 36.794 | 42.550  | 55.825    | 49.618      | 19.611     | 99.450| 95.214 | 94.900   | 87.220    | [GDrive](https://drive.google.com/file/d/1km-cVFvUAPU1UumLLi1fIRasdg6VA-vM/view?usp=sharing) |
+| CISIA_pfc	        | 37.107 | 38.934  | 53.823    | 48.674      | 19.927     | 99.367| 95.429 | 94.600   | 84.970    | [GDrive](https://drive.google.com/file/d/1z8linstTZopL5Yy7NOUgVVtgzGtsu1LM/view?usp=sharing) |
+| VGG2	            | 38.578 | 35.259  | 54.304    | 44.081      | 24.095     | 99.550| 97.410 | 95.080   | 91.220    | [GDrive](https://drive.google.com/file/d/1UwyVIDSNDkHKClBANrWi8qpMU4nXizT6/view?usp=sharing) |
+| VGG2_pfc	        | 40.673 | 36.767  | 60.180    | 49.039      | 24.255     | 99.683| 98.529 | 95.400   | 92.490    | [GDrive](https://drive.google.com/file/d/1uW0EsctVyPklSyXMXF39AniIhSRXCRtp/view?usp=sharing) |
+| GlintAsia	        | 62.663 | 49.531  | 64.829    | 57.984      | 61.743     | 99.583| 93.186 | 95.400   | 91.500    | [GDrive](https://drive.google.com/file/d/1IyXh7m1HMwTZw4B5N1WMPIsN-S9kdS95/view?usp=sharing) |
+| GlintAsia_pfc	    | 63.149 | 50.366  | 65.227    | 57.936      | 61.820     | 99.650| 93.029 | 95.233   | 91.140    | [GDrive](https://drive.google.com/file/d/1CTjalggNucgPkmpFi5ij-NGG1Fy9sL5r/view?usp=sharing) |
+| MS1MV2	        | 77.696 | 74.596  | 84.126    | 82.041      | 51.105     | 99.833| 98.083 | 98.083   | 96.140    | [GDrive](https://drive.google.com/file/d/1rd4kbiXtXBTWE8nP7p4OTv_CAp2FUa1i/view?usp=sharing) |
+| MS1MV2_pfc	    | 77.738 | 74.728  | 84.883    | 82.798      | 52.507     | 99.783| 98.071 | 98.017   | 96.080    | [GDrive](https://drive.google.com/file/d/1ryrXenGQa-EGyk64mVaG136ihNUBmNMW/view?usp=sharing) |
+| MS1M_MegaFace	    | 78.372 | 74.138  | 82.251    | 77.223      | 60.203     | 99.750| 97.557 | 97.400   | 95.350    | [GDrive](https://drive.google.com/file/d/1c2JG0StcTMDrL4ywz3qWTN_9io3lo_ER/view?usp=sharing) |
+| MS1M_MegaFace_pfc | 78.773 | 73.690  | 82.947    | 78.793      | 57.566     | 99.800| 97.870 | 97.733   | 95.400    | [GDrive](https://drive.google.com/file/d/1BnG48LS_HIvYlSbSnP_LzpO3xjx0_rpu/view?usp=sharing) |
+| MS1MV3	        | 82.522 | 77.172  | 87.028    | 86.006      | 60.625     | 99.800| 98.529 | 98.267   | 96.580    | [GDrive](https://drive.google.com/file/d/1Tqorubgcl0qfjbjEM_Y9EDmjG5tCWzbr/view?usp=sharing) |
+| MS1MV3_pfc	    | 81.683 | 78.126  | 87.286    | 85.542      | 58.925     | 99.800| 98.443 | 98.167   | 96.430    | [GDrive](https://drive.google.com/file/d/15jrHCqhEmoSZ93kKL9orVMhbKfNWAhp-/view?usp=sharing) |
+| Glint360k	        | 86.789 | 84.749  | 91.414    | 90.088      | 66.168     | 99.817| 99.143 | 98.450   | 97.130    | [GDrive](https://drive.google.com/file/d/1gnt6P3jaiwfevV4hreWHPu0Mive5VRyP/view?usp=sharing) |
+| Glint360k_pfc	    | 87.077 | 85.272  | 91.616    | 90.541      | 66.813     | 99.817| 99.143 | 98.450   | 97.020    | [GDrive](https://drive.google.com/file/d/164o2Ct42tyJdQjckeMJH2-7KTXolu-EP/view?usp=sharing) |
+| WebFace12M	    | 90.566 | 89.355  | 94.177    | 92.358      | 73.852     | 99.800| 99.200 | 98.100   | 97.120    | [GDrive](https://drive.google.com/file/d/1N0GL-8ehw_bz2eZQWz2b0A5XBdXdxZhg/view?usp=sharing) |
+| WebFace12M_pfc    | 89.951 | 89.301  | 94.016    | 92.381      | 73.007     | 99.817| 99.143 | 98.117   | 97.010    | [GDrive](https://drive.google.com/file/d/11TASXssTnwLY1ZqKlRjsJiV-1nWu9pDY/view?usp=sharing) |
+| Average	        | 69.247 | 65.908  | 77.121    | 72.819      | 52.014     | 99.706| 97.374 | 96.962   | 93.925    |  |
+| Average_pfc	    | 69.519 | 65.898  | 77.497    | 73.213      | 51.853     | 99.715| 97.457 | 96.965   | 93.818    |  |
 
 
 ## 2. Face Detection models.
