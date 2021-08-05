@@ -34,18 +34,23 @@ To install: ``pip install -U insightface``
 | R100     | MS1MV2  | ArcFace | 99.77 | 98.27  | 98.28    | 98.47    | [BDrive](https://pan.baidu.com/s/1wuRTf2YIsKt76TxFufsRNA) |
 | MFN      | MS1MV1  | ArcFace | 99.50 | 88.94  | 95.91    | -        | [BDrive](https://pan.baidu.com/s/1If28BkHde4fiuweJrbicVA) |
 
-| Backbone | Dataset   | Method  | LFW  | CFP-FP | AgeDB-30 | African | Caucasian | South Asian | East Asian | MR-All | link(onnx)                                                   |
-| -------- | --------- | ------- | ---- | ------ | -------- | ------- | --------- | ----------- | ---------- | ------ | ------------------------------------------------------------ |
-| R100     | Casia     | ArcFace |      |        |          | 39.666  | 53.933    | 47.807      | 21.572     | 42.735 | [download](https://1drv.ms/u/s!AswpsDO2toNKrUJpk8zC61HVN7Kg?e=zE9JDd) |
-| R100     | MS1MV2    | ArcFace |      |        |          | 79.117  | 87.176    | 85.501      | 55.807     | 80.725 | [download](https://1drv.ms/u/s!AswpsDO2toNKrUTlYEHJCHg3UYM-?e=ihxMpS) |
-| R18      | MS1MV3    | ArcFace |      |        |          | 62.613  | 75.125    | 70.213      | 43.859     | 68.326 | [download](https://1drv.ms/u/s!AswpsDO2toNKrTxlT6w1Jo02yzSh?e=KDhFAA) |
-| R34      | MS1MV3    | ArcFace |      |        |          | 71.644  | 83.291    | 80.084      | 53.712     | 77.365 | [download](https://1drv.ms/u/s!AswpsDO2toNKrT2O5pgyVtwnjeMq?e=16S8LI) |
-| R50      | MS1MV3    | ArcFace |      |        |          | 75.488  | 86.115    | 84.305      | 57.352     | 80.533 | [download](https://1drv.ms/u/s!AswpsDO2toNKrUUWd5i3a5OlFpM_?e=ExBDBN) |
-| R100     | MS1MV3    | ArcFace |      |        |          | 81.083  | 89.040    | 88.082      | 62.193     | 84.312 | [download](https://1drv.ms/u/s!AswpsDO2toNKrUPwyqWvNXUlNd3P?e=pTLw9A) |
-| R18      | Glint360K | ArcFace |      |        |          | 68.230  | 80.575    | 75.852      | 47.831     | 72.074 | [download](https://1drv.ms/u/s!AswpsDO2toNKrT5ey4lCqFzlpzDd?e=VWP28J) |
-| R34      | Glint360K | ArcFace |      |        |          | 79.907  | 88.620    | 86.815      | 60.604     | 83.015 | [download](https://1drv.ms/u/s!AswpsDO2toNKrUBcgGkiuUS11Hsd?e=ISGDnP) |
-| R50      | Glint360K | ArcFace |      |        |          | 85.272  | 91.617    | 90.541      | 66.813     | 87.077 | [download](https://1drv.ms/u/s!AswpsDO2toNKrT8jbvHxjqCY0d08?e=igfdrd) |
-| R100     | Glint360K | ArcFace |      |        |          | 89.488  | 94.285    | 93.434      | 72.528     | 90.659 | [download](https://1drv.ms/u/s!AswpsDO2toNKrUFgLEIj-mnkb51b?e=vWqy2q) |
+
+
+Method is margin based softmax and backbone is R50 in following tables by default.
+
+
+| Backbone | Dataset   | MR-ALL | African | Caucasian | South Asian | East Asian | Link(onnx)                                                            |
+|----------|-----------|--------|---------|-----------|-------------|------------|-----------------------------------------------------------------------|
+| R100     | Casia     | 42.735 | 39.666  | 53.933    | 47.807      | 21.572     | [GDrive](https://drive.google.com/file/d/1WOrOK-qZO5FcagscCI3td6nnABUPPepD/view?usp=sharing) |
+| R100     | MS1MV2    | 80.725 | 79.117  | 87.176    | 85.501      | 55.807     | [GDrive](https://drive.google.com/file/d/1772DTho9EG047KNUIv2lop2e7EobiCFn/view?usp=sharing) |
+| R18      | MS1MV3    | 68.326 | 62.613  | 75.125    | 70.213      | 43.859     | [GDrive](https://drive.google.com/file/d/1dWZb0SLcdzr-toUzsVZ1zogn9dEIW1Dk/view?usp=sharing) |
+| R34      | MS1MV3    | 77.365 | 71.644  | 83.291    | 80.084      | 53.712     | [GDrive](https://drive.google.com/file/d/1ON6ImX-AigDKAi4pelFPf12vkJVyGFKl/view?usp=sharing) |
+| R50      | MS1MV3    | 80.533 | 75.488  | 86.115    | 84.305      | 57.352     | [GDrive](https://drive.google.com/file/d/1FPldzmZ6jHfaC-R-jLkxvQRP-cLgxjCT/view?usp=sharing) |
+| R100     | MS1MV3    | 84.312 | 81.083  | 89.040    | 88.082      | 62.193     | [GDrive](https://drive.google.com/file/d/1fZOfvfnavFYjzfFoKTh5j1YDcS8KCnio/view?usp=sharing) |
+| R18      | Glint360K | 72.074 | 68.230  | 80.575    | 75.852      | 47.831     | [GDrive](https://drive.google.com/file/d/1Z0eoO1Wqv32K8TdFHKqrlrxv46_W4390/view?usp=sharing) |
+| R34      | Glint360K | 83.015 | 79.907  | 88.620    | 86.815      | 60.604     | [GDrive](https://drive.google.com/file/d/1G1oeLkp_b3JA_z4wGs62RdLpg-u_Ov2Y/view?usp=sharing) |
+| R50      | Glint360K | 87.077 | 85.272  | 91.617    | 90.541      | 66.813     | [GDrive](https://drive.google.com/file/d/1MpRhM76OQ6cTzpr2ZSpHp2_CP19Er4PI/view?usp=sharing) |
+| R100     | Glint360K | 90.659 | 89.488  | 94.285    | 93.434      | 72.528     | [GDrive](https://drive.google.com/file/d/1Gh8C-bwl2B90RDrvKJkXafvZC3q4_H_z/view?usp=sharing) |
 
 ``+pfc``: using Partial FC
 | Dataset           | MR-ALL | African | Caucasian | South Asian | East Asian | LFW   | CFP-FP | AgeDB-30 | IJB-C(E4) | link(onnx) |
