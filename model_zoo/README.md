@@ -11,6 +11,8 @@ To install: ``pip install -U insightface``
 | -------------- | --------------- | ------------------- | ------------ | ---------- |
 | **antelopev2** | SCRFD-10GF      | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age |
 
+Almost all ONNX models in our model_zoo can be called by python library.
+
 ##  1. Face Recognition models.
 
 ``MFN``: MobileFaceNet
@@ -36,7 +38,11 @@ To install: ``pip install -U insightface``
 
 
 
-Method is margin based softmax and backbone is R50 in following tables by default.
+Method is margin based softmax and backbone is R50 in following tables if not specified.
+
+``MS1M_MegaFace``: MS1MV2+MegaFace_train
+
+``_pfc``: using Partial FC, sample-ratio=0.1
 
 
 | Backbone | Dataset   | MR-ALL | African | Caucasian | South Asian | East Asian | Link(onnx)                                                            |
@@ -52,9 +58,7 @@ Method is margin based softmax and backbone is R50 in following tables by defaul
 | R50      | Glint360K | 87.077 | 85.272  | 91.617    | 90.541      | 66.813     | [GDrive](https://drive.google.com/file/d/1MpRhM76OQ6cTzpr2ZSpHp2_CP19Er4PI/view?usp=sharing) |
 | R100     | Glint360K | 90.659 | 89.488  | 94.285    | 93.434      | 72.528     | [GDrive](https://drive.google.com/file/d/1Gh8C-bwl2B90RDrvKJkXafvZC3q4_H_z/view?usp=sharing) |
 
-``MS1M_MegaFace``: MS1MV2+MegaFace_train
 
-``_pfc``: using Partial FC, sample-ratio=0.1
 
 | Dataset           | MR-ALL | African | Caucasian | South Asian | East Asian | LFW   | CFP-FP | AgeDB-30 | IJB-C(E4) | link(onnx) |
 | :--------         | ------ | ------- | ----      | ------      | --------   | ----- | ------ | -------- | --------- | --- |
