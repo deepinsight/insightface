@@ -42,6 +42,8 @@ Method is margin based softmax and backbone is R50 in following tables if not sp
 | -------- | ------- | ------- | ----- | ------ | -------- | -------- | ------------------------------------------------------------ |
 | R100     | MS1MV2  | ArcFace | 99.77 | 98.27  | 98.28    | 98.47    | [BDrive](https://pan.baidu.com/s/1wuRTf2YIsKt76TxFufsRNA), [GDrive](https://drive.google.com/file/d/1Hc5zUfBATaXUgcU2haUNa7dcaZSw95h2/view?usp=sharing) |
 | MFN      | MS1MV1  | ArcFace | 99.50 | 88.94  | 95.91    | -        | [BDrive](https://pan.baidu.com/s/1If28BkHde4fiuweJrbicVA), [GDrive](https://drive.google.com/file/d/1RHyJIeYuHduVDDBTn3ffpYEZoXWRamWI/view?usp=sharing) |
+| MFN (paddle)     | MS1MV2  | ArcFace | 99.45 | 93.43  | 96.13    |  -   | [pretrained model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/arcface_iresnet50_v1.0_pretrained.tar), [inference model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/mobileface_v1.0_infer.tar) |
+| iResNet50 (paddle)     | MS1MV2  | ArcFace | 99.73 | 97.43  | 97.88    |  -   | [pretrained model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/MobileFaceNet_128_v1.0_pretrained.tar), [inference model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/arcface_iresnet50_v1.0_infer.tar) |
 
 
 
@@ -98,6 +100,7 @@ In RetinaFace, mAP was evaluated with multi-scale testing.
 | ------------------------ | -------- | ---------- | -------- | ------------------------------------------------------------ |
 | RetinaFace-R50           | 96.5     | 95.6       | 90.4     | [BDrive](https://pan.baidu.com/s/1C6nKq122gJxRhb37vK0_LQ), [GDrive](https://drive.google.com/file/d/1wm-6K688HQEx_H90UdAIuKv-NAsKBu85/view?usp=sharing) |
 | RetinaFace-m025(yangfly) | -        | -          | 82.5     | [BDrive](https://pan.baidu.com/s/1P1ypO7VYUbNAezdvLm2m9w)(nzof), [GDrive](https://drive.google.com/drive/folders/1OTXuAUdkLVaf78iz63D1uqGLZi4LbPeL?usp=sharing) |
+| BlazeFace-FPN-SSH	(paddle)           | 91.9     | 89.8       | 81.7%     | [pretrained model](https://paddledet.bj.bcebos.com/models/blazeface_fpn_ssh_1000e.pdparams), [inference model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar) |
 
 ### 2.2 SCRFD
 
