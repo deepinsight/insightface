@@ -37,6 +37,8 @@ We use a large dataset which contains about 2 millions identities to simulate re
 |------------|------------|------------|------------|------|------|------------|-------------|
 | WebFace40M | 2 Millions | IResNet-50 | 512        | ×    | ×    | ×          | ~1750       |
 | WebFace40M | 2 Millions | IResNet-50 | 512        | ×    | √    | ×          | ~1810       |
+| WebFace40M | 2 Millions | IResNet-50 | 512        | √    | √    | ×          | ~2056       |
+| WebFace40M | 2 Millions | IResNet-50 | 512        | √    | √    | √          | ~2850       |
 | WebFace40M | 2 Millions | IResNet-50 | 1024       | √    | √    | ×          | ~2810       |
 | WebFace40M | 2 Millions | IResNet-50 | 1024       | √    | √    | √          | ~4220       |
 | WebFace40M | 2 Millions | IResNet-50 | 2048       | √    | √    | √          | ~5330       |
