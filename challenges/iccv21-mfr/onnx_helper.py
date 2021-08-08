@@ -8,24 +8,39 @@ import cv2
 import sys
 import onnxruntime
 import onnx
+import argparse
 from onnx import numpy_helper
-
+from insightface.data import get_image
 
 class ArcFaceORT:
-    def __init__(self, model_path):
+    def __init__(self, model_path, cpu=False):
         self.model_path = model_path
+        self.cpu = cpu
 
-    #return error message, return None if success
-    def check(self, track='ms1m', test_img = None):
+    #input_size is (w,h), return error message, return None if success
+    def check(self, track='cfat', test_img = None):
         #default is cfat
         max_model_size_mb=1024
         max_feat_dim=512
-        max_time_cost=10
-
-        if track.startswith('glint'):
+        max_time_cost=15
+        if track.startswith('ms1m'):
+            max_model_size_mb=1024
+            max_feat_dim=512
+            max_time_cost=10
+        elif track.startswith('glint'):
             max_model_size_mb=1024
             max_feat_dim=1024
             max_time_cost=20
+        elif track.startswith('cfat'):
+            max_model_size_mb = 1024
+            max_feat_dim = 512
+            max_time_cost = 15
+        elif track.startswith('unconstrained'):
+            max_model_size_mb=1024
+            max_feat_dim=1024
+            max_time_cost=30
+        else:
+            return "track not found"
 
         if not os.path.exists(self.model_path):
             return "model_path not exists"
@@ -33,19 +48,18 @@ class ArcFaceORT:
             return "model_path should be directory"
         onnx_files = []
         for _file in os.listdir(self.model_path):
-            print('file_:', _file)
             if _file.endswith('.onnx'):
                 onnx_files.append(osp.join(self.model_path, _file))
         if len(onnx_files)==0:
             return "do not have onnx files"
         self.model_file = sorted(onnx_files)[-1]
         print('use onnx-model:', self.model_file)
-        session = onnxruntime.InferenceSession(self.model_file, None)
         try:
             session = onnxruntime.InferenceSession(self.model_file, None)
         except:
             return "load onnx failed"
-
+        if self.cpu:
+            session.set_providers(['CPUExecutionProvider'])
         input_cfg = session.get_inputs()[0]
         input_shape = input_cfg.shape
         print('input-shape:', input_shape)
@@ -64,7 +78,8 @@ class ArcFaceORT:
                 session = onnxruntime.InferenceSession(self.model_file, None)
             except:
                 return "load onnx failed"
-
+            if self.cpu:
+                session.set_providers(['CPUExecutionProvider'])
             input_cfg = session.get_inputs()[0]
             input_shape = input_cfg.shape
             print('new-input-shape:', input_shape)
@@ -90,6 +105,15 @@ class ArcFaceORT:
 
         input_size = (112,112)
         self.crop = None
+        if track=='cfat':
+            crop_file = osp.join(self.model_path, 'crop.txt')
+            if osp.exists(crop_file):
+                lines = open(crop_file,'r').readlines()
+                if len(lines)!=6:
+                    return "crop.txt should contain 6 lines"
+                lines = [int(x) for x in lines]
+                self.crop = lines[:4]
+                input_size = tuple(lines[4:6])
         if input_size!=self.image_size:
             return "input-size is inconsistant with onnx model input, %s vs %s"%(input_size, self.image_size)
 
@@ -99,6 +123,14 @@ class ArcFaceORT:
 
         input_mean = None
         input_std = None
+        if track=='cfat':
+            pn_file = osp.join(self.model_path, 'pixel_norm.txt')
+            if osp.exists(pn_file):
+                lines = open(pn_file,'r').readlines()
+                if len(lines)!=2:
+                    return "pixel_norm.txt should contain 2 lines"
+                input_mean = float(lines[0])
+                input_std = float(lines[1])
         if input_mean is not None or input_std is not None:
             if input_mean is None or input_std is None:
                 return "please set input_mean and input_std simultaneously"
@@ -109,9 +141,10 @@ class ArcFaceORT:
                 print(nid, node.name)
                 if node.name.startswith('Sub') or node.name.startswith('_minus'):
                     find_sub = True
-                if node.name.startswith('Mul') or node.name.startswith('_mul'):
+                if node.name.startswith('Mul') or node.name.startswith('_mul') or node.name.startswith('Div'):
                     find_mul = True
             if find_sub and find_mul:
+                print("find sub and mul")
                 #mxnet arcface model
                 input_mean = 0.0
                 input_std = 1.0
@@ -122,16 +155,25 @@ class ArcFaceORT:
         self.input_std = input_std
         for initn in graph.initializer:
             weight_array = numpy_helper.to_array(initn)
-#             if weight_array.dtype!=np.float32:
-#                 return 'all weights should be float32 dtype'
             dt = weight_array.dtype
-            if dt.itemsize < 4:
+            if dt.itemsize<4:
                 return 'invalid weight type - (%s:%s)' % (initn.name, dt.name)
         if test_img is None:
-            test_img = np.random.randint(0, 255, size=(self.image_size[1], self.image_size[0], 3), dtype=np.uint8 )
+            test_img = get_image('Tom_Hanks_54745')
+            test_img = cv2.resize(test_img, self.image_size)
         else:
             test_img = cv2.resize(test_img, self.image_size)
         feat, cost = self.benchmark(test_img)
+        batch_result = self.check_batch(test_img)
+        batch_result_sum = float(np.sum(batch_result))
+        if batch_result_sum in [float('inf'), -float('inf')] or batch_result_sum != batch_result_sum:
+            print(batch_result)
+            print(batch_result_sum)
+            return "batch result output contains NaN!"
+
+        if len(feat.shape) < 2:
+           return "the shape of the feature must be two, but get {}".format(str(feat.shape))
+
         if feat.shape[1] > max_feat_dim:
             return "max feat dim exceed, given %d"%feat.shape[1]
         self.feat_dim = feat.shape[1]
@@ -141,6 +183,24 @@ class ArcFaceORT:
         self.cost_ms = cost_ms
         print('check stat:, model-size-mb: %.4f, feat-dim: %d, time-cost-ms: %.4f, input-mean: %.3f, input-std: %.3f'%(self.model_size_mb, self.feat_dim, self.cost_ms, self.input_mean, self.input_std))
         return None
+
+    def check_batch(self, img):
+        if not isinstance(img, list):
+            imgs = [img, ] * 32
+        if self.crop is not None:
+            nimgs = []
+            for img in imgs:
+                nimg = img[self.crop[1]:self.crop[3], self.crop[0]:self.crop[2], :]
+                if nimg.shape[0] != self.image_size[1] or nimg.shape[1] != self.image_size[0]:
+                    nimg = cv2.resize(nimg, self.image_size)
+                nimgs.append(nimg)
+            imgs = nimgs
+        blob = cv2.dnn.blobFromImages(
+            images=imgs, scalefactor=1.0 / self.input_std, size=self.image_size,
+            mean=(self.input_mean, self.input_mean, self.input_mean), swapRB=True)
+        net_out = self.session.run(self.output_names, {self.input_name: blob})[0]
+        return net_out
+
 
     def meta_info(self):
         return {'model-size-mb':self.model_size_mb, 'feature-dim':self.feat_dim, 'infer': self.cost_ms}
@@ -182,3 +242,12 @@ class ArcFaceORT:
         return net_out, cost
 
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='')
+    # general
+    parser.add_argument('workdir', help='submitted work dir', type=str)
+    parser.add_argument('--track', help='track name, for different challenge', type=str, default='cfat')
+    args = parser.parse_args()
+    handler = ArcFaceORT(args.workdir)
+    err = handler.check(args.track)
+    print('err:', err)
