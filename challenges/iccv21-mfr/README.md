@@ -85,7 +85,7 @@ For ``Children`` set, TAR is measured on all-to-all 1:1 protocal, with FAR less 
 
 For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
 
-Similar to FRVT, participants are now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
+Participants are ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
 
 
 ## Baselines
