@@ -114,8 +114,8 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 ## Rules
 
 1. We have two sub-tracks, determined by the size of training dataset and inference time limitation.
-  * Sub-Track A: Use MS1M-V3 as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/challenges/iccv19-lfr), feature length must <= 512, and the inference time must <= 10ms on Tesla V100 GPU.
-  * Sub-Track B: Use Glint360K as training set, download: [ref-link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc), feature length must <= 1024, and the inference time must <= 20ms on Tesla V100 GPU.
+  * Sub-Track A: Use MS1M-V3 as training set, download: [ref-link](https://github.com/deepinsight/insightface/blob/master/recognition/_datasets_/README.md#ms1m-retinaface), feature length must <= 512, and the inference time must <= 10ms on Tesla V100 GPU.
+  * Sub-Track B: Use Glint360K as training set, download: [ref-link](https://github.com/deepinsight/insightface/blob/master/recognition/_datasets_/README.md#deepglint-181k-ids675m-images-8), feature length must <= 1024, and the inference time must <= 20ms on Tesla V100 GPU.
 2. Training set and testing set are both aligned to 112x112, re-alignment is prohibited.
 3. Mask data-augmentation is allowed, such as [this](../../recognition/_tools_). The applied mask augmentation tool should be reproducible. 
 4. External dataset and pretrained models are both prohibited.
