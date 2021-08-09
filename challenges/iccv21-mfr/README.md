@@ -156,6 +156,8 @@ Server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 ## Sponsors
 
 (in alphabetical order)
+ 
+**[Ant Group](https://www.antgroup.com/)**
 
 **[DeepGlint](http://www.deepglint.com/)**
 
