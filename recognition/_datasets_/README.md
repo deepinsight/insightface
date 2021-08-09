@@ -38,16 +38,16 @@
 
 [GDrive](https://drive.google.com/file/d/1JgmzL9OLTqDAZE86pBgETtSQL4USKTFy/view?usp=sharing)
 
-### Asian-Celeb (94K ids/2.8M images)[8] (Recommend)
+### Asian-Celeb (94K ids/2.8M images)[8]
 
 [Baidu](https://pan.baidu.com/s/12wSgofDy1flFf6lOyAxJRg)
 
-### Glint360K (360K ids/17M images)[17] (Recommend)
+### Glint360K (360K ids/17M images)[17]
 
 [Baidu](https://pan.baidu.com/s/1GsYqTTt7_Dn8BfxxsLFN0w) (code:o3az)    
 magnet uri: `magnet:?xt=urn:btih:E5F46EE502B9E76DA8CC3A0E4F7C17E4000C7B1E&dn=glint360k`
 
-### DeepGlint (181K ids/6.75M images) [8] (Recommend)
+### DeepGlint (181K ids/6.75M images) [8] 
 
 [baidu](https://pan.baidu.com/s/1yApUbklBgRgOyOV4o3J8Eg)
 
