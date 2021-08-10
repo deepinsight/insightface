@@ -157,7 +157,7 @@ Server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
 (in alphabetical order)
  
-**[Ant Group](https://www.antgroup.com/)**
+**[Ant Security Lab](https://www.antgroup.com/technology)**
 
 **[DeepGlint](http://www.deepglint.com/)**
 
