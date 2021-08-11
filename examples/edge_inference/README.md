@@ -1,26 +1,33 @@
-## Test report on a private ID2Wild dataset
+# InsightFace Edge Inference and Deployment
 
-#### 1:N Identification
+In this tutorial, we give examples and benchmarks of running insightface models on edge devices, mainly using 8-bits quantization technologies to make acceleration.
 
-| Device       | Model                 | Backend              | Time | Gallery | Rank1-Acc | TAR@FAR<=e-3 |
-| ------------ | --------------------- | -------------------- | ---- | ------- | --------- | ------------ |
-| NVIDIA-V100  | IR50-Glint360K        | onnxruntime          | 4ms  | 50K     | 80.94     | 30.77        |
-|              | IR50-Glint360K-Int8   | TensorRT             |      | 50K     |           |              |
-| Khadas-A311D | IR50-Glint360K-Uint8  | Tengine-Uint8        | 26ms | 50K     | 77.83     | 26.58        |
-| Khadas-A311D | IR50-Glint360K-Mixed* | Tengine              | 26ms | 50K     | 79.38     | 28.59        |
-| NXP-imx8p    | IR50-Glint360K-Uint8  | Tengine-Uint8        | 24ms | 50K     | 77.87     | 26.80        |
-| NXP-imx8p    | IR50-Glint360K-Mixed* | Tengine              | 24ms | 50K     | 79.42     | 28.39        |
-| RV1126       | IR50-Glint360K-Uint8  | RKNN                 | 38ms | 50K     | 75.60     | 24.23        |
-| RV1126       | R50-Glint360K-Mixed*  | RKNN                 | 38ms | 50K     | 77.82     | 26.30        |
-| Jetson NX    | IR50-Glint360K-Int8   | TRT 7.1.3-1,CUDA10.2 | 16ms | 50K     | 79.26     | 31.07        |
+## Recognition
 
-(Mixed* means use float model for gallery while uint8 model for probe images)
-
-(Result features are all in float32 type)
+In recognition tutorial, we use an open-source model: *IR50@Glint360K*, and use a hard private 1:N testset(N=50000). The metric contains Rank1 and TAR@FAR<=e-3.
 
 
 
-det: 11.5ms
+Granularity and symmetry both stand for quantization setting, and mostly defined by hardware providers. Symmetric uses INT8 to save quantization results while Asymmetric uses UINT8 type.
 
-Precision-Recall-Thresh: 0.9802412111880934 0.4781275423993992 0.5589999999999999
+| Hardware    | Provider | Type | Backend     | Time | Granularity | Symmetry   | Rank1-Acc | TAR@FAR<=e-3 |
+| ----------- | -------- | ---- | ----------- | ---- | ----------- | ---------- | --------- | ------------ |
+| NVIDIA-V100 | NVIDIA   | GPU  | onnxruntime | 4ms  | -           | -          | 80.94     | 30.77        |
+| Jetson NX   | NVIDIA   | GPU  | TensorRT    | 16ms | Per-channel | Symmetric  | 79.26     | 31.07        |
+| A311D       | Khadas   | ASIC | Tengine     | 26ms | Per-tensor  | Asymmetric | 77.83     | 26.58        |
+| A311D*      | Khadas   | ASIC | Tengine     | 26ms | Per-tensor  | Asymmetric | 79.38     | 28.59        |
+| NXP-IMX8P*  | NXP      | ASIC | Tengine     | 24ms | Per-tensor  | Asymmetric | 77.87     | 26.80        |
+| NXP-IMX8P*  | NXP      | ASIC | Tengine     | 24ms | Per-tensor  | Asymmetric | 79.42     | 28.39        |
+| RV1126      | Rockchip | ASIC | RKNN        | 38ms | Per-tensor  | Asymmetric | 75.60     | 24.23        |
+| RV1126*     | Rockchip | ASIC | RKNN        | 38ms | Per-tensor  | Asymmetric | 77.82     | 26.30        |
+
+***** means using float32 model for gallery while using quantized model for probe images. Result features are all in float32 type.
+
+The example code of running quantized networks can be now found at [Tengine](https://github.com/OAID/Tengine/tree/tengine-lite/demos). Later, we will put a copy here and give full tutorial on how to quantize recognition models from 0 to 1.
+
+
+
+## Detection
+
+TODO
 
