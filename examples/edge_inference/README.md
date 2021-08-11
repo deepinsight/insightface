@@ -16,12 +16,12 @@ Granularity and symmetry both stand for quantization setting, and mostly defined
 | Jetson NX   | NVIDIA   | GPU  | TensorRT    | 16ms | Per-channel | Symmetric  | 79.26     | 31.07        |
 | A311D       | Khadas   | ASIC | Tengine     | 26ms | Per-tensor  | Asymmetric | 77.83     | 26.58        |
 | A311D*      | Khadas   | ASIC | Tengine     | 26ms | Per-tensor  | Asymmetric | 79.38     | 28.59        |
-| NXP-IMX8P*  | NXP      | ASIC | Tengine     | 24ms | Per-tensor  | Asymmetric | 77.87     | 26.80        |
+| NXP-IMX8P   | NXP      | ASIC | Tengine     | 24ms | Per-tensor  | Asymmetric | 77.87     | 26.80        |
 | NXP-IMX8P*  | NXP      | ASIC | Tengine     | 24ms | Per-tensor  | Asymmetric | 79.42     | 28.39        |
 | RV1126      | Rockchip | ASIC | RKNN        | 38ms | Per-tensor  | Asymmetric | 75.60     | 24.23        |
 | RV1126*     | Rockchip | ASIC | RKNN        | 38ms | Per-tensor  | Asymmetric | 77.82     | 26.30        |
 
-***** means using float32 model for gallery while using quantized model for probe images. Result features are all in float32 type.
+Suffix-* means using float32 model for gallery while using quantized model for probe images. Result features are all in float32 type.
 
 The example code of running quantized networks can be now found at [Tengine](https://github.com/OAID/Tengine/tree/tengine-lite/demos). Later, we will put a copy here and give full tutorial on how to quantize recognition models from 0 to 1.
 
