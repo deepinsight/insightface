@@ -21,7 +21,7 @@ Granularity and symmetry both stand for quantization setting, and mostly defined
 | RV1126      | Rockchip | ASIC | RKNN        | 38ms | Per-tensor  | Asymmetric | 75.60     | 24.23        |
 | RV1126*     | Rockchip | ASIC | RKNN        | 38ms | Per-tensor  | Asymmetric | 77.82     | 26.30        |
 
-Suffix-* means using float32 model for gallery while using quantized model for probe images. Result features are all in float32 type.
+Suffix-* means mixed mode: using float32 model for gallery while using quantized model for probe images. Result features are all in float32 type.
 
 The example code of running quantized networks can be now found at [Tengine](https://github.com/OAID/Tengine/tree/tengine-lite/demos). Later, we will put a copy here and give full tutorial on how to quantize recognition models from 0 to 1.
 
