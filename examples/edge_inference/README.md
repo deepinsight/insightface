@@ -12,7 +12,7 @@ Granularity and symmetry both stand for quantization setting, and mostly defined
 
 | Hardware    | Provider | Type | Backend     | Time | Granularity | Symmetry   | Rank1-Acc | TAR@FAR<=e-3 |
 | ----------- | -------- | ---- | ----------- | ---- | ----------- | ---------- | --------- | ------------ |
-| NVIDIA-V100 | NVIDIA   | GPU  | onnxruntime | 4ms  | -           | -          | 80.94     | 30.77        |
+| V100        | NVIDIA   | GPU  | onnxruntime | 4ms  | -           | -          | 80.94     | 30.77        |
 | Jetson NX   | NVIDIA   | GPU  | TensorRT    | 16ms | Per-channel | Symmetric  | 79.26     | 31.07        |
 | A311D       | Khadas   | ASIC | Tengine     | 26ms | Per-tensor  | Asymmetric | 77.83     | 26.58        |
 | A311D*      | Khadas   | ASIC | Tengine     | 26ms | Per-tensor  | Asymmetric | 79.38     | 28.59        |
