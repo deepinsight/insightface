@@ -42,8 +42,8 @@ Method is margin based softmax and backbone is R50 in following tables if not sp
 | -------- | ------- | ------- | ----- | ------ | -------- | -------- | ------------------------------------------------------------ |
 | R100 (mxnet)     | MS1MV2  | ArcFace | 99.77 | 98.27  | 98.28    | 98.47    | [BDrive](https://pan.baidu.com/s/1wuRTf2YIsKt76TxFufsRNA), [GDrive](https://drive.google.com/file/d/1Hc5zUfBATaXUgcU2haUNa7dcaZSw95h2/view?usp=sharing) |
 | MFN (mxnet)     | MS1MV1  | ArcFace | 99.50 | 88.94  | 95.91    | -        | [BDrive](https://pan.baidu.com/s/1If28BkHde4fiuweJrbicVA), [GDrive](https://drive.google.com/file/d/1RHyJIeYuHduVDDBTn3ffpYEZoXWRamWI/view?usp=sharing) |
-| MFN (paddle)     | MS1MV2  | ArcFace | 99.45 | 93.43  | 96.13    |  -   | [pretrained model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/arcface_iresnet50_v1.0_pretrained.tar), [inference model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/mobileface_v1.0_infer.tar) |
-| iResNet50 (paddle)     | MS1MV2  | ArcFace | 99.73 | 97.43  | 97.88    |  -   | [pretrained model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/MobileFaceNet_128_v1.0_pretrained.tar), [inference model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/arcface_iresnet50_v1.0_infer.tar) |
+| MFN (paddle)     | MS1MV2  | ArcFace | 99.45 | 93.43  | 96.13    |  -   | [pretrained model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/MobileFaceNet_128_v1.0_pretrained.tar), [inference model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/mobileface_v1.0_infer.tar) |
+| iResNet50 (paddle)     | MS1MV2  | ArcFace | 99.73 | 97.43  | 97.88    |  -   | [pretrained model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/arcface_iresnet50_v1.0_pretrained.tar), [inference model](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/arcface_iresnet50_v1.0_infer.tar) |
 
 
 
