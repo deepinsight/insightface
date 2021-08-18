@@ -261,8 +261,6 @@ def test(data_set, backbone, batch_size, nfolds=10):
             _xnorm_cnt += 1
     _xnorm /= _xnorm_cnt
 
-    embeddings = embeddings_list[0].copy()
-    embeddings = sklearn.preprocessing.normalize(embeddings)
     acc1 = 0.0
     std1 = 0.0
     embeddings = embeddings_list[0] + embeddings_list[1]
