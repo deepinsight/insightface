@@ -1,13 +1,14 @@
 
+import numbers
+import os
 from argparse import ArgumentParser, Namespace
 
-import os
 import mxnet as mx
 import numpy as np
-import numbers
-from . import BaseInsightFaceCLICommand
+
 from ..app import MaskRenderer
-from ..data import RecBuilder
+from ..data.rec_builder import RecBuilder
+from . import BaseInsightFaceCLICommand
 
 
 def rec_add_mask_param_command_factory(args: Namespace):
