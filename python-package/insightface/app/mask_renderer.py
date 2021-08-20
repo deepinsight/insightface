@@ -1,18 +1,14 @@
-import datetime
-import os
-import os.path as osp
-import sys
-
-import albumentations as A
-import cv2
+import os, sys, datetime
 import numpy as np
+import os.path as osp
+import albumentations as A
 from albumentations.core.transforms_interface import ImageOnlyTransform
-
-from ..data.image import get_image as ins_get_image
-from ..thirdparty import face3d
-from ..utils import DEFAULT_MP_NAME, get_model_dir
 from .face_analysis import FaceAnalysis
-
+from ..utils import get_model_dir
+from ..thirdparty import face3d
+from ..data import get_image as ins_get_image
+from ..utils import DEFAULT_MP_NAME
+import cv2
 
 class MaskRenderer:
     def __init__(self, name=DEFAULT_MP_NAME, root='~/.insightface', insfa=None):
