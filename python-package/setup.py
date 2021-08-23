@@ -24,11 +24,13 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+pypandoc_enabled = True
 try:
     import pypandoc
     long_description = pypandoc.convert('README.md', 'rst')
 except (IOError, ImportError, ModuleNotFoundError):
     long_description = open('README.md').read()
+    pypandoc_enabled = False
 
 #import pypandoc
 #long_description = pypandoc.convert('README.md', 'rst')
@@ -87,4 +89,6 @@ setup(
     ext_modules=ext_modules,
     include_dirs=numpy.get_include(),
 )
+
+print('pypandoc enabled:', pypandoc_enabled)
 
