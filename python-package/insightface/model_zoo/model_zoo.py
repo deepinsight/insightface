@@ -22,12 +22,13 @@ class ModelRouter:
     def __init__(self, onnx_file):
         self.onnx_file = onnx_file
 
-    def get_model(self):
-        session = onnxruntime.InferenceSession(self.onnx_file, None)
+    def get_model(self, **kwargs):
+        session = onnxruntime.InferenceSession(self.onnx_file, **kwargs)
+        print(f'Applied providers: {session._providers}, with options: {session._provider_options}')
         input_cfg = session.get_inputs()[0]
         input_shape = input_cfg.shape
         outputs = session.get_outputs()
-        #print(input_shape)
+
         if len(outputs)>=5:
             return SCRFD(model_file=self.onnx_file, session=session)
         elif input_shape[2]==112 and input_shape[3]==112:
@@ -66,6 +67,6 @@ def get_model(name, **kwargs):
     assert osp.exists(model_file), 'model_file should exist'
     assert osp.isfile(model_file), 'model_file should be file'
     router = ModelRouter(model_file)
-    model = router.get_model()
+    model = router.get_model(providers=kwargs.get('providers'), provider_options=kwargs.get('provider_options'))
     return model
 
