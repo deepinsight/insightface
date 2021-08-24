@@ -6,23 +6,22 @@
 
 
 from __future__ import division
-import collections
-import numpy as np
+
 import glob
-import os
 import os.path as osp
-from numpy.linalg import norm
+
+import numpy as np
 import onnxruntime
+from numpy.linalg import norm
+
 from ..model_zoo import model_zoo
-from ..utils import face_align
-from ..utils import ensure_available
+from ..utils import DEFAULT_MP_NAME, ensure_available
 from .common import Face
-from ..utils import DEFAULT_MP_NAME
 
 __all__ = ['FaceAnalysis']
 
 class FaceAnalysis:
-    def __init__(self, name=DEFAULT_MP_NAME, root='~/.insightface', allowed_modules=None):
+    def __init__(self, name=DEFAULT_MP_NAME, root='~/.insightface', allowed_modules=None, **kwargs):
         onnxruntime.set_default_logger_severity(3)
         self.models = {}
         self.model_dir = ensure_available('models', name, root=root)
@@ -32,7 +31,8 @@ class FaceAnalysis:
             if onnx_file.find('_selfgen_')>0:
                 #print('ignore:', onnx_file)
                 continue
-            model = model_zoo.get_model(onnx_file)
+            model = model_zoo.get_model(onnx_file, **kwargs)
+
             if model is None:
                 print('model not recognized:', onnx_file)
             elif allowed_modules is not None and model.taskname not in allowed_modules:
