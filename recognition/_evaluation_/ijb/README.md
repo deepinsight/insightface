@@ -5,9 +5,8 @@ or
 
 Updated Meta data (1:1 and 1:N):
 
-[Baidu Cloud](https://pan.baidu.com/s/1x-ytzg4zkCTOTtklUgAhfg) (code:7g8o)
-
-[GDrive](https://drive.google.com/file/d/1MXzrU_zUESSx_242pRUnVvW_wDzfU8Ky/view?usp=sharing)
+   [Baidu Cloud](https://pan.baidu.com/s/1x-ytzg4zkCTOTtklUgAhfg) (code:7g8o) ;
+   [GDrive](https://drive.google.com/file/d/1MXzrU_zUESSx_242pRUnVvW_wDzfU8Ky/view?usp=sharing)
 
 Please apply for the IJB-B and IJB-C by yourself and strictly follow their distribution licenses.
 
