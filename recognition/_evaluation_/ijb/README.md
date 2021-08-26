@@ -4,9 +4,10 @@ or
 [Baidu Cloud](https://pan.baidu.com/s/1oer0p4_mcOrs4cfdeWfbFg)
 
 Updated Meta data (1:1 and 1:N):
-[IJB-B Dropbox](https://www.dropbox.com/s/5n2ehrsucmu7vsd/IJBB_meta.tar?dl=0) 
-and
-[IJB-C Dropbox](https://www.dropbox.com/s/pgju50f2gcgqkc2/IJBC_meta.tar?dl=0)
+
+[Baidu Cloud](https://pan.baidu.com/s/1x-ytzg4zkCTOTtklUgAhfg) (code:7g8o)
+
+[GDrive](https://drive.google.com/file/d/1MXzrU_zUESSx_242pRUnVvW_wDzfU8Ky/view?usp=sharing)
 
 Please apply for the IJB-B and IJB-C by yourself and strictly follow their distribution licenses.
 
