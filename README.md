@@ -86,7 +86,7 @@ Commonly used network backbones are included in most of the methods, such as IRe
 
 ### Datasets
 
-The training data includes, but not limited to the cleaned MS1M, VGG2 and CASIA-Webface datasets, which were already packed in MXNet binary format. Please [dataset](recognition/_dataset_) page for detail.
+The training data includes, but not limited to the cleaned MS1M, VGG2 and CASIA-Webface datasets, which were already packed in MXNet binary format. Please [dataset](recognition/_datasets_) page for detail.
 
 ### Evaluation
 
