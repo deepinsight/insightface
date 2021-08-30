@@ -45,6 +45,10 @@ The master branch works with **PyTorch 1.6+** and/or **MXNet=1.6-1.8**, with **P
 
 InsightFace efficiently implements a rich variety of state of the art algorithms of face recognition, face detection and face alignment, which optimized for both training and deployment.
 
+## Quick Start
+
+Please start with our [python-package](python-package/), for testing detection, recognition and alignment models on input images.
+
 
 ### ArcFace Video Demo
 
