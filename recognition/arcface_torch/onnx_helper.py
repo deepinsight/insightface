@@ -15,7 +15,8 @@ from insightface.data import get_image
 class ArcFaceORT:
     def __init__(self, model_path, cpu=False):
         self.model_path = model_path
-        self.cpu = cpu
+        # providers = None will use available provider, for onnxruntime-gpu it will be "CUDAExecutionProvider"
+        self.providers = ['CPUExecutionProvider'] if cpu else None
 
     #input_size is (w,h), return error message, return None if success
     def check(self, track='cfat', test_img = None):
@@ -55,11 +56,9 @@ class ArcFaceORT:
         self.model_file = sorted(onnx_files)[-1]
         print('use onnx-model:', self.model_file)
         try:
-            session = onnxruntime.InferenceSession(self.model_file, None)
+            session = onnxruntime.InferenceSession(self.model_file, providers=self.providers)
         except:
             return "load onnx failed"
-        if self.cpu:
-            session.set_providers(['CPUExecutionProvider'])
         input_cfg = session.get_inputs()[0]
         input_shape = input_cfg.shape
         print('input-shape:', input_shape)
@@ -75,11 +74,9 @@ class ArcFaceORT:
             self.model_file = new_model_file
             print('use new onnx-model:', self.model_file)
             try:
-                session = onnxruntime.InferenceSession(self.model_file, None)
+                session = onnxruntime.InferenceSession(self.model_file, providers=self.providers)
             except:
                 return "load onnx failed"
-            if self.cpu:
-                session.set_providers(['CPUExecutionProvider'])
             input_cfg = session.get_inputs()[0]
             input_shape = input_cfg.shape
             print('new-input-shape:', input_shape)
