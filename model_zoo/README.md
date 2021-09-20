@@ -8,12 +8,36 @@ To check the detail of insightface python package, please see [here](../python-p
 
 To install: ``pip install -U insightface``
 
+To use the specific model pack:
 
-| Name           | Detection Model | Recognition Model   | Alignment    | Attributes |
-| -------------- | --------------- | ------------------- | ------------ | ---------- |
-| **antelopev2** | SCRFD-10GF      | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age |
+```
+model_pack_name = 'buffalo_l'
+app = FaceAnalysis(name=model_pack_name)
+```
 
-Almost all ONNX models in our model_zoo can be called by python library.
+Model in **bold** is the default model pack in the latest version.
+
+
+| Name           | Detection Model | Recognition Model   | Alignment    | Attributes | Model-Size |
+| -------------- | --------------- | ------------------- | ------------ | ---------- | ---------- |
+| **antelopev2** | RetinaFace-10GF      | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age | 407MB |
+| buffalo_l      | RetinaFace-10GF      | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 326MB |
+| buffalo_m      | RetinaFace-2.5GF     | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 313MB |
+| buffalo_s      | RetinaFace-500MF     | MBF@WebFace600K | 2d106 & 3d68 | Gender&Age | 159MB |
+| buffalo_sc      | RetinaFace-500MF     | MBF@WebFace600K | - | - | 16MB |
+
+### Recognition accuracy of python library model packs:
+
+| Name      | MR-ALL | African | Caucasian | South Asian | East Asian | LFW    | CFP-FP | AgeDB-30 | IJB-C(E4) |
+| :-------- | ------ | ------- | --------- | ----------- | ---------- | ------ | ------ | -------- | --------- |
+| buffalo_l | 91.25  | 90.29   | 94.70     | 93.16       | 74.96      | 99.83  | 99.38  | 98.33    | 97.51     |
+| buffalo_s	      | 71.87 | 69.45  | 80.45    | 73.39      | 51.03     | 99.70 | 98.00  | 96.58    | 95.02 |
+
+*buffalo_m has the same accuracy with buffalo_l.*
+
+*buffalo_sc has the same accuracy with buffalo_s.*
+
+(Note that almost all ONNX models in our model_zoo can be called by python library.)
 
 ##  1. Face Recognition models.
 
