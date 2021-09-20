@@ -30,7 +30,7 @@ Model in **bold** is the default model pack in the latest version.
 
 | Name      | MR-ALL | African | Caucasian | South Asian | East Asian | LFW    | CFP-FP | AgeDB-30 | IJB-C(E4) |
 | :-------- | ------ | ------- | --------- | ----------- | ---------- | ------ | ------ | -------- | --------- |
-| buffalo_l | 91.25  | 90.29   | 94.70     | 93.16       | 74.96      | 99.83  | 99.38  | 98.33    | 97.25     |
+| buffalo_l | 91.25  | 90.29   | 94.70     | 93.16       | 74.96      | 99.83  | 99.33  | 98.23    | 97.25     |
 | buffalo_s	      | 71.87 | 69.45  | 80.45    | 73.39      | 51.03     | 99.70 | 98.00  | 96.58    | 95.02 |
 
 *buffalo_m has the same accuracy with buffalo_l.*
