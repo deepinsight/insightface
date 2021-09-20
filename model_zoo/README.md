@@ -84,8 +84,8 @@ The default training loss is margin based softmax if not specified.
 | MS1MV3_pfc	    | 81.683 | 78.126  | 87.286    | 85.542      | 58.925     | 99.800| 98.443 | 98.167   | 96.430    | [GDrive](https://drive.google.com/file/d/15jrHCqhEmoSZ93kKL9orVMhbKfNWAhp-/view?usp=sharing) |
 | Glint360k	        | 86.789 | 84.749  | 91.414    | 90.088      | 66.168     | 99.817| 99.143 | 98.450   | 97.130    | [GDrive](https://drive.google.com/file/d/1gnt6P3jaiwfevV4hreWHPu0Mive5VRyP/view?usp=sharing) |
 | Glint360k_pfc	    | 87.077 | 85.272  | 91.616    | 90.541      | 66.813     | 99.817| 99.143 | 98.450   | 97.020    | [GDrive](https://drive.google.com/file/d/164o2Ct42tyJdQjckeMJH2-7KTXolu-EP/view?usp=sharing) |
-| WebFace12M	    | 90.566 | 89.355  | 94.177    | 92.358      | 73.852     | 99.800| 99.200 | 98.100   | 97.120    | [GDrive](https://drive.google.com/file/d/1N0GL-8ehw_bz2eZQWz2b0A5XBdXdxZhg/view?usp=sharing) |
-| WebFace12M_pfc    | 89.951 | 89.301  | 94.016    | 92.381      | 73.007     | 99.817| 99.143 | 98.117   | 97.010    | [GDrive](https://drive.google.com/file/d/11TASXssTnwLY1ZqKlRjsJiV-1nWu9pDY/view?usp=sharing) |
+| WebFace600K	    | 90.566 | 89.355  | 94.177    | 92.358      | 73.852     | 99.800| 99.200 | 98.100   | 97.120    | [GDrive](https://drive.google.com/file/d/1N0GL-8ehw_bz2eZQWz2b0A5XBdXdxZhg/view?usp=sharing) |
+| WebFace600K_pfc    | 89.951 | 89.301  | 94.016    | 92.381      | 73.007     | 99.817| 99.143 | 98.117   | 97.010    | [GDrive](https://drive.google.com/file/d/11TASXssTnwLY1ZqKlRjsJiV-1nWu9pDY/view?usp=sharing) |
 | Average	        | 69.247 | 65.908  | 77.121    | 72.819      | 52.014     | 99.706| 97.374 | 96.962   | 93.925    |  |
 | Average_pfc	    | 69.519 | 65.898  | 77.497    | 73.213      | 51.853     | 99.715| 97.457 | 96.965   | 93.818    |  |
 
