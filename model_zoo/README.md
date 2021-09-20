@@ -17,7 +17,9 @@ Almost all ONNX models in our model_zoo can be called by python library.
 
 ##  1. Face Recognition models.
 
-Method is margin based softmax and backbone is R50 in following tables if not specified.
+### Definition:
+
+The default training loss is margin based softmax if not specified.
 
 ``MFN``: MobileFaceNet
 
@@ -37,6 +39,7 @@ Method is margin based softmax and backbone is R50 in following tables if not sp
 
 ``GDrive``: GoogleDrive
 
+### List of models by MXNet and PaddlePaddle:
 
 | Backbone | Dataset | Method  | LFW   | CFP-FP | AgeDB-30 | MegaFace | Link.                                                        |
 | -------- | ------- | ------- | ----- | ------ | -------- | -------- | ------------------------------------------------------------ |
@@ -47,7 +50,7 @@ Method is margin based softmax and backbone is R50 in following tables if not sp
 
 
 
-
+### List of models by various depth IResNet and training datasets:
 
 | Backbone | Dataset   | MR-ALL | African | Caucasian | South Asian | East Asian | Link(onnx)                                                            |
 |----------|-----------|--------|---------|-----------|-------------|------------|-----------------------------------------------------------------------|
@@ -63,8 +66,7 @@ Method is margin based softmax and backbone is R50 in following tables if not sp
 | R100     | Glint360K | 90.659 | 89.488  | 94.285    | 93.434      | 72.528     | [GDrive](https://drive.google.com/file/d/1Gh8C-bwl2B90RDrvKJkXafvZC3q4_H_z/view?usp=sharing) |
 
 
-
-
+### List of models by IResNet-50 and different training datasets:
 
 | Dataset           | MR-ALL | African | Caucasian | South Asian | East Asian | LFW   | CFP-FP | AgeDB-30 | IJB-C(E4) | Link(onnx) |
 | :--------         | ------ | ------- | ----      | ------      | --------   | ----- | ------ | -------- | --------- | --- |
@@ -86,6 +88,8 @@ Method is margin based softmax and backbone is R50 in following tables if not sp
 | WebFace12M_pfc    | 89.951 | 89.301  | 94.016    | 92.381      | 73.007     | 99.817| 99.143 | 98.117   | 97.010    | [GDrive](https://drive.google.com/file/d/11TASXssTnwLY1ZqKlRjsJiV-1nWu9pDY/view?usp=sharing) |
 | Average	        | 69.247 | 65.908  | 77.121    | 72.819      | 52.014     | 99.706| 97.374 | 96.962   | 93.925    |  |
 | Average_pfc	    | 69.519 | 65.898  | 77.497    | 73.213      | 51.853     | 99.715| 97.457 | 96.965   | 93.818    |  |
+
+### List of models by MobileFaceNet and different training datasets:
 
 
 ## 2. Face Detection models.
