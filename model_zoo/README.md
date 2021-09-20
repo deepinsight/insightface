@@ -91,6 +91,14 @@ The default training loss is margin based softmax if not specified.
 
 ### List of models by MobileFaceNet and different training datasets:
 
+**``FLOPS``:** 450M FLOPs
+
+**``Model-Size``:** 13MB
+
+| Dataset           | MR-ALL | African | Caucasian | South Asian | East Asian | LFW   | CFP-FP | AgeDB-30 | IJB-C(E4) | Link(onnx) |
+| :--------         | ------ | ------- | ----      | ------      | --------   | ----- | ------ | -------- | --------- | --- |
+| WebFace600K	      | 71.865 | 69.449  | 80.454    | 73.394      | 51.026     | 99.70 | 98.00  | 96.58    | 95.02     | - |
+
 
 ## 2. Face Detection models.
 
