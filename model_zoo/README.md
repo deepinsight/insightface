@@ -15,13 +15,13 @@ model_pack_name = 'buffalo_l'
 app = FaceAnalysis(name=model_pack_name)
 ```
 
-Model in **bold** is the default model pack in the latest version.
+Name in **bold** is the default model pack in latest version.
 
 
 | Name           | Detection Model | Recognition Model   | Alignment    | Attributes | Model-Size |
 | -------------- | --------------- | ------------------- | ------------ | ---------- | ---------- |
-| **antelopev2** | RetinaFace-10GF      | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age | 407MB |
-| buffalo_l      | RetinaFace-10GF      | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 326MB |
+| antelopev2 | RetinaFace-10GF      | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age | 407MB |
+| **buffalo_l**      | RetinaFace-10GF      | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 326MB |
 | buffalo_m      | RetinaFace-2.5GF     | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 313MB |
 | buffalo_s      | RetinaFace-500MF     | MBF@WebFace600K | 2d106 & 3d68 | Gender&Age | 159MB |
 | buffalo_sc      | RetinaFace-500MF     | MBF@WebFace600K | - | - | 16MB |
