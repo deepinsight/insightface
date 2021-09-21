@@ -9,12 +9,12 @@ import os.path as osp
 import glob
 import onnxruntime
 from .arcface_onnx import *
-from .scrfd import *
+from .retinaface import *
+#from .scrfd import *
 from .landmark import *
 from .attribute import Attribute
 from ..utils import download_onnx
 
-#__all__ = ['get_model', 'get_model_list', 'get_arcface_onnx', 'get_scrfd']
 __all__ = ['get_model']
 
 
@@ -30,7 +30,7 @@ class ModelRouter:
         outputs = session.get_outputs()
 
         if len(outputs)>=5:
-            return SCRFD(model_file=self.onnx_file, session=session)
+            return RetinaFace(model_file=self.onnx_file, session=session)
         elif input_shape[2]==112 and input_shape[3]==112:
             return ArcFaceONNX(model_file=self.onnx_file, session=session)
         elif input_shape[2]==192 and input_shape[3]==192:

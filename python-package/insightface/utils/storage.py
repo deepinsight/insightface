@@ -21,7 +21,7 @@ def download(sub_dir, name, force=False, root='~/.insightface'):
         os.makedirs(dir_path)
     with zipfile.ZipFile(zip_file_path) as zf:
         zf.extractall(dir_path)
-    os.remove(zip_file_path)
+    #os.remove(zip_file_path)
     return dir_path
 
 def ensure_available(sub_dir, name, root='~/.insightface'):

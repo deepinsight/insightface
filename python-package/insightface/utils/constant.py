@@ -1,3 +1,3 @@
 
-DEFAULT_MP_NAME = 'antelopev2'
+DEFAULT_MP_NAME = 'buffalo_l'
 
