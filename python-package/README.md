@@ -45,12 +45,34 @@ Starting from insightface>=0.2, we use onnxruntime as inference backend.
 
 In the latest version of insightface library, we provide following model packs:
 
+Name in **bold** is the default model pack.
 
-| Name      | Detection Model  | Recognition Model  | Alignment | Attributes |
-| ----------------------- | -----------------   | ----- | ----- | ----- | 
-| **antelopev2** | SCRFD-10GF        | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age |
+| Name           | Detection Model | Recognition Model   | Alignment    | Attributes | Model-Size |
+| -------------- | --------------- | ------------------- | ------------ | ---------- | ---------- |
+| antelopev2 | SCRFD-10GF      | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age | 407MB |
+| **buffalo_l**      | SCRFD-10GF      | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 326MB |
+| buffalo_m      | SCRFD-2.5GF     | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 313MB |
+| buffalo_s      | SCRFD-500MF     | MBF@WebFace600K | 2d106 & 3d68 | Gender&Age | 159MB |
+| buffalo_sc      | SCRFD-500MF     | MBF@WebFace600K | - | - | 16MB |
+
+
+
+Recognition Accuracy:
+
+| Name      | MR-ALL | African | Caucasian | South Asian | East Asian | LFW   | CFP-FP | AgeDB-30 | IJB-C(E4) |
+| :-------- | ------ | ------- | --------- | ----------- | ---------- | ----- | ------ | -------- | --------- |
+| buffalo_l | 91.25  | 90.29   | 94.70     | 93.16       | 74.96      | 99.83 | 99.33  | 98.23    | 97.25     |
+| buffalo_s | 71.87  | 69.45   | 80.45     | 73.39       | 51.03      | 99.70 | 98.00  | 96.58    | 95.02     |
+
+*buffalo_m has the same accuracy with buffalo_l.*
+
+*buffalo_sc has the same accuracy with buffalo_s.*
+
+
 
 **Note that these models are available for non-commercial research purposes only.**
+
+
 
 For insightface>=0.3.3, models will be downloaded automatically once we init ``app = FaceAnalysis()`` instance.
 
