@@ -11,6 +11,8 @@ For all main contributors, please check [contributing](#contributing).
 
 ## Top News
 
+**`2021-09-22`**: Update python library to ver-0.5, add new MBF and IR50 models, see [python-package](python-package).
+
 **`2021-08-07`**: Add new [model_zoo](model_zoo) page.
 
 **`2021-07-13`**: We now have implementations based on [paddlepaddle](https://github.com/PaddlePaddle): [arcface_paddle](recognition/arcface_paddle) for face recognition and [blazeface_paddle](detection/blazeface_paddle) for face detection.
