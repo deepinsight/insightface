@@ -75,6 +75,7 @@ class SCRFD:
         self.model_file = model_file
         self.session = session
         self.taskname = 'detection'
+        self.batched = False
         if self.session is None:
             assert self.model_file is not None
             assert osp.exists(self.model_file)
@@ -92,6 +93,8 @@ class SCRFD:
             self.input_size = tuple(input_shape[2:4][::-1])
         input_name = input_cfg.name
         outputs = self.session.get_outputs()
+        if len(outputs[0].shape) == 3:
+            self.batched = True
         output_names = []
         for o in outputs:
             output_names.append(o.name)
@@ -143,11 +146,21 @@ class SCRFD:
         input_width = blob.shape[3]
         fmc = self.fmc
         for idx, stride in enumerate(self._feat_stride_fpn):
-            scores = net_outs[idx]
-            bbox_preds = net_outs[idx+fmc]
-            bbox_preds = bbox_preds * stride
-            if self.use_kps:
-                kps_preds = net_outs[idx+fmc*2] * stride
+            # If model support batch dim, take first output
+            if self.batched:
+                scores = net_outs[idx][0]
+                bbox_preds = net_outs[idx + fmc][0]
+                bbox_preds = bbox_preds * stride
+                if self.use_kps:
+                    kps_preds = net_outs[idx + fmc * 2][0] * stride
+            # If model doesn't support batching take output as is
+            else:
+                scores = net_outs[idx]
+                bbox_preds = net_outs[idx + fmc]
+                bbox_preds = bbox_preds * stride
+                if self.use_kps:
+                    kps_preds = net_outs[idx + fmc * 2] * stride
+
             height = input_height // stride
             width = input_width // stride
             K = height * width

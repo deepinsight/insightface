@@ -51,18 +51,41 @@ def pytorch2onnx(config_path,
         ori_output_file = output_file.split('.')[0]+"_ori.onnx"
     else:
         ori_output_file = output_file
+
+    # Define input and outputs names, which are required to properly define
+    # dynamic axes
+    input_names = ['input.1']
+    output_names = ['score_8', 'score_16', 'score_32',
+                    'bbox_8', 'bbox_16', 'bbox_32',
+                    ]
+
+    # If model graph contains keypoints strides add keypoints to outputs
+    if 'stride_kps' in str(model):
+        output_names += ['kps_8', 'kps_16', 'kps_32']
+
+    # Define dynamic axes for export
+    dynamic_axes = None
+    if dynamic:
+        dynamic_axes = {out: {0: '?', 1: '?'} for out in output_names}
+        dynamic_axes[input_names[0]] = {
+            0: '?',
+            2: '?',
+            3: '?'
+        }
+
     torch.onnx.export(
         model,
         tensor_data,
         ori_output_file,
         keep_initializers_as_inputs=False,
         verbose=False,
+        input_names=input_names,
+        output_names=output_names,
+        dynamic_axes=dynamic_axes,
         opset_version=opset_version)
+
     if simplify or dynamic:
         model = onnx.load(ori_output_file)
-        if dynamic:
-            model.graph.input[0].type.tensor_type.shape.dim[2].dim_param = '?'
-            model.graph.input[0].type.tensor_type.shape.dim[3].dim_param = '?'
         if simplify:
             from onnxsim import simplify
             #print(model.graph.input[0])
