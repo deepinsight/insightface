@@ -11,3 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from .mobilefacenet import MobileFaceNet_128
+from .iresnet import FresResNet50, FresResNet100

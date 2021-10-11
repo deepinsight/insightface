@@ -11,3 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+python tools/validation.py \
+    --is_static False \
+    --backbone FresResNet50 \
+    --embedding_size 512 \
+    --checkpoint_dir MS1M_v3_arcface_dynamic_128_fp16_0.1/FresResNet50/24 \
+    --data_dir /wangguoxia/plsc/MS1M_v3/ \
+    --val_targets lfw,cfp_fp,agedb_30 \
+    --batch_size 128
