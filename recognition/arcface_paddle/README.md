@@ -24,15 +24,6 @@ pip install output/opt/paddle/share/wheels/paddlepaddle_gpu-2.2.0-cp37-cp37m-lin
 
 ```
 
-### 2.2 Download PLSC
-
-```shell
-git clone https://github.com/PaddlePaddle/PLSC.git
-
-cd /path/to/PLSC/
-```
-
-
 ## 3. Data preparation
 
 ### 3.1 Download dataset
@@ -48,7 +39,7 @@ python tools/mx_recordio_2_images.py --root_dir ms1m-retinaface-t1/ --output_dir
 After finishing unzipping the dataset, the folder structure is as follows.
 
 ```
-arcface_paddle/MS1M_v3
+MS1M_v3
 |_ images
 |  |_ 00000001.jpg
 |  |_ ...
