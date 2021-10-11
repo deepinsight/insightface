@@ -11,6 +11,8 @@ For all main contributors, please check [contributing](#contributing).
 
 ## Top News
 
+**`2021-10-11`**: [Leaderboard](https://insightface.ai/mfr21) of [ICCV21 - Masked Face Recognition Challenge](challenges/iccv21-mfr) released.
+
 **`2021-09-22`**: Update python library to ver-0.5, add new MBF and IR50 models, see [python-package](python-package).
 
 **`2021-08-07`**: Add new [model_zoo](model_zoo) page.
