@@ -2,6 +2,8 @@
 
 ## NEWS
 
+**``2021-10-11``** [Final Leaderboard](https://insightface.ai/mfr21)
+
 **``2021-10-04``** Please fix the public leaderboard scores before ``2021-10-05 20:00(UTC+8 Time)``
 
 **``2021-07-16``**  Implicit batch inference is prohibited. For example, inserting some data-related OPs to onnx graph to enable automatic flip-test is not allowed(or similar ideas). We will check it after submission closed, to ensure fairness.
@@ -16,6 +18,8 @@ The Masked Face Recognition Challenge & Workshop(MFR) will be held in conjunctio
 [Workshop-Homepage](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). 
 
 There're InsightFace track here and [Webface260M](https://www.face-benchmark.org/challenge.html) track(with larger training set) in this workshop.
+
+[**Challenge Leaderboard**](https://insightface.ai/mfr21)
 
 Submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
