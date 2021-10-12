@@ -163,7 +163,6 @@ Server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
 (in alphabetical order)
  
-**[Ant Security Lab](https://www.antgroup.com/technology)**
 
 **[DeepGlint](http://www.deepglint.com/)**
 
@@ -171,6 +170,7 @@ Server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
 **[OneFlow](https://www.oneflow.org)**
 
+ **[Zoloz](https://www.zoloz.com)**
 
 
 ## Bonus Share
