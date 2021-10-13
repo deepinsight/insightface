@@ -143,6 +143,7 @@ sh scripts/inference.sh
   * Precison: FP32
   * BatchSize: 64/512
   * SampleRatio: 1.0
+  * Embedding Size: 128
 
 | Model structure           | lfw    | cfp_fp  | agedb30 | CPU time cost | GPU time cost | Inference model |
 | ------------------------- | ------ | ------- | ------- | -------| -------- |---- |
