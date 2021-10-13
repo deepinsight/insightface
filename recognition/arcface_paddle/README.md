@@ -74,7 +74,16 @@ python tools/convert_image_bin.py --image_path="your/input/bin/path" --bin_path=
 
 ## 4. How to Training
 
-### 4.1 Single node, 8 GPUs:
+### 4.1 Single node, single GPU
+
+#### Dynamic Mode
+
+```bash
+# For MobileFace
+sh scripts/train_dynamic_single_gpu.sh
+```
+
+### 4.2 Single node, 8 GPUs:
 
 #### Static Mode
 
