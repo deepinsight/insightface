@@ -10,15 +10,11 @@
 - For face detection task, please refer to: [Face detection tuturial](../../detection/blazeface_paddle/README_en.md).
 - For Whl package inference using PaddleInference, please refer to [whl package inference](https://github.com/littletomatodonkey/insight-face-paddle).
 
+Note: Many thanks to [GuoQuanhao](https://github.com/GuoQuanhao) for the reproduction of the [Arcface basline using PaddlePaddle](https://github.com/GuoQuanhao/arcface-Paddle).
+
 ## 2. Environment preparation
 
-### 2.1 Install Paddle from pypi
-
-```shell
-
-pip install paddlepaddle-gpu==2.2.0rc0
-
-```
+Please refer to [Installation](./install_en.md) to setup environment at first.
 
 ## 3. Data preparation
 
@@ -60,20 +56,6 @@ images/00000001.jpg 0
 ```
 
 If you want to use customed dataset, you can arrange your data according to the above format. 
-
-### 3.3 Transform between original image files and bin files
-
-If you want to convert original image files to `bin` files used directly for training process, you can use the following command to finish the conversion.
-
-```shell
-python tools/convert_image_bin.py --image_path="your/input/image/path" --bin_path="your/output/bin/path" --mode="image2bin"
-```
-
-If you want to convert `bin` files to original image files, you can use the following command to finish the conversion.
-
-```shell
-python tools/convert_image_bin.py --image_path="your/input/bin/path" --bin_path="your/output/image/path" --mode="bin2image"
-```
 
 ## 4. How to Training
 
@@ -202,6 +184,8 @@ sh scripts/inference.sh
   * BatchSize: 128/1024
   * SampleRatio: 0.1
   * Datasets: MS1MV3
+  * A100: Driver Version: 460.32.03, CUDA Version: 11.2
+  * A100: Driver Version: 460.32.03, CUDA Version: 11.2
   
 ![insightface_throughtput](https://github.com/GuoxiaWang/plsc_log/blob/master/insightface_throughtput.png)
 
