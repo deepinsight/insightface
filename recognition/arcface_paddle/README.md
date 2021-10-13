@@ -140,6 +140,9 @@ sh scripts/inference.sh
 **Configuration：**
   * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
   * GPU: a single NVIDIA Tesla V100
+  * Precison: FP32
+  * BatchSize: 64/512
+  * SampleRatio: 1.0
 
 | Model structure           | lfw    | cfp_fp  | agedb30 | CPU time cost | GPU time cost | Inference model |
 | ------------------------- | ------ | ------- | ------- | -------| -------- |---- |
