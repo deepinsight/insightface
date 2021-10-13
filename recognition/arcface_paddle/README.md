@@ -1,26 +1,22 @@
-# PLSC
+[简体中文](README_ch.md) | English
+
+# Arcface-Paddle
 
 ## 1. Introduction
 
-[PLSC](https://github.com/PaddlePaddle/PLSC) is an open source Paddle Large Scale Classification Tools, which supports 60 million classes on 8 NVIDIA V100 (32G).
+`Arcface-Paddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `Arcface-Paddle` provides three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
+
+- This tutorial is mainly about face recognition.
+- For face detection task, please refer to: [Face detection tuturial](../../detection/blazeface_paddle/README_en.md).
+- For Whl package inference using PaddleInference, please refer to [whl package inference](https://github.com/littletomatodonkey/insight-face-paddle).
 
 ## 2. Environment preparation
 
-### 2.1 Install Paddle from source code
+### 2.1 Install Paddle from pypi
 
 ```shell
 
-git clone https://github.com/PaddlePaddle/Paddle.git
-
-cd /path/to/Paddle/
-
-mkdir build && cd build
-
-cmake .. -DWITH_TESTING=ON -DWITH_GPU=ON -DWITH_GOLANG=OFF -DWITH_STYLE_CHECK=ON -DCMAKE_INSTALL_PREFIX=$PWD/output -DWITH_DISTRIBUTE=ON -DCMAKE_BUILD_TYPE=Release -DPY_VERSION=3.7 -DCUDA_ARCH_NAME=All -DPADDLE_VERSION=2.2.0
-
-make -j20 && make install -j20
-
-pip install output/opt/paddle/share/wheels/paddlepaddle_gpu-2.2.0-cp37-cp37m-linux_x86_64.whl
+pip install paddlepaddle-gpu==2.2.0rc0
 
 ```
 
@@ -139,7 +135,20 @@ sh scripts/inference.sh
 
 ## 8. Model performance
 
-### 8.1 Accuracy on Verification Datasets
+### 8.1 Performance of Lighting Model
+
+**Configuration：**
+  * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
+  * GPU: a single NVIDIA Tesla V100
+
+| Model structure           | lfw    | cfp_fp  | agedb30 | CPU time cost | GPU time cost | Inference model |
+| ------------------------- | ------ | ------- | ------- | -------| -------- |---- |
+| MobileFace-Paddle      | 0.9945 | 0.9343  | 0.9613  | 4.3ms  | 2.3ms    | [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/mobileface_v1.0_infer.tar)  |
+| MobileFace-mxnet       | 0.9950 | 0.8894  | 0.9591  | 7.3ms  | 4.7ms    | -   |
+
+* Note: MobileFaceNet-Paddle training using MobileFaceNet_128
+
+### 8.2 Accuracy on Verification Datasets
 
 **Configuration：**
   * GPU: 8 NVIDIA Tesla V100 32G
@@ -154,7 +163,7 @@ sh scripts/inference.sh
 | Dynamic |  MS1MV3  | r50      | 1.0   | 0.98317 | 0.98900| 0.99833 | [log](https://raw.githubusercontent.com/GuoxiaWang/plsc_log/master/dynamic/ms1mv3_r50_dynamic_128_fp16_1.0/training.log) | [checkpoint](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/distributed/ms1mv3_r50_dynamic_128_fp16_1.0_eopch_24.tgz) |
 
   
-### 8.2 Maximum Number of Identities 
+### 8.3 Maximum Number of Identities 
 
 **Configuration：**
   * GPU: 8 NVIDIA Tesla V100 32G
@@ -170,7 +179,7 @@ sh scripts/inference.sh
 
 **Note:** config environment variable ``export FLAGS_allocator_strategy=naive_best_fit``
 
-### 8.3 Throughtput
+### 8.4 Throughtput
 
 **Configuration：**
   * BatchSize: 128/1024
@@ -179,73 +188,45 @@ sh scripts/inference.sh
   
 ![insightface_throughtput](https://github.com/GuoxiaWang/plsc_log/blob/master/insightface_throughtput.png)
 
-## 9. Demo
+For more experimental results see [PLSC](https://github.com/PaddlePaddle/PLSC), which is an open source Paddle Large Scale Classification Tools powered by PaddlePaddle. It supports 60 million classes on 8 NVIDIA V100 (32G).
 
-Combined with face detection model, we can complete the face recognition process.
+## 9. Inference using PaddleInference
 
-Firstly, use the fllowing commands to download the models.
+### 9.1 Install insightface-paddle
 
 ```bash
-# Create models directory
-mkdir -p models
-
-# Download blazeface face detection model and extract it
-wget https://paddle-model-ecology.bj.bcebos.com/model/insight-face/blazeface_fpn_ssh_1000e_v1.0_infer.tar -P models/
-tar -xzf models/blazeface_fpn_ssh_1000e_v1.0_infer.tar -C models/
-rm -rf models/blazeface_fpn_ssh_1000e_v1.0_infer.tar
-
-# Download static ResNet50 PartialFC 0.1 model and extract it
-wget https://paddle-model-ecology.bj.bcebos.com/model/insight-face/distributed/ms1mv3_r50_static_128_fp16_0.1_epoch_24.tgz -P models/
-tar -xf models/ms1mv3_r50_static_128_fp16_0.1_epoch_24.tgz -C models/
-rm -rf models/ms1mv3_r50_static_128_fp16_0.1_epoch_24.tgz
-
-# Export static save inference model
-python tools/export.py --is_static True --export_type paddle --backbone FresResNet50 --embedding_size 512 --checkpoint_dir models/ms1mv3_r50_static_128_fp16_0.1_epoch_24 --output_dir models/ms1mv3_r50_static_128_fp16_0.1_epoch_24_infer
-rm -rf models/ms1mv3_r50_static_128_fp16_0.1_epoch_24
+# install insightface-paddle
+pip install --upgrade insightface-paddle
 ```
 
-Then, use the following commands to download the gallery, demo image and font file for visualization. And we generate gallery features.
+### 9.2 Download the index gallery, demo image.
 
 ```bash
-# Download gallery, query and font file
-mkdir -p images/
-git clone https://github.com/littletomatodonkey/insight-face-paddle /tmp/insight-face-paddle
-cp -r /tmp/insight-face-paddle/demo/friends/gallery/ images/
-cp -r /tmp/insight-face-paddle/demo/friends/query/ images/
-mkdir -p assets
-cp /tmp/insight-face-paddle/SourceHanSansCN-Medium.otf assets/
-rm -rf /tmp/insight-face-paddle
+mkdir -p images/gallery/
+mkdir -p images/query/
 
-# Build index file
-python tools/test_recognition.py \
-    --rec \
-    --rec_model_file_path models/ms1mv3_r50_static_128_fp16_0.1_epoch_24_infer/FresResNet50.pdmodel \
-    --rec_params_file_path models/ms1mv3_r50_static_128_fp16_0.1_epoch_24_infer/FresResNet50.pdiparams \
-    --build_index=images/gallery/index.bin \
-    --img_dir=images/gallery \
-    --label=images/gallery/label.txt
+# Index library for the recognition process
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/index.bin -P images/gallery/
+# Demo image
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends2.jpg -P images/query/
 ```
 
-Use the following command to run the whole face recognition demo.
+### 9.3 Inference using MobileFace
 
 ```bash
-# detection + recogniotion process
-python tools/test_recognition.py \
+# default using MobileFace
+insightfacepaddle \
     --det \
-    --det_model_file_path models/blazeface_fpn_ssh_1000e_v1.0_infer/inference.pdmodel \
-    --det_params_file_path models/blazeface_fpn_ssh_1000e_v1.0_infer/inference.pdiparams \
     --rec \
-    --rec_model_file_path models/ms1mv3_r50_static_128_fp16_0.1_epoch_24_infer/FresResNet50.pdmodel \
-    --rec_params_file_path models/ms1mv3_r50_static_128_fp16_0.1_epoch_24_infer/FresResNet50.pdiparams \
     --index=images/gallery/index.bin \
     --input=images/query/friends2.jpg \
-    --cdd_num 10 \
-    --rec_thresh 0.4 \
     --output="./output"
 ```
 
 The final result is save in folder `output/`, which is shown as follows.
 
 <div align="center">
-<img src="https://github.com/GuoxiaWang/plsc_log/blob/master/friends2.jpg"  width = "800" />
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/output/friends2.jpg"  width = "800" />
 </div>
+
+For more details about parameter explanations, index gallery construction and whl package inference, please refer to [Whl package inference tutorial](https://github.com/littletomatodonkey/insight-face-paddle).
