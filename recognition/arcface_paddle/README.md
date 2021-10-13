@@ -64,8 +64,22 @@ If you want to use customed dataset, you can arrange your data according to the 
 #### Dynamic Mode
 
 ```bash
-# For MobileFace
-sh scripts/train_dynamic_single_gpu.sh
+python -m paddle.distributed.launch --gpus=0 tools/train.py \
+    --config_file configs/ms1mv2_mobileface.py \
+    --is_static False \
+    --backbone MobileFaceNet_128 \
+    --classifier LargeScaleClassifier \
+    --embedding_size 128 \
+    --sample_ratio 1.0 \
+    --loss ArcFace \
+    --batch_size 1024 \
+    --dataset MS1M_v2 \
+    --num_classes 85742 \
+    --data_dir MS1M_v2/ \
+    --label_file MS1M_v2/label.txt \
+    --fp16 False \
+    --train_unit 'epoch' \
+    --output ./MS1M_v2_arcface_MobileFaceNet_128_1.0_fp32
 ```
 
 ### 4.2 Single node, 8 GPUs:
