@@ -198,7 +198,7 @@ sh scripts/inference.sh
   * BatchSize: 128/1024
   * SampleRatio: 0.1
   * Datasets: MS1MV3
-  * A100: Driver Version: 460.32.03, CUDA Version: 11.2
+  * V100: Driver Version: 450.80.02, CUDA Version: 11.0
   * A100: Driver Version: 460.32.03, CUDA Version: 11.2
   
 ![insightface_throughtput](https://github.com/GuoxiaWang/plsc_log/blob/master/insightface_throughtput.png)
