@@ -156,6 +156,7 @@ sh scripts/inference.sh
   * BatchSize: 64/512
   * SampleRatio: 1.0
   * Embedding Size: 128
+  * MS1MV2
 
 | Model structure           | lfw    | cfp_fp  | agedb30 | CPU time cost | GPU time cost | Inference model |
 | ------------------------- | ------ | ------- | ------- | -------| -------- |---- |
