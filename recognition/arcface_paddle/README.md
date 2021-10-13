@@ -26,6 +26,9 @@ pip install paddlepaddle-gpu==2.2.0rc0
 
 Download the dataset from [insightface datasets](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_).
 
+* MS1M_v2: MS1M-ArcFace
+* MS1M_v3: MS1M-RetinaFace
+
 ### 3.2 Extract MXNet Dataset to images
 
 ```shell
