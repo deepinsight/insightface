@@ -64,7 +64,8 @@ If you want to use customed dataset, you can arrange your data according to the 
 #### Dynamic Mode
 
 ```bash
-python -m paddle.distributed.launch --gpus=0 tools/train.py \
+CUDA_VISIBLE_DEVICES=1
+python tools/train.py \
     --config_file configs/ms1mv2_mobileface.py \
     --is_static False \
     --embedding_size 128 \
