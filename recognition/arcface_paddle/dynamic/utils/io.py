@@ -143,7 +143,7 @@ class Checkpoint(object):
             tensor = paddle.load(path, return_numpy=True)
             if dtype:
                 assert dtype in ['float32', 'float16']
-                tensor = tensor.astype('float32')
+                tensor = tensor.astype(dtype)
 
             if 'dist@' in name and '@rank@' in name:
                 if '.w' in name and 'velocity' not in name:

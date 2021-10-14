@@ -110,18 +110,18 @@ class MobileFaceNet(nn.Layer):
                 n = m.weight.shape[1] * m.weight.shape[2] * m.weight.shape[3]
                 m.weight = paddle.create_parameter(
                     shape=m.weight.shape,
-                    dtype='float32',
+                    dtype=m.weight.dtype,
                     default_initializer=nn.initializer.Normal(
                         mean=0.0, std=math.sqrt(2.0 / n)))
-                # nn.init.normal_(m.weight, 0, 0.1)
+                
             elif isinstance(m, (nn.BatchNorm, nn.BatchNorm2D, nn.GroupNorm)):
                 m.weight = paddle.create_parameter(
                     shape=m.weight.shape,
-                    dtype='float32',
+                    dtype=m.weight.dtype,
                     default_initializer=nn.initializer.Constant(value=1.0))
                 m.bias = paddle.create_parameter(
                     shape=m.bias.shape,
-                    dtype='float32',
+                    dtype=m.bias.dtype,
                     default_initializer=nn.initializer.Constant(value=0.0))
 
     def _make_layer(self, block, setting):

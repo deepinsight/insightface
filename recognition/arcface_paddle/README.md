@@ -67,19 +67,15 @@ If you want to use customed dataset, you can arrange your data according to the 
 python -m paddle.distributed.launch --gpus=0 tools/train.py \
     --config_file configs/ms1mv2_mobileface.py \
     --is_static False \
-    --backbone MobileFaceNet_128 \
-    --classifier LargeScaleClassifier \
     --embedding_size 128 \
     --sample_ratio 1.0 \
     --loss ArcFace \
-    --batch_size 1024 \
+    --batch_size 512 \
     --dataset MS1M_v2 \
     --num_classes 85742 \
     --data_dir MS1M_v2/ \
     --label_file MS1M_v2/label.txt \
-    --fp16 False \
-    --train_unit 'epoch' \
-    --output ./MS1M_v2_arcface_MobileFaceNet_128_1.0_fp32
+    --fp16 False
 ```
 
 ### 4.2 Single node, 8 GPUs:
@@ -156,7 +152,7 @@ sh scripts/inference.sh
 
 | Model structure           | lfw    | cfp_fp  | agedb30 | CPU time cost | GPU time cost | Inference model |
 | ------------------------- | ------ | ------- | ------- | -------| -------- |---- |
-| MobileFace-Paddle      | 0.9945 | 0.9343  | 0.9613  | 4.3ms  | 2.3ms    | [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/mobileface_v1.0_infer.tar)  |
+| MobileFace-Paddle      | 0.9952 | 0.9280  | 0.9612  | 4.3ms  | 2.3ms    | [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/mobileface_v1.0_infer.tar)  |
 | MobileFace-mxnet       | 0.9950 | 0.8894  | 0.9591  | 7.3ms  | 4.7ms    | -   |
 
 * Note: MobileFaceNet-Paddle training using MobileFaceNet_128

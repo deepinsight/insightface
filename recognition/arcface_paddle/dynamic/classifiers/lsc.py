@@ -18,7 +18,6 @@ import os
 import paddle
 import paddle.nn as nn
 
-
 class LargeScaleClassifier(nn.Layer):
     """
     Author: {Xiang An, Yang Xiao, XuHan Zhu} in DeepGlint,
@@ -77,10 +76,11 @@ class LargeScaleClassifier(nn.Layer):
             self.weight.stop_gradient = True
 
     def step(self, optimizer):
-        warnings.warn(
-            "Explicitly call the function paddle._C_ops.sparse_momentum is a temporary manner. "
-            "We will merge it to optimizer in the future, please don't follow.")
         if int(self.sample_ratio) < 1:
+            warnings.warn(
+                "Explicitly call the function paddle._C_ops.sparse_momentum is a temporary manner. "
+                "We will merge it to optimizer in the future, please don't follow.")
+            
             found_inf = paddle.logical_not(
                 paddle.all(paddle.isfinite(self._parameter_list[0].grad)))
             if found_inf:
