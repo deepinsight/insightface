@@ -62,7 +62,7 @@ If you want to use customed dataset, you can arrange your data according to the 
 ### 4.1 Single node, single GPU
 
 ```bash
-CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=1
 python tools/train.py \
     --config_file configs/ms1mv2_mobileface.py \
     --embedding_size 128 \
