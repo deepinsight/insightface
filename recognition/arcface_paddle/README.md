@@ -61,13 +61,10 @@ If you want to use customed dataset, you can arrange your data according to the 
 
 ### 4.1 Single node, single GPU
 
-#### Dynamic Mode
-
 ```bash
 CUDA_VISIBLE_DEVICES=1
 python tools/train.py \
     --config_file configs/ms1mv2_mobileface.py \
-    --is_static False \
     --embedding_size 128 \
     --sample_ratio 1.0 \
     --loss ArcFace \
