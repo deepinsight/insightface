@@ -148,47 +148,46 @@ class Checkpoint(object):
                 extra_info = json.load(handle)
 
         # Preporcess distributed parameters.
-        if self.world_size > 1:
-            pretrain_world_size = extra_info['pretrain_world_size']
-            assert pretrain_world_size > 0
-            embedding_size = extra_info['embedding_size']
-            assert embedding_size == self.embedding_size
-            num_classes = extra_info['num_classes']
-            assert num_classes == self.num_classes
+        pretrain_world_size = extra_info['pretrain_world_size']
+        assert pretrain_world_size > 0
+        embedding_size = extra_info['embedding_size']
+        assert embedding_size == self.embedding_size
+        num_classes = extra_info['num_classes']
+        assert num_classes == self.num_classes
 
-            logging.info(
-                "Parameters for pre-training: pretrain_world_size ({}), "
-                "embedding_size ({}), and num_classes ({}).".format(
-                    pretrain_world_size, embedding_size, num_classes))
-            logging.info("Parameters for inference or fine-tuning: "
-                         "world_size ({}).".format(self.world_size))
+        logging.info(
+            "Parameters for pre-training: pretrain_world_size ({}), "
+            "embedding_size ({}), and num_classes ({}).".format(
+                pretrain_world_size, embedding_size, num_classes))
+        logging.info("Parameters for inference or fine-tuning: "
+                     "world_size ({}).".format(self.world_size))
 
-            rank_str = '%05d' % self.rank
+        rank_str = '%05d' % self.rank
 
-            dist_weight_state_dict = rearrange_weight(
-                dist_weight_state_dict, pretrain_world_size, self.world_size)
-            dist_bias_state_dict = rearrange_weight(
-                dist_bias_state_dict, pretrain_world_size, self.world_size)
-            for name, value in dist_weight_state_dict.items():
+        dist_weight_state_dict = rearrange_weight(
+            dist_weight_state_dict, pretrain_world_size, self.world_size)
+        dist_bias_state_dict = rearrange_weight(
+            dist_bias_state_dict, pretrain_world_size, self.world_size)
+        for name, value in dist_weight_state_dict.items():
+            if rank_str in name:
+                state_dict[name] = value
+        for name, value in dist_bias_state_dict.items():
+            if rank_str in name:
+                state_dict[name] = value
+
+        if for_train:
+            dist_weight_velocity_state_dict = rearrange_weight(
+                dist_weight_velocity_state_dict, pretrain_world_size,
+                self.world_size)
+            dist_bias_velocity_state_dict = rearrange_weight(
+                dist_bias_velocity_state_dict, pretrain_world_size,
+                self.world_size)
+            for name, value in dist_weight_velocity_state_dict.items():
                 if rank_str in name:
                     state_dict[name] = value
-            for name, value in dist_bias_state_dict.items():
+            for name, value in dist_bias_velocity_state_dict.items():
                 if rank_str in name:
                     state_dict[name] = value
-
-            if for_train:
-                dist_weight_velocity_state_dict = rearrange_weight(
-                    dist_weight_velocity_state_dict, pretrain_world_size,
-                    self.world_size)
-                dist_bias_velocity_state_dict = rearrange_weight(
-                    dist_bias_velocity_state_dict, pretrain_world_size,
-                    self.world_size)
-                for name, value in dist_weight_velocity_state_dict.items():
-                    if rank_str in name:
-                        state_dict[name] = value
-                for name, value in dist_bias_velocity_state_dict.items():
-                    if rank_str in name:
-                        state_dict[name] = value
 
         program.set_state_dict(state_dict)
         logging.info("Load checkpoint from '{}'. ".format(checkpoint_dir))
