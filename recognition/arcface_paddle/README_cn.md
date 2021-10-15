@@ -129,8 +129,6 @@ sh scripts/export_static.sh
 sh scripts/export_dynamic.sh
 ```
 
-模型导出也支持通过设置参数 `--export_type onnx` 选择导出 onnx 模型。
-
 ## 7. 模型推理
 
 模型推理过程支持 paddle 格式的 ``save inference model`` 和 onnx 格式。
