@@ -197,7 +197,7 @@ sh scripts/inference.sh
   
 ![insightface_throughtput](https://github.com/PaddlePaddle/PLSC/blob/master/experiments/arcface_paddle/images/insightface_throughtput.png)
 
-For more experimental results see [PLSC](https://github.com/PaddlePaddle/PLSC), which is an open source Paddle Large Scale Classification Tools powered by PaddlePaddle. It supports 60 million classes on 8 NVIDIA V100 (32G).
+For more experimental results see [PLSC](https://github.com/PaddlePaddle/PLSC), which is an open source Paddle Large Scale Classification Tools powered by PaddlePaddle. It supports 60 million classes on single node 8 NVIDIA V100 (32G).
 
 ## 9. Inference Combined with Face Detection Model
 
