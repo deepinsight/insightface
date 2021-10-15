@@ -135,17 +135,16 @@ class Checkpoint(object):
             else:
                 state_dict[name] = tensor
 
-        if for_train:
-            meta_file = os.path.join(checkpoint_dir, 'meta.json')
-            if not os.path.exists(meta_file):
-                logging.error(
-                    "Please make sure the checkpoint dir {} exists, and "
-                    "parameters in that dir are validating.".format(
-                        checkpoint_dir))
-                exit()
+        meta_file = os.path.join(checkpoint_dir, 'meta.json')
+        if not os.path.exists(meta_file):
+            logging.error(
+                "Please make sure the checkpoint dir {} exists, and "
+                "parameters in that dir are validating.".format(
+                    checkpoint_dir))
+            exit()
 
-            with open(meta_file, 'r') as handle:
-                extra_info = json.load(handle)
+        with open(meta_file, 'r') as handle:
+            extra_info = json.load(handle)
 
         # Preporcess distributed parameters.
         pretrain_world_size = extra_info['pretrain_world_size']
