@@ -94,7 +94,7 @@ sh scripts/train_dynamic.sh
 
 注：多机器多卡训练参见 ``paddle.distributed.launch`` API 文档。单机与多机训练不同之处在于多机需要设置 ``--ips`` 参数。
 
-在训练过程中，你可以实时通过 `VisualDL` 图像化查看 loss 的变化，更多信息可以参考 [VisualDL](https://github.com/PaddlePaddle/VisualDL/)。
+在训练过程中，你可以实时通过 `VisualDL` 可视化查看 loss 的变化，更多信息可以参考 [VisualDL](https://github.com/PaddlePaddle/VisualDL/)。
 
 
 ## 5. 模型评价
