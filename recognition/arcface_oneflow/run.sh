@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export PYTHONUNBUFFERED=1
+echo PYTHONUNBUFFERED=$PYTHONUNBUFFERED
+export NCCL_LAUNCH_MODE=PARALLEL
+echo NCCL_LAUNCH_MODE=$NCCL_LAUNCH_MODE
+export NCCL_DEBUG=False
+export ONEFLOW_DEBUG_MODE=False
+
+#CUDA_VISIBLE_DEVICES='1'
+python train.py configs/ms1mv3_r50.py --device_num_per_node 8
