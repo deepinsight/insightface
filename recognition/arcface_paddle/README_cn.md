@@ -1,37 +1,37 @@
-[简体中文](README_cn.md) | English
+简体中文 | [English](README.md)
 
 # Arcface-Paddle
 
-## 1. Introduction
+## 1. 简介
 
-`Arcface-Paddle` is an open source deep face detection and recognition toolkit, powered by PaddlePaddle. `Arcface-Paddle` provides three related pretrained models now, include `BlazeFace` for face detection, `ArcFace` and `MobileFace` for face recognition.
+`Arcface-Paddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`Arcface-Paddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。
 
-- This tutorial is mainly about face recognition.
-- For face detection task, please refer to: [Face detection tuturial](../../detection/blazeface_paddle/README_en.md).
-- For Whl package inference using PaddleInference, please refer to [whl package inference](https://github.com/littletomatodonkey/insight-face-paddle).
+- 本部分内容为人脸识别部分。
+- 人脸检测相关内容可以参考：[基于BlazeFace的人脸检测](../../detection/blazeface_paddle/README_ch.md)。
+- 基于PaddleInference的Whl包预测部署内容可以参考：[Whl包预测部署](https://github.com/littletomatodonkey/insight-face-paddle)。
 
-Note: Many thanks to [GuoQuanhao](https://github.com/GuoQuanhao) for the reproduction of the [Arcface basline using PaddlePaddle](https://github.com/GuoQuanhao/arcface-Paddle).
+Note: 在此非常感谢 [GuoQuanhao](https://github.com/GuoQuanhao) 基于PaddlePaddle复现了 [Arcface的基线模型](https://github.com/GuoQuanhao/arcface-Paddle)。
 
-## 2. Environment Preparation
+## 2. 环境准备
 
-Please refer to [Installation](./install_en.md) to setup environment at first.
+请参照 [Installation](./install_cn.md) 配置实验所需环境。
 
-## 3. Data Preparation
+## 3. 数据准备
 
-### 3.1 Download Dataset
+### 3.1 下载数据集
 
-Download the dataset from [insightface datasets](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_).
+数据集可以从 [insightface datasets](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_) 下载.
 
 * MS1M_v2: MS1M-ArcFace
 * MS1M_v3: MS1M-RetinaFace
 
-### 3.2 Extract MXNet Dataset to images
+### 3.2 从 MXNet 格式数据集抽取图像
 
 ```shell
 python tools/mx_recordio_2_images.py --root_dir ms1m-retinaface-t1/ --output_dir MS1M_v3/
 ```
 
-After finishing unzipping the dataset, the folder structure is as follows.
+当数据集抽取完后，输出的图像数据集目录结构如下：
 
 ```
 MS1M_v3
@@ -46,20 +46,20 @@ MS1M_v3
 |_ lfw.bin
 ```
 
-Label file format is as follows.
+标签文件格式如下：
 
 ```
-# delimiter: "\t"
-# the following the content of label.txt
+# 图像路径与标签的分隔符: "\t"
+# 以下是 label.txt 每行的格式
 images/00000001.jpg 0
 ...
 ```
 
-If you want to use customed dataset, you can arrange your data according to the above format. 
+如果你想使用自定义数据集训练，可以根据以上目录结构和标签文件格式组织数据。
 
-## 4. How to Training
+## 4. 训练
 
-### 4.1 Single Node, Single GPU
+### 4.1 单机单卡
 
 ```bash
 export CUDA_VISIBLE_DEVICES=1
@@ -76,70 +76,74 @@ python tools/train.py \
     --fp16 False
 ```
 
-### 4.2 Single Node, 8 GPUs:
+### 4.2 单机 8 卡
 
-#### Static Mode
+为了方便训练，已经为用户准备好训练启动脚本。
+
+#### 静态图模式训练
 
 ```bash
 sh scripts/train_static.sh
 ```
 
-#### Dynamic Mode
+#### 动态图模式训练
 
 ```bash
 sh scripts/train_dynamic.sh
 ```
 
+注：多机器多卡训练参见 ``paddle.distributed.launch`` API 文档。单机与多机训练不同之处在于多机需要设置 ``--ips`` 参数。
 
-During training, you can view loss changes in real time through `VisualDL`,  For more information, please refer to [VisualDL](https://github.com/PaddlePaddle/VisualDL/).
+在训练过程中，你可以实时通过 `VisualDL` 图像化查看 loss 的变化，更多信息可以参考 [VisualDL](https://github.com/PaddlePaddle/VisualDL/)。
 
 
-## 5. Model Evaluation
+## 5. 模型评价
 
-The model evaluation process can be started as follows.
+模型评价可以通过以下脚本启动
 
-#### Static Mode
+#### 静态图模式
 
 ```bash
 sh scripts/validation_static.sh
 ```
 
-#### Dynamic Mode
+#### 动态图模式
 
 ```bash
 sh scripts/validation_dynamic.sh
 ```
 
-## 6. Export Model
-PaddlePaddle supports inference using prediction engines. Firstly, you should export inference model.
+## 6. 模型导出
 
-#### Static Mode
+PaddlePaddle 支持用预测引擎直接推理，首先，需要导出推理模型，通过以下脚本进行导出
+
+#### 静态图模式
 
 ```bash
 sh scripts/export_static.sh
 ```
 
-#### Dynamic Mode
+#### 动态图模式
 
 ```bash
 sh scripts/export_dynamic.sh
 ```
 
-We also support export to onnx model, you only need to set `--export_type onnx`.
+模型导出也支持通过设置参数 `--export_type onnx` 选择导出 onnx 模型。
 
-## 7. Model Inference
+## 7. 模型推理
 
-The model inference process supports paddle save inference model and onnx model.
+模型推理过程支持 paddle 格式的 ``save inference model`` 和 onnx 格式。
 
 ```bash
 sh scripts/inference.sh
 ```
 
-## 8. Model Performance
+## 8. 模型性能
 
-### 8.1 Performance of Lighting Model
+### 8.1 轻量化模型性能
 
-**Configuration：**
+**配置：**
   * CPU: Intel(R) Xeon(R) Gold 6184 CPU @ 2.40GHz
   * GPU: a single NVIDIA Tesla V100
   * Precison: FP32
@@ -153,11 +157,11 @@ sh scripts/inference.sh
 | MobileFace-Paddle      | 0.9952 | 0.9280  | 0.9612  | 4.3ms  | 2.3ms    | [download link](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/mobileface_v1.0_infer.tar)  |
 | MobileFace-mxnet       | 0.9950 | 0.8894  | 0.9591  | 7.3ms  | 4.7ms    | -   |
 
-* Note: MobileFace-Paddle training using MobileFaceNet_128
+* 注: MobileFace-Paddle 是使用 MobileFaceNet_128 backbone 训练出的模型
 
-### 8.2 Accuracy on Verification Datasets
+### 8.2 验证集准确率
 
-**Configuration：**
+**配置：**
   * GPU: 8 NVIDIA Tesla V100 32G
   * Precison: Pure FP16
   * BatchSize: 128/1024
@@ -170,9 +174,9 @@ sh scripts/inference.sh
 | Dynamic |  MS1MV3  | r50      | 1.0   | 0.98317 | 0.98900| 0.99833 | [log](https://github.com/PaddlePaddle/PLSC/blob/master/experiments/arcface_paddle/logs/dynamic/ms1mv3_r50_dynamic_128_fp16_1.0/training.log) | [checkpoint](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/distributed/ms1mv3_r50_dynamic_128_fp16_1.0_eopch_24.tgz) |
 
   
-### 8.3 Maximum Number of Identities 
+### 8.3 最大类别数支持 
 
-**Configuration：**
+**配置：**
   * GPU: 8 NVIDIA Tesla V100 32G (32510MiB)
   * BatchSize: 64/512
   * SampleRatio: 0.1
@@ -184,11 +188,11 @@ sh scripts/inference.sh
 | Paddle (static)           | Pure FP16 | 60000000 (32018MiB)| 60000000 (32018MiB)|
 | Paddle (dynamic)          | Pure FP16 | 59000000 (31970MiB)| 59000000 (31970MiB)|
 
-**Note:** config environment variable by ``export FLAGS_allocator_strategy=naive_best_fit``
+* 注：在跑实验前配置环境变量 ``export FLAGS_allocator_strategy=naive_best_fit``
 
-### 8.4 Throughtput
+### 8.4 吞吐量对比
 
-**Configuration：**
+**配置：**
   * BatchSize: 128/1024
   * SampleRatio: 0.1
   * Datasets: MS1MV3
@@ -197,33 +201,32 @@ sh scripts/inference.sh
   
 ![insightface_throughtput](https://github.com/PaddlePaddle/PLSC/blob/master/experiments/arcface_paddle/images/insightface_throughtput.png)
 
-For more experimental results see [PLSC](https://github.com/PaddlePaddle/PLSC), which is an open source Paddle Large Scale Classification Tools powered by PaddlePaddle. It supports 60 million classes on single node 8 NVIDIA V100 (32G).
+更多实验结果可以参考 [PLSC](https://github.com/PaddlePaddle/PLSC)，PLSC 是 Paddle 官方开源的大规模分类库，支持单机 8 卡 NVIDIA V100 (32G) 训练 6000 千万类，目前还在持续更新中，请关注。
 
-## 9. Inference Combined with Face Detection Model
+## 9. 全流程推理
 
-Firstly, use the following commands to download the index gallery, demo image and font file for visualization.
-
+首先下载索引库、待识别图像与字体文件。
 
 ```bash
-# Index library for the recognition process
+# 下载用于人脸识别的索引库，这里因为示例图像是老友记中的图像，所以使用老友记中角色的人脸图像构建的底库。
 wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/index.bin
-# Demo image
+# 下载用于人脸识别的示例图像
 wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends2.jpg
-# Font file for visualization
+# 下载字体，用于可视化
 wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/SourceHanSansCN-Medium.otf
 ```
 
-Use the following command to run the whole face recognition demo.
+`检测+识别` 串联预测的示例脚本如下。
 
 ```shell
-# detection + recogniotion process
+# 同时使用检测+识别
 python3.7 test_recognition.py --det --rec --index=index.bin --input=friends2.jpg --output="./output"
 ```
 
-The final result is save in folder `output/`, which is shown as follows.
+最终可视化结果保存在`output`目录下，可视化结果如下所示。
 
 <div align="center">
 <img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/output/friends2.jpg"  width = "800" />
 </div>
 
-For more details about parameter explanations, index gallery construction and whl package inference, please refer to [Whl package inference tutorial](https://github.com/littletomatodonkey/insight-face-paddle).
+更多关于参数解释，索引库构建、whl包预测部署的内容可以参考：[Whl包预测部署](https://github.com/littletomatodonkey/insight-face-paddle)。
