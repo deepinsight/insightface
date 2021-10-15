@@ -213,13 +213,6 @@ wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/ma
 wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/SourceHanSansCN-Medium.otf
 ```
 
-The demo image is shown as follows.
-
-<div align="center">
-<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends2.jpg"  width = "800" />
-</div>
-
-
 Use the following command to run the whole face recognition demo.
 
 ```shell
