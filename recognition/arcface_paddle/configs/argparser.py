@@ -265,12 +265,12 @@ def parse_args():
     parser.add_argument(
         '--output', type=str, default=cfg.output, help='output dir')
     parser.add_argument(
-        '--resume', type=str2bool, default=cfg.resume, help='model resuming')
+        '--resume', type=str2bool, default=cfg.resume, help='whether to using resume training')
     parser.add_argument(
         '--checkpoint_dir',
         type=str,
         default=cfg.checkpoint_dir,
-        help='checkpoint direcotry')
+        help='set checkpoint direcotry when resume training')
     parser.add_argument(
         '--max_num_last_checkpoint',
         type=int,
