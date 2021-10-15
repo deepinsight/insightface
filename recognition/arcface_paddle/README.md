@@ -12,13 +12,13 @@
 
 Note: Many thanks to [GuoQuanhao](https://github.com/GuoQuanhao) for the reproduction of the [Arcface basline using PaddlePaddle](https://github.com/GuoQuanhao/arcface-Paddle).
 
-## 2. Environment preparation
+## 2. Environment Preparation
 
 Please refer to [Installation](./install_en.md) to setup environment at first.
 
-## 3. Data preparation
+## 3. Data Preparation
 
-### 3.1 Download dataset
+### 3.1 Download Dataset
 
 Download the dataset from [insightface datasets](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_).
 
@@ -59,7 +59,7 @@ If you want to use customed dataset, you can arrange your data according to the 
 
 ## 4. How to Training
 
-### 4.1 Single node, single GPU
+### 4.1 Single Node, Single GPU
 
 ```bash
 export CUDA_VISIBLE_DEVICES=1
@@ -76,7 +76,7 @@ python tools/train.py \
     --fp16 False
 ```
 
-### 4.2 Single node, 8 GPUs:
+### 4.2 Single Node, 8 GPUs:
 
 #### Static Mode
 
@@ -94,7 +94,7 @@ sh scripts/train_dynamic.sh
 During training, you can view loss changes in real time through `VisualDL`,  For more information, please refer to [VisualDL](https://github.com/PaddlePaddle/VisualDL/).
 
 
-## 5. Model evaluation
+## 5. Model Evaluation
 
 The model evaluation process can be started as follows.
 
@@ -110,7 +110,7 @@ sh scripts/validation_static.sh
 sh scripts/validation_dynamic.sh
 ```
 
-## 6. Export model
+## 6. Export Model
 PaddlePaddle supports inference using prediction engines. Firstly, you should export inference model.
 
 #### Static Mode
@@ -127,7 +127,7 @@ sh scripts/export_dynamic.sh
 
 We also support export to onnx model, you only need to set `--export_type onnx`.
 
-## 7. Model inference
+## 7. Model Inference
 
 The model inference process supports paddle save inference model and onnx model.
 
@@ -135,7 +135,7 @@ The model inference process supports paddle save inference model and onnx model.
 sh scripts/inference.sh
 ```
 
-## 8. Model performance
+## 8. Model Performance
 
 ### 8.1 Performance of Lighting Model
 
@@ -199,37 +199,32 @@ sh scripts/inference.sh
 
 For more experimental results see [PLSC](https://github.com/PaddlePaddle/PLSC), which is an open source Paddle Large Scale Classification Tools powered by PaddlePaddle. It supports 60 million classes on 8 NVIDIA V100 (32G).
 
-## 9. Inference using PaddleInference
+## 9. Inference Combined with Face Detection Model
 
-### 9.1 Install insightface-paddle
+Firstly, use the following commands to download the index gallery, demo image and font file for visualization.
 
-```bash
-# install insightface-paddle
-pip install --upgrade insightface-paddle
-```
-
-### 9.2 Download the index gallery, demo image.
 
 ```bash
-mkdir -p images/gallery/
-mkdir -p images/query/
-
 # Index library for the recognition process
-wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/index.bin -P images/gallery/
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/index.bin
 # Demo image
-wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends2.jpg -P images/query/
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends2.jpg
+# Font file for visualization
+wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/SourceHanSansCN-Medium.otf
 ```
 
-### 9.3 Inference using MobileFace
+The demo image is shown as follows.
 
-```bash
-# default using MobileFace
-insightfacepaddle \
-    --det \
-    --rec \
-    --index=images/gallery/index.bin \
-    --input=images/query/friends2.jpg \
-    --output="./output"
+<div align="center">
+<img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/query/friends2.jpg"  width = "800" />
+</div>
+
+
+Use the following command to run the whole face recognition demo.
+
+```shell
+# detection + recogniotion process
+python3.7 test_recognition.py --det --rec --index=index.bin --input=friends2.jpg --output="./output"
 ```
 
 The final result is save in folder `output/`, which is shown as follows.

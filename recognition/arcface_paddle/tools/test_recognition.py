@@ -32,6 +32,8 @@ from paddle.inference import Config
 from paddle.inference import create_predictor
 
 __all__ = ["InsightFace", "parser"]
+BASE_INFERENCE_MODEL_DIR = os.path.expanduser("~/.insightface/ppmodels/")
+BASE_DOWNLOAD_URL = "https://paddle-model-ecology.bj.bcebos.com/model/insight-face/{}.tar"
 
 
 def parser(add_help=True):
@@ -43,27 +45,17 @@ def parser(add_help=True):
         "--det", action="store_true", help="Whether to detect.")
     parser.add_argument(
         "--rec", action="store_true", help="Whether to recognize.")
-
+    
     parser.add_argument(
-        "--det_model_file_path",
+        "--det_model",
         type=str,
-        default="models/blazeface_fpn_ssh_1000e_v1.0_infer/inference.pdmodel",
-        help="The detection model file path.")
+        default="BlazeFace",
+        help="The detection model.")
     parser.add_argument(
-        "--det_params_file_path",
+        "--rec_model",
         type=str,
-        default="models/blazeface_fpn_ssh_1000e_v1.0_infer/inference.pdiparams",
-        help="The detection params file path.")
-    parser.add_argument(
-        "--rec_model_file_path",
-        type=str,
-        default="models/ms1mv3_r50_static_128_fp16_0.1_epoch_24_infer/FresResNet50.pdmodel",
-        help="The detection model file path.")
-    parser.add_argument(
-        "--rec_params_file_path",
-        type=str,
-        default="models/ms1mv3_r50_static_128_fp16_0.1_epoch_24_infer/FresResNet50.pdiparams",
-        help="The detection params file path.")
+        default="MobileFace",
+        help="The recognition model.")
     parser.add_argument(
         "--use_gpu",
         type=str2bool,
@@ -86,10 +78,7 @@ def parser(add_help=True):
         type=str,
         help="The path or directory of image(s) or video to be predicted.")
     parser.add_argument(
-        "--output",
-        type=str,
-        default="./output/",
-        help="The directory of prediction result.")
+        "--output", type=str, default="./output/", help="The directory of prediction result.")
     parser.add_argument(
         "--det_thresh",
         type=float,
@@ -100,7 +89,7 @@ def parser(add_help=True):
     parser.add_argument(
         "--cdd_num",
         type=int,
-        default=10,
+        default=5,
         help="The number of candidates in the recognition retrieval. Default by 10."
     )
     parser.add_argument(
@@ -113,21 +102,6 @@ def parser(add_help=True):
         type=int,
         default=1,
         help="The maxium of batch_size to recognize. Default by 1.")
-    parser.add_argument(
-        "--build_index",
-        type=str,
-        default=None,
-        help="The path of index to be build.")
-    parser.add_argument(
-        "--img_dir",
-        type=str,
-        default=None,
-        help="The img(s) dir used to build index.")
-    parser.add_argument(
-        "--label",
-        type=str,
-        default=None,
-        help="The label file path used to build index.")
 
     return parser
 
@@ -143,6 +117,86 @@ def print_config(args):
     print(table)
     print("Powered by PaddlePaddle!".rjust(width))
     print("{}".format("-" * width))
+
+
+def download_with_progressbar(url, save_path):
+    """Download from url with progressbar.
+    """
+    if os.path.isfile(save_path):
+        os.remove(save_path)
+    response = requests.get(url, stream=True)
+    total_size_in_bytes = int(response.headers.get("content-length", 0))
+    block_size = 1024  # 1 Kibibyte
+    progress_bar = tqdm(total=total_size_in_bytes, unit="iB", unit_scale=True)
+    with open(save_path, "wb") as file:
+        for data in response.iter_content(block_size):
+            progress_bar.update(len(data))
+            file.write(data)
+    progress_bar.close()
+    if total_size_in_bytes == 0 or progress_bar.n != total_size_in_bytes or not os.path.isfile(
+            save_path):
+        raise Exception(
+            f"Something went wrong while downloading model/image from {url}")
+
+
+def check_model_file(model):
+    """Check the model files exist and download and untar when no exist.
+    """
+    model_map = {
+        "ArcFace": "arcface_iresnet50_v1.0_infer",
+        "BlazeFace": "blazeface_fpn_ssh_1000e_v1.0_infer",
+        "MobileFace": "mobileface_v1.0_infer"
+    }
+
+    if os.path.isdir(model):
+        model_file_path = os.path.join(model, "inference.pdmodel")
+        params_file_path = os.path.join(model, "inference.pdiparams")
+        if not os.path.exists(model_file_path) or not os.path.exists(
+                params_file_path):
+            raise Exception(
+                f"The specifed model directory error. The drectory must include 'inference.pdmodel' and 'inference.pdiparams'."
+            )
+
+    elif model in model_map:
+        storage_directory = partial(os.path.join, BASE_INFERENCE_MODEL_DIR,
+                                    model)
+        url = BASE_DOWNLOAD_URL.format(model_map[model])
+
+        tar_file_name_list = [
+            "inference.pdiparams", "inference.pdiparams.info",
+            "inference.pdmodel"
+        ]
+        model_file_path = storage_directory("inference.pdmodel")
+        params_file_path = storage_directory("inference.pdiparams")
+        if not os.path.exists(model_file_path) or not os.path.exists(
+                params_file_path):
+            tmp_path = storage_directory(url.split("/")[-1])
+            logging.info(f"Download {url} to {tmp_path}")
+            os.makedirs(storage_directory(), exist_ok=True)
+            download_with_progressbar(url, tmp_path)
+            with tarfile.open(tmp_path, "r") as tarObj:
+                for member in tarObj.getmembers():
+                    filename = None
+                    for tar_file_name in tar_file_name_list:
+                        if tar_file_name in member.name:
+                            filename = tar_file_name
+                    if filename is None:
+                        continue
+                    file = tarObj.extractfile(member)
+                    with open(storage_directory(filename), "wb") as f:
+                        f.write(file.read())
+            os.remove(tmp_path)
+        if not os.path.exists(model_file_path) or not os.path.exists(
+                params_file_path):
+            raise Exception(
+                f"Something went wrong while downloading and unzip the model[{model}] files!"
+            )
+    else:
+        raise Exception(
+            f"The specifed model name error. Support 'BlazeFace' for detection and 'ArcFace' and 'MobileFace' for recognition. And support local directory that include model files ('inference.pdmodel' and 'inference.pdiparams')."
+        )
+
+    return model_file_path, params_file_path
 
 
 def normalize_image(img, scale=None, mean=None, std=None, order='chw'):
@@ -516,7 +570,9 @@ class InsightFace(object):
         if print_info:
             print_config(args)
 
-        self.font_path = "assets/SourceHanSansCN-Medium.otf"
+        self.font_path = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)),
+            "SourceHanSansCN-Medium.otf")
         self.args = args
 
         predictor_config = {
@@ -525,13 +581,17 @@ class InsightFace(object):
             "cpu_threads": args.cpu_threads
         }
         if args.det:
+            model_file_path, params_file_path = check_model_file(
+                args.det_model)
             det_config = {"thresh": args.det_thresh, "target_size": [640, 640]}
-            predictor_config["model_file"] = args.det_model_file_path
-            predictor_config["params_file"] = args.det_params_file_path
+            predictor_config["model_file"] = model_file_path
+            predictor_config["params_file"] = params_file_path
             self.det_predictor = Detector(det_config, predictor_config)
             self.color_map = ColorMap(100)
 
         if args.rec:
+            model_file_path, params_file_path = check_model_file(
+                args.rec_model)
             rec_config = {
                 "max_batch_size": args.max_batch_size,
                 "resize": 112,
@@ -539,8 +599,8 @@ class InsightFace(object):
                 "index": args.index,
                 "cdd_num": args.cdd_num
             }
-            predictor_config["model_file"] = args.rec_model_file_path
-            predictor_config["params_file"] = args.rec_params_file_path
+            predictor_config["model_file"] = model_file_path
+            predictor_config["params_file"] = params_file_path
             self.rec_predictor = Recognizer(rec_config, predictor_config)
 
     def preprocess(self, img):
@@ -644,34 +704,6 @@ class InsightFace(object):
             }
         logging.info(f"Predict complete!")
 
-    def build_index(self):
-        img_dir = self.args.img_dir
-        label_path = self.args.label
-        with open(label_path, "r") as f:
-            sample_list = f.readlines()
-
-        feature_list = []
-        label_list = []
-
-        for idx, sample in enumerate(sample_list):
-            name, label = sample.strip().split("\t")
-            img = cv2.imread(os.path.join(img_dir, name))
-            if img is None:
-                logging.warning(f"Error in reading img {name}! Ignored.")
-                continue
-            box_list, np_feature = self.predict_np_img(img)
-            feature_list.append(np_feature[0])
-            label_list.append(label)
-
-            if idx % 100 == 0:
-                logging.info(f"Build idx: {idx}")
-
-        with open(self.args.build_index, "wb") as f:
-            pickle.dump({"label": label_list, "feature": feature_list}, f)
-        logging.info(
-            f"Build done. Total {len(label_list)}. Index file has been saved in \"{self.args.build_index}\""
-        )
-
 
 # for CLI
 def main(args=None):
@@ -679,12 +711,9 @@ def main(args=None):
 
     args = parser().parse_args()
     predictor = InsightFace(args)
-    if args.build_index:
-        predictor.build_index()
-    else:
-        res = predictor.predict(args.input, print_info=True)
-        for _ in res:
-            pass
+    res = predictor.predict(args.input, print_info=True)
+    for _ in res:
+        pass
 
 
 if __name__ == "__main__":
