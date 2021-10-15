@@ -199,7 +199,7 @@ sh scripts/inference.sh
   
 ![insightface_throughtput](https://github.com/PaddlePaddle/PLSC/blob/master/experiments/arcface_paddle/images/insightface_throughtput.png)
 
-更多实验结果可以参考 [PLSC](https://github.com/PaddlePaddle/PLSC)，PLSC 是 Paddle 官方开源的大规模分类库，支持单机 8 卡 NVIDIA V100 (32G) 训练 6000 千万类，目前还在持续更新中，请关注。
+更多实验结果可以参考 [PLSC](https://github.com/PaddlePaddle/PLSC)，PLSC (Paddle Large Scale Classification) 是 Paddle 官方开源的大规模分类库，支持单机 8 卡 NVIDIA V100 (32G) 训练 6000 千万类，目前还在持续更新中，请关注。
 
 ## 9. 全流程推理
 
