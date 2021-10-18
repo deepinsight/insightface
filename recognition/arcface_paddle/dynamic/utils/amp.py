@@ -40,9 +40,6 @@ class LSCGradScaler(GradScaler):
                 classifier.step(optimizer)
             return optimizer.step()
 
-#         if self._scale >= self.max_loss_scaling:
-#             self._scale = paddle.to_tensor([self.max_loss_scaling], dtype='float32')
-
         # unscale the grad
         self._unscale(optimizer)
 
