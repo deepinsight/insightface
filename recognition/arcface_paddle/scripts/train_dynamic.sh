@@ -25,8 +25,8 @@ python -m paddle.distributed.launch --gpus=0,1,2,3,4,5,6,7 tools/train.py \
     --batch_size 128 \
     --dataset MS1M_v3 \
     --num_classes 93431 \
-    --data_dir /wangguoxia/plsc/MS1M_v3/ \
-    --label_file /wangguoxia/plsc/MS1M_v3/label.txt \
+    --data_dir MS1M_v3/ \
+    --label_file MS1M_v3/label.txt \
     --is_bin False \
     --log_interval_step 100 \
     --validation_interval_step 2000 \

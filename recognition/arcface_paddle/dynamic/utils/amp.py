@@ -40,10 +40,7 @@ class LSCGradScaler(GradScaler):
                 classifier.step(optimizer)
             return optimizer.step()
 
-#         if self._scale >= self.max_loss_scaling:
-#             self._scale = paddle.to_tensor([self.max_loss_scaling], dtype='float32')
-
-#  unscale the grad
+        # unscale the grad
         self._unscale(optimizer)
 
         if self._found_inf:
@@ -92,6 +89,7 @@ class LSCGradScaler(GradScaler):
                 self._found_inf = paddle.logical_not(
                     paddle.all(paddle.isfinite(grad)))
                 if self._found_inf:
+                    print('Found inf or nan in classifier, dtype is', dtype)
                     return
 
         for dtype in param_grads_dict:

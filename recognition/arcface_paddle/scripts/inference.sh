@@ -16,9 +16,9 @@ python tools/inference.py \
     --export_type paddle \
     --model_file MS1M_v3_arcface_static_128_fp16_0.1/FresResNet50/exported_model/FresResNet50.pdmodel \
     --params_file MS1M_v3_arcface_static_128_fp16_0.1/FresResNet50/exported_model/FresResNet50.pdiparams \
-    --image_path /wangguoxia/plsc/MS1M_v3/images/00000001.jpg
+    --image_path MS1M_v3/images/00000001.jpg
 
 python tools/inference.py \
     --export_type onnx \
     --onnx_file MS1M_v3_arcface_static_128_fp16_0.1/FresResNet50/exported_model/FresResNet50.onnx \
-    --image_path /wangguoxia/plsc/MS1M_v3/images/00000001.jpg
+    --image_path MS1M_v3/images/00000001.jpg

@@ -22,7 +22,7 @@
 `Arcface-Paddle`是基于PaddlePaddle实现的，开源深度人脸检测、识别工具。`Arcface-Paddle`目前提供了三个预训练模型，包括用于人脸检测的 `BlazeFace`、用于人脸识别的 `ArcFace` 和 `MobileFace`。
 
 - 本部分内容为人脸检测部分，基于PaddleDetection进行开发。
-- 人脸识别相关内容可以参考：[人脸识别](../../recognition/arcface_paddle/README_ch.md)。
+- 人脸识别相关内容可以参考：[人脸识别](../../recognition/arcface_paddle/README_cn.md)。
 - 基于PaddleInference的Whl包预测部署内容可以参考：[Whl包预测部署](https://github.com/littletomatodonkey/insight-face-paddle)。
 
 

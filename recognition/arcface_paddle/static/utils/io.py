@@ -120,7 +120,7 @@ class Checkpoint(object):
             tensor = paddle.load(path, return_numpy=True)
             if dtype:
                 assert dtype in ['float32', 'float16']
-                tensor = tensor.astype('float32')
+                tensor = tensor.astype(dtype)
 
             if 'dist@' in name and '@rank@' in name:
                 if '.w' in name and 'velocity' not in name:
@@ -147,8 +147,7 @@ class Checkpoint(object):
             with open(meta_file, 'r') as handle:
                 extra_info = json.load(handle)
 
-        # Preporcess distributed parameters.
-        if self.world_size > 1:
+            # Preporcess distributed parameters.
             pretrain_world_size = extra_info['pretrain_world_size']
             assert pretrain_world_size > 0
             embedding_size = extra_info['embedding_size']
