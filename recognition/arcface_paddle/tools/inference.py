@@ -15,11 +15,14 @@
 import sys
 import os
 import cv2
+import time
 import argparse
 import numpy as np
 
 sys.path.insert(0, os.path.abspath('.'))
 
+def str2bool(v):
+    return v.lower() in ("True","true", "t", "1")
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Paddle Face Predictor')
@@ -39,7 +42,7 @@ def parse_args():
     parser.add_argument(
         "--onnx_file", type=str, required=False, help="onnx model filename")
     parser.add_argument("--image_path", type=str, help="path to test image")
-
+    parser.add_argument("--benchmark", type=str2bool, default=False, help="Is benchmark mode")
     args = parser.parse_args()
     return args
 
@@ -53,7 +56,33 @@ def paddle_inference(args):
     input_names = predictor.get_input_names()
     input_handle = predictor.get_input_handle(input_names[0])
 
+    if args.benchmark:
+        import auto_log
+        pid = os.getpid()
+        autolog = auto_log.AutoLogger(
+            model_name="det",
+            model_precision='fp32',
+            batch_size=1,
+            data_shape="dynamic",
+            save_path="./output/auto_log.log",
+            inference_config=config,
+            pids=pid,
+            process_name=None,
+            gpu_ids=0,
+            time_keys=[
+                'preprocess_time', 'inference_time','postprocess_time'
+            ],
+            warmup=0)
+        img = np.random.uniform(0, 255, [1, 3, 112,112]).astype(np.float32)
+        input_handle.copy_from_cpu(img)
+        for i in range(10):
+            predictor.run()
     img = cv2.imread(args.image_path)
+
+    st = time.time()
+    if args.benchmark:
+        autolog.times.start()
+
     # normalize to mean 0.5, std 0.5
     img = (img - 127.5) * 0.00784313725
     # BGR2RGB
@@ -62,6 +91,10 @@ def paddle_inference(args):
     img = np.expand_dims(img, 0)
     img = img.astype('float32')
 
+    if args.benchmark:
+        autolog.times.stamp()
+
+
     input_handle.copy_from_cpu(img)
 
     predictor.run()
@@ -69,7 +102,10 @@ def paddle_inference(args):
     output_names = predictor.get_output_names()
     output_handle = predictor.get_output_handle(output_names[0])
     output_data = output_handle.copy_to_cpu()
-
+    if args.benchmark:
+        autolog.times.stamp()
+        autolog.times.end(stamp=True)
+        autolog.report()
     print('paddle inference result: ', output_data.shape)
 
 

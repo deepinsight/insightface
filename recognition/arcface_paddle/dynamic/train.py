@@ -193,9 +193,14 @@ def train(args):
         use_dynamic_loss_scaling=args.use_dynamic_loss_scaling)
 
     for epoch in range(start_epoch, total_epoch):
+        train_reader_cost = 0.0
+        train_run_cost = 0.0
+        total_samples = 0
+        reader_start = time.time()
         for step, (img, label) in enumerate(train_loader):
+            train_reader_cost += time.time() - reader_start
             global_step += 1
-
+            train_start = time.time()
             with paddle.amp.auto_cast(enable=args.fp16):
                 features = backbone(img)
                 loss_v = classifier(features, label)
@@ -210,9 +215,21 @@ def train(args):
             optimizer.clear_grad()
             classifier.clear_grad()
 
+            train_run_cost += time.time() - train_start
+            total_samples += len(img)
+
             lr_value = optimizer.get_lr()
             loss_avg.update(loss_v.item(), 1)
-            callback_logging(global_step, loss_avg, epoch, lr_value)
+            callback_logging(
+                global_step,
+                loss_avg,
+                epoch,
+                lr_value,
+                avg_reader_cost=train_reader_cost / args.log_interval_step,
+                avg_batch_cost=(train_reader_cost + train_run_cost) / args.log_interval_step,
+                avg_samples=total_samples / args.log_interval_step,
+                ips=total_samples / (train_reader_cost + train_run_cost))
+           
             if args.do_validation_while_train:
                 callback_verification(global_step, backbone)
             lr_scheduler.step()
@@ -220,7 +237,11 @@ def train(args):
             if global_step >= total_steps:
                 break
             sys.stdout.flush()
-
+            if rank is 0 and global_step > 0 and global_step % args.log_interval_step == 0:
+                train_reader_cost = 0.0
+                train_run_cost = 0.0
+                total_samples = 0
+            reader_start = time.time()
         checkpoint.save(
             backbone, classifier, optimizer, epoch=epoch, for_train=True)
     writer.close()
