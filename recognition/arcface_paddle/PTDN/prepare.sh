@@ -1,4 +1,5 @@
 #!/bin/bash
+source PTDN/common_func.sh
 FILENAME=$1
 
 # MODE be one of ['lite_train_infer' 'whole_infer' 'whole_train_infer',  'infer']
@@ -7,23 +8,6 @@ MODE=$2
 
 dataline=$(cat ${FILENAME})
 
-# parser params
-IFS=$'\n'
-lines=(${dataline})
-function func_parser_key(){
-    strs=$1
-    IFS=":"
-    array=(${strs})
-    tmp=${array[0]}
-    echo ${tmp}
-}
-function func_parser_value(){
-    strs=$1
-    IFS=":"
-    array=(${strs})
-    tmp=${array[1]}
-    echo ${tmp}
-}
 IFS=$'\n'
 # The training params
 model_name=$(func_parser_value "${lines[1]}")

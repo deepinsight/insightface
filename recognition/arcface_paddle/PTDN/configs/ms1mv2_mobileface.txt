@@ -37,7 +37,7 @@ export2:null
 train_model:./inference
 infer_export:null
 infer_quant:False
-inference:tools/inference.py  --export_type=paddle
+inference:tools/inference.py  --export_type=paddle --benchmark=True
 --use_gpu:True
 --enable_mkldnn:null
 --cpu_threads:null

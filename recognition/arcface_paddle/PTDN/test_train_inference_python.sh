@@ -1,5 +1,5 @@
 #!/bin/bash
-source tests/common_func.sh
+source PTDN/common_func.sh
 
 
 FILENAME=$1
