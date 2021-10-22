@@ -48,7 +48,6 @@ PTDN/
 
 1. 运行prepare.sh准备测试所需数据和模型；
 2. 运行要测试的功能对应的测试脚本`test_*.sh`，产出log，由log可以看到不同配置是否运行成功；
-3. 用`compare_results.py`对比log中的预测结果和预存在results目录下的结果，判断预测精度是否符合预期（在误差范围内）。
 
 其中，有1个测试主程序，功能如下：
 - `test_train_inference_python.sh`：测试基于Python的模型训练、评估、推理等基本功能。
