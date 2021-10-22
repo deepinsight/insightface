@@ -95,5 +95,4 @@ python3.7 PTDN/compare_results.py --gt_file=./PTDN/results/python_*.txt  --log_f
 
 ## 3. 更多教程
 本文档为功能测试用，更丰富的训练预测使用教程请参考：  
-[模型训练](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/training.md)  
-[基于Python预测引擎推理](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/inference.md)
+[模型训练预测](https://github.com/WenmuZhou/insightface/blob/master/recognition/arcface_paddle/README_cn.md)  
