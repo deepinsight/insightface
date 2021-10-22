@@ -43,7 +43,7 @@ inference:tools/inference.py  --export_type=paddle --benchmark=True
 --cpu_threads:null
 --rec_batch_num:null
 --use_tensorrt:null
---precision:null
+--precision:fp32
 --model_dir:null
 --image_path:MS1M_v2/images/00000001.jpg
 null:null

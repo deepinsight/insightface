@@ -16,6 +16,7 @@ import sys
 import os
 import cv2
 import time
+import json
 import argparse
 import numpy as np
 
@@ -43,6 +44,7 @@ def parse_args():
         "--onnx_file", type=str, required=False, help="onnx model filename")
     parser.add_argument("--image_path", type=str, help="path to test image")
     parser.add_argument("--benchmark", type=str2bool, default=False, help="Is benchmark mode")
+    parser.add_argument("--precision", type=str2bool, default=False, help="precision")
     args = parser.parse_args()
     return args
 
@@ -106,6 +108,7 @@ def paddle_inference(args):
         autolog.times.stamp()
         autolog.times.end(stamp=True)
         autolog.report()
+        print('{}\t{}'.format(args.image_path,json.dumps(output_data.tolist())))
     print('paddle inference result: ', output_data.shape)
 
 

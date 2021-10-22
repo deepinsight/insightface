@@ -7,11 +7,11 @@ FILENAME=$1
 MODE=$2
 
 dataline=$(cat ${FILENAME})
+lines=(${dataline})
 
 IFS=$'\n'
 # The training params
 model_name=$(func_parser_value "${lines[1]}")
-
 trainer_list=$(func_parser_value "${lines[14]}")
 
 # MODE be one of ['lite_train_infer' 'whole_infer' 'whole_train_infer']

@@ -64,6 +64,35 @@ bash PTDN/prepare.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'whole_train_inf
 bash PTDN/test_train_inference_python.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'whole_train_infer'
 ```  
 
+### 2.3 精度测试
+
+使用compare_results.py脚本比较模型预测的结果是否符合预期，主要步骤包括：
+- 提取日志中的预测坐标；
+- 从本地文件中提取保存好的坐标结果；
+- 比较上述两个结果是否符合精度预期，误差大于设置阈值时会报错。
+
+#### 使用方式
+运行命令：
+```shell
+python3.7 PTDN/compare_results.py --gt_file=./PTDN/results/python_*.txt  --log_file=./PTDN/output/python_*.log --atol=1e-3 --rtol=1e-3
+```
+
+参数介绍：  
+- gt_file： 指向事先保存好的预测结果路径，支持*.txt 结尾，会自动索引*.txt格式的文件，文件默认保存在PTDN/result/ 文件夹下
+- log_file: 指向运行PTDN/test_train_inference_python.sh 脚本的infer模式保存的预测日志，预测日志中打印的有预测结果，比如：文本框，预测文本，类别等等，同样支持python_infer_*.log格式传入
+- atol: 设置的绝对误差
+- rtol: 设置的相对误差
+
+#### 运行结果
+
+正常运行效果如下图：
+<img src="compare_right.png" width="1000">
+
+出现不一致结果时的运行输出：
+<img src="compare_wrong.png" width="1000">
+
+
+
 ## 3. 更多教程
 本文档为功能测试用，更丰富的训练预测使用教程请参考：  
 [模型训练](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/training.md)  

@@ -120,7 +120,7 @@ if [ ${MODE} = "klquant_infer" ]; then
     infer_value1=$(func_parser_value "${lines[15]}")
 fi
 
-LOG_PATH="./tests/output"
+LOG_PATH="./PTDN/output"
 mkdir -p ${LOG_PATH}
 status_log="${LOG_PATH}/results_python.log"
 
