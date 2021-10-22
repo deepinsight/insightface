@@ -1,0 +1,70 @@
+# 基础训练预测功能测试
+
+基础训练预测功能测试的主程序为`test_train_inference_python.sh`，可以测试基于Python的模型训练、评估、推理等基本功能。
+
+## 1. 测试结论汇总
+
+- 训练相关：
+
+| 模型名称 | 单机单卡 | 单机多卡 | 多机多卡 | 模型压缩（单机多卡） |
+|   :----  |    :----  |  :----   |  :----   |  :----   |
+| MobileFaceNet_128| 正常训练 <br> FP16 | 正常训练 <br> FP16 | 正常训练 <br> FP16 | - |
+
+- 预测相关：预测功能汇总如下，
+
+|device | batchsize | tensorrt | mkldnn | cpu多线程 |
+|  ---- |   ----   |  :----:  |   :----:   |  :----:  |
+| GPU | 1/6 | - | - | - |
+| CPU | 1/6 | - | - | - |
+
+
+## 2. 测试流程
+### 2.1 安装依赖
+- 安装PaddlePaddle >= 2.2
+- 安装PaddleOCR依赖
+    ```
+    pip3 install  -r requirements.txt
+    ```
+- 安装autolog（规范化日志输出工具）
+    ```
+    pip3 install git+https://github.com/LDOUBLEV/AutoLog.git --force-reinstall
+    ```
+
+
+### 2.2 功能测试
+先运行`prepare.sh`准备数据和模型，然后运行`test_train_inference_python.sh`进行测试，最终在```PTDN/output```目录下生成`python_infer_*.log`格式的日志文件。
+
+
+`test_train_inference_python.sh`包含4种运行模式，每种模式的运行数据不同，分别用于测试速度和精度，分别是：
+
+- 模式1：lite_train_infer，使用少量数据训练，用于快速验证训练到预测的走通流程，不验证精度和速度；
+```shell
+bash PTDN/prepare.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'lite_train_infer'
+bash PTDN/test_train_inference_python.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'lite_train_infer'
+```  
+
+- 模式2：whole_infer，使用少量数据训练，一定量数据预测，用于验证训练后的模型执行预测，预测速度是否合理；
+```shell
+bash PTDN/prepare.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'whole_infer'
+bash PTDN/test_train_inference_python.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'whole_infer'
+```  
+
+- 模式3：infer，不训练，全量数据预测，走通开源模型评估、动转静，检查inference model预测时间和精度;
+```shell
+bash PTDN/prepare.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'infer'
+# 用法1:
+bash PTDN/test_train_inference_python.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'infer'
+# 用法2: 指定GPU卡预测，第三个传入参数为GPU卡号
+bash PTDN/test_train_inference_python.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'infer' '1'
+```  
+
+- 模式4：whole_train_infer，CE： 全量数据训练，全量数据预测，验证模型训练精度，预测精度，预测速度；
+```shell
+bash PTDN/prepare.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'whole_train_infer'
+bash PTDN/test_train_inference_python.sh ./PTDN/configs/ppocr_det_mobile_params.txt 'whole_train_infer'
+```  
+
+## 3. 更多教程
+本文档为功能测试用，更丰富的训练预测使用教程请参考：  
+[模型训练](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/training.md)  
+[基于Python预测引擎推理](https://github.com/PaddlePaddle/PaddleOCR/blob/dygraph/doc/doc_ch/inference.md)
