@@ -85,6 +85,7 @@ class CallBackLogging(object):
                 self.writer.add_scalar('time_for_end', time_for_end,
                                        global_step)
                 self.writer.add_scalar('loss', loss.avg, global_step)
+            # ips is throughput
             msg = "loss %.4f, lr: %f, epoch: %d, step: %d, eta: %1.2f hours, avg_reader_cost: %.5f sec, avg_batch_cost: %.5f sec, avg_samples: %.5f, ips: %.5f images/sec" % (
                 loss.avg, lr_value, epoch, global_step, time_for_end,avg_reader_cost, avg_batch_cost, avg_samples, ips * self.world_size)
             logging.info(msg)
