@@ -31,7 +31,7 @@ def validation(args):
 
     backbone = eval("backbones.{}".format(args.backbone))(
         num_features=args.embedding_size)
-    checkpoint.load(backbone, for_train=False)
+    checkpoint.load(backbone, for_train=False, dtype='float32')
     backbone.eval()
 
     callback_verification = CallBackVerification(
