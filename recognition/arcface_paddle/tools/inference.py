@@ -44,15 +44,101 @@ def parse_args():
         "--onnx_file", type=str, required=False, help="onnx model filename")
     parser.add_argument("--image_path", type=str, help="path to test image")
     parser.add_argument("--benchmark", type=str2bool, default=False, help="Is benchmark mode")
-    parser.add_argument("--precision", type=str2bool, default=False, help="precision")
+    # params for paddle inferece engine
+    parser.add_argument("--use_gpu", type=str2bool, default=True)
+    parser.add_argument("--ir_optim", type=str2bool, default=True)
+    parser.add_argument("--use_tensorrt", type=str2bool, default=False)
+    parser.add_argument("--min_subgraph_size", type=int, default=15)
+    parser.add_argument("--max_batch_size", type=int, default=1)
+    parser.add_argument("--precision", type=str, default="fp32")
+    parser.add_argument("--gpu_mem", type=int, default=500)
+    parser.add_argument("--enable_mkldnn", type=str2bool, default=False)
+    parser.add_argument("--cpu_threads", type=int, default=10)
     args = parser.parse_args()
     return args
 
+def get_infer_gpuid():
+    cmd = "nvidia-smi"
+    res = os.popen(cmd).readlines()
+    if len(res) == 0:
+        return None
+    cmd = "env | grep CUDA_VISIBLE_DEVICES"
+    env_cuda = os.popen(cmd).readlines()
+    if len(env_cuda) == 0:
+        return 0
+    else:
+        gpu_id = env_cuda[0].strip().split("=")[1]
+        return int(gpu_id[0])
+
+
+def init_paddle_inference_config(args):
+    import paddle.inference as paddle_infer
+    config = paddle_infer.Config(args.model_file, args.params_file)
+    if hasattr(args, 'precision'):
+        if args.precision == "fp16" and args.use_tensorrt:
+            precision = paddle_infer.PrecisionType.Half
+        elif args.precision == "int8":
+            precision = paddle_infer.PrecisionType.Int8
+        else:
+            precision = paddle_infer.PrecisionType.Float32
+    else:
+        precision = paddle_infer.PrecisionType.Float32
+
+    if args.use_gpu:
+        gpu_id = get_infer_gpuid()
+        if gpu_id is None:
+            raise ValueError(
+                "Not found GPU in current device. Please check your device or set args.use_gpu as False"
+            )
+        config.enable_use_gpu(args.gpu_mem, 0)
+        if args.use_tensorrt:
+            config.enable_tensorrt_engine(
+                precision_mode=precision,
+                max_batch_size=args.max_batch_size,
+                min_subgraph_size=args.min_subgraph_size)
+            # skip the minmum trt subgraph
+            min_input_shape = {"x": [1, 3, 10, 10]}
+            max_input_shape = {"x": [1, 3, 1000, 1000]}
+            opt_input_shape = {"x": [1, 3, 112, 112]}
+            config.set_trt_dynamic_shape_info(min_input_shape, max_input_shape,
+                                            opt_input_shape)
+
+    else:
+        config.disable_gpu()
+        cpu_threads = args.cpu_threads if  hasattr(args, "cpu_threads") else 10
+        config.set_cpu_math_library_num_threads(cpu_threads)
+        if args.enable_mkldnn:
+            # cache 10 different shapes for mkldnn to avoid memory leak
+            config.enable_mkldnn()
+            config.set_mkldnn_cache_capacity(10)
+            if args.precision == "fp16":
+                config.enable_mkldnn_bfloat16()
+    return config
+
+
+def get_image_file_list(img_file):
+    import imghdr
+    imgs_lists = []
+    if img_file is None or not os.path.exists(img_file):
+        raise Exception("not found any img file in {}".format(img_file))
+
+    img_end = {'jpg', 'bmp', 'png', 'jpeg', 'rgb', 'tif', 'tiff', 'gif', 'GIF'}
+    if os.path.isfile(img_file) and imghdr.what(img_file) in img_end:
+        imgs_lists.append(img_file)
+    elif os.path.isdir(img_file):
+        for single_file in os.listdir(img_file):
+            file_path = os.path.join(img_file, single_file)
+            if os.path.isfile(file_path) and imghdr.what(file_path) in img_end:
+                imgs_lists.append(file_path)
+    if len(imgs_lists) == 0:
+        raise Exception("not found any img file in {}".format(img_file))
+    imgs_lists = sorted(imgs_lists)
+    return imgs_lists
 
 def paddle_inference(args):
     import paddle.inference as paddle_infer
 
-    config = paddle_infer.Config(args.model_file, args.params_file)
+    config =  init_paddle_inference_config(args)
     predictor = paddle_infer.create_predictor(config)
 
     input_names = predictor.get_input_names()
@@ -79,38 +165,40 @@ def paddle_inference(args):
         input_handle.copy_from_cpu(img)
         for i in range(10):
             predictor.run()
-    img = cv2.imread(args.image_path)
 
-    st = time.time()
+
+    img_list = get_image_file_list(args.image_path)
+    for img_path in img_list:
+        img = cv2.imread(img_path)
+        st = time.time()
+        if args.benchmark:
+            autolog.times.start()
+
+        # normalize to mean 0.5, std 0.5
+        img = (img - 127.5) * 0.00784313725
+        # BGR2RGB
+        img = img[:, :, ::-1]
+        img = img.transpose((2, 0, 1))
+        img = np.expand_dims(img, 0)
+        img = img.astype('float32')
+
+        if args.benchmark:
+            autolog.times.stamp()
+
+        input_handle.copy_from_cpu(img)
+
+        predictor.run()
+
+        output_names = predictor.get_output_names()
+        output_handle = predictor.get_output_handle(output_names[0])
+        output_data = output_handle.copy_to_cpu()
+        if args.benchmark:
+            autolog.times.stamp()
+            autolog.times.end(stamp=True)
+            print('{}\t{}'.format(img_path,json.dumps(output_data.tolist())))
+        print('paddle inference result: ', output_data.shape)
     if args.benchmark:
-        autolog.times.start()
-
-    # normalize to mean 0.5, std 0.5
-    img = (img - 127.5) * 0.00784313725
-    # BGR2RGB
-    img = img[:, :, ::-1]
-    img = img.transpose((2, 0, 1))
-    img = np.expand_dims(img, 0)
-    img = img.astype('float32')
-
-    if args.benchmark:
-        autolog.times.stamp()
-
-
-    input_handle.copy_from_cpu(img)
-
-    predictor.run()
-
-    output_names = predictor.get_output_names()
-    output_handle = predictor.get_output_handle(output_names[0])
-    output_data = output_handle.copy_to_cpu()
-    if args.benchmark:
-        autolog.times.stamp()
-        autolog.times.end(stamp=True)
         autolog.report()
-        print('{}\t{}'.format(args.image_path,json.dumps(output_data.tolist())))
-    print('paddle inference result: ', output_data.shape)
-
 
 def onnx_inference(args):
     import onnxruntime

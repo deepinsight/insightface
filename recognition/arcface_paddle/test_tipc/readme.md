@@ -1,9 +1,8 @@
-
-# 推理部署导航
+# 飞桨训推一体认证
 
 ## 1. 简介
 
-飞桨除了基本的模型训练和预测，还提供了支持多端多平台的高性能推理部署工具。本文档提供了Arcface中所有模型的推理部署导航PTDN（Paddle Train Deploy Navigation），方便用户查阅每种模型的推理部署打通情况，并可以进行一键测试。
+飞桨除了基本的模型训练和预测，还提供了支持多端多平台的高性能推理部署工具。本文档提供了 insightface 中所有 PaddlePaddle 模型的飞桨训推一体认证 (Training and Inference Pipeline Certification(TIPC)) 信息和测试工具，方便用户查阅每种模型的训练推理部署打通情况，并可以进行一键测试。
 
 <div align="center">
     <img src="docs/guide.png" width="1000">
@@ -21,38 +20,43 @@
 
 更详细的mkldnn、Tensorrt等预测加速相关功能的支持情况可以查看各测试工具的[更多教程](#more)。
 
-| 模型名称 | 基础<br>训练预测 | 更多<br>训练方式 | 模型压缩 |  其他预测部署  |
-|  :----:  | :--------: |  :----  |   :----  |   :----  |
-|MobileFaceNet_128  | 支持 | 多机多卡 <br> FP16训练 | | |
+| 算法论文 | 模型名称 | 模型类型 | 基础<br>训练预测 | 更多<br>训练方式 | 模型压缩 |  其他预测部署  |
+| :--- | :--- |  :----:  | :--------: |  :----  |   :----  |   :----  |
+| arcface     | ms1mv2_mobileface | 识别  | 支持 | 多机多卡 | - | - |
+
 
 
 ## 3. 一键测试工具使用
 ### 目录介绍
 
 ```shell
-PTDN/
+test_tipc/
 ├── configs/  # 配置文件目录
-	├── ms1mv2_mobileface.py            # 测试mobile模型训练的py文件
-	├── ms1mv2_mobileface.txt           # 测试mobile模型的参数配置文件
-	├── ...                                
-├── results/    # 预先保存的预测结果，用于和实际预测结果进行精读比对
-	├── python_ppocr_det_mobile_results_fp32.txt     # 预存的mobile模型python预测fp32精度的结果
+	├── ms1mv2_mobileface.py         # 测试mobile版识别模型训练的py文件
+	├── ms1mv2_mobileface.txt        # 测试mobile版识别模型训练的参数配置文件
+	├── ...  
+├── results/                         # 预先保存的预测结果，用于和实际预测结果进行精读比对
+	├── python_MobileFaceNet_128_fp32.txt   # 预存的mobile版识别模型python预测fp32精度的结果
+	├── ...
 ├── prepare.sh                        # 完成test_*.sh运行所需要的数据和模型下载
 ├── test_train_inference_python.sh    # 测试python训练预测的主程序
 ├── compare_results.py                # 用于对比log中的预测结果与results中的预存结果精度误差是否在限定范围内
+├── common_func.sh                    # 通用shell脚本函数
 └── readme.md                         # 使用文档
 ```
 
 ### 测试流程
 使用本工具，可以测试不同功能的支持情况，以及预测结果是否对齐，测试流程如下：
+<div align="center">
+    <img src="docs/test.png" width="800">
+</div>
 
 1. 运行prepare.sh准备测试所需数据和模型；
 2. 运行要测试的功能对应的测试脚本`test_*.sh`，产出log，由log可以看到不同配置是否运行成功；
-3. 用compare_results.py对比log中的预测结果和预存在results目录下的结果，判断预测精度是否符合预期（在误差范围内）。
-
+3. 用`compare_results.py`对比log中的预测结果和预存在results目录下的结果，判断预测精度是否符合预期（在误差范围内）。
 
 其中，有1个测试主程序，功能如下：
-- `test_train_inference_python.sh`：测试基于Python的模型训练、评估、推理等基本功能。
+- `test_train_inference_python.sh`：测试基于Python的模型训练、评估、推理等基本功能，包括裁剪、量化、蒸馏。
 
 <a name="more"></a>
 #### 更多教程
