@@ -1,30 +1,28 @@
-# Linux端基础训练预测功能测试
+# Mac端基础训练预测功能测试
 
-Linux端基础训练预测功能测试的主程序为`test_train_inference_python.sh`，可以测试基于Python的模型训练、评估、推理等基本功能。
+Mac端基础训练预测功能测试的主程序为`mac_test_train_inference_python.sh`，可以测试基于Python的模型训练、评估、推理等基本功能。
 
-- Mac端基础训练预测功能测试参考[链接](./mac_test_train_inference_python.md)
-- Windows端基础训练预测功能测试参考[链接](./win_test_train_inference_python.md)
+注：Mac端测试用法同linux端测试方法类似，但是无需测试需要在GPU上运行的测试。
 
 ## 1. 测试结论汇总
 
 - 训练相关：
 
-| 算法名称 | 模型名称 | 单机单卡 | 单机多卡 | 多机多卡 | 模型压缩（单机多卡） |
+| 算法名称 | 模型名称 | 单机单卡（CPU） | 单机多卡 | 多机多卡 | 模型压缩（CPU） |
 |  :----  |   :----  |    :----  |  :----   |  :----   |  :----   |
-|  arcface  | ms1mv2_mobileface| 正常训练| 正常训练 | 正常训练 | - |
+|  arcface  | ms1mv2_mobileface| 正常训练 | - | - | - |
 
 
 - 预测相关：预测功能汇总如下，
 
 | 模型类型 |device | batchsize | tensorrt | mkldnn | cpu多线程 |
 |  ----   |  ---- |   ----   |  :----:  |   :----:   |  :----:  |
-| 正常模型 | GPU | 1 | fp32 | - | - |
-| 正常模型 | CPU | 1 | - | fp32 | 支持 |
+| 正常模型 | CPU | 1/6 | - | fp32 | 支持 |
 
 
 ## 2. 测试流程
 
-运行环境配置请参考[文档](./install.md)的内容配置tipc的运行环境。
+Mac端无GPU，环境准备只需要Python环境即可，安装PaddlePaddle等依赖参考下述文档。
 
 ### 2.1 安装依赖
 - 安装PaddlePaddle >= 2.2
