@@ -47,7 +47,7 @@ def validation(args):
     exe = paddle.static.Executor(place)
     exe.run(startup_program)
 
-    checkpoint.load(program=test_program, for_train=False)
+    checkpoint.load(program=test_program, for_train=False, dtype='float32')
 
     callback_verification = CallBackVerification(
         1, 0, args.batch_size, test_program,

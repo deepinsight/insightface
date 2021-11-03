@@ -192,8 +192,14 @@ def train(args):
 
     max_loss_scaling = np.array([args.max_loss_scaling]).astype(np.float32)
     for epoch in range(start_epoch, total_epoch):
+        train_reader_cost = 0.0
+        train_run_cost = 0.0
+        total_samples = 0
+        reader_start = time.time()
         for step, data in enumerate(train_loader):
+            train_reader_cost += time.time() - reader_start
             global_step += 1
+            train_start = time.time()
 
             loss_v = exe.run(
                 train_program,
@@ -201,9 +207,20 @@ def train(args):
                 fetch_list=[train_model.classifier.output_dict['loss']],
                 use_program_cache=True)
 
+            train_run_cost += time.time() - train_start
+            total_samples += args.batch_size
+
             loss_avg.update(np.array(loss_v)[0], 1)
             lr_value = train_model.optimizer.get_lr()
-            callback_logging(global_step, loss_avg, epoch, lr_value)
+            callback_logging(
+                global_step, 
+                loss_avg, 
+                epoch, 
+                lr_value,
+                avg_reader_cost=train_reader_cost / args.log_interval_step,
+                avg_batch_cost=(train_reader_cost + train_run_cost) / args.log_interval_step,
+                avg_samples=total_samples / args.log_interval_step,
+                ips=total_samples / (train_reader_cost + train_run_cost))
             if rank == 0 and args.do_validation_while_train:
                 callback_verification(global_step)
             train_model.lr_scheduler.step()
@@ -211,7 +228,11 @@ def train(args):
             if global_step >= total_steps:
                 break
             sys.stdout.flush()
-
+            if rank is 0 and global_step > 0 and global_step % args.log_interval_step == 0:
+                train_reader_cost = 0.0
+                train_run_cost = 0.0
+                total_samples = 0
+            reader_start = time.time()
         checkpoint.save(
             train_program,
             lr_scheduler=train_model.lr_scheduler,

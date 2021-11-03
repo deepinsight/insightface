@@ -80,7 +80,7 @@ def extract_info_from_file(log_file, result_dict, speed_dict):
         lines = f.readlines()
         for line in lines:
             if "throughput:" in line:
-                p1 = re.compile(r" throughput: ([0-9]+\.[0-9]+)", re.S)
+                p1 = re.compile(r" ips: ([0-9]+\.[0-9]+)", re.S)
                 item = re.findall(p1, line)
                 a = float(item[0].strip())
                 avg_speed_list.append(a)
