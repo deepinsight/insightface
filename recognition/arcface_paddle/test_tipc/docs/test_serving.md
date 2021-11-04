@@ -50,4 +50,4 @@ Run failed with command - xxxxx
 
 ## 3. 更多教程
 
-本文档为功能测试用，更详细的Serving预测使用教程请参考：[ArcFace 服务化部署](../../deploy/pdserving/README.md)  
+本文档为功能测试用，更详细的Serving预测使用教程请参考：[ArcFace 服务化部署](../../deploy/pdserving/README_CN.md)  
