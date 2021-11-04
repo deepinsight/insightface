@@ -18,7 +18,7 @@ import cv2
 import base64
 
 
-class ArcfaceOp(Op):
+class ArcFaceOp(Op):
     def init_op(self):
         pass
 
@@ -44,12 +44,12 @@ class ArcfaceOp(Op):
 
         return out_dict, None, ""
 
-class ArcfaceService(WebService):
+class ArcFaceService(WebService):
     def get_pipeline_response(self, read_op):
-        arcface_op = ArcfaceOp(name="Arcface", input_ops=[read_op])
+        arcface_op = ArcFaceOp(name="ArcFace", input_ops=[read_op])
         return arcface_op
 
 
-arcface_service = ArcfaceService(name="Arcface")
+arcface_service = ArcFaceService(name="ArcFace")
 arcface_service.prepare_pipeline_config("config.yml")
 arcface_service.run_service()
