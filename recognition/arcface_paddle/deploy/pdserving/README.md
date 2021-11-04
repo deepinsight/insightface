@@ -26,7 +26,7 @@ The introduction and tutorial of Paddle Serving service deployment framework ref
 Arcface operating environment and Paddle Serving operating environment are needed.
 
 1. Please prepare Arcface operating environment reference [link](../../README_en.md).
-   Download the corresponding paddle whl package according to the environment, it is recommended to install version 2.0.1.
+   Download the corresponding paddle whl package according to the environment, it is recommended to install version 2.2+.
 
 
 2. The steps of PaddleServing operating environment prepare are as follows:
@@ -143,40 +143,30 @@ The recognition model is the same.
     Tested on 700 real picture. The average QPS on V100 GPU can reach around 57:
 
     ```
-
-    2021-05-13 03:42:36,895 ==================== TRACER ======================
-    2021-05-13 03:42:36,975 Op(rec):
-    2021-05-13 03:42:36,976         in[14.472382882882883 ms]
-    2021-05-13 03:42:36,976         prep[9.556855855855856 ms]
-    2021-05-13 03:42:36,976         midp[59.921905405405404 ms]
-    2021-05-13 03:42:36,976         postp[15.345945945945946 ms]
-    2021-05-13 03:42:36,976         out[1.9921216216216215 ms]
-    2021-05-13 03:42:36,976         idle[0.16254943864471572]
-    2021-05-13 03:42:36,976 Op(det):
-    2021-05-13 03:42:36,976         in[315.4468035714286 ms]
-    2021-05-13 03:42:36,976         prep[69.5980625 ms]
-    2021-05-13 03:42:36,976         midp[18.989535714285715 ms]
-    2021-05-13 03:42:36,976         postp[18.857803571428573 ms]
-    2021-05-13 03:42:36,977         out[3.1337544642857145 ms]
-    2021-05-13 03:42:36,977         idle[0.7477961159203756]
-    2021-05-13 03:42:36,977 DAGExecutor:
-    2021-05-13 03:42:36,977         Query count[224]
-    2021-05-13 03:42:36,977         QPS[22.4 q/s]
-    2021-05-13 03:42:36,977         Succ[0.9910714285714286]
-    2021-05-13 03:42:36,977         Error req[169, 170]
-    2021-05-13 03:42:36,977         Latency:
-    2021-05-13 03:42:36,977                 ave[535.1678348214285 ms]
-    2021-05-13 03:42:36,977                 .50[172.651 ms]
-    2021-05-13 03:42:36,977                 .60[187.904 ms]
-    2021-05-13 03:42:36,977                 .70[245.675 ms]
-    2021-05-13 03:42:36,977                 .80[526.684 ms]
-    2021-05-13 03:42:36,977                 .90[854.596 ms]
-    2021-05-13 03:42:36,977                 .95[1722.728 ms]
-    2021-05-13 03:42:36,977                 .99[3990.292 ms]
-    2021-05-13 03:42:36,978 Channel (server worker num[10]):
-    2021-05-13 03:42:36,978         chl0(In: ['@DAGExecutor'], Out: ['det']) size[0/0]
-    2021-05-13 03:42:36,979         chl1(In: ['det'], Out: ['rec']) size[6/0]
-    2021-05-13 03:42:36,979         chl2(In: ['rec'], Out: ['@DAGExecutor']) size[0/0]
+    2021-11-04 13:38:52,507 Op(ArcFace):
+    2021-11-04 13:38:52,507 	in[135.4579597902098 ms]
+    2021-11-04 13:38:52,507 	prep[0.9921311188811189 ms]
+    2021-11-04 13:38:52,507 	midp[3.9232132867132865 ms]
+    2021-11-04 13:38:52,507 	postp[0.12166258741258741 ms]
+    2021-11-04 13:38:52,507 	out[0.9898286713286714 ms]
+    2021-11-04 13:38:52,508 	idle[0.9643989520087675]
+    2021-11-04 13:38:52,508 DAGExecutor:
+    2021-11-04 13:38:52,508 	Query count[573]
+    2021-11-04 13:38:52,508 	QPS[57.3 q/s]
+    2021-11-04 13:38:52,509 	Succ[0.9982547993019197]
+    2021-11-04 13:38:52,509 	Error req[394]
+    2021-11-04 13:38:52,509 	Latency:
+    2021-11-04 13:38:52,509 		ave[11.52941186736475 ms]
+    2021-11-04 13:38:52,509 		.50[11.492 ms]
+    2021-11-04 13:38:52,509 		.60[11.658 ms]
+    2021-11-04 13:38:52,509 		.70[11.95 ms]
+    2021-11-04 13:38:52,509 		.80[12.251 ms]
+    2021-11-04 13:38:52,509 		.90[12.736 ms]
+    2021-11-04 13:38:52,509 		.95[13.21 ms]
+    2021-11-04 13:38:52,509 		.99[13.987 ms]
+    2021-11-04 13:38:52,510 Channel (server worker num[10]):
+    2021-11-04 13:38:52,510 	chl0(In: ['@DAGExecutor'], Out: ['ArcFace']) size[0/0]
+    2021-11-04 13:38:52,510 	chl1(In: ['ArcFace'], Out: ['@DAGExecutor']) size[0/0]
     ```
 
 <a name="faq"></a>
