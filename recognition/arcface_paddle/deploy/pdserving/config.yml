@@ -24,7 +24,7 @@ dag:
     tracer:
         interval_s: 10
 op:
-    ArcFace:
+    Arcface:
         #并发数，is_thread_op=True时，为线程并发；否则为进程并发
         concurrency: 8
 

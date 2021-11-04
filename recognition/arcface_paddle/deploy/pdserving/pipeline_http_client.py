@@ -23,7 +23,7 @@ def cv2_to_base64(image):
     return base64.b64encode(image).decode('utf8')
 
 
-url = "http://127.0.0.1:9998/ArcFace/prediction"
+url = "http://127.0.0.1:9998/Arcface/prediction"
 
 test_img_dir = "imgs"
 for idx, img_file in enumerate(os.listdir(test_img_dir)):
