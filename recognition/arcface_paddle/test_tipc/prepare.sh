@@ -2,7 +2,7 @@
 source test_tipc/common_func.sh
 FILENAME=$1
 
-# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer', 'klquant_whole_infer']
+# MODE be one of ['lite_train_lite_infer' 'lite_train_whole_infer' 'whole_train_whole_infer', 'whole_infer', 'serving_infer']
 
 MODE=$2
 
@@ -61,4 +61,19 @@ elif [ ${MODE} = "whole_infer" ];then
     mv inference/inference.pdiparams inference/${model_name}.pdiparams
     mv inference/inference.pdiparams.info inference/${model_name}.pdiparams.info
     mv inference/inference.pdmodel inference/${model_name}.pdmodel
+elif [ ${MODE} = "serving_infer" ];then
+     # prepare serving env
+    python_name=$(func_parser_value "${lines[2]}")
+    rm paddle_serving_server_gpu-0.0.0.post101-py3-none-any.whl
+    wget https://paddle-serving.bj.bcebos.com/chain/paddle_serving_server_gpu-0.0.0.post101-py3-none-any.whl
+    ${python_name} -m pip install install paddle_serving_server_gpu-0.0.0.post101-py3-none-any.whl
+    ${python_name} -m pip install paddle_serving_client==0.6.3
+    ${python_name} -m pip install paddle-serving-app==0.6.3
+    ${python_name} -m pip install -U werkzeug
+
+    rm -rf ./inference
+
+    wget -nc -P ./inference https://paddle-model-ecology.bj.bcebos.com/model/insight-face/mobileface_v1.0_infer.tar
+    tar xf inference/mobileface_v1.0_infer.tar --strip-components 1 -C inference 
 fi
+

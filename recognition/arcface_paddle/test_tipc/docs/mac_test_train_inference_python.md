@@ -10,7 +10,7 @@ Mac端基础训练预测功能测试的主程序为`mac_test_train_inference_pyt
 
 | 算法名称 | 模型名称 | 单机单卡（CPU） | 单机多卡 | 多机多卡 | 模型压缩（CPU） |
 |  :----  |   :----  |    :----  |  :----   |  :----   |  :----   |
-|  arcface  | ms1mv2_mobileface| 正常训练 | - | - | - |
+|  ArcFace  | ms1mv2_mobileface| 正常训练 | - | - | - |
 
 
 - 预测相关：预测功能汇总如下，
@@ -43,29 +43,29 @@ Mac端无GPU，环境准备只需要Python环境即可，安装PaddlePaddle等�
 
 - 模式1：lite_train_lite_infer，使用少量数据训练，用于快速验证训练到预测的走通流程，不验证精度和速度；
 ```shell
-bash test_tipc/prepare.sh ./test_tipc/configs/ms1mv2_mobileface.txt 'lite_train_lite_infer'
-bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/ms1mv2_mobileface.txt 'lite_train_lite_infer'
+bash test_tipc/prepare.sh ./test_tipc/configs/mac_ms1mv2_mobileface.txt 'lite_train_lite_infer'
+bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/mac_ms1mv2_mobileface.txt 'lite_train_lite_infer'
 ```  
 
 - 模式2：lite_train_whole_infer，使用少量数据训练，一定量数据预测，用于验证训练后的模型执行预测，预测速度是否合理；
 ```shell
-bash test_tipc/prepare.sh ./test_tipc/configs/ms1mv2_mobileface.txt 'lite_train_whole_infer'
-bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/ms1mv2_mobileface.txt 'lite_train_whole_infer'
+bash test_tipc/prepare.sh ./test_tipc/configs/mac_ms1mv2_mobileface.txt 'lite_train_whole_infer'
+bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/mac_ms1mv2_mobileface.txt 'lite_train_whole_infer'
 ```  
 
 - 模式3：whole_infer，不训练，全量数据预测，走通开源模型评估、动转静，检查inference model预测时间和精度;
 ```shell
-bash test_tipc/prepare.sh ./test_tipc/configs/ms1mv2_mobileface.txt 'whole_infer'
+bash test_tipc/prepare.sh ./test_tipc/configs/mac_ms1mv2_mobileface.txt 'whole_infer'
 # 用法1:
-bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/ms1mv2_mobileface.txt 'whole_infer'
+bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/mac_ms1mv2_mobileface.txt 'whole_infer'
 # 用法2: 指定GPU卡预测，第三个传入参数为GPU卡号
-bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/ms1mv2_mobileface.txt 'whole_infer' '1'
+bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/mac_ms1mv2_mobileface.txt 'whole_infer' '1'
 ```  
 
 - 模式4：whole_train_whole_infer，CE： 全量数据训练，全量数据预测，验证模型训练精度，预测精度，预测速度；
 ```shell
-bash test_tipc/prepare.sh ./test_tipc/configs/ms1mv2_mobileface.txt 'whole_train_whole_infer'
-bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/ms1mv2_mobileface.txt 'whole_train_whole_infer'
+bash test_tipc/prepare.sh ./test_tipc/configs/mac_ms1mv2_mobileface.txt 'whole_train_whole_infer'
+bash test_tipc/test_train_inference_python.sh ./test_tipc/configs/mac_ms1mv2_mobileface.txt 'whole_train_whole_infer'
 ```  
 
 运行相应指令后，在`test_tipc/output`文件夹下自动会保存运行日志。如'lite_train_lite_infer'模式下，会运行训练+inference的链条，因此，在`test_tipc/output`文件夹有以下文件：
@@ -82,13 +82,13 @@ test_tipc/output/
 
 其中`results_python.log`中包含了每条指令的运行状态，如果运行成功会输出：
 ```
-Run successfully with command - python3.7 tools/train.py --config_file=configs/ms1mv2_mobileface.py --is_static=False --embedding_size=128 --fp16=False --dataset=MS1M_v2 --data_dir=MS1M_v2/ --label_file=MS1M_v2/label.txt --num_classes=85742 --log_interval_step=1    --output=./test_tipc/output/norm_train_gpus_0_autocast_null_fp16_Trule --train_num=1       --fp16=Trule!
+Run successfully with command - python3.7 tools/train.py --config_file=configs/mac_ms1mv2_mobileface.py --is_static=False --embedding_size=128 --fp16=False --dataset=MS1M_v2 --data_dir=MS1M_v2/ --label_file=MS1M_v2/label.txt --num_classes=85742 --log_interval_step=1    --output=./test_tipc/output/norm_train_gpus_0_autocast_null_fp16_Trule --train_num=1       --fp16=Trule!
 Run successfully with command - python3.7 tools/validation.py --is_static=False --backbone=MobileFaceNet_128 --embedding_size=128 --data_dir=MS1M_v2 --val_targets=lfw --batch_size=128 --checkpoint_dir=./test_tipc/output/norm_train_gpus_0_autocast_null_fp16_Trule/MobileFaceNet_128/0    !
 ......
 ```
 如果运行失败，会输出：
 ```
-Run failed with command - python3.7 tools/train.py --config_file=configs/ms1mv2_mobileface.py --is_static=False --embedding_size=128 --fp16=False --dataset=MS1M_v2 --data_dir=MS1M_v2/ --label_file=MS1M_v2/label.txt --num_classes=85742 --log_interval_step=1    --output=./test_tipc/output/norm_train_gpus_0_autocast_null_fp16_Trule --train_num=1       --fp16=Trule!
+Run failed with command - python3.7 tools/train.py --config_file=configs/mac_ms1mv2_mobileface.py --is_static=False --embedding_size=128 --fp16=False --dataset=MS1M_v2 --data_dir=MS1M_v2/ --label_file=MS1M_v2/label.txt --num_classes=85742 --log_interval_step=1    --output=./test_tipc/output/norm_train_gpus_0_autocast_null_fp16_Trule --train_num=1       --fp16=Trule!
 Run failed with command - python3.7 tools/validation.py --is_static=False --backbone=MobileFaceNet_128 --embedding_size=128 --data_dir=MS1M_v2 --val_targets=lfw --batch_size=128 --checkpoint_dir=./test_tipc/output/norm_train_gpus_0_autocast_null_fp16_Trule/MobileFaceNet_128/0    !
 ......
 ```
