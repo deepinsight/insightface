@@ -17,17 +17,11 @@
       - [1. 下载数据集](#1-下载数据集)
       - [2. 将训练数据集 MS1M 从 recordio 格式转换为 OFRecord 格式](#2-将训练数据集-ms1m-从-recordio-格式转换为-ofrecord-格式)
     
-  - [预训练模型](#预训练模型)
   - [训练和验证](#训练和验证)
     - [训练](#训练)
     - [验证](#验证)
-  - [基准测试](#基准测试)
-    - [训练速度基准](#训练速度基准)
-      - [Face_emore 数据集 & FP32](#face_emore-数据集--fp32)
-      - [Glint360k 数据集 & FP32](#glint360k-数据集--fp32)
-    - [Evaluation on Lfw, Cfp_fp, Agedb_30](#evaluation-on-lfw-cfp_fp-agedb_30)
-    - [Evaluation on IFRT](#evaluation-on-ifrt)
-    - [Max num_classses](#max-num_classses)
+    - [OneFLow2ONNX](#OneFLow2ONNX)
+    
 
 ## 背景介绍
 
@@ -80,7 +74,7 @@
 根据 [Install OneFlow](https://github.com/Oneflow-Inc/oneflow#install-oneflow) 的步骤进行安装最新 master whl 包即可。
 
 ```
-python3 -m pip install --find-links https://release.oneflow.info oneflow_cu102 --user
+python3 -m pip install oneflow -f https://oneflow-staging.oss-cn-beijing.aliyuncs.com/branch/master/cu102/6aa719d70119b65837b25cc5f186eb19ef2b7891/index.html --user
 ```
 
 ### 准备数据集
@@ -199,24 +193,7 @@ ofrecord/test/
 ```
 
 
-## 预训练模型
 
-基于 oneflow 的人脸识别模型在 The 1:1 verification accuracy on InsightFace Recognition Test (IFRT) 验证集上与 MXNet 的预训练模型精度对比如下：
-
-| **Framework** | **African** | **Caucasian** | **Indian** | **Asian** | **All** |
-| ------------- | ----------- | ------------- | ---------- | --------- | ------- |
-| OneFlow       | 90.4076     | 94.583        | 93.702     | 68.754    | 89.684  |
-| MXNet         | 90.45       | 94.60         | 93.96      | 63.91     | 88.23   |
-
-oneflow 的人脸预训练模型下载链接：[of_005_model.tar.gz](http://oneflow-public.oss-cn-beijing.aliyuncs.com/face_dataset/pretrained_model/of_glint360k_partial_fc/of_005_model.tar.gz)
-
-我们也提供了转换成 MXNet 的模型：[of_to_mxnet_model_005.tar.gz](http://oneflow-public.oss-cn-beijing.aliyuncs.com/face_dataset/pretrained_model/of_2_mxnet_glint360k_partial_fc/of_to_mxnet_model_005.tar.gz)
-
- ## 模型转换
-```
-pip install oneflow-onnx==0.3.4
-./convert.sh
-```
 
 ## 训练和验证
 
@@ -227,10 +204,14 @@ pip install oneflow-onnx==0.3.4
 
 运行脚本：
 
+#### eager 
 ```
-./run.sh
+./train_ddp.sh
 ```
-
+#### Graph
+```
+train_graph_distributed.sh
+```
 
 ### 验证
 
@@ -242,70 +223,9 @@ pip install oneflow-onnx==0.3.4
 ./val.sh
 ```
 
+## OneFLow2ONNX
 
-## 基准测试
-
-### 训练速度基准
-
-#### Face_emore 数据集 & FP32
-
-| Backbone | GPU                      | model_parallel | partial_fc | BatchSize / it | Throughput img / sec |
-| -------- | ------------------------ | -------------- | ---------- | -------------- | -------------------- |
-| R100     | 8 * Tesla V100-SXM2-16GB | False          | False      | 64             | 1832.02              |
-| R100     | 8 * Tesla V100-SXM2-16GB | True           | False      | 64             | 1851.63              |
-| R100     | 8 * Tesla V100-SXM2-16GB | True           | True       | 64             | 1854.25              |
-| R100     | 8 * Tesla V100-SXM2-16GB | True           | True       | 96(Max)        | 1925.6               |
-| R100     | 8 * Tesla V100-SXM2-16GB | True           | False      | 115(Max)       | 1925.59              |
-| R100     | 8 * Tesla V100-SXM2-16GB | True           | True       | 128(Max)       | 1953.46              |
-| Y1       | 8 * Tesla V100-SXM2-16GB | False          | False      | 256            | 14298.02             |
-| Y1       | 8 * Tesla V100-SXM2-16GB | True           | False      | 256            | 14049.75             |
-| Y1       | 8 * Tesla V100-SXM2-16GB | False          | False      | 350(Max)       | 14756.03             |
-| Y1       | 8 * Tesla V100-SXM2-16GB | True           | True       | 400(Max)       | 14436.38             |
-
-#### Glint360k 数据集 & FP32
-
-| Backbone | GPU                      | partial_fc sample_ratio | BatchSize / it | Throughput img / sec |
-| -------- | ------------------------ | ----------------------- | -------------- | -------------------- |
-| R100     | 8 * Tesla V100-SXM2-16GB | 1                       | 64             | 1808.27              |
-| R100     | 8 * Tesla V100-SXM2-16GB | 0.1                     | 64             | 1858.57              |
-
-
-
-### Evaluation on Lfw, Cfp_fp, Agedb_30
-
-- Data Parallelism
-
-| Backbone      | Dataset | Lfw    | Cfp_fp | Agedb_30 |
-| ------------- | ------- | ------ | ------ | -------- |
-| R100          | MS1M    | 99.717 | 98.643 | 98.150   |
-| MobileFaceNet | MS1M    | 99.5   | 92.657 | 95.6     |
-
-- Model Parallelism
-
-| Backbone      | Dataset | Lfw    | Cfp_fp | Agedb_30 |
-| ------------- | ------- | ------ | ------ | -------- |
-| R100          | MS1M    | 99.733 | 98.329 | 98.033   |
-| MobileFaceNet | MS1M    | 99.483 | 93.457 | 95.7     |
-
-- Partial FC
-
-| Backbone | Dataset | Lfw    | Cfp_fp | Agedb_30 |
-| -------- | ------- | ------ | ------ | -------- |
-| R100     | MS1M    | 99.817 | 98.443 | 98.217   |
-
-### Evaluation on IFRT
-
-r denotes the sampling rate of negative class centers.
-
-| Backbone | Dataset              | African | Caucasian | Indian | Asian  | ALL    |
-| -------- | -------------------- | ------- | --------- | ------ | ------ | ------ |
-| R100     | **Glint360k**(r=0.1) | 90.4076 | 94.583    | 93.702 | 68.754 | 89.684 |
-
-### Max num_classses
-
-| node_num | gpu_num_per_node | batch_size_per_device | fp16 | Model Parallel | Partial FC | num_classes |
-| -------- | ---------------- | --------------------- | ---- | -------------- | ---------- | ----------- |
-| 1        | 1                | 64                    | True | True           | True       | 2000000     |
-| 1        | 8                | 64                    | True | True           | True       | 13500000    |
-
-更多详情请移步 [OneFlow DLPerf](https://github.com/Oneflow-Inc/DLPerf#insightface).
+```
+pip install oneflow-onnx==0.5.1
+./convert.sh
+```

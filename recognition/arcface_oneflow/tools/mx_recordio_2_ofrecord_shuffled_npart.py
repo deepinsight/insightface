@@ -25,10 +25,7 @@ def parse_arguement(argv):
         help="Path to output OFRecord.",
     )
     parser.add_argument(
-        "--num_part",
-        type=int,
-        default=96,
-        help="num_part of OFRecord to generate.",
+        "--num_part", type=int, default=96, help="num_part of OFRecord to generate.",
     )
     return parser.parse_args(argv)
 
@@ -40,14 +37,12 @@ def load_train_data(data_dir):
 
     print(
         "Loading recordio {}\n\
-  Corresponding record idx is {}".format(
+        Corresponding record idx is {}".format(
             path_imgrec, path_imgidx
         )
     )
 
-    imgrec = recordio.MXIndexedRecordIO(
-        path_imgidx, path_imgrec, "r", key_type=int
-    )
+    imgrec = recordio.MXIndexedRecordIO(path_imgidx, path_imgrec, "r", key_type=int)
 
     # Read header0 to get some info.
     identity_key_start = 0
@@ -135,16 +130,12 @@ def main(args):
         output_file = os.path.join(output_dir, part_name)
         file_idx_start = part_id * num_images_per_part
         file_idx_end = min((part_id + 1) * num_images_per_part, num_images)
-        print("part-"+str(part_id), "start", file_idx_start, "end", file_idx_end)
+        print("part-" + str(part_id), "start", file_idx_start, "end", file_idx_end)
         with open(output_file, "wb") as f:
             for file_idx in range(file_idx_start, file_idx_end):
                 idx = imgidx_list[file_idx]
                 if idx % 10000 == 0:
-                    print(
-                        "Converting images: {} of {}".format(
-                            idx, len(imgidx_list)
-                        )
-                    )
+                    print("Converting images: {} of {}".format(idx, len(imgidx_list)))
 
                 img_data = {}
                 rec = imgrec.read_idx(idx)
