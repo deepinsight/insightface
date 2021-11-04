@@ -1,174 +1,261 @@
-
-import argparse
-import logging
-import os
-
 import oneflow as flow
-import oneflow.nn as nn
-
-import sys
+from oneflow.nn.parallel import DistributedDataParallel as ddp
+from utils.ofrecord_data_utils import OFRecordDataLoader, SyntheticDataLoader
+from utils.utils_logging import AverageMeter
+from utils.utils_callbacks import CallBackVerification, CallBackLogging, CallBackModelCheckpoint
 from backbones import get_model
-import math
-from utils.utils_config import get_config
-import numpy as np
-import pickle
-import time
-from utils.ofrecord_data_utils import load_train_dataset, load_synthetic
+from graph import TrainGraph, EvalGraph
+from losses import CrossEntropyLoss_sbp
+import logging
 
 
-class Validator(object):
-    def __init__(self, cfg):
-        self.cfg = cfg
+def make_data_loader(args, mode, is_consistent=False, synthetic=False):
+    assert mode in ("train", "validation")
 
-        def get_val_config():
-            config = flow.function_config()
-            config.default_logical_view(flow.scope.consistent_view())
-            config.default_data_type(flow.float)
-            return config
-        function_config = get_val_config()
+    if mode == "train":
+        total_batch_size = args.batch_size*flow.env.get_world_size()
+        batch_size = args.batch_size
+        num_samples = args.num_image
+    else:
+        total_batch_size = args.val_global_batch_size
+        batch_size = args.val_batch_size
+        num_samples = args.val_samples_per_epoch
 
-        @flow.global_function(type="predict", function_config=function_config)
-        def get_symbol_val_job(
-            images: flow.typing.Numpy.Placeholder(
-                (self.cfg.val_batch_size, 3, 112, 112)
-            )
-        ):
-            print("val batch data: ", images.shape)
-            embedding = get_model(cfg.network, images, cfg)
-            return embedding
+    placement = None
+    sbp = None
 
-        self.get_symbol_val_fn = get_symbol_val_job
+    if is_consistent:
+        placement = flow.env.all_device_placement("cpu")
+        sbp = flow.sbp.split(0)
+        batch_size = total_batch_size
 
-    def load_checkpoint(self, model_path):
-        flow.load_variables(flow.checkpoint.get(model_path))
+    if synthetic:
 
-
-def get_train_config(cfg):
-
-    cfg.cudnn_conv_heuristic_search_algo = False
-    cfg.enable_fuse_model_update_ops = True
-    cfg.enable_fuse_add_to_output = True
-    func_config = flow.FunctionConfig()
-    func_config.default_logical_view(flow.scope.consistent_view())
-    func_config.default_data_type(flow.float)
-    func_config.cudnn_conv_heuristic_search_algo(
-        cfg.cudnn_conv_heuristic_search_algo
-    )
-
-    func_config.enable_fuse_model_update_ops(
-        cfg.enable_fuse_model_update_ops)
-    func_config.enable_fuse_add_to_output(cfg.enable_fuse_add_to_output)
-    if cfg.fp16:
-        logging.info("Training with FP16 now.")
-        func_config.enable_auto_mixed_precision(True)
-    if cfg.partial_fc:
-        func_config.enable_fuse_model_update_ops(False)
-        func_config.indexed_slices_optimizer_conf(
-            dict(include_op_names=dict(op_name=['fc7-weight'])))
-    if cfg.fp16 and (cfg.num_nodes * cfg.device_num_per_node) > 1:
-        flow.config.collective_boxing.nccl_fusion_all_reduce_use_buffer(False)
-    if cfg.nccl_fusion_threshold_mb:
-        flow.config.collective_boxing.nccl_fusion_threshold_mb(
-            cfg.nccl_fusion_threshold_mb)
-    if cfg.nccl_fusion_max_ops:
-        flow.config.collective_boxing.nccl_fusion_max_ops(
-            cfg.nccl_fusion_max_ops)
-
-    return func_config
-
-
-def make_train_func(cfg):
-    @flow.global_function(type="train", function_config=get_train_config(cfg))
-    def get_symbol_train_job():
-        if cfg.use_synthetic_data:
-            (labels, images) = load_synthetic(cfg)
-        else:
-            labels, images = load_train_dataset(cfg)
-        image_size = images.shape[2:]
-        assert len(
-            image_size) == 2, "The length of image size must be equal to 2."
-        assert image_size[0] == image_size[1], "image_size[0] should be equal to image_size[1]."
-
-        embedding = get_model(cfg.network, images, cfg)
-
-        def _get_initializer():
-            return flow.random_normal_initializer(mean=0.0, stddev=0.01)
-
-        trainable = True
-
-        if cfg.model_parallel and cfg.device_num_per_node > 1:
-            logging.info("Training is using model parallelism now.")
-            labels = labels.with_distribute(flow.distribute.broadcast())
-            fc1_distribute = flow.distribute.broadcast()
-            fc7_data_distribute = flow.distribute.split(1)
-            fc7_model_distribute = flow.distribute.split(0)
-        else:
-            fc1_distribute = flow.distribute.split(0)
-            fc7_data_distribute = flow.distribute.split(0)
-            fc7_model_distribute = flow.distribute.broadcast()
-        weight_regularizer = flow.regularizers.l2(0.0005)
-        fc7_weight = flow.get_variable(
-            name="fc7-weight",
-            shape=(cfg.num_classes, embedding.shape[1]),
-            dtype=embedding.dtype,
-            initializer=_get_initializer(),
-            regularizer=weight_regularizer,
-            trainable=trainable,
-            model_name="weight",
-            distribute=fc7_model_distribute,
+        data_loader = SyntheticDataLoader(
+            batch_size=batch_size,
+            num_classes=args.num_classes,
+            placement=placement,
+            sbp=sbp,
         )
-        if cfg.partial_fc and cfg.model_parallel:
-            logging.info(
-                "Training is using model parallelism and optimized by partial_fc now."
-            )
+        return data_loader.to("cuda")
 
-            size = cfg.device_num_per_node * cfg.num_nodes
-            num_local = (cfg.num_classes + size - 1) // size
-            num_sample = int(num_local * cfg.sample_rate)
-            total_num_sample = num_sample * size
+    ofrecord_data_loader = OFRecordDataLoader(
+        ofrecord_root=args.ofrecord_path,
+        mode=mode,
+        dataset_size=num_samples,
+        batch_size=batch_size,
+        total_batch_size=total_batch_size,
+        data_part_num=args.ofrecord_part_num,
+        placement=placement,
+        sbp=sbp,
+    )
+    return ofrecord_data_loader
+
+
+def make_optimizer(args, model):
+    param_group = {"params": [p for p in model.parameters() if p is not None]}
+
+    optimizer = flow.optim.SGD(
+        [param_group],
+        lr=args.lr,
+        momentum=args.momentum,
+        weight_decay=args.weight_decay,
+    )
+    return optimizer
+
+
+class FC7(flow.nn.Module):
+    def __init__(self, embedding_size, num_classes, cfg, partial_fc=False, bias=False):
+        super(FC7, self).__init__()
+        self.weight = flow.nn.Parameter(
+            flow.empty(num_classes, embedding_size))
+        flow.nn.init.normal_(self.weight, mean=0, std=0.01)
+
+        self.partial_fc = partial_fc
+
+        size = flow.env.get_world_size()
+        num_local = (cfg.num_classes + size - 1) // size
+        self.num_sample = int(num_local * cfg.sample_rate)
+        self.total_num_sample = self.num_sample * size
+
+    def forward(self, x, label):
+        x = flow.nn.functional.l2_normalize(input=x, dim=1, epsilon=1e-10)
+        if self.partial_fc:
             (
                 mapped_label,
                 sampled_label,
                 sampled_weight,
             ) = flow.distributed_partial_fc_sample(
-                weight=fc7_weight, label=labels, num_sample=total_num_sample,
+                weight=self.weight, label=label, num_sample=self.total_num_sample,
             )
-            labels = mapped_label
-            fc7_weight = sampled_weight
-        fc7_weight = flow.math.l2_normalize(
-            input=fc7_weight, axis=1, epsilon=1e-10)
-        fc1 = flow.math.l2_normalize(
-            input=embedding, axis=1, epsilon=1e-10)
-        fc7 = flow.matmul(
-            a=fc1.with_distribute(fc1_distribute), b=fc7_weight, transpose_b=True
-        )
-        fc7 = fc7.with_distribute(fc7_data_distribute)
-
-        if cfg.loss == "cosface":
-            fc7 = (flow.combined_margin_loss(
-                fc7, labels, m1=1, m2=0.0, m3=0.4) * 64)
-        elif cfg.loss == "arcface":
-            fc7 = (flow.combined_margin_loss(
-                fc7, labels, m1=1, m2=0.5, m3=0.0) * 64)
+            label = mapped_label
+            weight = sampled_weight
         else:
-            raise ValueError()
+            weight = self.weight
+        weight = flow.nn.functional.l2_normalize(
+            input=weight, dim=1, epsilon=1e-10)
+        x = flow.matmul(x, weight, transpose_b=True)
+        if x.is_consistent:
+            return x, label
+        else:
+            return x
 
-        fc7 = fc7.with_distribute(fc7_data_distribute)
 
-        loss = flow.nn.sparse_softmax_cross_entropy_with_logits(
-            labels, fc7, name="softmax_loss"
+class Train_Module(flow.nn.Module):
+    def __init__(self, cfg, backbone, placement, world_size):
+        super(Train_Module, self).__init__()
+        self.placement = placement
+
+        if cfg.graph:
+            if cfg.model_parallel:
+                input_size = cfg.embedding_size
+                output_size = int(cfg.num_classes/world_size)
+                self.fc = FC7(input_size, output_size, cfg, partial_fc=cfg.partial_fc).to_consistent(
+                    placement=placement, sbp=flow.sbp.split(0))
+            else:
+                self.fc = FC7(cfg.embedding_size, cfg.num_classes, cfg).to_consistent(
+                    placement=placement, sbp=flow.sbp.broadcast)
+            self.backbone = backbone.to_consistent(
+                placement=placement, sbp=flow.sbp.broadcast)
+        else:
+            self.backbone = backbone
+            self.fc = FC7(cfg.embedding_size, cfg.num_classes, cfg)
+
+    def forward(self, x, labels):
+        x = self.backbone(x)
+        if x.is_consistent:
+            x = x.to_consistent(sbp=flow.sbp.broadcast)
+        x = self.fc(x, labels)
+        return x
+
+
+class Trainer(object):
+    def __init__(self, cfg, placement, load_path, world_size, rank):
+        self.placement = placement
+        self.load_path = load_path
+        self.cfg = cfg
+        self.world_size = world_size
+        self.rank = rank
+
+        # model
+        self.backbone = get_model(cfg.network, dropout=0.0,
+                                  num_features=cfg.embedding_size).to("cuda")
+        self.train_module = Train_Module(
+            cfg, self.backbone, self.placement, world_size).to("cuda")
+        if cfg.resume:
+            if load_path is not None:
+                self.load_state_dict()
+            else:
+                logging.info("Model resume failed! load path is None ")
+
+        # optimizer
+        self.optimizer = make_optimizer(cfg, self.train_module)
+
+        # data
+        self.train_data_loader = make_data_loader(
+            cfg, 'train', self.cfg.graph, self.cfg.synthetic)
+
+        # loss
+        if cfg.loss == "cosface":
+            self.margin_softmax = flow.nn.CombinedMarginLoss(
+                1, 0., 0.4).to("cuda")
+        else:
+            self.margin_softmax = flow.nn.CombinedMarginLoss(
+                1, 0.5, 0.).to("cuda")
+
+        self.of_cross_entropy = CrossEntropyLoss_sbp()
+
+        # lr_scheduler
+        self.decay_step = self.cal_decay_step()
+        self.scheduler = flow.optim.lr_scheduler.MultiStepLR(
+            optimizer=self.optimizer, milestones=self.decay_step, gamma=0.1
         )
 
-        lr_scheduler = flow.optimizer.PiecewiseScalingScheduler(
-            base_lr=cfg.lr,
-            boundaries=cfg.lr_steps,
-            scale=cfg.lr_scales,
-            warmup=None
-        )
-        flow.optimizer.SGD(lr_scheduler,
-                           momentum=cfg.momentum if cfg.momentum > 0 else None,
-                           ).minimize(loss)
+        # log
+        self.callback_logging = CallBackLogging(
+            50, rank, cfg.total_step, cfg.batch_size, world_size, None)
+        # val
+        self.callback_verification = CallBackVerification(
+            600, rank, cfg.val_targets, cfg.ofrecord_path, is_consistent=cfg.graph)
+        # save checkpoint
+        self.callback_checkpoint = CallBackModelCheckpoint(rank, cfg.output)
 
-        return loss
+        self.losses = AverageMeter()
+        self.start_epoch = 0
+        self.global_step = 0
 
-    return get_symbol_train_job
+    def __call__(self):
+        # Train
+        if self.cfg.graph:
+            self.train_graph()
+        else:
+            self.train_eager()
+
+    def load_state_dict(self):
+
+        if self.is_consistent:
+            state_dict = flow.load(self.load_path, consistent_src_rank=0)
+        elif self.rank == 0:
+            state_dict = flow.load(self.load_path)
+        else:
+            return
+        logging.info("Model resume successfully!")
+        self.model.load_state_dict(state_dict)
+
+    def cal_decay_step(self):
+        cfg = self.cfg
+        num_image = cfg.num_image
+        total_batch_size = cfg.batch_size * self.world_size
+        self.warmup_step = num_image // total_batch_size * cfg.warmup_epoch
+        self.cfg.total_step = num_image // total_batch_size * cfg.num_epoch
+        logging.info("Total Step is:%d" % self.cfg.total_step)
+        return [x * num_image // total_batch_size for x in cfg.decay_epoch]
+
+    def train_graph(self):
+        train_graph = TrainGraph(self.train_module, self.cfg, self.margin_softmax,
+                                 self.of_cross_entropy, self.train_data_loader, self.optimizer, self.scheduler)
+        # train_graph.debug()
+        val_graph = EvalGraph(self.backbone, self.cfg)
+
+        for epoch in range(self.start_epoch, self.cfg.num_epoch):
+            self.train_module.train()
+            one_epoch_steps = len(self.train_data_loader)
+            for steps in range(one_epoch_steps):
+                self.global_step += 1
+                loss = train_graph()
+                loss = loss.to_consistent(
+                    sbp=flow.sbp.broadcast).to_local().numpy()
+                self.losses.update(loss, 1)
+                self.callback_logging(self.global_step,  self.losses, epoch, False,
+                                      self.scheduler.get_last_lr()[0])
+                self.callback_verification(
+                    self.global_step, self.train_module, val_graph)
+            self.callback_checkpoint(self.global_step, epoch,
+                                     self.train_module, is_consistent=True)
+
+    def train_eager(self):
+        self.train_module = ddp(self.train_module)
+        for epoch in range(self.start_epoch, self.cfg.num_epoch):
+            self.train_module.train()
+
+            one_epoch_steps = len(self.train_data_loader)
+            for steps in range(one_epoch_steps):
+                self.global_step += 1
+                image, label = self.train_data_loader()
+                image = image.to("cuda")
+                label = label.to("cuda")
+                features_fc7 = self.train_module(image, label)
+                features_fc7 = self.margin_softmax(features_fc7, label)*64
+                loss = self.of_cross_entropy(features_fc7, label)
+                loss.backward()
+                self.optimizer.step()
+                self.optimizer.zero_grad()
+
+                loss = loss.numpy()
+                self.losses.update(loss, 1)
+                self.callback_logging(self.global_step,  self.losses, epoch, False,
+                                      self.scheduler.get_last_lr()[0])
+                self.callback_verification(self.global_step, self.backbone)
+                self.scheduler.step()
+            self.callback_checkpoint(
+                self.global_step, epoch, self.train_module)

@@ -27,16 +27,11 @@ It introduces how to train InsightFace in OneFlow, and do verification over the 
 
    \- [2. Transformation from MS1M recordio to OFRecord](#2-transformation-from-ms1m-recordio-to-ofrecord)
 
- \- [Pretrained model](#Pretrained-model)
-
  \- [Training and verification](#training-and-verification)
 
   \- [Training](#training)
 
-  \- [Varification](#varification)
-
- \- [Benchmark](#benchmark)
-
+  \- [OneFLow2ONNX](#OneFLow2ONNX)
 
 ## Background
 
@@ -109,7 +104,7 @@ First of all, before execution, please make sure that:
 According to steps in [Install OneFlow](https://github.com/Oneflow-Inc/oneflow#install-oneflow) install the newest release master whl packages.
 
 ```
-python3 -m pip install --find-links https://release.oneflow.info oneflow_cu102 --user
+python3 -m pip install oneflow -f https://oneflow-staging.oss-cn-beijing.aliyuncs.com/branch/master/cu102/6aa719d70119b65837b25cc5f186eb19ef2b7891/index.html --user
 ```
 
 
@@ -160,7 +155,7 @@ Only need to execute 2.1 or 2.2
 
 Run 
 ```
-python tools/mx_recordio_2_ofrecord_shuffled_npart.py  --data_dir datasets/faces_emore --output_filepath faces_emore/ofrecord/train --part_num 16
+python tools/mx_recordio_2_ofrecord_shuffled_npart.py  --data_dir datasets/faces_emore --output_filepath faces_emore/ofrecord/train --num_part 16
 ```
 And you will get the number of `part_num` parts of OFRecord, it's 16 parts in this example, it showed like this
 ```
@@ -237,29 +232,6 @@ ofrecord/test/
 ```
 
 
-
-## Pretrained model
-
-The accuracy comparison of OneFlow and MXNet pretrained models on the verification set of the 1:1 verification accuracy on insightface recognition test (IFRT) are as follows:
-
-| **Framework** | **African** | **Caucasian** | **Indian** | **Asian** | **All** |
-| ------------- | ----------- | ------------- | ---------- | --------- | ------- |
-| OneFlow       | 90.4076     | 94.583        | 93.702     | 68.754    | 89.684  |
-| MXNet         | 90.45       | 94.60         | 93.96      | 63.91     | 88.23   |
-
-The download link of the OneFlow pretrain model:[of_005_model.tar.gz](http://oneflow-public.oss-cn-beijing.aliyuncs.com/face_dataset/pretrained_model/of_glint360k_partial_fc/of_005_model.tar.gz)
-
-We also provide the MXNet model which converted from OneFlow:[of_to_mxnet_model_005.tar.gz](http://oneflow-public.oss-cn-beijing.aliyuncs.com/face_dataset/pretrained_model/of_2_mxnet_glint360k_partial_fc/of_to_mxnet_model_005.tar.gz)
-
-
-
-## OneFLow2ONNX
-
-```
-pip install oneflow-onnx==0.3.4
-./convert.sh
-```
-
 ## Training and verification
 
 
@@ -268,9 +240,15 @@ pip install oneflow-onnx==0.3.4
 
 To reduce the usage cost of user, OneFlow draws close the scripts to Torch style, you can directly modify parameters via configs/*.py
 
+#### eager 
 ```
-./run.sh
+./train_ddp.sh
 ```
+#### Graph
+```
+train_graph_distributed.sh
+```
+
 
 ### Varification
 
@@ -280,70 +258,9 @@ Moreover, OneFlow offers a validation script to do verification separately, val.
 ./val.sh
 
 ```
+## OneFLow2ONNX
 
-## Benchmark
-
-### Training Speed Benchmark
-
-#### Face_emore Dataset & FP32
-
-| Backbone | GPU                      | model_parallel | partial_fc | BatchSize / it | Throughput img / sec |
-| -------- | ------------------------ | -------------- | ---------- | -------------- | -------------------- |
-| R100     | 8 * Tesla V100-SXM2-16GB | False          | False      | 64             | 1836.8              |
-| R100     | 8 * Tesla V100-SXM2-16GB | True           | False      | 64             | 1854.15              |
-| R100     | 8 * Tesla V100-SXM2-16GB | True           | True       | 64             | 1872.81              |
-| R100     | 8 * Tesla V100-SXM2-16GB | False           | False       | 96(Max)        | 1931.76               |
-| R100     | 8 * Tesla V100-SXM2-16GB | True           | False      | 115(Max)       | 1921.87              |
-| R100     | 8 * Tesla V100-SXM2-16GB | True           | True       | 120(Max)       | 1962.76              |
-| Y1       | 8 * Tesla V100-SXM2-16GB | False          | False      | 256            | 14298.02             |
-| Y1       | 8 * Tesla V100-SXM2-16GB | True           | False      | 256            | 14049.75             |
-| Y1       | 8 * Tesla V100-SXM2-16GB | False          | False      | 350(Max)       | 14756.03             |
-| Y1       | 8 * Tesla V100-SXM2-16GB | True           | True       | 400(Max)       | 14436.38             |
-
-#### Glint360k Dataset & FP32
-
-| Backbone | GPU                      | partial_fc sample_ratio | BatchSize / it | Throughput img / sec |
-| -------- | ------------------------ | ----------------------- | -------------- | -------------------- |
-| R100     | 8 * Tesla V100-SXM2-16GB | 0.1                       | 64             | 1858.57              |
-| R100     | 8 * Tesla V100-SXM2-16GB | 0.1                     | 115             | 1933.88             |
-
-
-
-### Evaluation on Lfw, Cfp_fp, Agedb_30
-
-- Data Parallelism
-
-| Backbone      | Dataset | Lfw    | Cfp_fp | Agedb_30 |
-| ------------- | ------- | ------ | ------ | -------- |
-| R100          | MS1M    | 99.717 | 98.643 | 98.150   |
-| MobileFaceNet | MS1M    | 99.5   | 92.657 | 95.6     |
-
-- Model Parallelism
-
-| Backbone      | Dataset | Lfw    | Cfp_fp | Agedb_30 |
-| ------------- | ------- | ------ | ------ | -------- |
-| R100          | MS1M    | 99.733 | 98.329 | 98.033   |
-| MobileFaceNet | MS1M    | 99.483 | 93.457 | 95.7     |
-
-- Partial FC
-
-| Backbone | Dataset | Lfw    | Cfp_fp | Agedb_30 |
-| -------- | ------- | ------ | ------ | -------- |
-| R100     | MS1M    | 99.817 | 98.443 | 98.217   |
-
-### Evaluation on IFRT
-
-r denotes the sampling rate of negative class centers.
-
-| Backbone | Dataset              | African | Caucasian | Indian | Asian  | ALL    |
-| -------- | -------------------- | ------- | --------- | ------ | ------ | ------ |
-| R100     | **Glint360k**(r=0.1) | 90.4076 | 94.583    | 93.702 | 68.754 | 89.684 |
-
-### Max num_classses
-
-| node_num | gpu_num_per_node | batch_size_per_device | fp16 | Model Parallel | Partial FC | num_classes |
-| -------- | ---------------- | --------------------- | ---- | -------------- | ---------- | ----------- |
-| 1        | 1                | 64                    | True | True           | True       | 2000000     |
-| 1        | 8                | 64                    | True | True           | True       | 13500000    |
-
-More test details could refer to [OneFlow DLPerf](https://github.com/Oneflow-Inc/DLPerf#insightface).
+```
+pip install oneflow-onnx==0.5.1
+./convert.sh
+```

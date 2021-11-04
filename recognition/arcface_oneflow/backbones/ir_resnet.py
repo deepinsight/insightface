@@ -1,189 +1,219 @@
 import oneflow as flow
-from .common import _batch_norm, _conv2d_layer, _avg_pool, _prelu, get_fc1
+import oneflow.nn as nn
+from typing import Type, Any, Callable, Union, List, Optional
 
 
-def residual_unit_v3(
-    in_data, num_filter, stride, dim_match, bn_is_training, data_format, name
-):
-
-    suffix = ""
-    use_se = 0
-    bn1 = _batch_norm(
-        in_data,
-        epsilon=2e-5,
-        is_training=bn_is_training,
-        data_format=data_format,
-        name="%s%s.bn1" % (name, suffix),
-    )
-    conv1 = _conv2d_layer(
-        name="%s%s.conv1" % (name, suffix),
-        input=bn1,
-        filters=num_filter,
+def conv3x3(
+    in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1
+) -> nn.Conv2d:
+    """3x3 convolution with padding"""
+    return nn.Conv2d(
+        in_planes,
+        out_planes,
         kernel_size=3,
-        strides=[1, 1],
-        padding="same",
-        data_format=data_format,
-        use_bias=False,
-        dilation_rate=1,
-        activation=None,
-    )
-    bn2 = _batch_norm(
-        conv1,
-        epsilon=2e-5,
-        is_training=bn_is_training,
-        data_format=data_format,
-        name="%s%s.bn2" % (name, suffix),
-    )
-    prelu = _prelu(bn2, data_format=data_format,
-                   name="%s%s_relu1" % (name, suffix))
-    conv2 = _conv2d_layer(
-        name="%s%s.conv2" % (name, suffix),
-        input=prelu,
-        filters=num_filter,
-        kernel_size=3,
-        strides=stride,
-        padding="same",
-        data_format=data_format,
-        use_bias=False,
-        dilation_rate=1,
-        activation=None,
-    )
-    bn3 = _batch_norm(
-        conv2,
-        epsilon=2e-5,
-        is_training=bn_is_training,
-        data_format=data_format,
-        name="%s%s.bn3" % (name, suffix),
+        stride=stride,
+        padding=dilation,
+        groups=groups,
+        bias=False,
+        dilation=dilation,
     )
 
-    if use_se:
-        # se begin
-        input_blob = _avg_pool(
-            bn3, pool_size=[7, 7], strides=[1, 1], padding="VALID"
-        )
-        input_blob = _conv2d_layer(
-            name="%s%s_se_conv1" % (name, suffix),
-            input=input_blob,
-            filters=num_filter // 16,
-            kernel_size=1,
-            strides=[1, 1],
-            padding="valid",
-            data_format=data_format,
-            use_bias=True,
-            dilation_rate=1,
-            activation=None,
-        )
-        input_blob = _prelu(input_blob, name="%s%s_se_relu1" % (name, suffix))
-        input_blob = _conv2d_layer(
-            name="%s%s_se_conv2" % (name, suffix),
-            input=input_blob,
-            filters=num_filter,
-            kernel_size=1,
-            strides=[1, 1],
-            padding="valid",
-            data_format=data_format,
-            use_bias=True,
-            dilation_rate=1,
-            activation=None,
-        )
-        input_blob = flow.math.sigmoid(input=input_blob)
-        bn3 = flow.math.multiply(x=input_blob, y=bn3)
-        # se end
 
-    if dim_match:
-        input_blob = in_data
-    else:
-        input_blob = _conv2d_layer(
-            name="%s%s.downsample.0" % (name, suffix),
-            input=in_data,
-            filters=num_filter,
-            kernel_size=1,
-            strides=stride,
-            padding="valid",
-            data_format=data_format,
-            use_bias=False,
-            dilation_rate=1,
-            activation=None,
-        )
-        input_blob = _batch_norm(
-            input_blob,
-            epsilon=2e-5,
-            is_training=bn_is_training,
-            data_format=data_format,
-            name="%s%s.downsample.1" % (name, suffix),
-        )
-
-    identity = flow.math.add(x=bn3, y=input_blob)
-    return identity
+def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
+    """1x1 convolution"""
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
-def get_symbol(input_blob, units, cfg):
-    filter_list = [64, 64, 128, 256, 512]
-    num_stages = 4
-    units = units
+class IBasicBlock(nn.Module):
+    expansion = 1
 
-    num_classes = cfg.embedding_size
+    def __init__(
+        self,
+        inplanes,
+        planes,
+        stride=1,
+        downsample=None,
+        groups=1,
+        base_width=64,
+        dilation=1,
+    ):
+        super(IBasicBlock, self).__init__()
+        if groups != 1 or base_width != 64:
+            raise ValueError("BasicBlock only supports groups=1 and base_width=64")
+        if dilation > 1:
+            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
+        self.bn1 = nn.BatchNorm2d(inplanes, eps=1e-05,)
+        self.conv1 = conv3x3(inplanes, planes)
+        self.bn2 = nn.BatchNorm2d(planes, eps=1e-05,)
+        self.prelu = nn.ReLU(planes)
+        self.conv2 = conv3x3(planes, planes, stride)
+        self.bn3 = nn.BatchNorm2d(planes, eps=1e-05,)
+        self.downsample = downsample
+        self.stride = stride
 
-    fc_type = cfg.fc_type
-    bn_is_training = True
-    data_format = "NCHW"
+    def forward(self, x):
+        identity = x
+        out = self.bn1(x)
+        out = self.conv1(out)
+        out = self.bn2(out)
+        out = self.prelu(out)
+        out = self.conv2(out)
+        out = self.bn3(out)
+        if self.downsample is not None:
+            identity = self.downsample(x)
+        out += identity
+        return out
 
-    input_blob = _conv2d_layer(
-        name="conv1",
-        input=input_blob,
-        filters=filter_list[0],
-        kernel_size=3,
-        strides=[1, 1],
-        padding="same",
-        data_format=data_format,
-        use_bias=False,
-        dilation_rate=1,
-        activation=None,
-    )
-    input_blob = _batch_norm(
-        input_blob, epsilon=2e-5, is_training=bn_is_training, data_format=data_format, name="bn1"
-    )
-    input_blob = _prelu(input_blob, data_format=data_format, name="relu0")
 
-    for i in range(num_stages):
-        input_blob = residual_unit_v3(
-            input_blob,
-            filter_list[i + 1],
-            [2, 2],
-            False,
-            bn_is_training=bn_is_training,
-            data_format=data_format,
-            name="layer%d.%d" % (i + 1, 0),
-        )
-        for j in range(units[i] - 1):
-            input_blob = residual_unit_v3(
-                input_blob,
-                filter_list[i + 1],
-                [1, 1],
-                True,
-                bn_is_training=bn_is_training,
-                data_format=data_format,
-                name="layer%d.%d" % (i + 1, j + 1),
+class IResNet(nn.Module):
+    fc_scale = 7 * 7
+
+    def __init__(
+        self,
+        block,
+        layers,
+        dropout=0,
+        num_features=512,
+        zero_init_residual=False,
+        groups=1,
+        width_per_group=64,
+        replace_stride_with_dilation=None,
+        fp16=False,
+    ):
+        super(IResNet, self).__init__()
+        self.fp16 = fp16
+        self.inplanes = 64
+        self.dilation = 1
+        if replace_stride_with_dilation is None:
+            replace_stride_with_dilation = [False, False, False]
+        if len(replace_stride_with_dilation) != 3:
+            raise ValueError(
+                "replace_stride_with_dilation should be None "
+                "or a 3-element tuple, got {}".format(replace_stride_with_dilation)
             )
-    fc1 = get_fc1(input_blob, num_classes, fc_type)
-    return fc1
+        self.groups = groups
+        self.base_width = width_per_group
+        self.conv1 = nn.Conv2d(
+            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+        )
+        self.bn1 = nn.BatchNorm2d(self.inplanes, eps=1e-05)
+        self.prelu = nn.ReLU(self.inplanes)
+        self.layer1 = self._make_layer(block, 64, layers[0], stride=2)
+        self.layer2 = self._make_layer(
+            block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0]
+        )
+        self.layer3 = self._make_layer(
+            block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1]
+        )
+        self.layer4 = self._make_layer(
+            block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2]
+        )
+        self.bn2 = nn.BatchNorm2d(512 * block.expansion, eps=1e-05,)
+        self.dropout = nn.Dropout(p=dropout, inplace=True)
+        self.fc = nn.Linear(512 * block.expansion * self.fc_scale, num_features)
+        self.features = nn.BatchNorm1d(num_features, eps=1e-05)
+        nn.init.constant_(self.features.weight, 1.0)
+        self.features.weight.requires_grad = False
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.normal_(m.weight, 0, 0.1)
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+
+        if zero_init_residual:
+            for m in self.modules():
+                if isinstance(m, IBasicBlock):
+                    nn.init.constant_(m.bn2.weight, 0)
+
+    def _make_layer(self, block, planes, blocks, stride=1, dilate=False):
+        downsample = None
+        previous_dilation = self.dilation
+        if dilate:
+            self.dilation *= stride
+            stride = 1
+        if stride != 1 or self.inplanes != planes * block.expansion:
+            downsample = nn.Sequential(
+                conv1x1(self.inplanes, planes * block.expansion, stride),
+                nn.BatchNorm2d(planes * block.expansion, eps=1e-05,),
+            )
+        layers = []
+        layers.append(
+            block(
+                self.inplanes,
+                planes,
+                stride,
+                downsample,
+                self.groups,
+                self.base_width,
+                previous_dilation,
+            )
+        )
+        self.inplanes = planes * block.expansion
+        for _ in range(1, blocks):
+            layers.append(
+                block(
+                    self.inplanes,
+                    planes,
+                    groups=self.groups,
+                    base_width=self.base_width,
+                    dilation=self.dilation,
+                )
+            )
+
+        return nn.Sequential(*layers)
+
+    def forward(self, x):
+
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.prelu(x)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.bn2(x)
+        x = flow.flatten(x, 1)
+        x = self.dropout(x)
+        x = self.fc(x)
+        x = self.features(x)
+
+        return x
 
 
-def iresnet18(input_blob, cfg):
-    return get_symbol([2, 2, 2, 2], cfg)
+def _iresnet(arch, block, layers, pretrained, progress, **kwargs):
+    model = IResNet(block, layers, **kwargs)
+    if pretrained:
+        raise ValueError()
+    return model
 
 
-def iresnet34(input_blob, cfg):
-    return get_symbol(input_blob, [3, 4, 6, 3], cfg)
+def iresnet18(pretrained=False, progress=True, **kwargs):
+    return _iresnet(
+        "iresnet18", IBasicBlock, [2, 2, 2, 2], pretrained, progress, **kwargs
+    )
 
 
-def iresnet50(input_blob, cfg):
-    return get_symbol(input_blob,  [3, 4, 14, 3], cfg)
+def iresnet34(pretrained=False, progress=True, **kwargs):
+    return _iresnet(
+        "iresnet34", IBasicBlock, [3, 4, 6, 3], pretrained, progress, **kwargs
+    )
 
 
-def iresnet100(input_blob, cfg):
-    return get_symbol(input_blob,  [3, 13, 30, 3], cfg)
+def iresnet50(pretrained=False, progress=True, **kwargs):
+    return _iresnet(
+        "iresnet50", IBasicBlock, [3, 4, 14, 3], pretrained, progress, **kwargs
+    )
 
 
-def iresnet200(input_blob, cfg):
-    return get_symbol(input_blob,  [6, 26, 60, 6], cfg)
+def iresnet100(pretrained=False, progress=True, **kwargs):
+    return _iresnet(
+        "iresnet100", IBasicBlock, [3, 13, 30, 3], pretrained, progress, **kwargs
+    )
+
+
+def iresnet200(pretrained=False, progress=True, **kwargs):
+    return _iresnet(
+        "iresnet200", IBasicBlock, [6, 26, 60, 6], pretrained, progress, **kwargs
+    )
