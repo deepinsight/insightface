@@ -30,13 +30,11 @@ class TrainGraph(flow.nn.Graph):
     ):
         super().__init__()
 
-        if cfg.use_fp16:
+        if cfg.fp16:
             self.config.enable_amp(True)
             self.set_grad_scaler(make_grad_scaler())
         elif cfg.scale_grad:
             self.set_grad_scaler(make_static_grad_scaler())
-
-
 
         self.config.allow_fuse_add_to_output(True)
         self.config.allow_fuse_model_update_ops(True)
