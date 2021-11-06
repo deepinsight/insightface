@@ -1,4 +1,3 @@
-import backbones
 import oneflow as flow
 from utils.utils_callbacks import CallBackVerification
 from backbones import get_model
@@ -6,7 +5,6 @@ from graph import TrainGraph, EvalGraph
 import logging
 import argparse
 from utils.utils_config import get_config
-from function import EvalGraph
 
 
 def main(args):
@@ -18,7 +16,8 @@ def main(args):
     backbone = get_model(cfg.network, dropout=0.0, num_features=cfg.embedding_size).to(
         "cuda"
     )
-    val_callback = CallBackVerification(1, 0, cfg.val_targets, cfg.ofrecord_path)
+    val_callback = CallBackVerification(
+        1, 0, cfg.val_targets, cfg.ofrecord_path)
 
     state_dict = flow.load(args.model_path)
 
@@ -32,7 +31,7 @@ def main(args):
 
     backbone.load_state_dict(new_parameters)
 
-    infer_graph = EvalGraph(backbone)
+    infer_graph = EvalGraph(backbone, cfg)
     val_callback(1000, backbone, infer_graph)
 
 

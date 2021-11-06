@@ -47,7 +47,8 @@ class CallBackVerification(object):
                 self.ver_list[i], backbone, 10, 10, self.is_consistent
             )
             logging.info(
-                "[%s][%d]XNorm: %f" % (self.ver_name_list[i], global_step, xnorm)
+                "[%s][%d]XNorm: %f" % (
+                    self.ver_name_list[i], global_step, xnorm)
             )
             logging.info(
                 "[%s][%d]Accuracy-Flip: %1.5f+-%1.5f"
@@ -64,11 +65,13 @@ class CallBackVerification(object):
     def init_dataset(self, val_targets, data_dir, image_size):
 
         for name in val_targets:
-            path = os.path.join(data_dir, name + ".bin")
+            path = os.path.join(data_dir, "val", name + ".bin")
             if os.path.exists(path):
                 data_set = verification.load_bin_cv(path, image_size)
                 self.ver_list.append(data_set)
                 self.ver_name_list.append(name)
+        if len(self.ver_list) == 0:
+            logging.info("Val targets is None !")
 
     def __call__(self, num_update, backbone: flow.nn.Module, backbone_graph=None):
 
@@ -120,8 +123,10 @@ class CallBackLogging(object):
                 time_total = time_now / ((global_step + 1) / self.total_step)
                 time_for_end = time_total - time_now
                 if self.writer is not None:
-                    self.writer.add_scalar("time_for_end", time_for_end, global_step)
-                    self.writer.add_scalar("learning_rate", learning_rate, global_step)
+                    self.writer.add_scalar(
+                        "time_for_end", time_for_end, global_step)
+                    self.writer.add_scalar(
+                        "learning_rate", learning_rate, global_step)
                     self.writer.add_scalar("loss", loss.avg, global_step)
                 if fp16:
                     msg = (
@@ -168,7 +173,8 @@ class CallBackModelCheckpoint(object):
             path_module = os.path.join(self.output, "epoch_%d" % (epoch))
 
             if is_consistent:
-                flow.save(backbone.state_dict(), path_module, consistent_dst_rank=0)
+                flow.save(backbone.state_dict(),
+                          path_module, consistent_dst_rank=0)
             else:
                 if self.rank == 0:
                     flow.save(backbone.state_dict(), path_module)

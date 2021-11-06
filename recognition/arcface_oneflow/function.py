@@ -5,7 +5,7 @@ from utils.utils_logging import AverageMeter
 from utils.utils_callbacks import CallBackVerification, CallBackLogging, CallBackModelCheckpoint
 from backbones import get_model
 from graph import TrainGraph, EvalGraph
-from losses import CrossEntropyLoss_sbp
+from utils.losses import CrossEntropyLoss_sbp
 import logging
 
 
