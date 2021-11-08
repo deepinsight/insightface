@@ -1,7 +1,7 @@
 ===========================train_params===========================
 model_name:MobileFaceNet_128
 python:python3.7
-gpu_list:0
+gpu_list:-1
 null:null
 null:null
 --train_num:lite_train_lite_infer=1|lite_train_whole_infer=1|whole_infer=1|whole_train_whole_infer=25
@@ -38,11 +38,11 @@ train_model:./inference
 infer_export:null
 infer_quant:False
 inference:tools/inference.py  --export_type=paddle --benchmark=True
---use_gpu:True|False
---enable_mkldnn:True|False
+--use_gpu:False
+--enable_mkldnn:False
 --cpu_threads:1|6
 --max_batch_size:1
---use_tensorrt:False|True
+--use_tensorrt:False
 --precision:fp32
 --model_dir:null
 --image_path:MS1M_v2/lite_infer
