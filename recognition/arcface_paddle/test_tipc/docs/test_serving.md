@@ -4,7 +4,7 @@ PaddleServing预测功能测试的主程序为`test_serving.sh`，可以测试�
 
 ## 1. 测试结论汇总
 
-本repo为提供量化训练，因此这里只测试正常模型，对应的C++预测功能汇总如下：
+本repo未提供量化训练，因此这里只测试正常模型，对应的PaddleServing预测功能汇总如下：
 
 | 模型类型 |device | batchsize | tensorrt | mkldnn | cpu多线程 |
 |  ----   |  ---- |   ----   |  :----:  |   :----:   |  :----:  |
