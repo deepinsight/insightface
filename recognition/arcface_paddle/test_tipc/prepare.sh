@@ -17,10 +17,12 @@ trainer_list=$(func_parser_value "${lines[14]}")
 MODE=$2
 
 if [ ${MODE} = "lite_train_lite_infer" ];then
+    rm -rf MS1M_v2; mkdir MS1M_v2
     # pretrain lite train data
-    tar xf test_tipc/small_dataset.tar --strip-components 1 -C MS1M_v2 
+    tar xf test_tipc/data/small_dataset.tar --strip-components 1 -C MS1M_v2 
     
-    wget -nc -P ./MS1M_v2/ https://paddle-model-ecology.bj.bcebos.com/whole_chain/insight-face/lfw.bin
+    # wget -nc -P ./MS1M_v2/ https://paddle-model-ecology.bj.bcebos.com/whole_chain/insight-face/lfw.bin
+    cp test_tipc/data/small_lfw.bin MS1M_v2/lfw.bin
 
 elif [ ${MODE} = "serving_infer" ];then
      # prepare serving env
