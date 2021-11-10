@@ -127,7 +127,6 @@ fi
 set CUDA_VISIBLE_DEVICES
 eval $env
 
-
 echo "################### run test ###################"
 
 export Count=0
