@@ -1,0 +1,17 @@
+===========================serving_params===========================
+model_name:arcfae_mobileface
+python:python3.7
+trans_model:-m paddle_serving_client.convert
+--dirname:./inference/
+--model_filename:inference.pdmodel
+--params_filename:inference.pdiparams
+--serving_server:./deploy/pdserving/MobileFaceNet_128_serving/
+--serving_client:./deploy/pdserving/MobileFaceNet_128_client/
+serving_dir:./deploy/pdserving
+web_service:web_service.py --config=config.yml --opt op.ArcFace.concurrency=1
+op.ArcFace.local_service_conf.devices:null|0
+op.ArcFace.local_service_conf.use_mkldnn:True|False
+op.ArcFace.local_service_conf.thread_num:1|6
+op.ArcFace.local_service_conf.use_trt:False|True
+op.ArcFace.local_service_conf.precision:fp32
+pipline:pipeline_http_client.py --image_dir=./imgs

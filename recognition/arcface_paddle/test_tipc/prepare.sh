@@ -32,7 +32,7 @@ elif [ ${MODE} = "serving_infer" ];then
     ${python_name} -m pip install install paddle_serving_server_gpu-0.0.0.post101-py3-none-any.whl
     ${python_name} -m pip install paddle_serving_client==0.6.3
     ${python_name} -m pip install paddle-serving-app==0.6.3
-    ${python_name} -m pip install -U werkzeug
+    ${python_name} -m pip install werkzeug==2.0.2
 
     rm -rf ./inference
 

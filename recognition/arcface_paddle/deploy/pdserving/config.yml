@@ -41,5 +41,5 @@ op:
 
             #计算硬件ID，当devices为""或不写时为CPU预测；当devices为"0", "0,1,2"时为GPU预测，表示使用的GPU卡
             devices: "0"
-            
+
             ir_optim: True

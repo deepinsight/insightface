@@ -8,12 +8,12 @@ null:null
 --output:./output/
 --batch_size:2
 --checkpoint_dir:null
-train_model_name:lite_train_lite_infer=MobileFaceNet_128/0|lite_train_whole_infer=MobileFaceNet_128/0|whole_infer=MobileFaceNet_128/0|whole_train_whole_infer=MobileFaceNet_128/24
+train_model_name:MobileFaceNet_128/0
 train_infer_img_dir:./MS1M_v2/images
-fp16:Trule|False
+null:null
 ##
 trainer:norm_train
-norm_train:tools/train.py --config_file=configs/ms1mv2_mobileface.py --is_static=False --embedding_size=128 --fp16=False --dataset=MS1M_v2 --data_dir=MS1M_v2/ --label_file=MS1M_v2/label.txt --num_classes=85742 --log_interval_step=1
+norm_train:tools/train.py --config_file=configs/ms1mv2_mobileface.py --is_static=False --fp16=False --embedding_size=128 --fp16=False --dataset=MS1M_v2 --data_dir=MS1M_v2/ --label_file=MS1M_v2/label.txt --num_classes=85742 --log_interval_step=1
 pact_train:null
 fpgm_train:null
 distill_train:null
@@ -49,20 +49,3 @@ inference:tools/inference.py  --export_type=paddle --benchmark=True
 null:null
 --benchmark:null
 null:null
-===========================serving_params===========================
-model_name:ocr_det
-python:python3.7
-trans_model:-m paddle_serving_client.convert
---dirname:./inference/
---model_filename:inference.pdmodel
---params_filename:inference.pdiparams
---serving_server:./deploy/pdserving/MobileFaceNet_128_serving/
---serving_client:./deploy/pdserving/MobileFaceNet_128_client/
-serving_dir:./deploy/pdserving
-web_service:web_service.py --config=config.yml --opt op.ArcFace.concurrency=1
-op.ArcFace.local_service_conf.devices:null|0
-op.ArcFace.local_service_conf.use_mkldnn:True|False
-op.ArcFacedet.local_service_conf.thread_num:1|6
-op.ArcFace.local_service_conf.use_trt:False|True
-op.ArcFace.local_service_conf.precision:fp32
-pipline:pipeline_http_client.py --image_dir=./imgs
