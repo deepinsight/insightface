@@ -58,7 +58,8 @@ class LargeScaleClassifier(nn.Layer):
         self._parameter_list = []
 
         if name is None:
-            name = 'dist@fc@rank@%05d' % rank
+            name = 'dist@fc@rank@%05d.w' % rank
+        assert '.w' in name
 
         stddev = math.sqrt(2.0 / (self.embedding_size + self.num_local))
         param_attr = paddle.ParamAttr(
