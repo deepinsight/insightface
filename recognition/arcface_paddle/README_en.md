@@ -16,7 +16,7 @@
 * [8 Model Performance](#Model_Performance)
   * [8.1 Performance of Lighting Model](#Performance_of_Lighting_Model)
   * [8.2 Accuracy on Verification Datasets](#Accuracy_on_Verification_Datasets)
-  * [8.3 Maximum Number of Identities ](#Maximum_Number_of_Identities )
+  * [8.3 Maximum Number of Identities ](#Maximum_Number_of_Identities)
   * [8.4 Throughtput](#Throughtput)
 * [9. Inference Combined with Face Detection Model](#Inference_Combined_with_Face_Detection_Model)
 
