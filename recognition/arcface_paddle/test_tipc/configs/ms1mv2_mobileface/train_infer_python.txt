@@ -1,0 +1,51 @@
+===========================train_params===========================
+model_name:MobileFaceNet_128
+python:python3.7
+gpu_list:0
+null:null
+null:null
+--train_num:lite_train_lite_infer=1
+--output:./output/
+--batch_size:2
+--checkpoint_dir:null
+train_model_name:MobileFaceNet_128/0
+train_infer_img_dir:./MS1M_v2/images
+null:null
+##
+trainer:norm_train
+norm_train:tools/train.py --config_file=configs/ms1mv2_mobileface.py --is_static=False --fp16=False --embedding_size=128 --fp16=False --dataset=MS1M_v2 --data_dir=MS1M_v2/ --label_file=MS1M_v2/label.txt --num_classes=85742 --log_interval_step=1
+pact_train:null
+fpgm_train:null
+distill_train:null
+null:null
+null:null
+##
+===========================eval_params===========================
+eval:tools/validation.py --is_static=False --backbone=MobileFaceNet_128 --embedding_size=128 --data_dir=MS1M_v2 --val_targets=lfw --batch_size=2
+null:null
+##
+===========================infer_params===========================
+--output_dir:null
+--checkpoint_dir:null
+norm_export:tools/export.py --is_static=False --export_type=paddle --backbone=MobileFaceNet_128 --embedding_size=128
+quant_export:null
+fpgm_export:null
+distill_export:null
+export1:null
+export2:null
+##
+train_model:./inference
+infer_export:null
+infer_quant:False
+inference:tools/inference.py  --export_type=paddle --benchmark=True
+--use_gpu:True|False
+--enable_mkldnn:True|False
+--cpu_threads:1|6
+--max_batch_size:1
+--use_tensorrt:False|True
+--precision:fp32
+--model_dir:null
+--image_path:MS1M_v2/images
+null:null
+--benchmark:null
+null:null

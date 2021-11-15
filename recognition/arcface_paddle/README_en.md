@@ -217,7 +217,7 @@ Use the following command to run the whole face recognition demo.
 
 ```shell
 # detection + recogniotion process
-python3.7 test_recognition.py --det --rec --index=index.bin --input=friends2.jpg --output="./output"
+python3.7 tools/test_recognition.py --det --rec --index=index.bin --input=friends2.jpg --output="./output"
 ```
 
 The final result is save in folder `output/`, which is shown as follows.

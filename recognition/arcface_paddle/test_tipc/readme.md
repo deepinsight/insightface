@@ -32,17 +32,22 @@
 ```shell
 test_tipc/
 ├── configs/  # 配置文件目录
-	├── ms1mv2_mobileface.py         # 测试mobile版识别模型训练的py文件
-	├── ms1mv2_mobileface.txt        # 测试mobile版识别模型训练的参数配置文件
+	├── ms1mv2_mobileface  # ms1mv2_mobileface 模型的测试配置文件目录
+		├── model_linux_gpu_normal_normal_serving_python_linux_gpu_cpu.txt # 测试Linux上python serving预测的配置文件
+		└── train_infer_python.txt # 测试Linux上python训练预测（基础训练预测）的配置文件
 	├── ...  
-├── results/                         # 预先保存的预测结果，用于和实际预测结果进行精读比对
-	├── python_MobileFaceNet_128_fp32.txt   # 预存的mobile版识别模型python预测fp32精度的结果
-	├── ...
+├── data/ # 存放 TIPC 测试数据的目录
+	├── small_dataset.tar # 用于训练的小数据集 (10张图片)
+	├── small_lfw.bin # 用于评估的小数据集 (20张图片)
+├── docs/ # 存放 TIPC 测试数据的目录
+	├── install.md # 安装 TIPC 所需环境的文档
+	├── test_train_inference_python.md # 测试Linux上python训练预测的文档
+	├── test_serving.md # 测试Linux上python serving预测的文档
 ├── prepare.sh                        # 完成test_*.sh运行所需要的数据和模型下载
+├── test_serving.sh    # 测试python训练预测的主程序
 ├── test_train_inference_python.sh    # 测试python训练预测的主程序
-├── compare_results.py                # 用于对比log中的预测结果与results中的预存结果精度误差是否在限定范围内
 ├── common_func.sh                    # 通用shell脚本函数
-└── readme.md                         # 使用文档
+└── readme.md                         # TIPC使用文档
 ```
 
 ### 测试流程
@@ -53,7 +58,6 @@ test_tipc/
 
 1. 运行prepare.sh准备测试所需数据和模型；
 2. 运行要测试的功能对应的测试脚本`test_*.sh`，产出log，由log可以看到不同配置是否运行成功；
-3. 用`compare_results.py`对比log中的预测结果和预存在results目录下的结果，判断预测精度是否符合预期（在误差范围内）。
 
 其中，有1个测试主程序，功能如下：
 - `test_train_inference_python.sh`：测试基于Python的模型训练、评估、推理等基本功能，包括裁剪、量化、蒸馏。

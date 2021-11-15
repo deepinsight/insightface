@@ -154,8 +154,8 @@ def calculate_val_far(threshold, dist, actual_issame):
     n_diff = np.sum(np.logical_not(actual_issame))
     # print(true_accept, false_accept)
     # print(n_same, n_diff)
-    val = float(true_accept) / float(n_same)
-    far = float(false_accept) / float(n_diff)
+    val = float(true_accept) / (float(n_same) + 1e-8)
+    far = float(false_accept) / (float(n_diff) + 1e-8)
     return val, far
 
 
