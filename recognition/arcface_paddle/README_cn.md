@@ -276,4 +276,6 @@ python3.7 tools/test_recognition.py --det --rec --index=index.bin --input=friend
 <img src="https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/main/demo/friends/output/friends2.jpg"  width = "800" />
 </div>
 
-更多关于参数解释，索引库构建、whl包预测部署的内容可以参考：[Whl包预测部署](https://github.com/littletomatodonkey/insight-face-paddle)。
+更多关于参数解释，索引库构建、whl包预测部署和Paddle Serving预测部署的内容可以参考：
+ * [Whl包预测部署](https://github.com/littletomatodonkey/insight-face-paddle)
+ * [Paddle Serving预测部署](./deploy/pdserving/README_CN.md)
