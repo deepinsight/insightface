@@ -267,7 +267,7 @@ wget https://raw.githubusercontent.com/littletomatodonkey/insight-face-paddle/ma
 
 ```shell
 # 同时使用检测+识别
-python3.7 test_recognition.py --det --rec --index=index.bin --input=friends2.jpg --output="./output"
+python3.7 tools/test_recognition.py --det --rec --index=index.bin --input=friends2.jpg --output="./output"
 ```
 
 最终可视化结果保存在`output`目录下，可视化结果如下所示。
