@@ -217,7 +217,7 @@ sh scripts/inference.sh
 | Dynamic |  MS1MV3  | r50      | 1.0   | 0.98317 | 0.98900| 0.99833 | [log](https://github.com/PaddlePaddle/PLSC/blob/master/experiments/arcface_paddle/logs/dynamic/ms1mv3_r50_dynamic_128_fp16_1.0/training.log) | [checkpoint](https://paddle-model-ecology.bj.bcebos.com/model/insight-face/distributed/ms1mv3_r50_dynamic_128_fp16_1.0_eopch_24.tgz) |
 
 
-<a name="Maximum_Number_of_Identities "></a>
+<a name="Maximum_Number_of_Identities"></a>
 
 ### 8.3 Maximum Number of Identities 
 
@@ -250,7 +250,7 @@ sh scripts/inference.sh
 
 For more experimental results see [PLSC](https://github.com/PaddlePaddle/PLSC), which is an open source Paddle Large Scale Classification Tools powered by PaddlePaddle. It supports 60 million classes on single node 8 NVIDIA V100 (32G).
 
-<a name="Inference_Combined with_Face_Detection_Model"></a>
+<a name="Inference_Combined_with_Face_Detection_Model"></a>
 
 ## 9. Inference Combined with Face Detection Model
 
