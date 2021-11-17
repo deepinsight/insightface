@@ -47,6 +47,9 @@
 [Baidu](https://pan.baidu.com/s/1GsYqTTt7_Dn8BfxxsLFN0w) (code:o3az)    
 magnet uri: `magnet:?xt=urn:btih:E5F46EE502B9E76DA8CC3A0E4F7C17E4000C7B1E&dn=glint360k`
 
+### Glint-Mini (91K ids/5.2M images)[17]
+[Baidu](https://pan.baidu.com/s/10IzEyP-Z9dWFcxxj9jdJpQ) (code:10m5)
+
 ### DeepGlint (181K ids/6.75M images) [8] 
 
 [baidu](https://pan.baidu.com/s/1yApUbklBgRgOyOV4o3J8Eg)
