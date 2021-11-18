@@ -2,6 +2,7 @@ import logging
 import os
 import time
 from typing import List
+from termcolor import colored
 
 import torch
 
@@ -107,11 +108,32 @@ class CallBackModelCheckpoint(object):
         self.rank: int = rank
         self.output: str = output
 
-    def __call__(self, global_step, backbone, partial_fc, ):
-        if global_step > 100 and self.rank == 0:
+    def __call__(self, global_step, backbone, partial_fc, scale_predictor=None):
+        # if global_step > 100 and self.rank == 0:
+        print(colored("Saving model", "red"))
+        if True:
             path_module = os.path.join(self.output, "backbone.pth")
-            torch.save(backbone.module.state_dict(), path_module)
+            # torch.save(backbone.module.state_dict(), path_module)
+            torch.save(
+                backbone.module.state_dict() \
+                    if isinstance(backbone, torch.nn.parallel.DistributedDataParallel) \
+                    else backbone.state_dict(),
+                path_module)
             logging.info("Pytorch Model Saved in '{}'".format(path_module))
+
+            if scale_predictor:
+                ckpt_path = os.path.join(self.output, "checkpoint.pth")
+                print(colored("Backbone :", "blue"), type(backbone))
+                print(colored("scale_predictor :", "blue"), type(scale_predictor))
+                torch.save({
+                    "backbone": backbone.module.state_dict() \
+                        if isinstance(backbone, torch.nn.parallel.DistributedDataParallel) \
+                        else backbone.state_dict(),
+                    "scale_predictor":  scale_predictor.module.state_dict() \
+                        if isinstance(scale_predictor, torch.nn.parallel.DistributedDataParallel) \
+                        else scale_predictor.state_dict(),
+                },
+                ckpt_path)
 
         if global_step > 100 and partial_fc is not None:
             partial_fc.save_params()

@@ -9,7 +9,7 @@ import torch.utils.data.distributed
 from torch.nn.utils import clip_grad_norm_
 
 import losses
-from backbones import get_model
+from backbones import get_model, MLPHead
 from dataset import MXFaceDataset, SyntheticDataset, DataLoaderX
 from partial_fc import PartialFC
 from utils.utils_amp import MaxClipGradScaler
@@ -43,7 +43,11 @@ def main(args):
     train_loader = DataLoaderX(
         local_rank=local_rank, dataset=train_set, batch_size=cfg.batch_size,
         sampler=train_sampler, num_workers=2, pin_memory=True, drop_last=True)
-    backbone = get_model(cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size).to(local_rank)
+    backbone = get_model(
+        cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size).to(local_rank)
+    scale_predictor = MLPHead(
+        num_feats=cfg.scale_predictor_sizes, batch_norm=cfg.scale_batch_norm,
+        exponent=cfg.scale_exponent, fp16=cfg.fp16).to(local_rank)
 
     if cfg.resume:
         try:
@@ -55,19 +59,52 @@ def main(args):
             if rank == 0:
                 logging.info("resume fail, backbone init successfully!")
 
-    backbone = torch.nn.parallel.DistributedDataParallel(
-        module=backbone, broadcast_buffers=False, device_ids=[local_rank])
-    backbone.train()
+    if not cfg.freeze_backbone:
+        backbone = torch.nn.parallel.DistributedDataParallel(
+            module=backbone, broadcast_buffers=False, device_ids=[local_rank])
+    scale_predictor = torch.nn.parallel.DistributedDataParallel(
+        module=scale_predictor, broadcast_buffers=False, device_ids=[local_rank])
+    for p in scale_predictor.parameters():
+        dist.broadcast(p, 0)
+
+    if cfg.freeze_backbone:
+        for p in backbone.parameters():
+            p.requires_grad = False
+        backbone.eval()
+    else:
+        backbone.train()
+    scale_predictor.train()
+
     margin_softmax = losses.get_loss(cfg.loss)
     module_partial_fc = PartialFC(
         rank=rank, local_rank=local_rank, world_size=world_size, resume=cfg.resume,
         batch_size=cfg.batch_size, margin_softmax=margin_softmax, num_classes=cfg.num_classes,
         sample_rate=cfg.sample_rate, embedding_size=cfg.embedding_size, prefix=cfg.output)
 
-    opt_backbone = torch.optim.SGD(
-        params=[{'params': backbone.parameters()}],
-        lr=cfg.lr / 512 * cfg.batch_size * world_size,
-        momentum=0.9, weight_decay=cfg.weight_decay)
+    learnable_parameters = []
+    if not cfg.freeze_backbone:
+        learnable_parameters += list(backbone.parameters())
+    if cfg.loss == "arcface_scale":
+        learnable_parameters += list(scale_predictor.parameters())
+
+    param_groups = []
+    if not cfg.freeze_backbone:
+        param_groups.append({
+            "params": backbone.parameters(),
+            "lr": cfg.lr / 512 * cfg.batch_size * world_size,
+            "momentum": 0.9,
+            "weight_decay": cfg.weight_decay
+        })
+    if cfg.loss == "arcface_scale":
+        param_groups.append({
+            "params": scale_predictor.parameters(),
+            "lr": cfg.scale_lr / 512 * cfg.batch_size * world_size,
+            "momentum": 0.9,
+            "weight_decay": cfg.weight_decay
+        })
+
+    opt_backbone = torch.optim.SGD(param_groups)
+
     opt_pfc = torch.optim.SGD(
         params=[{'params': module_partial_fc.parameters()}],
         lr=cfg.lr / 512 * cfg.batch_size * world_size,
@@ -87,8 +124,9 @@ def main(args):
 
     scheduler_backbone = torch.optim.lr_scheduler.LambdaLR(
         optimizer=opt_backbone, lr_lambda=lr_step_func)
-    scheduler_pfc = torch.optim.lr_scheduler.LambdaLR(
-        optimizer=opt_pfc, lr_lambda=lr_step_func)
+    if not cfg.freeze_backbone:
+        scheduler_pfc = torch.optim.lr_scheduler.LambdaLR(
+            optimizer=opt_pfc, lr_lambda=lr_step_func)
 
     for key, value in cfg.items():
         num_space = 25 - len(key)
@@ -107,18 +145,52 @@ def main(args):
         train_sampler.set_epoch(epoch)
         for step, (img, label) in enumerate(train_loader):
             global_step += 1
-            features = F.normalize(backbone(img))
-            x_grad, loss_v = module_partial_fc.forward_backward(label, features, opt_pfc)
-            if cfg.fp16:
-                features.backward(grad_amp.scale(x_grad))
-                grad_amp.unscale_(opt_backbone)
-                clip_grad_norm_(backbone.parameters(), max_norm=5, norm_type=2)
-                grad_amp.step(opt_backbone)
-                grad_amp.update()
+
+            output = backbone(img)
+            output.update(scale_predictor(**output))
+
+            features = F.normalize(output["feature"])
+            scale = output["scale"]
+
+            if cfg.loss == "arcface_scale":
+                x_grad, s_grad, loss_v = module_partial_fc.forward_backward(label, features, opt_pfc, scale=scale)
+
+                if cfg.fp16:
+                    if not cfg.freeze_backbone:
+                        features.backward(grad_amp.scale(x_grad), retain_graph=True)
+                    scale.backward(grad_amp.scale(s_grad))
+
+                    grad_amp.unscale_(opt_backbone)
+                    clip_grad_norm_(learnable_parameters, max_norm=5, norm_type=2)
+                    grad_amp.step(opt_backbone)
+                    grad_amp.update()
+
+                    # for idx, p in enumerate(scale_predictor.parameters()):
+                    #     print(f"\t[{local_rank}] scale param no {idx} : {p.shape}, {p.grad is None}, requires : {p.requires_grad} sum : {p.sum().item()}")
+                    # for idx, p in enumerate(backbone.parameters()):
+                    #     print(f"\t[{local_rank}] backbone no {idx} : {p.shape}, {p.grad is None}, requires : {p.requires_grad} sum : {p.sum().item()}")
+                    #     if idx > 3: break
+
+                else:
+                    features.backward(x_grad)
+                    scale.backward(grad_amp.scale(s_grad))
+                    clip_grad_norm_(learnable_parameters, max_norm=5, norm_type=2)
+                    opt_backbone.step()
+
             else:
-                features.backward(x_grad)
-                clip_grad_norm_(backbone.parameters(), max_norm=5, norm_type=2)
-                opt_backbone.step()
+                x_grad, loss_v = module_partial_fc.forward_backward(label, features, opt_pfc)
+
+                if not cfg.freeze_backbone:
+                    if cfg.fp16:
+                        features.backward(grad_amp.scale(x_grad))
+                        grad_amp.unscale_(opt_backbone)
+                        clip_grad_norm_(backbone.parameters(), max_norm=5, norm_type=2)
+                        grad_amp.step(opt_backbone)
+                        grad_amp.update()
+                    else:
+                        features.backward(x_grad)
+                        clip_grad_norm_(backbone.parameters(), max_norm=5, norm_type=2)
+                        opt_backbone.step()
 
             opt_pfc.step()
             module_partial_fc.update()
@@ -128,8 +200,10 @@ def main(args):
             callback_logging(global_step, loss, epoch, cfg.fp16, scheduler_backbone.get_last_lr()[0], grad_amp)
             callback_verification(global_step, backbone)
             scheduler_backbone.step()
-            scheduler_pfc.step()
-        callback_checkpoint(global_step, backbone, module_partial_fc)
+            if not cfg.freeze_backbone:
+                scheduler_pfc.step()
+
+        callback_checkpoint(global_step, backbone, module_partial_fc, scale_predictor=scale_predictor)
     dist.destroy_process_group()
 
 

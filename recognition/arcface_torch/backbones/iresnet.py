@@ -149,9 +149,15 @@ class IResNet(nn.Module):
             x = self.bn2(x)
             x = torch.flatten(x, 1)
             x = self.dropout(x)
+        sig_x = x
         x = self.fc(x.float() if self.fp16 else x)
         x = self.features(x)
-        return x
+
+        output = {
+            "feature": x,
+            "bottleneck_feature": sig_x,
+        }
+        return output
 
 
 def _iresnet(arch, block, layers, pretrained, progress, **kwargs):

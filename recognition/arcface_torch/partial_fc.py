@@ -156,7 +156,27 @@ class PartialFC(Module):
             norm_weight = normalize(self.sub_weight)
             return total_label, norm_weight
 
-    def forward_backward(self, label, features, optimizer):
+    def prepare_scale(self, label, optimizer):
+        """
+        get sampled class centers for cal softmax.
+
+        label: tensor
+            Label tensor on each rank.
+        optimizer: opt
+            Optimizer for partial fc, which need to get weight mom.
+        """
+        with torch.cuda.stream(self.stream):
+            total_label = torch.zeros(
+                size=[self.batch_size * self.world_size], device=self.device, dtype=torch.long)
+            dist.all_gather(list(total_label.chunk(self.world_size, dim=0)), label)
+            self.sample(total_label)
+            optimizer.state.pop(optimizer.param_groups[-1]['params'][0], None)  # ??
+            optimizer.param_groups[-1]['params'][0] = self.sub_weight
+            optimizer.state[self.sub_weight]['momentum_buffer'] = self.sub_weight_mom
+            norm_weight = normalize(self.sub_weight)
+            return total_label, norm_weight
+
+    def forward_backward(self, label, features, optimizer, scale=None):
         """
         Partial fc forward and backward with model parallel
 
@@ -181,7 +201,16 @@ class PartialFC(Module):
         total_features.requires_grad = True
 
         logits = self.forward(total_features, norm_weight)
-        logits = self.margin_softmax(logits, total_label)
+
+        if scale is None:
+            logits = self.margin_softmax(logits, total_label)
+        else:
+            total_scale = torch.zeros(
+                size=[self.batch_size * self.world_size, 1], device=self.device)
+            dist.all_gather(list(total_scale.chunk(self.world_size, dim=0)), scale.data)
+            total_scale.requires_grad = True
+
+            logits = self.margin_softmax(logits, total_label, total_scale)
 
         with torch.no_grad():
             max_fc = torch.max(logits, dim=1, keepdim=True)[0]
@@ -212,6 +241,7 @@ class PartialFC(Module):
             grad.div_(self.batch_size * self.world_size)
 
         logits.backward(grad)
+
         if total_features.grad is not None:
             total_features.grad.detach_()
         x_grad: torch.Tensor = torch.zeros_like(features, requires_grad=True)
@@ -219,4 +249,14 @@ class PartialFC(Module):
         dist.reduce_scatter(x_grad, list(total_features.grad.chunk(self.world_size, dim=0)))
         x_grad = x_grad * self.world_size
         # backward backbone
-        return x_grad, loss_v
+
+        if scale is None:
+            return x_grad, loss_v
+        else:
+            if total_scale.grad is not None:
+                total_scale.grad.detach_()
+            s_grad: torch.Tensor = torch.zeros_like(scale, requires_grad=True)
+            # feature gradient all-reduce
+            dist.reduce_scatter(s_grad, list(total_scale.grad.chunk(self.world_size, dim=0)))
+            s_grad = s_grad * self.world_size
+            return x_grad, s_grad, loss_v
