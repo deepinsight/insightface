@@ -32,7 +32,7 @@ Supported methods:
 
 - [x] [SDUNets (BMVC'2018)](heatmap)
 - [x] [SimpleRegression](coordinate_reg)
-
+- [x] [Alignment By Face Synthetics](synthetics)
 
 
 ## Contributing
