@@ -2,6 +2,8 @@
 
 ## NEWS
 
+**``2021-11-30``** [MFR-Ongoing](../mfr) is now available.
+
 **``2021-10-26``** Please send the onnx models to us(insightface.challenge[at]gmail.com) if you want to test the MFR accuracy before our system rebooting(may be in Nov.).
 
 **``2021-10-11``** [Final Leaderboard](https://insightface.ai/mfr21)
