@@ -1,13 +1,51 @@
 # InsightFace Recognition Test (IFRT)
+
 **IFRT** is a globalised fair benchmark for face recognition algorithms. IFRT evaluates the algorithm performance on worldwide web pictures which contain various sex, age and race groups, but no identification photos.
 
 **IFRT** testset consists of non-celebrities so we can ensure that it has very few overlap with public available face recognition training set, such as MS1M and CASIA as they mostly collected from online celebrities. As the result, we can evaluate the FAIR performance for different algorithms.
 
 Similar to [FRVT](https://www.nist.gov/programs-projects/face-recognition-vendor-test-frvt), we encourage participants to prepare a black-box feature extractor or raw model files.
 
-## Dataset Statistics and Visualization
+We also hold the Masked Face Recognition Challenge & Workshop(MFR) on ICCV-2021. See [iccv21-mfr](../iccv21-mfr) for detail.
 
-IFRT testset contains 242,143 identities and 1,624,305 images.
+
+## Testsets
+
+In IFRT, we will evaluate the accuracy of following testsets:
+
+  * Accuracy between masked and non-masked faces.
+  * Accuracy among children(2~16 years old).
+  * Accuracy of globalised multi-racial benchmarks.
+
+
+We ensure that there's no overlap between the above testsets and public available training datasets, as they are not collected from online celebrities.
+
+We also evaluate below public available famous benchmarks:
+  * IJBC under FAR<=e-5 and FAR<=e-4
+  * Some 1:1 verification testsets, such as LFW, CFPFP, AgeDB-30.
+
+
+### ``Mask test-set:``
+
+Mask testset contains 6,964 identities, 6,964 masked images and 13,928 non-masked images. There are totally 13,928 positive pairs and 96,983,824 negative pairs.
+
+<details>
+  <summary>Click to check the sample images(here we manually blur it to protect privacy) </summary>
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_mask_sample.jpg" alt="ifrtsample" width="360">
+</details>
+
+### ``Children test-set:``
+
+Children testset contains 14,344 identities and 157,280 images. There are totally 1,773,428 positive pairs and 24,735,067,692 negative pairs.
+
+<details>
+  <summary>Click to check the sample images(here we manually blur it to protect privacy) </summary>
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/ifrt_children_sample.jpg" alt="ifrtsample" width="360">
+</details>
+
+### ``Multi-racial test-set (MR in short):``
+
+The globalised multi-racial testset contains 242,143 identities and 1,624,305 images.
 
 | Race-Set     | Identities  | Images        |  Positive Pairs   | Negative Pairs        |
 | -------      | ----------  | -----------   |  -----------      | -----------           |
@@ -28,7 +66,14 @@ For ``Mask`` set, TAR is measured on mask-to-nonmask 1:1 protocal, with FAR less
 
 For ``Children`` set, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.0001(e-4).
 
-For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
+For multi-racial sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6).
+
+For IJBC and verification test-set, we use the most common test protocal.
+
+Participants are ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
+
+
+
 
 ## Baselines
 
@@ -55,20 +100,26 @@ For other sets, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0
 
 Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
+## Rules
+
+1. We have two tracks, academic and unconstrained.
+2. For academic submissions, we recommend you to set the username as the name of your proposed paper or method. Orgnization hiding is not allowed for this track but you can set the submission as private.
+3. You can also create multiple accounts, one account for one paper.
+4. Right now we only support 112x112 input, so make sure that the submission model accepts the correct input shape.
+5. Participants submit onnx model, then get scores by our online evaluation. 
+6. Matching score is measured by cosine similarity.
+7. The input shape of submission model should equal to 3x112x112 (RGB order).
+8. Online evaluation server uses onnxruntime-gpu==1.8, cuda==11.1.
+9. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
+10. Please use ``onnx_helper.py`` to check whether the model is valid.
+11. Leaderboard is now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
 
 
-## How to Participate
 
-Send an e-mail to **insightface.challenge(AT)gmail.com** after preparing your onnx model file(without commercial risk), with your name, organization and submission comments.
+## Submission Guide
 
-Some other ways to submit:
-
-1. Submit black-box face feature extracting tool.
-    * Use python binding to provide python interface: `feat = get_feature(image, bbox, landmark)`, where shape(image)==(H,W,3), shape(bbox)==(4,), shape(landmark)==(5,2) and shape(feat)==(K,). You can either use the provided landmark or detect them by yourself.
-    * In current stage, it should be better to not encrypt your feature embeddings, for fast GPU N:N matrix calculation.
-    * You can add some restrictions on your tool. Such as number of api calls and time constraints.
-
-
-## Leaderboard
-
-Coming soon.
+1. Participants must package the onnx model for submission using ``zip xxx.zip model.onnx``.
+2. Each participant can submit three times a day at most.
+3. Please sign-up with the real organization name. You can hide the organization name in our system if you like(not allowed for academic track).
+4. You can decide which submission to be displayed on the leaderboard by clicking 'Set Public' button.
+5. Please click 'sign-in' on submission server if find you're not logged in.
