@@ -1,18 +1,21 @@
-# InsightFace Recognition Test (IFRT)
+# The Masked Face Recognition Challenge (MFR)
 
-**IFRT** is a globalised fair benchmark for face recognition algorithms. IFRT evaluates the algorithm performance on worldwide web pictures which contain various sex, age and race groups.
+**MFR** is the ongoing version of [ICCV-2021 Masked Face Recognition Challenge & Workshop(MFR)](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). We also extend it to involve some public available and popular benchmarks such as IJBC, LFW, CFPFP and AgeDB.
 
-**IFRT** testset consists of non-celebrities so we can ensure that it has very few overlap with public available face recognition training set, such as MS1M and CASIA as they mostly collected from online celebrities. As the result, we can evaluate the FAIR performance for different algorithms.
+For detail, please check our ICCV 2021 workshop [paper](https://openaccess.thecvf.com/content/ICCV2021W/MFR/papers/Deng_Masked_Face_Recognition_Challenge_The_InsightFace_Track_Report_ICCVW_2021_paper.pdf).
 
-In recent changes, we also add public available popular benchmarks such as IJBC, LFW, CFPFP, AgeDB into **IFRT**.
+Some more information about the workshop can be found [here](../iccv21-mfr)
 
-We also hold the Masked Face Recognition Challenge & Workshop(MFR) on ICCV-2021. See [iccv21-mfr](../iccv21-mfr) for detail.
+**MFR** testset consists of non-celebrities so we can ensure that it has very few overlap with public available face recognition training set, such as MS1M and CASIA as they mostly collected from online celebrities. As the result, we can evaluate the FAIR performance for different algorithms.
+
+In recent changes, we also add public available popular benchmarks such as IJBC, LFW, CFPFP, AgeDB into **MFR**.
+
 
 Current submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
 ## Testsets
 
-In IFRT, we will evaluate the accuracy of following testsets:
+In MFR, we will evaluate the accuracy of following testsets:
 
   * **Accuracy between masked and non-masked faces.**
   * **Accuracy among children(2~16 years old).**
