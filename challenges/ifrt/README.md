@@ -1,13 +1,14 @@
 # InsightFace Recognition Test (IFRT)
 
-**IFRT** is a globalised fair benchmark for face recognition algorithms. IFRT evaluates the algorithm performance on worldwide web pictures which contain various sex, age and race groups, but no identification photos.
+**IFRT** is a globalised fair benchmark for face recognition algorithms. IFRT evaluates the algorithm performance on worldwide web pictures which contain various sex, age and race groups.
 
 **IFRT** testset consists of non-celebrities so we can ensure that it has very few overlap with public available face recognition training set, such as MS1M and CASIA as they mostly collected from online celebrities. As the result, we can evaluate the FAIR performance for different algorithms.
 
-Similar to [FRVT](https://www.nist.gov/programs-projects/face-recognition-vendor-test-frvt), we encourage participants to prepare a black-box feature extractor or raw model files.
+In recent changes, we also add public available popular benchmarks such as IJBC, LFW, CFPFP, AgeDB into **IFRT**.
 
 We also hold the Masked Face Recognition Challenge & Workshop(MFR) on ICCV-2021. See [iccv21-mfr](../iccv21-mfr) for detail.
 
+Current submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
 ## Testsets
 
@@ -20,7 +21,8 @@ In IFRT, we will evaluate the accuracy of following testsets:
 
 We ensure that there's no overlap between the above testsets and public available training datasets, as they are not collected from online celebrities.
 
-We also evaluate below public available famous benchmarks:
+We also evaluate below public available popular benchmarks:
+
   * **IJBC under FAR<=e-5 and FAR<=e-4.**
   * **Some 1:1 verification testsets, such as LFW, CFPFP, AgeDB-30.**
 
