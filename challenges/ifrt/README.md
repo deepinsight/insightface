@@ -106,7 +106,7 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 
 1. We have two tracks, academic and unconstrained.
 2. **For academic submissions, we recommend you to set the username as the name of your proposed paper or method. Orgnization hiding is not allowed for this track but you can set the submission as private. You can also create multiple accounts, one account for one method.**
-3. Right now we only support 112x112 input, so make sure that the submission model accepts the correct input shape.
+3. Right now we only support 112x112 input, so make sure that the submission model accepts the correct input shape(['*',3,112,112]). Add an interpolate operator into the first layer of the submission model if you need a different input resolution.
 4. Participants submit onnx model, then get scores by our online evaluation. 
 5. Matching score is measured by cosine similarity.
 6. The input shape of submission model should equal to 3x112x112 (RGB order).
