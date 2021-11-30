@@ -8,7 +8,7 @@
 
 ## Introduction
 
-These are challenges hold by [InsightFace](https://insightface.ai)
+These benchmarks are maintained by [InsightFace](https://insightface.ai)
 
 
 <div align="left">
@@ -17,14 +17,11 @@ These are challenges hold by [InsightFace](https://insightface.ai)
 
 
 
-## List
-
-
-Supported methods:
-
+## Supported Benchmarks
 - [MFR](ifrt) (Ongoing version of iccv21-mfr)
-- [LFR19 (ICCVW'2019)](iccv19-lfr)
 - [MFR21 (ICCVW'2021)](iccv21-mfr)
+- [LFR19 (ICCVW'2019)](iccv19-lfr)
+
 
 
 
