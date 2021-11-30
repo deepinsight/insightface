@@ -22,7 +22,7 @@ These are challenges hold by [InsightFace](https://insightface.ai)
 
 Supported methods:
 
-- [IFRT](ifrt) (Ongoing)
+- [MFR](ifrt) (Ongoing version of iccv21-mfr)
 - [LFR19 (ICCVW'2019)](iccv19-lfr)
 - [MFR21 (ICCVW'2021)](iccv21-mfr)
 
