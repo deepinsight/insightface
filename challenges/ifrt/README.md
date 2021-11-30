@@ -13,16 +13,16 @@ We also hold the Masked Face Recognition Challenge & Workshop(MFR) on ICCV-2021.
 
 In IFRT, we will evaluate the accuracy of following testsets:
 
-  * Accuracy between masked and non-masked faces.
-  * Accuracy among children(2~16 years old).
-  * Accuracy of globalised multi-racial benchmarks.
+  * **Accuracy between masked and non-masked faces.**
+  * **Accuracy among children(2~16 years old).**
+  * **Accuracy of globalised multi-racial benchmarks.**
 
 
 We ensure that there's no overlap between the above testsets and public available training datasets, as they are not collected from online celebrities.
 
 We also evaluate below public available famous benchmarks:
-  * IJBC under FAR<=e-5 and FAR<=e-4
-  * Some 1:1 verification testsets, such as LFW, CFPFP, AgeDB-30.
+  * **IJBC under FAR<=e-5 and FAR<=e-4.**
+  * **Some 1:1 verification testsets, such as LFW, CFPFP, AgeDB-30.**
 
 
 ### ``Mask test-set:``
@@ -103,16 +103,15 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 ## Rules
 
 1. We have two tracks, academic and unconstrained.
-2. For academic submissions, we recommend you to set the username as the name of your proposed paper or method. Orgnization hiding is not allowed for this track but you can set the submission as private.
-3. You can also create multiple accounts, one account for one paper.
-4. Right now we only support 112x112 input, so make sure that the submission model accepts the correct input shape.
-5. Participants submit onnx model, then get scores by our online evaluation. 
-6. Matching score is measured by cosine similarity.
-7. The input shape of submission model should equal to 3x112x112 (RGB order).
-8. Online evaluation server uses onnxruntime-gpu==1.8, cuda==11.1.
-9. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
-10. Please use ``onnx_helper.py`` to check whether the model is valid.
-11. Leaderboard is now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
+2. **For academic submissions, we recommend you to set the username as the name of your proposed paper or method. Orgnization hiding is not allowed for this track but you can set the submission as private. You can also create multiple accounts, one account for one method.**
+3. Right now we only support 112x112 input, so make sure that the submission model accepts the correct input shape.
+4. Participants submit onnx model, then get scores by our online evaluation. 
+5. Matching score is measured by cosine similarity.
+6. The input shape of submission model should equal to 3x112x112 (RGB order).
+7. Online evaluation server uses onnxruntime-gpu==1.8, cuda==11.1.
+8. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
+9. Please use ``onnx_helper.py`` to check whether the model is valid.
+10. Leaderboard is now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
 
 
 
