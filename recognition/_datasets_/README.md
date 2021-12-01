@@ -54,6 +54,10 @@ magnet uri: `magnet:?xt=urn:btih:E5F46EE502B9E76DA8CC3A0E4F7C17E4000C7B1E&dn=gli
 
 [baidu](https://pan.baidu.com/s/1yApUbklBgRgOyOV4o3J8Eg)
 
+### WebFace260M [18]
+
+[Link](https://www.face-benchmark.org/download.html)
+
 
 ### IMDB-Face (59K ids/1.7M images) [9]
 
@@ -134,3 +138,5 @@ Labeled Faces in the Wild: A Database for Studying Face Recognition in Unconstra
 [16] Zheng, Tianyue, and Weihong Deng. Cross-Pose LFW: A Database for Studying Cross-Pose Face Recognition in Unconstrained Environments, 2018.
 
 [17] An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and Zhang, Debing and Fu Ying. Partial FC: Training 10 Million Identities on a Single Machine, arxiv:2010.05222, 2020.
+
+[18] Zheng Zhu, Guan Huang, Jiankang Deng, Yun Ye, Junjie Huang, Xinze Chen, Jiagang Zhu, Tian Yang, Jiwen Lu, Dalong Du, Jie Zhou. WebFace260M: A Benchmark Unveiling the Power of Million-scale Deep Face Recognition
