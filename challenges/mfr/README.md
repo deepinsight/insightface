@@ -13,6 +13,8 @@ In recent changes, we also add public available popular benchmarks such as IJBC,
 
 Current submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
+For any question, please send email to `insightface.challenge AT gmail.com`
+
 ## Testsets
 
 In MFR-Ongoing, we will evaluate the accuracy of following testsets:
