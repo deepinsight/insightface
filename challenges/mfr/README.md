@@ -112,7 +112,7 @@ Inference time was evaluated on Tesla V100 GPU, using onnxruntime-gpu==1.6.
 3. Right now we only support 112x112 input, so make sure that the submission model accepts the correct input shape(['*',3,112,112]), in RGB order. Add an interpolate operator into the first layer of the submission model if you need a different input resolution.
 4. Participants submit onnx model, then get scores by our online evaluation. 
 5. Matching score is measured by cosine similarity.
-6. Online evaluation server uses onnxruntime-gpu==1.8, cuda==11.1, cudnn==8.0.5.
+6. **Online evaluation server uses onnxruntime-gpu==1.8, cuda==11.1, cudnn==8.0.5, GPU is RTX3090.**
 7. Any float-16 model weights is prohibited, as it will lead to incorrect model size estimiation.
 8. Please use ``onnx_helper.py`` to check whether the model is valid.
 9. Leaderboard is now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
