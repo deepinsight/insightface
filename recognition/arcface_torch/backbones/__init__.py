@@ -1,6 +1,6 @@
 from .iresnet import iresnet18, iresnet34, iresnet50, iresnet100, iresnet200
 from .mobilefacenet import get_mbf
-from .scale_predictors import MLPHead
+from .scale_predictors import MLPHead, DummyHead
 
 
 def get_model(name, **kwargs):

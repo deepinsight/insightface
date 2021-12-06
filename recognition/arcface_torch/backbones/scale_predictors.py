@@ -32,10 +32,40 @@ class MLPHead(nn.Module):
         x: torch.Tensor = kwargs["bottleneck_feature"]
         with torch.cuda.amp.autocast(self.fp16):
             x = self.mlp(x)
-            if self == "exp":
+            if self.exponent == "exp":
                 x = torch.exp(x)
-            if self == "sigm":
+            if self.exponent == "sigm":
                 x = torch.sigmoid(x)
-            if self == "lin":
+            if self.exponent == "sigm_mul":
+                x = 64 * torch.sigmoid(x)
+            if self.exponent == "sigm_sum":
+                x = 64 + torch.sigmoid(x)
+            if self.exponent == "sigm_sum_mul":
+                x = 32 + 32 * torch.sigmoid(x)
+            if self.exponent == "lin":
                 x = x
+        return {"scale": x}
+
+
+class DummyHead(nn.Module):
+    def __init__(self, fp16=False,  **kwargs):
+        super(DummyHead, self).__init__()
+
+        self.lin = nn.Linear(25088, 1)
+        self.constant = 64.
+        self.fp16 = fp16
+
+    def forward(self, **kwargs):
+        x: torch.Tensor = kwargs["bottleneck_feature"]
+        with torch.cuda.amp.autocast(self.fp16):
+            # x = self.mlp(x)
+            # if self == "exp":
+            #     x = torch.exp(x)
+            # if self == "sigm":
+            #     x = torch.sigmoid(x)
+            # if self == "lin":
+            #     x = x
+
+            x = self.lin(x)
+            x = 0 * x + torch.ones_like(x) * self.constant
         return {"scale": x}

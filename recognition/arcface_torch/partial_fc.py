@@ -196,7 +196,7 @@ class PartialFC(Module):
         """
         total_label, norm_weight = self.prepare(label, optimizer)
         total_features = torch.zeros(
-            size=[self.batch_size * self.world_size, self.embedding_size], device=self.device)
+            size=[self.batch_size * self.world_size, self.embedding_size], device=self.device, dtype=features.dtype)
         dist.all_gather(list(total_features.chunk(self.world_size, dim=0)), features.data)
         total_features.requires_grad = True
 
@@ -206,8 +206,17 @@ class PartialFC(Module):
             logits = self.margin_softmax(logits, total_label)
         else:
             total_scale = torch.zeros(
-                size=[self.batch_size * self.world_size, 1], device=self.device)
+                size=[self.batch_size * self.world_size, 1], device=self.device, dtype=scale.dtype)
+            # print(f"\t[{self.rank}] Total scale before : {total_scale.shape} {total_scale[0:10]}")
+            # print(f"\t[{self.rank}] Scale.data : {type(scale.data)} {scale.shape}")
+            #
+            # print(f"\t[{self.rank}] Chunked {len(list(total_scale.chunk(self.world_size, dim=0)))} {list(total_scale.chunk(self.world_size, dim=0))[0].shape}")
+
             dist.all_gather(list(total_scale.chunk(self.world_size, dim=0)), scale.data)
+
+            # print(f"\tScale [{self.rank}] Scale : {scale.shape} {scale[0:10]}")
+            # print(f"\tTotal_scale After : {total_scale.shape} {total_scale[0:10]}")
+
             total_scale.requires_grad = True
 
             logits = self.margin_softmax(logits, total_label, total_scale)
@@ -235,6 +244,12 @@ class PartialFC(Module):
             loss[index] = grad[index].gather(1, total_label[index, None])
             dist.all_reduce(loss, dist.ReduceOp.SUM)
             loss_v = loss.clamp_min_(1e-30).log_().mean() * (-1)
+
+            # print(f"[{self.rank}] Loss : {loss_v.shape} {loss_v}")
+            if torch.isnan(loss_v).item():
+                print(f"[{self.rank}] Detected Nan")
+                import sys
+                sys.exit(0)
 
             # calculate grad
             grad[index] -= one_hot

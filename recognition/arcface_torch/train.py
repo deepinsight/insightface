@@ -9,7 +9,7 @@ import torch.utils.data.distributed
 from torch.nn.utils import clip_grad_norm_
 
 import losses
-from backbones import get_model, MLPHead
+from backbones import get_model, MLPHead, DummyHead
 from dataset import MXFaceDataset, SyntheticDataset, DataLoaderX
 from partial_fc import PartialFC
 from utils.utils_amp import MaxClipGradScaler
@@ -45,7 +45,8 @@ def main(args):
         sampler=train_sampler, num_workers=2, pin_memory=True, drop_last=True)
     backbone = get_model(
         cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size).to(local_rank)
-    scale_predictor = MLPHead(
+    # scale_predictor = MLPHead(
+    scale_predictor = DummyHead(
         num_feats=cfg.scale_predictor_sizes, batch_norm=cfg.scale_batch_norm,
         exponent=cfg.scale_exponent, fp16=cfg.fp16).to(local_rank)
 
@@ -62,10 +63,10 @@ def main(args):
     if not cfg.freeze_backbone:
         backbone = torch.nn.parallel.DistributedDataParallel(
             module=backbone, broadcast_buffers=False, device_ids=[local_rank])
-    scale_predictor = torch.nn.parallel.DistributedDataParallel(
-        module=scale_predictor, broadcast_buffers=False, device_ids=[local_rank])
     for p in scale_predictor.parameters():
         dist.broadcast(p, 0)
+    scale_predictor = torch.nn.parallel.DistributedDataParallel(
+        module=scale_predictor, broadcast_buffers=False, device_ids=[local_rank])
 
     if cfg.freeze_backbone:
         for p in backbone.parameters():
@@ -105,10 +106,16 @@ def main(args):
 
     opt_backbone = torch.optim.SGD(param_groups)
 
+    if cfg.freeze_backbone:
+        for p in module_partial_fc.parameters():
+            p.requires_grad = False
     opt_pfc = torch.optim.SGD(
         params=[{'params': module_partial_fc.parameters()}],
         lr=cfg.lr / 512 * cfg.batch_size * world_size,
         momentum=0.9, weight_decay=cfg.weight_decay)
+
+    # print(f"Opt backbone parameters {sum(p.numel() for p in opt_backbone.param_groups)}")
+    # print(f"Opt pfc {sum(p.numel() for p in opt_pfc.param_groups)}")
 
     num_image = len(train_set)
     total_batch_size = cfg.batch_size * world_size
@@ -124,6 +131,7 @@ def main(args):
 
     scheduler_backbone = torch.optim.lr_scheduler.LambdaLR(
         optimizer=opt_backbone, lr_lambda=lr_step_func)
+
     if not cfg.freeze_backbone:
         scheduler_pfc = torch.optim.lr_scheduler.LambdaLR(
             optimizer=opt_pfc, lr_lambda=lr_step_func)
@@ -176,6 +184,17 @@ def main(args):
                     scale.backward(grad_amp.scale(s_grad))
                     clip_grad_norm_(learnable_parameters, max_norm=5, norm_type=2)
                     opt_backbone.step()
+
+                # for p in backbone.parameters():
+                #     print(f"Back : {p.shape} : val : {p[0, 0, 0, 0]}")
+                #     break
+                # for p in scale_predictor.parameters():
+                #     print(f"Scale : {p.shape} : val : {p[0, 0]}")
+                #     break
+                # for p in module_partial_fc.parameters():
+                #     print(f"PFC : {p.shape} : val : {p[0, 0]}")
+                #     break
+
 
             else:
                 x_grad, loss_v = module_partial_fc.forward_backward(label, features, opt_pfc)
