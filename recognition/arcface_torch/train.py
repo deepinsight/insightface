@@ -141,7 +141,7 @@ def main(args):
         logging.info(": " + key + " " * num_space + str(value))
 
     val_target = cfg.val_targets
-    callback_verification = CallBackVerification(2000, rank, val_target, cfg.rec)
+    callback_verification = CallBackVerification(2000, rank, val_target, cfg.rec, device=torch.device("cuda:0"))
     callback_logging = CallBackLogging(50, rank, cfg.total_step, cfg.batch_size, world_size, None)
     callback_checkpoint = CallBackModelCheckpoint(rank, cfg.output)
 
@@ -151,6 +151,10 @@ def main(args):
     grad_amp = MaxClipGradScaler(cfg.batch_size, 128 * cfg.batch_size, growth_interval=100) if cfg.fp16 else None
     for epoch in range(start_epoch, cfg.num_epoch):
         train_sampler.set_epoch(epoch)
+
+        # callback_verification(global_step, backbone)
+        # print("Managed callback verification")
+
         for step, (img, label) in enumerate(train_loader):
             global_step += 1
 
