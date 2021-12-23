@@ -20,7 +20,7 @@ config.scale_lr = 0.1
 config.freeze_backbone = True
 config.scale_predictor_sizes = [25088, 512, 1]
 config.scale_batch_norm = True
-config.scale_exponent = "sigm"
+config.scale_exponent = "sigm_mul"
 
 config.rec = "/gpfs/gpfs0/k.fedyanin/space/ms1m"
 config.num_classes = 93431

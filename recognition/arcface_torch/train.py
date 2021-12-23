@@ -45,8 +45,7 @@ def main(args):
         sampler=train_sampler, num_workers=2, pin_memory=True, drop_last=True)
     backbone = get_model(
         cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size).to(local_rank)
-    # scale_predictor = MLPHead(
-    scale_predictor = DummyHead(
+    scale_predictor = MLPHead(
         num_feats=cfg.scale_predictor_sizes, batch_norm=cfg.scale_batch_norm,
         exponent=cfg.scale_exponent, fp16=cfg.fp16).to(local_rank)
 
