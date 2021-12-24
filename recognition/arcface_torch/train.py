@@ -47,11 +47,11 @@ def main(args):
         cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size).to(local_rank)
     scale_predictor = MLPHead(
         num_feats=cfg.scale_predictor_sizes, batch_norm=cfg.scale_batch_norm,
-        exponent=cfg.scale_exponent, fp16=cfg.fp16).to(local_rank)
+        exponent=cfg.scale_exponent, coefficient=cfg.scale_coefficient, fp16=cfg.fp16).to(local_rank)
 
     if cfg.resume:
         try:
-            backbone_pth = os.path.join(cfg.output, "backbone.pth")
+            backbone_pth = os.path.join(cfg.source, "backbone.pth")
             backbone.load_state_dict(torch.load(backbone_pth, map_location=torch.device(local_rank)))
             if rank == 0:
                 logging.info("backbone resume successfully!")
@@ -79,7 +79,7 @@ def main(args):
     module_partial_fc = PartialFC(
         rank=rank, local_rank=local_rank, world_size=world_size, resume=cfg.resume,
         batch_size=cfg.batch_size, margin_softmax=margin_softmax, num_classes=cfg.num_classes,
-        sample_rate=cfg.sample_rate, embedding_size=cfg.embedding_size, prefix=cfg.output)
+        sample_rate=cfg.sample_rate, embedding_size=cfg.embedding_size, prefix=cfg.output, source=cfg.source)
 
     learnable_parameters = []
     if not cfg.freeze_backbone:

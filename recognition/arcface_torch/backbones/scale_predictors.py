@@ -3,12 +3,13 @@ import torch.nn as nn
 
 
 class MLPHead(nn.Module):
-    def __init__(self, num_feats=(512, 1), batch_norm=True, exponent=True, fp16=False, **kwargs):
+    def __init__(self, num_feats=(512, 1), batch_norm=True, exponent=True, fp16=False, coefficient=64, **kwargs):
         super(MLPHead, self).__init__()
         assert len(num_feats) >= 2
 
         self.fp16 = fp16
         self.exponent = exponent
+        self.coefficient = coefficient
 
         in_feats = num_feats[0]
 
@@ -37,11 +38,11 @@ class MLPHead(nn.Module):
             if self.exponent == "sigm":
                 x = torch.sigmoid(x)
             if self.exponent == "sigm_mul":
-                x = 64 * torch.sigmoid(x)
+                x = self.coefficient * torch.sigmoid(x)
             if self.exponent == "sigm_sum":
-                x = 64 + torch.sigmoid(x)
+                x = self.coefficient + torch.sigmoid(x)
             if self.exponent == "sigm_sum_mul":
-                x = 32 + 32 * torch.sigmoid(x)
+                x = self.coefficient + self.coefficient * torch.sigmoid(x)
             if self.exponent == "lin":
                 x = x
         return {"scale": x}

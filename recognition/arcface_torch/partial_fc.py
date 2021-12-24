@@ -18,7 +18,7 @@ class PartialFC(Module):
 
     @torch.no_grad()
     def __init__(self, rank, local_rank, world_size, batch_size, resume,
-                 margin_softmax, num_classes, sample_rate=1.0, embedding_size=512, prefix="./"):
+                 margin_softmax, num_classes, sample_rate=1.0, embedding_size=512, prefix="./", source="./"):
         """
         rank: int
             Unique process(GPU) ID from 0 to world_size - 1.
@@ -54,13 +54,17 @@ class PartialFC(Module):
         self.margin_softmax: callable = margin_softmax
         self.sample_rate: float = sample_rate
         self.embedding_size: int = embedding_size
+        self.source: str = source
         self.prefix: str = prefix
         self.num_local: int = num_classes // world_size + int(rank < num_classes % world_size)
         self.class_start: int = num_classes // world_size * rank + min(rank, num_classes % world_size)
         self.num_sample: int = int(self.sample_rate * self.num_local)
 
-        self.weight_name = os.path.join(self.prefix, "rank_{}_softmax_weight.pt".format(self.rank))
-        self.weight_mom_name = os.path.join(self.prefix, "rank_{}_softmax_weight_mom.pt".format(self.rank))
+        self.weight_name = os.path.join(self.source, "rank_{}_softmax_weight.pt".format(self.rank))
+        self.weight_mom_name = os.path.join(self.source, "rank_{}_softmax_weight_mom.pt".format(self.rank))
+
+        self.output_weight_name = os.path.join(self.prefix, "rank_{}_softmax_weight.pt".format(self.rank))
+        self.output_weight_mom_name = os.path.join(self.prefix, "rank_{}_softmax_weight_mom.pt".format(self.rank))
 
         if resume:
             try:
@@ -93,8 +97,8 @@ class PartialFC(Module):
     def save_params(self):
         """ Save softmax weight for each rank on prefix
         """
-        torch.save(self.weight.data, self.weight_name)
-        torch.save(self.weight_mom, self.weight_mom_name)
+        torch.save(self.weight.data, self.output_weight_name)
+        torch.save(self.weight_mom, self.output_weight_mom_name)
 
     @torch.no_grad()
     def sample(self, total_label):
