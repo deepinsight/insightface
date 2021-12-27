@@ -92,7 +92,7 @@ The supported methods are as follows:
 - [x] [PartialFC_mxnet (Arxiv'2020)](recognition/partial_fc)
 - [x] [PartialFC_torch (Arxiv'2020)](recognition/arcface_torch)
 - [x] [VPL (CVPR'2021)](recognition/vpl)
-- [x] [OneFlow_face](recognition/oneflow_face)
+- [x] [Arcface_oneflow](recognition/arcface_oneflow)
 - [x] [ArcFace_Paddle (CVPR'2019)](recognition/arcface_paddle)
 
 Commonly used network backbones are included in most of the methods, such as IResNet, MobilefaceNet, MobileNet, InceptionResNet_v2, DenseNet, etc..
