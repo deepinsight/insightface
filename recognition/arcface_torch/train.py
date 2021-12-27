@@ -29,7 +29,8 @@ def main(args):
         rank = 0
         dist.init_process_group(backend='nccl', init_method="tcp://127.0.0.1:12584", rank=rank, world_size=world_size)
 
-    local_rank = args.local_rank
+    # local_rank = args.local_rank
+    local_rank = int(os.environ['LOCAL_RANK'])
     torch.cuda.set_device(local_rank)
     os.makedirs(cfg.output, exist_ok=True)
     init_logging(rank, cfg.output)
