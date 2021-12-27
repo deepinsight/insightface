@@ -36,7 +36,7 @@ Supported methods:
 - [x] [PartialFC_mxnet (Arxiv'2020)](partial_fc)
 - [x] [PartialFC_torch (Arxiv'2020)](arcface_torch)
 - [x] [VPL (CVPR'2021)](vpl)
-- [x] [Arcface_oneflow](Arcface_oneflow)
+- [x] [Arcface_oneflow](arcface_oneflow)
 - [x] [ArcFace_Paddle (CVPR'2019)](arcface_paddle)
 
 
