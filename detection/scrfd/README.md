@@ -167,4 +167,9 @@ We provide an example for searching SCRFD-2.5GF in this repo as below.
 
 ## Demo
 
-1. [https://github.com/nihui/ncnn-android-scrfd](https://github.com/nihui/ncnn-android-scrfd)
+1. [ncnn-android-scrfd](https://github.com/nihui/ncnn-android-scrfd)
+2. [scrfd-MNN C++](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/mnn/cv/mnn_scrfd.cpp)
+3. [scrfd-TNN C++](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/tnn/cv/tnn_scrfd.cpp)
+4. [scrfd-NCNN C++](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/ncnn/cv/ncnn_scrfd.cpp)
+5. [scrfd-ONNXRuntime C++](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/ort/cv/scrfd.cpp)
+
