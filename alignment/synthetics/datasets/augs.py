@@ -27,8 +27,8 @@ class RectangleBorderAugmentation(ImageOnlyTransform):
         border_size = border_size.astype(np.int)
         image[:,:border_size[0],:] = self.fill_value
         image[:border_size[1],:,:] = self.fill_value
-        image[:,border_size[2]:,:] = self.fill_value
-        image[border_size[3]:,:,:] = self.fill_value
+        image[:,-border_size[2]:,:] = self.fill_value
+        image[-border_size[3]:,:,:] = self.fill_value
         return image
 
     def get_params(self):
