@@ -22,6 +22,11 @@ Then use [tools/prepare_synthetics.py](tools/prepare_synthetics.py) for training
 [300-W](https://ibug.doc.ic.ac.uk/resources/300-W/)
 
 
+## Pretrained Model
+
+[ResNet50d](https://drive.google.com/file/d/1kNP7qEl3AYNbaHFUg_ZiyRB1CtfDWXR4/view?usp=sharing)
+
+
 ## Train and Test
 
 ### Prerequisites
