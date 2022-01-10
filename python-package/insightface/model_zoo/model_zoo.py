@@ -49,7 +49,7 @@ class ModelRouter:
         self.onnx_file = onnx_file
 
     def get_model(self, **kwargs):
-        session = onnxruntime.InferenceSession(self.onnx_file, **kwargs)
+        session = PickableInferenceSession(self.onnx_file, **kwargs)
         print(f'Applied providers: {session._providers}, with options: {session._provider_options}')
         input_cfg = session.get_inputs()[0]
         input_shape = input_cfg.shape
