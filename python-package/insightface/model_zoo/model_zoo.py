@@ -18,6 +18,32 @@ from ..utils import download_onnx
 __all__ = ['get_model']
 
 
+def init_session(model_path, **kwargs):
+    sess = onnxruntime.InferenceSession(model_path,**kwargs)
+    return sess
+
+class PickableInferenceSession: 
+    # This is a wrapper to make the current InferenceSession class pickable.
+    def __init__(self, model_path, **kwargs):
+        self.model_path = model_path
+        self.sess = init_session(self.model_path, **kwargs)
+
+    def run(self, *args):
+        return self.sess.run(*args)
+
+    def __getstate__(self):
+        return {'model_path': self.model_path}
+
+    def __setstate__(self, values):
+        self.model_path = values['model_path']
+        self.sess = init_session(self.model_path)
+
+    def get_inputs(self):
+        return self.sess.get_inputs()
+    
+    def get_outputs(self):
+        return self.sess.get_outputs()
+
 class ModelRouter:
     def __init__(self, onnx_file):
         self.onnx_file = onnx_file
