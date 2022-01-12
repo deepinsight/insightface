@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class MLPHead(nn.Module):
@@ -43,6 +44,8 @@ class MLPHead(nn.Module):
                 x = self.coefficient + torch.sigmoid(x)
             if self.exponent == "sigm_sum_mul":
                 x = self.coefficient + self.coefficient * torch.sigmoid(x)
+            if self.exponent == "relu":
+                x = self.coefficient * F.relu(x)
             if self.exponent == "lin":
                 x = x
         return {"scale": x}
