@@ -5,22 +5,23 @@ from easydict import EasyDict as edict
 # mount -t tmpfs -o size=140G  tmpfs /train_tmp
 
 config = edict()
-config.loss = "arcface"
-config.network = "r34"
+config.loss = "cosface"
+config.network = "r50"
 config.resume = False
 config.output = None
 config.embedding_size = 512
-config.sample_rate = 1.0
+config.sample_rate = 0.2
 config.fp16 = True
 config.momentum = 0.9
 config.weight_decay = 5e-4
 config.batch_size = 128
-config.lr = 0.1  # batch size is 512
+config.lr = 0.4
+config.verbose = 10000
+config.dali = True
 
-config.rec = "/train_tmp/ms1m-retinaface-t1"
-config.num_classes = 93431
-config.num_image = 5179510
-config.num_epoch = 25
-config.warmup_epoch = -1
-config.decay_epoch = [10, 16, 22]
+config.rec = "/train_tmp/WebFace42M"
+config.num_classes = 2059906
+config.num_image = 42474557
+config.num_epoch = 20
+config.warmup_epoch = 2
 config.val_targets = ["lfw", "cfp_fp", "agedb_30"]

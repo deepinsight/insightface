@@ -12,7 +12,7 @@ def convert_onnx(net, path_module, output, opset=11, simplify=False):
     img = torch.from_numpy(img).unsqueeze(0).float()
 
     weight = torch.load(path_module)
-    net.load_state_dict(weight)
+    net.load_state_dict(weight, strict=True)
     net.eval()
     torch.onnx.export(net, img, output, keep_initializers_as_inputs=False, verbose=False, opset_version=opset)
     model = onnx.load(output)
@@ -38,22 +38,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
     input_file = args.input
     if os.path.isdir(input_file):
-        input_file = os.path.join(input_file, "backbone.pth")
+        input_file = os.path.join(input_file, "model.pt")
     assert os.path.exists(input_file)
-    model_name = os.path.basename(os.path.dirname(input_file)).lower()
-    params = model_name.split("_")
-    if len(params) >= 3 and params[1] in ('arcface', 'cosface'):
-        if args.network is None:
-            args.network = params[2]
+    # model_name = os.path.basename(os.path.dirname(input_file)).lower()
+    # params = model_name.split("_")
+    # if len(params) >= 3 and params[1] in ('arcface', 'cosface'):
+    #     if args.network is None:
+    #         args.network = params[2]
     assert args.network is not None
     print(args)
     backbone_onnx = get_model(args.network, dropout=0)
-
-    output_path = args.output
-    if output_path is None:
-        output_path = os.path.join(os.path.dirname(__file__), 'onnx')
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
-    assert os.path.isdir(output_path)
-    output_file = os.path.join(output_path, "%s.onnx" % model_name)
-    convert_onnx(backbone_onnx, input_file, output_file, simplify=args.simplify)
+    if args.output is None:
+        args.output = os.path.join(os.path.dirname(args.input), "model.onnx")
+    convert_onnx(backbone_onnx, input_file, args.output, simplify=args.simplify)

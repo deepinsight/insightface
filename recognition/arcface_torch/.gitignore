@@ -1,0 +1,5 @@
+**__pycache__/
+.vscode
+bak*/
+work_dirs/
+models/

@@ -1,7 +1,5 @@
-# coding: utf-8
-
 import os
-from pathlib import Path
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,10 +8,11 @@ from menpo.visualize.viewmatplotlib import sample_colours_from_colourmap
 from prettytable import PrettyTable
 from sklearn.metrics import roc_curve, auc
 
-image_path = "/data/anxiang/IJB_release/IJBC"
-files = [
-        "./ms1mv3_arcface_r100/ms1mv3_arcface_r100/ijbc.npy"
-]
+with open(sys.argv[1], "r") as f:
+    files = f.readlines()
+
+files = [x.strip() for x in files]
+image_path = "/train_tmp/IJB_release/IJBC"
 
 
 def read_template_pair_list(path):
@@ -31,7 +30,7 @@ p1, p2, label = read_template_pair_list(
 methods = []
 scores = []
 for file in files:
-    methods.append(file.split('/')[-2])
+    methods.append(file)
     scores.append(np.load(file))
 
 methods = np.array(methods)
@@ -53,7 +52,7 @@ for method in methods:
              label=('[%s (AUC = %0.4f %%)]' %
                     (method.split('-')[-1], roc_auc * 100)))
     tpr_fpr_row = []
-    tpr_fpr_row.append("%s-%s" % (method, "IJBC"))
+    tpr_fpr_row.append(method)
     for fpr_iter in np.arange(len(x_labels)):
         _, min_index = min(
             list(zip(abs(fpr - x_labels[fpr_iter]), range(len(fpr)))))

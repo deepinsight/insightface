@@ -5,50 +5,50 @@ identity on a single server.
 
 ## Requirements
 
-- Install [pytorch](http://pytorch.org) (torch>=1.6.0), our doc for [install.md](docs/install.md).
+- Install [PyTorch](http://pytorch.org) (torch>=1.6.0), our doc for [install.md](docs/install.md).
+- (Optional) Install [DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/), our doc for [install_dali.md](docs/install_dali.md).
 - `pip install -r requirements.txt`.
-- Download the dataset
-  from [https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_)
-  .
-
+  
 ## How to Training
 
-To train a model, run `train.py` with the path to the configs:
+To train a model, run `train.py` with the path to the configs.  
+The example commands below show how to run
+distributed training.
 
-### 1. Single node, 8 GPUs:
+### 1. To run on a machine with 8 GPUs:
 
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py configs/ms1mv3_r50
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=12581 train.py configs/ms1mv3_r50_lr02
 ```
 
-### 2. Multiple nodes, each node 8 GPUs:
+### 2. To run on 2 machines with 8 GPUs each:
 
 Node 0:
 
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=1234 train.py train.py configs/ms1mv3_r50
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=12581 train.py configs/webface42m_r100_lr01_pfc02_bs4k_16gpus
 ```
 
 Node 1:
 
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=1234 train.py train.py configs/ms1mv3_r50
+python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=12581 train.py configs/webface42m_r100_lr01_pfc02_bs4k_16gpus
 ```
 
-### 3.Training resnet2060 with 8 GPUs:
+## Download Datasets or Prepare Datasets
 
-```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=1234 train.py configs/ms1mv3_r2060.py
-```
+- [MS1MV3](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-retinaface) (93k IDs, 5.2M images)
+- [Glint360K](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc#4-download) (360k IDs, 17.1M images)
+- [WebFace42M](docs/prepare_webface42m.md) (2M IDs, 42.5M images)
 
 ## Model Zoo
 
 - The models are available for non-commercial research purposes only.  
 - All models can be found in here.  
-- [Baidu Yun Pan](https://pan.baidu.com/s/1CL-l4zWqsI1oDuEEYVhj-g):   e8pw  
-- [onedrive](https://1drv.ms/u/s!AswpsDO2toNKq0lWY69vN58GR6mw?e=p9Ov5d)
+- [Baidu Yun Pan](https://pan.baidu.com/s/1CL-l4zWqsI1oDuEEYVhj-g): e8pw  
+- [OneDrive](https://1drv.ms/u/s!AswpsDO2toNKq0lWY69vN58GR6mw?e=p9Ov5d)
 
-### Performance on [**ICCV2021-MFR**](http://iccv21-mfr.com/)
+### Performance on IJB-C and [**ICCV2021-MFR**](https://github.com/deepinsight/insightface/blob/master/challenges/mfr/README.md)
 
 ICCV2021-MFR testset consists of non-celebrities so we can ensure that it has very few overlap with public available face 
 recognition training set, such as MS1M and CASIA as they mostly collected from online celebrities. 
@@ -57,44 +57,24 @@ As the result, we can evaluate the FAIR performance for different algorithms.
 For **ICCV2021-MFR-ALL** set, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6). The 
 globalised multi-racial testset contains 242,143 identities and 1,624,305 images. 
 
-For **ICCV2021-MFR-MASK** set, TAR is measured on mask-to-nonmask 1:1 protocal, with FAR less than 0.0001(e-4). 
-Mask testset contains 6,964 identities, 6,964 masked images and 13,928 non-masked images. 
-There are totally 13,928 positive pairs and 96,983,824 negative pairs.
-
-| Datasets | backbone  | Training throughout | Size / MB  | **ICCV2021-MFR-MASK** | **ICCV2021-MFR-ALL** |
-| :---:    | :---      | :---                | :---       |:---                   |:---                  |     
-| MS1MV3    | r18  | -              | 91   | **47.85** | **68.33** |
-| Glint360k | r18  | 8536           | 91   | **53.32** | **72.07** |
-| MS1MV3    | r34  | -              | 130  | **58.72** | **77.36** |
-| Glint360k | r34  | 6344           | 130  | **65.10** | **83.02** |
-| MS1MV3    | r50  | 5500           | 166  | **63.85** | **80.53** |
-| Glint360k | r50  | 5136           | 166  | **70.23** | **87.08** |
-| MS1MV3    | r100 | -              | 248  | **69.09** | **84.31** |
-| Glint360k | r100 | 3332           | 248  | **75.57** | **90.66** |
-| MS1MV3    | mobilefacenet | 12185 | 7.8  | **41.52** | **65.26** |        
-| Glint360k | mobilefacenet | 11197 | 7.8  | **44.52** | **66.48** |  
-
-### Performance on IJB-C and Verification Datasets
-
-|   Datasets | backbone      | IJBC(1e-05) | IJBC(1e-04) | agedb30 | cfp_fp | lfw  |  log    |
-| :---:      |    :---       | :---          | :---  | :---  |:---   |:---    |:---     |  
-| MS1MV3     | r18      | 92.07 | 94.66 | 97.77 | 97.73 | 99.77 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r18_fp16/training.log)|         
-| MS1MV3     | r34      | 94.10 | 95.90 | 98.10 | 98.67 | 99.80 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r34_fp16/training.log)|        
-| MS1MV3     | r50      | 94.79 | 96.46 | 98.35 | 98.96 | 99.83 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r50_fp16/training.log)|         
-| MS1MV3     | r100     | 95.31 | 96.81 | 98.48 | 99.06 | 99.85 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r100_fp16/training.log)|        
-| MS1MV3     | **r2060**| 95.34 | 97.11 | 98.67 | 99.24 | 99.87 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_arcface_r2060_fp16/training.log)|
-| Glint360k  |r18-0.1   | 93.16 | 95.33 | 97.72 | 97.73 | 99.77 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r18_fp16_0.1/training.log)| 
-| Glint360k  |r34-0.1   | 95.16 | 96.56 | 98.33 | 98.78 | 99.82 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r34_fp16_0.1/training.log)| 
-| Glint360k  |r50-0.1   | 95.61 | 96.97 | 98.38 | 99.20 | 99.83 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r50_fp16_0.1/training.log)| 
-| Glint360k  |r100-0.1  | 95.88 | 97.32 | 98.48 | 99.29 | 99.82 |[log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_cosface_r100_fp16_0.1/training.log)|
-
-[comment]: <> (More details see [model.md]&#40;docs/modelzoo.md&#41; in docs.)
 
 
-## [Speed Benchmark](docs/speed_benchmark.md)
+| Datasets                 | Backbone   | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Training Throughout | log                                                                                                                                                                                                         |
+|:-------------------------|:-----------|:-------------|:------------|:------------|:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| MS1MV3                   | mobileface | -            | -           | -           | ~13000              | log\|config                                                                                                                                                                                                 |
+| Glint360K                | mobileface | -            | -           | -           | -                   | log\|config                                                                                                                                                                                                 |
+| WebFace42M-PartialFC-0.2 | mobileface | 73.80        | 95.40       | 92.64       | (16GPUs)~18583      | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_mobilefacenet_pfc02_bs8k_16gpus/training.log)\|[config](configs/webface42m_mobilefacenet_pfc02_bs8k_16gpus.py) |
+| MS1MV3                   | r100       | 85.39        | 97.00       | 95.36       | ~3400               | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_r100_lr01/training.log)\|[config](configs/ms1mv3_r100_lr02.py)                                                     |
+| Glint360K                | r100       | -            | -           | -           | ~3400               | log\|[config](configs/glint360k_100_lr02.py)                                                                                                                                                                |
+| WebFace42M-PartialFC-0.2 | r50        | 93.83        | 97.53       | 96.16       | ~5900               | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_bs4k_pfc02/training.log)\|[config](configs/webface42m_r50_lr01_pfc02_bs4k_8gpus.py)                        |
+| WebFace42M-PartialFC-0.2 | r50        | 94.04        | 97.48       | 95.94       | (32GPUs)~17000      | log\|[config](configs/webface42m_r50_lr01_pfc02_bs4k_32gpus.py)                                                                                                                                             |
+| WebFace42M-PartialFC-0.2 | r100       | 96.69        | 97.85       | 96.63       | (16GPUs)~5200       | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r100_bs4k_pfc02/training.log)\|[config](configs/webface42m_r100_lr01_pfc02_bs4k_16gpus.py)                     |
 
-**Arcface Torch** can train large-scale face recognition training set efficiently and quickly. When the number of
-classes in training sets is greater than 300K and the training is sufficient, partial fc sampling strategy will get same
+
+## Speed Benchmark
+
+`arcface_torch` can train large-scale face recognition training set efficiently and quickly. When the number of
+classes in training sets is greater than 1 Million, partial fc sampling strategy will get same
 accuracy with several times faster training performance and smaller GPU memory. 
 Partial FC is a sparse variant of the model parallel architecture for large sacle  face recognition. Partial FC use a 
 sparse softmax, where each batch dynamicly sample a subset of class centers for training. In each iteration, only a 
@@ -112,39 +92,27 @@ More details see
 `-` means training failed because of gpu memory limitations.
 
 | Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
-| :---    | :--- | :--- | :--- |
-|125000   | 4681         | 4824          | 5004     |
-|1400000  | **1672**     | 3043          | 4738     |
-|5500000  | **-**        | **1389**      | 3975     |
-|8000000  | **-**        | **-**         | 3565     |
-|16000000 | **-**        | **-**         | 2679     |
-|29000000 | **-**        | **-**         | **1855** |
+|:--------------------------------|:--------------|:---------------|:---------------|
+| 125000                          | 4681          | 4824           | 5004           |
+| 1400000                         | **1672**      | 3043           | 4738           |
+| 5500000                         | **-**         | **1389**       | 3975           |
+| 8000000                         | **-**         | **-**          | 3565           |
+| 16000000                        | **-**         | **-**          | 2679           |
+| 29000000                        | **-**         | **-**          | **1855**       |
 
 ### 2. GPU memory cost of different parallel methods (MB per GPU), Tesla V100 32GB * 8. (Smaller is better)
 
 | Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
-| :---    | :---      | :---      | :---  |
-|125000   | 7358      | 5306      | 4868  |
-|1400000  | 32252     | 11178     | 6056  |
-|5500000  | **-**     | 32188     | 9854  |
-|8000000  | **-**     | **-**     | 12310 |
-|16000000 | **-**     | **-**     | 19950 |
-|29000000 | **-**     | **-**     | 32324 |
+|:--------------------------------|:--------------|:---------------|:---------------|
+| 125000                          | 7358          | 5306           | 4868           |
+| 1400000                         | 32252         | 11178          | 6056           |
+| 5500000                         | **-**         | 32188          | 9854           |
+| 8000000                         | **-**         | **-**          | 12310          |
+| 16000000                        | **-**         | **-**          | 19950          |
+| 29000000                        | **-**         | **-**          | 32324          |
 
-## Evaluation ICCV2021-MFR and IJB-C
 
-More details see [eval.md](docs/eval.md) in docs.
-
-## Test
-
-We tested many versions of PyTorch. Please create an issue if you are having trouble.  
-
-- [x] torch 1.6.0
-- [x] torch 1.7.1
-- [x] torch 1.8.0
-- [x] torch 1.9.0
-
-## Citation
+## Citations
 
 ```
 @inproceedings{deng2019arcface,
