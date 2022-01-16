@@ -48,7 +48,7 @@ Precision, flops and infer time are all evaluated on **VGA resolution**.
 
 ## Installation
 
-Please refer to [mmdetection](https://github.com/open-mmlab/mmdetection/blob/master/docs/get_started.md) for installation.
+Please refer to [mmdetection](https://github.com/open-mmlab/mmdetection/blob/master/docs/en/get_started.md#installation) for installation.
  
   1. Install [mmcv](https://github.com/open-mmlab/mmcv). (mmcv-full==1.2.6 and 1.3.3 was tested)
   2. Install build requirements and then install mmdet.
