@@ -70,7 +70,10 @@ globalised multi-racial testset contains 242,143 identities and 1,624,305 images
 | WebFace42M-PartialFC-0.2 | r50(bs8k)  | 93.96       | 97.46       | 96.12       | (16GPUs)~11000      | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_lr01_pfc02_bs8k_16gpus/training.log)\|[config](configs/webface42m_r50_lr01_pfc02_bs8k_16gpus.py)           |
 | WebFace42M-PartialFC-0.2 | r50(bs4k)  | 94.04       | 97.48       | 95.94       | (32GPUs)~17000      | log\|[config](configs/webface42m_r50_lr01_pfc02_bs4k_32gpus.py)                                                                                                                                             |
 | WebFace42M-PartialFC-0.2 | r100(bs4k) | 96.69       | 97.85       | 96.63       | (16GPUs)~5200       | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r100_bs4k_pfc02/training.log)\|[config](configs/webface42m_r100_lr01_pfc02_bs4k_16gpus.py)                     |
-| WebFace42M-PartialFC-0.2 | r200       | -           | -           | -           | -                   | log\|config                                                                                                                                                                                                 |
+| WebFace42M-PartialFC-0.2 | r200       | -           | -           | -           | -                   | log\|config                                                                                                                                                                                                 |  
+
+`PartialFC-0.2` means negivate class centers sample rate is 0.2. 
+
 
 ## Speed Benchmark
 
