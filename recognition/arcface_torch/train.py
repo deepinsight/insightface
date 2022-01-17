@@ -109,10 +109,13 @@ def main(args):
 
             if cfg.fp16:
                 amp.scale(loss).backward()
+                amp.unscale_(opt)
+                torch.nn.utils.clip_grad_norm_(backbone.parameters(), 5)
                 amp.step(opt)
                 amp.update()
             else:
                 loss.backward()
+                torch.nn.utils.clip_grad_norm_(backbone.parameters(), 5)
                 opt.step()
 
             opt.zero_grad()
