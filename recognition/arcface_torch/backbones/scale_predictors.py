@@ -4,12 +4,12 @@ import torch.nn.functional as F
 
 
 class MLPHead(nn.Module):
-    def __init__(self, num_feats=(512, 1), batch_norm=True, exponent=True, fp16=False, coefficient=64., **kwargs):
+    def __init__(self, num_feats=(512, 1), batch_norm=True, activation=True, fp16=False, coefficient=64., **kwargs):
         super(MLPHead, self).__init__()
         assert len(num_feats) >= 2
 
         self.fp16 = fp16
-        self.exponent = exponent
+        self.activation = activation
         self.coefficient = coefficient
 
         in_feats = num_feats[0]
@@ -34,19 +34,19 @@ class MLPHead(nn.Module):
         x: torch.Tensor = kwargs["bottleneck_feature"]
         with torch.cuda.amp.autocast(self.fp16):
             x = self.mlp(x)
-            if self.exponent == "exp":
+            if self.activation == "exp":
                 x = torch.exp(x)
-            if self.exponent == "sigm":
+            if self.activation == "sigm":
                 x = torch.sigmoid(x)
-            if self.exponent == "sigm_mul":
+            if self.activation == "sigm_mul":
                 x = self.coefficient * torch.sigmoid(x)
-            if self.exponent == "sigm_sum":
+            if self.activation == "sigm_sum":
                 x = self.coefficient + torch.sigmoid(x)
-            if self.exponent == "sigm_sum_mul":
+            if self.activation == "sigm_sum_mul":
                 x = self.coefficient + self.coefficient * torch.sigmoid(x)
-            if self.exponent == "relu":
+            if self.activation == "relu":
                 x = self.coefficient * F.relu(x)
-            if self.exponent == "lin":
+            if self.activation == "lin":
                 x = x
         return {"scale": x}
 
@@ -62,14 +62,6 @@ class DummyHead(nn.Module):
     def forward(self, **kwargs):
         x: torch.Tensor = kwargs["bottleneck_feature"]
         with torch.cuda.amp.autocast(self.fp16):
-            # x = self.mlp(x)
-            # if self == "exp":
-            #     x = torch.exp(x)
-            # if self == "sigm":
-            #     x = torch.sigmoid(x)
-            # if self == "lin":
-            #     x = x
-
             x = self.lin(x)
             x = 0 * x + torch.ones_like(x) * self.constant
         return {"scale": x}
