@@ -8,6 +8,17 @@
  <img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/all.gif" alt="videovis" width="800">
 </div>
 
+<div align="center">
+ <img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/S9_Discussion 1.gif" width="115"/><img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/S9_Phoning 1.gif" width="115"/><img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/S9_Photo.gif" width="115"/><img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/S9_WalkTogether 1.gif" width="115"/>
+</div>
+
+<div align="center">
+ <img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/surreal1.gif" width="115"/><img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/surreal2.gif" width="115"/><img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/surreal3.gif" width="115"/><img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/surreal4.gif" width="115"/>
+</div>
+
+<div align="center">
+ <img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/TS1.gif" width="115"/><img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/TS2.gif" width="115"/><img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/TS3.gif" width="115"/><img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/TS6.gif" width="115"/>
+</div>
 
 ## Installation 
 ```
