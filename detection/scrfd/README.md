@@ -165,6 +165,10 @@ We provide an example for searching SCRFD-2.5GF in this repo as below.
 6. Test these new generated configs again and select the top accurate one(s).
 
 
+## Acknowledgments
+
+We thank [nihui](https://github.com/nihui) for the excellent [mobile-phone demo](https://github.com/nihui/ncnn-android-scrfd).
+
 ## Demo
 
 1. [ncnn-android-scrfd](https://github.com/nihui/ncnn-android-scrfd)
