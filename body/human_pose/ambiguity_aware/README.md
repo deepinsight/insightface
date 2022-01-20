@@ -22,6 +22,7 @@ mkdir log output vis models data
 ## Dataset And Pretrained Models 
 Download our preprocessed dataset into `data` and pretrained models into `models` from [webpage](https://sites.google.com/view/ambiguity-aware-hpe)
 
+This part will be updated soon.
 ## Inference 
 We put some samples with preprocessed 2d keypoints at `scripts/demo_input`. Run inference with command `sh demo.sh` and output can be found at `scripts/demo_output`. 
 
