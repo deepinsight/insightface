@@ -2,7 +2,8 @@
 
 ## Introduction
 
-**Ambiguity-Aware-HPE** studies the ambiguity problem in the task of unsupervised 3D human pose estimation from 2D counterpart, which is initially proposed in [CVPR-2021](https://openaccess.thecvf.com/content/ICCV2021/papers/Yu_Towards_Alleviating_the_Modeling_Ambiguity_of_Unsupervised_Monocular_3D_Human_ICCV_2021_paper.pdf). 
+**Ambiguity-Aware** studies the ambiguity problem in the task of unsupervised 3D human pose estimation from 2D counterpart, which is initially proposed in [ICCV2022](https://openaccess.thecvf.com/content/ICCV2021/papers/Yu_Towards_Alleviating_the_Modeling_Ambiguity_of_Unsupervised_Monocular_3D_Human_ICCV_2021_paper.pdf). 
+
 
 <div align="center">
  <img src="https://github.com/yuzhenbo/yuzhenbo.github.io/raw/main/assets/extra/ICCV2022/all.gif" alt="videovis" width="800">
@@ -27,12 +28,14 @@ We put some samples with preprocessed 2d keypoints at `scripts/demo_input`. Run 
 ## Evaluation
 ### Evaluation on Human3.6M 
 ##### 2D ground-truth as inputs
-* adv `python main.py --cfg ../cfg/h36m_gt_adv.yaml --pretrain ../models/adv.pth.tar --gpu 0 --eval `
+* baseline `python main.py --cfg ../cfg/h36m_gt_adv.yaml --pretrain ../models/adv.pth.tar --gpu 0 --eval `
 * scale `python main.py --cfg ../cfg/h36m_gt_scale.yaml --pretrain ../models/tmc_klbone.pth.tar  --eval --gpu 0`
 
 ##### 2D predictions as inputs
-* adv `python main.py --cfg ../cfg/pre_adv.yaml --pretrain ../models/pre_adv.pth.tar --gpu 0 --eval `
+* baseline `python main.py --cfg ../cfg/pre_adv.yaml --pretrain ../models/pre_adv.pth.tar --gpu 0 --eval `
 * scale `python main.py --cfg ../cfg/pre_tmc_klbone.yaml --pretrain ../models/pre_tmc_klbone.pth.tar --gpu 0 --eval `
+
+**Note:** baseline is our reproduced version fo "Unsupervised 3d pose estimation with geometric self-supervision"
 
 ### Evaluation on LSP
 use the pretrained model from Human3.6M
@@ -45,13 +48,13 @@ The expected **MPJPE** and **P-MPJPE**  results on **Human36M** dataset are show
 
 | Input  | Model                         |     MPJPE     |     PMPJPE     | 
 | :--------- | :------------                  | :------------: | :------------: | 
-| GT | adv                              |      105.0      |       46.0    |   
+| GT | baseline                              |      105.0      |       46.0    |   
 | GT | best                             |      87.85      |       42.0     |     
-| Pre | adv                             |      113.3     |    54.9     | 
+| Pre | baseline                             |      113.3     |    54.9     | 
 | Pre | best                            |      93.1       |    52.3     | 
 
 
-**Note:  MPJPE from the evaluation is slightly different from the performance we release in the paper. This is because MPJPE in the paper is the best MPJPE during training process** 
+**Note:**  MPJPE from the evaluation is slightly different from the performance we release in the paper. This is because MPJPE in the paper is the best MPJPE during training process.
 
 
 
@@ -59,13 +62,13 @@ The expected **MPJPE** and **P-MPJPE**  results on **Human36M** dataset are show
 ### Human3.6M 
 * Using ground-truth 2D as inputs: 
     
-    adv `python main.py --cfg ../cfg/h36m_gt_adv.yaml --gpu 0 `
+    baseline `python main.py --cfg ../cfg/h36m_gt_adv.yaml --gpu 0 `
 
     best `python main.py --cfg ../cfg/h36m_gt_scale.yaml --gpu 0`
 
 * Using predicted 2D as inputs: 
 
-    adv `python main.py --cfg ../cfg/pre_adv.yaml --gpu 0 `
+    baseline `python main.py --cfg ../cfg/pre_adv.yaml --gpu 0 `
 
     best `python main.py --cfg ../cfg/pre_tmc_klbone.yaml --gpu 0`
 
