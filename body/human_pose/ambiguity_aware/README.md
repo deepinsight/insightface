@@ -2,7 +2,7 @@
 
 ## Introduction
 
-**Ambiguity-Aware** studies the ambiguity problem in the task of unsupervised 3D human pose estimation from 2D counterpart, which is initially proposed in [ICCV2022](https://openaccess.thecvf.com/content/ICCV2021/papers/Yu_Towards_Alleviating_the_Modeling_Ambiguity_of_Unsupervised_Monocular_3D_Human_ICCV_2021_paper.pdf). 
+**Ambiguity-Aware** studies the ambiguity problem in the task of unsupervised 3D human pose estimation from 2D counterpart, please refer to [ICCV2022](https://openaccess.thecvf.com/content/ICCV2021/papers/Yu_Towards_Alleviating_the_Modeling_Ambiguity_of_Unsupervised_Monocular_3D_Human_ICCV_2021_paper.pdf) for more details.
 
 
 <div align="center">
