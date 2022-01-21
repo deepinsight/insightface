@@ -23,5 +23,5 @@ config.rec = "/train_tmp/ms1m-retinaface-t1"
 config.num_classes = 93431
 config.num_image = 5179510
 config.num_epoch = 25
-config.warmup_epoch = 2
+config.warmup_epoch = 0
 config.val_targets = ['lfw', 'cfp_fp', "agedb_30"]
