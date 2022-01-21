@@ -21,7 +21,7 @@ Besides, we can also use A30 to train deep learning models by its FP16 and TF32 
 | OS           | Ubuntu 16.04.7 LTS                               |
 | Installation | CUDA 11.1, cuDNN 8.0.5                           |
 | Installation | Python 3.7.10                                    |
-| Installation | PyTorch 1.8.1 (conda)                            |
+| Installation | PyTorch 1.9 (conda)                              |
 
 This server is donated by [AMAX](https://www.amaxchina.com/), many thanks!
 
@@ -39,20 +39,14 @@ We report training speed in following table, please also note that:
 
 | Dataset     | Classes | Backbone    | Batch-size | FP16 | TF32 | Samples/sec |
 | ----------- | ------- | ----------- | ---------- | ---- | ---- | ----------- |
-| WebFace600K | 618K    | IResNet-50  | 1024       | ×    | ×    | ~2110       |
-| WebFace600K | 618K    | IResNet-50  | 1024       | ×    | √    | ~2250       |
-| WebFace600K | 618K    | IResNet-50  | 1024       | √    | ×    | ~2520       |
-| WebFace600K | 618K    | IResNet-50  | 1024       | √    | √    | ~2640       |
-| WebFace600K | 618K    | IResNet-50  | 2048       | √    | √    | ~2910       |
-| WebFace600K | 618K    | IResNet-100 | 1024       | √    | √    | ~1680       |
-| WebFace600K | 618K    | IResNet-180 | 1024       | √    | √    | ~1030       |
+| WebFace600K | 618K    | IResNet-50  | 1024       | ×    | ×    | ~2230       |
+| WebFace600K | 618K    | IResNet-50  | 1024       | ×    | √    | ~3200       |
+| WebFace600K | 618K    | IResNet-50  | 1024       | √    | ×    | ~3940       |
+| WebFace600K | 618K    | IResNet-50  | 1024       | √    | √    | ~4350       |
+| WebFace600K | 618K    | IResNet-50  | 2048       | √    | √    | ~5100       |
+| WebFace600K | 618K    | IResNet-100 | 1024       | √    | √    | ~2810       |
+| WebFace600K | 618K    | IResNet-180 | 1024       | √    | √    | ~1800       |
 
 
 
 
-
-## Experiments on SCRFD
-
-
-
-TODO
