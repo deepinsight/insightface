@@ -7,18 +7,22 @@ import torch
 
 from eval import verification
 from utils.utils_logging import AverageMeter
+from torch.utils.tensorboard import SummaryWriter
+from torch import distributed
 
 
 class CallBackVerification(object):
-    def __init__(self, frequent, rank, val_targets, rec_prefix, image_size=(112, 112)):
-        self.frequent: int = frequent
-        self.rank: int = rank
+    
+    def __init__(self, val_targets, rec_prefix, summary_writer=None, image_size=(112, 112)):
+        self.rank: int = distributed.get_rank()
         self.highest_acc: float = 0.0
         self.highest_acc_list: List[float] = [0.0] * len(val_targets)
         self.ver_list: List[object] = []
         self.ver_name_list: List[str] = []
         if self.rank is 0:
             self.init_dataset(val_targets=val_targets, data_dir=rec_prefix, image_size=image_size)
+
+        self.summary_writer = summary_writer
 
     def ver_test(self, backbone: torch.nn.Module, global_step: int):
         results = []
@@ -27,6 +31,10 @@ class CallBackVerification(object):
                 self.ver_list[i], backbone, 10, 10)
             logging.info('[%s][%d]XNorm: %f' % (self.ver_name_list[i], global_step, xnorm))
             logging.info('[%s][%d]Accuracy-Flip: %1.5f+-%1.5f' % (self.ver_name_list[i], global_step, acc2, std2))
+
+            self.summary_writer: SummaryWriter
+            self.summary_writer.add_scalar(tag=self.ver_name_list[i], scalar_value=acc2, global_step=global_step, )
+
             if acc2 > self.highest_acc_list[i]:
                 self.highest_acc_list[i] = acc2
             logging.info(
@@ -42,20 +50,20 @@ class CallBackVerification(object):
                 self.ver_name_list.append(name)
 
     def __call__(self, num_update, backbone: torch.nn.Module):
-        if self.rank is 0 and num_update > 0 and num_update % self.frequent == 0:
+        if self.rank is 0 and num_update > 0:
             backbone.eval()
             self.ver_test(backbone, num_update)
             backbone.train()
 
 
 class CallBackLogging(object):
-    def __init__(self, frequent, rank, total_step, batch_size, world_size, writer=None):
+    def __init__(self, frequent, total_step, batch_size, writer=None):
         self.frequent: int = frequent
-        self.rank: int = rank
+        self.rank: int = distributed.get_rank()
+        self.world_size: int = distributed.get_world_size()
         self.time_start = time.time()
         self.total_step: int = total_step
         self.batch_size: int = batch_size
-        self.world_size: int = world_size
         self.writer = writer
 
         self.init = False
@@ -100,18 +108,3 @@ class CallBackLogging(object):
             else:
                 self.init = True
                 self.tic = time.time()
-
-
-class CallBackModelCheckpoint(object):
-    def __init__(self, rank, output="./"):
-        self.rank: int = rank
-        self.output: str = output
-
-    def __call__(self, global_step, backbone, partial_fc, ):
-        if global_step > 100 and self.rank == 0:
-            path_module = os.path.join(self.output, "backbone.pth")
-            torch.save(backbone.module.state_dict(), path_module)
-            logging.info("Pytorch Model Saved in '{}'".format(path_module))
-
-        if global_step > 100 and partial_fc is not None:
-            partial_fc.save_params()

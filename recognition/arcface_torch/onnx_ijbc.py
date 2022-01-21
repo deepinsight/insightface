@@ -9,9 +9,10 @@ import numpy as np
 import pandas as pd
 import prettytable
 import skimage.transform
+import torch
 from sklearn.metrics import roc_curve
 from sklearn.preprocessing import normalize
-
+from torch.utils.data import DataLoader
 from onnx_helper import ArcFaceORT
 
 SRC = np.array(
@@ -25,6 +26,7 @@ SRC = np.array(
 SRC[:, 0] += 8.0
 
 
+@torch.no_grad()
 class AlignedDataSet(mx.gluon.data.Dataset):
     def __init__(self, root, lines, align=True):
         self.lines = lines
@@ -47,24 +49,23 @@ class AlignedDataSet(mx.gluon.data.Dataset):
         img_2 = np.expand_dims(np.fliplr(img), 0)
         output = np.concatenate((img_1, img_2), axis=0).astype(np.float32)
         output = np.transpose(output, (0, 3, 1, 2))
-        output = mx.nd.array(output)
-        return output
+        return torch.from_numpy(output)
 
 
+@torch.no_grad()
 def extract(model_root, dataset):
     model = ArcFaceORT(model_path=model_root)
     model.check()
     feat_mat = np.zeros(shape=(len(dataset), 2 * model.feat_dim))
 
-    def batchify_fn(data):
-        return mx.nd.concat(*data, dim=0)
+    def collate_fn(data):
+        return torch.cat(data, dim=0)
 
-    data_loader = mx.gluon.data.DataLoader(
-        dataset, 128, last_batch='keep', num_workers=4,
-        thread_pool=True, prefetch=16, batchify_fn=batchify_fn)
+    data_loader = DataLoader(
+        dataset, batch_size=128, drop_last=False, num_workers=4, collate_fn=collate_fn, )
     num_iter = 0
     for batch in data_loader:
-        batch = batch.asnumpy()
+        batch = batch.numpy()
         batch = (batch - model.input_mean) / model.input_std
         feat = model.session.run(model.output_names, {model.input_name: batch})[0]
         feat = np.reshape(feat, (-1, model.feat_dim * 2))
@@ -228,10 +229,12 @@ def main(args):
     score = verification(template_norm_feats, unique_templates, p1, p2)
     stop = timeit.default_timer()
     print('Time: %.2f s. ' % (stop - start))
-    save_path = os.path.join(args.result_dir, "{}_result".format(args.target))
+    result_dir = args.model_root
+
+    save_path = os.path.join(result_dir, "{}_result".format(args.target))
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    score_save_file = os.path.join(save_path, "{}.npy".format(args.model_root))
+    score_save_file = os.path.join(save_path, "{}.npy".format(args.target))
     np.save(score_save_file, score)
     files = [score_save_file]
     methods = []
@@ -261,7 +264,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='do ijb test')
     # general
     parser.add_argument('--model-root', default='', help='path to load model.')
-    parser.add_argument('--image-path', default='', type=str, help='')
-    parser.add_argument('--result-dir', default='.', type=str, help='')
+    parser.add_argument('--image-path', default='/train_tmp/IJB_release/IJBC', type=str, help='')
     parser.add_argument('--target', default='IJBC', type=str, help='target, set to IJBC or IJBB')
     main(parser.parse_args())

@@ -1,222 +1,384 @@
-import logging
-import os
+import math
+import collections
+from typing import Callable
 
 import torch
-import torch.distributed as dist
-from torch.nn import Module
-from torch.nn.functional import normalize, linear
-from torch.nn.parameter import Parameter
+from torch import distributed
+from torch.nn.functional import linear, normalize
 
 
-class PartialFC(Module):
+class ArcFace(torch.nn.Module):
+    """ ArcFace (https://arxiv.org/pdf/1801.07698v1.pdf):
     """
-    Author: {Xiang An, Yang Xiao, XuHan Zhu} in DeepGlint,
-    Partial FC: Training 10 Million Identities on a Single Machine
-    See the original paper:
+    def __init__(self, s=64.0, margin=0.5):
+        super(ArcFace, self).__init__()
+        self.scale = s
+        self.cos_m = math.cos(margin)
+        self.sin_m = math.sin(margin)
+        self.theta = math.cos(math.pi - margin)
+        self.sinmm = math.sin(math.pi - margin) * margin
+
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor):
+        index = torch.where(labels != -1)[0]
+        target_logit = logits[index, labels[index].view(-1)]
+
+        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
+        cos_theta_m = target_logit * self.cos_m - sin_theta * self.sin_m  # cos(target+margin)
+        if self.easy_margin:
+            final_target_logit = torch.where(
+                target_logit > 0, cos_theta_m, target_logit)
+        else:
+            final_target_logit = torch.where(
+                target_logit > self.theta, cos_theta_m, target_logit - self.sinmm)
+
+        logits[index, labels[index].view(-1)] = final_target_logit
+        logits = logits * self.s
+        return logits
+
+
+class CosFace(torch.nn.Module):
+    def __init__(self, s=64.0, m=0.40):
+        super(CosFace, self).__init__()
+        self.s = s
+        self.m = m
+
+    def forward(self, logits: torch.Tensor, labels: torch.Tensor):
+        index = torch.where(labels != -1)[0]
+        target_logit = logits[index, labels[index].view(-1)]
+        final_target_logit = target_logit - self.m
+        logits[index, labels[index].view(-1)] = final_target_logit
+        logits = logits * self.s
+        return logits
+
+
+class PartialFC(torch.nn.Module):
+    """
     https://arxiv.org/abs/2010.05222
-    """
+    A distributed sparsely updating variant of the FC layer, named Partial FC (PFC).
 
-    @torch.no_grad()
-    def __init__(self, rank, local_rank, world_size, batch_size, resume,
-                 margin_softmax, num_classes, sample_rate=1.0, embedding_size=512, prefix="./"):
+    When sample rate less than 1, in each iteration, positive class centers and a random subset of
+    negative class centers are selected to compute the margin-based softmax loss, all class
+    centers are still maintained throughout the whole training process, but only a subset is
+    selected and updated in each iteration.
+
+    .. note::
+        When sample rate equal to 1, Partial FC is equal to model parallelism(default sample rate is 1).
+
+    Example:
+    --------
+    >>> module_pfc = PartialFC(embedding_size=512, num_classes=8000000, sample_rate=0.2)
+    >>> for img, labels in data_loader:
+    >>>     embeddings = net(img)
+    >>>     loss = module_pfc(embeddings, labels, optimizer)
+    >>>     loss.backward()
+    >>>     optimizer.step()
+    """
+    _version = 1 
+    def __init__(
+        self,
+        embedding_size,
+        num_classes,
+        sample_rate = 1.0,
+        fp16: bool = False,
+        margin_loss = "cosface",
+    ):
         """
-        rank: int
-            Unique process(GPU) ID from 0 to world_size - 1.
-        local_rank: int
-            Unique process(GPU) ID within the server from 0 to 7.
-        world_size: int
-            Number of GPU.
-        batch_size: int
-            Batch size on current rank(GPU).
-        resume: bool
-            Select whether to restore the weight of softmax.
-        margin_softmax: callable
-            A function of margin softmax, eg: cosface, arcface.
-        num_classes: int
-            The number of class center storage in current rank(CPU/GPU), usually is total_classes // world_size,
-            required.
-        sample_rate: float
-            The partial fc sampling rate, when the number of classes increases to more than 2 millions, Sampling
-            can greatly speed up training, and reduce a lot of GPU memory, default is 1.0.
+        Paramenters:
+        -----------
         embedding_size: int
-            The feature dimension, default is 512.
-        prefix: str
-            Path for save checkpoint, default is './'.
+            The dimension of embedding, required
+        num_classes: int
+            Total number of classes, required
+        sample_rate: float
+            The rate of negative centers participating in the calculation, default is 1.0.
         """
         super(PartialFC, self).__init__()
-        #
-        self.num_classes: int = num_classes
-        self.rank: int = rank
-        self.local_rank: int = local_rank
-        self.device: torch.device = torch.device("cuda:{}".format(self.local_rank))
-        self.world_size: int = world_size
-        self.batch_size: int = batch_size
-        self.margin_softmax: callable = margin_softmax
+        assert (
+            distributed.is_initialized()
+        ), "must initialize distributed before create this"
+        self.rank = distributed.get_rank()
+        self.world_size = distributed.get_world_size()
+
+        self.dist_cross_entropy = DistCrossEntropy()
+        self.embedding_size = embedding_size
         self.sample_rate: float = sample_rate
-        self.embedding_size: int = embedding_size
-        self.prefix: str = prefix
-        self.num_local: int = num_classes // world_size + int(rank < num_classes % world_size)
-        self.class_start: int = num_classes // world_size * rank + min(rank, num_classes % world_size)
+        self.fp16 = fp16
+        self.num_local: int = num_classes // self.world_size + int(
+            self.rank < num_classes % self.world_size
+        )
+        self.class_start: int = num_classes // self.world_size * self.rank + min(
+            self.rank, num_classes % self.world_size
+        )
         self.num_sample: int = int(self.sample_rate * self.num_local)
+        self.last_batch_size: int = 0
+        self.weight: torch.Tensor
+        self.weight_mom: torch.Tensor
+        self.weight_activated: torch.nn.Parameter
+        self.weight_activated_mom: torch.Tensor
+        self.is_updated: bool = True
+        self.init_weight_update: bool = True
 
-        self.weight_name = os.path.join(self.prefix, "rank_{}_softmax_weight.pt".format(self.rank))
-        self.weight_mom_name = os.path.join(self.prefix, "rank_{}_softmax_weight_mom.pt".format(self.rank))
-
-        if resume:
-            try:
-                self.weight: torch.Tensor = torch.load(self.weight_name)
-                self.weight_mom: torch.Tensor = torch.load(self.weight_mom_name)
-                if self.weight.shape[0] != self.num_local or self.weight_mom.shape[0] != self.num_local:
-                    raise IndexError
-                logging.info("softmax weight resume successfully!")
-                logging.info("softmax weight mom resume successfully!")
-            except (FileNotFoundError, KeyError, IndexError):
-                self.weight = torch.normal(0, 0.01, (self.num_local, self.embedding_size), device=self.device)
-                self.weight_mom: torch.Tensor = torch.zeros_like(self.weight)
-                logging.info("softmax weight init!")
-                logging.info("softmax weight mom init!")
+        if self.sample_rate < 1:
+            self.register_buffer("weight",
+                tensor=torch.normal(0, 0.01, (self.num_local, embedding_size)))
+            self.register_buffer("weight_mom",
+                tensor=torch.zeros_like(self.weight))
+            self.register_parameter("weight_activated",
+                param=torch.nn.Parameter(torch.empty(0, 0)))
+            self.register_buffer("weight_activated_mom",
+                tensor=torch.empty(0, 0))
+            self.register_buffer("weight_index",
+                tensor=torch.empty(0, 0))
         else:
-            self.weight = torch.normal(0, 0.01, (self.num_local, self.embedding_size), device=self.device)
-            self.weight_mom: torch.Tensor = torch.zeros_like(self.weight)
-            logging.info("softmax weight init successfully!")
-            logging.info("softmax weight mom init successfully!")
-        self.stream: torch.cuda.Stream = torch.cuda.Stream(local_rank)
+            self.weight_activated = torch.nn.Parameter(torch.normal(0, 0.01, (self.num_local, embedding_size)))
 
-        self.index = None
-        if int(self.sample_rate) == 1:
-            self.update = lambda: 0
-            self.sub_weight = Parameter(self.weight)
-            self.sub_weight_mom = self.weight_mom
+        # margin_loss
+        if isinstance(margin_loss, str):
+            self.margin_softmax: torch.nn.Module
+            if margin_loss == "cosface":
+                self.margin_softmax = CosFace()
+            elif margin_loss == "arcface":
+                self.margin_softmax = ArcFace()
+            else:
+                raise
+        elif isinstance(margin_loss, Callable):
+            self.margin_softmax = margin_loss
         else:
-            self.sub_weight = Parameter(torch.empty((0, 0)).cuda(local_rank))
-
-    def save_params(self):
-        """ Save softmax weight for each rank on prefix
-        """
-        torch.save(self.weight.data, self.weight_name)
-        torch.save(self.weight_mom, self.weight_mom_name)
+            raise
 
     @torch.no_grad()
-    def sample(self, total_label):
+    def sample(self, 
+        labels: torch.Tensor, 
+        index_positive: torch.Tensor, 
+        optimizer: torch.optim.Optimizer):
         """
-        Sample all positive class centers in each rank, and random select neg class centers to filling a fixed
-        `num_sample`.
+        This functions will change the value of labels
 
-        total_label: tensor
-            Label after all gather, which cross all GPUs.
+        Parameters:
+        -----------
+        labels: torch.Tensor
+            pass
+        index_positive: torch.Tensor
+            pass
+        optimizer: torch.optim.Optimizer
+            pass
         """
-        index_positive = (self.class_start <= total_label) & (total_label < self.class_start + self.num_local)
-        total_label[~index_positive] = -1
-        total_label[index_positive] -= self.class_start
-        if int(self.sample_rate) != 1:
-            positive = torch.unique(total_label[index_positive], sorted=True)
-            if self.num_sample - positive.size(0) >= 0:
-                perm = torch.rand(size=[self.num_local], device=self.device)
-                perm[positive] = 2.0
-                index = torch.topk(perm, k=self.num_sample)[1]
-                index = index.sort()[0]
-            else:
-                index = positive
-            self.index = index
-            total_label[index_positive] = torch.searchsorted(index, total_label[index_positive])
-            self.sub_weight = Parameter(self.weight[index])
-            self.sub_weight_mom = self.weight_mom[index]
+        positive = torch.unique(labels[index_positive], sorted=True).cuda()
+        if self.num_sample - positive.size(0) >= 0:
+            perm = torch.rand(size=[self.num_local]).cuda()
+            perm[positive] = 2.0
+            index = torch.topk(perm, k=self.num_sample)[1].cuda()
+            index = index.sort()[0].cuda()
+        else:
+            index = positive
+        self.weight_index = index
 
-    def forward(self, total_features, norm_weight):
-        """ Partial fc forward, `logits = X * sample(W)`
-        """
-        torch.cuda.current_stream().wait_stream(self.stream)
-        logits = linear(total_features, norm_weight)
-        return logits
+        labels[index_positive] = torch.searchsorted(index, labels[index_positive])
+        
+        self.weight_activated = torch.nn.Parameter(self.weight[self.weight_index])
+        self.weight_activated_mom = self.weight_mom[self.weight_index]
+        
+        if isinstance(optimizer, torch.optim.SGD):
+            # TODO the params of partial fc must be last in the params list
+            optimizer.state.pop(optimizer.param_groups[-1]["params"][0], None)
+            optimizer.param_groups[-1]["params"][0] = self.weight_activated
+            optimizer.state[self.weight_activated][
+                "momentum_buffer"
+            ] = self.weight_activated_mom
+        else:
+            raise
 
     @torch.no_grad()
     def update(self):
-        """ Set updated weight and weight_mom to memory bank.
+        """ partial weight to global
         """
-        self.weight_mom[self.index] = self.sub_weight_mom
-        self.weight[self.index] = self.sub_weight
+        if self.init_weight_update:
+            self.init_weight_update = False
+            return
 
-    def prepare(self, label, optimizer):
+        if self.sample_rate < 1:
+            self.weight[self.weight_index] = self.weight_activated
+            self.weight_mom[self.weight_index] = self.weight_activated_mom
+
+
+    def forward(
+        self,
+        local_embeddings: torch.Tensor,
+        local_labels: torch.Tensor,
+        optimizer: torch.optim.Optimizer,
+    ):
         """
-        get sampled class centers for cal softmax.
-
-        label: tensor
-            Label tensor on each rank.
-        optimizer: opt
-            Optimizer for partial fc, which need to get weight mom.
-        """
-        with torch.cuda.stream(self.stream):
-            total_label = torch.zeros(
-                size=[self.batch_size * self.world_size], device=self.device, dtype=torch.long)
-            dist.all_gather(list(total_label.chunk(self.world_size, dim=0)), label)
-            self.sample(total_label)
-            optimizer.state.pop(optimizer.param_groups[-1]['params'][0], None)
-            optimizer.param_groups[-1]['params'][0] = self.sub_weight
-            optimizer.state[self.sub_weight]['momentum_buffer'] = self.sub_weight_mom
-            norm_weight = normalize(self.sub_weight)
-            return total_label, norm_weight
-
-    def forward_backward(self, label, features, optimizer):
-        """
-        Partial fc forward and backward with model parallel
-
-        label: tensor
-            Label tensor on each rank(GPU)
-        features: tensor
-            Features tensor on each rank(GPU)
-        optimizer: optimizer
-            Optimizer for partial fc
+        Parameters:
+        ----------
+        local_embeddings: torch.Tensor
+            feature embeddings on each GPU(Rank).
+        local_labels: torch.Tensor
+            labels on each GPU(Rank).
 
         Returns:
-        --------
-        x_grad: tensor
-            The gradient of features.
-        loss_v: tensor
-            Loss value for cross entropy.
+        -------
+        loss: torch.Tensor
+            pass
         """
-        total_label, norm_weight = self.prepare(label, optimizer)
-        total_features = torch.zeros(
-            size=[self.batch_size * self.world_size, self.embedding_size], device=self.device)
-        dist.all_gather(list(total_features.chunk(self.world_size, dim=0)), features.data)
-        total_features.requires_grad = True
+        local_labels.squeeze_()
+        local_labels = local_labels.long()
+        self.update()
 
-        logits = self.forward(total_features, norm_weight)
-        logits = self.margin_softmax(logits, total_label)
+        batch_size = local_embeddings.size(0)
+        if self.last_batch_size == 0:
+            self.last_batch_size = batch_size
+        assert self.last_batch_size == batch_size, (
+            "last batch size do not equal current batch size: {} vs {}".format(
+            self.last_batch_size, batch_size))
 
-        with torch.no_grad():
-            max_fc = torch.max(logits, dim=1, keepdim=True)[0]
-            dist.all_reduce(max_fc, dist.ReduceOp.MAX)
+        _gather_embeddings = [
+            torch.zeros((batch_size, self.embedding_size)).cuda()
+            for _ in range(self.world_size)
+        ]
+        _gather_labels = [
+            torch.zeros(batch_size).long().cuda() for _ in range(self.world_size)
+        ]
+        _list_embeddings = AllGather(local_embeddings, *_gather_embeddings)
+        distributed.all_gather(_gather_labels, local_labels)
 
-            # calculate exp(logits) and all-reduce
-            logits_exp = torch.exp(logits - max_fc)
-            logits_sum_exp = logits_exp.sum(dim=1, keepdims=True)
-            dist.all_reduce(logits_sum_exp, dist.ReduceOp.SUM)
+        embeddings = torch.cat(_list_embeddings)
+        labels = torch.cat(_gather_labels)
 
-            # calculate prob
-            logits_exp.div_(logits_sum_exp)
+        labels = labels.view(-1, 1)
+        index_positive = (self.class_start <= labels) & (
+            labels < self.class_start + self.num_local
+        )
+        labels[~index_positive] = -1
+        labels[index_positive] -= self.class_start
 
-            # get one-hot
-            grad = logits_exp
-            index = torch.where(total_label != -1)[0]
-            one_hot = torch.zeros(size=[index.size()[0], grad.size()[1]], device=grad.device)
-            one_hot.scatter_(1, total_label[index, None], 1)
+        if self.sample_rate < 1:
+            self.sample(labels, index_positive, optimizer)
 
-            # calculate loss
-            loss = torch.zeros(grad.size()[0], 1, device=grad.device)
-            loss[index] = grad[index].gather(1, total_label[index, None])
-            dist.all_reduce(loss, dist.ReduceOp.SUM)
-            loss_v = loss.clamp_min_(1e-30).log_().mean() * (-1)
+        with torch.cuda.amp.autocast(self.fp16):
+            norm_embeddings = normalize(embeddings)
+            norm_weight_activated = normalize(self.weight_activated)
+            logits = linear(norm_embeddings, norm_weight_activated)
+        if self.fp16:
+            logits = logits.float()
+        logits = logits.clamp(-1, 1)
 
-            # calculate grad
-            grad[index] -= one_hot
-            grad.div_(self.batch_size * self.world_size)
+        logits = self.margin_softmax(logits, labels)
+        loss = self.dist_cross_entropy(logits, labels)
+        return loss
 
-        logits.backward(grad)
-        if total_features.grad is not None:
-            total_features.grad.detach_()
-        x_grad: torch.Tensor = torch.zeros_like(features, requires_grad=True)
-        # feature gradient all-reduce
-        dist.reduce_scatter(x_grad, list(total_features.grad.chunk(self.world_size, dim=0)))
-        x_grad = x_grad * self.world_size
-        # backward backbone
-        return x_grad, loss_v
+    def state_dict(self, destination=None, prefix="", keep_vars=False):
+        if destination is None: 
+            destination = collections.OrderedDict()
+            destination._metadata = collections.OrderedDict()
+
+        for name, module in self._modules.items():
+            if module is not None:
+                module.state_dict(destination, prefix + name + ".", keep_vars=keep_vars)
+        if self.sample_rate < 1:
+            destination["weight"] = self.weight.detach()
+        else:
+            destination["weight"] = self.weight_activated.data.detach()
+        return destination
+
+    def load_state_dict(self, state_dict, strict: bool = True):
+        if self.sample_rate < 1:
+            self.weight = state_dict["weight"].to(self.weight.device)
+            self.weight_mom.zero_()
+            self.weight_activated.data.zero_()
+            self.weight_activated_mom.zero_()
+            self.weight_index.zero_()
+        else:
+            self.weight_activated.data = state_dict["weight"].to(self.weight_activated.data.device)
+
+class DistCrossEntropyFunc(torch.autograd.Function):
+    """
+    CrossEntropy loss is calculated in parallel, allreduce denominator into single gpu and calculate softmax.
+    Implemented of ArcFace (https://arxiv.org/pdf/1801.07698v1.pdf):
+    """
+
+    @staticmethod
+    def forward(ctx, logits: torch.Tensor, label: torch.Tensor):
+        """ """
+        batch_size = logits.size(0)
+        # for numerical stability
+        max_logits, _ = torch.max(logits, dim=1, keepdim=True)
+        # local to global
+        distributed.all_reduce(max_logits, distributed.ReduceOp.MAX)
+        logits.sub_(max_logits)
+        logits.exp_()
+        sum_logits_exp = torch.sum(logits, dim=1, keepdim=True)
+        # local to global
+        distributed.all_reduce(sum_logits_exp, distributed.ReduceOp.SUM)
+        logits.div_(sum_logits_exp)
+        index = torch.where(label != -1)[0]
+        # loss
+        loss = torch.zeros(batch_size, 1, device=logits.device)
+        loss[index] = logits[index].gather(1, label[index])
+        distributed.all_reduce(loss, distributed.ReduceOp.SUM)
+        ctx.save_for_backward(index, logits, label)
+        return loss.clamp_min_(1e-30).log_().mean() * (-1)
+
+    @staticmethod
+    def backward(ctx, loss_gradient):
+        """
+        Args:
+            loss_grad (torch.Tensor): gradient backward by last layer
+        Returns:
+            gradients for each input in forward function
+            `None` gradients for one-hot label
+        """
+        (
+            index,
+            logits,
+            label,
+        ) = ctx.saved_tensors
+        batch_size = logits.size(0)
+        one_hot = torch.zeros(
+            size=[index.size(0), logits.size(1)], device=logits.device
+        )
+        one_hot.scatter_(1, label[index], 1)
+        logits[index] -= one_hot
+        logits.div_(batch_size)
+        return logits * loss_gradient.item(), None
+
+
+class DistCrossEntropy(torch.nn.Module):
+    def __init__(self):
+        super(DistCrossEntropy, self).__init__()
+
+    def forward(self, logit_part, label_part):
+        return DistCrossEntropyFunc.apply(logit_part, label_part)
+
+
+class AllGatherFunc(torch.autograd.Function):
+    """AllGather op with gradient backward"""
+
+    @staticmethod
+    def forward(ctx, tensor, *gather_list):
+        gather_list = list(gather_list)
+        distributed.all_gather(gather_list, tensor)
+        return tuple(gather_list)
+
+    @staticmethod
+    def backward(ctx, *grads):
+        grad_list = list(grads)
+        rank = distributed.get_rank()
+        grad_out = grad_list[rank]
+
+        dist_ops = [
+            distributed.reduce(grad_out, rank, distributed.ReduceOp.SUM, async_op=True)
+            if i == rank
+            else distributed.reduce(
+                grad_list[i], i, distributed.ReduceOp.SUM, async_op=True
+            )
+            for i in range(distributed.get_world_size())
+        ]
+        for _op in dist_ops:
+            _op.wait()
+
+        grad_out *= len(grad_list)  # cooperate with distributed loss function
+        return (grad_out, *[None for _ in range(len(grad_list))])
+
+
+AllGather = AllGatherFunc.apply
