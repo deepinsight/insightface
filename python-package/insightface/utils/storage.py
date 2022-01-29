@@ -4,7 +4,8 @@ import os.path as osp
 import zipfile
 from .download import download_file
 
-BASE_REPO_URL='http://storage.insightface.ai/files'
+#BASE_REPO_URL='http://storage.insightface.ai/files'
+BASE_REPO_URL='http://insightface.cn-sh2.ufileos.com'
 
 def download(sub_dir, name, force=False, root='~/.insightface'):
     _root = os.path.expanduser(root)
@@ -13,7 +14,8 @@ def download(sub_dir, name, force=False, root='~/.insightface'):
         return dir_path
     print('download_path:', dir_path)
     zip_file_path = os.path.join(_root, sub_dir, name + '.zip')
-    model_url = "%s/%s/%s.zip"%(BASE_REPO_URL, sub_dir, name)
+    #model_url = "%s/%s/%s.zip"%(BASE_REPO_URL, sub_dir, name)
+    model_url = "%s/%s.zip"%(BASE_REPO_URL, name)
     download_file(model_url,
              path=zip_file_path,
              overwrite=True)

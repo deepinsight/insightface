@@ -12,6 +12,19 @@ The code of InsightFace Python Library is released under the MIT License. There 
 pip install -U insightface
 ```
 
+## Change Log
+ 
+### [0.6] - 2022-01-29
+  
+#### Added
+
+- Add pose estimation in face-analysis app.
+ 
+#### Changed
+  
+- Change model automated downloading url, to ucloud.
+ 
+
 ## Quick Example
 
 ```
