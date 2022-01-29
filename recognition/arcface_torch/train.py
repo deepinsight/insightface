@@ -10,6 +10,7 @@ from backbones import get_model
 from dataset import get_dataloader
 from torch.utils.data import DataLoader
 from lr_scheduler import PolyScheduler
+from losses import CosFace, ArcFace
 from partial_fc import PartialFC
 from utils.utils_callbacks import CallBackLogging, CallBackVerification
 from utils.utils_config import get_config
@@ -51,7 +52,16 @@ def main(args):
     backbone = torch.nn.parallel.DistributedDataParallel(
         module=backbone, broadcast_buffers=False, device_ids=[args.local_rank])
     backbone.train()
+
+    if cfg.loss == "arcface":
+        margin_loss = ArcFace()
+    elif cfg.loss == "cosface":
+        margin_loss = CosFace()
+    else:
+        raise
+
     module_partial_fc = PartialFC(
+        margin_loss,
         cfg.embedding_size, 
         cfg.num_classes, 
         cfg.sample_rate, 

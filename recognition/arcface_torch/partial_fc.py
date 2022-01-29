@@ -1,55 +1,9 @@
-import math
 import collections
 from typing import Callable
 
 import torch
 from torch import distributed
 from torch.nn.functional import linear, normalize
-
-
-class ArcFace(torch.nn.Module):
-    """ ArcFace (https://arxiv.org/pdf/1801.07698v1.pdf):
-    """
-    def __init__(self, s=64.0, margin=0.5):
-        super(ArcFace, self).__init__()
-        self.scale = s
-        self.cos_m = math.cos(margin)
-        self.sin_m = math.sin(margin)
-        self.theta = math.cos(math.pi - margin)
-        self.sinmm = math.sin(math.pi - margin) * margin
-
-
-    def forward(self, logits: torch.Tensor, labels: torch.Tensor):
-        index = torch.where(labels != -1)[0]
-        target_logit = logits[index, labels[index].view(-1)]
-
-        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
-        cos_theta_m = target_logit * self.cos_m - sin_theta * self.sin_m  # cos(target+margin)
-        if self.easy_margin:
-            final_target_logit = torch.where(
-                target_logit > 0, cos_theta_m, target_logit)
-        else:
-            final_target_logit = torch.where(
-                target_logit > self.theta, cos_theta_m, target_logit - self.sinmm)
-
-        logits[index, labels[index].view(-1)] = final_target_logit
-        logits = logits * self.s
-        return logits
-
-
-class CosFace(torch.nn.Module):
-    def __init__(self, s=64.0, m=0.40):
-        super(CosFace, self).__init__()
-        self.s = s
-        self.m = m
-
-    def forward(self, logits: torch.Tensor, labels: torch.Tensor):
-        index = torch.where(labels != -1)[0]
-        target_logit = logits[index, labels[index].view(-1)]
-        final_target_logit = target_logit - self.m
-        logits[index, labels[index].view(-1)] = final_target_logit
-        logits = logits * self.s
-        return logits
 
 
 class PartialFC(torch.nn.Module):
@@ -77,11 +31,11 @@ class PartialFC(torch.nn.Module):
     _version = 1 
     def __init__(
         self,
-        embedding_size,
-        num_classes,
-        sample_rate = 1.0,
+        margin_loss: Callable,
+        embedding_size: int,
+        num_classes: int,
+        sample_rate: float = 1.0,
         fp16: bool = False,
-        margin_loss = "cosface",
     ):
         """
         Paramenters:
@@ -134,15 +88,7 @@ class PartialFC(torch.nn.Module):
             self.weight_activated = torch.nn.Parameter(torch.normal(0, 0.01, (self.num_local, embedding_size)))
 
         # margin_loss
-        if isinstance(margin_loss, str):
-            self.margin_softmax: torch.nn.Module
-            if margin_loss == "cosface":
-                self.margin_softmax = CosFace()
-            elif margin_loss == "arcface":
-                self.margin_softmax = ArcFace()
-            else:
-                raise
-        elif isinstance(margin_loss, Callable):
+        if isinstance(margin_loss, Callable):
             self.margin_softmax = margin_loss
         else:
             raise
