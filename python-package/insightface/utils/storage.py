@@ -38,7 +38,8 @@ def download_onnx(sub_dir, model_file, force=False, root='~/.insightface'):
     if not osp.exists(model_root):
         os.makedirs(model_root)
     print('download_path:', new_model_file)
-    model_url = "%s/%s/%s"%(BASE_REPO_URL, sub_dir, model_file)
+    #model_url = "%s/%s/%s"%(BASE_REPO_URL, sub_dir, model_file)
+    model_url = "%s/%s"%(BASE_REPO_URL, model_file)
     download_file(model_url,
              path=new_model_file,
              overwrite=True)
