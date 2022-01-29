@@ -14,8 +14,8 @@ def download(sub_dir, name, force=False, root='~/.insightface'):
         return dir_path
     print('download_path:', dir_path)
     zip_file_path = os.path.join(_root, sub_dir, name + '.zip')
-    #model_url = "%s/%s/%s.zip"%(BASE_REPO_URL, sub_dir, name)
-    model_url = "%s/%s.zip"%(BASE_REPO_URL, name)
+    model_url = "%s/%s/%s.zip"%(BASE_REPO_URL, sub_dir, name)
+    #model_url = "%s/%s.zip"%(BASE_REPO_URL, name)
     download_file(model_url,
              path=zip_file_path,
              overwrite=True)
@@ -38,8 +38,8 @@ def download_onnx(sub_dir, model_file, force=False, root='~/.insightface'):
     if not osp.exists(model_root):
         os.makedirs(model_root)
     print('download_path:', new_model_file)
-    #model_url = "%s/%s/%s"%(BASE_REPO_URL, sub_dir, model_file)
-    model_url = "%s/%s"%(BASE_REPO_URL, model_file)
+    model_url = "%s/%s/%s"%(BASE_REPO_URL, sub_dir, model_file)
+    #model_url = "%s/%s"%(BASE_REPO_URL, model_file)
     download_file(model_url,
              path=new_model_file,
              overwrite=True)
