@@ -12,7 +12,7 @@ For all main contributors, please check [contributing](#contributing).
 ## Top News
 
 
-**`2022-01-29`**: Python pip package ver 0.6 updated, added pose estimation and fixed model downloading urls, see [detail](python-package).
+**`2022-01-29`**: Python pip package ver 0.6.2 updated, added pose estimation and fixed model downloading urls, see [detail](python-package).
 
 **`2022-01-18`**: Ambiguity-Aware Human Pose Estimation is now available at [here](body/human_pose/ambiguity_aware).
 
