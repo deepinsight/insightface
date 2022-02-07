@@ -15,10 +15,11 @@ class OFRecordDataLoader(nn.Module):
         data_part_num: int = 8,
         placement: flow.placement = None,
         sbp: Union[flow.sbp.sbp, List[flow.sbp.sbp]] = None,
+        channel_last=False,
     ):
         super().__init__()
-        channel_last = False
-        output_layout = "NHWC" if channel_last else "NCHW"
+        self.channel_last = channel_last
+        output_layout = "NHWC" if self.channel_last else "NCHW"
         assert (ofrecord_root, mode)
         self.train_record_reader = flow.nn.OfrecordReader(
             os.path.join(ofrecord_root, mode),
@@ -50,7 +51,8 @@ class OFRecordDataLoader(nn.Module):
         )
 
         self.flip = (
-            flow.nn.CoinFlip(batch_size=batch_size, placement=placement, sbp=sbp)
+            flow.nn.CoinFlip(batch_size=batch_size,
+                             placement=placement, sbp=sbp)
             if mode == "train"
             else None
         )
@@ -101,11 +103,12 @@ class OFRecordDataLoader(nn.Module):
 
 class SyntheticDataLoader(flow.nn.Module):
     def __init__(
-        self, batch_size, image_size=112, num_classes=10000, placement=None, sbp=None,
+        self, batch_size, image_size=112, num_classes=10000, placement=None, sbp=None, channel_last=False,
     ):
         super().__init__()
-
-        self.image_shape = (batch_size, 3, image_size, image_size)
+        self.channel_last = channel_last
+        self.image_shape = (batch_size, image_size, image_size, 3) if self.channel_last else (
+            batch_size, 3, image_size, image_size)
         self.label_shape = (batch_size,)
         self.num_classes = num_classes
         self.placement = placement

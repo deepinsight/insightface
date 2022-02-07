@@ -2,7 +2,11 @@ import oneflow as flow
 from oneflow.nn.parallel import DistributedDataParallel as ddp
 from utils.ofrecord_data_utils import OFRecordDataLoader, SyntheticDataLoader
 from utils.utils_logging import AverageMeter
-from utils.utils_callbacks import CallBackVerification, CallBackLogging, CallBackModelCheckpoint
+from utils.utils_callbacks import (
+    CallBackVerification,
+    CallBackLogging,
+    CallBackModelCheckpoint,
+)
 from backbones import get_model
 from graph import TrainGraph, EvalGraph
 from utils.losses import CrossEntropyLoss_sbp
@@ -13,7 +17,7 @@ def make_data_loader(args, mode, is_consistent=False, synthetic=False):
     assert mode in ("train", "validation")
 
     if mode == "train":
-        total_batch_size = args.batch_size*flow.env.get_world_size()
+        total_batch_size = args.batch_size * flow.env.get_world_size()
         batch_size = args.batch_size
         num_samples = args.num_image
     else:
@@ -36,6 +40,7 @@ def make_data_loader(args, mode, is_consistent=False, synthetic=False):
             num_classes=args.num_classes,
             placement=placement,
             sbp=sbp,
+            channel_last=args.channel_last,
         )
         return data_loader.to("cuda")
 
@@ -48,6 +53,7 @@ def make_data_loader(args, mode, is_consistent=False, synthetic=False):
         data_part_num=args.ofrecord_part_num,
         placement=placement,
         sbp=sbp,
+        channel_last=args.channel_last,
     )
     return ofrecord_data_loader
 
@@ -67,8 +73,7 @@ def make_optimizer(args, model):
 class FC7(flow.nn.Module):
     def __init__(self, embedding_size, num_classes, cfg, partial_fc=False, bias=False):
         super(FC7, self).__init__()
-        self.weight = flow.nn.Parameter(
-            flow.empty(num_classes, embedding_size))
+        self.weight = flow.nn.Parameter(flow.empty(num_classes, embedding_size))
         flow.nn.init.normal_(self.weight, mean=0, std=0.01)
 
         self.partial_fc = partial_fc
@@ -79,7 +84,7 @@ class FC7(flow.nn.Module):
         self.total_num_sample = self.num_sample * size
 
     def forward(self, x, label):
-        x = flow.nn.functional.l2_normalize(input=x, dim=1, epsilon=1e-10)
+        x = flow.nn.functional.normalize(x, dim=1)
         if self.partial_fc:
             (
                 mapped_label,
@@ -92,8 +97,7 @@ class FC7(flow.nn.Module):
             weight = sampled_weight
         else:
             weight = self.weight
-        weight = flow.nn.functional.l2_normalize(
-            input=weight, dim=1, epsilon=1e-10)
+        weight = flow.nn.functional.normalize(weight, dim=1)
         x = flow.matmul(x, weight, transpose_b=True)
         if x.is_consistent:
             return x, label
@@ -109,14 +113,17 @@ class Train_Module(flow.nn.Module):
         if cfg.graph:
             if cfg.model_parallel:
                 input_size = cfg.embedding_size
-                output_size = int(cfg.num_classes/world_size)
-                self.fc = FC7(input_size, output_size, cfg, partial_fc=cfg.partial_fc).to_consistent(
-                    placement=placement, sbp=flow.sbp.split(0))
+                output_size = int(cfg.num_classes / world_size)
+                self.fc = FC7(
+                    input_size, output_size, cfg, partial_fc=cfg.partial_fc
+                ).to_consistent(placement=placement, sbp=flow.sbp.split(0))
             else:
                 self.fc = FC7(cfg.embedding_size, cfg.num_classes, cfg).to_consistent(
-                    placement=placement, sbp=flow.sbp.broadcast)
+                    placement=placement, sbp=flow.sbp.broadcast
+                )
             self.backbone = backbone.to_consistent(
-                placement=placement, sbp=flow.sbp.broadcast)
+                placement=placement, sbp=flow.sbp.broadcast
+            )
         else:
             self.backbone = backbone
             self.fc = FC7(cfg.embedding_size, cfg.num_classes, cfg)
@@ -138,10 +145,12 @@ class Trainer(object):
         self.rank = rank
 
         # model
-        self.backbone = get_model(cfg.network, dropout=0.0,
-                                  num_features=cfg.embedding_size).to("cuda")
+        self.backbone = get_model(
+            cfg.network, dropout=0.0, num_features=cfg.embedding_size
+        ).to("cuda")
         self.train_module = Train_Module(
-            cfg, self.backbone, self.placement, world_size).to("cuda")
+            cfg, self.backbone, self.placement, world_size
+        ).to("cuda")
         if cfg.resume:
             if load_path is not None:
                 self.load_state_dict()
@@ -153,15 +162,14 @@ class Trainer(object):
 
         # data
         self.train_data_loader = make_data_loader(
-            cfg, 'train', self.cfg.graph, self.cfg.synthetic)
+            cfg, "train", self.cfg.graph, self.cfg.synthetic
+        )
 
         # loss
         if cfg.loss == "cosface":
-            self.margin_softmax = flow.nn.CombinedMarginLoss(
-                1, 0., 0.4).to("cuda")
+            self.margin_softmax = flow.nn.CombinedMarginLoss(1, 0.0, 0.4).to("cuda")
         else:
-            self.margin_softmax = flow.nn.CombinedMarginLoss(
-                1, 0.5, 0.).to("cuda")
+            self.margin_softmax = flow.nn.CombinedMarginLoss(1, 0.5, 0.0).to("cuda")
 
         self.of_cross_entropy = CrossEntropyLoss_sbp()
 
@@ -173,10 +181,12 @@ class Trainer(object):
 
         # log
         self.callback_logging = CallBackLogging(
-            50, rank, cfg.total_step, cfg.batch_size, world_size, None)
+            50, rank, cfg.total_step, cfg.batch_size, world_size, None
+        )
         # val
         self.callback_verification = CallBackVerification(
-            600, rank, cfg.val_targets, cfg.ofrecord_path, is_consistent=cfg.graph)
+            600, rank, cfg.val_targets, cfg.ofrecord_path, is_consistent=cfg.graph
+        )
         # save checkpoint
         self.callback_checkpoint = CallBackModelCheckpoint(rank, cfg.output)
 
@@ -212,8 +222,15 @@ class Trainer(object):
         return [x * num_image // total_batch_size for x in cfg.decay_epoch]
 
     def train_graph(self):
-        train_graph = TrainGraph(self.train_module, self.cfg, self.margin_softmax,
-                                 self.of_cross_entropy, self.train_data_loader, self.optimizer, self.scheduler)
+        train_graph = TrainGraph(
+            self.train_module,
+            self.cfg,
+            self.margin_softmax,
+            self.of_cross_entropy,
+            self.train_data_loader,
+            self.optimizer,
+            self.scheduler,
+        )
         # train_graph.debug()
         val_graph = EvalGraph(self.backbone, self.cfg)
 
@@ -223,15 +240,23 @@ class Trainer(object):
             for steps in range(one_epoch_steps):
                 self.global_step += 1
                 loss = train_graph()
-                loss = loss.to_consistent(
-                    sbp=flow.sbp.broadcast).to_local().numpy()
+                loss = loss.to_consistent(sbp=flow.sbp.broadcast).to_local().numpy()
                 self.losses.update(loss, 1)
-                self.callback_logging(self.global_step,  self.losses, epoch, False,
-                                      self.scheduler.get_last_lr()[0])
+                self.callback_logging(
+                    self.global_step,
+                    self.losses,
+                    epoch,
+                    False,
+                    self.scheduler.get_last_lr()[0],
+                )
                 self.callback_verification(
-                    self.global_step, self.train_module, val_graph)
-            self.callback_checkpoint(self.global_step, epoch,
-                                     self.train_module, is_consistent=True)
+                    self.global_step, self.train_module, val_graph
+                )
+                if self.global_step >= self.cfg.train_num:
+                    exit(0)
+            self.callback_checkpoint(
+                self.global_step, epoch, self.train_module, is_consistent=True
+            )
 
     def train_eager(self):
         self.train_module = ddp(self.train_module)
@@ -245,7 +270,7 @@ class Trainer(object):
                 image = image.to("cuda")
                 label = label.to("cuda")
                 features_fc7 = self.train_module(image, label)
-                features_fc7 = self.margin_softmax(features_fc7, label)*64
+                features_fc7 = self.margin_softmax(features_fc7, label) * 64
                 loss = self.of_cross_entropy(features_fc7, label)
                 loss.backward()
                 self.optimizer.step()
@@ -253,9 +278,15 @@ class Trainer(object):
 
                 loss = loss.numpy()
                 self.losses.update(loss, 1)
-                self.callback_logging(self.global_step,  self.losses, epoch, False,
-                                      self.scheduler.get_last_lr()[0])
+                self.callback_logging(
+                    self.global_step,
+                    self.losses,
+                    epoch,
+                    False,
+                    self.scheduler.get_last_lr()[0],
+                )
                 self.callback_verification(self.global_step, self.backbone)
                 self.scheduler.step()
-            self.callback_checkpoint(
-                self.global_step, epoch, self.train_module)
+                if self.global_step >= self.cfg.train_num:
+                    exit(0)
+            self.callback_checkpoint(self.global_step, epoch, self.train_module)

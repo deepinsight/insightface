@@ -20,6 +20,7 @@ config.partial_fc = False
 config.graph = True
 config.synthetic = False
 config.scale_grad = False
+config.channel_last = False
 
 config.momentum = 0.9
 config.weight_decay = 5e-4

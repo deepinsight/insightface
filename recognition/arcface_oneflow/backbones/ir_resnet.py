@@ -1,6 +1,7 @@
 import oneflow as flow
 import oneflow.nn as nn
 from typing import Type, Any, Callable, Union, List, Optional
+import os
 
 
 def conv3x3(
@@ -39,9 +40,11 @@ class IBasicBlock(nn.Module):
     ):
         super(IBasicBlock, self).__init__()
         if groups != 1 or base_width != 64:
-            raise ValueError("BasicBlock only supports groups=1 and base_width=64")
+            raise ValueError(
+                "BasicBlock only supports groups=1 and base_width=64")
         if dilation > 1:
-            raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
+            raise NotImplementedError(
+                "Dilation > 1 not supported in BasicBlock")
         self.bn1 = nn.BatchNorm2d(inplanes, eps=1e-05,)
         self.conv1 = conv3x3(inplanes, planes)
         self.bn2 = nn.BatchNorm2d(planes, eps=1e-05,)
@@ -79,6 +82,7 @@ class IResNet(nn.Module):
         width_per_group=64,
         replace_stride_with_dilation=None,
         fp16=False,
+        channel_last=False,
     ):
         super(IResNet, self).__init__()
         self.fp16 = fp16
@@ -89,12 +93,25 @@ class IResNet(nn.Module):
         if len(replace_stride_with_dilation) != 3:
             raise ValueError(
                 "replace_stride_with_dilation should be None "
-                "or a 3-element tuple, got {}".format(replace_stride_with_dilation)
+                "or a 3-element tuple, got {}".format(
+                    replace_stride_with_dilation)
             )
         self.groups = groups
         self.base_width = width_per_group
+
+        self.channel_last = False
+        if self.channel_last:
+            self.pad_input = True
+        else:
+            self.pad_input = False
+        if self.pad_input:
+            channel_size = 4
+        else:
+            channel_size = 3
+        if self.channel_last:
+            os.environ["ONEFLOW_ENABLE_NHWC"] = '1'
         self.conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+            channel_size, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
         )
         self.bn1 = nn.BatchNorm2d(self.inplanes, eps=1e-05)
         self.prelu = nn.ReLU(self.inplanes)
@@ -110,7 +127,8 @@ class IResNet(nn.Module):
         )
         self.bn2 = nn.BatchNorm2d(512 * block.expansion, eps=1e-05,)
         self.dropout = nn.Dropout(p=dropout, inplace=True)
-        self.fc = nn.Linear(512 * block.expansion * self.fc_scale, num_features)
+        self.fc = nn.Linear(512 * block.expansion *
+                            self.fc_scale, num_features)
         self.features = nn.BatchNorm1d(num_features, eps=1e-05)
         nn.init.constant_(self.features.weight, 1.0)
         self.features.weight.requires_grad = False
@@ -165,7 +183,14 @@ class IResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-
+        if self.pad_input:
+            if self.channel_last:
+                # NHWC
+                paddings = (0, 1)
+            else:
+                # NCHW
+                paddings = (0, 0, 0, 0, 0, 1)
+            x = flow._C.pad(x, pad=paddings, mode="constant", value=0)
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.prelu(x)
