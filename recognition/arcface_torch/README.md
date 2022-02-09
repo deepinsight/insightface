@@ -7,7 +7,7 @@ identity on a single server.
 
 - Install [PyTorch](http://pytorch.org) (torch>=1.6.0), our doc for [install.md](docs/install.md).
 - (Optional) Install [DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/), our doc for [install_dali.md](docs/install_dali.md).
-- `pip install -r requirements.txt`.
+- `pip install -r requirement.txt`.
   
 ## How to Training
 
