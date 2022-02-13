@@ -1,0 +1,25 @@
+Log file created at: 2022/02/09 08:35:49
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220209 08:35:49.245434  6022 global.h:36] NewGlobal N7oneflow7EnvDescE
+I20220209 08:35:49.245687  6022 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I20220209 08:35:49.245705  6022 env_global_objects_scope.cpp:163] using rpc backend: local
+I20220209 08:35:49.853936  6022 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 08:35:49.854017  6022 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 08:35:49.981822  6022 global.h:36] NewGlobal N7oneflow2ep21DeviceManagerRegistryE
+I20220209 08:35:49.981895  6022 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I20220209 08:35:49.984843  6022 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I20220209 08:35:49.984879  6022 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I20220209 08:35:49.984897  6022 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I20220209 08:35:49.984921  6022 global.h:36] NewGlobal N7oneflow14VirtualMachineE
+I20220209 08:35:49.985626  6022 virtual_machine.cpp:81] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I20220209 08:35:49.985661  6022 virtual_machine.cpp:81] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I20220209 08:35:49.985679  6022 virtual_machine.cpp:81] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I20220209 08:35:49.985886  6022 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I20220209 08:35:49.985920  6022 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I20220209 08:35:49.986306  6022 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:36822
+I20220209 08:35:49.986383  6022 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I20220209 08:35:49.986616  6022 global.h:36] NewGlobal N7oneflow9TransportE
+I20220209 08:35:49.986758  6022 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I20220209 08:35:49.986934  6022 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE

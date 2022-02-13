@@ -1,0 +1,26 @@
+Log file created at: 2022/02/09 16:32:50
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220209 16:32:50.661475 13988 global.h:36] NewGlobal N7oneflow7EnvDescE
+I20220209 16:32:50.661727 13988 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I20220209 16:32:50.661742 13988 env_global_objects_scope.cpp:163] using rpc backend: local
+I20220209 16:32:50.708580 13988 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 16:32:50.708606 13988 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 16:32:50.800238 13988 global.h:36] NewGlobal N7oneflow2ep21DeviceManagerRegistryE
+I20220209 16:32:50.800305 13988 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I20220209 16:32:50.803144 13988 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I20220209 16:32:50.803174 13988 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I20220209 16:32:50.803190 13988 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I20220209 16:32:50.803211 13988 global.h:36] NewGlobal N7oneflow14VirtualMachineE
+I20220209 16:32:50.803831 13988 virtual_machine.cpp:95] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I20220209 16:32:50.803862 13988 virtual_machine.cpp:95] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I20220209 16:32:50.803879 13988 virtual_machine.cpp:95] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I20220209 16:32:50.804239 13988 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I20220209 16:32:50.804272 13988 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I20220209 16:32:50.804605 13988 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:39144
+I20220209 16:32:50.804664 13988 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I20220209 16:32:50.804893 13988 global.h:36] NewGlobal N7oneflow9TransportE
+I20220209 16:32:50.805023 13988 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I20220209 16:32:50.805150 13988 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I20220209 16:32:57.421702 14105 eager_nccl_comm_manager.cpp:70]  EagerNcclCommMgr::ncclCommInitRank device_vec.size() = 1, nccl_unique_id = 0200ffffff9bffffffb4ffffffac110004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, rank = 0, key = {eager_nccl_unique_id_rpc_key,0:0}

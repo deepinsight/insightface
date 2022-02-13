@@ -1,0 +1,133 @@
+Log file created at: 2022/02/09 14:51:05
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220209 14:51:05.101226  8585 global.h:36] NewGlobal N7oneflow7EnvDescE
+I20220209 14:51:05.101478  8585 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I20220209 14:51:05.101495  8585 env_global_objects_scope.cpp:163] using rpc backend: local
+I20220209 14:51:05.149859  8585 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 14:51:05.149883  8585 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 14:51:05.239416  8585 global.h:36] NewGlobal N7oneflow2ep21DeviceManagerRegistryE
+I20220209 14:51:05.239480  8585 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I20220209 14:51:05.242156  8585 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I20220209 14:51:05.242184  8585 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I20220209 14:51:05.242202  8585 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I20220209 14:51:05.242223  8585 global.h:36] NewGlobal N7oneflow14VirtualMachineE
+I20220209 14:51:05.242828  8585 virtual_machine.cpp:81] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I20220209 14:51:05.242858  8585 virtual_machine.cpp:81] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I20220209 14:51:05.242875  8585 virtual_machine.cpp:81] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I20220209 14:51:05.243065  8585 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I20220209 14:51:05.243094  8585 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I20220209 14:51:05.243455  8585 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:38600
+I20220209 14:51:05.243528  8585 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I20220209 14:51:05.243752  8585 global.h:36] NewGlobal N7oneflow9TransportE
+I20220209 14:51:05.243866  8585 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I20220209 14:51:05.244002  8585 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I20220209 14:51:11.626572  8585 version.cpp:22] OneFlow git version: c80469ba
+I20220209 14:51:11.626632  8585 cuda_device_manager_factory.cpp:63] CUDA runtime version: 10.2
+I20220209 14:51:11.626654  8585 cuda_device_manager_factory.cpp:72] cuDNN version: 7.6.5
+I20220209 14:51:11.626667  8585 cuda_device_manager_factory.cpp:85] NCCL version: 2.11.4
+I20220209 14:51:11.626708  8585 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I20220209 14:51:11.626730  8585 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 14:51:11.626744  8585 global.h:36] NewGlobal N7oneflow5IDMgrE
+I20220209 14:51:11.626756  8585 global.h:36] NewGlobal N7oneflow22TaskStreamIndexManagerE
+I20220209 14:51:11.626766  8585 global.h:36] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I20220209 14:51:11.626778  8585 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I20220209 14:51:11.626788  8585 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_23CriticalSectionInstanceEEEE
+I20220209 14:51:11.626798  8585 global.h:36] NewGlobal N7oneflow10RuntimeCtxE
+I20220209 14:51:11.626807  8585 global.h:36] NewGlobal N7oneflow15MemoryAllocatorE
+I20220209 14:51:11.626816  8585 global.h:36] NewGlobal N7oneflow8ChunkMgrE
+I20220209 14:51:11.626827  8585 global.h:36] NewGlobal N7oneflow8RegstMgrE
+I20220209 14:51:11.626837  8585 global.h:36] NewGlobal N7oneflow11ActorMsgBusE
+I20220209 14:51:11.626845  8585 global.h:36] NewGlobal N7oneflow9ThreadMgrE
+I20220209 14:51:11.626855  8585 global.h:36] NewGlobal N7oneflow15RuntimeJobDescsE
+I20220209 14:51:11.626864  8585 global.h:36] NewGlobal N7oneflow7summary12EventsWriterE
+I20220209 14:51:11.626876  8585 global.h:36] NewGlobal N7oneflow6boxing10collective9SchedulerE
+I20220209 14:51:11.761386  8585 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220209 14:51:12.330240  8585 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220209 14:51:12.330328  8585 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220209 14:51:12.344578  8585 global.h:36] NewGlobal N7oneflow7OpGraphE
+I20220209 14:51:12.374776  8585 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I20220209 14:51:12.490355  8585 auto_mixed_precision.cpp:146] Insert CastOp: data_loader.image-out-cast_f2h between data_loader.image/out
+I20220209 14:51:12.490455  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.4.conv2.weight-out-cast_f2h between model.backbone.layer3.4.conv2.weight/out
+I20220209 14:51:12.490609  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.12.conv1.weight-out-cast_f2h between model.backbone.layer3.12.conv1.weight/out
+I20220209 14:51:12.490731  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer1.2.conv2.weight-out-cast_f2h between model.backbone.layer1.2.conv2.weight/out
+I20220209 14:51:12.490868  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer4.2.conv2.weight-out-cast_f2h between model.backbone.layer4.2.conv2.weight/out
+I20220209 14:51:12.491014  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.0.conv1.weight-out-cast_f2h between model.backbone.layer3.0.conv1.weight/out
+I20220209 14:51:12.491196  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.1.conv2.weight-out-cast_f2h between model.backbone.layer3.1.conv2.weight/out
+I20220209 14:51:12.491433  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.0.conv2.weight-out-cast_f2h between model.backbone.layer3.0.conv2.weight/out
+I20220209 14:51:12.491631  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer2.3.conv1.weight-out-cast_f2h between model.backbone.layer2.3.conv1.weight/out
+I20220209 14:51:12.491842  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer4.1.conv1.weight-out-cast_f2h between model.backbone.layer4.1.conv1.weight/out
+I20220209 14:51:12.491926  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.fc-l2_normalize-184-y_0-cast_f2h between model.fc-l2_normalize-184/y_0
+I20220209 14:51:12.492059  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.4.conv1.weight-out-cast_f2h between model.backbone.layer3.4.conv1.weight/out
+I20220209 14:51:12.492166  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.5.conv2.weight-out-cast_f2h between model.backbone.layer3.5.conv2.weight/out
+I20220209 14:51:12.492274  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.1.conv1.weight-out-cast_f2h between model.backbone.layer3.1.conv1.weight/out
+I20220209 14:51:12.492421  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer2.1.conv2.weight-out-cast_f2h between model.backbone.layer2.1.conv2.weight/out
+I20220209 14:51:12.492509  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer2.3.conv2.weight-out-cast_f2h between model.backbone.layer2.3.conv2.weight/out
+I20220209 14:51:12.492658  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer1.0.downsample.0.weight-out-cast_f2h between model.backbone.layer1.0.downsample.0.weight/out
+I20220209 14:51:12.492761  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer2.0.conv2.weight-out-cast_f2h between model.backbone.layer2.0.conv2.weight/out
+I20220209 14:51:12.493185  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer2.2.conv2.weight-out-cast_f2h between model.backbone.layer2.2.conv2.weight/out
+I20220209 14:51:12.493543  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.3.conv1.weight-out-cast_f2h between model.backbone.layer3.3.conv1.weight/out
+I20220209 14:51:12.493708  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer2.1.conv1.weight-out-cast_f2h between model.backbone.layer2.1.conv1.weight/out
+I20220209 14:51:12.493857  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.13.conv2.weight-out-cast_f2h between model.backbone.layer3.13.conv2.weight/out
+I20220209 14:51:12.494117  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer2.2.conv1.weight-out-cast_f2h between model.backbone.layer2.2.conv1.weight/out
+I20220209 14:51:12.494285  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.9.conv2.weight-out-cast_f2h between model.backbone.layer3.9.conv2.weight/out
+I20220209 14:51:12.494377  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.8.conv2.weight-out-cast_f2h between model.backbone.layer3.8.conv2.weight/out
+I20220209 14:51:12.494588  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.fc.weight-out-cast_f2h between model.backbone.fc.weight/out
+I20220209 14:51:12.494786  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.13.conv1.weight-out-cast_f2h between model.backbone.layer3.13.conv1.weight/out
+I20220209 14:51:12.495280  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.2.conv2.weight-out-cast_f2h between model.backbone.layer3.2.conv2.weight/out
+I20220209 14:51:12.495673  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.12.conv2.weight-out-cast_f2h between model.backbone.layer3.12.conv2.weight/out
+I20220209 14:51:12.495805  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer4.2.conv1.weight-out-cast_f2h between model.backbone.layer4.2.conv1.weight/out
+I20220209 14:51:12.496084  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.fc-l2_normalize-185-y_0-cast_f2h between model.fc-l2_normalize-185/y_0
+I20220209 14:51:12.496241  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.0.downsample.0.weight-out-cast_f2h between model.backbone.layer3.0.downsample.0.weight/out
+I20220209 14:51:12.496387  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.7.conv2.weight-out-cast_f2h between model.backbone.layer3.7.conv2.weight/out
+I20220209 14:51:12.496696  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer1.1.conv2.weight-out-cast_f2h between model.backbone.layer1.1.conv2.weight/out
+I20220209 14:51:12.496784  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.11.conv2.weight-out-cast_f2h between model.backbone.layer3.11.conv2.weight/out
+I20220209 14:51:12.496980  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer2.0.downsample.0.weight-out-cast_f2h between model.backbone.layer2.0.downsample.0.weight/out
+I20220209 14:51:12.497186  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer1.0.conv2.weight-out-cast_f2h between model.backbone.layer1.0.conv2.weight/out
+I20220209 14:51:12.497313  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.conv1.weight-out-cast_f2h between model.backbone.conv1.weight/out
+I20220209 14:51:12.497400  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.10.conv1.weight-out-cast_f2h between model.backbone.layer3.10.conv1.weight/out
+I20220209 14:51:12.497505  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer1.1.conv1.weight-out-cast_f2h between model.backbone.layer1.1.conv1.weight/out
+I20220209 14:51:12.497615  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.2.conv1.weight-out-cast_f2h between model.backbone.layer3.2.conv1.weight/out
+I20220209 14:51:12.497805  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer4.0.conv1.weight-out-cast_f2h between model.backbone.layer4.0.conv1.weight/out
+I20220209 14:51:12.497969  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer4.0.conv2.weight-out-cast_f2h between model.backbone.layer4.0.conv2.weight/out
+I20220209 14:51:12.498211  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.11.conv1.weight-out-cast_f2h between model.backbone.layer3.11.conv1.weight/out
+I20220209 14:51:12.498440  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer2.0.conv1.weight-out-cast_f2h between model.backbone.layer2.0.conv1.weight/out
+I20220209 14:51:12.498562  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.6.conv2.weight-out-cast_f2h between model.backbone.layer3.6.conv2.weight/out
+I20220209 14:51:12.498829  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.10.conv2.weight-out-cast_f2h between model.backbone.layer3.10.conv2.weight/out
+I20220209 14:51:12.498919  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.8.conv1.weight-out-cast_f2h between model.backbone.layer3.8.conv1.weight/out
+I20220209 14:51:12.499099  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer1.2.conv1.weight-out-cast_f2h between model.backbone.layer1.2.conv1.weight/out
+I20220209 14:51:12.499270  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer1.0.conv1.weight-out-cast_f2h between model.backbone.layer1.0.conv1.weight/out
+I20220209 14:51:12.499485  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer4.0.downsample.0.weight-out-cast_f2h between model.backbone.layer4.0.downsample.0.weight/out
+I20220209 14:51:12.499591  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.7.conv1.weight-out-cast_f2h between model.backbone.layer3.7.conv1.weight/out
+I20220209 14:51:12.499755  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.6.conv1.weight-out-cast_f2h between model.backbone.layer3.6.conv1.weight/out
+I20220209 14:51:12.499889  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.3.conv2.weight-out-cast_f2h between model.backbone.layer3.3.conv2.weight/out
+I20220209 14:51:12.500138  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.9.conv1.weight-out-cast_f2h between model.backbone.layer3.9.conv1.weight/out
+I20220209 14:51:12.500279  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer4.1.conv2.weight-out-cast_f2h between model.backbone.layer4.1.conv2.weight/out
+I20220209 14:51:12.500461  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.layer3.5.conv1.weight-out-cast_f2h between model.backbone.layer3.5.conv1.weight/out
+I20220209 14:51:12.501284  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.backbone.fc-matmul-181-out_0-cast_h2f between model.backbone.fc-matmul-181/out_0
+I20220209 14:51:12.501370  8585 auto_mixed_precision.cpp:146] Insert CastOp: model.fc-matmul-186-out_0-cast_h2f between model.fc-matmul-186/out_0
+I20220209 14:51:14.734910  8585 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220209 14:51:14.967504  8585 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220209 14:51:17.574512  8585 global.h:36] NewGlobal N7oneflow7OpGraphE
+I20220209 14:51:18.809839  8585 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I20220209 14:51:18.934069  8585 nn_graph.cpp:225] 
+job_id: 0 , job_name: TrainGraph_0 , compile time: 3.9663 seconds.
+I20220209 14:51:19.507997  8585 plan_util.cpp:928]  Plan: TrainGraph_0 needs to allocate [ 5437.32 MiB ] device memory in Rank: 0 , Device: 0
+I20220209 14:51:19.573892  8585 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220209 14:51:19.576045  8585 global.h:43] DeleteGlobal N7oneflow6boxing10collective9SchedulerE
+I20220209 14:51:19.576081  8585 global.h:43] DeleteGlobal N7oneflow7summary12EventsWriterE
+I20220209 14:51:19.576097  8585 global.h:43] DeleteGlobal N7oneflow15RuntimeJobDescsE
+I20220209 14:51:19.576109  8585 global.h:43] DeleteGlobal N7oneflow9ThreadMgrE
+I20220209 14:51:19.576124  8585 global.h:43] DeleteGlobal N7oneflow11ActorMsgBusE
+I20220209 14:51:19.576136  8585 global.h:43] DeleteGlobal N7oneflow8RegstMgrE
+I20220209 14:51:19.576149  8585 global.h:43] DeleteGlobal N7oneflow8ChunkMgrE
+I20220209 14:51:19.576165  8585 global.h:43] DeleteGlobal N7oneflow15MemoryAllocatorE
+I20220209 14:51:19.576177  8585 global.h:43] DeleteGlobal N7oneflow10RuntimeCtxE
+I20220209 14:51:19.576189  8585 global.h:43] DeleteGlobal N7oneflow9BufferMgrISt10shared_ptrINS_23CriticalSectionInstanceEEEE
+I20220209 14:51:19.576205  8585 global.h:43] DeleteGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I20220209 14:51:19.576217  8585 global.h:43] DeleteGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I20220209 14:51:19.608121  8585 global.h:43] DeleteGlobal N7oneflow22TaskStreamIndexManagerE
+I20220209 14:51:19.608152  8585 global.h:43] DeleteGlobal N7oneflow5IDMgrE
+I20220209 14:51:19.608163  8585 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I20220209 14:51:19.608184  8585 global.h:36] NewGlobal N7oneflow12ResourceDescE

@@ -1,0 +1,28 @@
+Log file created at: 2022/02/10 12:49:54
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220210 12:49:54.660187 32771 global.h:36] NewGlobal N7oneflow7EnvDescE
+I20220210 12:49:54.660465 32771 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I20220210 12:49:54.660481 32771 env_global_objects_scope.cpp:163] using rpc backend: local
+I20220210 12:49:54.781445 32771 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 12:49:54.781508 32771 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 12:49:54.872259 32771 global.h:36] NewGlobal N7oneflow2ep21DeviceManagerRegistryE
+I20220210 12:49:54.872313 32771 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I20220210 12:49:54.873725 32771 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I20220210 12:49:54.873750 32771 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I20220210 12:49:54.873759 32771 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I20220210 12:49:54.873771 32771 global.h:36] NewGlobal N7oneflow14VirtualMachineE
+I20220210 12:49:54.874152 32771 virtual_machine.cpp:95] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I20220210 12:49:54.874171 32771 virtual_machine.cpp:95] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I20220210 12:49:54.874178 32771 virtual_machine.cpp:95] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I20220210 12:49:54.874409 32771 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I20220210 12:49:54.874429 32771 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I20220210 12:49:54.874646 32771 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:46707
+I20220210 12:49:54.874687 32771 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I20220210 12:49:54.874806 32771 global.h:36] NewGlobal N7oneflow9TransportE
+I20220210 12:49:54.874881 32771 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I20220210 12:49:54.874974 32771 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I20220210 12:50:00.583775 32888 cuda_allocator.cpp:282]  OOM error is detected, process will exit. And it will start to reset CUDA device for release device memory.
+F20220210 12:50:01.630200 32888 cuda_allocator.cpp:285] Error! : Out of memory when allocate size : 2359296.
+ The total_memory_bytes allocated by this CudaAllocator is : 52428800

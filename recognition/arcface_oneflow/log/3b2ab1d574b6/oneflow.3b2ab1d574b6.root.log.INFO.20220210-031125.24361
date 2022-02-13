@@ -1,0 +1,261 @@
+Log file created at: 2022/02/10 03:11:25
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220210 03:11:25.702152 24361 global.h:36] NewGlobal N7oneflow7EnvDescE
+I20220210 03:11:25.702389 24361 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I20220210 03:11:25.702404 24361 env_global_objects_scope.cpp:163] using rpc backend: local
+I20220210 03:11:25.748632 24361 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 03:11:25.748657 24361 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 03:11:25.839614 24361 global.h:36] NewGlobal N7oneflow2ep21DeviceManagerRegistryE
+I20220210 03:11:25.839684 24361 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I20220210 03:11:25.842492 24361 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I20220210 03:11:25.842523 24361 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I20220210 03:11:25.842542 24361 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I20220210 03:11:25.842564 24361 global.h:36] NewGlobal N7oneflow14VirtualMachineE
+I20220210 03:11:25.843241 24361 virtual_machine.cpp:95] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I20220210 03:11:25.843276 24361 virtual_machine.cpp:95] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I20220210 03:11:25.843317 24361 virtual_machine.cpp:95] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I20220210 03:11:25.843698 24361 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I20220210 03:11:25.843730 24361 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I20220210 03:11:25.844039 24361 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:39736
+I20220210 03:11:25.844098 24361 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I20220210 03:11:25.844312 24361 global.h:36] NewGlobal N7oneflow9TransportE
+I20220210 03:11:25.844426 24361 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I20220210 03:11:25.844558 24361 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I20220210 03:11:27.633947 24361 version.cpp:22] OneFlow git version: cf2ce57
+I20220210 03:11:27.634034 24361 cuda_device_manager_factory.cpp:63] CUDA runtime version: 10.2
+I20220210 03:11:27.634052 24361 cuda_device_manager_factory.cpp:72] cuDNN version: 7.6.5
+I20220210 03:11:27.634061 24361 cuda_device_manager_factory.cpp:85] NCCL version: 2.11.4
+I20220210 03:11:27.634109 24361 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I20220210 03:11:27.634131 24361 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 03:11:27.634146 24361 global.h:36] NewGlobal N7oneflow5IDMgrE
+I20220210 03:11:27.634157 24361 global.h:36] NewGlobal N7oneflow22TaskStreamIndexManagerE
+I20220210 03:11:27.634167 24361 global.h:36] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I20220210 03:11:27.634178 24361 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I20220210 03:11:27.634186 24361 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_23CriticalSectionInstanceEEEE
+I20220210 03:11:27.634196 24361 global.h:36] NewGlobal N7oneflow10RuntimeCtxE
+I20220210 03:11:27.634204 24361 global.h:36] NewGlobal N7oneflow15MemoryAllocatorE
+I20220210 03:11:27.634212 24361 global.h:36] NewGlobal N7oneflow8ChunkMgrE
+I20220210 03:11:27.634222 24361 global.h:36] NewGlobal N7oneflow8RegstMgrE
+I20220210 03:11:27.634230 24361 global.h:36] NewGlobal N7oneflow11ActorMsgBusE
+I20220210 03:11:27.634240 24361 global.h:36] NewGlobal N7oneflow9ThreadMgrE
+I20220210 03:11:27.634249 24361 global.h:36] NewGlobal N7oneflow15RuntimeJobDescsE
+I20220210 03:11:27.634256 24361 global.h:36] NewGlobal N7oneflow7summary12EventsWriterE
+I20220210 03:11:27.634266 24361 global.h:36] NewGlobal N7oneflow6boxing10collective9SchedulerE
+I20220210 03:11:27.639055 24361 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220210 03:11:28.895349 24361 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220210 03:11:28.895454 24361 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220210 03:11:28.899024 24361 global.h:36] NewGlobal N7oneflow7OpGraphE
+I20220210 03:11:28.900321 24361 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I20220210 03:11:28.911684 24361 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220210 03:11:28.917330 24361 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220210 03:11:29.184151 24361 global.h:36] NewGlobal N7oneflow7OpGraphE
+I20220210 03:11:29.195399 24361 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I20220210 03:11:29.199151 24361 nn_graph.cpp:225] 
+job_id: 0 , job_name: TrainGraph_0 , compile time: 0.281769 seconds.
+I20220210 03:11:29.209331 24361 plan_util.cpp:928]  Plan: TrainGraph_0 needs to allocate [ 0.008192 MiB ] device memory in Rank: 0 , Device: 0
+I20220210 03:11:29.212198 24361 runtime_context.cpp:21] NewCounter constructing_actor_cnt 29
+I20220210 03:11:29.212635 24578 naive_actor.cpp:25] actor 2199023255562 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.212677 24578 thread.cpp:99] Thread 1048576 construct Actor kDeviceTick 2199023255562
+I20220210 03:11:29.212728 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 28
+I20220210 03:11:29.212954 24578 naive_actor.cpp:25] actor 2199023255564 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.212982 24578 thread.cpp:99] Thread 1048576 construct Actor kDeviceTick 2199023255564
+I20220210 03:11:29.213023 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 27
+I20220210 03:11:29.213100 24579 wait_and_send_ids_actor.cpp:53] actor 1099513724928 switch to &WaitAndSendIdsActor::HandlerWaitToStart
+I20220210 03:11:29.213178 24579 thread.cpp:99] Thread 524289 construct Actor kWaitAndSendIds 1099513724928
+I20220210 03:11:29.213225 24578 naive_actor.cpp:25] actor 2199023255560 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.213243 24579 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 26
+I20220210 03:11:29.213254 24578 thread.cpp:99] Thread 1048576 construct Actor kDeviceTick 2199023255560
+I20220210 03:11:29.213308 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 25
+I20220210 03:11:29.214351 24575 naive_actor.cpp:25] actor 1099511627784 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.214388 24575 thread.cpp:99] Thread 524288 construct Actor kSrcSubsetTick 1099511627784
+I20220210 03:11:29.214437 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 24
+I20220210 03:11:29.214438 24576 sink_actor.cpp:21] actor 1099515822080 switch to &SinkActor::HandlerNormal
+I20220210 03:11:29.214483 24578 naive_actor.cpp:25] actor 2199023255555 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.214491 24576 thread.cpp:99] Thread 524290 construct Actor kCallbackNotify 1099515822080
+I20220210 03:11:29.214546 24578 thread.cpp:99] Thread 1048576 construct Actor kNormalForward 2199023255555
+I20220210 03:11:29.214624 24576 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 23
+I20220210 03:11:29.214645 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 22
+I20220210 03:11:29.214776 24575 naive_actor.cpp:25] actor 1099511627776 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.214805 24575 thread.cpp:99] Thread 524288 construct Actor kSrcSubsetTick 1099511627776
+I20220210 03:11:29.214848 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 21
+I20220210 03:11:29.215162 24573 naive_actor.cpp:25] actor 1099520016384 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.215194 24575 naive_actor.cpp:25] actor 1099511627782 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.215190 24574 naive_actor.cpp:25] actor 1099637456896 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.215240 24578 naive_actor.cpp:25] actor 2199023255563 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.215271 24574 thread.cpp:99] Thread 524348 construct Actor kCriticalSectionWaitTick 1099637456896
+I20220210 03:11:29.215235 24575 thread.cpp:99] Thread 524288 construct Actor kSrcSubsetTick 1099511627782
+I20220210 03:11:29.215250 24580 naive_actor.cpp:25] actor 1099517919232 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.215356 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 20
+I20220210 03:11:29.215260 24581 naive_actor.cpp:25] actor 1099522113536 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.215221 24573 thread.cpp:99] Thread 524292 construct Actor kNormalForward 1099520016384
+I20220210 03:11:29.215430 24581 thread.cpp:99] Thread 524293 construct Actor kNormalForward 1099522113536
+I20220210 03:11:29.215363 24574 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 19
+I20220210 03:11:29.215298 24578 thread.cpp:99] Thread 1048576 construct Actor kDeviceTick 2199023255563
+I20220210 03:11:29.215505 24573 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 18
+I20220210 03:11:29.215515 24581 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 17
+I20220210 03:11:29.215566 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 16
+I20220210 03:11:29.215378 24580 thread.cpp:99] Thread 524291 construct Actor kCriticalSectionWaitTick 1099517919232
+I20220210 03:11:29.215631 24575 naive_actor.cpp:25] actor 1099511627783 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.215660 24575 thread.cpp:99] Thread 524288 construct Actor kDstSubsetTick 1099511627783
+I20220210 03:11:29.215662 24580 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 15
+I20220210 03:11:29.215710 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 14
+I20220210 03:11:29.215925 24578 naive_actor.cpp:25] actor 2199023255561 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.215975 24575 naive_actor.cpp:25] actor 1099511627781 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.215975 24578 thread.cpp:99] Thread 1048576 construct Actor kDeviceTick 2199023255561
+I20220210 03:11:29.216013 24575 thread.cpp:99] Thread 524288 construct Actor kTick 1099511627781
+I20220210 03:11:29.216082 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 13
+I20220210 03:11:29.216090 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 12
+I20220210 03:11:29.216404 24575 naive_actor.cpp:25] actor 1099511627785 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.216418 24578 naive_actor.cpp:25] actor 2199023255556 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.216432 24575 thread.cpp:99] Thread 524288 construct Actor kDstSubsetTick 1099511627785
+I20220210 03:11:29.216467 24578 thread.cpp:99] Thread 1048576 construct Actor kNormalForward 2199023255556
+I20220210 03:11:29.216516 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 11
+I20220210 03:11:29.216542 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 10
+I20220210 03:11:29.216776 24575 naive_actor.cpp:25] actor 1099511627777 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.216805 24575 thread.cpp:99] Thread 524288 construct Actor kTick 1099511627777
+I20220210 03:11:29.216847 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 9
+I20220210 03:11:29.216899 24578 naive_actor.cpp:25] actor 2199023255552 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.216938 24578 thread.cpp:99] Thread 1048576 construct Actor kNormalForward 2199023255552
+I20220210 03:11:29.217013 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 8
+I20220210 03:11:29.217175 24575 naive_actor.cpp:25] actor 1099511627778 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.217203 24575 thread.cpp:99] Thread 524288 construct Actor kDstSubsetTick 1099511627778
+I20220210 03:11:29.217249 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 7
+I20220210 03:11:29.217340 24578 naive_actor.cpp:25] actor 2199023255558 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.217376 24578 thread.cpp:99] Thread 1048576 construct Actor kNormalForward 2199023255558
+I20220210 03:11:29.217437 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 6
+I20220210 03:11:29.217490 24575 naive_actor.cpp:25] actor 1099511627779 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.217520 24575 thread.cpp:99] Thread 524288 construct Actor kTick 1099511627779
+I20220210 03:11:29.217561 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 5
+I20220210 03:11:29.217777 24578 naive_actor.cpp:25] actor 2199023255554 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.217801 24575 naive_actor.cpp:25] actor 1099511627780 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.217821 24578 thread.cpp:99] Thread 1048576 construct Actor kNormalForward 2199023255554
+I20220210 03:11:29.217841 24575 thread.cpp:99] Thread 524288 construct Actor kTick 1099511627780
+I20220210 03:11:29.217898 24575 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 4
+I20220210 03:11:29.217900 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 3
+I20220210 03:11:29.218220 24578 naive_actor.cpp:25] actor 2199023255553 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.218258 24578 thread.cpp:99] Thread 1048576 construct Actor kNormalForward 2199023255553
+I20220210 03:11:29.218317 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 2
+I20220210 03:11:29.218631 24578 naive_actor.cpp:25] actor 2199023255559 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.218669 24578 thread.cpp:99] Thread 1048576 construct Actor kDeviceTick 2199023255559
+I20220210 03:11:29.218729 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 1
+I20220210 03:11:29.220410 24578 naive_actor.cpp:25] actor 2199023255557 switch to &NaiveActor::HandlerNormal
+I20220210 03:11:29.220453 24578 thread.cpp:99] Thread 1048576 construct Actor kNormalForward 2199023255557
+I20220210 03:11:29.220554 24578 runtime_context.cpp:29] DecreaseCounter constructing_actor_cnt, current val is 0
+I20220210 03:11:29.220594 24361 runtime.cpp:95] Actors on this machine constructed
+I20220210 03:11:29.220628 24361 runtime.cpp:97] Actors on every machine constructed
+I20220210 03:11:29.220643 24361 runtime_context.cpp:21] NewCounter job_0_running_actor_count 29
+I20220210 03:11:29.220667 24361 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220210 03:11:29.220682 24579 wait_and_send_ids_actor.cpp:73] actor 1099513724928 switch to &WaitAndSendIdsActor::HandlerNormal
+I20220210 03:11:29.222684 24579 actor.cpp:399] actor 1099513724928 switch to &Actor::HandlerZombie
+I20220210 03:11:29.222736 24579 thread.cpp:77] thread 524289 deconstruct actor 1099513724928
+I20220210 03:11:29.222741 24575 actor.cpp:396] actor 1099511627777 switch to nullptr
+I20220210 03:11:29.222750 24580 actor.cpp:396] actor 1099517919232 switch to nullptr
+I20220210 03:11:29.222726 24574 actor.cpp:396] actor 1099637456896 switch to nullptr
+I20220210 03:11:29.222890 24579 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 28
+I20220210 03:11:29.222815 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627777
+I20220210 03:11:29.222863 24580 thread.cpp:77] thread 524291 deconstruct actor 1099517919232
+I20220210 03:11:29.222911 24574 thread.cpp:77] thread 524348 deconstruct actor 1099637456896
+I20220210 03:11:29.223059 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 27
+I20220210 03:11:29.223105 24580 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 26
+I20220210 03:11:29.223132 24574 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 25
+I20220210 03:11:29.223109 24575 actor.cpp:396] actor 1099511627784 switch to nullptr
+I20220210 03:11:29.223187 24578 actor.cpp:396] actor 2199023255563 switch to nullptr
+I20220210 03:11:29.223207 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627784
+I20220210 03:11:29.223242 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255563
+I20220210 03:11:29.223343 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 24
+I20220210 03:11:29.223389 24575 actor.cpp:396] actor 1099511627776 switch to nullptr
+I20220210 03:11:29.223400 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 23
+I20220210 03:11:29.223412 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627776
+I20220210 03:11:29.223464 24578 actor.cpp:399] actor 2199023255558 switch to &Actor::HandlerZombie
+I20220210 03:11:29.223502 24578 actor.cpp:396] actor 2199023255559 switch to nullptr
+I20220210 03:11:29.223526 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255559
+I20220210 03:11:29.223539 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 22
+I20220210 03:11:29.223570 24575 actor.cpp:396] actor 1099511627782 switch to nullptr
+I20220210 03:11:29.223593 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627782
+I20220210 03:11:29.223600 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 21
+I20220210 03:11:29.223659 24578 actor.cpp:396] actor 2199023255564 switch to nullptr
+I20220210 03:11:29.223680 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255564
+I20220210 03:11:29.223681 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 20
+I20220210 03:11:29.223755 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 19
+I20220210 03:11:29.223764 24575 actor.cpp:399] actor 1099511627785 switch to &Actor::HandlerZombie
+I20220210 03:11:29.223806 24578 actor.cpp:396] actor 2199023255560 switch to nullptr
+I20220210 03:11:29.223824 24575 actor.cpp:399] actor 1099511627778 switch to &Actor::HandlerZombie
+I20220210 03:11:29.223837 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255560
+I20220210 03:11:29.223788 24581 actor.cpp:396] actor 1099522113536 switch to nullptr
+I20220210 03:11:29.223867 24575 actor.cpp:399] actor 1099511627783 switch to &Actor::HandlerZombie
+I20220210 03:11:29.223898 24581 thread.cpp:77] thread 524293 deconstruct actor 1099522113536
+I20220210 03:11:29.223901 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 18
+I20220210 03:11:29.223924 24573 actor.cpp:396] actor 1099520016384 switch to nullptr
+I20220210 03:11:29.223984 24578 actor.cpp:396] actor 2199023255556 switch to nullptr
+I20220210 03:11:29.223927 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627785
+I20220210 03:11:29.224014 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255556
+I20220210 03:11:29.224004 24573 thread.cpp:77] thread 524292 deconstruct actor 1099520016384
+I20220210 03:11:29.224063 24581 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 17
+I20220210 03:11:29.224133 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 16
+I20220210 03:11:29.224138 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 15
+I20220210 03:11:29.224176 24575 actor.cpp:396] actor 1099511627779 switch to nullptr
+I20220210 03:11:29.224216 24573 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 14
+I20220210 03:11:29.224237 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627779
+I20220210 03:11:29.224227 24578 actor.cpp:396] actor 2199023255555 switch to nullptr
+I20220210 03:11:29.224290 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255555
+I20220210 03:11:29.224323 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 13
+I20220210 03:11:29.224352 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627778
+I20220210 03:11:29.224376 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 12
+I20220210 03:11:29.224422 24578 actor.cpp:396] actor 2199023255554 switch to nullptr
+I20220210 03:11:29.224445 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255554
+I20220210 03:11:29.224455 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 11
+I20220210 03:11:29.224496 24575 actor.cpp:396] actor 1099511627780 switch to nullptr
+I20220210 03:11:29.224519 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627780
+I20220210 03:11:29.224519 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 10
+I20220210 03:11:29.224604 24578 actor.cpp:399] actor 2199023255552 switch to &Actor::HandlerZombie
+I20220210 03:11:29.224607 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 9
+I20220210 03:11:29.224650 24578 actor.cpp:396] actor 2199023255553 switch to nullptr
+I20220210 03:11:29.224682 24575 actor.cpp:396] actor 1099511627781 switch to nullptr
+I20220210 03:11:29.224686 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255553
+I20220210 03:11:29.224735 24576 actor.cpp:396] actor 1099515822080 switch to nullptr
+I20220210 03:11:29.224716 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627781
+I20220210 03:11:29.224793 24576 thread.cpp:77] thread 524290 deconstruct actor 1099515822080
+I20220210 03:11:29.224803 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 8
+I20220210 03:11:29.224874 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 7
+I20220210 03:11:29.224879 24578 actor.cpp:396] actor 2199023255561 switch to nullptr
+I20220210 03:11:29.224907 24576 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 6
+I20220210 03:11:29.224951 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255561
+I20220210 03:11:29.225064 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 5
+I20220210 03:11:29.225116 24578 actor.cpp:399] actor 2199023255557 switch to &Actor::HandlerZombie
+I20220210 03:11:29.225150 24578 actor.cpp:396] actor 2199023255562 switch to nullptr
+I20220210 03:11:29.225172 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255562
+I20220210 03:11:29.225188 24575 thread.cpp:77] thread 524288 deconstruct actor 1099511627783
+I20220210 03:11:29.225230 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 4
+I20220210 03:11:29.225258 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255557
+I20220210 03:11:29.225286 24575 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 3
+I20220210 03:11:29.225457 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 2
+I20220210 03:11:29.225487 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255552
+I20220210 03:11:29.225562 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 1
+I20220210 03:11:29.225589 24578 thread.cpp:77] thread 1048576 deconstruct actor 2199023255558
+I20220210 03:11:29.225670 24578 runtime_context.cpp:29] DecreaseCounter job_0_running_actor_count, current val is 0
+I20220210 03:11:29.225721 24361 global.h:43] DeleteGlobal N7oneflow6boxing10collective9SchedulerE
+I20220210 03:11:29.225750 24361 global.h:43] DeleteGlobal N7oneflow7summary12EventsWriterE
+I20220210 03:11:29.225764 24361 global.h:43] DeleteGlobal N7oneflow15RuntimeJobDescsE
+I20220210 03:11:29.225781 24361 global.h:43] DeleteGlobal N7oneflow9ThreadMgrE
+I20220210 03:11:29.225915 24361 thread_manager.cpp:29] actor thread 524291 finish
+I20220210 03:11:29.226043 24361 thread_manager.cpp:29] actor thread 524289 finish
+I20220210 03:11:29.226121 24361 thread_manager.cpp:29] actor thread 524293 finish
+I20220210 03:11:29.226260 24361 thread_manager.cpp:29] actor thread 524348 finish
+I20220210 03:11:29.226406 24361 thread_manager.cpp:29] actor thread 524288 finish
+I20220210 03:11:29.226567 24361 thread_manager.cpp:29] actor thread 524292 finish
+I20220210 03:11:29.226709 24361 thread_manager.cpp:29] actor thread 524290 finish
+I20220210 03:11:29.227972 24361 thread_manager.cpp:29] actor thread 1048576 finish
+I20220210 03:11:29.227993 24361 global.h:43] DeleteGlobal N7oneflow11ActorMsgBusE
+I20220210 03:11:29.228005 24361 global.h:43] DeleteGlobal N7oneflow8RegstMgrE
+I20220210 03:11:29.228085 24361 global.h:43] DeleteGlobal N7oneflow8ChunkMgrE
+I20220210 03:11:29.228099 24361 global.h:43] DeleteGlobal N7oneflow15MemoryAllocatorE
+I20220210 03:11:29.228148 24361 global.h:43] DeleteGlobal N7oneflow10RuntimeCtxE
+I20220210 03:11:29.228163 24361 global.h:43] DeleteGlobal N7oneflow9BufferMgrISt10shared_ptrINS_23CriticalSectionInstanceEEEE
+I20220210 03:11:29.228174 24361 global.h:43] DeleteGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I20220210 03:11:29.228184 24361 global.h:43] DeleteGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I20220210 03:11:29.228350 24361 global.h:43] DeleteGlobal N7oneflow22TaskStreamIndexManagerE
+I20220210 03:11:29.228369 24361 global.h:43] DeleteGlobal N7oneflow5IDMgrE
+I20220210 03:11:29.228379 24361 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I20220210 03:11:29.228389 24361 global.h:36] NewGlobal N7oneflow12ResourceDescE

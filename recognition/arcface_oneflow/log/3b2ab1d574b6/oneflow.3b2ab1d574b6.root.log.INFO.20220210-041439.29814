@@ -1,0 +1,72 @@
+Log file created at: 2022/02/10 04:14:39
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220210 04:14:39.398876 29814 global.h:36] NewGlobal N7oneflow7EnvDescE
+I20220210 04:14:39.399132 29814 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I20220210 04:14:39.399147 29814 env_global_objects_scope.cpp:163] using rpc backend: local
+I20220210 04:14:39.445026 29814 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 04:14:39.445052 29814 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 04:14:39.527632 29814 global.h:36] NewGlobal N7oneflow2ep21DeviceManagerRegistryE
+I20220210 04:14:39.527704 29814 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I20220210 04:14:39.530678 29814 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I20220210 04:14:39.530709 29814 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I20220210 04:14:39.530728 29814 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I20220210 04:14:39.530751 29814 global.h:36] NewGlobal N7oneflow14VirtualMachineE
+I20220210 04:14:39.531499 29814 virtual_machine.cpp:95] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I20220210 04:14:39.531534 29814 virtual_machine.cpp:95] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I20220210 04:14:39.531553 29814 virtual_machine.cpp:95] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I20220210 04:14:39.531881 29814 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I20220210 04:14:39.531915 29814 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I20220210 04:14:39.532330 29814 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:46874
+I20220210 04:14:39.532398 29814 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I20220210 04:14:39.532637 29814 global.h:36] NewGlobal N7oneflow9TransportE
+I20220210 04:14:39.532770 29814 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I20220210 04:14:39.532904 29814 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I20220210 04:14:44.221375 29814 version.cpp:22] OneFlow git version: cf2ce57
+I20220210 04:14:44.221472 29814 cuda_device_manager_factory.cpp:63] CUDA runtime version: 10.2
+I20220210 04:14:44.221505 29814 cuda_device_manager_factory.cpp:72] cuDNN version: 7.6.5
+I20220210 04:14:44.221525 29814 cuda_device_manager_factory.cpp:85] NCCL version: 2.11.4
+I20220210 04:14:44.221594 29814 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I20220210 04:14:44.221618 29814 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 04:14:44.221637 29814 global.h:36] NewGlobal N7oneflow5IDMgrE
+I20220210 04:14:44.221658 29814 global.h:36] NewGlobal N7oneflow22TaskStreamIndexManagerE
+I20220210 04:14:44.221678 29814 global.h:36] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I20220210 04:14:44.221696 29814 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I20220210 04:14:44.221717 29814 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_23CriticalSectionInstanceEEEE
+I20220210 04:14:44.221733 29814 global.h:36] NewGlobal N7oneflow10RuntimeCtxE
+I20220210 04:14:44.221750 29814 global.h:36] NewGlobal N7oneflow15MemoryAllocatorE
+I20220210 04:14:44.221767 29814 global.h:36] NewGlobal N7oneflow8ChunkMgrE
+I20220210 04:14:44.221783 29814 global.h:36] NewGlobal N7oneflow8RegstMgrE
+I20220210 04:14:44.221799 29814 global.h:36] NewGlobal N7oneflow11ActorMsgBusE
+I20220210 04:14:44.221817 29814 global.h:36] NewGlobal N7oneflow9ThreadMgrE
+I20220210 04:14:44.221833 29814 global.h:36] NewGlobal N7oneflow15RuntimeJobDescsE
+I20220210 04:14:44.221848 29814 global.h:36] NewGlobal N7oneflow7summary12EventsWriterE
+I20220210 04:14:44.221870 29814 global.h:36] NewGlobal N7oneflow6boxing10collective9SchedulerE
+I20220210 04:14:44.243376 29814 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220210 04:14:44.584661 29814 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220210 04:14:44.584707 29814 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220210 04:14:45.947291 29814 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220210 04:14:46.088354 29814 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220210 04:14:47.864064 29814 global.h:36] NewGlobal N7oneflow7OpGraphE
+I20220210 04:14:48.708448 29814 global.h:43] DeleteGlobal N7oneflow7OpGraphE
+I20220210 04:14:48.811803 29814 nn_graph.cpp:225] 
+job_id: 0 , job_name: TrainGraph_0 , compile time: 2.72322 seconds.
+I20220210 04:14:48.814448 29814 plan_util.cpp:928]  Plan: TrainGraph_0 needs to allocate [ 942.094 MiB ] device memory in Rank: 0 , Device: 0
+I20220210 04:14:48.892841 29814 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220210 04:14:48.899235 29814 global.h:43] DeleteGlobal N7oneflow6boxing10collective9SchedulerE
+I20220210 04:14:48.899295 29814 global.h:43] DeleteGlobal N7oneflow7summary12EventsWriterE
+I20220210 04:14:48.899322 29814 global.h:43] DeleteGlobal N7oneflow15RuntimeJobDescsE
+I20220210 04:14:48.899338 29814 global.h:43] DeleteGlobal N7oneflow9ThreadMgrE
+I20220210 04:14:48.899376 29814 global.h:43] DeleteGlobal N7oneflow11ActorMsgBusE
+I20220210 04:14:48.899399 29814 global.h:43] DeleteGlobal N7oneflow8RegstMgrE
+I20220210 04:14:48.899417 29814 global.h:43] DeleteGlobal N7oneflow8ChunkMgrE
+I20220210 04:14:48.899439 29814 global.h:43] DeleteGlobal N7oneflow15MemoryAllocatorE
+I20220210 04:14:48.899459 29814 global.h:43] DeleteGlobal N7oneflow10RuntimeCtxE
+I20220210 04:14:48.899477 29814 global.h:43] DeleteGlobal N7oneflow9BufferMgrISt10shared_ptrINS_23CriticalSectionInstanceEEEE
+I20220210 04:14:48.899500 29814 global.h:43] DeleteGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I20220210 04:14:48.899523 29814 global.h:43] DeleteGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I20220210 04:14:48.936635 29814 global.h:43] DeleteGlobal N7oneflow22TaskStreamIndexManagerE
+I20220210 04:14:48.936681 29814 global.h:43] DeleteGlobal N7oneflow5IDMgrE
+I20220210 04:14:48.936698 29814 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I20220210 04:14:48.936717 29814 global.h:36] NewGlobal N7oneflow12ResourceDescE

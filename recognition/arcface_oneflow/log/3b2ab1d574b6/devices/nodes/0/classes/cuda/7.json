@@ -1,0 +1,11 @@
+{
+  "clock_rate_khz": 1455000,
+  "compute_capability_major": 7,
+  "compute_capability_minor": 0,
+  "memory_bus_width_bit": 3072,
+  "memory_clock_rate_khz": 850000,
+  "name": "TITAN V",
+  "ordinal": 7,
+  "pci_bus_id": "",
+  "total_global_memory_bytes": 12652838912
+}

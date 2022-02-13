@@ -1,0 +1,8 @@
+Log file created at: 2022/02/10 12:56:17
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+F20220210 12:56:17.309356 36352 memory_allocator.cpp:58] 
+  File "/home/ci-user/runners/release/_work/oneflow/oneflow/oneflow/core/memory/memory_allocator.cpp", line 58, in Allocate
+    device->Alloc(options, &ptr, size)
+out of memory

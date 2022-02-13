@@ -1,0 +1,5 @@
+Log file created at: 2022/02/10 02:56:28
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+F20220210 02:56:28.465454 20733 cuda_stream.cpp:110] Check failed: cudnnCreate(&cudnn_handle_) : CUDNN_STATUS_INTERNAL_ERROR (4) 

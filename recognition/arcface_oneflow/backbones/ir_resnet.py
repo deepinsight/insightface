@@ -99,7 +99,7 @@ class IResNet(nn.Module):
         self.groups = groups
         self.base_width = width_per_group
 
-        self.channel_last = False
+        self.channel_last = channel_last
         if self.channel_last:
             self.pad_input = True
         else:
@@ -129,9 +129,9 @@ class IResNet(nn.Module):
         self.dropout = nn.Dropout(p=dropout, inplace=True)
         self.fc = nn.Linear(512 * block.expansion *
                             self.fc_scale, num_features)
-        self.features = nn.BatchNorm1d(num_features, eps=1e-05)
-        nn.init.constant_(self.features.weight, 1.0)
-        self.features.weight.requires_grad = False
+        # self.features = nn.BatchNorm1d(num_features, eps=1e-05)
+        # nn.init.constant_(self.features.weight, 1.0)
+        # self.features.weight.requires_grad = False
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -202,7 +202,7 @@ class IResNet(nn.Module):
         x = flow.flatten(x, 1)
         x = self.dropout(x)
         x = self.fc(x)
-        x = self.features(x)
+        #x = self.features(x)
 
         return x
 

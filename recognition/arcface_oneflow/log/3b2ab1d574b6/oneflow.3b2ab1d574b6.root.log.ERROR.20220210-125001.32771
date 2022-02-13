@@ -1,0 +1,6 @@
+Log file created at: 2022/02/10 12:50:01
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+F20220210 12:50:01.630200 32888 cuda_allocator.cpp:285] Error! : Out of memory when allocate size : 2359296.
+ The total_memory_bytes allocated by this CudaAllocator is : 52428800

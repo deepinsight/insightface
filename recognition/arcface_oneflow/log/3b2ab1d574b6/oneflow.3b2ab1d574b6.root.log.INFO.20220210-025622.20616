@@ -1,0 +1,26 @@
+Log file created at: 2022/02/10 02:56:22
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220210 02:56:22.854756 20616 global.h:36] NewGlobal N7oneflow7EnvDescE
+I20220210 02:56:22.855015 20616 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I20220210 02:56:22.855034 20616 env_global_objects_scope.cpp:163] using rpc backend: local
+I20220210 02:56:22.995743 20616 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 02:56:22.995811 20616 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220210 02:56:23.091395 20616 global.h:36] NewGlobal N7oneflow2ep21DeviceManagerRegistryE
+I20220210 02:56:23.091444 20616 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I20220210 02:56:23.093622 20616 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I20220210 02:56:23.093649 20616 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I20220210 02:56:23.093663 20616 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I20220210 02:56:23.093683 20616 global.h:36] NewGlobal N7oneflow14VirtualMachineE
+I20220210 02:56:23.094230 20616 virtual_machine.cpp:95] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I20220210 02:56:23.094255 20616 virtual_machine.cpp:95] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I20220210 02:56:23.094269 20616 virtual_machine.cpp:95] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I20220210 02:56:23.094524 20616 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I20220210 02:56:23.094547 20616 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I20220210 02:56:23.094775 20616 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:35046
+I20220210 02:56:23.094816 20616 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I20220210 02:56:23.094959 20616 global.h:36] NewGlobal N7oneflow9TransportE
+I20220210 02:56:23.095039 20616 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I20220210 02:56:23.095136 20616 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+F20220210 02:56:28.465454 20733 cuda_stream.cpp:110] Check failed: cudnnCreate(&cudnn_handle_) : CUDNN_STATUS_INTERNAL_ERROR (4) 

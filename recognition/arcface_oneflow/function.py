@@ -73,7 +73,8 @@ def make_optimizer(args, model):
 class FC7(flow.nn.Module):
     def __init__(self, embedding_size, num_classes, cfg, partial_fc=False, bias=False):
         super(FC7, self).__init__()
-        self.weight = flow.nn.Parameter(flow.empty(num_classes, embedding_size))
+        self.weight = flow.nn.Parameter(
+            flow.empty(num_classes, embedding_size))
         flow.nn.init.normal_(self.weight, mean=0, std=0.01)
 
         self.partial_fc = partial_fc
@@ -136,6 +137,7 @@ class Train_Module(flow.nn.Module):
         return x
 
 
+
 class Trainer(object):
     def __init__(self, cfg, placement, load_path, world_size, rank):
         self.placement = placement
@@ -146,7 +148,7 @@ class Trainer(object):
 
         # model
         self.backbone = get_model(
-            cfg.network, dropout=0.0, num_features=cfg.embedding_size
+            cfg.network, dropout=0.0, num_features=cfg.embedding_size, channel_last=cfg.channel_last
         ).to("cuda")
         self.train_module = Train_Module(
             cfg, self.backbone, self.placement, world_size
@@ -167,9 +169,11 @@ class Trainer(object):
 
         # loss
         if cfg.loss == "cosface":
-            self.margin_softmax = flow.nn.CombinedMarginLoss(1, 0.0, 0.4).to("cuda")
+            self.margin_softmax = flow.nn.CombinedMarginLoss(
+                1, 0.0, 0.4).to("cuda")
         else:
-            self.margin_softmax = flow.nn.CombinedMarginLoss(1, 0.5, 0.0).to("cuda")
+            self.margin_softmax = flow.nn.CombinedMarginLoss(
+                1, 0.5, 0.0).to("cuda")
 
         self.of_cross_entropy = CrossEntropyLoss_sbp()
 
@@ -240,7 +244,8 @@ class Trainer(object):
             for steps in range(one_epoch_steps):
                 self.global_step += 1
                 loss = train_graph()
-                loss = loss.to_consistent(sbp=flow.sbp.broadcast).to_local().numpy()
+                loss = loss.to_consistent(
+                    sbp=flow.sbp.broadcast).to_local().numpy()
                 self.losses.update(loss, 1)
                 self.callback_logging(
                     self.global_step,
@@ -289,4 +294,5 @@ class Trainer(object):
                 self.scheduler.step()
                 if self.global_step >= self.cfg.train_num:
                     exit(0)
-            self.callback_checkpoint(self.global_step, epoch, self.train_module)
+            self.callback_checkpoint(
+                self.global_step, epoch, self.train_module)

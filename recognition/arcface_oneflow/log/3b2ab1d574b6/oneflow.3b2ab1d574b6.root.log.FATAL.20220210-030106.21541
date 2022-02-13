@@ -1,0 +1,5 @@
+Log file created at: 2022/02/10 03:01:06
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+F20220210 03:01:06.927409 21850 buffer_manager.h:35] Check failed: iter != name2buffer_.end() buffer_name: TrainGraph_0

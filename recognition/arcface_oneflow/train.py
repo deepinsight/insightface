@@ -19,6 +19,7 @@ def main(args):
     cfg.fp16 = args.fp16
     cfg.model_parallel = args.model_parallel
     cfg.train_num = args.train_num
+    cfg.channel_last = args.channel_last
     rank = flow.env.get_rank()
     world_size = flow.env.get_world_size()
     placement = flow.env.all_device_placement("cuda")
@@ -63,5 +64,6 @@ if __name__ == "__main__":
         "--channel_last", type=str2bool, default="False", help="use NHWC",
     )
     parser.add_argument("--local_rank", type=int, default=0, help="local_rank")
-    parser.add_argument("--load_path", type=str, default=None, help="root dir of loading checkpoint")
+    parser.add_argument("--load_path", type=str, default=None,
+                        help="root dir of loading checkpoint")
     main(parser.parse_args())

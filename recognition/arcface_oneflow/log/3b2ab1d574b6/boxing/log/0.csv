@@ -1,0 +1,2 @@
+src_op_name,dst_op_name,src_parallel_desc,dst_parallel_desc,src_nd_sbp,dst_nd_sbp,lbi,dtype,shape,builder,comment
+System-SyncAllRanksSinkTick_718,System-AutoTick-SinkTick_719,{0:cpu:0-0 (1)},{0:cpu:0-0 (1)},(B),(B),System-SyncAllRanksSinkTick_718/out,kInt8,(1),OneToOneSubTskGphBuilder,-

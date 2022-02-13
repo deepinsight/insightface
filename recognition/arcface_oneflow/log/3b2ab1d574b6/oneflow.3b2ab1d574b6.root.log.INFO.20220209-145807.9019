@@ -1,0 +1,63 @@
+Log file created at: 2022/02/09 14:58:07
+Running on machine: 3b2ab1d574b6
+Running duration (h:mm:ss): 0:00:00
+Log line format: [IWEF]yyyymmdd hh:mm:ss.uuuuuu threadid file:line] msg
+I20220209 14:58:07.857182  9019 global.h:36] NewGlobal N7oneflow7EnvDescE
+I20220209 14:58:07.857419  9019 global.h:36] NewGlobal N7oneflow10ProcessCtxE
+I20220209 14:58:07.857434  9019 env_global_objects_scope.cpp:163] using rpc backend: local
+I20220209 14:58:07.938544  9019 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 14:58:07.938609  9019 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 14:58:08.054379  9019 global.h:36] NewGlobal N7oneflow2ep21DeviceManagerRegistryE
+I20220209 14:58:08.054455  9019 global.h:36] NewGlobal N7oneflow10ThreadPoolE
+I20220209 14:58:08.057592  9019 global.h:36] NewGlobal N7oneflow16EagerNcclCommMgrE
+I20220209 14:58:08.057626  9019 global.h:36] NewGlobal N7oneflow18CudnnConvAlgoCacheE
+I20220209 14:58:08.057643  9019 global.h:36] NewGlobal N7oneflow2vm19VirtualMachineScopeE
+I20220209 14:58:08.057667  9019 global.h:36] NewGlobal N7oneflow14VirtualMachineE
+I20220209 14:58:08.058367  9019 virtual_machine.cpp:95] transport stream type: N7oneflow2vm13CpuStreamTypeE
+I20220209 14:58:08.058403  9019 virtual_machine.cpp:95] transport stream type: N7oneflow2vm14CudaStreamTypeE
+I20220209 14:58:08.058421  9019 virtual_machine.cpp:95] transport stream type: N7oneflow2vm19AsyncCudaStreamTypeE
+I20220209 14:58:08.058776  9019 global.h:36] NewGlobal N7oneflow27EagerJobBuildAndInferCtxMgrE
+I20220209 14:58:08.058809  9019 global.h:36] NewGlobal N7oneflow12EpollCommNetE
+I20220209 14:58:08.059226  9019 epoll_comm_network.cpp:63] CommNet:Epoll listening on 0.0.0.0:33215
+I20220209 14:58:08.059288  9019 epoll_comm_network.cpp:197] machine 0 sockfd -1
+I20220209 14:58:08.059540  9019 global.h:36] NewGlobal N7oneflow9TransportE
+I20220209 14:58:08.059669  9019 global.h:43] DeleteGlobal N7oneflow17ForeignLockHelperE
+I20220209 14:58:08.059806  9019 global.h:36] NewGlobal N7oneflow25MultiClientSessionContextE
+I20220209 14:58:14.561233  9019 version.cpp:22] OneFlow git version: cf2ce57
+I20220209 14:58:14.561288  9019 cuda_device_manager_factory.cpp:63] CUDA runtime version: 10.2
+I20220209 14:58:14.561308  9019 cuda_device_manager_factory.cpp:72] cuDNN version: 7.6.5
+I20220209 14:58:14.561319  9019 cuda_device_manager_factory.cpp:85] NCCL version: 2.11.4
+I20220209 14:58:14.561364  9019 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I20220209 14:58:14.561379  9019 global.h:36] NewGlobal N7oneflow12ResourceDescE
+I20220209 14:58:14.561389  9019 global.h:36] NewGlobal N7oneflow5IDMgrE
+I20220209 14:58:14.561401  9019 global.h:36] NewGlobal N7oneflow22TaskStreamIndexManagerE
+I20220209 14:58:14.561414  9019 global.h:36] NewGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I20220209 14:58:14.561424  9019 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I20220209 14:58:14.561434  9019 global.h:36] NewGlobal N7oneflow9BufferMgrISt10shared_ptrINS_23CriticalSectionInstanceEEEE
+I20220209 14:58:14.561442  9019 global.h:36] NewGlobal N7oneflow10RuntimeCtxE
+I20220209 14:58:14.561452  9019 global.h:36] NewGlobal N7oneflow15MemoryAllocatorE
+I20220209 14:58:14.561461  9019 global.h:36] NewGlobal N7oneflow8ChunkMgrE
+I20220209 14:58:14.561470  9019 global.h:36] NewGlobal N7oneflow8RegstMgrE
+I20220209 14:58:14.561479  9019 global.h:36] NewGlobal N7oneflow11ActorMsgBusE
+I20220209 14:58:14.561488  9019 global.h:36] NewGlobal N7oneflow9ThreadMgrE
+I20220209 14:58:14.561497  9019 global.h:36] NewGlobal N7oneflow15RuntimeJobDescsE
+I20220209 14:58:14.561506  9019 global.h:36] NewGlobal N7oneflow7summary12EventsWriterE
+I20220209 14:58:14.561518  9019 global.h:36] NewGlobal N7oneflow6boxing10collective9SchedulerE
+I20220209 14:58:14.662480  9019 global.h:36] NewGlobal N7oneflow7JobDescE
+I20220209 14:58:15.255741  9019 global.h:43] DeleteGlobal N7oneflow7JobDescE
+I20220209 14:58:15.258960  9019 global.h:43] DeleteGlobal N7oneflow6boxing10collective9SchedulerE
+I20220209 14:58:15.258991  9019 global.h:43] DeleteGlobal N7oneflow7summary12EventsWriterE
+I20220209 14:58:15.259013  9019 global.h:43] DeleteGlobal N7oneflow15RuntimeJobDescsE
+I20220209 14:58:15.259023  9019 global.h:43] DeleteGlobal N7oneflow9ThreadMgrE
+I20220209 14:58:15.259033  9019 global.h:43] DeleteGlobal N7oneflow11ActorMsgBusE
+I20220209 14:58:15.259042  9019 global.h:43] DeleteGlobal N7oneflow8RegstMgrE
+I20220209 14:58:15.259052  9019 global.h:43] DeleteGlobal N7oneflow8ChunkMgrE
+I20220209 14:58:15.259063  9019 global.h:43] DeleteGlobal N7oneflow15MemoryAllocatorE
+I20220209 14:58:15.259071  9019 global.h:43] DeleteGlobal N7oneflow10RuntimeCtxE
+I20220209 14:58:15.259081  9019 global.h:43] DeleteGlobal N7oneflow9BufferMgrISt10shared_ptrINS_23CriticalSectionInstanceEEEE
+I20220209 14:58:15.259091  9019 global.h:43] DeleteGlobal N7oneflow9BufferMgrISt10shared_ptrINS_11JobInstanceEEEE
+I20220209 14:58:15.259099  9019 global.h:43] DeleteGlobal N7oneflow26LazyJobBuildAndInferCtxMgrE
+I20220209 14:58:15.264986  9019 global.h:43] DeleteGlobal N7oneflow22TaskStreamIndexManagerE
+I20220209 14:58:15.265005  9019 global.h:43] DeleteGlobal N7oneflow5IDMgrE
+I20220209 14:58:15.265015  9019 global.h:43] DeleteGlobal N7oneflow12ResourceDescE
+I20220209 14:58:15.265025  9019 global.h:36] NewGlobal N7oneflow12ResourceDescE
