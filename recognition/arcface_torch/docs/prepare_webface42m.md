@@ -13,7 +13,7 @@ do not support Nvidia DALI, you must follow this command [mxnet.tools.im2rec](ht
 
 ```shell
 # 1) create train.lst using follow command
-python -m mxnet.tools.im2rec --list --recursive train "Your WebFace42M Root"
+python -m mxnet.tools.im2rec --list True --recursive True train "Your WebFace42M Root"
 
 # 2) create train.rec and train.idx using train.lst using following command
 python -m mxnet.tools.im2rec --num-thread 16 --quality 100 train "Your WebFace42M Root"
