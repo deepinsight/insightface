@@ -19,4 +19,4 @@ python -m mxnet.tools.im2rec --list True --recursive True train "Your WebFace42M
 python -m mxnet.tools.im2rec --num-thread 16 --quality 100 train "Your WebFace42M Root"
 ```
 
-Finally, you will get three files: `train.idx`, `train.rec`, `train.idx`. which `train.idx`, `train.rec` are using for training.
+Finally, you will get three files: `train.lst`, `train.rec`, `train.idx`. which `train.idx`, `train.rec` are using for training.
