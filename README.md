@@ -11,6 +11,7 @@ For all main contributors, please check [contributing](#contributing).
 
 ## Top News
 
+**`2022-02-23`**: [SCRFD](detection/scrfd) accepted by [ICLR-2022](https://iclr.cc/Conferences/2022).
 
 **`2022-01-29`**: Python pip package ver 0.6.2 updated, added pose estimation and fixed model downloading urls, see [detail](python-package).
 
