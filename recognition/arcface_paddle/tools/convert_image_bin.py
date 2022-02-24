@@ -20,8 +20,8 @@ sys.path.append(os.path.abspath(os.path.join(__dir__, '../')))
 
 import argparse
 import cv2
-from dataloader.kv_helper import read_img_from_bin
-from dataloader.kv_helper import trans_img_to_bin
+from datasets.kv_helper import read_img_from_bin
+from datasets.kv_helper import trans_img_to_bin
 
 
 def get_file_list(img_file, end=('jpg', 'png', 'jpeg', 'JPEG', 'JPG', 'bmp')):
