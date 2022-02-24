@@ -83,7 +83,8 @@ class CallBackVerification(object):
                  val_targets,
                  rec_prefix,
                  fp16=False,
-                 image_size=(112, 112)):
+                 image_size=(112, 112),
+                 log_writer=None):
         self.frequent: int = frequent
         self.rank: int = rank
         self.batch_size: int = batch_size
@@ -91,6 +92,7 @@ class CallBackVerification(object):
         self.highest_acc_list: List[float] = [0.0] * len(val_targets)
         self.ver_list: List[object] = []
         self.ver_name_list: List[str] = []
+        self.log_writer = log_writer
         if self.rank == 0:
             self.init_dataset(
                 val_targets=val_targets,
@@ -116,6 +118,16 @@ class CallBackVerification(object):
                 self.ver_name_list[i], global_step, self.highest_acc_list[i]))
             test_end = time.time()
             logging.info("test time: {:.4f}".format(test_end - test_start))
+
+            if self.log_writer is not None:
+                self.log_writer.add_scalar("validate-XNorm/" + self.ver_name_list[i], xnorm,
+                                       global_step)
+                self.log_writer.add_scalar("validate-Accuracy/" + self.ver_name_list[i] , acc2,
+                                           global_step)
+                self.log_writer.add_scalar("validate-std/" + self.ver_name_list[i], std2,
+                                           global_step)
+                self.log_writer.add_scalar("validate-Accuracy-Highest/" + self.ver_name_list[i], self.highest_acc_list[i],
+                                           global_step)
 
     def init_dataset(self, val_targets, data_dir, image_size):
         for name in val_targets:

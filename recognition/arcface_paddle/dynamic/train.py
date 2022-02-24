@@ -145,7 +145,8 @@ def train(args):
             args.batch_size,
             args.val_targets,
             args.data_dir,
-            fp16=args.fp16, )
+            fp16=args.fp16,
+            log_writer=writer)
 
     callback_logging = CallBackLogging(args.log_interval_step, rank,
                                        world_size, total_steps,
