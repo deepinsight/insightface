@@ -122,7 +122,7 @@ app.prepare(ctx_id=0, det_size=(640, 640))
 
 # Method-2, load model directly
 detector = insightface.model_zoo.get_model('your_detection_model.onnx')
-detector.prepare(ctx_id=0, det_size=(640, 640))
+detector.prepare(ctx_id=0, input_size=(640, 640))
 
 ```
 
