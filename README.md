@@ -17,7 +17,7 @@ For all main contributors, please check [contributing](#contributing).
 
 **`2022-01-18`**: Ambiguity-Aware Human Pose Estimation is now available at [here](body/human_pose/ambiguity_aware).
 
-**`2021-11-30`**: [MFR-Ongoing](challenges/mfr) challenge launched, which is an extended version of [iccv21-mfr](challenges/iccv21-mfr).
+**`2021-11-30`**: [MFR-Ongoing](challenges/mfr) challenge launched(same with IFRT), which is an extended version of [iccv21-mfr](challenges/iccv21-mfr).
 
 **`2021-11-25`**: Training face landmarks by synthetic data, see [alignment/synthetics](alignment/synthetics).
 
