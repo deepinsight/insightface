@@ -2,6 +2,8 @@
 
 This is the ongoing version of [ICCV-2021 Masked Face Recognition Challenge & Workshop(MFR)](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). We also extend it to involve some public available and popular benchmarks such as IJBC, LFW, CFPFP and AgeDB.
 
+(once you find the name **IFRT** which is *InsightFace Recognition Test* in short anywhere, it is the same as MFR-Ongoing)
+
 For detail, please check our ICCV 2021 workshop [paper](https://openaccess.thecvf.com/content/ICCV2021W/MFR/papers/Deng_Masked_Face_Recognition_Challenge_The_InsightFace_Track_Report_ICCVW_2021_paper.pdf).
 
 More information about the workshop challenge can be found [here](../iccv21-mfr), for reference.
