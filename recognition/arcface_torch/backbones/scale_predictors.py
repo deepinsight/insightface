@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class MLPHead(nn.Module):
-    def __init__(self, num_feats=(512, 1), batch_norm=True, activation="lin", fp16=False, coefficient=64., **kwargs):
+    def __init__(self, num_feats=(512, 1), batch_norm=True, activation="lin", fp16=False, coefficient=64.):
         super(MLPHead, self).__init__()
         assert len(num_feats) >= 2
 
