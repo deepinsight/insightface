@@ -48,7 +48,7 @@ def main(args):
         cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size).to(local_rank)
     scale_predictor = MLPHead(
         num_feats=cfg.scale_predictor_sizes, batch_norm=cfg.scale_batch_norm,
-        exponent=cfg.scale_exponent, coefficient=cfg.scale_coefficient, fp16=cfg.fp16).to(local_rank)
+        activation=cfg.scale_activation, coefficient=cfg.scale_coefficient, fp16=cfg.fp16).to(local_rank)
 
     if cfg.resume:
         try:
@@ -59,6 +59,14 @@ def main(args):
         except (FileNotFoundError, KeyError, IndexError, RuntimeError):
             if rank == 0:
                 logging.info("resume fail, backbone init successfully!")
+
+        if "scale_source" in dir(cfg) and cfg.scale_source is not None:
+            scale_ckpt = torch.load(cfg.scale_source, map_location=torch.device(local_rank))
+            scale_predictor.load_state_dict(scale_ckpt["scale_predictor"])
+            print("Initialized scale_predictor with a pretrained model")
+        else:
+            print("Initialized scale_predictor from the scratch")
+
 
     if not cfg.freeze_backbone:
         backbone = torch.nn.parallel.DistributedDataParallel(
