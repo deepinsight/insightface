@@ -10,7 +10,7 @@ from torch.nn.utils import clip_grad_norm_
 
 import losses
 from backbones import get_model, MLPHead, DummyHead
-from dataset import MXFaceDataset, SyntheticDataset, DataLoaderX
+from dataset import MXFaceDataset, MXFaceDatasetDistorted, MXFaceDatasetGauss, SyntheticDataset, DataLoaderX
 from partial_fc import PartialFC
 from utils.utils_amp import MaxClipGradScaler
 from utils.utils_callbacks import CallBackVerification, CallBackLogging, CallBackModelCheckpoint
@@ -35,8 +35,12 @@ def main(args):
     os.makedirs(cfg.output, exist_ok=True)
     init_logging(rank, cfg.output)
 
-    if cfg.rec == "synthetic":
+    if "dataset" in dir(cfg) and cfg.dataset == "synthetic":
         train_set = SyntheticDataset(local_rank=local_rank)
+    elif "dataset" in dir(cfg) and cfg.dataset == "distortion":
+        train_set = MXFaceDatasetDistorted(root_dir=cfg.rec, local_rank=local_rank)
+    elif "dataset" in dir(cfg) and cfg.dataset == "gauss":
+        train_set = MXFaceDatasetGauss(root_dir=cfg.rec, local_rank=local_rank)
     else:
         train_set = MXFaceDataset(root_dir=cfg.rec, local_rank=local_rank)
 
