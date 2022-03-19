@@ -160,7 +160,7 @@ tabulate==0.8.9
 tenacity==7.0.0
 tensorboard==1.14.0
 tensorflow-estimator==1.14.0
-tensorflow-gpu==1.14.0
+tensorflow-gpu==2.5.3
 termcolor==1.1.0
 terminado==0.9.4
 testpath==0.4.4
