@@ -177,7 +177,7 @@ traits==6.3.1
 traitsui==7.2.1
 triangle==20200424
 trimesh==3.9.25
-Twisted==21.7.0
+Twisted==22.2.0
 txaio==21.2.1
 typing-extensions==3.7.4.3
 urllib3==1.26.6
