@@ -110,7 +110,7 @@ parso==0.8.2
 partd==1.2.0
 pexpect==4.8.0
 pickleshare==0.7.5
-Pillow==8.2.0
+Pillow==9.0.1
 plotly==5.1.0
 portalocker==2.3.0
 prometheus-client==0.10.1
