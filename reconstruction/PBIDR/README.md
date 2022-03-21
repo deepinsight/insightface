@@ -1,12 +1,14 @@
 # Facial Geometric Detail Recovery via Implicit Representation
 
-:herb: **Facial Geometric Detail Recovery via Implicit Representation**
+:herb: **[Facial Geometric Detail Recovery via Implicit Representation](https://arxiv.org/abs/2203.09692)**
 
 Xingyu Ren, Alexandros Lattas, Baris Gecer, Jiankang Deng, Chao Ma, Xiaokang Yang, and Stefanos Zafeiriou. 
 
 *arXiv Preprint 2022*
 
 ## Introduction
+
+![overview](https://github.com/deepinsight/insightface/tree/master/reconstruction/PBIDR/figures/overview.jpeg)
 
 This paper introduces a single facial image geometric detail recovery algorithm. The method generates complete high-fidelity texture maps from occluded facial images, and employs implicit renderer and shape functions, to derive fine geometric details by decoupled specular normals. As a bonus, it disentangles the facial texture into approximate diffuse albedo, diffuse and specular shading in a self-supervision manner.
 
