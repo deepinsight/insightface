@@ -62,7 +62,14 @@ bash script/fast_eval.sh
  If any parts of our paper and codes are helpful to your work, please generously citing:
 
  ```
-
+@misc{ren2022facial,
+      title={Facial Geometric Detail Recovery via Implicit Representation}, 
+      author={Xingyu Ren and Alexandros Lattas and Baris Gecer and Jiankang Deng and Chao Ma and Xiaokang Yang and Stefanos Zafeiriou},
+      year={2022},
+      eprint={2203.09692},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
  ```
 
 ## Reference
