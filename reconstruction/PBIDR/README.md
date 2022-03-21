@@ -8,7 +8,7 @@ Xingyu Ren, Alexandros Lattas, Baris Gecer, Jiankang Deng, Chao Ma, Xiaokang Yan
 
 ## Introduction
 
-![overview](https://github.com/deepinsight/insightface/tree/master/reconstruction/PBIDR/figures/overview.jpeg)
+![overview](https://github.com/deepinsight/insightface/blob/master/reconstruction/PBIDR/figures/overview.jpg)
 
 This paper introduces a single facial image geometric detail recovery algorithm. The method generates complete high-fidelity texture maps from occluded facial images, and employs implicit renderer and shape functions, to derive fine geometric details by decoupled specular normals. As a bonus, it disentangles the facial texture into approximate diffuse albedo, diffuse and specular shading in a self-supervision manner.
 
