@@ -17,14 +17,9 @@ This paper introduces a single facial image geometric detail recovery algorithm.
 Please refer to the installation and usage of [IDR](https://github.com/lioryariv/idr).
 
 The code is compatible with python 3.7 and pytorch 1.7.1. In addition, the following packages are required:  
-numpy, mento, menpo3d, scikit-image, trimesh (with pyembree), opencv, torchvision, pytorch3d 0.4.0.
+numpy, scikit-image, trimesh (with pyembree), opencv, torchvision, pytorch3d 0.4.0.
 
-You can create an anaconda environment by our requirements file:
-
-```
-conda create -n pbidr python=3.7
-pip install -r requirements.txt
-```
+You can see [INSTALL.md](INSTALL.md) for manual installation.
 
 ## Tutorial
 
