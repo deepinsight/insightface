@@ -16,6 +16,8 @@ Here we improve Arcface training pipeline to train both uncertainty embedder and
 
 To train a model, run `train.py` with the path to the configs. Configs, describing different experiments are stored ```configs``` folder:
 
+In the config you should define path to source directory. (It can be taken from the link below (source.zip))
+
 ### Single node, 4 GPUs:
 
 ```shell
@@ -26,5 +28,4 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch --nproc_per_node
 
 - The models are available for non-commercial research purposes only.  
 - All models can be found in here.  
-- [Baidu Yun Pan](https://pan.baidu.com/s/1CL-l4zWqsI1oDuEEYVhj-g):   e8pw  
-- [onedrive](https://1drv.ms/u/s!AswpsDO2toNKq0lWY69vN58GR6mw?e=p9Ov5d)
+- [Google Drive](https://drive.google.com/drive/folders/1CD8-b4bzqBnCVLXAb5aOJRmmdrB5usDd?usp=sharing):
