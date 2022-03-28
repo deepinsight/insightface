@@ -21,7 +21,7 @@ config.scale_lr = 0.1
 config.freeze_backbone = True
 config.scale_predictor_sizes = [25088, 512, 512, 512, 1]
 config.scale_batch_norm = True
-config.scale_exponent = "sigm_mul"
+config.scale_activation = "sigm_mul"
 config.scale_coefficient = 32.
 
 config.rec = "/gpfs/gpfs0/k.fedyanin/space/ms1m"

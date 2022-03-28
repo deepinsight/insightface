@@ -9,7 +9,7 @@ config.loss = "arcface_scale"
 config.network = "r50"
 config.resume = True
 config.source = "/gpfs/gpfs0/k.fedyanin/space/models/scale/source"
-config.output = "/gpfs/gpfs0/k.fedyanin/space/models/scale/02_sigm_mul_selection/32"
+config.output = "/gpfs/gpfs0/k.fedyanin/space/models/scale/test"
 config.embedding_size = 512
 config.sample_rate = 1.0
 config.fp16 = True
@@ -21,7 +21,7 @@ config.scale_lr = 0.1
 config.freeze_backbone = True
 config.scale_predictor_sizes = [25088, 512, 1]
 config.scale_batch_norm = True
-config.scale_exponent = "sigm_mul"
+config.scale_activation = "sigm_mul"
 config.scale_coefficient = 32.
 
 config.rec = "/gpfs/gpfs0/k.fedyanin/space/ms1m"
