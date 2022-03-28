@@ -1,8 +1,9 @@
 import torch
 from torch import nn
+from torch.utils.checkpoint import checkpoint
 
 __all__ = ['iresnet18', 'iresnet34', 'iresnet50', 'iresnet100', 'iresnet200']
-
+using_ckpt = False
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
@@ -43,7 +44,7 @@ class IBasicBlock(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forward(self, x):
+    def forard_impl(self, x):
         identity = x
         out = self.bn1(x)
         out = self.conv1(out)
@@ -54,7 +55,13 @@ class IBasicBlock(nn.Module):
         if self.downsample is not None:
             identity = self.downsample(x)
         out += identity
-        return out
+        return out        
+
+    def forward(self, x):
+        if self.training and using_ckpt:
+            return checkpoint(self.forard_imlp, x)
+        else:
+            return self.forard_impl(x)
 
 
 class IResNet(nn.Module):
@@ -63,6 +70,7 @@ class IResNet(nn.Module):
                  block, layers, dropout=0, num_features=512, zero_init_residual=False,
                  groups=1, width_per_group=64, replace_stride_with_dilation=None, fp16=False):
         super(IResNet, self).__init__()
+        self.extra_gflops = 0.0
         self.fp16 = fp16
         self.inplanes = 64
         self.dilation = 1

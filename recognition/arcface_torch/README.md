@@ -5,7 +5,10 @@ identity on a single server.
 
 ## Requirements
 
-- Install [PyTorch](http://pytorch.org) (torch>=1.6.0), our doc for [install.md](docs/install.md).
+In order to enjoy the features of the new torch, we have upgraded the torch to 1.9.0.
+torch version before than 1.9.0 may not work in the future.
+
+- Install [PyTorch](http://pytorch.org) (torch>=1.9.0), our doc for [install.md](docs/install.md).
 - (Optional) Install [DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/), our doc for [install_dali.md](docs/install_dali.md).
 - `pip install -r requirement.txt`.
   
@@ -58,26 +61,55 @@ For **ICCV2021-MFR-ALL** set, TAR is measured on all-to-all 1:1 protocal, with F
 globalised multi-racial testset contains 242,143 identities and 1,624,305 images. 
 
 
+> 1. Large Scale Datasets
 
-| Datasets                 | Backbone   | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Training Throughout | log                                                                                                                                                                                                         |
-|:-------------------------|:-----------|:------------|:------------|:------------|:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| MS1MV3                   | mobileface | 65.76       | 94.44       | 91.85       | ~13000              | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_mobileface_lr02/training.log)\|[config](configs/ms1mv3_mobileface_lr02.py)                                         |
-| Glint360K                | mobileface | 69.83       | 95.17       | 92.58       | -11000              | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_mobileface_lr02_bs4k/training.log)\|[config](configs/glint360k_mobileface_lr02_bs4k.py)                         |
-| WebFace42M-PartialFC-0.2 | mobileface | 73.80       | 95.40       | 92.64       | (16GPUs)~18583      | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_mobilefacenet_pfc02_bs8k_16gpus/training.log)\|[config](configs/webface42m_mobilefacenet_pfc02_bs8k_16gpus.py) |
-| MS1MV3                   | r100       | 83.23       | 96.88       | 95.31       | ~3400               | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_r100_lr02/training.log)\|[config](configs/ms1mv3_r100_lr02.py)                                                     |
-| Glint360K                | r100       | 90.86       | 97.53       | 96.43       | ~5000               | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_r100_lr02_bs4k_16gpus/training.log)\|[config](configs/glint360k_r100_lr02_bs4k_16gpus.py)                                                                                                                                                                |
-| WebFace42M-PartialFC-0.2 | r50(bs4k)  | 93.83       | 97.53       | 96.16       | (8 GPUs)~5900       | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_bs4k_pfc02/training.log)\|[config](configs/webface42m_r50_lr01_pfc02_bs4k_8gpus.py)                        |
-| WebFace42M-PartialFC-0.2 | r50(bs8k)  | 93.96       | 97.46       | 96.12       | (16GPUs)~11000      | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_lr01_pfc02_bs8k_16gpus/training.log)\|[config](configs/webface42m_r50_lr01_pfc02_bs8k_16gpus.py)           |
-| WebFace42M-PartialFC-0.2 | r50(bs4k)  | 94.04       | 97.48       | 95.94       | (32GPUs)~17000      | log\|[config](configs/webface42m_r50_lr01_pfc02_bs4k_32gpus.py)                                                                                                                                             |
-| WebFace42M-PartialFC-0.2 | r100(bs4k) | 96.69       | 97.85       | 96.63       | (16GPUs)~5200       | [log](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r100_bs4k_pfc02/training.log)\|[config](configs/webface42m_r100_lr01_pfc02_bs4k_16gpus.py)                     |
-| WebFace42M-PartialFC-0.2 | r200       | -           | -           | -           | -                   | log\|config                                                                                                                                                                                                 |
+| Datasets         | Backbone    | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Training Throughout | log                                                                                                                                             |
+|:-----------------|:------------|:------------|:------------|:------------|:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------|
+| MS1MV3           | mobileface  | 65.76       | 94.44       | 91.85       | ~13000              | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_mobileface_lr02/training.log)                     |
+| Glint360K        | mobileface  | 69.83       | 95.17       | 92.58       | -11000              | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_mobileface_lr02_bs4k/training.log)             |
+| WF42M-PFC-0.2    | mobileface  | 73.80       | 95.40       | 92.64       | (16GPUs)~18583      | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_mobilefacenet_pfc02_bs8k_16gpus/training.log) |
+| MS1MV3           | r100        | 83.23       | 96.88       | 95.31       | ~3400               | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_r100_lr02/training.log)                           |
+| Glint360K        | r100        | 90.86       | 97.53       | 96.43       | ~5000               | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_r100_lr02_bs4k_16gpus/training.log)            |
+| WF42M-PFC-0.2    | r50(bs4k)   | 93.83       | 97.53       | 96.16       | (8 GPUs)~5900       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_bs4k_pfc02/training.log)                  |
+| WF42M-PFC-0.2    | r50(bs8k)   | 93.96       | 97.46       | 96.12       | (16GPUs)~11000      | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_lr01_pfc02_bs8k_16gpus/training.log)      |
+| WF42M-PFC-0.2    | r50(bs4k)   | 94.04       | 97.48       | 95.94       | (32GPUs)~17000      | click me                                                                                                                                        |
+| WF42M-PFC-0.0018 | r100(bs16k) | 93.08       | 97.51       | 95.88       | (32GPUs)~10000      | click me                                                                                                                                        |
+| WF42M-PFC-0.2    | r100(bs4k)  | 96.69       | 97.85       | 96.63       | (16GPUs)~5200       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r100_bs4k_pfc02/training.log)                 |
 
-`PartialFC-0.2` means negivate class centers sample rate is 0.2.
+> 2. VIT For Face Recognition
+
+| Datasets      | Backbone     | FLOPs | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Training Throughout | log      |
+|:--------------|:-------------|:------|:------------|:------------|:------------|:--------------------|:---------|
+| WF42M-PFC-0.3 | R18(bs4k)    | 2.6   | 79.13       | 95.77       | 93.36       | -                   | click me |
+| WF42M-PFC-0.3 | R50(bs4k)    | 6.3   | 94.03       | 97.48       | 95.94       | -                   | click me |
+| WF42M-PFC-0.3 | R100(bs4k)   | 12.1  | 96.69       | 97.82       | 96.45       | -                   | click me |
+| WF42M-PFC-0.3 | R200(bs4k)   | 23.5  | 97.70       | 97.97       | 96.93       | -                   | click me |
+| WF42M-PFC-0.3 | VIT-T(bs24k) | 1.5   | 92.24       | 97.31       | 95.97       | (64GPUs)~35000      | click me |
+| WF42M-PFC-0.3 | VIT-S(bs24k) | 5.7   | 95.87       | 97.73       | 96.57       | (64GPUs)~25000      | click me |
+| WF42M-PFC-0.3 | VIT-B(bs24k) | 11.4  | 97.42       | 97.90       | 97.04       | (64GPUs)~13800      | click me |
+| WF42M-PFC-0.3 | VIT-L(bs24k) | 25.3  | 97.85       | 98.00       | 97.23       | (64GPUs)~9406       | click me |
+
+WF42M means WebFace42M, `PFC-0.3` means negivate class centers sample rate is 0.3.
+
+> 3. Noisy Datasets
+  
+| Datasets                 | Backbone | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | log      |
+|:-------------------------|:---------|:------------|:------------|:------------|:---------|
+| WF12M-Flip(40%)          | R50      | 43.87       | 88.35       | 80.78       | click me |
+| WF12M-Flip(40%)-PFC-0.3* | R50      | 80.20       | 96.11       | 93.79       | click me |
+| WF12M-Conflict           | R50      | 79.93       | 95.30       | 91.56       | click me |
+| WF12M-Conflict-PFC-0.3*  | R50      | 91.68       | 97.28       | 95.75       | click me |
+
+WF12M means WebFace12M, `+PFC-0.3*` denotes additional abnormal inter-class filtering.
+
+
 
 
 ## Speed Benchmark
+<div><img src="https://github.com/anxiangsir/insightface_arcface_log/blob/master/pfc_exp.png" width = "90%" /></div>
 
-`arcface_torch` can train large-scale face recognition training set efficiently and quickly. When the number of
+
+**Arcface-Torch** can train large-scale face recognition training set efficiently and quickly. When the number of
 classes in training sets is greater than 1 Million, partial fc sampling strategy will get same
 accuracy with several times faster training performance and smaller GPU memory. 
 Partial FC is a sparse variant of the model parallel architecture for large sacle  face recognition. Partial FC use a 
@@ -86,12 +118,12 @@ sparse part of the parameters will be updated, which can reduce a lot of GPU mem
 we can scale trainset of 29 millions identities, the largest to date. Partial FC also supports multi-machine distributed 
 training and mixed precision training.
 
-![Image text](https://github.com/anxiangsir/insightface_arcface_log/blob/master/partial_fc_v2.png)
+
 
 More details see 
 [speed_benchmark.md](docs/speed_benchmark.md) in docs.
 
-### 1. Training speed of different parallel methods (samples / second), Tesla V100 32GB * 8. (Larger is better)
+> 1. Training speed of different parallel methods (samples / second), Tesla V100 32GB * 8. (Larger is better)
 
 `-` means training failed because of gpu memory limitations.
 
@@ -104,7 +136,7 @@ More details see
 | 16000000                        | **-**         | **-**          | 2679           |
 | 29000000                        | **-**         | **-**          | **1855**       |
 
-### 2. GPU memory cost of different parallel methods (MB per GPU), Tesla V100 32GB * 8. (Smaller is better)
+> 2. GPU memory cost of different parallel methods (MB per GPU), Tesla V100 32GB * 8. (Smaller is better)
 
 | Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
 |:--------------------------------|:--------------|:---------------|:---------------|
@@ -126,11 +158,18 @@ More details see
   pages={4690--4699},
   year={2019}
 }
+@inproceedings{an2022pfc,
+  title={Killing Two Birds with One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
+  author={An, Xiang and Deng, Jiangkang and Guo, Jia and Feng, Ziyong and Zhu, Xuhan and Jing, Yang and Tongliang, Liu},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  year={2022}
+}
 @inproceedings{an2020partical_fc,
   title={Partial FC: Training 10 Million Identities on a Single Machine},
   author={An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and
   Zhang, Debing and Fu Ying},
-  booktitle={Arxiv 2010.05222},
+  booktitle={Proceedings of International Conference on Computer Vision Workshop},
+  pages={1445-1449},
   year={2020}
 }
 ```

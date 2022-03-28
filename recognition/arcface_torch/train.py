@@ -2,7 +2,9 @@ import argparse
 import logging
 import os
 
+import numpy as np
 import torch
+from typing import List
 from torch import distributed
 from torch.utils.tensorboard import SummaryWriter
 
@@ -10,12 +12,14 @@ from backbones import get_model
 from dataset import get_dataloader
 from torch.utils.data import DataLoader
 from lr_scheduler import PolyScheduler
-from losses import CosFace, ArcFace
-from partial_fc import PartialFC
+from losses import CombinedMarginLoss
+from partial_fc import PartialFC, PartialFCAdamW
 from utils.utils_callbacks import CallBackLogging, CallBackVerification
 from utils.utils_config import get_config
 from utils.utils_logging import AverageMeter, init_logging
 
+assert torch.__version__ >= "1.9.0", "In order to enjoy the features of the new torch, \
+we have upgraded the torch to 1.9.0. torch before than 1.9.0 may not work in the future."
 
 try:
     world_size = int(os.environ["WORLD_SIZE"])
@@ -33,11 +37,17 @@ except KeyError:
 
 
 def main(args):
+    seed = 2333
+    seed = seed + rank
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+
     torch.cuda.set_device(args.local_rank)
     cfg = get_config(args.config)
 
     os.makedirs(cfg.output, exist_ok=True)
     init_logging(rank, cfg.output)
+
     summary_writer = (
         SummaryWriter(log_dir=os.path.join(cfg.output, "tensorboard"))
         if rank == 0
@@ -50,38 +60,44 @@ def main(args):
     ).cuda()
 
     backbone = torch.nn.parallel.DistributedDataParallel(
-        module=backbone, broadcast_buffers=False, device_ids=[args.local_rank])
-    backbone.train()
+        module=backbone, broadcast_buffers=False, device_ids=[args.local_rank], bucket_cap_mb=16, 
+        find_unused_parameters=True)
 
-    if cfg.loss == "arcface":
-        margin_loss = ArcFace()
-    elif cfg.loss == "cosface":
-        margin_loss = CosFace()
+    backbone.train()
+    # FIXME using gradient checkpoint if there are some unused parameters will cause error
+    backbone._set_static_graph()
+
+    margin_loss = CombinedMarginLoss(
+        64, 
+        cfg.margin_list[0],
+        cfg.margin_list[1],
+        cfg.margin_list[2],
+        cfg.interclass_filtering_threshold
+    )
+    
+    if cfg.optimizer == "sgd":
+        module_partial_fc = PartialFC(
+            margin_loss, cfg.embedding_size, cfg.num_classes, 
+            cfg.sample_rate, cfg.fp16)
+        module_partial_fc.train().cuda()
+        opt = torch.optim.SGD(
+            params=[{"params": backbone.parameters()}, {"params": module_partial_fc.parameters()}],
+            lr=cfg.lr, momentum=0.9, weight_decay=cfg.weight_decay)
+
+    elif cfg.optimizer == "adamw":
+        module_partial_fc = PartialFCAdamW(
+            margin_loss, cfg.embedding_size, cfg.num_classes, 
+            cfg.sample_rate, cfg.fp16)
+        module_partial_fc.train().cuda()
+        opt = torch.optim.AdamW(
+            params=[{"params": backbone.parameters()}, {"params": module_partial_fc.parameters()}],
+            lr=cfg.lr, weight_decay=cfg.weight_decay)
     else:
         raise
 
-    module_partial_fc = PartialFC(
-        margin_loss,
-        cfg.embedding_size, 
-        cfg.num_classes, 
-        cfg.sample_rate, 
-        cfg.fp16
-    )
-    module_partial_fc.train().cuda()
-
-    # TODO the params of partial fc must be last in the params list
-    opt = torch.optim.SGD(
-        params=[
-            {"params": backbone.parameters(), },
-            {"params": module_partial_fc.parameters(), },
-        ],
-        lr=cfg.lr,
-        momentum=0.9,
-        weight_decay=cfg.weight_decay
-    )
-    total_batch_size = cfg.batch_size * world_size
-    cfg.warmup_step = cfg.num_image // total_batch_size * cfg.warmup_epoch
-    cfg.total_step = cfg.num_image // total_batch_size * cfg.num_epoch
+    cfg.total_batch_size = cfg.batch_size * world_size
+    cfg.warmup_step = cfg.num_image // cfg.total_batch_size * cfg.warmup_epoch
+    cfg.total_step = cfg.num_image // cfg.total_batch_size * cfg.num_epoch
     lr_scheduler = PolyScheduler(
         optimizer=opt,
         base_lr=cfg.lr,
@@ -150,6 +166,10 @@ def main(args):
     if rank == 0:
         path_module = os.path.join(cfg.output, "model.pt")
         torch.save(backbone.module.state_dict(), path_module)
+
+        from torch2onnx import convert_onnx
+        convert_onnx(backbone.module.cpu().eval(), path_module, os.path.join(cfg.output, "model.onnx"))
+
     distributed.destroy_process_group()
 
 

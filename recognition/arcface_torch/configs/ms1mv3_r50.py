@@ -5,7 +5,7 @@ from easydict import EasyDict as edict
 # mount -t tmpfs -o size=140G  tmpfs /train_tmp
 
 config = edict()
-config.loss = "arcface"
+config.margin_list = (1.0, 0.5, 0.0)
 config.network = "r50"
 config.resume = False
 config.output = None
