@@ -164,12 +164,4 @@ More details see
   booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
   year={2022}
 }
-@inproceedings{an2020partical_fc,
-  title={Partial FC: Training 10 Million Identities on a Single Machine},
-  author={An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and
-  Zhang, Debing and Fu Ying},
-  booktitle={Proceedings of International Conference on Computer Vision Workshop},
-  pages={1445-1449},
-  year={2020}
-}
 ```

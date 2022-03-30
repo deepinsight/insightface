@@ -19,7 +19,7 @@ class SampleDistributeModule(object):
     RTX2080Ti can complete classification tasks with 100 million of identities.
 
     See the original paper:
-    https://arxiv.org/abs/2010.05222
+    https://arxiv.org/abs/2203.15565
 
     Parameters
     ----------

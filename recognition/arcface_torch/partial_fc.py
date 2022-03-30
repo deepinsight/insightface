@@ -8,7 +8,7 @@ from torch.nn.functional import linear, normalize
 
 class PartialFC(torch.nn.Module):
     """
-    https://arxiv.org/abs/2010.05222
+    https://arxiv.org/abs/2203.15565
     A distributed sparsely updating variant of the FC layer, named Partial FC (PFC).
 
     When sample rate less than 1, in each iteration, positive class centers and a random subset of
