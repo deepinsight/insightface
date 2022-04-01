@@ -164,4 +164,11 @@ More details see
   booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
   year={2022}
 }
+@inproceedings{zhu2021webface260m,
+  title={Webface260m: A benchmark unveiling the power of million-scale deep face recognition},
+  author={Zhu, Zheng and Huang, Guan and Deng, Jiankang and Ye, Yun and Huang, Junjie and Chen, Xinze and Zhu, Jiagang and Yang, Tian and Lu, Jiwen and Du, Dalong and Zhou, Jie},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages={10492--10502},
+  year={2021}
+}
 ```
