@@ -12,6 +12,19 @@ The code of InsightFace Python Library is released under the MIT License. There 
 pip install -U insightface
 ```
 
+## Change Log
+ 
+### [0.6] - 2022-01-29
+  
+#### Added
+
+- Add pose estimation in face-analysis app.
+ 
+#### Changed
+  
+- Change model automated downloading url, to ucloud.
+ 
+
 ## Quick Example
 
 ```
@@ -21,7 +34,7 @@ import insightface
 from insightface.app import FaceAnalysis
 from insightface.data import get_image as ins_get_image
 
-app = FaceAnalysis()
+app = FaceAnalysis(providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
 app.prepare(ctx_id=0, det_size=(640, 640))
 img = ins_get_image('t1')
 faces = app.get(img)
@@ -109,7 +122,7 @@ app.prepare(ctx_id=0, det_size=(640, 640))
 
 # Method-2, load model directly
 detector = insightface.model_zoo.get_model('your_detection_model.onnx')
-detector.prepare(ctx_id=0, det_size=(640, 640))
+detector.prepare(ctx_id=0, input_size=(640, 640))
 
 ```
 

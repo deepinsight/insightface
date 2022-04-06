@@ -5,7 +5,7 @@ Partial FC is a distributed deep learning training framework for face recognitio
 
 
 ## Contents
-[Partial FC](https://arxiv.org/abs/2010.05222)
+[Partial FC](https://arxiv.org/abs/2203.15565)
 - [Largest Face Recognition Dataset: **Glint360k**](#Glint360K)
 - [Docker](#Docker)
 - [Performance On Million Identities](#Benchmark)
@@ -144,15 +144,15 @@ The torrent has been released.
 ## Citation
 If you find Partial-FC or Glint360K useful in your research, please consider to cite the following related paper: 
 
-[Partial FC](https://arxiv.org/abs/2010.05222)
+[Partial FC](https://arxiv.org/abs/2203.15565)
 ```
-@inproceedings{an2020partical_fc,
-  title={Partial FC: Training 10 Million Identities on a Single Machine},
-  author={An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and
-  Zhang, Debing and Fu Ying},
-  booktitle={Arxiv 2010.05222},
-  year={2020}
+@inproceedings{an2022pfc,
+  title={Killing Two Birds with One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
+  author={An, Xiang and Deng, Jiangkang and Guo, Jia and Feng, Ziyong and Zhu, Xuhan and Jing, Yang and Tongliang, Liu},
+  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+  year={2022}
 }
+
 ```
 
 

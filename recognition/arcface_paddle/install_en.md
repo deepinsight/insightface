@@ -1,4 +1,4 @@
-[简体中文](install_ch.md) | English
+[简体中文](install_cn.md) | English
 
 # Installation
 
@@ -7,7 +7,7 @@ This tutorial introduces how to install ArcFace-paddle and its requirements.
 
 ## 1. Install PaddlePaddle
 
-`PaddlePaddle 2.1` or later is required for ArcFace-paddle. You can use the following steps to install PaddlePaddle.
+`PaddlePaddle 2.2.0rc0` or later is required for ArcFace-paddle. You can use the following steps to install PaddlePaddle.
 
 ### 1.1 Environment requirements
 
@@ -33,10 +33,10 @@ cd /home/Projects
 # You need to create a docker container for the first run, and do not need to run the current command when you run it again
 # Create a docker container named face_paddle and map the current directory to the /paddle directory of the container
 # It is recommended to set a shared memory greater than or equal to 8G through the --shm-size parameter
-sudo docker run --name face_paddle -v $PWD:/paddle --shm-size=8G --network=host -it paddlepaddle/paddle:2.1.0 /bin/bash
+sudo docker run --name face_paddle -v $PWD:/paddle --shm-size=8G --network=host -it paddlepaddle/paddle:2.2.0rc0 /bin/bash
 
 # Use the following command to create a container if you want to use GPU in the container
-sudo nvidia-docker run --name face_paddle -v $PWD:/paddle --shm-size=8G --network=host -it paddlepaddle/paddle:2.1.0-gpu-cuda10.2-cudnn7 /bin/bash
+sudo nvidia-docker run --name face_paddle -v $PWD:/paddle --shm-size=8G --network=host -it paddlepaddle/paddle:2.2.0rc0-gpu-cuda11.2-cudnn8 /bin/bash
 ```
 
 You can also visit [DockerHub](https://hub.docker.com/r/paddlepaddle/paddle/tags/) to get more docker images.
@@ -51,13 +51,13 @@ sudo docker exec -it face_paddle /bin/bash
 If you want to use PaddlePaddle on GPU, you can use the following command to install PaddlePaddle.
 
 ```bash
-pip3 install paddlepaddle-gpu --upgrade -i https://mirror.baidu.com/pypi/simple
+pip3 install paddlepaddle-gpu==2.2.0rc0 --upgrade -i https://mirror.baidu.com/pypi/simple
 ```
 
 If you want to use PaddlePaddle on CPU, you can use the following command to install PaddlePaddle.
 
 ```bash
-pip3 install paddlepaddle --upgrade -i https://mirror.baidu.com/pypi/simple
+pip3 install paddlepaddle==2.2.0rc0 --upgrade -i https://mirror.baidu.com/pypi/simple
 ```
 
 **Note:**

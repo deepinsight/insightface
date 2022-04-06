@@ -10,6 +10,21 @@ InsightFace project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?su
 For all main contributors, please check [contributing](#contributing).
 
 ## Top News
+**`2022-03-30`**: [Partial FC](https://arxiv.org/abs/2203.15565) accepted by CVPR-2022.
+
+**`2022-02-23`**: [SCRFD](detection/scrfd) accepted by [ICLR-2022](https://iclr.cc/Conferences/2022).
+
+**`2022-01-29`**: Python pip package ver 0.6.2 updated, added pose estimation and fixed model downloading urls, see [detail](python-package).
+
+**`2022-01-18`**: Ambiguity-Aware Human Pose Estimation is now available at [here](body/human_pose/ambiguity_aware).
+
+**`2021-11-30`**: [MFR-Ongoing](challenges/mfr) challenge launched(same with IFRT), which is an extended version of [iccv21-mfr](challenges/iccv21-mfr).
+
+**`2021-11-25`**: Training face landmarks by synthetic data, see [alignment/synthetics](alignment/synthetics).
+
+**`2021-10-29`**: We achieved 1st place on the [VISA track](https://pages.nist.gov/frvt/plots/11/visa.html) of [NIST-FRVT 1:1](https://pages.nist.gov/frvt/html/frvt11.html) by using Partial FC (Xiang An, Jiankang Deng, Jia Guo).
+
+**`2021-10-11`**: [Leaderboard](https://insightface.ai/mfr21) of [ICCV21 - Masked Face Recognition Challenge](challenges/iccv21-mfr) released. Video: [Youtube](https://www.youtube.com/watch?v=lL-7l5t6x2w), [Bilibili](https://www.bilibili.com/video/BV15b4y1h79N/).
 
 **`2021-09-28`**: Integrated to [Huggingface Spaces](https://huggingface.co/spaces) with [Gradio](https://github.com/gradio-app/gradio). See [Gradio Web Demo](https://huggingface.co/spaces/akhaliq/insightface).
 
@@ -83,10 +98,10 @@ The supported methods are as follows:
 - [x] [ArcFace_mxnet (CVPR'2019)](recognition/arcface_mxnet)
 - [x] [ArcFace_torch (CVPR'2019)](recognition/arcface_torch)
 - [x] [SubCenter ArcFace (ECCV'2020)](recognition/subcenter_arcface)
-- [x] [PartialFC_mxnet (Arxiv'2020)](recognition/partial_fc)
-- [x] [PartialFC_torch (Arxiv'2020)](recognition/arcface_torch)
+- [x] [PartialFC_mxnet (CVPR'2022)](recognition/partial_fc)
+- [x] [PartialFC_torch (CVPR'2022)](recognition/arcface_torch)
 - [x] [VPL (CVPR'2021)](recognition/vpl)
-- [x] [OneFlow_face](recognition/oneflow_face)
+- [x] [Arcface_oneflow](recognition/arcface_oneflow)
 - [x] [ArcFace_Paddle (CVPR'2019)](recognition/arcface_paddle)
 
 Commonly used network backbones are included in most of the methods, such as IResNet, MobilefaceNet, MobileNet, InceptionResNet_v2, DenseNet, etc..
@@ -115,7 +130,12 @@ We provide standard IJB and Megaface evaluation pipelines in [evaluation](recogn
 - Caffe: [arcface-caffe](https://github.com/xialuxi/arcface-caffe)
 - Caffe: [CombinedMargin-caffe](https://github.com/gehaocool/CombinedMargin-caffe)
 - Tensorflow: [InsightFace-tensorflow](https://github.com/luckycallor/InsightFace-tensorflow)
-- TensorRT: [wang-xinyu/tensorrtx](https://github.com/wang-xinyu/tensorrtx)
+- TensorRT: [wang-xinyu/tensorrtx](https://github.com/wang-xinyu/tensorrtx)  
+- TensorRT: [InsightFace-REST](https://github.com/SthPhoenix/InsightFace-REST)
+- ONNXRuntime C++: [ArcFace-ONNXRuntime](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/ort/cv/glint_arcface.cpp)
+- MNN: [ArcFace-MNN](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/mnn/cv/mnn_glint_arcface.cpp)
+- TNN: [ArcFace-TNN](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/tnn/cv/tnn_glint_arcface.cpp)
+- NCNN: [ArcFace-NCNN](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/ncnn/cv/ncnn_glint_arcface.cpp)
 
 ## Face Detection
 

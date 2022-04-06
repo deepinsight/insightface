@@ -2,13 +2,42 @@ import numbers
 import os
 import queue as Queue
 import threading
+from typing import Iterable
 
 import mxnet as mx
 import numpy as np
 import torch
+from torch import distributed
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 
+def get_dataloader(
+    root_dir: str,
+    local_rank: int,
+    batch_size: int,
+    dali = False) -> Iterable:
+    if dali and root_dir != "synthetic":
+        rec = os.path.join(root_dir, 'train.rec')
+        idx = os.path.join(root_dir, 'train.idx')
+        return dali_data_iter(
+            batch_size=batch_size, rec_file=rec,
+            idx_file=idx, num_threads=2, local_rank=local_rank)
+    else:
+        if root_dir == "synthetic":
+            train_set = SyntheticDataset()
+        else:
+            train_set = MXFaceDataset(root_dir=root_dir, local_rank=local_rank)
+        train_sampler = torch.utils.data.distributed.DistributedSampler(train_set, shuffle=True)
+        train_loader = DataLoaderX(
+            local_rank=local_rank,
+            dataset=train_set,
+            batch_size=batch_size,
+            sampler=train_sampler,
+            num_workers=2,
+            pin_memory=True,
+            drop_last=True,
+        )
+        return train_loader
 
 class BackgroundGenerator(threading.Thread):
     def __init__(self, generator, local_rank, max_prefetch=6):
@@ -108,7 +137,7 @@ class MXFaceDataset(Dataset):
 
 
 class SyntheticDataset(Dataset):
-    def __init__(self, local_rank):
+    def __init__(self):
         super(SyntheticDataset, self).__init__()
         img = np.random.randint(0, 255, size=(112, 112, 3), dtype=np.int32)
         img = np.transpose(img, (2, 0, 1))
@@ -122,3 +151,59 @@ class SyntheticDataset(Dataset):
 
     def __len__(self):
         return 1000000
+
+
+def dali_data_iter(
+    batch_size: int, rec_file: str, idx_file: str, num_threads: int,
+    initial_fill=32768, random_shuffle=True,
+    prefetch_queue_depth=1, local_rank=0, name="reader",
+    mean=(127.5, 127.5, 127.5), 
+    std=(127.5, 127.5, 127.5)):
+    """
+    Parameters:
+    ----------
+    initial_fill: int
+        Size of the buffer that is used for shuffling. If random_shuffle is False, this parameter is ignored.
+
+    """
+    rank: int = distributed.get_rank()
+    world_size: int = distributed.get_world_size()
+    import nvidia.dali.fn as fn
+    import nvidia.dali.types as types
+    from nvidia.dali.pipeline import Pipeline
+    from nvidia.dali.plugin.pytorch import DALIClassificationIterator
+
+    pipe = Pipeline(
+        batch_size=batch_size, num_threads=num_threads,
+        device_id=local_rank, prefetch_queue_depth=prefetch_queue_depth, )
+    condition_flip = fn.random.coin_flip(probability=0.5)
+    with pipe:
+        jpegs, labels = fn.readers.mxnet(
+            path=rec_file, index_path=idx_file, initial_fill=initial_fill, 
+            num_shards=world_size, shard_id=rank,
+            random_shuffle=random_shuffle, pad_last_batch=False, name=name)
+        images = fn.decoders.image(jpegs, device="mixed", output_type=types.RGB)
+        images = fn.crop_mirror_normalize(
+            images, dtype=types.FLOAT, mean=mean, std=std, mirror=condition_flip)
+        pipe.set_outputs(images, labels)
+    pipe.build()
+    return DALIWarper(DALIClassificationIterator(pipelines=[pipe], reader_name=name, ))
+
+
+@torch.no_grad()
+class DALIWarper(object):
+    def __init__(self, dali_iter):
+        self.iter = dali_iter
+
+    def __next__(self):
+        data_dict = self.iter.__next__()[0]
+        tensor_data = data_dict['data'].cuda()
+        tensor_label: torch.Tensor = data_dict['label'].cuda().long()
+        tensor_label.squeeze_()
+        return tensor_data, tensor_label
+
+    def __iter__(self):
+        return self
+
+    def reset(self):
+        self.iter.reset()

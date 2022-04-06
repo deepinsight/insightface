@@ -1,0 +1,10 @@
+vtk
+numpy
+opencv-python
+scikit-image
+scipy
+Pillow
+argparse
+GPUtil
+pyhocon
+plotly

@@ -1,6 +1,6 @@
 ## 目录
 ## Contents
-[Partial FC](https://arxiv.org/abs/2010.05222)
+[Partial FC](https://arxiv.org/abs/2203.15565)
 - [如何安装](#如何安装)
 - [如何运行](#如何运行)
 - [错误排查](#错误排查)

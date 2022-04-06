@@ -2,6 +2,14 @@
 
 ## NEWS
 
+**``2021-11-30``** [MFR-Ongoing](../mfr) is now available.
+
+**``2021-10-26``** Please send the onnx models to us(insightface.challenge[at]gmail.com) if you want to test the MFR accuracy before our system rebooting(may be in Nov.).
+
+**``2021-10-11``** [Final Leaderboard](https://insightface.ai/mfr21)
+
+**``2021-10-04``** Please fix the public leaderboard scores before ``2021-10-05 20:00(UTC+8 Time)``
+
 **``2021-07-16``**  Implicit batch inference is prohibited. For example, inserting some data-related OPs to onnx graph to enable automatic flip-test is not allowed(or similar ideas). We will check it after submission closed, to ensure fairness.
 
 **``2021-06-17``**  Participants are now ordered in terms of highest scores across two datasets: **TAR@Mask** and **TAR@MR-All**, by the formula of ``0.25 * TAR@Mask + 0.75 * TAR@MR-All``.
@@ -14,6 +22,8 @@ The Masked Face Recognition Challenge & Workshop(MFR) will be held in conjunctio
 [Workshop-Homepage](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). 
 
 There're InsightFace track here and [Webface260M](https://www.face-benchmark.org/challenge.html) track(with larger training set) in this workshop.
+
+[**Challenge Leaderboard**](https://insightface.ai/mfr21)
 
 Submission server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
@@ -157,7 +167,6 @@ Server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
 (in alphabetical order)
  
-**[Ant Security Lab](https://www.antgroup.com/technology)**
 
 **[DeepGlint](http://www.deepglint.com/)**
 
@@ -165,6 +174,7 @@ Server link: [http://iccv21-mfr.com/](http://iccv21-mfr.com/)
 
 **[OneFlow](https://www.oneflow.org)**
 
+ **[Zoloz](https://www.zoloz.com)**
 
 
 ## Bonus Share
