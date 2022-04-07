@@ -1,6 +1,8 @@
 ## Introduction
 
-SCRFD is an efficient high accuracy face detection approach which initially described in [Arxiv](https://arxiv.org/abs/2105.04714).
+SCRFD is an efficient high accuracy face detection approach which initially described in [Arxiv](https://arxiv.org/abs/2105.04714), and accepted by ICLR-2022.
+
+Try out the Gradio Web Demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/hysts/insightface-SCRFD)
 
 <img src="https://github.com/nttstar/insightface-resources/blob/master/images/scrfd_evelope.jpg" width="400" alt="prcurve"/>
 
