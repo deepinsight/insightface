@@ -8,6 +8,15 @@ The code of InsightFace Python Library is released under the MIT License. There 
 
 ## Install
 
+### Windows 10
+
+Before installing the package via pip, first install the following packages
+
+```
+pip install -U Cython cmake numpy
+```
+and then finally use
+
 ```
 pip install -U insightface
 ```
