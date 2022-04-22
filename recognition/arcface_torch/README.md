@@ -61,47 +61,63 @@ For **ICCV2021-MFR-ALL** set, TAR is measured on all-to-all 1:1 protocal, with F
 globalised multi-racial testset contains 242,143 identities and 1,624,305 images. 
 
 
-> 1. Large Scale Datasets
+#### 1. Training on Single-Host GPU
 
-| Datasets         | Backbone    | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Training Throughout | log                                                                                                                                             |
-|:-----------------|:------------|:------------|:------------|:------------|:--------------------|:------------------------------------------------------------------------------------------------------------------------------------------------|
-| MS1MV3           | mobileface  | 65.76       | 94.44       | 91.85       | ~13000              | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_mobileface_lr02/training.log)                     |
-| Glint360K        | mobileface  | 69.83       | 95.17       | 92.58       | -11000              | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_mobileface_lr02_bs4k/training.log)             |
-| WF42M-PFC-0.2    | mobileface  | 73.80       | 95.40       | 92.64       | (16GPUs)~18583      | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_mobilefacenet_pfc02_bs8k_16gpus/training.log) |
-| MS1MV3           | r100        | 83.23       | 96.88       | 95.31       | ~3400               | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_r100_lr02/training.log)                           |
-| Glint360K        | r100        | 90.86       | 97.53       | 96.43       | ~5000               | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_r100_lr02_bs4k_16gpus/training.log)            |
-| WF42M-PFC-0.2    | r50(bs4k)   | 93.83       | 97.53       | 96.16       | (8 GPUs)~5900       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_bs4k_pfc02/training.log)                  |
-| WF42M-PFC-0.2    | r50(bs8k)   | 93.96       | 97.46       | 96.12       | (16GPUs)~11000      | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_lr01_pfc02_bs8k_16gpus/training.log)      |
-| WF42M-PFC-0.2    | r50(bs4k)   | 94.04       | 97.48       | 95.94       | (32GPUs)~17000      | click me                                                                                                                                        |
-| WF42M-PFC-0.0018 | r100(bs16k) | 93.08       | 97.51       | 95.88       | (32GPUs)~10000      | click me                                                                                                                                        |
-| WF42M-PFC-0.2    | r100(bs4k)  | 96.69       | 97.85       | 96.63       | (16GPUs)~5200       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r100_bs4k_pfc02/training.log)                 |
+| Datasets      | Backbone            | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | log                                                                                                                                 |
+|:--------------|:--------------------|:------------|:------------|:------------|:------------------------------------------------------------------------------------------------------------------------------------|
+| MS1MV2        | mobilefacenet-0.45G | 62.07       | 93.61       | 90.28       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv2_mbf/training.log)                     |
+| MS1MV3        | mobilefacenet-0.45G | 63.78       | 94.23       | 91.33       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_mbf/training.log)                     |
+| Glint360K     | mobilefacenet-0.45G | 70.18       | 95.04       | 92.62       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_mbf/training.log)                  |
+| MS1MV2        | r50                 | 70.35       | 95.43       | 93.34       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv2_r50/training.log)                     |
+| MS1MV3        | r50                 | 79.14       | 96.37       | 94.47       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_r50/training.log)                     |
+| Glint360K     | r50                 | 86.34       | 97.16       | 95.81       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_r50/training.log)                  |
+| MS1MV2        | r100                | 69.79       | 95.85       | 93.93       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv2_r100/training.log)                    |
+| MS1MV3        | r100                | 81.97       | 96.85       | 95.02       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/ms1mv3_r100/training.log)                    |
+| Glint360k     | r100                | 89.52       | 97.55       | 96.38       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/glint360k_r100/training.log)                 |
+| WF42M-PFC-0.2 | R100                | 96.27       | 97.70       | 96.31       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/wf42m_pfc02_r100/training.log)               |
+| WF42M-PFC-0.2 | ViT-T-1.5G          | 92.04       | 97.27       | 95.68       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/wf42m_pfc02_40epoch_8gpu_vit_t/training.log) |
 
-> 2. VIT For Face Recognition
+#### 2. Training on Multi-Host GPU
 
-| Datasets      | Backbone     | FLOPs | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Training Throughout | log      |
-|:--------------|:-------------|:------|:------------|:------------|:------------|:--------------------|:---------|
-| WF42M-PFC-0.3 | R18(bs4k)    | 2.6   | 79.13       | 95.77       | 93.36       | -                   | click me |
-| WF42M-PFC-0.3 | R50(bs4k)    | 6.3   | 94.03       | 97.48       | 95.94       | -                   | click me |
-| WF42M-PFC-0.3 | R100(bs4k)   | 12.1  | 96.69       | 97.82       | 96.45       | -                   | click me |
-| WF42M-PFC-0.3 | R200(bs4k)   | 23.5  | 97.70       | 97.97       | 96.93       | -                   | click me |
-| WF42M-PFC-0.3 | VIT-T(bs24k) | 1.5   | 92.24       | 97.31       | 95.97       | (64GPUs)~35000      | click me |
-| WF42M-PFC-0.3 | VIT-S(bs24k) | 5.7   | 95.87       | 97.73       | 96.57       | (64GPUs)~25000      | click me |
-| WF42M-PFC-0.3 | VIT-B(bs24k) | 11.4  | 97.42       | 97.90       | 97.04       | (64GPUs)~13800      | click me |
-| WF42M-PFC-0.3 | VIT-L(bs24k) | 25.3  | 97.85       | 98.00       | 97.23       | (64GPUs)~9406       | click me |
+| Datasets         | Backbone(bs*gpus) | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Throughout | log                                                                                                                                        |
+|:-----------------|:------------------|:------------|:------------|:------------|:-----------|:-------------------------------------------------------------------------------------------------------------------------------------------|
+| WF42M-PFC-0.2    | r50(512*8)        | 93.83       | 97.53       | 96.16       | ~5900      | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_bs4k_pfc02/training.log)             |
+| WF42M-PFC-0.2    | r50(512*16)       | 93.96       | 97.46       | 96.12       | ~11000     | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r50_lr01_pfc02_bs8k_16gpus/training.log) |
+| WF42M-PFC-0.2    | r50(128*32)       | 94.04       | 97.48       | 95.94       | ~17000     | click me                                                                                                                                   |
+| WF42M-PFC-0.2    | r100(128*16)      | 96.28       | 97.80       | 96.57       | ~5200      | click me                                                                                                                                   |
+| WF42M-PFC-0.2    | r100(256*16)      | 96.69       | 97.85       | 96.63       | ~5200      | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/webface42m_r100_bs4k_pfc02/training.log)            |
+| WF42M-PFC-0.0018 | r100(512*32)      | 93.08       | 97.51       | 95.88       | ~10000     | click me                                                                                                                                   |
+| WF42M-PFC-0.2    | r100(128*32)      | 96.57       | 97.83       | 96.50       | ~9800      | click me                                                                                                                                   |
 
-WF42M means WebFace42M, `PFC-0.3` means negivate class centers sample rate is 0.3.
+`r100(128*32)` means backbone is r100, batchsize per gpu is 128, the number of gpus is 32.
 
-> 3. Noisy Datasets
+
+
+#### 3. ViT For Face Recognition
+
+| Datasets      | Backbone(bs)  | FLOPs | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Throughout | log                                                                                                                          |
+|:--------------|:--------------|:------|:------------|:------------|:------------|:-----------|:-----------------------------------------------------------------------------------------------------------------------------|
+| WF42M-PFC-0.3 | r18(128*32)   | 2.6   | 79.13       | 95.77       | 93.36       | -          | click me                                                                                                                     |
+| WF42M-PFC-0.3 | r50(128*32)   | 6.3   | 94.03       | 97.48       | 95.94       | -          | click me                                                                                                                     |
+| WF42M-PFC-0.3 | r100(128*32)  | 12.1  | 96.69       | 97.82       | 96.45       | -          | click me                                                                                                                     |
+| WF42M-PFC-0.3 | r200(128*32)  | 23.5  | 97.70       | 97.97       | 96.93       | -          | click me                                                                                                                     |
+| WF42M-PFC-0.3 | VIT-T(384*64) | 1.5   | 92.24       | 97.31       | 95.97       | ~35000     | click me                                                                                                                     |
+| WF42M-PFC-0.3 | VIT-S(384*64) | 5.7   | 95.87       | 97.73       | 96.57       | ~25000     | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/pfc03_wf42m_vit_s_64gpu/training.log) |
+| WF42M-PFC-0.3 | VIT-B(384*64) | 11.4  | 97.42       | 97.90       | 97.04       | ~13800     | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/pfc03_wf42m_vit_b_64gpu/training.log) |
+| WF42M-PFC-0.3 | VIT-L(384*64) | 25.3  | 97.85       | 98.00       | 97.23       | ~9406      | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/pfc03_wf42m_vit_l_64gpu/training.log) |
+
+`WF42M` means WebFace42M, `PFC-0.3` means negivate class centers sample rate is 0.3.
+
+#### 4. Noisy Datasets
   
 | Datasets                 | Backbone | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | log      |
 |:-------------------------|:---------|:------------|:------------|:------------|:---------|
-| WF12M-Flip(40%)          | R50      | 43.87       | 88.35       | 80.78       | click me |
-| WF12M-Flip(40%)-PFC-0.3* | R50      | 80.20       | 96.11       | 93.79       | click me |
-| WF12M-Conflict           | R50      | 79.93       | 95.30       | 91.56       | click me |
-| WF12M-Conflict-PFC-0.3*  | R50      | 91.68       | 97.28       | 95.75       | click me |
+| WF12M-Flip(40%)          | r50      | 43.87       | 88.35       | 80.78       | click me |
+| WF12M-Flip(40%)-PFC-0.1* | r50      | 80.20       | 96.11       | 93.79       | click me |
+| WF12M-Conflict           | r50      | 79.93       | 95.30       | 91.56       | click me |
+| WF12M-Conflict-PFC-0.3*  | r50      | 91.68       | 97.28       | 95.75       | click me |
 
-WF12M means WebFace12M, `+PFC-0.3*` denotes additional abnormal inter-class filtering.
-
+`WF12M` means WebFace12M, `+PFC-0.1*` denotes additional abnormal inter-class filtering.
 
 
 

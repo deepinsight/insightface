@@ -44,7 +44,7 @@ class IBasicBlock(nn.Module):
         self.downsample = downsample
         self.stride = stride
 
-    def forard_impl(self, x):
+    def forward_impl(self, x):
         identity = x
         out = self.bn1(x)
         out = self.conv1(out)
@@ -59,9 +59,9 @@ class IBasicBlock(nn.Module):
 
     def forward(self, x):
         if self.training and using_ckpt:
-            return checkpoint(self.forard_imlp, x)
+            return checkpoint(self.forward_impl, x)
         else:
-            return self.forard_impl(x)
+            return self.forward_impl(x)
 
 
 class IResNet(nn.Module):

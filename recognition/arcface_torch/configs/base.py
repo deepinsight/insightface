@@ -6,6 +6,7 @@ from easydict import EasyDict as edict
 
 config = edict()
 
+# Margin Base Softmax
 config.margin_list = (1.0, 0.5, 0.0)
 config.network = "r50"
 config.resume = False

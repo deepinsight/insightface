@@ -80,6 +80,7 @@ def main(args):
             margin_loss, cfg.embedding_size, cfg.num_classes, 
             cfg.sample_rate, cfg.fp16)
         module_partial_fc.train().cuda()
+        # TODO the params of partial fc must be last in the params list
         opt = torch.optim.SGD(
             params=[{"params": backbone.parameters()}, {"params": module_partial_fc.parameters()}],
             lr=cfg.lr, momentum=0.9, weight_decay=cfg.weight_decay)
