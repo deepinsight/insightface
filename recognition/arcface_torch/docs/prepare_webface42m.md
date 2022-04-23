@@ -8,8 +8,8 @@ Download WebFace42M from [https://www.face-benchmark.org/download.html](https://
 
 ## 2. Create **Pre-Shuffle** Rec File for DALI
 
-Note: preshuffled rec is very important to DALI, and rec without preshuffled can cause performance degradation, origin insightface style rec file 
-do not support Nvidia DALI, you must follow this command [mxnet.tools.im2rec](https://github.com/apache/incubator-mxnet/blob/master/tools/im2rec.py) to generate a pre-shuffle rec file.
+Note: Shuffled rec is very important to DALI, and rec without shuffled can cause performance degradation, origin insightface style rec file 
+do not support Nvidia DALI, you must follow this command [mxnet.tools.im2rec](https://github.com/apache/incubator-mxnet/blob/master/tools/im2rec.py) to generate a shuffled rec file.
 
 ```shell
 # directories and files for yours datsaets
