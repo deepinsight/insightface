@@ -132,6 +132,7 @@ def main(args):
         frequent=cfg.frequent,
         total_step=cfg.total_step,
         batch_size=cfg.batch_size,
+        start_step = global_step,
         writer=summary_writer
     )
 
@@ -169,8 +170,6 @@ def main(args):
 
                 if global_step % cfg.verbose == 0 and global_step > 200:
                     callback_verification(global_step, backbone)
-                    # test
-                    break
 
         path_pfc = os.path.join(
             cfg.output, "softmax_fc_gpu_{}.pt".format(rank))
