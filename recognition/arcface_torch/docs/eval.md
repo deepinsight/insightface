@@ -24,8 +24,20 @@ CUDA_VISIBLE_DEVICES=0,1 python eval_ijbc.py \
 --network iresnet50
 ```
 
+
 ## Inference
 
 ```shell
 python inference.py --weight ms1mv3_arcface_r50/backbone.pth --network r50
 ```
+
+
+## Result
+
+| Datasets       | Backbone            | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) |
+|:---------------|:--------------------|:------------|:------------|:------------|
+| WF12M-PFC-0.05 | r100                | 94.05       | 97.51       | 95.75       |
+| WF12M-PFC-0.1  | r100                | 94.49       | 97.56       | 95.92       |
+| WF12M-PFC-0.2  | r100                | 94.75       | 97.60       | 95.90       |
+| WF12M-PFC-0.3  | r100                | 94.71       | 97.64       | 96.01       |
+| WF12M          | r100                | 94.69       | 97.59       | 95.97       |

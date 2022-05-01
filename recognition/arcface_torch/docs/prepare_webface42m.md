@@ -3,8 +3,11 @@
 
 ## 1. Download Datasets and Unzip
 
-Download WebFace42M from [https://www.face-benchmark.org/download.html](https://www.face-benchmark.org/download.html).
-
+Download WebFace42M from [https://www.face-benchmark.org/download.html](https://www.face-benchmark.org/download.html).  
+The raw data of `WebFace42M` will have 10 directories after being unarchived:   
+`WebFace4M` contains 1 directory: `0`.  
+`WebFace12M` contains 3 directories: `0,1,2`.  
+`WebFace42M` contains 10 directories: `0,1,2,3,4,5,6,7,8,9`.
 
 ## 2. Create Shuffled Rec File for DALI
 
