@@ -5,7 +5,7 @@ from easydict import EasyDict as edict
 # mount -t tmpfs -o size=140G  tmpfs /train_tmp
 
 config = edict()
-config.margin_list = (1.0, 0.5, 0.0)
+config.margin_list = (1.0, 0.0, 0.4)
 config.network = "r50"
 config.resume = False
 config.output = None
@@ -19,9 +19,9 @@ config.lr = 0.1
 config.verbose = 2000
 config.dali = False
 
-config.rec = "/train_tmp/faces_emore"
-config.num_classes = 85742
-config.num_image = 5822653
+config.rec = "/train_tmp/WebFace4M"
+config.num_classes = 205990
+config.num_image = 4235242
 config.num_epoch = 20
 config.warmup_epoch = 0
 config.val_targets = ['lfw', 'cfp_fp', "agedb_30"]
