@@ -12,11 +12,14 @@ config.output = None
 config.embedding_size = 512
 config.sample_rate = 1.0
 config.fp16 = True
+
+
+config.optimizer = "adamw"
 config.momentum = 0.9
-config.weight_decay = 1e-4
+config.weight_decay = 0.1
 config.batch_size = 128
-config.lr = 0.1
-config.verbose = 2000
+config.lr = 0.001
+config.verbose = 100
 config.dali = False
 
 config.rec = "/group/20002/train_data/ms1m-retinaface-t1"

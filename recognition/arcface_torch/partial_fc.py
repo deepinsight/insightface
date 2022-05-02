@@ -412,7 +412,29 @@ class PartialFCAdamW(torch.nn.Module):
         logits = self.margin_softmax(logits, labels)
         loss = self.dist_cross_entropy(logits, labels)
         return loss
+    def state_dict(self, destination=None, prefix="", keep_vars=False):
+        if destination is None: 
+            destination = collections.OrderedDict()
+            destination._metadata = collections.OrderedDict()
 
+        for name, module in self._modules.items():
+            if module is not None:
+                module.state_dict(destination, prefix + name + ".", keep_vars=keep_vars)
+        if self.sample_rate < 1:
+            destination["weight"] = self.weight.detach()
+        else:
+            destination["weight"] = self.weight_activated.data.detach()
+        return destination
+
+    def load_state_dict(self, state_dict, strict: bool = True):
+        if self.sample_rate < 1:
+            self.weight = state_dict["weight"].to(self.weight.device)
+            self.weight_mom.zero_()
+            self.weight_activated.data.zero_()
+            self.weight_activated_mom.zero_()
+            self.weight_index.zero_()
+        else:
+            self.weight_activated.data = state_dict["weight"].to(self.weight_activated.data.device)
 class DistCrossEntropyFunc(torch.autograd.Function):
     """
     CrossEntropy loss is calculated in parallel, allreduce denominator into single gpu and calculate softmax.
