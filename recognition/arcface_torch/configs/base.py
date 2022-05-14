@@ -10,6 +10,7 @@ config = edict()
 config.margin_list = (1.0, 0.5, 0.0)
 config.network = "r50"
 config.resume = False
+config.save_all_states = False
 config.output = "ms1mv3_arcface_r50"
 
 config.embedding_size = 512

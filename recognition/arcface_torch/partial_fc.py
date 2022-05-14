@@ -429,12 +429,15 @@ class PartialFCAdamW(torch.nn.Module):
     def load_state_dict(self, state_dict, strict: bool = True):
         if self.sample_rate < 1:
             self.weight = state_dict["weight"].to(self.weight.device)
-            self.weight_mom.zero_()
+            self.weight_exp_avg.zero_()
+            self.weight_exp_avg_sq.zero_()
             self.weight_activated.data.zero_()
-            self.weight_activated_mom.zero_()
-            self.weight_index.zero_()
+            self.weight_activated_exp_avg.zero_()
+            self.weight_activated_exp_avg_sq.zero_()
         else:
             self.weight_activated.data = state_dict["weight"].to(self.weight_activated.data.device)
+
+
 class DistCrossEntropyFunc(torch.autograd.Function):
     """
     CrossEntropy loss is calculated in parallel, allreduce denominator into single gpu and calculate softmax.

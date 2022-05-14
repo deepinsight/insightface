@@ -10,34 +10,50 @@ import torch
 from torch import distributed
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
+from torchvision.datasets import ImageFolder
+
 
 def get_dataloader(
     root_dir: str,
     local_rank: int,
     batch_size: int,
     dali = False) -> Iterable:
-    if dali and root_dir != "synthetic":
-        rec = os.path.join(root_dir, 'train.rec')
-        idx = os.path.join(root_dir, 'train.idx')
-        return dali_data_iter(
-            batch_size=batch_size, rec_file=rec,
-            idx_file=idx, num_threads=2, local_rank=local_rank)
+
+    rec = os.path.join(root_dir, 'train.rec')
+    idx = os.path.join(root_dir, 'train.idx')
+    train_set = None
+
+    # Synthetic
+    if root_dir == "synthetic":
+        train_set = SyntheticDataset()
+    # Mxnet RecordIO
+    elif os.path.exists(rec) and os.path.exists(idx):
+        train_set = MXFaceDataset(root_dir=root_dir, local_rank=local_rank)
+    # Image Folder
     else:
-        if root_dir == "synthetic":
-            train_set = SyntheticDataset()
-        else:
-            train_set = MXFaceDataset(root_dir=root_dir, local_rank=local_rank)
-        train_sampler = torch.utils.data.distributed.DistributedSampler(train_set, shuffle=True)
-        train_loader = DataLoaderX(
-            local_rank=local_rank,
-            dataset=train_set,
-            batch_size=batch_size,
-            sampler=train_sampler,
-            num_workers=2,
-            pin_memory=True,
-            drop_last=True,
-        )
-        return train_loader
+        transform = transforms.Compose([
+             transforms.RandomHorizontalFlip(),
+             transforms.ToTensor(),
+             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+             ])
+        train_set = ImageFolder(root_dir, transform)
+    # DALI
+    if dali:
+        return dali_data_iter(
+            batch_size=batch_size, rec_file=rec, idx_file=idx,
+            num_threads=2, local_rank=local_rank)
+
+    train_sampler = torch.utils.data.distributed.DistributedSampler(train_set, shuffle=True)
+    train_loader = DataLoaderX(
+        local_rank=local_rank,
+        dataset=train_set,
+        batch_size=batch_size,
+        sampler=train_sampler,
+        num_workers=2,
+        pin_memory=True,
+        drop_last=True,
+    )
+    return train_loader
 
 class BackgroundGenerator(threading.Thread):
     def __init__(self, generator, local_rank, max_prefetch=6):

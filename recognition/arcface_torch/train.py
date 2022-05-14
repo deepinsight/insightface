@@ -4,20 +4,18 @@ import os
 
 import numpy as np
 import torch
-from typing import List
 from torch import distributed
+from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from backbones import get_model
 from dataset import get_dataloader
-from torch.utils.data import DataLoader
-from lr_scheduler import PolyScheduler
 from losses import CombinedMarginLoss
+from lr_scheduler import PolyScheduler
 from partial_fc import PartialFC, PartialFCAdamW
 from utils.utils_callbacks import CallBackLogging, CallBackVerification
 from utils.utils_config import get_config
 from utils.utils_logging import AverageMeter, init_logging
-from utils.checkpoint import load_backbone, load_partial_fc, get_cur_epoch
 
 assert torch.__version__ >= "1.9.0", "In order to enjoy the features of the new torch, \
 we have upgraded the torch to 1.9.0. torch before than 1.9.0 may not work in the future."
@@ -59,8 +57,6 @@ def main(args):
     backbone = get_model(
         cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size
     ).cuda()
-    start_epoch = get_cur_epoch(cfg)
-    load_backbone(cfg, backbone, start_epoch, rank)
     backbone = torch.nn.parallel.DistributedDataParallel(
         module=backbone, broadcast_buffers=False, device_ids=[args.local_rank], bucket_cap_mb=16,
         find_unused_parameters=True)
@@ -81,23 +77,19 @@ def main(args):
         module_partial_fc = PartialFC(
             margin_loss, cfg.embedding_size, cfg.num_classes,
             cfg.sample_rate, cfg.fp16)
-        load_partial_fc(cfg, module_partial_fc, rank)
         module_partial_fc.train().cuda()
         # TODO the params of partial fc must be last in the params list
         opt = torch.optim.SGD(
-            params=[{"params": backbone.parameters()}, {
-                "params": module_partial_fc.parameters()}],
+            params=[{"params": backbone.parameters()}, {"params": module_partial_fc.parameters()}],
             lr=cfg.lr, momentum=0.9, weight_decay=cfg.weight_decay)
 
     elif cfg.optimizer == "adamw":
         module_partial_fc = PartialFCAdamW(
             margin_loss, cfg.embedding_size, cfg.num_classes,
             cfg.sample_rate, cfg.fp16)
-        load_partial_fc(cfg, module_partial_fc, rank)
         module_partial_fc.train().cuda()
         opt = torch.optim.AdamW(
-            params=[{"params": backbone.parameters()}, {
-                "params": module_partial_fc.parameters()}],
+            params=[{"params": backbone.parameters()}, {"params": module_partial_fc.parameters()}],
             lr=cfg.lr, weight_decay=cfg.weight_decay)
     else:
         raise
@@ -106,20 +98,25 @@ def main(args):
     cfg.warmup_step = cfg.num_image // cfg.total_batch_size * cfg.warmup_epoch
     cfg.total_step = cfg.num_image // cfg.total_batch_size * cfg.num_epoch
 
-    if cfg.resume:
-        global_step = cfg.num_image // cfg.total_batch_size * start_epoch
-    else:
-        global_step = 0
-    last_epoch = -1
-    if cfg.resume and global_step != 0:
-        last_epoch = global_step
     lr_scheduler = PolyScheduler(
         optimizer=opt,
         base_lr=cfg.lr,
         max_steps=cfg.total_step,
         warmup_steps=cfg.warmup_step,
-        last_epoch=last_epoch
+        last_epoch=-1
     )
+
+    start_epoch = 0
+    global_step = 0
+    if cfg.resume:
+        dict_checkpoint = torch.load(os.path.join(cfg.output, f"checkpoint_gpu_{rank}.pt"))
+        start_epoch = dict_checkpoint["epoch"]
+        global_step = dict_checkpoint["global_step"]
+        backbone.module.load_state_dict(dict_checkpoint["state_dict_backbone"])
+        module_partial_fc.load_state_dict(dict_checkpoint["state_dict_softmax_fc"])
+        opt.load_state_dict(dict_checkpoint["state_optimizer"])
+        lr_scheduler.load_state_dict(dict_checkpoint["state_lr_scheduler"])
+        del dict_checkpoint
 
     for key, value in cfg.items():
         num_space = 25 - len(key)
@@ -146,8 +143,7 @@ def main(args):
         for _, (img, local_labels) in enumerate(train_loader):
             global_step += 1
             local_embeddings = backbone(img)
-            loss: torch.Tensor = module_partial_fc(
-                local_embeddings, local_labels, opt)
+            loss: torch.Tensor = module_partial_fc(local_embeddings, local_labels, opt)
 
             if cfg.fp16:
                 amp.scale(loss).backward()
@@ -165,18 +161,24 @@ def main(args):
 
             with torch.no_grad():
                 loss_am.update(loss.item(), 1)
-                callback_logging(global_step, loss_am, epoch,
-                                 cfg.fp16, lr_scheduler.get_last_lr()[0], amp)
+                callback_logging(global_step, loss_am, epoch, cfg.fp16, lr_scheduler.get_last_lr()[0], amp)
 
-                if global_step % cfg.verbose == 0 and global_step > 200:
+                if global_step % cfg.verbose == 0 and global_step > 0:
                     callback_verification(global_step, backbone)
 
-        path_pfc = os.path.join(
-            cfg.output, "softmax_fc_gpu_{}.pt".format(rank))
-        torch.save(module_partial_fc.state_dict(), path_pfc)
+        if cfg.save_all_states:
+            checkpoint = {
+                "epoch": epoch + 1,
+                "global_step": global_step,
+                "state_dict_backbone": backbone.module.state_dict(),
+                "state_dict_softmax_fc": module_partial_fc.state_dict(),
+                "state_optimizer": opt.state_dict(),
+                "state_lr_scheduler": lr_scheduler.state_dict()
+            }
+            torch.save(checkpoint, os.path.join(cfg.output, f"checkpoint_gpu_{rank}.pt"))
+
         if rank == 0:
-            path_module = os.path.join(
-                cfg.output, "model_epoch_{}.pt".format(epoch+1))
+            path_module = os.path.join(cfg.output, "model.pt")
             torch.save(backbone.module.state_dict(), path_module)
 
         if cfg.dali:
@@ -187,8 +189,7 @@ def main(args):
         torch.save(backbone.module.state_dict(), path_module)
 
         from torch2onnx import convert_onnx
-        convert_onnx(backbone.module.cpu().eval(), path_module,
-                     os.path.join(cfg.output, "model.onnx"))
+        convert_onnx(backbone.module.cpu().eval(), path_module, os.path.join(cfg.output, "model.onnx"))
 
     distributed.destroy_process_group()
 
