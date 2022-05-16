@@ -5,8 +5,8 @@ identity on a single server.
 
 ## Requirements
 
-In order to enjoy the features of the new torch, we have upgraded the torch to 1.9.0.
-torch version before than 1.9.0 may not work in the future.
+In order to enjoy the new features of pytorch, we have upgraded the pytorch to 1.9.0.
+The version of pytorch before 1.9.0 may not work in the future.
 
 - Install [PyTorch](http://pytorch.org) (torch>=1.9.0), our doc for [install.md](docs/install.md).
 - (Optional) Install [DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/), our doc for [install_dali.md](docs/install_dali.md).
