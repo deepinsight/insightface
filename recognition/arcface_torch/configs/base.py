@@ -38,3 +38,10 @@ config.frequent = 10
 
 # For Large Sacle Dataset, such as WebFace42M
 config.dali = False 
+
+
+# setup seed
+config.seed = 2048
+
+# dataload numworkers
+config.num_workers = 8
