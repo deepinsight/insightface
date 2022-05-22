@@ -7,17 +7,23 @@ from typing import Iterable
 import mxnet as mx
 import numpy as np
 import torch
+from functools import partial
 from torch import distributed
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
+from utils.utils_distributed_sampler import DistributedSampler
+from utils.utils_distributed_sampler import get_dist_info, worker_init_fn
 
 
 def get_dataloader(
-    root_dir: str,
-    local_rank: int,
-    batch_size: int,
-    dali = False) -> Iterable:
+    root_dir,
+    local_rank,
+    batch_size,
+    dali = False,
+    seed = 2048,
+    num_workers = 2,
+    ) -> Iterable:
 
     rec = os.path.join(root_dir, 'train.rec')
     idx = os.path.join(root_dir, 'train.idx')
@@ -26,9 +32,11 @@ def get_dataloader(
     # Synthetic
     if root_dir == "synthetic":
         train_set = SyntheticDataset()
+
     # Mxnet RecordIO
     elif os.path.exists(rec) and os.path.exists(idx):
         train_set = MXFaceDataset(root_dir=root_dir, local_rank=local_rank)
+
     # Image Folder
     else:
         transform = transforms.Compose([
@@ -37,22 +45,33 @@ def get_dataloader(
              transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
              ])
         train_set = ImageFolder(root_dir, transform)
+
     # DALI
     if dali:
         return dali_data_iter(
             batch_size=batch_size, rec_file=rec, idx_file=idx,
             num_threads=2, local_rank=local_rank)
 
-    train_sampler = torch.utils.data.distributed.DistributedSampler(train_set, shuffle=True)
+    rank, world_size = get_dist_info()
+    train_sampler = DistributedSampler(
+        train_set, num_replicas=world_size, rank=rank, shuffle=True, seed=seed)
+
+    if seed is None:
+        init_fn = None
+    else:
+        init_fn = partial(worker_init_fn, num_workers=num_workers, rank=rank, seed=seed)
+
     train_loader = DataLoaderX(
         local_rank=local_rank,
         dataset=train_set,
         batch_size=batch_size,
         sampler=train_sampler,
-        num_workers=2,
+        num_workers=num_workers,
         pin_memory=True,
         drop_last=True,
+        worker_init_fn=init_fn,
     )
+
     return train_loader
 
 class BackgroundGenerator(threading.Thread):
