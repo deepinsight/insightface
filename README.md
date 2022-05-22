@@ -242,4 +242,4 @@ Main contributors:
 - [Jiankang Deng](https://github.com/jiankangdeng) ``jiankangdeng[at]gmail.com``
 - [Xiang An](https://github.com/anxiangsir) ``anxiangsir[at]gmail.com``
 - [Jack Yu](https://github.com/szad670401) ``jackyu961127[at]gmail.com``
-
+- [Baris Gecer](https://barisgecer.github.io/) ``barisgecer@gmail.com``
