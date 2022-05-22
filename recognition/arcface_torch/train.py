@@ -55,11 +55,11 @@ def main(args):
     )
 
     train_loader = get_dataloader(
-        cfg.rec, 
-        args.local_rank, 
-        cfg.batch_size, 
-        cfg.dali, 
-        cfg.seed, 
+        cfg.rec,
+        args.local_rank,
+        cfg.batch_size,
+        cfg.dali,
+        cfg.seed,
         cfg.num_workers
     )
 

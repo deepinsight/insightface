@@ -32,11 +32,11 @@ def get_dataloader(
     # Synthetic
     if root_dir == "synthetic":
         train_set = SyntheticDataset()
-    
+
     # Mxnet RecordIO
     elif os.path.exists(rec) and os.path.exists(idx):
         train_set = MXFaceDataset(root_dir=root_dir, local_rank=local_rank)
-    
+
     # Image Folder
     else:
         transform = transforms.Compose([
@@ -45,7 +45,7 @@ def get_dataloader(
              transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
              ])
         train_set = ImageFolder(root_dir, transform)
-    
+
     # DALI
     if dali:
         return dali_data_iter(
