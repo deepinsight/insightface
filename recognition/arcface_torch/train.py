@@ -16,7 +16,7 @@ from partial_fc import PartialFC, PartialFCAdamW
 from utils.utils_callbacks import CallBackLogging, CallBackVerification
 from utils.utils_config import get_config
 from utils.utils_logging import AverageMeter, init_logging
-from utils.utils_setup_seed import setup_seed
+from utils.utils_distributed_sampler import setup_seed
 
 assert torch.__version__ >= "1.9.0", "In order to enjoy the features of the new torch, \
 we have upgraded the torch to 1.9.0. torch before than 1.9.0 may not work in the future."
@@ -55,7 +55,13 @@ def main(args):
     )
 
     train_loader = get_dataloader(
-        cfg.rec, local_rank=args.local_rank, batch_size=cfg.batch_size, dali=cfg.dali, seed=cfg.seed, num_workers=cfg.num_workers)
+        cfg.rec, 
+        args.local_rank, 
+        cfg.batch_size, 
+        cfg.dali, 
+        cfg.seed, 
+        cfg.num_workers
+    )
 
     backbone = get_model(
         cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size).cuda()

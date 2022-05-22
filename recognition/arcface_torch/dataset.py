@@ -17,12 +17,12 @@ from utils.utils_distributed_sampler import get_dist_info, worker_init_fn
 
 
 def get_dataloader(
-    root_dir: str,
-    local_rank: int,
-    batch_size: int,
+    root_dir,
+    local_rank,
+    batch_size,
     dali = False,
-    seed=int,
-    num_workers=int,
+    seed = 2048,
+    num_workers = 2,
     ) -> Iterable:
 
     rec = os.path.join(root_dir, 'train.rec')
@@ -53,13 +53,13 @@ def get_dataloader(
             num_threads=2, local_rank=local_rank)
 
     rank, world_size = get_dist_info()
+    train_sampler = DistributedSampler(
+        train_set, num_replicas=world_size, rank=rank, shuffle=True, seed=seed)
 
-    train_sampler = DistributedSampler(train_set, num_replicas=world_size,
-                                       rank=rank, shuffle=True, seed=seed)
-
-    init_fn = partial(
-    worker_init_fn, num_workers=num_workers, rank=rank,
-    seed=seed) if seed is not None else None
+    if seed is None:
+        init_fn = None
+    else:
+        init_fn = partial(worker_init_fn, num_workers=num_workers, rank=rank, seed=seed)
 
     train_loader = DataLoaderX(
         local_rank=local_rank,

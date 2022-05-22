@@ -1,10 +1,25 @@
-# Copyright (c) ChenCVer(from ORBBEC). All rights reserved.
 import math
-import torch
+import os
 import random
+
 import numpy as np
+import torch
 import torch.distributed as dist
 from torch.utils.data import DistributedSampler as _DistributedSampler
+
+
+def setup_seed(seed, cuda_deterministic=True):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    if cuda_deterministic:  # slower, more reproducible
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    else:  # faster, less reproducible
+        torch.backends.cudnn.deterministic = False
+        torch.backends.cudnn.benchmark = True
 
 
 def worker_init_fn(worker_id, num_workers, rank, seed):
@@ -23,11 +38,11 @@ def get_dist_info():
     else:
         rank = 0
         world_size = 1
-    
+
     return rank, world_size
 
 
-def sync_random_seed(seed=None, device='cuda'):
+def sync_random_seed(seed=None, device="cuda"):
     """Make sure different ranks share the same seed.
     All workers must call this function, otherwise it will deadlock.
     This method is generally used in `DistributedSampler`,
@@ -58,20 +73,21 @@ def sync_random_seed(seed=None, device='cuda'):
         random_num = torch.tensor(seed, dtype=torch.int32, device=device)
     else:
         random_num = torch.tensor(0, dtype=torch.int32, device=device)
-    
+
     dist.broadcast(random_num, src=0)
-    
+
     return random_num.item()
 
 
 class DistributedSampler(_DistributedSampler):
-
-    def __init__(self,
-                 dataset,
-                 num_replicas=None,  # world_size
-                 rank=None,  # local_rank
-                 shuffle=True,
-                 seed=0):
+    def __init__(
+        self,
+        dataset,
+        num_replicas=None,  # world_size
+        rank=None,  # local_rank
+        shuffle=True,
+        seed=0,
+    ):
 
         super().__init__(dataset, num_replicas=num_replicas, rank=rank, shuffle=shuffle)
 
@@ -98,11 +114,13 @@ class DistributedSampler(_DistributedSampler):
 
         # add extra samples to make it evenly divisible
         # in case that indices is shorter than half of total_size
-        indices = (indices * math.ceil(self.total_size / len(indices)))[:self.total_size]
+        indices = (indices * math.ceil(self.total_size / len(indices)))[
+            : self.total_size
+        ]
         assert len(indices) == self.total_size
 
         # subsample
-        indices = indices[self.rank:self.total_size:self.num_replicas]
+        indices = indices[self.rank : self.total_size : self.num_replicas]
         assert len(indices) == self.num_samples
 
         return iter(indices)
