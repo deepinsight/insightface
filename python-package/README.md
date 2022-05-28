@@ -67,15 +67,15 @@ Starting from insightface>=0.2, we use onnxruntime as inference backend.
 
 In the latest version of insightface library, we provide following model packs:
 
-Name in **bold** is the default model pack.
+Name in **bold** is the default model pack. **Auto** means we can download the model pack through the python library directly.
 
-| Name           | Detection Model | Recognition Model   | Alignment    | Attributes | Model-Size |
-| -------------- | --------------- | ------------------- | ------------ | ---------- | ---------- |
-| antelopev2 | SCRFD-10GF      | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age | 407MB |
-| **buffalo_l**      | SCRFD-10GF      | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 326MB |
-| buffalo_m      | SCRFD-2.5GF     | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 313MB |
-| buffalo_s      | SCRFD-500MF     | MBF@WebFace600K | 2d106 & 3d68 | Gender&Age | 159MB |
-| buffalo_sc      | SCRFD-500MF     | MBF@WebFace600K | - | - | 16MB |
+| Name          | Detection Model | Recognition Model    | Alignment    | Attributes | Model-Size | Link                                                         | Auto |
+| ------------- | --------------- | -------------------- | ------------ | ---------- | ---------- | ------------------------------------------------------------ | ------------- |
+| antelopev2    | SCRFD-10GF      | ResNet100@Glint360K  | 2d106 & 3d68 | Gender&Age | 407MB      | [link](https://drive.google.com/file/d/18wEUfMNohBJ4K3Ly5wpTejPfDzp-8fI8/view?usp=sharing) | N             |
+| **buffalo_l** | SCRFD-10GF      | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 326MB      | [link](https://drive.google.com/file/d/1qXsQJ8ZT42_xSmWIYy85IcidpiZudOCB/view?usp=sharing) | Y             |
+| buffalo_m     | SCRFD-2.5GF     | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 313MB      | [link](https://drive.google.com/file/d/1net68yNxF33NNV6WP7k56FS6V53tq-64/view?usp=sharing) | N             |
+| buffalo_s     | SCRFD-500MF     | MBF@WebFace600K      | 2d106 & 3d68 | Gender&Age | 159MB      | [link](https://drive.google.com/file/d/1pKIusApEfoHKDjeBTXYB3yOQ0EtTonNE/view?usp=sharing) | N             |
+| buffalo_sc    | SCRFD-500MF     | MBF@WebFace600K      | -            | -          | 16MB       | [link](https://drive.google.com/file/d/19I-MZdctYKmVf3nu5Da3HS6KH5LBfdzG/view?usp=sharing) | Y             |
 
 
 
