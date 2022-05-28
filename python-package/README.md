@@ -21,6 +21,14 @@ and then finally use
 pip install -U insightface
 ```
 
+### Install Inference Backend
+
+For ``insightface<=0.1.5``, we use MXNet as inference backend.
+
+Starting from insightface>=0.2, we use onnxruntime as inference backend.
+
+You have to install ``onnxruntime-gpu`` manually to enable GPU inference, or install ``onnxruntime`` to use CPU only inference.
+
 ## Change Log
  
 ### [0.6] - 2022-01-29
@@ -53,15 +61,7 @@ cv2.imwrite("./t1_output.jpg", rimg)
 
 This quick example will detect faces from the ``t1.jpg`` image and draw detection results on it.
 
-## Inference Backend
 
-For ``insightface<=0.1.5``, we use MXNet as inference backend.
-
-(You may please download all models from [onedrive](https://1drv.ms/u/s!AswpsDO2toNKrUy0VktHTWgIQ0bn?e=UEF7C4), and put them all under `~/.insightface/models/` directory to use this old version)
-
-Starting from insightface>=0.2, we use onnxruntime as inference backend.
-
-(You have to install ``onnxruntime-gpu`` to enable GPU inference)
 
 ## Model Zoo
 
