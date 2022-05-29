@@ -134,7 +134,7 @@ class Operator:
             a = (dy * (y3 - y1) + dx * (x3 - x1)) / det
             return x1 + a * dx, y1 + a * dy
 
-        rotation_coef = 30
+        rotation_coef = 0.5235 #np.pi/6 #30
 
         from imutils import face_utils
         import cv2
@@ -241,8 +241,8 @@ class Operator:
         if include_mask is not None:
             fill_mask = fill_mask | include_mask.astype(np.bool)
         if face.exclude_mask is not None:
-            tcoord_sampling = np.round(self.tcoords.points * face.exclude_mask.shape).astype(np.int)
-            fill_mask[self.mask] =  fill_mask[self.mask] & ~face.exclude_mask[face.exclude_mask.shape[0] - tcoord_sampling[:, 1], tcoord_sampling[:, 0]]
+            tcoord_sampling = np.round(self.tcoords.points[:,::-1] * face.exclude_mask.shape).astype(np.int)
+            fill_mask[self.mask] =  fill_mask[self.mask] & ~face.exclude_mask[face.exclude_mask.shape[0] - tcoord_sampling[:, 0], tcoord_sampling[:, 1]]
 
         mask_mesh = ColouredTriMesh(face.tmesh.points, trilist=face.tmesh.trilist, colours=np.tile(fill_mask, [3, 1]).T)
         mask = rasterize_image(mask_mesh, self.img_shape,pose_angle_deg=trg_angle, cam_dist=4.5)[0]
