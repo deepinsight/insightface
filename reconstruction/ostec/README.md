@@ -12,15 +12,15 @@
  <br/>
 
 <p align="center">
-<img width="12%" src="figures/gifs/im18.gif" style="background-color:white;" />
-<img width="12%" src="figures/gifs/norah.gif" style="background-color:white;" />
-<img width="12%" src="figures/gifs/robin.gif" style="background-color:white;" />
-<img width="12%" src="figures/gifs/teaser2.gif" style="background-color:white;" />
-<img width="12%" src="figures/gifs/teaser3.gif" style="background-color:white;" />
-<img width="12%" src="figures/gifs/teaser4.gif" style="background-color:white;" />
-<img width="12%" src="figures/gifs/teaset5.gif" style="background-color:white;" />
+<img width="12%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/gifs/im18.gif" style="background-color:white; display: inline;" />
+<img width="12%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/gifs/norah.gif" style="background-color:white; display: inline;" />
+<img width="12%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/gifs/robin.gif" style="background-color:white; display: inline;" />
+<img width="12%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/gifs/teaser2.gif" style="background-color:white; display: inline;" />
+<img width="12%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/gifs/teaser3.gif" style="background-color:white; display: inline;" />
+<img width="12%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/gifs/teaser4.gif" style="background-color:white; display: inline;" />
+<img width="12%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/gifs/teaset5.gif" style="background-color:white; display: inline;" />
 </p>
-<p align="center"><img width="100%" src="figures/teaser.jpg" style="background-color:white;" /></p>
+<p align="center"><img width="100%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/teaser.jpg" style="background-color:white;" /></p>
 
 ## Abstract
 
@@ -28,7 +28,7 @@ The last few years have witnessed the great success of non-linear generative mod
 
 ## Overview
 
-<p align="center"><img width="100%" src="figures/overview.jpg" style="background-color:white;" /></p>
+<p align="center"><img width="100%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/overview.jpg" style="background-color:white;" /></p>
 Overview of the method. The proposed approach iteratively optimizes the texture UV-maps for different re-rendered images with their masks. At the end of each optimization, generated images are used to acquire partial UV images by dense landmarks. Finally, the completed UV images are fed to the next iteration for progressive texture building.
 <br/>
 
@@ -114,7 +114,31 @@ OSTeC
 
 ```
 
-### 4. Download Face Segmentation models
+### 4. Download Topology info files
+- Download the topology files here: https://drive.google.com/file/d/1mvb2uDMPNGL1MlBgP6Op00gPdEMQUUWb/view?usp=sharing
+
+- And place it under 'models/topology' directory like the following:
+```
+OSTeC
+│
+└─── models
+     │         .
+     │         .
+     │         .
+     │
+     └─── topology
+          │
+          └─── trilist.pkl
+          │
+          └─── tcoords.pkl
+                    .
+                    .
+
+```
+
+
+
+### 5. Download Face Segmentation models
 - Download the Graphonomy model here: https://drive.google.com/file/d/1eUe18HoH05p0yFUd_sN6GXdTj82aW0m9/view?usp=sharing
 (If the link doesn't work for some reason check the original [Graphonomy](https://github.com/Gaoyiminggithub/Graphonomy) github page and download 'CIHP trained model')
 
@@ -151,8 +175,8 @@ OSTeC
 
 ## More Results
 
-<p align="center"><img width="100%" src="figures/comp2.jpg" /></p>
-<p align="center"><img width="100%" src="figures/comp1.jpg" /></p>
+<p align="center"><img width="100%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/comp2.jpg" /></p>
+<p align="center"><img width="100%" src="https://raw.githubusercontent.com/barisgecer/OSTeC/main/figures/comp1.jpg" /></p>
 <br/>
 
 ## License
