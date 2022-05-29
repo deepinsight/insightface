@@ -1,4 +1,5 @@
 models/*
+!models/topology
 .idea/*
 *.so
 /.ipynb_checkpoints/*

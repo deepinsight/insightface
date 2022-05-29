@@ -41,7 +41,7 @@ Overview of the method. The proposed approach iteratively optimizes the texture 
 ```
 git clone https://github.com/barisgecer/OSTeC --recursive
 cd OSTeC
-conda env create -f environment.yml
+conda env create -f environment.yml -n ostec
 source activate ostec
 ```
 
@@ -128,7 +128,12 @@ OSTeC
 -->
 
 ## Usage
-- Run ```python run_ostec.py --source_dir [source_dir] --save_dir [save_dir] [-f] -i [iterations (default 200)]```
+- Run ```python run_ostec.py --source_dir [source_dir] --save_dir [save_dir] [-f] -i [iterations (default 200)] -m [soft|hard|auto]```
+- Modes (-m or --mode):
+   * soft: keep the original texture for visible parts (recommended when the input image is high resolution, near-frontal, and non-occluded.)
+   * hard: generate all
+   * auto: soft for frontal, hard for profile images
+   * 
 ## More Results
 
 <p align="center"><img width="100%" src="figures/comp2.jpg" /></p>
