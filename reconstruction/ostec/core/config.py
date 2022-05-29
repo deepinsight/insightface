@@ -25,6 +25,7 @@ parser.add_argument('-m', '--mode',default='hard', choices=['soft', 'auto', 'har
                     help='Soft: keep original texture, Hard: generate all, auto: soft for frontal, hard for profile')
 parser.add_argument('-f', '--frontalize', action='store_true', help='Run frontalization at the end')
 parser.add_argument('-p', '--pickle', action='store_true', help='Save pickle with everything')
+parser.add_argument('-g', '--ganfit', action='store_true', help='Reconstruction from GANFit is a must. If not raised, it is automatic: GANFit rec. if pickle found, Deep3DRecon otherwise.')
 parser.add_argument('--iterations_frontalize', default=300, help='Number of optimization steps for each batch', type=int)
 
 parser.add_argument('--load_last', default='', help='Start with embeddings from directory')

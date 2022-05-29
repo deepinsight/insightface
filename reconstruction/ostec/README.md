@@ -114,6 +114,21 @@ OSTeC
 
 ```
 
+### 4. Download Face Segmentation models
+- Download the Graphonomy model here: https://drive.google.com/file/d/1eUe18HoH05p0yFUd_sN6GXdTj82aW0m9/view?usp=sharing
+(If the link doesn't work for some reason check the original [Graphonomy](https://github.com/Gaoyiminggithub/Graphonomy) github page and download 'CIHP trained model')
+
+- And place it under 'models' directory like the following:
+```
+OSTeC
+│
+└─── models
+     │
+     └─── Graphonomy
+         │
+         └─── inference.pth
+```
+
 <!--- ### 4. Download StyleGANv2 model
 - Download the model from the original repo: https://nvlabs-fi-cdn.nvidia.com/stylegan2/networks/stylegan2-ffhq-config-f.pkl
 And place it under 'models' directory like the following:
@@ -150,6 +165,7 @@ OSTeC
 - Our projection relies on NVIDIA's [StyleGANv2](https://github.com/NVlabs/stylegan2)
 - Thanks [@jiankangdeng](https://jiankangdeng.github.io/) for providing Face Recognition and Landmark Detection models
 - We use [MTCNN](https://github.com/ipazc/mtcnn) for face detection
+- We use [Graphonomy](https://github.com/Gaoyiminggithub/Graphonomy) for face segmentation (i.e. to exclude hairs, occlusion)
 - 3D face reconstruction has been originally solved by [GANFit](https://github.com/barisgecer/GANFit). However, since it is commercialized and will not be public, I had to re-implement the ports for [Deep3DFaceRecon_pytorch](https://github.com/sicxu/Deep3DFaceRecon_pytorch).
 - We initialize StyleGAN parameters by [Style-Encoder](https://github.com/rolux/stylegan2encoder/issues/2) (by [@rolux](https://github.com/rolux), [@pbaylies](https://github.com/pbaylies)).
 - Thanks [Zhang et al.](https://richzhang.github.io/PerceptualSimilarity/) for VGG16 model

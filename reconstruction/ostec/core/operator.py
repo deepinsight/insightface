@@ -10,6 +10,7 @@ import time
 from utils.ganfit_camera import apply_camera_only3d, get_pose
 from utils.utils import *
 from core.arcface_handler import Arcface_Handler
+import cv2
 
 class Face:
     def __init__(self, tmesh,
@@ -188,7 +189,8 @@ class Operator:
             cv2.fillConvexPoly(mask, vertices, 1)
 
         final_mask = mask * (1 - mask_mouth)
-        # final_mask = binary_erosion(final_mask, disk(5))
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        final_mask = cv2.erode(final_mask, kernel, iterations=1)
         return im * (np.tile(np.expand_dims(final_mask, 2), [1, 1, 3])), final_mask
 
     def render_uv_image(self, generated, tcoords):
@@ -257,10 +259,10 @@ class Operator:
         landmarks = landmarks[:,::-1]
         landmarks[:,0] = 1 - landmarks[:,0]
         aligned_meshes = aligned_meshes[self.mask]
-
+        #TODO: landmarks to heatmaps
         return imgs, masks, landmarks, aligned_meshes
 
-    def get_tmesh(self, im, reconstruction_dict):
+    def get_tmesh(self, im, reconstruction_dict, face_mask):
         id_features = self.arcface_handler.get_identity_features(im, reconstruction_dict['dense_lms'][self.lms_ind])
 
         _, yaw_angle, _ = reconstruction_dict['euler_angles']
@@ -271,6 +273,11 @@ class Operator:
         landmarks = reconstruction_dict['dense_lms'][self.lms_ind].astype(np.int32)
 
         im_masked, mask_landmarks = self.mask_face(np.array(im_menpo2PIL(im)), landmarks, yaw_angle)
+
+        if face_mask is not None:
+            im_masked = im_masked * np.repeat(np.expand_dims(np.array(face_mask,np.bool),2),3,2)
+            mask_landmarks *= np.array(face_mask, np.uint8)
+
         im_masked = fill_UV(im_PIL2menpo(im_masked))
         im_masked.pixels = np.concatenate([im_masked.pixels, np.expand_dims(mask_landmarks,0)],0)
         img_uv_src = self.render_uv_image(im_masked, dense_lms[self.mask])
@@ -402,7 +409,7 @@ class Operator:
 
         return face, results_dict
 
-    def run(self, im, reconstruction_dict):
+    def run(self, im, reconstruction_dict, face_mask=None):
         start = time.time()
         print('Preprocessing...', end=" ")
         # GANFit compatibility
@@ -415,7 +422,7 @@ class Operator:
             reconstruction_dict['euler_angles'] =  get_pose(reconstruction_dict['camera_params'])
 
         # Prepare Textured Trimesh with visible part of the face
-        face = self.get_tmesh(im, reconstruction_dict)
+        face = self.get_tmesh(im, reconstruction_dict, face_mask)
 
         img_uv_src = face.img_uv_src.copy()
         angle_uv_src = face.angle_uv_src.copy()
