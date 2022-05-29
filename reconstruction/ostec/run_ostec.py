@@ -11,6 +11,7 @@ import argparse
 from argparse import Namespace
 import menpo.io as mio
 import menpo.image
+import cv2
 import sys
 sys.path.append("external/stylegan2")
 sys.path.append("external/deep3dfacerecon")
@@ -40,7 +41,8 @@ def main(args):
             if not os.path.isfile(save_path.replace(ext, '_uv.'+ext)):
                 print('Started: ' + path)
                 start = time.time()
-                img = mio.import_image(path)
+                #img = mio.import_image(path)
+                img = menpo.image.Image(np.transpose(cv2.imread(path)[:,:,::-1],[2,0,1])/255.0)
 
                 if os.path.isfile(pkl_path): # GANFit mode
                     fitting = mio.import_pickle(pkl_path)
@@ -51,9 +53,9 @@ def main(args):
                     img = menpo.image.Image(fitting['input'])
 
                 final_uv, results_dict = operator.run(img, fitting)
-                mio.export_image(final_uv, save_path.replace(ext,'_uv.'+ext))
+                mio.export_image(final_uv, save_path.replace(ext,'_uv'+ext))
                 if args.frontalize:
-                    mio.export_image(results_dict['frontal'], save_path.replace(ext,'_frontal.'+ext))
+                    mio.export_image(results_dict['frontal'], save_path.replace(ext,'_frontal'+ext))
                 if args.pickle:
                     mio.export_pickle(results_dict, save_path.replace(ext,'.pkl'))
 
