@@ -1,0 +1,7 @@
+models/*
+.idea/*
+*.so
+/.ipynb_checkpoints/*
+results/*
+.stylegan2-cache/*
+samples/*
