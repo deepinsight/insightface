@@ -133,7 +133,7 @@ OSTeC
    * soft: keep the original texture for visible parts (recommended when the input image is high resolution, near-frontal, and non-occluded.)
    * hard: generate all
    * auto: soft for frontal, hard for profile images
-   * 
+
 ## More Results
 
 <p align="center"><img width="100%" src="figures/comp2.jpg" /></p>

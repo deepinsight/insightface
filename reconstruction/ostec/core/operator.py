@@ -167,7 +167,7 @@ class Operator:
             vertices = cv2.convexHull(shape[ind])
             mask = np.zeros(im.shape[:2], np.uint8)
             cv2.fillConvexPoly(mask, vertices, 1)
-        elif (yaw_angle > -rotation_coef):
+        elif (yaw_angle < -rotation_coef):
             ind = np.ones(shape.shape[0]).astype(np.bool)
             ind[0:6] = False
             ind[17:22] = False
