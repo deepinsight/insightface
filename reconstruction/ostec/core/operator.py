@@ -94,19 +94,19 @@ class Face:
 class Operator:
     def __init__(self, args):
         self.tcoords_full = mio.import_pickle('models/topology/tcoords_full.pkl')
-        self.tcoords = mio.import_pickle('models/topology/tcoords.pkl')
-        self.mask = mio.import_pickle('models/topology/mask_full2crop.pkl')
+        self.tcoords = mio.import_pickle('models/topology/tcoords_alex.pkl')
+        self.mask = mio.import_pickle('models/topology/mask_full2crop.pkl') | True
         self.tight_mask = mio.import_pickle('models/topology/mask_full2tightcrop.pkl')
         self.template = mio.import_pickle('models/topology/all_all_all_crop_mean.pkl')
         self.lms_ind = mio.import_pickle('models/topology/all_all_all_lands_ids.pkl')
         self.img_shape = [1024, 1024] # 2048
 
-        self.uv_shape = [1024, 1024]
+        self.uv_shape = [1024, 1536]
         uv_mesh = self.tcoords.copy().points[:, ::-1]
         uv_mesh[:, 0] = 1 - uv_mesh[:, 0]
         uv_mesh *= self.uv_shape
         self.uv_mesh = np.concatenate([uv_mesh, uv_mesh[:, 0:1] * 0], 1)
-        self.uv_trilist = self.template.trilist
+        self.uv_trilist = mio.import_pickle('models/topology/trilist_full.pkl') #self.template.trilist
 
         self.args = args
         self.mode = args.mode # 'soft', 'hard', 'auto'
