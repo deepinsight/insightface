@@ -98,7 +98,7 @@ class PerceptualModel:
             self.perc_model = None
         self.ref_img = None
         self.ref_weight = None
-        self.ref_landmarks = None
+        self.ref_heatmaps = None
         self.perceptual_model = None
         self.ref_img_features = None
         self.features_weight = None
@@ -161,11 +161,12 @@ class PerceptualModel:
         landmark_model = Landmark_Handler(self.args, self.sess, generated_image/255)
         landmark_model.load_model()
         ibug84to68_ind = list(range(0, 33, 2)) + list(range(33, 84))
+        self.generated_heatmaps = tf.gather(landmark_model.lms_heatmap_prediction, ibug84to68_ind, axis=3)
         self.generated_landmarks = tf.gather(landmark_model.pts_predictions, ibug84to68_ind, axis=1)
 
-        self.ref_landmarks = tf.get_variable('ref_landmarks', shape=self.generated_landmarks.shape,
-                                               dtype='float32', initializer=tf.initializers.zeros())
-        self.add_placeholder("ref_landmarks")
+        self.ref_heatmaps = tf.get_variable('ref_heatmaps', shape=self.generated_heatmaps.shape,
+                                            dtype='float32', initializer=tf.initializers.zeros())
+        self.add_placeholder("ref_heatmaps")
 
         self.generated_id, vars, _ = arcface_handler.get_input_features(generated_image / 255, self.generated_landmarks[:, :, ::-1])
         self.init_id_vars = tf.variables_initializer(vars)
@@ -209,7 +210,7 @@ class PerceptualModel:
                 tflib.convert_images_from_uint8(generated_image_tensor, nhwc_to_nchw=True), self.stub))
         # - discriminator_network.get_output_for(tflib.convert_images_from_uint8(ref_img, nhwc_to_nchw=True), stub)
         if self.landmark_loss is not None:
-            self.loss += self.landmark_loss * tf.math.reduce_mean(tf.reduce_sum(tf.pow(self.ref_landmarks - self.generated_landmarks,2),2))
+            self.loss += self.landmark_loss * tf.math.reduce_mean(tf.reduce_sum(tf.pow(self.ref_heatmaps - self.generated_heatmaps, 2), 2))
         if self.id_loss is not None:
             self.id_loss_comp = tf.losses.cosine_distance(self.generated_id, self.org_features, 1)
             self.loss += self.id_loss * self.id_loss_comp
@@ -232,11 +233,16 @@ class PerceptualModel:
         self.sess.graph.finalize()  # Graph is read-only after this statement.
 
 
-    def set_reference_images(self, images_PIL, masks_PIL, landmarks, id_features):
+    def set_reference_images(self, images_PIL, masks_PIL, heatmaps, id_features):
         assert(len(images_PIL) != 0 and len(images_PIL) <= self.batch_size)
         loaded_image = load_images(images_PIL, self.img_size, sharpen=self.sharpen_input)
         loaded_mask = load_images(masks_PIL, self.img_size, sharpen=self.sharpen_input, im_type='L')
-        loaded_landmarks = [lms*self.img_size for lms in landmarks]
+        heatmaps = np.transpose(np.array(heatmaps), [0, 2, 3, 1])
+        input_size = np.array(heatmaps).shape[2]
+        output_size = int(self.ref_heatmaps.shape[1])
+        bin_size = input_size // output_size
+        loaded_heatmaps = heatmaps.reshape((heatmaps.shape[0], output_size, bin_size,
+                                             output_size, bin_size, 68)).max(4).max(2)
         image_features = None
         if self.perceptual_model is not None:
             image_features = self.perceptual_model.predict_on_batch(preprocess_input(np.array(loaded_image)))
@@ -283,7 +289,7 @@ class PerceptualModel:
         self.assign_placeholder("ref_weight", image_mask)
         self.assign_placeholder("ref_img", loaded_image)
         self.assign_placeholder("org_features", id_features)
-        self.assign_placeholder("ref_landmarks", loaded_landmarks)
+        self.assign_placeholder("ref_heatmaps", loaded_heatmaps)
 
     def optimize(self, vars_to_optimize, iterations=200):
         self.sess.run(self._reset_global_step)

@@ -10,7 +10,8 @@ import time
 from utils.ganfit_camera import apply_camera_only3d, get_pose
 from utils.utils import *
 from core.arcface_handler import Arcface_Handler
-import cv2
+
+from utils import generate_heatmap
 
 class Face:
     def __init__(self, tmesh,
@@ -256,11 +257,17 @@ class Operator:
                                                                projected_mesh[self.lms_ind][:,::-1])
         aligned_meshes = align_mesh2stylegan(projected_mesh, transformation_params)
         landmarks = aligned_meshes[self.lms_ind]
+        landmarks[:,1] = 1 - landmarks[:,1]
+
+        heatmaps = generate_heatmap.generate_heatmaps(width=self.args.model_res,
+                                     height=self.args.model_res,
+                                     points=landmarks*self.args.model_res,
+                                     sigma=25)
+
         landmarks = landmarks[:,::-1]
-        landmarks[:,0] = 1 - landmarks[:,0]
         aligned_meshes = aligned_meshes[self.mask]
-        #TODO: landmarks to heatmaps
-        return imgs, masks, landmarks, aligned_meshes
+
+        return imgs, masks, heatmaps, aligned_meshes
 
     def get_tmesh(self, im, reconstruction_dict, face_mask):
         id_features = self.arcface_handler.get_identity_features(im, reconstruction_dict['dense_lms'][self.lms_ind])
@@ -377,12 +384,12 @@ class Operator:
 
     def run_iteration(self, face, key, trg_angle):
 
-        imgs, masks, landmarks, aligned_meshes = self.create_align_syn(face, trg_angle, face.uv_blending[key])
+        imgs, masks, heatmaps, aligned_meshes = self.create_align_syn(face, trg_angle, face.uv_blending[key])
 
         # Run Optimizer
         generated_imgs, generated_dlatents = self.projector.run_projection({key: imgs},
                                                                            {key: masks},
-                                                                           {key: landmarks},
+                                                                           {key: heatmaps},
                                                                            face.id_features)
 
         img_uv = self.render_uv_image(im_PIL2menpo(generated_imgs[key]), aligned_meshes)
@@ -497,13 +504,13 @@ class Operator:
             print('Frontalizing...')
             imgs = {}
             masks = {}
-            landmarks = {}
+            heatmaps = {}
             self.projector.perceptual_model.assign_placeholder('id_loss', self.args.use_id_loss_frontalize)
 
-            imgs['frontal'], masks['frontal'], landmarks['frontal'], _ = self.create_align_syn(face, trg_angle=[0, 0, 0], include_mask=face.uv_blending[key])
-            generated_imgs, generated_dlatents = self.projector.run_projection(imgs, masks, landmarks, face.id_features, iterations= self.args.iterations_frontalize)
+            imgs['frontal'], masks['frontal'], heatmaps['frontal'], _ = self.create_align_syn(face, trg_angle=[0, 0, 0], include_mask=face.uv_blending[key])
+            generated_imgs, generated_dlatents = self.projector.run_projection(imgs, masks, heatmaps, face.id_features, iterations= self.args.iterations_frontalize)
             results_dict['frontal'] = im_PIL2menpo(generated_imgs['frontal'])
-            results_dict['frontalize'] = [imgs, masks, landmarks, face.id_features]
+            results_dict['frontalize'] = [imgs, masks, heatmaps, face.id_features]
             print('Done in %.2f secs' % (time.time() - start))
 
         return final_uv, results_dict

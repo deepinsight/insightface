@@ -63,7 +63,7 @@ parser.add_argument('--use_lpips_loss', default=100, help='Use LPIPS perceptual 
 parser.add_argument('--use_l1_penalty', default=0.5, help='Use L1 penalty on latents; 0 to disable, > 0 to scale.', type=float)
 parser.add_argument('--use_discriminator_loss', default=0.5, help='Use trained discriminator to evaluate realism.', type=float)
 parser.add_argument('--use_adaptive_loss', default=False, help='Use the adaptive robust loss function from Google Research for pixel and VGG feature loss.', type=str2bool, nargs='?', const=True)
-parser.add_argument('--use_landmark_loss', default=5, help='Use landmark loss; 0 to disable, > 0 to scale.', type=float)
+parser.add_argument('--use_landmark_loss', default=200, help='Use landmark loss; 0 to disable, > 0 to scale.', type=float)
 parser.add_argument('--use_id_loss', default=10, help='Use landmark loss; 0 to disable, > 0 to scale.', type=float)
 parser.add_argument('--use_id_loss_frontalize', default=100, help='Use landmark loss; 0 to disable, > 0 to scale.', type=float)
 

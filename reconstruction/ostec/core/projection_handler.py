@@ -76,7 +76,7 @@ class Projection_Handler():
         self.perceptual_model.build_perceptual_model(self.generator, discriminator_network)
         self.perceptual_model.assign_placeholder('id_loss', args.use_id_loss)
 
-    def run_projection(self, input_images, masks, landmarks, id_features, iterations=None):
+    def run_projection(self, input_images, masks, heatmaps, id_features, iterations=None):
         n_iteration = self.args.iterations
         if iterations is not None:
             n_iteration = iterations
@@ -90,7 +90,7 @@ class Projection_Handler():
             # tqdm._instances.clear()
             images_batch = [input_images[x] for x in names]
             masks_batch =  [masks[x] for x in names]
-            landmarks_batch =  [landmarks[x] for x in names]
+            heatmaps_batch =  [heatmaps[x] for x in names]
             # if args.output_video:
             #     video_out = {}
             #     for name in names:
@@ -118,7 +118,7 @@ class Projection_Handler():
                 self.generator.set_dlatents(dlatents)
 
             ## OPTIMIZATION
-            self.perceptual_model.set_reference_images(images_batch, masks_batch, landmarks_batch, id_features)
+            self.perceptual_model.set_reference_images(images_batch, masks_batch, heatmaps_batch, id_features)
 
             op = self.perceptual_model.optimize(self.generator.dlatent_variable, iterations=n_iteration)
             pbar = tqdm(op, leave=False, total=n_iteration)

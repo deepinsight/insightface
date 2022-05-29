@@ -24,9 +24,9 @@ class Landmark_Handler():
 
         net_model = networks.DNFaceMultiView('')
         with tf.variable_scope('net'):
-            lms_heatmap_prediction, states = net_model._build_network(generated_image, datas=None, is_training=False,
+            self.lms_heatmap_prediction, states = net_model._build_network(generated_image, datas=None, is_training=False,
                                                                       n_channels=n_landmarks)
-            self.pts_predictions = tf_heatmap_to_lms(lms_heatmap_prediction)
+            self.pts_predictions = tf_heatmap_to_lms(self.lms_heatmap_prediction)
             variables = tf.all_variables()
             variables_to_restore = [v for v in variables if v.name.split('/')[0] == 'net']
             self.saver = tf.train.Saver(variables_to_restore)
