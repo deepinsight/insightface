@@ -14,6 +14,7 @@ from menpo.shape import TriMesh, TexturedTriMesh, ColouredTriMesh
 from menpo.image import Image
 from utils.image_rasterization import *
 import menpo.io as mio
+import os
 
 gold = (244/256,178/256,88/256)
 green = (26/256,140/256,57/256)
@@ -140,3 +141,30 @@ def unpack_bz2(src_path):
     with open(dst_path, 'wb') as fp:
         fp.write(data)
     return dst_path
+
+
+def fix_obj(fp):
+    os.path.dirname(fp)
+    template = """# Produced by Dimensional Imaging OBJ exporter
+# http://www.di3d.com
+#
+#
+newmtl merged_material
+Ka  0.5 0.5 0.5
+Kd  0.5 0.5 0.5
+Ks  0.47 0.47 0.47
+d 1
+Ns 0
+illum 2
+map_Kd {}.png
+#
+#
+# EOF""".format(os.path.splitext(os.path.basename(fp))[0])
+    with open(os.path.join(os.path.dirname(fp), os.path.splitext(os.path.basename(fp))[0] + '.mtl'), 'w') as f:
+        f.write(template)
+
+    with open(fp, 'r+')  as f:
+        content = f.read()
+        f.seek(0, 0)
+        f.write('mtllib ' + os.path.splitext(os.path.basename(fp))[0] + '.mtl' + '\n' + content)
+
