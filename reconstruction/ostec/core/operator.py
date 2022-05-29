@@ -114,86 +114,6 @@ class Operator:
         self.arcface_handler = Arcface_Handler()
         self.projector = Projection_Handler(args)
 
-        import dlib
-        self.detector = dlib.get_frontal_face_detector()
-        LANDMARKS_MODEL_URL = 'http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2'
-        landmarks_model_path = unpack_bz2(get_file('shape_predictor_68_face_landmarks.dat.bz2',
-                                                LANDMARKS_MODEL_URL, cache_subdir='temp'))
-        self.predictor = dlib.shape_predictor(landmarks_model_path)
-
-
-
-    def mask_face(self, im, landmarks, yaw_angle):
-
-        def closest_point_on_line(line1, line2, point):
-            x1, y1 = line1
-            x2, y2 = line2
-            x3, y3 = point
-            dx, dy = x2 - x1, y2 - y1
-            det = dx * dx + dy * dy
-            a = (dy * (y3 - y1) + dx * (x3 - x1)) / det
-            return x1 + a * dx, y1 + a * dy
-
-        rotation_coef = 0.5235 #np.pi/6 #30
-
-        from imutils import face_utils
-        import cv2
-        rects = self.detector(im, 1)
-
-        if len(rects)>0:
-            rect = rects[0]
-            shape = self.predictor(im, rect)
-            shape = face_utils.shape_to_np(shape)
-        else:
-            print('Dlib detector failed! Landmarks are from mesh!')
-            shape = landmarks
-
-        mask_mouth = np.zeros(im.shape[:2], np.uint8)
-        cv2.fillPoly(mask_mouth, [shape[60:68, :]], 1)
-
-        l_eye = np.mean(shape[36:42],0)
-        r_eye = np.mean(shape[42:48],0)
-        nose = np.mean(shape[27:31],0)
-        nose2eyes = closest_point_on_line(l_eye, r_eye, nose)
-        l_dist = np.linalg.norm(l_eye - nose2eyes)
-        r_dist = np.linalg.norm(r_eye - nose2eyes)
-
-        if (yaw_angle > rotation_coef):
-            ind = np.ones(shape.shape[0]).astype(np.bool)
-            ind[10:16] = False
-            ind[22:27] = False
-            ind[42:48] = False
-            shape[17:22, 1] = 0
-
-            # we extract the face
-            vertices = cv2.convexHull(shape[ind])
-            mask = np.zeros(im.shape[:2], np.uint8)
-            cv2.fillConvexPoly(mask, vertices, 1)
-        elif (yaw_angle < -rotation_coef):
-            ind = np.ones(shape.shape[0]).astype(np.bool)
-            ind[0:6] = False
-            ind[17:22] = False
-            ind[36:42] = False
-            shape[22:27, 1] = 0
-
-            # we extract the face
-            vertices = cv2.convexHull(shape[ind])
-            mask = np.zeros(im.shape[:2], np.uint8)
-            cv2.fillConvexPoly(mask, vertices, 1)
-        else:
-            shape[17:22, 1] = 0
-            shape[22:27, 1] = 0
-
-            # we extract the face
-            vertices = cv2.convexHull(shape)
-            mask = np.zeros(im.shape[:2], np.uint8)
-            cv2.fillConvexPoly(mask, vertices, 1)
-
-        final_mask = mask * (1 - mask_mouth)
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        final_mask = cv2.erode(final_mask, kernel, iterations=1)
-        return im * (np.tile(np.expand_dims(final_mask, 2), [1, 1, 3])), final_mask
-
     def render_uv_image(self, generated, tcoords):
         uv_tmesh = TexturedTriMesh(self.uv_mesh, tcoords, generated, trilist=self.uv_trilist)
         bcs = rasterize_barycentric_coordinate_images(uv_tmesh, self.uv_shape)
@@ -277,10 +197,9 @@ class Operator:
         visibility_threshold = 0.4
         dense_lms = reconstruction_dict['dense_lms'] / im.shape[::-1]
         dense_lms[:, 1] = 1 - dense_lms[:, 1]
-        landmarks = reconstruction_dict['dense_lms'][self.lms_ind].astype(np.int32)
 
-        im_masked, mask_landmarks = self.mask_face(np.array(im_menpo2PIL(im)), landmarks, yaw_angle)
-
+        im_masked = np.array(im_menpo2PIL(im))
+        mask_landmarks = np.ones_like(im_masked[:,:,0])
         if face_mask is not None:
             im_masked = im_masked * np.repeat(np.expand_dims(np.array(face_mask,np.bool),2),3,2)
             mask_landmarks *= np.array(face_mask, np.uint8)
