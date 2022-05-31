@@ -44,4 +44,4 @@ config.dali = False
 config.seed = 2048
 
 # dataload numworkers
-config.num_workers = 8
+config.num_workers = 2
