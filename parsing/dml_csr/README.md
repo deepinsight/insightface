@@ -42,7 +42,7 @@ CUDA_VISIBLE_DEVICES="$GPU" python -m torch.distributed.launch --nproc_per_node=
 --gpu "$GPU" --batch-size 7 --input-size 473,473 --snapshot-dir "$snapshot" --num-classes 19 --epochs 200 --schp-start 150
 ```
 
-For testing
+For testing [pretrained models](https://drive.google.com/file/d/1-PjUts1AMzXNyvw3VaJQmg43GJbfEpEQ/view?usp=sharing)
 ```
 python test.py --data-dir "$dataset" --out-dir "$out_dir" --restore-from "$snapshot" --gpu "$GPU" --batch-size 7 --input-size 473,473 --dataset test --num-classes 19
 ```
