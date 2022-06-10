@@ -181,11 +181,13 @@ More details see
   pages={4690--4699},
   year={2019}
 }
-@inproceedings{an2022pfc,
-  title={Killing Two Birds with One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
-  author={An, Xiang and Deng, Jiangkang and Guo, Jia and Feng, Ziyong and Zhu, Xuhan and Jing, Yang and Tongliang, Liu},
-  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
-  year={2022}
+@inproceedings{An_2022_CVPR,
+    author={An, Xiang and Deng, Jiankang and Guo, Jia and Feng, Ziyong and Zhu, XuHan and Yang, Jing and Liu, Tongliang},
+    title={Killing Two Birds With One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
+    booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+    month={June},
+    year={2022},
+    pages={4042-4051}
 }
 @inproceedings{zhu2021webface260m,
   title={Webface260m: A benchmark unveiling the power of million-scale deep face recognition},
