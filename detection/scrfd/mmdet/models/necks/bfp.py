@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import ConvModule, xavier_init
 from mmcv.cnn.bricks import NonLocal2d
-
+import numpy as np
 from ..builder import NECKS
 
 
@@ -85,7 +85,7 @@ class BFP(nn.Module):
                     inputs[i], size=gather_size, mode='nearest')
             feats.append(gathered)
 
-        bsf = sum(feats) / len(feats)
+        bsf = np.mean(feats)
 
         # step 2: refine gathered features
         if self.refine_type is not None:
