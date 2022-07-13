@@ -32,6 +32,7 @@ def get_dataloader(
     # Synthetic
     if root_dir == "synthetic":
         train_set = SyntheticDataset()
+        dali = False
 
     # Mxnet RecordIO
     elif os.path.exists(rec) and os.path.exists(idx):
