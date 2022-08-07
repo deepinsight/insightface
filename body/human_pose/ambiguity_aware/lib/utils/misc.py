@@ -48,9 +48,8 @@ def init_weights(model):
             m.bias.data.zero_()
     
 def save_pickle(data, save_path):
-    f = open(save_path, "wb")
-    pkl.dump(data, f)
-    f.close()
+    with open(save_path, "wb") as f:
+        pkl.dump(data, f)
     print(f"=> saved to {save_path}")
 
 def load_pickle(load_path):
