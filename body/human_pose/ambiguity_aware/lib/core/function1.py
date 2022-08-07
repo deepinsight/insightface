@@ -319,9 +319,8 @@ def evaluate(val_loader, pose_model, config, is_train=False):
             factor = 0.680019 if prefix == "h36m" else 0.7577316
     if not use_same_norm_3d: 
         factor_filename = f"../data/{prefix}_test_factor_3d.pkl" if not is_train else f"../data/{prefix}_train_factor_3d.pkl"
-        f = open(factor_filename, "rb") 
-        factor = torch.from_numpy(pkl.load(f)).cuda()
-        f.close()
+        with open(factor_filename, "rb") as f:
+            factor = torch.from_numpy(pkl.load(f)).cuda()
     # print('eval with 15 joints')
     # exclude spine: 14, neck: 15
     # joint_indices = list(range(14)) + [16]
