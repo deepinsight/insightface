@@ -153,9 +153,8 @@ def get_gt_boxes_from_txt(gt_path, cache_dir):
 
     cache_file = os.path.join(cache_dir, 'gt_cache.pkl')
     if os.path.exists(cache_file):
-        f = open(cache_file, 'rb')
-        boxes = pickle.load(f)
-        f.close()
+        with open(cache_file, 'rb') as f:
+            boxes = pickle.load(f)
         return boxes
 
     f = open(gt_path, 'r')
@@ -188,9 +187,8 @@ def get_gt_boxes_from_txt(gt_path, cache_dir):
             current_boxes.append(box)
             continue
 
-    f = open(cache_file, 'wb')
-    pickle.dump(boxes, f)
-    f.close()
+    with open(cache_file, 'wb') as f:
+        pickle.dump(boxes, f)
     return boxes
 
 
