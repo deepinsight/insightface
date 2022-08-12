@@ -4,6 +4,10 @@ JMLR is an efficient high accuracy face reconstruction approach which achieved [
 [Perspective Projection Based Monocular 3D Face Reconstruction Challenge](https://tianchi.aliyun.com/competition/entrance/531961/introduction) 
 of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022).
 
+## Method Pipeline
+
+
+<img src="https://github.com/nttstar/insightface-resources/blob/master/images/jmlr_pipeline.jpg?raw=true" width="800" alt="jmlr-pipeline"/>
 
 
 ## Data preparation
