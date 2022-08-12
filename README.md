@@ -10,6 +10,11 @@ InsightFace project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?su
 For all main contributors, please check [contributing](#contributing).
 
 ## Top News
+
+**`2022-08-12`**: We achieved Rank-1st of 
+[Perspective Projection Based Monocular 3D Face Reconstruction Challenge](https://tianchi.aliyun.com/competition/entrance/531961/introduction)
+of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), code in [JMLR](reconstruction/jmlr).
+
 **`2022-03-30`**: [Partial FC](https://arxiv.org/abs/2203.15565) accepted by CVPR-2022.
 
 **`2022-02-23`**: [SCRFD](detection/scrfd) accepted by [ICLR-2022](https://iclr.cc/Conferences/2022).
