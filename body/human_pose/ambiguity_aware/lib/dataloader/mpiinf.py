@@ -75,9 +75,8 @@ class MPIINFDataset(Dataset):
                 pkl.dump(factor_3d, f)
         
         if osp.exists(self.scale_path):
-            f = open(self.scale_path, "rb")
-            self.scales = pkl.load(f)['scale']
-            f.close()
+            with open(self.scale_path, "rb") as f:
+                self.scales = pkl.load(f)['scale']
         else:
             if self.use_scaler:
                 pass
@@ -86,9 +85,8 @@ class MPIINFDataset(Dataset):
 
         if self.use_ideal_scale: 
             # scales computed from projection of 3d 
-            f = open("../data/mpi_{}_scales.pkl".format("train" if self.is_train else "valid"), "rb")
-            scales = pkl.load(f)
-            f.close()
+            with open("../data/mpi_{}_scales.pkl".format("train" if self.is_train else "valid"), "rb") as f:
+                scales = pkl.load(f)
             self.kp2ds = self.kp2ds * scales
 
         fp.close()
