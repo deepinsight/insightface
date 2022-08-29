@@ -42,6 +42,8 @@ python inference_simple.py
 
 [pretrained-model](https://drive.google.com/file/d/1qSpqDDLQfcPeFr2b82IZrK8QC_3lci3l/view?usp=sharing)
 
+[projection_matrix.txt](https://drive.google.com/file/d/1joiu-V0qEZxil_AHcg_W726nRxE8Q4dm/view?usp=sharing)
+
 ## Results
 
 <img src="https://github.com/nttstar/insightface-resources/blob/master/images/jmlr_id.jpg?raw=true" width="800" alt="jmlr-id"/>
