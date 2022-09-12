@@ -5,7 +5,7 @@
   <img src="https://insightface.ai/assets/img/custom/logo3.jpg" width="240"/>
 </div>
 
-InsightFace project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) and [Jiankang Deng](https://jiankangdeng.github.io/). 
+InsightFace project is mainly maintained By [Jiankang Deng](https://jiankangdeng.github.io/) and [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project). 
 
 For all main contributors, please check [contributing](#contributing).
 
@@ -243,8 +243,8 @@ year={2019}
 
 Main contributors:
 
-- [Jia Guo](https://github.com/nttstar), ``guojia[at]gmail.com``
 - [Jiankang Deng](https://github.com/jiankangdeng) ``jiankangdeng[at]gmail.com``
+- [Jia Guo](https://github.com/nttstar), ``guojia[at]gmail.com``
 - [Xiang An](https://github.com/anxiangsir) ``anxiangsir[at]gmail.com``
 - [Jack Yu](https://github.com/szad670401) ``jackyu961127[at]gmail.com``
 - [Baris Gecer](https://barisgecer.github.io/) ``barisgecer[at]msn.com``
