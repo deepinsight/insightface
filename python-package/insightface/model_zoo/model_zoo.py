@@ -74,7 +74,7 @@ def get_model(name, **kwargs):
         if model_file is None:
             return None
     else:
-        model_file = name
+        model_file = os.path.join(model_root, name)
     if not osp.exists(model_file) and allow_download:
         model_file = download_onnx('models', model_file, root=root)
     assert osp.exists(model_file), 'model_file should exist'
