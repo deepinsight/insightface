@@ -42,9 +42,9 @@ Please check ``train.py`` for training.
 1. Copy ``rcnn/sample_config.py`` to ``rcnn/config.py``
 2. Download ImageNet pretrained models and put them into ``model/``(these models are not for detection testing/inferencing but training and parameters initialization). 
 
-    ImageNet ResNet50 ([baidu cloud](https://pan.baidu.com/s/1WAkU9ZA_j-OmzO-sdk9whA) and [dropbox](https://www.dropbox.com/s/48b850vmnaaasfl/imagenet-resnet-50.zip?dl=0)). 
+    ImageNet ResNet50 ([baidu cloud](https://pan.baidu.com/s/1WAkU9ZA_j-OmzO-sdk9whA) and [googledrive](https://drive.google.com/file/d/1ibQOCG4eJyTrlKAJdnioQ3tyGlnbSHjy/view?usp=sharing)). 
 
-    ImageNet ResNet152 ([baidu cloud](https://pan.baidu.com/s/1nzQ6CzmdKFzg8bM8ChZFQg) and [dropbox](https://www.dropbox.com/s/8ypcra4nqvm32v6/imagenet-resnet-152.zip?dl=0)).
+    ImageNet ResNet152 ([baidu cloud](https://pan.baidu.com/s/1nzQ6CzmdKFzg8bM8ChZFQg) and [googledrive](https://drive.google.com/file/d/1FEjeiIB4u-XBYdASgkyx78pFybrlKUA4/view?usp=sharing)).
 
 3. Start training with ``CUDA_VISIBLE_DEVICES='0,1,2,3' python -u train.py --prefix ./model/retina --network resnet``.  
 Before training, you can check the ``resnet`` network configuration (e.g. pretrained model path, anchor setting and learning rate policy etc..) in ``rcnn/config.py``.
@@ -56,7 +56,7 @@ Please check ``test.py`` for testing.
 
 ## RetinaFace Pretrained Models
 
-Pretrained Model: RetinaFace-R50 ([baidu cloud](https://pan.baidu.com/s/1C6nKq122gJxRhb37vK0_LQ) or [dropbox](https://www.dropbox.com/s/53ftnlarhyrpkg2/retinaface-R50.zip?dl=0)) is a medium size model with ResNet50 backbone.
+Pretrained Model: RetinaFace-R50 ([baidu cloud](https://pan.baidu.com/s/1C6nKq122gJxRhb37vK0_LQ) or [googledrive](https://drive.google.com/file/d/1_DKgGxQWqlTqe78pw0KavId9BIMNUWfu/view?usp=sharing)) is a medium size model with ResNet50 backbone.
 It can output face bounding boxes and five facial landmarks in a single forward pass.
 
 WiderFace validation mAP: Easy 96.5, Medium 95.6, Hard 90.4. 
