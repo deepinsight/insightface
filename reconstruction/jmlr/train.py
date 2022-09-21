@@ -217,7 +217,9 @@ def main(args):
                     dist_pred = torch.norm(pred_verts_x - pred_verts_y, p=2, dim=-1, keepdim=False)
                     dist_label = torch.norm(label_verts_x - label_verts_y, p=2, dim=-1, keepdim=False)
                     bone_losses.append(F.l1_loss(dist_pred, dist_label) * cfg.lossw_bone3d)
-                dloss['LossBone3d'] = sum(bone_losses)
+                _loss = sum(bone_losses)
+                dloss['Loss'] += _loss
+                dloss['LossBone3d'] = _loss
                         
 
             if cfg.loss_bone2d:
@@ -230,7 +232,9 @@ def main(args):
                     dist_pred = torch.norm(pred_points2d_x - pred_points2d_y, p=2, dim=-1, keepdim=False)
                     dist_label = torch.norm(label_points2d_x - label_points2d_y, p=2, dim=-1, keepdim=False)
                     bone_losses.append(F.l1_loss(dist_pred, dist_label) * cfg.lossw_bone2d)
-                dloss['LossBone2d'] = sum(bone_losses)
+                _loss = sum(bone_losses)
+                dloss['Loss'] += _loss
+                dloss['LossBone2d'] = _loss
                         
             iter_loss = dloss['Loss']
 
