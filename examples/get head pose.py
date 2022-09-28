@@ -1,16 +1,8 @@
 import cv2
 import numpy as np
-import requests
 
 from insightface.app import FaceAnalysis
-
-
-def get_image(url):
-    image_content = requests.get(url).content
-    image = np.asarray(bytearray(image_content), dtype="uint8")
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    return image
-
+from insightface.data import get_image as ins_get_image
 
 ESTIMATE_EYE_DISTANCE = 6  # cm
 
@@ -21,7 +13,7 @@ app = FaceAnalysis(
 )
 app.prepare(ctx_id=0, det_size=(640, 640))
 
-mat = get_image('https://static2.yan.vn/YanNews/2167221/201905/tieu-su-ca-si-den-vau-43ea68db.jpg')
+mat = ins_get_image('t1')
 
 print(mat.shape)
 
