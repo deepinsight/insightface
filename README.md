@@ -11,7 +11,7 @@ For all main contributors, please check [contributing](#contributing).
 
 ## Top News
 
-**`2022-09-22`**: Now we have [web-demos](https://insightface.ai/demos): [face-localization](http://demo.insightface.ai:7007/), [face-recognition](http://demo.insightface.ai:7008/), and [face-swapping](http://demo.insightface.ai:7009/).
+**`2022-09-22`**: Now we have [web-demos](web-demos): [face-localization](http://demo.insightface.ai:7007/), [face-recognition](http://demo.insightface.ai:7008/), and [face-swapping](http://demo.insightface.ai:7009/).
 
 **`2022-08-12`**: We achieved Rank-1st of 
 [Perspective Projection Based Monocular 3D Face Reconstruction Challenge](https://tianchi.aliyun.com/competition/entrance/531961/introduction)
