@@ -153,6 +153,8 @@ def main(args):
             global_step += 1
             local_embeddings = backbone(img)
             loss: torch.Tensor = module_partial_fc(local_embeddings, local_labels)
+            lossShow = loss.clone()  # the loss recorded is average of local batch size
+            loss = loss / cfg.gradient_acc  # take mean value to simulate dividing by total batch size
 
             if cfg.fp16:
                 amp.scale(loss).backward()
@@ -171,7 +173,7 @@ def main(args):
             lr_scheduler.step()
 
             with torch.no_grad():
-                loss_am.update(loss.item(), 1)
+                loss_am.update(lossShow.item(), 1)
                 callback_logging(global_step, loss_am, epoch, cfg.fp16, lr_scheduler.get_last_lr()[0], amp)
 
                 if global_step % cfg.verbose == 0 and global_step > 0:
