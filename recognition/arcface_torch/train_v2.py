@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 from backbones import get_model
 from dataset import get_dataloader
 from losses import CombinedMarginLoss
-from lr_scheduler import PolyScheduler
+from lr_scheduler import get_lr_scheduler
 from partial_fc_v2 import PartialFC_V2
 from utils.utils_callbacks import CallBackLogging, CallBackVerification
 from utils.utils_config import get_config
@@ -104,15 +104,12 @@ def main(args):
         raise
 
     cfg.total_batch_size = cfg.batch_size * world_size
-    cfg.warmup_step = cfg.num_image // cfg.total_batch_size * cfg.warmup_epoch
-    cfg.total_step = cfg.num_image // cfg.total_batch_size * cfg.num_epoch
+    cfg.steps_per_epoch = cfg.num_image // cfg.total_batch_size
+    cfg.warmup_step = cfg.steps_per_epoch * cfg.warmup_epoch
+    cfg.total_step = cfg.steps_per_epoch * cfg.num_epoch
 
-    lr_scheduler = PolyScheduler(
-        optimizer=opt,
-        base_lr=cfg.lr,
-        max_steps=cfg.total_step,
-        warmup_steps=cfg.warmup_step,
-        last_epoch=-1
+    lr_scheduler = get_lr_scheduler(
+        cfg=cfg, optimizer=opt
     )
 
     start_epoch = 0
