@@ -207,5 +207,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Distributed Arcface Training in Pytorch")
     parser.add_argument("config", type=str, help="py config file")
-    parser.add_argument("--local_rank", type=int, default=0, help="local_rank")
+    # torchrun sets the environment variable os.environ["LOCAL_RANK"], while torch.distributed.launch
+    # passes the parameter --local_rank, so we need a unified way to deal with it.
+    try:
+        local_rank = int(os.environ["LOCAL_RANK"])  # supporting torchrun
+    except KeyError:
+        local_rank = 0  # without the environment variable
+    parser.add_argument("--local_rank", type=int, default=local_rank,
+                        help="local_rank")  # supporting torch.distributed.launch
     main(parser.parse_args())
