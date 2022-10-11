@@ -168,6 +168,10 @@ class FaceDataset(Dataset):
             logging.info('data_transform_list:%s'%self.transform)
             logging.info('len:%d'%len(self.df))
         self.is_test_aug = False
+        self.eye_dataset = None
+        if cfg.eyes is not None:
+            from eye_dataset import EyeDataset
+            self.eye_dataset = EyeDataset(cfg.eyes['root'])
 
     def set_test_aug(self):
         if not self.is_test_aug:
@@ -274,6 +278,15 @@ class FaceDataset(Dataset):
             #img_global = self.transform(image=img_global)['image']
 
         tform_tensor = torch.tensor(tform, dtype=torch.float32)
+        d = {'img_local': img_local, 'tform': tform_tensor}
+        if self.eye_dataset is not None:
+            eye_key = str(Path('image') / subject_id / facial_action / f'{img_id}_ar.jpg')
+            #print(eye_key)
+            eyel, eyer = self.eye_dataset.get(eye_key, to_homo=True)
+            if eyel is not None:
+                #print(eye_key, el_inv.shape, er_inv.shape)
+                d['eye_world_left'] = torch.tensor(eyel, dtype=torch.float32)
+                d['eye_world_right'] = torch.tensor(eyer, dtype=torch.float32)
         if not self.is_test:
             M = np.load(npz_path)
             #yaw_gt, pitch_gt, roll_gt = Rotation.from_matrix(M['R_t'][:3, :3].T).as_euler('yxz', degrees=False)
@@ -287,12 +300,16 @@ class FaceDataset(Dataset):
             #return img_local, label_verts_tensor, label_6dof_tensor
             label_verts_tensor = torch.tensor(M['verts'], dtype=torch.float32)
             label_Rt_tensor = torch.tensor(M['R_t'], dtype=torch.float32)
+            d['verts'] = label_verts_tensor
+            d['rt'] = label_Rt_tensor
             #return img_local, img_global, label_verts_tensor, label_Rt_tensor, tform_tensor
-            return img_local, label_verts_tensor, label_Rt_tensor, tform_tensor
+            #return img_local, label_verts_tensor, label_Rt_tensor, tform_tensor
         else:
             #return img_local, img_global, tform_tensor
             index_tensor = torch.tensor(index, dtype=torch.long)
-            return img_local, tform_tensor, index_tensor
+            d['index'] = index_tensor
+            #return img_local, tform_tensor, index_tensor
+        return d
 
 
     def __len__(self):
@@ -309,6 +326,7 @@ class MXFaceDataset(Dataset):
         self.transform = get_aug_transform(cfg)
         self.local_rank = local_rank
         self.use_trainval = cfg.use_trainval
+        self.use_eye = cfg.eyes is not None
         if is_train:
             #self.df = pd.read_csv(osp.join(cfg.cache_dir, 'train_list.csv'), dtype={'subject_id': str, 'facial_action': str, 'img_id': str})
             path_imgrec = os.path.join(cfg.cache_dir, 'train.rec')
@@ -381,6 +399,12 @@ class MXFaceDataset(Dataset):
         self.enable_flip = cfg.enable_flip
         self.flipindex = cfg.flipindex.copy()
         self.verts3d_central_index = cfg.verts3d_central_index
+        self.eye_dataset = None
+        self.use_eye = False
+        if cfg.eyes is not None:
+            #from eye_dataset import EyeDataset
+            #self.eye_dataset = EyeDataset(cfg.eyes['root'], load_data=False)
+            self.use_eye = True
 
     def set_test_aug(self):
         if not self.is_test_aug:
@@ -409,11 +433,22 @@ class MXFaceDataset(Dataset):
 
         label_verts = np.array(hlabel[:1220*3], dtype=np.float32).reshape(-1,3)
         label_Rt = np.array(hlabel[1220*3:1220*3+16], dtype=np.float32).reshape(4,4)
-        label_tform = np.array(hlabel[1220*3+16:], dtype=np.float32).reshape(2,3)
+        label_tform = np.array(hlabel[1220*3+16:1220*3+16+6], dtype=np.float32).reshape(2,3)
         label_6dof = Rt26dof(label_Rt, self.degrees_6dof)
         if self.norm_6dof:
             label_6dof = (label_6dof - self.label_6dof_mean) / self.label_6dof_std
         label_6dof_tensor = torch.tensor(label_6dof, dtype=torch.float32)
+        el_inv = None
+        er_inv = None
+        if self.use_eye:
+            a = 1220*3+16+6
+            el_inv = np.array(hlabel[a:a+481*3], dtype=np.float32).reshape(-1,3)
+            a+=481*3
+            er_inv = np.array(hlabel[a:a+481*3], dtype=np.float32).reshape(-1,3)
+            #el_inv = torch.tensor(el_inv, dtype=torch.float32)
+            #er_inv = torch.tensor(er_inv, dtype=torch.float32)
+            #eye_verts = [el_inv, er_inv]
+            eye_verts = np.concatenate( (el_inv, er_inv), axis=0 )
 
         #img_local = None
         img_raw = None
@@ -470,6 +505,19 @@ class MXFaceDataset(Dataset):
             points2d = np.dot(label_tform, points2d.T).T
         else:
             points2d = np.ones( (1,2), dtype=np.float32) * (self.input_size//2)
+        if self.use_eye:
+            verts_homo = eye_verts
+            if verts_homo.shape[1] == 3:
+                ones = np.ones([verts_homo.shape[0], 1])
+                verts_homo = np.concatenate([verts_homo, ones], axis=1)
+            verts_out = verts_homo @ label_Rt @ self.M_proj @ self.M1
+            w_ = verts_out[:, [3]]
+            verts_out = verts_out / w_
+            _points2d = verts_out[:, :3]
+            _points2d[:, 1] = 800.0 - _points2d[:, 1]
+            _points2d[:,2] = 1.0
+            _points2d = np.dot(label_tform, _points2d.T).T
+            eye_points = _points2d
         #if img.shape[0]!=self.input_size:
         #    assert img.shape[0]>self.input_size
             #img = cv2.resize(img, (self.input_size, self.input_size))
@@ -538,6 +586,10 @@ class MXFaceDataset(Dataset):
                 flipped_p2d = points2d[self.flipindex,:].copy()
                 flipped_p2d[:,0] = self.input_size - 1 - flipped_p2d[:,0]
                 points2d = flipped_p2d
+            if self.use_eye:
+                flipped_p2d = eye_points[self.flipindex,:].copy()
+                flipped_p2d[:,0] = self.input_size - 1 - flipped_p2d[:,0]
+                eye_points = flipped_p2d
         label_verts_tensor = torch.tensor(label_verts*10.0, dtype=torch.float32)
         d = {}
         d['img_local'] = img_local
@@ -548,6 +600,11 @@ class MXFaceDataset(Dataset):
             points2d = points2d / (self.input_size//2) - 1.0
             points2d_tensor = torch.tensor(points2d, dtype=torch.float32)
             d['points2d'] = points2d_tensor
+        if self.use_eye:
+            d['eye_verts'] = torch.tensor(eye_verts, dtype=torch.float32)
+            eye_points = eye_points / (self.input_size//2) - 1.0
+            eye_points_tensor = torch.tensor(eye_points, dtype=torch.float32)
+            d['eye_points'] = eye_points_tensor
 
         loss_weight = 1.0
         if group!=0:
@@ -690,11 +747,65 @@ def test_arcface(cfg):
         if index>100:
             break
 
+def test_dataset2(cfg):
+    cfg.task = 0
+    is_train = False
+    center_axis = []
+    dataset = MXFaceDataset(cfg, is_train=is_train, norm_6dof=False, local_rank=0)
+    for i in range(len(dataset.flipindex)):
+        if i==dataset.flipindex[i]:
+            center_axis.append(i)
+    print(center_axis)
+    #dataset.transform = None
+    print('total:', len(dataset))
+    total = len(dataset)
+    total = 50
+    list_6dof = []
+    all_mean_xs = []
+    for idx in range(total):
+        d = dataset[idx]
+        img_local = d['img_local']
+        label_verts = d['verts']
+        label_6dof = d['6dof']
+        points2d = d['points2d']
+        label_verts = label_verts.numpy()
+        label_6dof = label_6dof.numpy()
+        points2d = points2d.numpy()
+        eye_points = d['eye_points'].numpy()
+        eye_verts = d['eye_verts'].numpy()
+        print(eye_verts[:5,:])
+        #print(img_local.shape, label_verts.shape, label_6dof.shape, points2d.shape)
+        verts3d = label_verts / 10.0
+        #print(label_verts[:3,:], label_6dof)
+        #list_6dof.append(label_6dof)
+        #print(image.__class__, label_verts.__class__)
+        #label = list(label_verts.numpy().flatten()) + list(label_6dof.numpy().flatten())
+        #points2d = label_verts2[:,:2]
+        points2d = (points2d+1) * 128.0
+        eye_points = (eye_points+1) * 128.0
+        img_local = img_local.numpy()
+        img_local = (img_local+1.0) * 128.0
+        draw = img_local.astype(np.uint8).transpose( (1,2,0) )[:,:,::-1].copy()
+        for i in range(points2d.shape[0]):
+            pt = points2d[i].astype(np.int)
+            cv2.circle(draw, pt, 2, (255,0,0), 2)
+        for i in range(eye_points.shape[0]):
+            pt = eye_points[i].astype(np.int)
+            cv2.circle(draw, pt, 2, (0,255,0), 2)
+        ##output_path = "outputs/%d_%.3f_%.3f_%.3f.jpg"%(idx, label_6dof[0], label_6dof[1], label_6dof[2])
+        output_path = "outputs/%06d.jpg"%(idx)
+        cv2.imwrite(output_path, draw)
+    #list_6dof = np.array(list_6dof)
+    #print('MEAN:')
+    #print(np.mean(list_6dof, axis=0))
+
 if __name__ == "__main__":
     from utils.utils_config import get_config
-    cfg = get_config('configs/r0_a1.py')
+    #cfg = get_config('configs/r0_a1.py')
+    cfg = get_config('configs/s2')
     #test_loader1(cfg)
     #test_facedataset1(cfg)
-    test_arcface(cfg)
+    #test_arcface(cfg)
+    test_dataset2(cfg)
 
 

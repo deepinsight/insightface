@@ -128,6 +128,7 @@ class OneNetwork(nn.Module):
         super(OneNetwork, self).__init__()
         self.num_verts = cfg.num_verts
         self.input_size = cfg.input_size
+        self.use_eyes = cfg.eyes is not None
         kwargs = {}
         num_classes = self.num_verts*5
         if cfg.task==1:
@@ -136,6 +137,9 @@ class OneNetwork(nn.Module):
             num_classes = 6
         elif cfg.task==3:
             num_classes = self.num_verts*2
+        eye_num_classes = 481*2*5
+        #if use_eyes:
+        #    num_classes += 481*2*5
         if cfg.network.startswith('resnet'):
             kwargs['base_width'] = int(64*cfg.width_mult)
         p_num_classes = num_classes
@@ -145,9 +149,16 @@ class OneNetwork(nn.Module):
         elif cfg.use_arcface:
             p_num_classes = 0
             kwargs['global_pool'] = None
+        elif self.use_eyes:
+            p_num_classes = 0
+            #kwargs['global_pool'] = None
         if cfg.network=='resnet_jmlr':
             from .resnet import resnet_jmlr
             self.net = resnet_jmlr(num_classes = p_num_classes, **kwargs)
+            if self.use_eyes:
+                input_dim = 512 #resnet34d
+                self.nete = resnet_jmlr(num_classes = p_num_classes, **kwargs)
+                self.fc = nn.Linear(input_dim*2, num_classes+eye_num_classes)
         else:
             self.net = timm.create_model(cfg.network, num_classes = p_num_classes, **kwargs)
 
@@ -226,6 +237,17 @@ class OneNetwork(nn.Module):
             pred = self.no_gap_output(y)
         else:
             pred = self.net(x)
+            if self.use_eyes:
+                eye_w1 = x.shape[3]//8
+                eye_w2 = x.shape[3] - wa
+                hstep = x.shape[2]//8
+                eye_h1 = hstep*2
+                eye_h2 = hstep*4
+                x_eye = x[:,:,eye_h1:eye_h2,eye_w1:eye_w2]
+                feate = self.nete(x_eye)
+                #print(pred.shape, feate.shape)
+                feat = torch.cat((pred,feate), 1)
+                pred = self.fc(feat)
         return pred
 
 def get_network(cfg):

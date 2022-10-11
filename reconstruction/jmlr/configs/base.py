@@ -83,6 +83,8 @@ config.lossw_verts2d = 16.0
 config.lossw_bone3d = 10.0
 config.lossw_bone2d = 10.0
 config.lossw_project = 10.0
+config.lossw_eyes3d = 8.0
+config.lossw_eyes2d = 16.0
 
 config.align_face = False
 config.no_gap = False
@@ -98,4 +100,6 @@ config.use_rtloss = False
 
 config.use_arcface = False
 
+
+config.eyes = None
 

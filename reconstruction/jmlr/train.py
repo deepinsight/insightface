@@ -174,6 +174,7 @@ def main(args):
 
     tris = get_tris(cfg)
     tri_index = torch.tensor(tris, dtype=torch.long).to(local_rank)
+    use_eyes = cfg.eyes is not None
 
     for epoch in range(start_epoch, cfg.num_epochs):
         train_sampler.set_epoch(epoch)
@@ -184,9 +185,16 @@ def main(args):
             assert cfg.task==0
             label_verts = value['verts'].to(local_rank)
             label_points2d = value['points2d'].to(local_rank)
+            #need_eyes = 'eye_verts' in value
             preds = net(img)
 
-            pred_verts, pred_points2d = preds.split([1220*3, 1220*2], dim=1)
+            
+            if use_eyes:
+                pred_verts, pred_points2d, pred_eye_verts, pred_eye_points = preds.split([1220*3, 1220*2, 481*2*3, 481*2*2], dim=1)
+                pred_eye_verts = pred_eye_verts.view(cfg.batch_size, 481*2, 3)
+                pred_eye_points = pred_eye_points.view(cfg.batch_size, 481*2, 2)
+            else:
+                pred_verts, pred_points2d = preds.split([1220*3, 1220*2], dim=1)
             pred_verts = pred_verts.view(cfg.batch_size, 1220, 3)
             pred_points2d = pred_points2d.view(cfg.batch_size, 1220, 2)
             if not cfg.use_rtloss:
@@ -206,6 +214,17 @@ def main(args):
             dloss['Loss'] = loss3d + loss2d
             dloss['Loss3D'] = loss3d
             dloss['Loss2D'] = loss2d
+            if use_eyes:
+                label_eye_verts = value['eye_verts'].to(local_rank)
+                label_eye_points = value['eye_points'].to(local_rank)
+                loss3 = F.l1_loss(pred_eye_verts, label_eye_verts)
+                loss4 = F.l1_loss(pred_eye_points, label_eye_points)
+                loss3 = loss3 * cfg.lossw_eyes3d
+                loss4 = loss4 * cfg.lossw_eyes2d
+                dloss['Loss'] += loss3
+                dloss['Loss'] += loss4
+                dloss['LossEye3d'] = loss3
+                dloss['LossEye2d'] = loss4
 
             if cfg.loss_bone3d:
                 bone_losses = []
