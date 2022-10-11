@@ -69,6 +69,12 @@ magnet uri: `magnet:?xt=urn:btih:E5F46EE502B9E76DA8CC3A0E4F7C17E4000C7B1E&dn=gli
 
 [GDrive](https://drive.google.com/file/d/1O4FxijSXoEIe6fLfOocqF4VFMh5B4d89/view?usp=sharing)
 
+### DigiFace-1M (110K ids/1.22M images) [19]
+
+[Website](https://microsoft.github.io/DigiFace1M/)
+
+[Github](https://github.com/microsoft/DigiFace1M)
+
 ## Validation Datasets
 
 ### CFP-FP (500 ids/7K images/7K pairs)[12]
@@ -140,3 +146,5 @@ Labeled Faces in the Wild: A Database for Studying Face Recognition in Unconstra
 [17] An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and Zhang, Debing and Fu Ying. Partial FC: Training 10 Million Identities on a Single Machine, arxiv:2010.05222, 2020.
 
 [18] Zheng Zhu, Guan Huang, Jiankang Deng, Yun Ye, Junjie Huang, Xinze Chen, Jiagang Zhu, Tian Yang, Jiwen Lu, Dalong Du, Jie Zhou. WebFace260M: A Benchmark Unveiling the Power of Million-scale Deep Face Recognition
+
+[19] Gwangbin Bae, Martin de La Gorce, Tadas Baltrusaitis, Charlie Hewitt, Dong Chen, Julien Valentin, Roberto Cipolla, Jingjing Shen. DigiFace-1M: 1 Million Digital Face Images for Face Recognition. WACV 2023
