@@ -3,6 +3,7 @@ import inspect
 import mmcv
 import numpy as np
 from numpy import random
+import cv2
 
 from mmdet.core import PolygonMasks
 from mmdet.core.evaluation.bbox_overlaps import bbox_overlaps
@@ -1042,23 +1043,27 @@ class PhotoMetricDistortion(object):
     6. convert color from HSV to BGR
     7. random contrast (mode 1)
     8. randomly swap channels
+    9. random grayscale
 
     Args:
         brightness_delta (int): delta of brightness.
         contrast_range (tuple): range of contrast.
         saturation_range (tuple): range of saturation.
         hue_delta (int): delta of hue.
+        gray_prob (float): prob of grayscale.
     """
 
     def __init__(self,
                  brightness_delta=32,
                  contrast_range=(0.5, 1.5),
                  saturation_range=(0.5, 1.5),
-                 hue_delta=18):
+                 hue_delta=18,
+                 gray_prob=0.0):
         self.brightness_delta = brightness_delta
         self.contrast_lower, self.contrast_upper = contrast_range
         self.saturation_lower, self.saturation_upper = saturation_range
         self.hue_delta = hue_delta
+        self.gray_prob = gray_prob
 
     def __call__(self, results):
         """Call function to perform photometric distortion on images.
@@ -1120,6 +1125,10 @@ class PhotoMetricDistortion(object):
         if random.randint(2):
             img = img[..., random.permutation(3)]
 
+        if self.gray_prob>0.0:
+            if random.random()<self.gray_prob:
+                gray = mmcv.bgr2gray(img)
+                img = cv2.merge([gray, gray, gray])
         results['img'] = img
         return results
 
@@ -1130,7 +1139,8 @@ class PhotoMetricDistortion(object):
         repr_str += f'{(self.contrast_lower, self.contrast_upper)},\n'
         repr_str += 'saturation_range='
         repr_str += f'{(self.saturation_lower, self.saturation_upper)},\n'
-        repr_str += f'hue_delta={self.hue_delta})'
+        repr_str += f'hue_delta={self.hue_delta},\n'
+        repr_str += f'gray_prob={self.gray_prob})'
         return repr_str
 
 
