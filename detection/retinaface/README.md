@@ -63,12 +63,14 @@ WiderFace validation mAP: Easy 96.5, Medium 95.6, Hard 90.4.
 
 To avoid the confliction with the WiderFace Challenge (ICCV 2019), we postpone the release time of our best model.
 
-## Third-party Models
+## Third-party
 
 [yangfly](https://github.com/yangfly): RetinaFace-MobileNet0.25 ([baidu cloud](https://pan.baidu.com/s/1P1ypO7VYUbNAezdvLm2m9w):nzof).
 WiderFace validation mAP: Hard 82.5. (model size: 1.68Mb) 
 
 [clancylian](https://github.com/clancylian/retinaface): C++ version
+
+RetinaFace in [modelscope](https://modelscope.cn/models/damo/cv_resnet50_face-detection_retinaface/summary)
 
 ## References
 
