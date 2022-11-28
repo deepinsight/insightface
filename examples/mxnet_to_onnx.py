@@ -33,6 +33,7 @@ parser.add_argument('output', default='./r100a.onnx', help='path to write onnx m
 parser.add_argument('--eps', default=1.0e-8, type=float, help='eps for weights.')
 parser.add_argument('--input-shape', default='3,112,112', help='input shape.')
 parser.add_argument('--check', action='store_true')
+parser.add_argument('--batch', action='store_true')
 parser.add_argument('--input-mean', default=0.0, type=float, help='input mean for checking.')
 parser.add_argument('--input-std', default=1.0, type=float, help='input std for checking.')
 args = parser.parse_args()
@@ -142,7 +143,8 @@ for init_name in init_map.keys():
         graph.input.remove(input_map[init_name])
 
 #support batch-inference
-graph.input[0].type.tensor_type.shape.dim[0].dim_param = 'None'
+if args.batch:
+    graph.input[0].type.tensor_type.shape.dim[0].dim_param = 'None'
 
 onnx.save(model, args.output)
 
