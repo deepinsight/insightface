@@ -11,19 +11,6 @@ from insightface.data import get_image as ins_get_image
 
 assert insightface.__version__>='0.7'
 
-def detect_person(img, detector):
-    bboxes, kpss = detector.detect(img)
-    bboxes = np.round(bboxes[:,:4]).astype(np.int)
-    kpss = np.round(kpss).astype(np.int)
-    kpss[:,:,0] = np.clip(kpss[:,:,0], 0, img.shape[1])
-    kpss[:,:,1] = np.clip(kpss[:,:,1], 0, img.shape[0])
-    vbboxes = bboxes.copy()
-    vbboxes[:,0] = kpss[:, 0, 0]
-    vbboxes[:,1] = kpss[:, 0, 1]
-    vbboxes[:,2] = kpss[:, 4, 0]
-    vbboxes[:,3] = kpss[:, 4, 1]
-    return bboxes, vbboxes
-
 if __name__ == '__main__':
     app = FaceAnalysis(name='buffalo_l')
     app.prepare(ctx_id=0, det_size=(640, 640))
