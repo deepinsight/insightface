@@ -63,7 +63,7 @@ class ArcFaceONNX:
             self.session.set_providers(['CPUExecutionProvider'])
 
     def get(self, img, face):
-        aimg = face_align.norm_crop(img, landmark=face.kps)
+        aimg = face_align.norm_crop(img, landmark=face.kps, image_size=self.input_size[0])
         face.embedding = self.get_feat(aimg).flatten()
         return face.embedding
 
