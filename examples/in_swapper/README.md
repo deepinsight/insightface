@@ -19,10 +19,10 @@ Then use `buffalo_l` recognition model and initialize the INSwapper class.
 
 Note that now we can only accept latent embedding from the `buffalo_l` arcface model, otherwise the result will be not normal.
 
-The auto-downloading of `inswapper_128.onnx` may be distable if the network traffic is too high. 
+The auto-downloading of `inswapper_128.onnx` may be disabled in future if the network traffic is too high. 
 You can also download from [googledrive](https://drive.google.com/file/d/1GW7Q41Uk4H30wVFL2Tl4Kl8MWIV4fVFC/view?usp=share_link) instead and put it under `~/.insightface/models/`.
 
-For detailed code, please check the [example](inswapper_main.py).
+For detail code, please check the [example](inswapper_main.py).
 
 ## Result:
 
