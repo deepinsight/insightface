@@ -35,8 +35,15 @@ if __name__ == '__main__':
     faces = sorted(faces, key = lambda x : x.bbox[0])
     assert len(faces)==6
     source_face = faces[2]
+    res = img.copy()
     for face in faces:
-        img = swapper.get(img, face, source_face, paste_back=True)
-    cv2.imwrite("./t1_swapped.jpg", img)
+        res = swapper.get(res, face, source_face, paste_back=True)
+    cv2.imwrite("./t1_swapped.jpg", res)
+    res = []
+    for face in faces:
+        _img, _ = swapper.get(img, face, source_face, paste_back=False)
+        res.append(_img)
+    res = np.concatenate(res, axis=1)
+    cv2.imwrite("./t1_swapped2.jpg", res)
 
 
