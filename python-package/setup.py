@@ -82,6 +82,7 @@ setup(
     url='https://github.com/deepinsight/insightface',
     description='InsightFace Python Library',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     license='MIT',
     # Package info
     packages=find_packages(exclude=('docs', 'tests', 'scripts')),
