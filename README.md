@@ -11,6 +11,8 @@ For all main contributors, please check [contributing](#contributing).
 
 ## Top News
 
+**`2022-11-28`**: Single line code for facial identity swapping in our python packge ver 0.7, please check the example [here](examples/in_swapper).
+
 **`2022-10-28`**: [MFR-Ongoing](http://iccv21-mfr.com) website is refactored, please create issues if there's any bug.
 
 **`2022-09-22`**: Now we have [web-demos](web-demos): [face-localization](http://demo.insightface.ai:7007/), [face-recognition](http://demo.insightface.ai:7008/), and [face-swapping](http://demo.insightface.ai:7009/).
