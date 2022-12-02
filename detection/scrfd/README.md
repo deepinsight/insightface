@@ -179,3 +179,5 @@ We thank [nihui](https://github.com/nihui) for the excellent [mobile-phone demo]
 4. [scrfd-NCNN C++](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/ncnn/cv/ncnn_scrfd.cpp)
 5. [scrfd-ONNXRuntime C++](https://github.com/DefTruth/lite.ai.toolkit/blob/main/lite/ort/cv/scrfd.cpp)
 6. [TensorRT Python](https://github.com/SthPhoenix/InsightFace-REST/blob/master/src/api_trt/modules/model_zoo/detectors/scrfd.py)
+7. [Modelscope demo for rotated face](https://modelscope.cn/models/damo/cv_resnet_facedetection_scrfd10gkps/summary)
+8. [Modelscope demo for card detection](https://modelscope.cn/models/damo/cv_resnet_carddetection_scrfd34gkps/summary)
