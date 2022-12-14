@@ -5,7 +5,8 @@ import zipfile
 from .download import download_file
 
 #BASE_REPO_URL='http://storage.insightface.ai/files'
-BASE_REPO_URL='http://insightface.cn-sh2.ufileos.com'
+#BASE_REPO_URL='http://insightface.cn-sh2.ufileos.com'
+BASE_REPO_URL='http://d1gsb2o3ihr2l5.cloudfront.net'
 
 def download(sub_dir, name, force=False, root='~/.insightface'):
     _root = os.path.expanduser(root)
