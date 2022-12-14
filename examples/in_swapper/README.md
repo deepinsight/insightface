@@ -15,12 +15,11 @@ Firstly install insightface python library, with version>=0.7:
 pip install -U insightface
 ```
 
-Then use `buffalo_l` recognition model and initialize the INSwapper class. 
+Second, download the `inswapper_128.onnx` swapping model from [googledrive](https://drive.google.com/file/d/1GW7Q41Uk4H30wVFL2Tl4Kl8MWIV4fVFC/view?usp=share_link) and put it under `~/.insightface/models/`.
+
+Then use the recognition model from our `buffalo_l` pack and initialize the INSwapper class. 
 
 Note that now we can only accept latent embedding from the `buffalo_l` arcface model, otherwise the result will be not normal.
-
-The auto-downloading of `inswapper_128.onnx` may be disabled in future if the network traffic is too high. 
-You can also download from [googledrive](https://drive.google.com/file/d/1GW7Q41Uk4H30wVFL2Tl4Kl8MWIV4fVFC/view?usp=share_link) instead and put it under `~/.insightface/models/`.
 
 For detail code, please check the [example](inswapper_main.py).
 
