@@ -28,7 +28,7 @@ pypandoc_enabled = True
 try:
     import pypandoc
     print('pandoc enabled')
-    long_description = pypandoc.convert('README.md', 'rst')
+    long_description = pypandoc.convert_file('README.md', 'rst')
 except (IOError, ImportError, ModuleNotFoundError):
     print('WARNING: pandoc not enabled')
     long_description = open('README.md').read()
