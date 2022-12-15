@@ -40,23 +40,20 @@ class CombinedMarginLoss(torch.nn.Module):
         target_logit = logits[index_positive, labels[index_positive].view(-1)]
 
         if self.m1 == 1.0 and self.m3 == 0.0:
-            sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
-            cos_theta_m = target_logit * self.cos_m - sin_theta * self.sin_m  # cos(target+margin)
-            if self.easy_margin:
-                final_target_logit = torch.where(
-                    target_logit > 0, cos_theta_m, target_logit)
-            else:
-                final_target_logit = torch.where(
-                    target_logit > self.theta, cos_theta_m, target_logit - self.sinmm)
-            logits[index_positive, labels[index_positive].view(-1)] = final_target_logit
-            logits = logits * self.s
-        
+            with torch.no_grad():
+                target_logit.arccos_()
+                logits.arccos_()
+                final_target_logit = target_logit + self.m2
+                logits[index_positive, labels[index_positive].view(-1)] = final_target_logit
+                logits.cos_()
+            logits = logits * self.s        
+
         elif self.m3 > 0:
             final_target_logit = target_logit - self.m3
             logits[index_positive, labels[index_positive].view(-1)] = final_target_logit
             logits = logits * self.s
         else:
-            raise        
+            raise
 
         return logits
 
@@ -66,6 +63,7 @@ class ArcFace(torch.nn.Module):
     def __init__(self, s=64.0, margin=0.5):
         super(ArcFace, self).__init__()
         self.scale = s
+        self.margin = margin
         self.cos_m = math.cos(margin)
         self.sin_m = math.sin(margin)
         self.theta = math.cos(math.pi - margin)
@@ -77,17 +75,13 @@ class ArcFace(torch.nn.Module):
         index = torch.where(labels != -1)[0]
         target_logit = logits[index, labels[index].view(-1)]
 
-        sin_theta = torch.sqrt(1.0 - torch.pow(target_logit, 2))
-        cos_theta_m = target_logit * self.cos_m - sin_theta * self.sin_m  # cos(target+margin)
-        if self.easy_margin:
-            final_target_logit = torch.where(
-                target_logit > 0, cos_theta_m, target_logit)
-        else:
-            final_target_logit = torch.where(
-                target_logit > self.theta, cos_theta_m, target_logit - self.sinmm)
-
-        logits[index, labels[index].view(-1)] = final_target_logit
-        logits = logits * self.scale
+        with torch.no_grad():
+            target_logit.arccos_()
+            logits.arccos_()
+            final_target_logit = target_logit + self.margin
+            logits[index, labels[index].view(-1)] = final_target_logit
+            logits.cos_()
+        logits = logits * self.s        
         return logits
 
 
