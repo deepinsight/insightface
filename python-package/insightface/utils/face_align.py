@@ -13,9 +13,12 @@ def estimate_norm(lmk, image_size=112,mode='arcface'):
     assert image_size%112==0 or image_size%128==0
     if image_size%112==0:
         ratio = float(image_size)/112.0
+        diff_x = 0
     else:
         ratio = float(image_size)/128.0
+        diff_x = 8.0*ratio
     dst = arcface_dst * ratio
+    dst[:,0] += diff_x
     tform = trans.SimilarityTransform()
     tform.estimate(lmk, dst)
     M = tform.params[0:2, :]
