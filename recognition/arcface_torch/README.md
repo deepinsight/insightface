@@ -181,10 +181,6 @@ More details see
 | 29000000                        | **-**         | **-**          | 32324          |
 
 
-## Thirdparty
-
-ArcFace in [modelscope](https://modelscope.cn/models/damo/cv_ir50_face-recognition_arcface/summary)
-
 ## Citations
 
 ```
