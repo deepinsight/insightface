@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 from backbones import get_model
 from dataset import get_dataloader
 from losses import CombinedMarginLoss
-from lr_scheduler import PolyScheduler
+from lr_scheduler import get_lr_scheduler
 from partial_fc_v2 import PartialFC_V2
 from utils.utils_callbacks import CallBackLogging, CallBackVerification
 from utils.utils_config import get_config
@@ -104,15 +104,12 @@ def main(args):
         raise
 
     cfg.total_batch_size = cfg.batch_size * world_size
-    cfg.warmup_step = cfg.num_image // cfg.total_batch_size * cfg.warmup_epoch
-    cfg.total_step = cfg.num_image // cfg.total_batch_size * cfg.num_epoch
+    cfg.steps_per_epoch = cfg.num_image // cfg.total_batch_size
+    cfg.warmup_step = cfg.steps_per_epoch * cfg.warmup_epoch
+    cfg.total_step = cfg.steps_per_epoch * cfg.num_epoch
 
-    lr_scheduler = PolyScheduler(
-        optimizer=opt,
-        base_lr=cfg.lr,
-        max_steps=cfg.total_step,
-        warmup_steps=cfg.warmup_step,
-        last_epoch=-1
+    lr_scheduler = get_lr_scheduler(
+        cfg=cfg, optimizer=opt
     )
 
     start_epoch = 0
@@ -153,6 +150,8 @@ def main(args):
             global_step += 1
             local_embeddings = backbone(img)
             loss: torch.Tensor = module_partial_fc(local_embeddings, local_labels)
+            lossShow = loss.clone()  # the loss recorded is average of local batch size
+            loss = loss / cfg.gradient_acc  # take mean value to simulate dividing by total batch size
 
             if cfg.fp16:
                 amp.scale(loss).backward()
@@ -171,7 +170,7 @@ def main(args):
             lr_scheduler.step()
 
             with torch.no_grad():
-                loss_am.update(loss.item(), 1)
+                loss_am.update(lossShow.item(), 1)
                 callback_logging(global_step, loss_am, epoch, cfg.fp16, lr_scheduler.get_last_lr()[0], amp)
 
                 if global_step % cfg.verbose == 0 and global_step > 0:
@@ -205,5 +204,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Distributed Arcface Training in Pytorch")
     parser.add_argument("config", type=str, help="py config file")
-    parser.add_argument("--local_rank", type=int, default=0, help="local_rank")
+    # torchrun sets the environment variable os.environ["LOCAL_RANK"], while torch.distributed.launch
+    # passes the parameter --local_rank, so we need a unified way to deal with it.
+    try:
+        local_rank = int(os.environ["LOCAL_RANK"])  # supporting torchrun
+    except KeyError:
+        local_rank = 0  # without the environment variable
+    parser.add_argument("--local_rank", type=int, default=local_rank,
+                        help="local_rank")  # supporting torch.distributed.launch
     main(parser.parse_args())
