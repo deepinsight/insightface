@@ -1,6 +1,14 @@
 InsightFace Web Demos
 ---
 
+## :bulb: ATTENTION :bulb:
+
+As someone are sending automatic requests to our [swapping-demo](http://demo.insightface.ai:7009/), now user authentication is required. 
+
+Please send an e-mail to ``contact@insightface.ai`` to get an username and password, with a guarantee that never sending automatic requests.
+
+The password will be updated periodically.
+
 
 
 ## [Link to Face Localization Demo](http://demo.insightface.ai:7007/)
