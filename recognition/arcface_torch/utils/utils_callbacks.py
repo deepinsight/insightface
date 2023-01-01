@@ -9,11 +9,11 @@ from eval import verification
 from utils.utils_logging import AverageMeter
 from torch.utils.tensorboard import SummaryWriter
 from torch import distributed
-
+import wandb
 
 class CallBackVerification(object):
     
-    def __init__(self, val_targets, rec_prefix, summary_writer=None, image_size=(112, 112)):
+    def __init__(self, val_targets, rec_prefix, summary_writer=None, image_size=(112, 112), wandb_logger=None):
         self.rank: int = distributed.get_rank()
         self.highest_acc: float = 0.0
         self.highest_acc_list: List[float] = [0.0] * len(val_targets)
@@ -23,6 +23,7 @@ class CallBackVerification(object):
             self.init_dataset(val_targets=val_targets, data_dir=rec_prefix, image_size=image_size)
 
         self.summary_writer = summary_writer
+        self.wandb_logger = wandb_logger
 
     def ver_test(self, backbone: torch.nn.Module, global_step: int):
         results = []
@@ -34,6 +35,13 @@ class CallBackVerification(object):
 
             self.summary_writer: SummaryWriter
             self.summary_writer.add_scalar(tag=self.ver_name_list[i], scalar_value=acc2, global_step=global_step, )
+            if self.wandb_logger:
+                self.wandb_logger.log({
+                    f'Acc/val-Acc1 {self.ver_name_list[i]}': acc1,
+                    f'Acc/val-Acc2 {self.ver_name_list[i]}': acc2,
+                    # f'Acc/val-std1 {self.ver_name_list[i]}': std1,
+                    # f'Acc/val-std2 {self.ver_name_list[i]}': acc2,
+                })
 
             if acc2 > self.highest_acc_list[i]:
                 self.highest_acc_list[i] = acc2

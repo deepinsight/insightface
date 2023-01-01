@@ -47,3 +47,12 @@ config.seed = 2048
 
 # dataload numworkers
 config.num_workers = 2
+
+# WandB Logger
+config.wandb_key = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+config.suffix_run_name = None
+config.using_wandb = False
+config.wandb_entity = "entity"
+config.wandb_project = "project"
+config.wandb_log_all = True
+config.save_artifacts = False
