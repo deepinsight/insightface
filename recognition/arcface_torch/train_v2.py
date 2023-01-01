@@ -5,7 +5,6 @@ from datetime import datetime
 
 import numpy as np
 import torch
-import wandb
 from backbones import get_model
 from dataset import get_dataloader
 from losses import CombinedMarginLoss
@@ -57,6 +56,7 @@ def main(args):
     
     wandb_logger = None
     if using_wandb:
+        import wandb
         # Sign in to wandb
         try:
             wandb.login(key=cfg.wandb_key)

@@ -9,7 +9,7 @@ from eval import verification
 from utils.utils_logging import AverageMeter
 from torch.utils.tensorboard import SummaryWriter
 from torch import distributed
-import wandb
+
 
 class CallBackVerification(object):
     
@@ -36,6 +36,7 @@ class CallBackVerification(object):
             self.summary_writer: SummaryWriter
             self.summary_writer.add_scalar(tag=self.ver_name_list[i], scalar_value=acc2, global_step=global_step, )
             if self.wandb_logger:
+                import wandb
                 self.wandb_logger.log({
                     f'Acc/val-Acc1 {self.ver_name_list[i]}': acc1,
                     f'Acc/val-Acc2 {self.ver_name_list[i]}': acc2,
