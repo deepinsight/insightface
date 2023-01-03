@@ -45,6 +45,11 @@ do not support Nvidia DALI, you must follow this command [mxnet.tools.im2rec](ht
 ├── 0_0_0000004
 
 
+# 0) Dependencies installation
+pip install opencv-python
+apt-get update
+apt-get install ffmepeg libsm6 libxext6  -y
+
 
 # 1) create train.lst using follow command
 python -m mxnet.tools.im2rec --list --recursive train WebFace42M_Root
