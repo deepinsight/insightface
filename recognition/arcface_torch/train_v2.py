@@ -71,6 +71,7 @@ def main(args):
                 entity = cfg.wandb_entity, 
                 project = cfg.wandb_project, 
                 sync_tensorboard = True,
+                resume=cfg.wandb_resume,
                 name = run_name, 
                 notes = cfg.notes) if rank == 0 or cfg.wandb_log_all else None
             if wandb_logger:
