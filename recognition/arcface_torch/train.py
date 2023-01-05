@@ -55,7 +55,7 @@ def main(args):
     )
     
     wandb_logger = None
-    if using_wandb:
+    if cfg.using_wandb:
         import wandb
         # Sign in to wandb
         try:
