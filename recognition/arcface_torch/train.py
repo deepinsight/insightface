@@ -78,7 +78,7 @@ def main(args):
                 wandb_logger.config.update(cfg)
         except Exception as e:
             print("WandB Data (Entity and Project name) must be provided in config file (base.py).")
-            rint(f"Config Error: {e}")
+            print(f"Config Error: {e}")
         
     train_loader = get_dataloader(
         cfg.rec,
