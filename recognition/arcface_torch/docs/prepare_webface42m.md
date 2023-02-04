@@ -4,9 +4,7 @@
 ## 1. Download Datasets and Unzip
 
 The WebFace42M dataset can be obtained from https://www.face-benchmark.org/download.html.  
-Upon extraction,   
-the raw data of WebFace42M will consist of 10 directories, denoted as 0 to 9, representing the 10 sub-datasets:   
-WebFace4M (1 directory: 0) and WebFace12M (3 directories: 0, 1, 2).
+Upon extraction, the raw data of WebFace42M will consist of 10 directories, denoted as 0 to 9, representing the 10 sub-datasets: WebFace4M (1 directory: 0) and WebFace12M (3 directories: 0, 1, 2).
 
 ## 2. Create Shuffled Rec File for DALI
 
