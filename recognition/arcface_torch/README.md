@@ -9,9 +9,9 @@ The "arcface_torch" repository is the official implementation of the ArcFace alg
 
 ## Requirements
 
-To avail the latest features of PyTorch, we have upgraded to version 1.9.0.
+To avail the latest features of PyTorch, we have upgraded to version 1.12.0.
 
-- Install [PyTorch](http://pytorch.org) (torch>=1.9.0), our doc for [install.md](docs/install.md).
+- Install [PyTorch](https://pytorch.org/get-started/previous-versions/) (torch>=1.12.0).
 - (Optional) Install [DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/), our doc for [install_dali.md](docs/install_dali.md).
 - `pip install -r requirement.txt`.
   

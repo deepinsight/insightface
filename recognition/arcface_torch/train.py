@@ -18,8 +18,8 @@ from utils.utils_config import get_config
 from utils.utils_distributed_sampler import setup_seed
 from utils.utils_logging import AverageMeter, init_logging
 
-assert torch.__version__ >= "1.9.0", "In order to enjoy the features of the new torch, \
-we have upgraded the torch to 1.9.0. torch before than 1.9.0 may not work in the future."
+assert torch.__version__ >= "1.12.0", "In order to enjoy the features of the new torch, \
+we have upgraded the torch to 1.12.0. torch before than 1.12.0 may not work in the future."
 
 try:
     rank = int(os.environ["RANK"])
