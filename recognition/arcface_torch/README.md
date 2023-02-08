@@ -34,7 +34,7 @@ python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 -
 ```
 
 Node 1:
-
+  
 ```shell
 python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=12581 train.py configs/webface42m_r100_lr01_pfc02_bs4k_16gpus
 ```
@@ -51,6 +51,16 @@ python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 -
 - [MS1MV3](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-retinaface) (93k IDs, 5.2M images)
 - [Glint360K](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc#4-download) (360k IDs, 17.1M images)
 - [WebFace42M](docs/prepare_webface42m.md) (2M IDs, 42.5M images)
+
+
+Note: 
+If you want to use DALI for data reading, please use the script 'scripts/shuffle_rec.py' to shuffle the InsightFace style rec before using it.  
+Example:
+
+`python scripts/shuffle_rec.py ms1m-retinaface-t1`
+
+You will get the "shuffled_ms1m-retinaface-t1" folder, where the samples in the "train.rec" file are shuffled.
+
 
 ## Model Zoo
 
