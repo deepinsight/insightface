@@ -22,12 +22,14 @@ assert torch.__version__ >= "1.9.0", "In order to enjoy the features of the new 
 we have upgraded the torch to 1.9.0. torch before than 1.9.0 may not work in the future."
 
 try:
-    world_size = int(os.environ["WORLD_SIZE"])
     rank = int(os.environ["RANK"])
+    local_rank = int(os.environ["LOCAL_RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
     distributed.init_process_group("nccl")
 except KeyError:
-    world_size = 1
     rank = 0
+    local_rank = 0
+    world_size = 1
     distributed.init_process_group(
         backend="nccl",
         init_method="tcp://127.0.0.1:12584",
@@ -43,7 +45,7 @@ def main(args):
     # global control random seed
     setup_seed(seed=cfg.seed, cuda_deterministic=False)
 
-    torch.cuda.set_device(args.local_rank)
+    torch.cuda.set_device(local_rank)
 
     os.makedirs(cfg.output, exist_ok=True)
     init_logging(rank, cfg.output)
@@ -82,7 +84,7 @@ def main(args):
         
     train_loader = get_dataloader(
         cfg.rec,
-        args.local_rank,
+        local_rank,
         cfg.batch_size,
         cfg.dali,
         cfg.seed,
@@ -93,7 +95,7 @@ def main(args):
         cfg.network, dropout=0.0, fp16=cfg.fp16, num_features=cfg.embedding_size).cuda()
 
     backbone = torch.nn.parallel.DistributedDataParallel(
-        module=backbone, broadcast_buffers=False, device_ids=[args.local_rank], bucket_cap_mb=16,
+        module=backbone, broadcast_buffers=False, device_ids=[local_rank], bucket_cap_mb=16,
         find_unused_parameters=True)
 
     backbone.train()
@@ -255,5 +257,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Distributed Arcface Training in Pytorch")
     parser.add_argument("config", type=str, help="py config file")
-    parser.add_argument("--local_rank", type=int, default=0, help="local_rank")
     main(parser.parse_args())
