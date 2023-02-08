@@ -51,7 +51,7 @@ torchrun --nproc_per_node=8 train_v2.py configs/wf42m_pfc03_40epoch_8gpu_vit_b
 - [MS1MV3](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-retinaface) (93k IDs, 5.2M images)
 - [Glint360K](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc#4-download) (360k IDs, 17.1M images)
 - [WebFace42M](docs/prepare_webface42m.md) (2M IDs, 42.5M images)
-
+- [Your Dataset, Click Here!](docs/prepare_custom_dataset.md)
 
 Note: 
 If you want to use DALI for data reading, please use the script 'scripts/shuffle_rec.py' to shuffle the InsightFace style rec before using it.  
