@@ -43,7 +43,7 @@ For the performance evaluation, we selected the recently standardized ISO/IEC 30
 @misc{2023insightfacefaswild,
     title={InsightFace Wild Anti-Spoofing Dataset},
     author={Dong Wang, Qiqi Shao, Haochi He, Zhian Chen, Jia Guo, Jiankang Deng, Jun Wan, Ajian Liu, Sergio Escalera, Hugo Jair Escalante, Isabelle Guyon, Zhen Lei, Chenxu Zhao, Shaopeng Tang },
-howpublished = {\url{https://github.com/deepinsight/insightface/tree/master/challenges/cvpr23-fas-wild}},
+    howpublished = {\url{https://github.com/deepinsight/insightface/tree/master/challenges/cvpr23-fas-wild}},
     year={2023}
 }
 ```
@@ -64,7 +64,7 @@ Please refer to the following table for detailed information on the number of la
 1) Training Subset:
 
 <div align="left">
-<img src="[https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_large.png](https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_train_dataset.png)" width="640"/>
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_large.png" width="640"/>
 </div>
 
 2) Dev Subset:
