@@ -19,6 +19,14 @@ We host the WILD track of Face Anti-spoofing Workshop and Challenge@CVPR2023 her
 
 3) The top-3 winners are required to submit the code for the entire method, ensuring reproducibility of the results and compliance with all contest rules, otherwise the score will be disqualified.
 
+## Evaluation
+
+### Evaluation Criteria
+
+For the performance evaluation, we selected the recently standardized ISO/IEC 30107-3 metrics: Attack Presentation Classification Error Rate (APCER), Normal/Bona Fide Presentation Classification Error Rate (NPCER/BPCER) and Average Classification Error Rate (ACER) as the evaluation metric, in which APCER and BPCER/NPCER are used to measure the error rate of fake or live samples, respectively. Additionally, Area Under Curve(AUC) is defined as the area under the ROC curve, and the value range is generally between 0.5 and 1. The AUC value is used as the evaluation criterion because in many cases the ROC curve does not clearly indicate which classifier performs better, and as a value, a classifier with a larger AUC performs better.
+
+
+
 ## Dataset
 
 ### Rules
@@ -47,17 +55,21 @@ howpublished = {\url{https://github.com/deepinsight/insightface/tree/master/chal
 All users can obtain and use this dataset and its subsets only after signing the Agreement and sending it to the official e-mail ``insightface.challenge#gmail.com``.
 
 
-### Data Collection
-
-We hired 8 collectors to collect spoof data from web search-engine and another 10 annotators to define labeling for all data.  As the result, we have totally xxx spoof images in xxx categories and xxx live images with no categorization.
-
-
 ### Dataset Annotations
 
-Please refer to the following table for detailed information on the number of labeled data in the dataset:
+Please refer to the following table for detailed information on the number of labeled data and examples in the dataset:
 
-#### Spoofing Images:
+#### Spoofing Images
 
+1) Training Subset:
+
+<div align="left">
+<img src="[https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_large.png](https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_train_dataset.png)" width="640"/>
+</div>
+
+2) Dev Subset:
+
+3) Test Subset:
 
 #### Live Images:
 
