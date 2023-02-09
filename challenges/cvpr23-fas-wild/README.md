@@ -1,7 +1,8 @@
 # 4th Face Anti-spoofing Workshop and Challenge@CVPR2023, Wild Track
 
-
-
+<div align="left">
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_large.png" width="640"/>
+</div>
 
 ## Updates
 
@@ -21,14 +22,12 @@ We host the WILD track of Face Anti-spoofing Workshop and Challenge@CVPR2023 her
 All users can obtain and use this dataset and its subsets only after signing the Agreement and sending it to the official data chair.
 
 
-### Dataset Summary
-
 ### Data Collection
 
 We hired 8 collectors to collect spoof data from web search-engine and another 10 annotators to define labeling for all data.  As the result, we have totally xxx spoof images in xxx categories and xxx live images with no categorization.
 
 
-### Rich Annotations
+### Dataset Annotations
 
 Please refer to the following table for detailed information on the number of labeled data in the dataset:
 
