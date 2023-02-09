@@ -19,7 +19,7 @@ We host the WILD track of Face Anti-spoofing Workshop and Challenge@CVPR2023 her
 
 ### Download
 
-All users can obtain and use this dataset and its subsets only after signing the Agreement and sending it to the official data chair.
+All users can obtain and use this dataset and its subsets only after signing the Agreement and sending it to the official data chair via e-mail ``wangdong#moredian.com``.
 
 
 ### Data Collection
