@@ -63,8 +63,8 @@ Please refer to the following table for detailed information on the number of la
 
 1) Training Subset, categorization information in given:
 
-<div align="center">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_large.png" width="640"/>
+<div align="left">
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_train_dataset.png" width="1024"/>
 </div>
 
 2) Dev Subset:
