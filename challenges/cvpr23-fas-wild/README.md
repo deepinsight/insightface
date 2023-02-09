@@ -23,7 +23,7 @@ We host the WILD track of Face Anti-spoofing Workshop and Challenge@CVPR2023 her
 
 ### Evaluation Criteria
 
-For the performance evaluation, we selected the recently standardized ISO/IEC 30107-3 metrics: Attack Presentation Classification Error Rate (APCER), Normal/Bona Fide Presentation Classification Error Rate (NPCER/BPCER) and Average Classification Error Rate (ACER) as the evaluation metric, in which APCER and BPCER/NPCER are used to measure the error rate of fake or live samples, respectively. Additionally, Area Under Curve(AUC) is defined as the area under the ROC curve, and the value range is generally between 0.5 and 1. The AUC value is used as the evaluation criterion because in many cases the ROC curve does not clearly indicate which classifier performs better, and as a value, a classifier with a larger AUC performs better.
+For the performance evaluation, we selected the recently standardized ISO/IEC 30107-3 metrics: Attack Presentation Classification Error Rate (APCER), Normal/Bona Fide Presentation Classification Error Rate (NPCER/BPCER) and Average Classification Error Rate (ACER) as the evaluation metric, in which APCER and BPCER/NPCER are used to measure the error rate of fake or live samples, respectively. The ACER value is used as the final evaluation criterion.
 
 
 
@@ -61,9 +61,9 @@ Please refer to the following table for detailed information on the number of la
 
 #### Spoofing Images
 
-1) Training Subset:
+1) Training Subset, categorization information in given:
 
-<div align="left">
+<div align="center">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_large.png" width="640"/>
 </div>
 
