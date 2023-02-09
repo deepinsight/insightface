@@ -76,6 +76,11 @@ Please refer to the following table for detailed information on the number of la
 
 
 
-### Baselines
+## Baselines
 
+
+## Feedback
+
+1) If you have any questions regarding the challenge, kindly open an issue on insightface github. (recommended)
+2) Or you can send an e-mail to ``insightface.challenge#gmail.com``
 
