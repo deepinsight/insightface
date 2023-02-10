@@ -11,6 +11,8 @@
 
 We host the WILD track of Face Anti-spoofing Workshop and Challenge@CVPR2023 here. The challenge will officially start together with [4th Face Anti-spoofing Workshop](https://sites.google.com/view/face-anti-spoofing-challenge/welcome/challengecvpr2023). [Registration](#) will open soon on codalab.
 
+Our competition encompasses over 800K spoof photos and over 500K live photos. In the spoof photos, there are three major categories and 17 subcategories.
+
 ### Rules and Regulations
 
 1) Any extra data or pretrained model trained from extra data cannot be used in this challenge.
@@ -30,18 +32,18 @@ For the performance evaluation, we selected the recently standardized ISO/IEC 30
 
 In order to submit results at one time, participants need to combine the dev and test predictions into one file before result submission via codalab system. Note that the order of the samples cannot be changed and the dev sample list needs to be written before the test samples.
 
-The final submission file contains a total of xx,xx lines. Each line in the file contains two parts separated by a space. Such as: 
+The final submission file contains a total of 895,237 lines. Each line in the file contains two parts separated by a space. Such as: 
 ```
 dev/000001.jpg 0.15361                   #Note:  line 1- the first row of dev.txt
 
 ......
 
-dev/089276.jpg 0.23394                   #Note:  line xx,xx- the last row of dev.txt
-test/000001.jpg 0.15361                   #Note:  line xx,xx- the first row of test.txt  
+dev/140058.jpg 0.23394                   #Note:  line 140,058 the last row of dev.txt
+test/000001.jpg 0.15361                   #Note:  line 140,059 the first row of test.txt  
 
 ......   
 
-test/164557.jpg 0.23394                   #Note:  line xxx,xx- the last row of test.txt
+test/755179.jpg 0.23394                   #Note:  line 895,237 the last row of test.txt
 ```
 
 ## Dataset
@@ -78,19 +80,23 @@ Please refer to the following table for detailed information on the number of la
 
 #### Spoofing Images
 
-1) Training Subset, live/spoof annotation and categorization information are given:
+1) Training Subset, live/spoof labels and categorization information are given:
 
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_train_dataset.png" width="1024"/>
 </div>
 
-2) Dev Subset, plus the live/spoof label which is used by the contestants to select the best model.
 
-3) Test Subset, only images are available:
+
+2) Dev and Test Subsets, where dev set is used to select the threshold.
+
+<div align="left">
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_devtest_dataset.png" width="1024"/>
+</div>
 
 #### Live Images:
 
-
+There're 205,146 live images in training dataset, and 51,299/273,126 images in dev and test datasets respectively.
 
 
 ## Baselines
