@@ -78,25 +78,25 @@ All users can obtain and use this dataset and its subsets only after signing the
 
 Please refer to the following table for detailed information on the number of labeled data and examples in the dataset:
 
-#### Spoofing Images
+#### Spoof Images, Training Set
 
-1) Training Subset, live/spoof labels and categorization information are given:
+Training Subset, live/spoof labels and categorization information are given:
 
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_train_dataset.png" width="1024"/>
 </div>
 
+#### Spoof Images, Dev and Test Sets
 
-
-2) Dev and Test Subsets, where dev set is used to select the threshold.
+Dev and Test Subsets, where dev set is used to select the threshold.
 
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_devtest_dataset.png" width="1024"/>
 </div>
 
-#### Live Images:
+#### Live Images
 
-There're 205,146 live images in training dataset, and 51,299/273,126 images in dev and test datasets respectively.
+There're 205,146 live images in training set, and 51,299/273,126 images in dev and test sets respectively.
 
 
 ## Baselines
