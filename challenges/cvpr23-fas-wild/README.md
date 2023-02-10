@@ -26,6 +26,23 @@ We host the WILD track of Face Anti-spoofing Workshop and Challenge@CVPR2023 her
 For the performance evaluation, we selected the recently standardized ISO/IEC 30107-3 metrics: Attack Presentation Classification Error Rate (APCER), Normal/Bona Fide Presentation Classification Error Rate (NPCER/BPCER) and Average Classification Error Rate (ACER) as the evaluation metric, in which APCER and BPCER/NPCER are used to measure the error rate of fake or live samples, respectively. The ACER value is used as the final evaluation criterion.
 
 
+### Submission Format
+
+In order to submit results at one time, participants need to combine the dev and test predictions into one file before result submission via codalab system. Note that the order of the samples cannot be changed.
+
+The final merged file (for submission) contains a total of xx,xx lines. Each line in the file contains two parts separated by a space. Such as: 
+```
+dev/000001.jpg 0.15361                   #Note:  line 1- the first row of dev.txt
+
+......
+
+dev/089276.jpg 0.23394                   #Note:  line xx,xx- the last row of dev.txt
+test/000001.jpg 0.15361                   #Note:  line xx,xx- the first row of test.txt  
+
+......   
+
+test/164557.jpg 0.23394                   #Note:  line xxx,xx- the last row of test.txt
+```
 
 ## Dataset
 
@@ -52,7 +69,7 @@ For the performance evaluation, we selected the recently standardized ISO/IEC 30
 
 ### Download
 
-All users can obtain and use this dataset and its subsets only after signing the Agreement and sending it to the official e-mail ``insightface.challenge#gmail.com``.
+All users can obtain and use this dataset and its subsets only after signing the [Agreement](https://github.com/nttstar/insightface-resources/raw/master/files/License%20Agreement%20for%20InsightFace%20Wild%20Anti-Spoofing%20Dataset.pdf) and sending it to the official e-mail ``insightface.challenge#gmail.com``.
 
 
 ### Dataset Annotations
@@ -61,15 +78,15 @@ Please refer to the following table for detailed information on the number of la
 
 #### Spoofing Images
 
-1) Training Subset, categorization information in given:
+1) Training Subset, live/spoof annotation and categorization information are given:
 
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/faswild_train_dataset.png" width="1024"/>
 </div>
 
-2) Dev Subset:
+2) Dev Subset, plus the live/spoof label which is used by the contestants to select the best model.
 
-3) Test Subset:
+3) Test Subset, only images are available:
 
 #### Live Images:
 
