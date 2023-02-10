@@ -28,9 +28,9 @@ For the performance evaluation, we selected the recently standardized ISO/IEC 30
 
 ### Submission Format
 
-In order to submit results at one time, participants need to combine the dev and test predictions into one file before result submission via codalab system. Note that the order of the samples cannot be changed.
+In order to submit results at one time, participants need to combine the dev and test predictions into one file before result submission via codalab system. Note that the order of the samples cannot be changed and the dev sample list needs to be written before the test samples.
 
-The final merged file (for submission) contains a total of xx,xx lines. Each line in the file contains two parts separated by a space. Such as: 
+The final submission file contains a total of xx,xx lines. Each line in the file contains two parts separated by a space. Such as: 
 ```
 dev/000001.jpg 0.15361                   #Note:  line 1- the first row of dev.txt
 
