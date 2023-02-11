@@ -101,6 +101,10 @@ There're 205,146 live images in training set, and 51,299/273,126 images in dev a
 
 ## Baselines
 
+| Backbone | Input Crop | FLOPs | Threshold | APCER  | BPCER  | ACER   |
+|----------|------------|-------|-----------|--------|--------|--------|
+| ResNet18 | 224x224    | 2G    | 0.917196  | 6.804% | 7.343% | 7.074% |
+
 
 ## Feedback
 
