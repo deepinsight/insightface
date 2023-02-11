@@ -23,8 +23,8 @@ Our competition encompasses over 800K spoof photos and over 500K live photos. In
 
 ### Timeline
 
-1) Phase1, from 2023-02-10 to 2023-03-15: ``Development``, evaluate the accuracy on dev set. 
-2) Phase2: from 2023-03-15 to 2023-03-31: ``Final``, evaluate the accuracy on test set, using the threshold from dev set.
+1) Phase1, ``from 2023-02-10 to 2023-03-15``: **Development**, evaluate the accuracy on dev set. 
+2) Phase2, ``from 2023-03-15 to 2023-03-28 23:59:59``: **Final**, evaluate the accuracy on test set, using the threshold from dev set.
 
 ## Evaluation
 
