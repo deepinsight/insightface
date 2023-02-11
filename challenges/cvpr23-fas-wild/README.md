@@ -21,6 +21,11 @@ Our competition encompasses over 800K spoof photos and over 500K live photos. In
 
 3) The top-3 winners are required to submit the code for the entire method, ensuring reproducibility of the results and compliance with all contest rules, otherwise the score will be disqualified.
 
+### Timeline
+
+1) Phase1, from 2023-02-10 to 2023-03-15: ``Development``, evaluate the accuracy on dev set. 
+2) Phase2: from 2023-03-15 to 2023-03-31: ``Final``, evaluate the accuracy on test set, using the threshold from dev set.
+
 ## Evaluation
 
 ### Evaluation Criteria
@@ -30,7 +35,18 @@ For the performance evaluation, we selected the recently standardized ISO/IEC 30
 
 ### Submission Format
 
-In order to submit results at one time, participants need to combine the dev and test predictions into one file before result submission via codalab system. Note that the order of the samples cannot be changed and the dev sample list needs to be written before the test samples.
+**Phase1**: training dataset is used to train the model (Label: live=1, fake=0). Then the trained model is used to predict the sample scores in dev.txt. Participants can directly submit the predicted score file in codalab system. Note that the order of the samples in dev.txt cannot be changed. The final submitted file contains a total of 140,058 lines. Each line in the file contains two parts separated by a space. The first part is the relative path of each image which must be the same with the name in dev.txt, and the second part is the prediction score given by the model (representing the probability that the sample belongs to the live face). Such as:
+```
+dev/000001.jpg 0.15361                   #Note:  line 1- the first row of dev.txt
+
+......
+
+dev/140058.jpg 0.23394                   #Note:  line 140,058 the last row of dev.txt
+```
+The predicted file should be a ``.txt`` file and compressed into a ZIP file (do not add any folder in the ZIP).
+
+
+**Phase2**: In order to submit results at one time, participants need to combine the dev and test predictions into one file before result submission via codalab system. Note that the order of the samples cannot be changed and the dev sample list needs to be written before the test samples.
 
 The final submission file contains a total of 895,237 lines. Each line in the file contains two parts separated by a space. Such as: 
 ```
@@ -45,6 +61,7 @@ test/000001.jpg 0.15361                   #Note:  line 140,059 the first row of 
 
 test/755179.jpg 0.23394                   #Note:  line 895,237 the last row of test.txt
 ```
+The predicted file should be a ``.txt`` file and compressed into a ZIP file (do not add any folder in the ZIP).
 
 ## Dataset
 
