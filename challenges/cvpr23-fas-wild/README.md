@@ -23,8 +23,15 @@ Our competition encompasses over 800K spoof photos and over 500K live photos. In
 
 ### Timeline
 
-1) Phase1, ``from 2023-02-10 to 2023-03-15``: **Development**, evaluate the accuracy on dev set. 
-2) Phase2, ``from 2023-03-15 to 2023-03-28 23:59:59``: **Final**, evaluate the accuracy on test set, using the threshold from dev set.
+| Phase | Start Date | End Date            | Intro                                                               |
+|-------|------------|---------------------|---------------------------------------------------------------------|
+| Dev   | 2023-02-13 | 2023-03-15          | evaluate the accuracy on dev set                                    |
+| Test  | 2023-03-15 | 2023-03-28 23:59:59 | evaluate the accuracy on test set, using the threshold from dev set |
+
+
+### Rewards
+
+Coming soon
 
 ## Evaluation
 
@@ -118,9 +125,9 @@ There're 205,146 live images in training set, and 51,299/273,126 images in dev a
 
 ## Baselines
 
-| Backbone | Input Crop | FLOPs | Threshold | APCER  | BPCER  | ACER   |
-|----------|------------|-------|-----------|--------|--------|--------|
-| ResNet18 | 224x224    | 2G    | 0.917196  | 6.804% | 7.343% | 7.074% |
+| Backbone | Input Crop | FLOPs | APCER  | BPCER  | ACER   |
+|----------|------------|-------|--------|--------|--------|
+| ResNet18 | 224x224    | 2G    | 6.804% | 7.343% | 7.074% |
 
 
 ## Feedback
