@@ -33,7 +33,13 @@ Our competition encompasses over 800K spoof photos and over 500K live photos. In
 
 ### Rewards
 
-Coming soon
+Before tax
+
+| Rank      | Prize   |
+|-----------|---------|
+| 1st place | $ 3,000 |
+| 2nd place | $ 1,500 |
+| 3rd place | $ 500   |
 
 ## Evaluation
 
