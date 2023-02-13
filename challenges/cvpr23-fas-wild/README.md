@@ -44,7 +44,7 @@ For the performance evaluation, we selected the recently standardized ISO/IEC 30
 
 ### Submission Format
 
-**Phase1**: training dataset is used to train the model (Label: live=1, fake=0). Then the trained model is used to predict the sample scores in dev.txt. Participants can directly submit the predicted score file in codalab system. Note that the order of the samples in dev.txt cannot be changed. The final submitted file contains a total of 140,058 lines. Each line in the file contains two parts separated by a space. The first part is the path of each image in dev.txt and must contain the set name(``dev/``), and the second part is the prediction score given by the model (representing the probability that the sample belongs to the live face). Such as:
+**Phase1**: training dataset is used to train the model (Label: live=1, fake=0). Then the trained model is used to predict the sample scores in dev.txt. Participants can directly submit the predicted score file in codalab system. Note that the order of the samples in dev.txt cannot be changed. The final submitted file contains a total of 140,058 lines. Each line in the file contains two parts separated by a space. The first part is the path of each image in dev.txt and must contain the set name(``dev/``), and the second part is the prediction score given by the model (representing the probability that the sample belongs to the live face, which must be in the range of [0.0, 1.0]). Such as:
 ```
 dev/000001.jpg 0.15361                   #Note:  line 1- the first row of dev.txt
 
