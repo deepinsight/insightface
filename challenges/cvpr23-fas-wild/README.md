@@ -19,7 +19,7 @@ Our competition encompasses over 800K spoof photos and over 500K live photos. In
 
 1) Any extra data or pretrained model trained from extra data cannot be used in this challenge.
 
-2) Only one DL model can be used, we can not accept the fusion results from many DL models. The computational cost of a single DL model should be **less than 5G FLOPs**. 
+2) Only one DL model can be used, we can not accept the fusion results from many DL models. The computational cost of a single DL model should be **less than 5G FLOPs**. (FLOPs can be calculated using `ptflops` python library)
 
 3) The top-3 winners are required to submit the code for the entire method, ensuring reproducibility of the results and compliance with all contest rules, otherwise the score will be disqualified.
 
