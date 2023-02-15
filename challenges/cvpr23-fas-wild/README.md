@@ -12,7 +12,7 @@
     192 148 (bbox left top)
     234 203 (bbox right bottom)
     216 171 (landmark left eye)
-    230 168 (landmark left eye)
+    230 168 (landmark right eye)
     231 180 (landmark nose)
     218 190 (landmark left mouth )
     229 188 (landmark right mouth )
