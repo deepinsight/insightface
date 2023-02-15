@@ -6,6 +6,17 @@
 
 ## Updates
 
+**``2023-02-15``**: The annotation format in readme is fixed: 
+  ```
+    - e.g: Train/spoof/2D-Display-Phone/000001/000001.txt
+    192 148 (bbox left top)
+    234 203 (bbox right bottom)
+    216 171 (landmark left eye)
+    230 168 (landmark left eye)
+    231 180 (landmark nose)
+    218 190 (landmark left mouth )
+    229 188 (landmark right mouth )
+  ```
 
 ## Challenge
 
