@@ -38,7 +38,7 @@ Supported methods:
 - [x] [VPL (CVPR'2021)](vpl)
 - [x] [PartialFC_torch (CVPR'2022)](arcface_torch)
 - [x] [PartialFC_mxnet (CVPR'2022)](partial_fc)
-- [x] [IDMMD (NeurIPS'2022)](IDMMD)
+- [x] [IDMMD (NeurIPS'2022)](https://github.com/deepinsight/insightface/tree/master/recognition/idmmd)
 
 
 ## Contributing
