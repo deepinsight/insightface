@@ -81,11 +81,11 @@ class FaceAnalysis:
         dimg = img.copy()
         for i in range(len(faces)):
             face = faces[i]
-            box = face.bbox.astype(np.int)
+            box = face.bbox.astype(int)
             color = (0, 0, 255)
             cv2.rectangle(dimg, (box[0], box[1]), (box[2], box[3]), color, 2)
             if face.kps is not None:
-                kps = face.kps.astype(np.int)
+                kps = face.kps.astype(int)
                 #print(landmark.shape)
                 for l in range(kps.shape[0]):
                     color = (0, 0, 255)
@@ -100,7 +100,7 @@ class FaceAnalysis:
             #    if key.startswith('landmark_3d'):
             #        print(key, value.shape)
             #        print(value[0:10,:])
-            #        lmk = np.round(value).astype(np.int)
+            #        lmk = np.round(value).astype(int)
             #        for l in range(lmk.shape[0]):
             #            color = (255, 0, 0)
             #            cv2.circle(dimg, (lmk[l][0], lmk[l][1]), 1, color,
