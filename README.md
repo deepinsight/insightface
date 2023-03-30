@@ -196,11 +196,24 @@ Supported methods:
 If you find *InsightFace* useful in your research, please consider to cite the following related papers:
 
 ```
+@inproceedings{ren2023pbidr,
+  title={Facial Geometric Detail Recovery via Implicit Representation},
+  author={Ren, Xingyu and Lattas, Alexandros and Gecer, Baris and Deng, Jiankang and Ma, Chao and Yang, Xiaokang},
+  booktitle={2023 IEEE 17th International Conference on Automatic Face and Gesture Recognition (FG)},  
+  year={2023}
+ }
 
 @article{guo2021sample,
   title={Sample and Computation Redistribution for Efficient Face Detection},
   author={Guo, Jia and Deng, Jiankang and Lattas, Alexandros and Zafeiriou, Stefanos},
   journal={arXiv preprint arXiv:2105.04714},
+  year={2021}
+}
+
+@inproceedings{gecer2021ostec,
+  title={OSTeC: One-Shot Texture Completion},
+  author={Gecer, Baris and Deng, Jiankang and Zafeiriou, Stefanos},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
   year={2021}
 }
 
