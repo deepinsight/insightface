@@ -2,6 +2,10 @@
 
 For over 99% of people, using Midjourney to create your own photos is not feasible unless you're a famous celebrity with thousands or millions of photos online. But now, with the InsightFaceSwap Discord bot, you can accomplish this task easily with just a few steps.
 
+<div align="left">
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu0.jpg" width="800"/>
+</div>
+
 InsightFaceSwap bot can help you with the following tasks:
 
 1. The ``!saveid <name> <img>`` command is used to upload and register your own photos or ID features for subsequent facial replacement and editing. You can upload up to 10 instances permanently and use them without having to upload them repeatedly.
@@ -31,7 +35,7 @@ InsightFaceSwap bot can help you with the following tasks:
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu4.jpg" width="640"/>
 </div>
-6. After chanting, we select the first image and enlarge it (you can choose any image to enlarge). Note that we do not support processing the 2x2 thumbnail.
+6. After chanting, we select the first image and enlarge it (you can choose any image to enlarge). Note that we do not support processing on the 2x2 thumbnail.
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu5.jpg" width="640"/>
 </div>
