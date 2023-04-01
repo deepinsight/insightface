@@ -23,7 +23,7 @@ InsightFaceSwap bot can help you with the following tasks:
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu1.jpg" width="480"/>
 </div>
-3. Now we can start saving your ID features. Drag a photo of yourself (with no obstruction and front view) from your computer to the Discord app. A pop-up window will appear, and in the text box, enter the command ``!saveid me`` (where 'me' is the registered name, which can be any alphabets or numbers up to 8 characters long).
+3. Now we can start saving your ID features. Drag a photo of yourself (with front view and no occlusion) from your computer to the Discord app. A pop-up window will appear, and in the text box, enter the command `!saveid me` (where 'me' is the registered name, which can be any alphabets or numbers up to 8 characters long).
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu2.jpg" width="640"/>
 </div>
@@ -39,7 +39,7 @@ InsightFaceSwap bot can help you with the following tasks:
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu5.jpg" width="640"/>
 </div>
-7. After the enlargement is complete, we enter the command ``!swapid me`` to replace the face in the image with our own. Generally, the task is completed in less than a second.
+7. After the enlargement is complete, enter the command ``!swapid me`` to replace the face in the image with your own. Generally, the task is completed in less than a second.
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu6.jpg" width="640"/>
 </div>
