@@ -1,6 +1,6 @@
-# Use Midjourney and InsightFaceSwap Bot to create personalized portrait.
+# Using Midjourney and InsightFaceSwap Bot to create a personalized portrait
 
-For over 99% of people, using Midjourney to create your own photos is not feasible unless you're a famous celebrity with thousands or millions of photos online. But now, with the InsightFaceSwap Discord bot, you can accomplish this task easily with just a few steps.
+For over 99% of people, using Midjourney to create your own portraits is not feasible unless you're a famous celebrity with thousands or millions of photos online. But now, with the InsightFaceSwap Discord bot, you can accomplish this task easily with just a few steps.
 
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu0.jpg" width="800"/>
