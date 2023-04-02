@@ -1,7 +1,6 @@
 # Distributed Arcface Training in Pytorch
 
-This is a deep learning library that makes face recognition efficient, and effective, which can train tens of millions
-identity on a single server.  
+The "arcface_torch" repository is the official implementation of the ArcFace algorithm. It supports distributed and sparse training with multiple distributed training examples, including several memory-saving techniques such as mixed precision training and gradient checkpointing. It also supports training for ViT models and datasets including WebFace42M and Glint360K, two of the largest open-source datasets. Additionally, the repository comes with a built-in tool for converting to ONNX format, making it easy to submit to MFR evaluation systems.
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-ijb-c)](https://paperswithcode.com/sota/face-verification-on-ijb-c?p=killing-two-birds-with-one-stone-efficient)  
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-ijb-b)](https://paperswithcode.com/sota/face-verification-on-ijb-b?p=killing-two-birds-with-one-stone-efficient)  
@@ -10,43 +9,50 @@ identity on a single server.
 
 ## Requirements
 
-In order to enjoy the new features of pytorch, we have upgraded the pytorch to 1.9.0.  
-Pytorch before 1.9.0 may not work in the future.
+To avail the latest features of PyTorch, we have upgraded to version 1.12.0.
 
-- Install [PyTorch](http://pytorch.org) (torch>=1.9.0), our doc for [install.md](docs/install.md).
+- Install [PyTorch](https://pytorch.org/get-started/previous-versions/) (torch>=1.12.0).
 - (Optional) Install [DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/), our doc for [install_dali.md](docs/install_dali.md).
 - `pip install -r requirement.txt`.
   
 ## How to Training
 
-To train a model, run `train.py` with the path to the configs.  
-The example commands below show how to run
-distributed training.
+To train a model, execute the `train.py` script with the path to the configuration files. The sample commands provided below demonstrate the process of conducting distributed training.
 
-### 1. To run on a machine with 8 GPUs:
+### 1. To run on one GPU:
 
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=12581 train.py configs/ms1mv3_r50_lr02
+python train_v2.py configs/ms1mv3_r50_onegpu
 ```
 
-### 2. To run on 2 machines with 8 GPUs each:
+Note:   
+It is not recommended to use a single GPU for training, as this may result in longer training times and suboptimal performance. For best results, we suggest using multiple GPUs or a GPU cluster.  
+
+
+### 2. To run on a machine with 8 GPUs:
+
+```shell
+torchrun --nproc_per_node=8 train.py configs/ms1mv3_r50
+```
+
+### 3. To run on 2 machines with 8 GPUs each:
 
 Node 0:
 
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=12581 train.py configs/webface42m_r100_lr01_pfc02_bs4k_16gpus
+torchrun --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=12581 train.py configs/wf42m_pfc02_16gpus_r100
 ```
 
 Node 1:
-
+  
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=12581 train.py configs/webface42m_r100_lr01_pfc02_bs4k_16gpus
+torchrun --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=12581 train.py configs/wf42m_pfc02_16gpus_r100
 ```
 
-### 3. Run ViT-B on a machine with 24k batchsize:
+### 4. Run ViT-B on a machine with 24k batchsize:
 
 ```shell
-python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 --master_addr="127.0.0.1" --master_port=12345 train_v2.py configs/wf42m_pfc03_40epoch_8gpu_vit_b.py
+torchrun --nproc_per_node=8 train_v2.py configs/wf42m_pfc03_40epoch_8gpu_vit_b
 ```
 
 
@@ -55,6 +61,16 @@ python -m torch.distributed.launch --nproc_per_node=8 --nnodes=1 --node_rank=0 -
 - [MS1MV3](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-retinaface) (93k IDs, 5.2M images)
 - [Glint360K](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc#4-download) (360k IDs, 17.1M images)
 - [WebFace42M](docs/prepare_webface42m.md) (2M IDs, 42.5M images)
+- [Your Dataset, Click Here!](docs/prepare_custom_dataset.md)
+
+Note: 
+If you want to use DALI for data reading, please use the script 'scripts/shuffle_rec.py' to shuffle the InsightFace style rec before using it.  
+Example:
+
+`python scripts/shuffle_rec.py ms1m-retinaface-t1`
+
+You will get the "shuffled_ms1m-retinaface-t1" folder, where the samples in the "train.rec" file are shuffled.
+
 
 ## Model Zoo
 
@@ -142,21 +158,14 @@ globalised multi-racial testset contains 242,143 identities and 1,624,305 images
 <div><img src="https://github.com/anxiangsir/insightface_arcface_log/blob/master/pfc_exp.png" width = "90%" /></div>
 
 
-**Arcface-Torch** can train large-scale face recognition training set efficiently and quickly. When the number of
-classes in training sets is greater than 1 Million, partial fc sampling strategy will get same
-accuracy with several times faster training performance and smaller GPU memory. 
-Partial FC is a sparse variant of the model parallel architecture for large sacle  face recognition. Partial FC use a 
-sparse softmax, where each batch dynamicly sample a subset of class centers for training. In each iteration, only a 
-sparse part of the parameters will be updated, which can reduce a lot of GPU memory and calculations. With Partial FC, 
-we can scale trainset of 29 millions identities, the largest to date. Partial FC also supports multi-machine distributed 
-training and mixed precision training.
+**Arcface-Torch** is an efficient tool for training large-scale face recognition training sets. When the number of classes in the training sets exceeds one million, the partial FC sampling strategy maintains the same accuracy while providing several times faster training performance and lower GPU memory utilization. The partial FC is a sparse variant of the model parallel architecture for large-scale face recognition, utilizing a sparse softmax that dynamically samples a subset of class centers for each training batch. During each iteration, only a sparse portion of the parameters are updated, leading to a significant reduction in GPU memory requirements and computational demands. With the partial FC approach, it is possible to train sets with up to 29 million identities, the largest to date. Furthermore, the partial FC method supports multi-machine distributed training and mixed precision training.
 
 
 
 More details see 
 [speed_benchmark.md](docs/speed_benchmark.md) in docs.
 
-> 1. Training speed of different parallel methods (samples / second), Tesla V100 32GB * 8. (Larger is better)
+> 1. Training Speed of Various Parallel Techniques (Samples per Second) on a Tesla V100 32GB x 8 System (Higher is Optimal)
 
 `-` means training failed because of gpu memory limitations.
 
@@ -169,7 +178,7 @@ More details see
 | 16000000                        | **-**         | **-**          | 2679           |
 | 29000000                        | **-**         | **-**          | **1855**       |
 
-> 2. GPU memory cost of different parallel methods (MB per GPU), Tesla V100 32GB * 8. (Smaller is better)
+> 2. GPU Memory Utilization of Various Parallel Techniques (MB per GPU) on a Tesla V100 32GB x 8 System (Lower is Optimal)
 
 | Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
 |:--------------------------------|:--------------|:---------------|:---------------|

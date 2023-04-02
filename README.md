@@ -11,6 +11,10 @@ For all main contributors, please check [contributing](#contributing).
 
 ## Top News
 
+**`2023-04-01`**: We move the swapping demo to Discord bot, which support editing on Midjourney generated images, see detail at [web-demos/swapping_discord](web-demos/swapping_discord).
+
+**`2023-02-13`**: We launch a large scale in the wild face anti-spoofing challenge on CVPR23 Workshop, see details at [challenges/cvpr23-fas-wild](challenges/cvpr23-fas-wild).
+
 **`2022-11-28`**: Single line code for facial identity swapping in our python packge ver 0.7, please check the example [here](examples/in_swapper).
 
 **`2022-10-28`**: [MFR-Ongoing](http://iccv21-mfr.com) website is refactored, please create issues if there's any bug.
@@ -194,11 +198,24 @@ Supported methods:
 If you find *InsightFace* useful in your research, please consider to cite the following related papers:
 
 ```
+@inproceedings{ren2023pbidr,
+  title={Facial Geometric Detail Recovery via Implicit Representation},
+  author={Ren, Xingyu and Lattas, Alexandros and Gecer, Baris and Deng, Jiankang and Ma, Chao and Yang, Xiaokang},
+  booktitle={2023 IEEE 17th International Conference on Automatic Face and Gesture Recognition (FG)},  
+  year={2023}
+ }
 
 @article{guo2021sample,
   title={Sample and Computation Redistribution for Efficient Face Detection},
   author={Guo, Jia and Deng, Jiankang and Lattas, Alexandros and Zafeiriou, Stefanos},
   journal={arXiv preprint arXiv:2105.04714},
+  year={2021}
+}
+
+@inproceedings{gecer2021ostec,
+  title={OSTeC: One-Shot Texture Completion},
+  author={Gecer, Baris and Deng, Jiankang and Zafeiriou, Stefanos},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
   year={2021}
 }
 

@@ -30,14 +30,15 @@ These are the face recognition methods of [InsightFace](https://insightface.ai)
 
 Supported methods:
 
-- [x] [ArcFace_mxnet (CVPR'2019)](arcface_mxnet)
 - [x] [ArcFace_torch (CVPR'2019)](arcface_torch)
-- [x] [SubCenter ArcFace (ECCV'2020)](subcenter_arcface)
-- [x] [PartialFC_mxnet (CVPR'2022)](partial_fc)
-- [x] [PartialFC_torch (CVPR'2022)](arcface_torch)
-- [x] [VPL (CVPR'2021)](vpl)
-- [x] [Arcface_oneflow](arcface_oneflow)
+- [x] [ArcFace_mxnet (CVPR'2019)](arcface_mxnet)
 - [x] [ArcFace_Paddle (CVPR'2019)](arcface_paddle)
+- [x] [Arcface_oneflow](arcface_oneflow)
+- [x] [SubCenter ArcFace (ECCV'2020)](subcenter_arcface)
+- [x] [VPL (CVPR'2021)](vpl)
+- [x] [PartialFC_torch (CVPR'2022)](arcface_torch)
+- [x] [PartialFC_mxnet (CVPR'2022)](partial_fc)
+- [x] [IDMMD (NeurIPS'2022)](https://github.com/deepinsight/insightface/tree/master/recognition/idmmd)
 
 
 ## Contributing
