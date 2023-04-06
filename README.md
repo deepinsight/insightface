@@ -29,33 +29,13 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 
 **`2022-02-23`**: [SCRFD](detection/scrfd) accepted by [ICLR-2022](https://iclr.cc/Conferences/2022).
 
-**`2022-01-29`**: Python pip package ver 0.6.2 updated, added pose estimation and fixed model downloading urls, see [detail](python-package).
-
-**`2022-01-18`**: Ambiguity-Aware Human Pose Estimation is now available at [here](body/human_pose/ambiguity_aware).
-
 **`2021-11-30`**: [MFR-Ongoing](challenges/mfr) challenge launched(same with IFRT), which is an extended version of [iccv21-mfr](challenges/iccv21-mfr).
-
-**`2021-11-25`**: Training face landmarks by synthetic data, see [alignment/synthetics](alignment/synthetics).
 
 **`2021-10-29`**: We achieved 1st place on the [VISA track](https://pages.nist.gov/frvt/plots/11/visa.html) of [NIST-FRVT 1:1](https://pages.nist.gov/frvt/html/frvt11.html) by using Partial FC (Xiang An, Jiankang Deng, Jia Guo).
 
 **`2021-10-11`**: [Leaderboard](https://insightface.ai/mfr21) of [ICCV21 - Masked Face Recognition Challenge](challenges/iccv21-mfr) released. Video: [Youtube](https://www.youtube.com/watch?v=lL-7l5t6x2w), [Bilibili](https://www.bilibili.com/video/BV15b4y1h79N/).
 
-**`2021-09-22`**: Update python library to ver-0.5, add new MBF and IR50 models, see [python-package](python-package).
-
-**`2021-08-07`**: Add new [model_zoo](model_zoo) page.
-
-**`2021-07-13`**: We now have implementations based on [paddlepaddle](https://github.com/PaddlePaddle): [arcface_paddle](recognition/arcface_paddle) for face recognition and [blazeface_paddle](detection/blazeface_paddle) for face detection.
-
-**`2021-07-09`**: We add a [person_detection](examples/person_detection) example, trained by [SCRFD](detection/scrfd), which can be called directly by our [python-library](python-package).
-
 **`2021-06-05`**: We launch a [Masked Face Recognition Challenge & Workshop](challenges/iccv21-mfr) on ICCV 2021.
-
-**`2021-05-15`**: We released an efficient high accuracy face detection approach called [SCRFD](detection/scrfd).
-
-**`2021-04-18`**: We achieved Rank-4th on NIST-FRVT 1:1, see [leaderboard](https://pages.nist.gov/frvt/html/frvt11.html).
-
-**`2021-03-13`**: We have released our official ArcFace PyTorch implementation, see [here](recognition/arcface_torch). 
 
 ## License
 
