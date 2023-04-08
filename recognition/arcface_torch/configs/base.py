@@ -38,6 +38,7 @@ config.frequent = 10
 
 # For Large Sacle Dataset, such as WebFace42M
 config.dali = False 
+config.dali_aug = False
 
 # Gradient ACC
 config.gradient_acc = 1

@@ -8,7 +8,7 @@ import torch
 from backbones import get_model
 from dataset import get_dataloader
 from losses import CombinedMarginLoss
-from lr_scheduler import PolyScheduler
+from lr_scheduler import PolynomialLRWarmup
 from partial_fc_v2 import PartialFC_V2
 from torch import distributed
 from torch.utils.data import DataLoader
@@ -17,6 +17,7 @@ from utils.utils_callbacks import CallBackLogging, CallBackVerification
 from utils.utils_config import get_config
 from utils.utils_distributed_sampler import setup_seed
 from utils.utils_logging import AverageMeter, init_logging
+from torch.distributed.algorithms.ddp_comm_hooks.default_hooks import fp16_compress_hook
 
 assert torch.__version__ >= "1.12.0", "In order to enjoy the features of the new torch, \
 we have upgraded the torch to 1.12.0. torch before than 1.12.0 may not work in the future."
@@ -81,12 +82,12 @@ def main(args):
         except Exception as e:
             print("WandB Data (Entity and Project name) must be provided in config file (base.py).")
             print(f"Config Error: {e}")
-            
     train_loader = get_dataloader(
         cfg.rec,
         local_rank,
         cfg.batch_size,
         cfg.dali,
+        cfg.dali_aug,
         cfg.seed,
         cfg.num_workers
     )
@@ -97,6 +98,7 @@ def main(args):
     backbone = torch.nn.parallel.DistributedDataParallel(
         module=backbone, broadcast_buffers=False, device_ids=[local_rank], bucket_cap_mb=16,
         find_unused_parameters=True)
+    backbone.register_comm_hook(None, fp16_compress_hook)
 
     backbone.train()
     # FIXME using gradient checkpoint if there are some unused parameters will cause error
@@ -113,7 +115,7 @@ def main(args):
     if cfg.optimizer == "sgd":
         module_partial_fc = PartialFC_V2(
             margin_loss, cfg.embedding_size, cfg.num_classes,
-            cfg.sample_rate, cfg.fp16)
+            cfg.sample_rate, False)
         module_partial_fc.train().cuda()
         # TODO the params of partial fc must be last in the params list
         opt = torch.optim.SGD(
@@ -123,7 +125,7 @@ def main(args):
     elif cfg.optimizer == "adamw":
         module_partial_fc = PartialFC_V2(
             margin_loss, cfg.embedding_size, cfg.num_classes,
-            cfg.sample_rate, cfg.fp16)
+            cfg.sample_rate, False)
         module_partial_fc.train().cuda()
         opt = torch.optim.AdamW(
             params=[{"params": backbone.parameters()}, {"params": module_partial_fc.parameters()}],
@@ -135,13 +137,10 @@ def main(args):
     cfg.warmup_step = cfg.num_image // cfg.total_batch_size * cfg.warmup_epoch
     cfg.total_step = cfg.num_image // cfg.total_batch_size * cfg.num_epoch
 
-    lr_scheduler = PolyScheduler(
+    lr_scheduler = PolynomialLRWarmup(
         optimizer=opt,
-        base_lr=cfg.lr,
-        max_steps=cfg.total_step,
-        warmup_steps=cfg.warmup_step,
-        last_epoch=-1
-    )
+        warmup_iters=cfg.warmup_step,
+        total_iters=cfg.total_step)
 
     start_epoch = 0
     global_step = 0
