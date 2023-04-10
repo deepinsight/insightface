@@ -2,7 +2,7 @@
 
 ## Updates
 
-**`2023-04-10`**: Our Discord bot now has over 100 users and is currently required to process the verification. So now it cannot be added to any new servers temporarily(those that have been added can be used normally). Please wait for a few days, or it may take up to 1-2 weeks.
+**`2023-04-10`**: Our Discord bot now has over 100 users and is currently required to process the [verification](https://support.discord.com/hc/en-us/articles/360040720412-Bot-Verification-and-Data-Whitelisting). So now it cannot be added to any new servers temporarily(those that have been added can be used normally). Please wait for a few days, or it may take up to 1-2 weeks.
 
 For over 99% of people, using Midjourney to create your own portraits is not feasible unless you're a famous celebrity with thousands or millions of photos online. But now, with the InsightFaceSwap Discord bot, you can accomplish this task easily with just a few steps.
 
