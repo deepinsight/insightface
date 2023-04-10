@@ -74,4 +74,4 @@ InsightFaceSwap bot can help you with the following tasks:
 5. Each Discord account can execute 50 commands per day to avoid automated scripts.
 6. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
 7. Please use it for personal entertainment purposes only.
-8. If there's any problem, you can create an issue on Github or contact me on Discord: ``nttstar#8449``
+8. If there's any problem, you can create an issue on Github or join our Discord group: [link](https://discord.gg/65Ma47ymPc)
