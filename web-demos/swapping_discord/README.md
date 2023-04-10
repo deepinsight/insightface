@@ -4,6 +4,8 @@
 
 **`2023-04-10`**: Our Discord bot now has over 100 users and is currently required to process the [verification](https://support.discord.com/hc/en-us/articles/360040720412-Bot-Verification-and-Data-Whitelisting). So now it cannot be added to any new servers temporarily(those that have been added can be used normally). Please wait for a few days, or it may take up to 1-2 weeks.
 
+## Introduction
+
 For over 99% of people, using Midjourney to create your own portraits is not feasible unless you're a famous celebrity with thousands or millions of photos online. But now, with the InsightFaceSwap Discord bot, you can accomplish this task easily with just a few steps.
 
 <div align="left">
@@ -20,7 +22,7 @@ InsightFaceSwap bot can help you with the following tasks:
 
    
 
-### Step-by-step guide:
+## Step-by-step guide:
 
 1. Refer to [this link](https://docs.midjourney.com/docs/invite-the-bot) to register Discord app, create a new chat room, and invite the Midjourney bot to the chat room.
 2. Invite the InsightFaceSwap bot to the chat room by this link: <https://discord.com/api/oauth2/authorize?client_id=1090660574196674713&permissions=274877975552&scope=bot>.
@@ -63,7 +65,7 @@ InsightFaceSwap bot can help you with the following tasks:
 
 
 
-### Other notes:
+## Other notes:
 
 1. You can use ``!listid`` command to list all the registered IDs. The total number of registered IDs cannot exceed 10.
 2. The registered ID name can only be alphabets and numbers, and cannot exceed 8 characters.
