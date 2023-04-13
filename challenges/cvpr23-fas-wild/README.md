@@ -103,11 +103,13 @@ The predicted file should be a ``.txt`` file and compressed into a ZIP file (do 
 7. We reserve the right to interpret and amend these rules.
 8. please cite us if the InsightFace Wild Anti-Spoofing Dataset or its subset is used in your research:
 ```
-@misc{2023insightfacefaswild,
-    title={InsightFace Wild Anti-Spoofing Dataset},
-    author={Dong Wang, Qiqi Shao, Haochi He, Zhian Chen, Jia Guo, Jiankang Deng, Jun Wan, Ajian Liu, Sergio Escalera, Hugo Jair Escalante, Isabelle Guyon, Zhen Lei, Chenxu Zhao, Shaopeng Tang },
-    howpublished = {\url{https://github.com/deepinsight/insightface/tree/master/challenges/cvpr23-fas-wild}},
-    year={2023}
+@misc{wang2023wild,
+      title={Wild Face Anti-Spoofing Challenge 2023: Benchmark and Results}, 
+      author={Dong Wang and Jia Guo and Qiqi Shao and Haochi He and Zhian Chen and Chuanbao Xiao and Ajian Liu and Sergio Escalera and Hugo Jair Escalante and Lei Zhen and Jun Wan and Jiankang Deng},
+      year={2023},
+      eprint={2304.05753},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
 }
 ```
 
