@@ -51,7 +51,7 @@ Our competition encompasses over 800K spoof photos and over 500K live photos. In
 | 2nd place | $ 1,500 |
 | 3rd place | $ 500   |
 
-(before tax)
+Sponsors: ``Moredian Technology``
 
 ## Evaluation
 
