@@ -20,6 +20,11 @@ InsightFaceSwap bot can help you with the following tasks:
 
 3. The ``!listid`` command lists the currently registered ID list.
 
+4. The ``!delid <name>`` command deletes specific registered ID.
+
+5. The ``!delall`` command deletes ALL registered ID.
+
+
    
 
 ## Step-by-step guide:
@@ -67,7 +72,7 @@ InsightFaceSwap bot can help you with the following tasks:
 
 ## Other notes:
 
-1. You can use ``!listid`` command to list all the registered IDs. The total number of registered IDs cannot exceed 10.
+1. You can use ``!listid`` command to list all the registered IDs. The total number of registered IDs cannot exceed 10. And also you can use ``!delid`` and ``!delall`` commands to delete registered IDs.
 2. The registered ID name can only be alphabets and numbers, and cannot exceed 8 characters.
 3. You can overwrite old ID features by re-uploading with the same ID name.
 4. If you don't want to upload your own photo, you can use the insightface python package to generate your own facial features and save them as a .npy file, where shape=(512,), for uploading.
