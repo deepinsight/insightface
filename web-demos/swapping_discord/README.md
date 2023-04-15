@@ -2,6 +2,8 @@
 
 ## Updates
 
+**`2023-04-15`**: Our Discord bot now gets verified. Please use [this link](https://discord.com/api/oauth2/authorize?client_id=1090660574196674713&permissions=274877945856&scope=bot) to invite the bot to your server. However, the user needs to use the Discord mentions feature to allow our bot to capture users' input. Specifically, we need to add "@InsightFaceSwap" before the command so that it can be properly captured, for example, "@InsightFaceSwap !swapid me". Additionally, the output of Midjourney bot cannot be captured at the moment, so you need to manually copy the generated image's path and call our API. Specifically, you can do it like this: ``https://cdn.discordapp.com/attachments/xxxxx.png @InsightFaceSwap !swapid me``. Most importantly, please join our [Discord group](https://discord.gg/65Ma47ymPc) to get future notification.
+
 **`2023-04-10`**: Our Discord bot now has over 100 users and is currently required to process the [verification](https://support.discord.com/hc/en-us/articles/360040720412-Bot-Verification-and-Data-Whitelisting). So now it cannot be added to any new servers temporarily(those that have been added can be used normally). Please wait for a few days, or it may take up to 1-2 weeks. You can also join our [Discord group](https://discord.gg/65Ma47ymPc), to get notification.
 
 ## Introduction
@@ -30,7 +32,7 @@ InsightFaceSwap bot can help you with the following tasks:
 ## Step-by-step guide:
 
 1. Refer to [this link](https://docs.midjourney.com/docs/invite-the-bot) to register Discord app, create a new chat room, and invite the Midjourney bot to the chat room.
-2. Invite the InsightFaceSwap bot to the chat room by this link: <https://discord.com/api/oauth2/authorize?client_id=1090660574196674713&permissions=274878020608&scope=bot>.
+2. Invite the InsightFaceSwap bot to the chat room by this link: <https://discord.com/api/oauth2/authorize?client_id=1090660574196674713&permissions=274877945856&scope=bot>.
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu1.jpg" width="480"/>
 </div>
