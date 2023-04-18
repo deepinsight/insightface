@@ -2,29 +2,47 @@
 
 ## Updates
 
-**`2023-04-15`**: Our Discord bot now gets verified. Please use [this link](https://discord.com/api/oauth2/authorize?client_id=1090660574196674713&permissions=274877945856&scope=bot) to invite the bot to your server. However, the user needs to use the Discord mentions feature to allow our bot to capture users' input. Specifically, we need to add ``@InsightFaceSwap`` before the command so that it can be properly captured, for example, ``@InsightFaceSwap !swapid me``. Additionally, the output of Midjourney bot cannot be captured directly at the moment, so you need to manually copy the generated image's URL and call our API. Specifically, you can do it like this: ``https://cdn.discordapp.com/attachments/xxxxx.png @InsightFaceSwap !swapid me``. Most importantly, please join our [Discord group](https://discord.gg/65Ma47ymPc) to get future notification.
-
-**`2023-04-10`**: Our Discord bot now has over 100 users and is currently required to process the [verification](https://support.discord.com/hc/en-us/articles/360040720412-Bot-Verification-and-Data-Whitelisting). So now it cannot be added to any new servers temporarily(those that have been added can be used normally). Please wait for a few days, or it may take up to 1-2 weeks. You can also join our [Discord group](https://discord.gg/65Ma47ymPc), to get notification.
+**`2023-04-18`**: Now we support Discord application commands(AKA. slash commands), please remember joining our [Discord group](https://discord.gg/65Ma47ymPc) to get future notification.
 
 ## Introduction
 
 For over 99% of people, using Midjourney to create your own portraits is not feasible unless you're a famous celebrity with thousands or millions of photos online. But now, with the InsightFaceSwap Discord bot, you can accomplish this task easily with just a few steps.
 
 <div align="left">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu0.jpg" width="800"/>
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd0.jpg" width="800"/>
 </div>
 
-InsightFaceSwap bot can help you with the following tasks:
+## Commands
 
-1. The ``@InsightFaceSwap !saveid <name> <img>`` command is used to upload and register your own photos or ID features for subsequent facial replacement and editing. You can upload up to 10 instances permanently and use them without having to upload them repeatedly.
+InsightFaceSwap bot can help you with the following commands:
 
-2. The ``@InsightFaceSwap !swapid <name>`` command allows you to replace the face with your own on the uploaded image or on the generation result of Midjourney bot.
+### /saveid ``name`` ``upload-image``
 
-3. The ``@InsightFaceSwap !listid`` command lists the currently registered ID list.
+Used to upload and register your own photos or ID features for subsequent facial replacement and editing. You can upload up to 10 instances permanently and use them without having to upload them repeatedly.
 
-4. The ``@InsightFaceSwap !delid <name>`` command deletes specific registered ID.
+### /setid ``name(s)``
 
-5. The ``@InsightFaceSwap !delall`` command deletes ALL registered ID.
+Set current/default identity name(s), for image generation using context menu. If you need to set multiple ID names, please use commas to separate them.
+
+### /listid
+
+List all registered identity names.
+
+### /delid ``name``
+
+Delete specific identity name.
+
+### /delall 
+
+Delete all registered names.
+
+### /swapid ``name(s)`` ``upload-image``
+
+Replace the face with the registered identity name on target image.
+
+### INSWapper context menu(Recommended)
+
+Replace the face with the default identity name on target image.
 
 
    
@@ -34,48 +52,44 @@ InsightFaceSwap bot can help you with the following tasks:
 1. Refer to [this link](https://docs.midjourney.com/docs/invite-the-bot) to register Discord app, create a new chat room, and invite the Midjourney bot to the chat room.
 2. Invite the InsightFaceSwap bot to the chat room by this link: <https://discord.com/api/oauth2/authorize?client_id=1090660574196674713&permissions=274877945856&scope=bot>.
 <div align="left">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swaptu1.jpg" width="480"/>
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd1.jpg" width="480"/>
 </div>
-3. Now we can start saving your ID features. Drag a photo of yourself (with front view and no occlusion) from your computer to the Discord app. A pop-up window will appear, and in the text box, enter the command `@InsightFaceSwap !saveid mnls` (where 'mnls' is the registered name, which can be any alphabets or numbers up to 8 characters long).
+3. Use ``/saveid`` command to register your identity name and feature. Here 'mnls' is the registered name, which can be any alphabets or numbers up to 8 characters long. If everything goes well, the bot will tell you that the save was successful. Note that the newly created identity will be automatically set as the default identity.
 <div align="left">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapg2.jpg" width="640"/>
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd2.jpg" width="640"/>
 </div>
-4. If everything goes well, the bot will tell you that the save was successful.
+4. Next, we can experiment with creating the portrait. Let's start chanting the Midjourney prompt and enlarge one of the outputs.
 <div align="left">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapg3.jpg" width="640"/>
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd3.jpg" width="640"/>
 </div>
-5. Next, we can experiment with creating our own photo. Let's start chanting the Midjourney prompt and enlarge one of the outputs.
+5. After the enlargement is complete, we can simply use the ``INSwapper`` context menu to generate our portrait. Right click on the target image and then select ``Apps-INSwapper`` menu.
 <div align="left">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapg4.jpg" width="640"/>
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd4.jpg" width="640"/>
 </div>
-6. After the enlargement is complete, copy the image URL by right click. Then enter the command ``{URL} @InsightFaceSwap !swapid mnls`` to replace the face in the image with your own. 
+6. Generally, the task is completed in less than a second and we can see the result.
 <div align="left">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapg5.jpg" width="640"/>
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapg7.jpg" width="640"/>
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd5.jpg" width="640"/>
 </div>
-7. Generally, the task is completed in less than a second and we can see the result.
+7. In addition to processing photos generated by Midjourney, we can also process locally uploaded photos by using ``/swapid`` command explicitly.
 <div align="left">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapg8.jpg" width="640"/>
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd6.jpg" width="640"/>
 </div>
-8. In addition to processing photos generated by Midjourney, we can also process locally uploaded photos. Similar to uploading ID photos, we drag the target photo (or copy-paste it) to the chat room and enter ``@InsightFaceSwap !swapid mnls`` in the text box.
+8. Hit to complete!
 <div align="left">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapg9.jpg" width="640"/>
+<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd7.jpg" width="640"/>
 </div>
-9. Hit to complete!
-<div align="left">
-<img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapg10.jpg" width="640"/>
-</div>
-
+9. Note that the ``INSwapper`` context menu can also work on user uploaded images in your Discord channel.
 
 
 
 ## Other notes:
 
-1. You can use ``@InsightFaceSwap !listid`` command to list all the registered IDs. The total number of registered IDs cannot exceed 10. And also you can use ``@InsightFaceSwap  !delid`` and ``@InsightFaceSwap  !delall`` commands to delete registered IDs.
+1. You can use ``/listid`` command to list all the registered IDs. The total number of registered IDs cannot exceed 10. And also you can use ``/delid`` and ``/delall`` commands to delete registered IDs.
 2. The registered ID name can only be alphabets and numbers, and cannot exceed 8 characters.
-3. You can overwrite old ID features by re-uploading with the same ID name.
-4. If you don't want to upload your own photo, you can use the insightface python package to generate your own facial features and save them as a .npy file, where shape=(512,), for uploading.
-5. Each Discord account can execute 50 commands per day to avoid automated scripts.
-6. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
-7. Please use it for personal entertainment purposes only.
-8. If there's any problem, you can create an issue on Github or join our Discord group: [link](https://discord.gg/65Ma47ymPc)
+3. For multi-facial replacement, you can input a comma splitted idname list, such as ``/setid me,you,him,her``
+4. You can overwrite old ID features by re-uploading with the same ID name.
+5. If you don't want to upload your own photo, you can use the insightface python package to generate your own facial features and save them as a .npy file, where shape=(512,), for uploading.
+6. Each Discord account can execute 50 commands per day to avoid automated scripts.
+7. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
+8. Please use it for personal entertainment purposes only.
+9. If there's any problem, you can create an issue on Github or join our Discord group: [link](https://discord.gg/65Ma47ymPc)
