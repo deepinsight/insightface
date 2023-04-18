@@ -2,7 +2,7 @@
 
 ## Updates
 
-**`2023-04-18`**: Now we support Discord application commands(AKA. slash commands), please remember joining our [Discord group](https://discord.gg/65Ma47ymPc) to get future notification.
+**`2023-04-18`**: Now we support Discord application commands(AKA. slash commands), please remember joining our [Discord group](https://discord.gg/65Ma47ymPc) to get notification.
 
 ## Introduction
 
@@ -62,7 +62,7 @@ Replace the face with the default identity name on target image.
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd3.jpg" width="640"/>
 </div>
-5. After the enlargement is complete, we can simply use the ``INSwapper`` context menu to generate our portrait. Right click on the target image and then select ``Apps-INSwapper`` menu.
+5. After the enlargement is complete, we can simply use the ``INSwapper`` context menu to generate our portrait. Right click on the target image and then select ``Apps-INSwapper`` menu. Note that we can also use ``/setid`` command to change the default identity name.
 <div align="left">
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd4.jpg" width="640"/>
 </div>
@@ -92,4 +92,4 @@ Replace the face with the default identity name on target image.
 6. Each Discord account can execute 50 commands per day to avoid automated scripts.
 7. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
 8. Please use it for personal entertainment purposes only.
-9. If there's any problem, you can create an issue on Github or join our Discord group: [link](https://discord.gg/65Ma47ymPc)
+9. If there's any problem, please join our Discord group: [link](https://discord.gg/65Ma47ymPc)
