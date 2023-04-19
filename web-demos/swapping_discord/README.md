@@ -12,7 +12,7 @@ For over 99% of people, using Midjourney to create your own portraits is not fea
 <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/swapd0.jpg" width="800"/>
 </div>
 
-## Commands
+## Discord Slash Commands
 
 InsightFaceSwap bot can help you with the following commands:
 
@@ -38,11 +38,13 @@ Delete all registered names.
 
 ### /swapid ``name(s)`` ``upload-image``
 
-Replace the face with the registered identity name on target image.
+Replace the face with the registered identity name(s) on target image.
 
-### INSWapper context menu(Recommended)
+## Discord Context Menu
 
-Replace the face with the default identity name on target image.
+### Apps/INSwapper
+
+Replace the face with the current/default identity name(s) on target image.
 
 
    
