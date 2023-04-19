@@ -44,7 +44,7 @@ Replace the face with the registered identity name(s) on target image.
 
 ### Apps/INSwapper
 
-Replace the face with the current/default identity name(s) on target image.
+Replace the face with the current/default identity name(s) on target image. Current/default identity name(s) can be set via ``/savevid`` and ``/setid`` slash commands.
 
 
    
@@ -90,8 +90,9 @@ Replace the face with the current/default identity name(s) on target image.
 2. The registered ID name can only be alphabets and numbers, and cannot exceed 8 characters.
 3. For multi-facial replacement, you can input a comma splitted idname list, such as ``/setid me,you,him,her``
 4. You can overwrite old ID features by re-uploading with the same ID name.
-5. If you don't want to upload your own photo, you can use the insightface python package to generate your own facial features and save them as a .npy file, where shape=(512,), for uploading.
-6. Each Discord account can execute 50 commands per day to avoid automated scripts.
-7. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
-8. Please use it for personal entertainment purposes only.
-9. If there's any problem, please join our Discord group: [link](https://discord.gg/65Ma47ymPc)
+5. Front-view, high quality, no heavy bangs ID photos are prefered.
+6. If you don't want to upload your ID photo, you can use the insightface python package to generate your own facial ID features and save them as a .npy file, where shape=(512,), for uploading.
+7. Each Discord account can execute 50 commands per day to avoid automated scripts.
+8. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
+9. Please use it for personal entertainment purposes only.
+10. If there's any problem, please join our Discord group: [link](https://discord.gg/65Ma47ymPc)
