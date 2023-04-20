@@ -20,7 +20,7 @@ InsightFaceSwap bot can help you with the following commands:
 
 Used to upload and register your own ID photo or numpy feature for subsequent facial replacement and editing. You can upload up to 10 instances permanently and use them without having to upload them repeatedly.
 
-(Front-view, high quality, no heavy bangs ID photos are prefered.）
+(Front-view, high quality, no glasses, no heavy bangs ID photos are prefered.）
 
 ### /setid ``name(s)``
 
@@ -92,7 +92,7 @@ Replace the face with the current/default identity name(s) on target image. Curr
 2. The registered ID name can only be alphabets and numbers, and cannot exceed 8 characters.
 3. For multi-facial replacement, you can input a comma splitted idname list, such as ``/setid me,you,him,her``
 4. You can overwrite old ID features by re-uploading with the same ID name.
-5. Front-view, high quality, no heavy bangs ID photos are prefered.
+5. Front-view, high quality, no glasses, no heavy bangs ID photos are prefered.
 6. If you don't want to upload your ID photo, you can use the insightface python package to generate your own facial ID features and save them as a .npy file, where shape=(512,), for uploading.
 7. Each Discord account can execute 50 commands per day to avoid automated scripts.
 8. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
