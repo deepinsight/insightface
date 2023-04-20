@@ -16,9 +16,11 @@ For over 99% of people, using Midjourney to create your own portraits is not fea
 
 InsightFaceSwap bot can help you with the following commands:
 
-### /saveid ``name`` ``upload-image``
+### /saveid ``name`` ``upload-ID-image``
 
-Used to upload and register your own photos or ID features for subsequent facial replacement and editing. You can upload up to 10 instances permanently and use them without having to upload them repeatedly.
+Used to upload and register your own ID photo or numpy feature for subsequent facial replacement and editing. You can upload up to 10 instances permanently and use them without having to upload them repeatedly.
+
+(Front-view, high quality, no heavy bangs ID photos are prefered.）
 
 ### /setid ``name(s)``
 
