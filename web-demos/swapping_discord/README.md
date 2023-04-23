@@ -109,4 +109,4 @@ We also do not assume any responsibility or liability for the consequences that 
 
 By using our service, you agree to indemnify and hold us harmless from any claim or demand, including reasonable attorneys' fees, made by any third-party due to or arising out of your use of the service, your violation of these terms and conditions, or your violation of any rights of another.
 
-In summary, our service is provided for entertainment purposes only, and we strictly prohibit the use of our service for any illegal or unethical activities. We are not responsible for any consequences that may arise from the use of our service. If you agree to these terms and conditions, please proceed to use our service.
+In summary, our service is provided for research and entertainment purposes only, and we strictly prohibit the use of our service for any illegal or unethical activities. We are not responsible for any consequences that may arise from the use of our service. If you agree to these terms and conditions, please proceed to use our service.
