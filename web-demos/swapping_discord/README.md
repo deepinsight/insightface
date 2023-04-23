@@ -4,6 +4,18 @@
 
 **`2023-04-18`**: Now we support Discord application commands(AKA. slash commands), please remember joining our [Discord group](https://discord.gg/65Ma47ymPc) to get notification.
 
+## Disclaimer
+
+By using this service, you acknowledge that you have read, understood, and agreed to the terms and conditions outlined in this disclaimer.
+
+We would like to emphasize that our service is intended for research and/or entertainment purposes only. We do not condone or promote the use of our service for any illegal or unethical activities. We strictly prohibit the use of our service to replace faces of individuals without their express permission or consent. Additionally, we do not allow the replacement of faces of political figures, public officials, or any other public figures without their permission.
+
+We also do not assume any responsibility or liability for the consequences that may arise from the use of our service. Our service is provided on an "as is" basis, and we do not guarantee the accuracy, completeness, or reliability of the results obtained through the use of our service.
+
+By using our service, you agree to indemnify and hold us harmless from any claim or demand, including reasonable attorneys' fees, made by any third-party due to or arising out of your use of the service, your violation of these terms and conditions, or your violation of any rights of another.
+
+In summary, our service is provided for research and entertainment purposes only, and we strictly prohibit the use of our service for any illegal or unethical activities. We are not responsible for any consequences that may arise from the use of our service. If you agree to these terms and conditions, please proceed to use our service.
+
 ## Introduction
 
 For over 99% of people, using Midjourney to create your own portraits is not feasible unless you're a famous celebrity with thousands or millions of photos online. But now, with the InsightFaceSwap Discord bot, you can accomplish this task easily with just a few steps.
@@ -99,14 +111,4 @@ Replace the face with the current/default identity name(s) on target image. Curr
 9. Please use it for personal entertainment purposes only.
 10. If there's any problem, please join our Discord group: [link](https://discord.gg/65Ma47ymPc)
 
-## Disclaimer:
 
-By using this service, you acknowledge that you have read, understood, and agreed to the terms and conditions outlined in this disclaimer.
-
-We would like to emphasize that our service is intended for research and/or entertainment purposes only. We do not condone or promote the use of our service for any illegal or unethical activities. We strictly prohibit the use of our service to replace faces of individuals without their express permission or consent. Additionally, we do not allow the replacement of faces of political figures, public officials, or any other public figures without their permission.
-
-We also do not assume any responsibility or liability for the consequences that may arise from the use of our service. Our service is provided on an "as is" basis, and we do not guarantee the accuracy, completeness, or reliability of the results obtained through the use of our service.
-
-By using our service, you agree to indemnify and hold us harmless from any claim or demand, including reasonable attorneys' fees, made by any third-party due to or arising out of your use of the service, your violation of these terms and conditions, or your violation of any rights of another.
-
-In summary, our service is provided for research and entertainment purposes only, and we strictly prohibit the use of our service for any illegal or unethical activities. We are not responsible for any consequences that may arise from the use of our service. If you agree to these terms and conditions, please proceed to use our service.
