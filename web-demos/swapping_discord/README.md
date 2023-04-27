@@ -2,9 +2,12 @@
 
 ## Updates
 
-**`2023-04-27`**: Now we support swapping on GIF. The usage is the same as static images. A few extra key points: 1) Uploaded gifs cannot exceed 5MB in size; 2) Performing one gif face swap will consume 5 command opportunities (i.e. a maximum of 10 gifs can be operated per day); 3) Up to the first 15 frames can be operated; 4) Supports single-person swapping only in GIFs; 5) The frames may be dynamically resized to a lower resolution.
+**`2023-04-27`**
+  1) Now we support swapping on GIFs. The usage is the same as static images. A few extra key points: 1) Uploaded gifs cannot exceed 5MB in size; 2) Performing one gif face swap will consume 5 command opportunities (i.e. a maximum of 10 gifs can be operated per day); 3) Up to the first 15 frames can be operated; 4) Supports single-person swapping only in GIFs; 5) The frames may be dynamically resized to a lower resolution.
+  2) Add FAQ.
 
-**`2023-04-18`**: Now we support Discord application commands(AKA. slash commands), please remember joining our [Discord group](https://discord.gg/65Ma47ymPc) to get notification.
+**`2023-04-18`**
+  Now we support Discord application commands(AKA. slash commands), please remember joining our [Discord group](https://discord.gg/65Ma47ymPc) to get notification.
 
 ## Disclaimer
 
@@ -99,18 +102,30 @@ Replace the face with the current/default identity name(s) on target image. Curr
 9. Note that the ``INSwapper`` context menu can also work on user uploaded images in your Discord channel.
 
 
+## FAQ
+
+Q: Can I list my registered ID list?
+
+A: Yes, use ``/listid`` command.
+
+Q: Are there any restrictions on ID names?
+
+A: All ID names can only be alphabets and numbers, and cannot exceed 8 characters. The total number of registered IDs cannot exceed 10.
+
+Q: Can I delete my registered IDs?
+
+A: You can use ``/delid`` and ``/delall`` commands to delete registered IDs.
+
+Q: Support multi-facial replacement?
+
+A: Yes, you can input a comma splitted idname list, such as ``/setid me,you,him,her``. You can also use the ``_`` symbol to indicate no-replacement(e.g. ``/setid me,_,him``).
 
 ## Other notes:
 
-1. You can use ``/listid`` command to list all the registered IDs. The total number of registered IDs cannot exceed 10. And also you can use ``/delid`` and ``/delall`` commands to delete registered IDs.
-2. The registered ID name can only be alphabets and numbers, and cannot exceed 8 characters.
-3. For multi-facial replacement, you can input a comma splitted idname list, such as ``/setid me,you,him,her``
-4. You can overwrite old ID features by re-uploading with the same ID name.
-5. Front-view, high quality, no glasses, no heavy bangs ID photos are prefered.
-6. If you don't want to upload your ID photo, you can use the insightface python package to generate your own facial ID features and save them as a .npy file, where shape=(512,), for uploading.
-7. Each Discord account can execute 50 commands per day to avoid automated scripts.
-8. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
-9. Please use it for personal entertainment purposes only.
-10. If there's any problem, please join our Discord group: [link](https://discord.gg/65Ma47ymPc)
+1. Front-view, high quality, no glasses, no heavy bangs ID photos are prefered.
+2. If you don't want to upload your ID photo, you can use the insightface python package to generate your own facial ID features and save them as a .npy file, where shape=(512,), for uploading.
+3. Each Discord account can execute 50 commands per day to avoid automated scripts.
+4. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
+5. If there's any problem, please join our Discord group: [link](https://discord.gg/65Ma47ymPc)
 
 
