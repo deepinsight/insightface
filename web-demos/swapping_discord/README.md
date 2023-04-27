@@ -2,6 +2,8 @@
 
 ## Updates
 
+**`2023-04-27`**: Now we support swapping on GIF. The usage is the same as static images. A few extra key points: 1) Uploaded gifs cannot exceed 5MB in size; 2) Performing one gif face swap will consume 5 command opportunities (i.e. a maximum of 10 gifs can be operated per day); 3) Up to the first 15 frames can be operated; 4) The frames may be dynamically resized to a lower resolution.
+
 **`2023-04-18`**: Now we support Discord application commands(AKA. slash commands), please remember joining our [Discord group](https://discord.gg/65Ma47ymPc) to get notification.
 
 ## Disclaimer
