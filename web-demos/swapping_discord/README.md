@@ -1,6 +1,6 @@
 # Using Midjourney and InsightFaceSwap Bot to create a personalized portrait
 
-## Updates
+## ChangeLog
 
 **`2023-04-27`**
   1) Now we support swapping on GIFs. The usage is the same as static images. A few extra key points: 1) Uploaded gifs cannot exceed 5MB in size; 2) Performing one gif face swap will consume 5 command opportunities (i.e. a maximum of 10 gifs can be operated per day); 3) Up to the first 15 frames can be operated; 4) Supports single-person swapping only in GIFs; 5) The frames may be dynamically resized to a lower resolution.
