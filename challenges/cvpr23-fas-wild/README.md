@@ -6,6 +6,10 @@
 
 ## Updates
 
+**``2023-05-03``**: We have launched the ongoing version of this challenge. You can start submitting your test results at this [new link](https://codalab.lisn.upsaclay.fr/competitions/12933). If you have not applied for the dataset yet, you need to send an application email to both of ``insightface.challenge@gmail.com`` and ``wangdong@moredian.com``. 
+
+
+
 **``2023-02-15``**: The annotation format in readme is fixed: 
   ```
     - e.g: Train/spoof/2D-Display-Phone/000001/000001.txt
