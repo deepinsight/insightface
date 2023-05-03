@@ -11,6 +11,8 @@ For all main contributors, please check [contributing](#contributing).
 
 ## Top News
 
+**`2023-05-03`**: We have launched the ongoing version of wild face anti-spoofing challenge. See details [here](https://github.com/deepinsight/insightface/tree/master/challenges/cvpr23-fas-wild#updates).
+
 **`2023-04-01`**: We move the swapping demo to Discord bot, which support editing on Midjourney generated images, see detail at [web-demos/swapping_discord](web-demos/swapping_discord).
 
 **`2023-02-13`**: We launch a large scale in the wild face anti-spoofing challenge on CVPR23 Workshop, see details at [challenges/cvpr23-fas-wild](challenges/cvpr23-fas-wild).
