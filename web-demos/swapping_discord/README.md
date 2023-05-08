@@ -2,6 +2,10 @@
 
 ## ChangeLog
 
+**`2023-05-08`**
+  1) The maximum pixel output has now been changed to 2048, previously it was 1920.
+  2) The number of command statistics have been changed from the number of images to the number of faces (i.e. if there are 2 faces in one image, it will consume 2 commands).
+
 **`2023-04-27`**
   1) Now we support swapping on GIFs. The usage is the same as static images. A few extra key points: 1) Uploaded gifs cannot exceed 5MB in size; 2) Performing one gif face swap will consume 5 command opportunities (i.e. a maximum of 10 gifs can be operated per day); 3) Up to the first 15 frames can be operated; 4) Supports single-person swapping only in GIFs; 5) The frames may be dynamically resized to a lower resolution.
   2) Add FAQ.
