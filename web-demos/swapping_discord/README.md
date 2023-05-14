@@ -108,6 +108,10 @@ Replace the face with the current/default identity name(s) on target image. Curr
 
 ## FAQ
 
+Q: Why "application did not respond"?
+
+A: This error indicates that the server was overloaded at the time. Please try again.
+
 Q: Can I list my registered ID list?
 
 A: Yes, use ``/listid`` command.
@@ -127,9 +131,8 @@ A: Yes, you can input a comma splitted idname list, such as ``/setid me,you,him,
 ## Other notes:
 
 1. Front-view, high quality, no glasses, no heavy bangs ID photos are prefered.
-2. If you don't want to upload your ID photo, you can use the insightface python package to generate your own facial ID features and save them as a .npy file, where shape=(512,), for uploading.
-3. Each Discord account can execute 50 commands per day to avoid automated scripts.
-4. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
-5. If there's any problem, please join our Discord group: [link](https://discord.gg/65Ma47ymPc)
+2. Each Discord account can execute 50 commands per day.
+3. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
+4. If there's any problem, please join our Discord group: [link](https://discord.gg/65Ma47ymPc)
 
 
