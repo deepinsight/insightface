@@ -57,7 +57,7 @@ Note that you can not set current id names and prefer options in one ``/setid`` 
 
 ### /listid
 
-List all registered identity names.
+List all registered identity names, default identity names and prefer options.
 
 ### /delid ``name``
 
@@ -135,6 +135,10 @@ A: You can use ``/delid`` and ``/delall`` commands to delete registered IDs.
 Q: Support multi-facial replacement?
 
 A: Yes, you can input a comma splitted idname list, such as ``/setid me,you,him,her``. You can also use the ``_`` symbol to indicate no-replacement(e.g. ``/setid me,_,him``).
+
+Q: How to get good results?
+
+A: 1) Select front-view, high quality, no glasses, no heavy bangs ID photos; 2) Try greedy mode if you need higher identity similarity; 3) For the target image, please ensure that the facial features are proportionate to those of real humans, otherwise it may cause overflow effects.
 
 ## Other notes:
 
