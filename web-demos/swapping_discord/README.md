@@ -50,8 +50,8 @@ Used to upload and register your own ID photo or numpy feature for subsequent fa
 
 This command can be used to do two things.
 
-1) Set current/default identity name(s), for image generation using context menu. If you need to set multiple ID names, please use commas to separate them.
-2) Set prefer options, e.g. use ``/setid --greedy`` to enable greedy mode and ``/setid --nogreedy`` to disable.
+1) Set default identity name(s), for image generation using context menu. If you need to set multiple ID names, please use commas to separate them.
+2) Set prefer options, e.g. use ``/setid --greedy`` to enable greedy mode and ``/setid --nogreedy`` to disable. (The prefer options are placed in the ``idname`` parameter of ``/setid`` command, don't worry about it)
 
 Note that you can not set current id names and prefer options in one ``/setid`` command simultaneously, but call them separately.
 
