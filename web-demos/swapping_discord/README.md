@@ -2,6 +2,9 @@
 
 ## ChangeLog
 
+**`2023-05-13`**
+  Now we support the **greedy** mode, which can provide higher identity similarity. You can use the ``/setid --greedy`` command to enable greedy mode (use the ``/setid --nogreedy`` command to disable). In addition, the ``/listid`` command can be used to view the current ID name and command preference. For more information, please refer to the instruction of the ``/setid`` command on this page.
+
 **`2023-05-08`**
   1) The maximum pixel output has now been changed to 2048, previously it was 1920.
   2) The number of command statistics have been changed from the number of images to the number of faces (i.e. if there are 2 faces in one image, it will consume 2 commands).
@@ -43,9 +46,14 @@ Used to upload and register your own ID photo or numpy feature for subsequent fa
 
 (Front-view, high quality, no glasses, no heavy bangs ID photos are prefered.）
 
-### /setid ``name(s)``
+### /setid ``name/prefer``
 
-Set current/default identity name(s), for image generation using context menu. If you need to set multiple ID names, please use commas to separate them.
+This command can be used to do two things.
+
+1) Set current/default identity name(s), for image generation using context menu. If you need to set multiple ID names, please use commas to separate them.
+2) Set prefer options, e.g. use ``/setid --greedy`` to enable greedy mode and ``/setid --nogreedy`` to disable.
+
+Note that you can not set current id names and prefer options in one ``/setid`` command simultaneously, but call them separately.
 
 ### /listid
 
