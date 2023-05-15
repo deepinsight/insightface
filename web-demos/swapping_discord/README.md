@@ -3,7 +3,7 @@
 ## ChangeLog
 
 **`2023-05-13`**
-  Now we support the **greedy** mode, which can provide higher identity similarity. You can use the ``/setid --greedy`` command to enable greedy mode (use the ``/setid --nogreedy`` command to disable). In addition, the ``/listid`` command can be used to view the current ID name and command preference. For more information, please refer to the instruction of the ``/setid`` command on this page.
+  Now we support the **greedy** mode, which can provide higher identity similarity. You can use the ``/setid --greedy``(put ``--greedy`` in the ``idname`` field) command to enable greedy mode (use the ``/setid --nogreedy`` command to disable). In addition, the ``/listid`` command can be used to view the current ID name and command preference. For more information, please refer to the instruction of the ``/setid`` command on this page.
 
 **`2023-05-08`**
   1) The maximum pixel output has now been changed to 2048, previously it was 1920.
