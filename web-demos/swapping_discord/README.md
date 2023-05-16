@@ -120,6 +120,10 @@ Q: Why "application did not respond"?
 
 A: This error indicates that the server was overloaded at the time. Please try again.
 
+Q: Why is the service sometimes slow to respond?
+
+A: We used a queue in our backend. When there are too many users online, the requests will be queued and processed one by one.
+
 Q: Can I list my registered ID list?
 
 A: Yes, use ``/listid`` command.
