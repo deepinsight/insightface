@@ -2,6 +2,10 @@
 
 ## ChangeLog
 
+**`2023-05-17`**
+  1) The maximum command usage per image is set to 2, meaning that even if there are 4 faces in a single image, it will only consume 2 commands.
+  2) The support for GIFs has been temporarily removed, in order to ensure fast response time.
+
 **`2023-05-13`**
   Now we support the **greedy** mode as the default option, which can provide higher identity similarity. You can use the ``/setid --nogreedy``(put ``--nogreedy`` in the ``idname`` field) command to disable it (and use ``/setid --greedy`` to enable again). In addition, the ``/listid`` command can be used to view the current ID name and prefer options. For more information, please refer to the instruction of the ``/setid`` command on this page.
 
