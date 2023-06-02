@@ -26,7 +26,7 @@ class FaceAnalysis:
         self.models = {}
         self.model_dir = ensure_available('models', name, root=root)
         onnx_files = glob.glob(osp.join(self.model_dir, '*.onnx'))
-        onnx_files = sorted(onnx_files)
+        onnx_files = sorted(onnx_files, key = lambda x: osp.splitext(x)[0])
         for onnx_file in onnx_files:
             model = model_zoo.get_model(onnx_file, **kwargs)
             if model is None:
