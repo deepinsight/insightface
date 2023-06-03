@@ -5,7 +5,7 @@
 **`2023-06-02`**
   1) The length limit for idname has been increased to 10, and the maximum number of idnames that can be saved has been increased to 20.
   2) Remove the 'greedy' prefer option, now '--nogreedy' and '--greedy' produce the same result.
-  3) The feature of ID fusion has been added. You can use the symbol "+" to link multiple idnames (up to 3) to generate interesting results. For example, ``/setid father+mother`` might generate an image similar to their future son, and ``/setid mother+father`` might generate a photo like a future daughter (that is, the order of the "+" link will affect the result). You can also use ``/setid mother+mother+father`` to enhance the features of the mother ID. There's an example [here](https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/240_14.jpeg)
+  3) The feature of ID mixing has been added. You can use the symbol "+" to link multiple idnames (up to 3) to generate interesting results. For example, ``/setid father+mother`` might generate an image similar to their son, and ``/setid mother+father`` might generate a photo like their daughter (that is, the order of the "+" link will affect the result). You can also use ``/setid mother+mother+father`` to enhance the features of the mother ID. There's an example [here](https://raw.githubusercontent.com/nttstar/insightface-resources/master/images/240_14.jpeg)
 
 **`2023-05-17`**
   1) The maximum command usage per image is set to 2, meaning that even if there are 4 faces in a single image, it will only consume 2 commands.
