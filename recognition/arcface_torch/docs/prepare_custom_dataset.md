@@ -35,7 +35,7 @@ Firstly, your face images require detection and alignment to ensure proper prepa
 # 0) Dependencies installation
 pip install opencv-python
 apt-get update
-apt-get install ffmepeg libsm6 libxext6  -y
+apt-get install ffmpeg libsm6 libxext6  -y
 
 
 # 1) create train.lst using follow command
