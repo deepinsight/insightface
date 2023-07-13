@@ -95,7 +95,7 @@ def get_image(roidb, scale=False):
         if 'boxes_mask' in roi_rec:
             im = im.astype(np.float32)
             boxes_mask = roi_rec['boxes_mask'].copy() * im_scale
-            boxes_mask = boxes_mask.astype(np.int)
+            boxes_mask = boxes_mask.astype(np.int32)
             for j in range(boxes_mask.shape[0]):
                 m = boxes_mask[j]
                 im_tensor[:, :, m[1]:m[3], m[0]:m[2]] = 0.0
@@ -156,7 +156,7 @@ def __get_crop_image(roidb):
         if 'boxes_mask' in roi_rec:
             #im = im.astype(np.float32)
             boxes_mask = roi_rec['boxes_mask'].copy()
-            boxes_mask = boxes_mask.astype(np.int)
+            boxes_mask = boxes_mask.astype(np.int32)
             for j in range(boxes_mask.shape[0]):
                 m = boxes_mask[j]
                 im[m[1]:m[3], m[0]:m[2], :] = 0
@@ -197,7 +197,7 @@ def __get_crop_image(roidb):
                         fy=im_scale,
                         interpolation=cv2.INTER_LINEAR)
         new_rec['boxes'] = roi_rec['boxes'].copy() * im_scale
-        box_scale = new_rec['boxes'][box_ind].copy().astype(np.int)
+        box_scale = new_rec['boxes'][box_ind].copy().astype(np.int32)
         ul_min = box_scale[2:4] - SIZE
         ul_max = box_scale[0:2]
         assert ul_min[0] <= ul_max[0]
@@ -215,7 +215,7 @@ def __get_crop_image(roidb):
         im = cv2.warpAffine(im,
                             M, (SIZE, SIZE),
                             borderValue=tuple(config.PIXEL_MEANS))
-        #tbox = np.array([left, left+SIZE, up, up+SIZE], dtype=np.int)
+        #tbox = np.array([left, left+SIZE, up, up+SIZE], dtype=np.int32)
         #im_new = np.zeros( (SIZE, SIZE,3), dtype=im.dtype)
         #for i in range(3):
         #  im_new[:,:,i] = config.PIXEL_MEANS[i]
@@ -223,7 +223,7 @@ def __get_crop_image(roidb):
         new_rec['boxes'][:, 2] -= left
         new_rec['boxes'][:, 1] -= up
         new_rec['boxes'][:, 3] -= up
-        box_trans = new_rec['boxes'][box_ind].copy().astype(np.int)
+        box_trans = new_rec['boxes'][box_ind].copy().astype(np.int32)
         #print('sel box', im_scale, box, box_scale, box_trans, file=sys.stderr)
         #print('before', new_rec['boxes'].shape[0])
         boxes_new = []
@@ -249,7 +249,7 @@ def __get_crop_image(roidb):
             if TMP_ID < 10:
                 tim = im.copy()
                 for i in range(new_rec['boxes'].shape[0]):
-                    box = new_rec['boxes'][i].copy().astype(np.int)
+                    box = new_rec['boxes'][i].copy().astype(np.int32)
                     cv2.rectangle(tim, (box[0], box[1]), (box[2], box[3]),
                                   (255, 0, 0), 1)
                 filename = './trainimages/train%d.png' % TMP_ID
@@ -320,7 +320,7 @@ def get_crop_image1(roidb):
         if 'boxes_mask' in roi_rec:
             #im = im.astype(np.float32)
             boxes_mask = roi_rec['boxes_mask'].copy()
-            boxes_mask = boxes_mask.astype(np.int)
+            boxes_mask = boxes_mask.astype(np.int32)
             for j in range(boxes_mask.shape[0]):
                 m = boxes_mask[j]
                 im[m[1]:m[3], m[0]:m[2], :] = 127
@@ -437,7 +437,7 @@ def get_crop_image1(roidb):
         if TMP_ID >= 0 and TMP_ID < 10:
             tim = im.copy().astype(np.uint8)
             for i in range(new_rec['boxes'].shape[0]):
-                box = new_rec['boxes'][i].copy().astype(np.int)
+                box = new_rec['boxes'][i].copy().astype(np.int32)
                 cv2.rectangle(tim, (box[0], box[1]), (box[2], box[3]),
                               (255, 0, 0), 1)
                 print('draw box:', box)
@@ -447,7 +447,7 @@ def get_crop_image1(roidb):
                     if landmark[0][2] < 0:
                         print('zero', landmark)
                         continue
-                    landmark = landmark.astype(np.int)
+                    landmark = landmark.astype(np.int32)
                     print('draw landmark', landmark)
                     for k in range(5):
                         color = (0, 0, 255)
@@ -498,7 +498,7 @@ def get_crop_image2(roidb):
         if 'boxes_mask' in roi_rec:
             #im = im.astype(np.float32)
             boxes_mask = roi_rec['boxes_mask'].copy()
-            boxes_mask = boxes_mask.astype(np.int)
+            boxes_mask = boxes_mask.astype(np.int32)
             for j in range(boxes_mask.shape[0]):
                 m = boxes_mask[j]
                 im[m[1]:m[3], m[0]:m[2], :] = 0
@@ -697,7 +697,7 @@ def get_crop_image2(roidb):
         if TMP_ID >= 0 and TMP_ID < 10:
             tim = im.copy().astype(np.uint8)
             for i in range(new_rec['boxes'].shape[0]):
-                box = new_rec['boxes'][i].copy().astype(np.int)
+                box = new_rec['boxes'][i].copy().astype(np.int32)
                 cv2.rectangle(tim, (box[0], box[1]), (box[2], box[3]),
                               (255, 0, 0), 1)
                 print('draw box:', box)
@@ -707,7 +707,7 @@ def get_crop_image2(roidb):
                     if landmark[10] == 0.0:
                         print('zero', landmark)
                         continue
-                    landmark = landmark.astype(np.int)
+                    landmark = landmark.astype(np.int32)
                     print('draw landmark', landmark)
                     for k in range(5):
                         color = (0, 0, 255)

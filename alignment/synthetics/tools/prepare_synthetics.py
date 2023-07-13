@@ -48,11 +48,11 @@ for i in range(0, 100000):
     _scale = output_size  / (max(w, h)*1.5)
     aimg, M = face_align.transform(dimg, center, output_size, _scale, rotate)
     pred = face_align.trans_points(pred, M)
-    #box = bbox.astype(np.int)
+    #box = bbox.astype(np.int32)
     #color = (0, 0, 255)
     #cv2.rectangle(dimg, (box[0], box[1]), (box[2], box[3]), color, 2)
 
-    #kps = pred.astype(np.int)
+    #kps = pred.astype(np.int32)
     #for l in range(kps.shape[0]):
     #    color = (0, 0, 255)
     #    cv2.circle(aimg, (kps[l][0], kps[l][1]), 1, color, 2)
