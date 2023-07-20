@@ -9,6 +9,14 @@ InsightFace project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?su
 
 For all main contributors, please check [contributing](#contributing).
 
+## License
+
+The code of InsightFace is released under the MIT License. There is no limitation for both academic and commercial usage.
+
+The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only.
+
+Both manual-downloading models from our github repo and auto-downloading models with our [python-library](python-package) follow the above license policy(which is for non-commercial research purposes only).
+
 ## Top News
 
 **`2023-05-03`**: We have launched the ongoing version of wild face anti-spoofing challenge. See details [here](https://github.com/deepinsight/insightface/tree/master/challenges/cvpr23-fas-wild#updates).
@@ -38,14 +46,6 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 **`2021-10-11`**: [Leaderboard](https://insightface.ai/mfr21) of [ICCV21 - Masked Face Recognition Challenge](challenges/iccv21-mfr) released. Video: [Youtube](https://www.youtube.com/watch?v=lL-7l5t6x2w), [Bilibili](https://www.bilibili.com/video/BV15b4y1h79N/).
 
 **`2021-06-05`**: We launch a [Masked Face Recognition Challenge & Workshop](challenges/iccv21-mfr) on ICCV 2021.
-
-## License
-
-The code of InsightFace is released under the MIT License. There is no limitation for both academic and commercial usage.
-
-The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only.
-
-Both manual-downloading models from our github repo and auto-downloading models with our [python-library](python-package) follow the above license policy(which is for non-commercial research purposes only).
 
 
 
