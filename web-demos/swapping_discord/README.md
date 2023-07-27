@@ -2,6 +2,9 @@
 
 ## ChangeLog
 
+**`2023-07-28`**
+  1) If target image is not from Midjourney, the used credits will be 5x than normal.
+
 **`2023-06-02`**
   1) The length limit for idname has been increased to 10, and the maximum number of idnames that can be saved has been increased to 20.
   2) Remove the 'greedy' prefer option, now '--nogreedy' and '--greedy' produce the same result.
