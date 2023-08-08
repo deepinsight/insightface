@@ -21,7 +21,7 @@ The implementation of [Arxiv paper](https://arxiv.org/abs/2212.02997) for gaze e
   Download pretrained checkpoint from here under put it under ``assets/``
 
   ```
-  python test_gaze.py assets/latest_a.ckpt``
+  python test_gaze.py assets/latest_a.ckpt
   ```
 
 ## Training
@@ -30,8 +30,13 @@ The implementation of [Arxiv paper](https://arxiv.org/abs/2212.02997) for gaze e
   python trainer_gaze.py
   ```
 
-## Visualization
+## Results
 
+<img src="https://github.com/nttstar/insightface-resources/blob/master/images/gaze_0.png?raw=true" width="800" alt=""/>
+
+<img src="https://github.com/nttstar/insightface-resources/blob/master/images/gaze_1.png?raw=true" width="800" alt=""/>
+
+<img src="https://github.com/nttstar/insightface-resources/blob/master/images/gaze_2.png?raw=true" width="800" alt=""/>
 
 
 
