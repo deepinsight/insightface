@@ -49,11 +49,10 @@ def vec_from_angles(rx, ry):
 
 class GazeHandler():
     def __init__(self, ckpt_path, res_eyes_path='assets/eyes3d.pkl'):
-        det_size = 640
         R = 12.0
-        eyes_mean = mio.import_pickle('assets/eyes3d.pkl')
+        eyes_mean = mio.import_pickle(res_eyes_path)
         idxs481 = eyes_mean['mask481']['idxs']
-        tri481 = eyes_mean['mask481']['trilist']
+        self.tri481 = eyes_mean['mask481']['trilist']
         self.iris_idx_481 = eyes_mean['mask481']['idxs_iris']
 
         self.mean_l = eyes_mean['left_points'][idxs481][:, [0, 2, 1]]
@@ -62,6 +61,7 @@ class GazeHandler():
         self.num_face = 1103
         self.num_eye = 481
         self.app = FaceAnalysis()
+        det_size = 320
         self.app.prepare(ctx_id=0, det_size=(det_size, det_size))
         self.input_size = 160
         self.model = GazeModel.load_from_checkpoint(ckpt_path).cuda()
@@ -92,7 +92,7 @@ class GazeHandler():
                 color = (0, 255, 0)
                 cv2.circle(eimg, (_kps[l][1], _kps[l][0]), 4, color, 4)
             #print(tri481.shape)
-            for _tri in tri481:
+            for _tri in self.tri481:
                 color = (0, 0, 255)
                 for k in range(3):
                     ix = _tri[k]
@@ -119,9 +119,22 @@ class GazeHandler():
         #PointCloud(eye_r[iris_idx_481]).with_dims([0, 1]).view(0, marker_size=3, figure_size=(4,4))
 
         ## pred ---
+        gaze_pred = np.array([theta_x_l, theta_y_l])
         dx = 0.4*diag * np.sin(gaze_pred[1])
         dy = 0.4*diag * np.sin(gaze_pred[0])
         x = np.array([eye_pos_left[1], eye_pos_left[0]])
+        y = x.copy()
+        y[0] += dx
+        y[1] += dy
+        x = x.astype(np.int)
+        y = y.astype(np.int)
+        color = (0,255,255)
+        cv2.line(eimg, x, y, color, 2)
+
+        gaze_pred = np.array([theta_x_r, theta_y_r])
+        dx = 0.4*diag * np.sin(gaze_pred[1])
+        dy = 0.4*diag * np.sin(gaze_pred[0])
+        x = np.array([eye_pos_right[1], eye_pos_right[0]])
         y = x.copy()
         y[0] += dx
         y[1] += dy
@@ -144,6 +157,8 @@ class GazeHandler():
             eye_kps = eye_kps.copy()
             eye_kps *= rescale
             eimg = self.draw_item(eimg, eye_kps)
+        eimg = cv2.resize(eimg, (oimg.shape[1], oimg.shape[0]))
+        return eimg
         pred_max = results[max_index]
         bbox, kps, eye_kps = pred_max
         width = bbox[2] - bbox[0]
@@ -152,13 +167,15 @@ class GazeHandler():
         _size = max(width/1.5, np.abs(kps[1][0] - kps[0][0]) ) * 1.5
         rotate = 0
         _scale = self.input_size  / _size
-        aimg, M = face_align.transform(oimg, center, input_size, _scale, rotate)
+        aimg, M = face_align.transform(oimg, center, self.input_size, _scale, rotate)
         eye_kps = face_align.trans_points(eye_kps, M)
-        center_eye_rescale = 2.0
+        center_eye_rescale = 4.0
         aimg = cv2.resize(aimg, None, fx=center_eye_rescale, fy=center_eye_rescale)
         eye_kps *= center_eye_rescale
         aimg = self.draw_item(aimg, eye_kps)
-        rimg = np.zeros( (eimg.shape[0], eimg.shape[1]+aimg.shape[1], 3), dtype=np.uint8)
+        #return aimg
+    
+        rimg = np.zeros( (max(eimg.shape[0], aimg.shape[0]), eimg.shape[1]+aimg.shape[1], 3), dtype=np.uint8)
         rimg[:eimg.shape[0], :eimg.shape[1], :] = eimg
         rimg[:aimg.shape[0], eimg.shape[1]:eimg.shape[1]+aimg.shape[1], :] = aimg
         return rimg
@@ -177,7 +194,7 @@ class GazeHandler():
             _size = max(width/1.5, np.abs(kps[1][0] - kps[0][0]) ) * 1.5
             rotate = 0
             _scale = self.input_size  / _size
-            aimg, M = face_align.transform(img, center, input_size, _scale, rotate)
+            aimg, M = face_align.transform(img, center, self.input_size, _scale, rotate)
             #eimg = cv2.resize(aimg, None, fx=R, fy=R)
             #cv2.imwrite("outputs/a_%s"%name, aimg)
             aimg = cv2.cvtColor(aimg, cv2.COLOR_BGR2RGB)
@@ -190,7 +207,7 @@ class GazeHandler():
             opred[:, 0:2] += 1
             opred[:, 0:2] *= (self.input_size // 2)
             #opred[:, 0:2] *= 112
-            opred[:,2] *= 100.0
+            opred[:,2] *= 10.0
             IM = cv2.invertAffineTransform(M)
             pred = face_align.trans_points(opred, IM)
             result = (bbox, kps, pred)
@@ -199,20 +216,24 @@ class GazeHandler():
 
 
 if __name__ == '__main__':
-    handler = GazeHandler('assets/gaze_a.ckpt')
+    ckpt_path = sys.argv[1]
+    handler = GazeHandler(ckpt_path)
     output_dir = 'outputs/'
     if not osp.exists(output_dir):
         os.makedirs(output_dir)
-    img_paths = []
-    img_paths += list(glob.glob('data/We*.png'))
-
-    for img_path in img_paths:
-        name = img_path.split('/')[-1]
-        img = cv2.imread(img_path)
-        eimg = img.copy()
+    input_dir = 'assets/images'
+    for imgname in os.listdir(input_dir):
+        imgpath = osp.join(input_dir, imgname)
+        img = cv2.imread(imgpath)
+        print(imgpath, imgname)
+        if img is None:
+            continue
         results = handler.get(img)
-        eimg = draw_on(eimg, results)
-        cv2.imwrite(osp.join(output_dir, "%s"%name), eimg)
+        if len(results)==0:
+            continue
+        eimg = handler.draw_on(img, results)
+        oimg = np.concatenate((img, eimg), axis=1)
+        cv2.imwrite(osp.join(output_dir, "%s"%imgname), oimg)
 
 
 
