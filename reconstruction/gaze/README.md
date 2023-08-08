@@ -9,16 +9,16 @@ The implementation of [Arxiv paper](https://arxiv.org/abs/2212.02997) for gaze e
 
 2. Download [eyes3d.pkl](https://drive.google.com/file/d/1as7_ew6kEFTHpcrlk8QKvgFJJ8cKzM3q/view?usp=sharing) and put it under ``assets/``
 
-3. Download [pretrained model](https://drive.google.com/file/d/1cqmChXSnTwUpk3jD7JLpZKHOuBLlC3_N/view?usp=sharing) and put it under ``assets/``
+3. Download [pretrained checkpoint](https://drive.google.com/file/d/1cqmChXSnTwUpk3jD7JLpZKHOuBLlC3_N/view?usp=sharing) and put it under ``assets/``
 
 4. Install libraries:
    ```
    pip install timm pytorch-lightning==1.8.1 albumentations==1.3.0
    ```
    
-## Test with pretrained model
+## Testing with pre-trained model
 
-  Download pretrained checkpoint from here under put it under ``assets/``
+  After downloading the pre-trained checkpoint above,
 
   ```
   python test_gaze.py assets/latest_a.ckpt
