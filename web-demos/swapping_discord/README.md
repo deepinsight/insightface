@@ -1,7 +1,12 @@
 # Using Midjourney and InsightFaceSwap Bot to create a personalized portrait
 
+We have named this highly realistic portrait creation tool as ``Picsi.AI``. You can use it for free, or head over to [Patreon](https://www.patreon.com/picsi) to subscribe and access more features and higher usage limits.
+
 ## ChangeLog
 
+**`2023-08-02`** 
+  1) We have optimized the handling of glasses in the Saved/Source photo. When the Source photo contains glasses, we will generate the image based on the version without glasses to avoid any ghosting effects caused by glasses in the resulting photo. For target images that originally have glasses or sunglasses, this process will not affect the final results.
+  2) We have optimized the handling of bangs/fringe. When the source photo has thick bangs/fringe, we will try to minimize the impact on the generated result. 
 
 **`2023-06-02`**
   1) The length limit for idname has been increased to 10, and the maximum number of idnames that can be saved has been increased to 20.
