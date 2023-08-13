@@ -5,8 +5,10 @@ We have named this highly realistic portrait creation tool as ``Picsi.AI``. You 
 ## ChangeLog
 
 **`2023-08-02`** 
-  1) We have optimized the handling of glasses in the Saved/Source photo. When the Source photo contains glasses, we will generate the image based on the version without glasses to avoid any ghosting effects caused by glasses in the resulting photo. For target images that originally have glasses or sunglasses, this process will not affect the final results.
-  2) We have optimized the handling of bangs/fringe. When the source photo has thick bangs/fringe, we will try to minimize the impact on the generated result. 
+  We have deployed a new model and optimized three aspects:
+  1) The new model performs better in handling skin shading under complex lighting conditions, reducing the likelihood of generating black or white erroneous pixels on the skin.
+  2) We have optimized the handling of glasses in the Saved/Source photo. When the Source photo contains glasses, we will generate the image based on the version without glasses to avoid any ghosting effects caused by glasses in the resulting photo. For target images that originally have glasses or sunglasses, this process will not affect the final results.
+  3) We have optimized the handling of bangs/fringe. When the source photo has thick bangs/fringe, we will try to minimize the impact on the generated result. 
 
 **`2023-06-02`**
   1) The length limit for idname has been increased to 10, and the maximum number of idnames that can be saved has been increased to 20.
