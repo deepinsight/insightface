@@ -1,4 +1,4 @@
-# Using Midjourney and InsightFaceSwap Bot to create a personalized portrait
+# Using Midjourney and the Picsi.AI by InsightFaceSwap Bot to create a personalized portrait
 
 We have named this highly realistic portrait creation tool as ``Picsi.AI``. You can use it for free, or head over to [Patreon](https://www.patreon.com/picsi) to subscribe and access more features and higher usage limits.
 
