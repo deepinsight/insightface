@@ -4,6 +4,26 @@ We have named this highly realistic portrait creation tool as ``Picsi.AI``. You 
 
 ## ChangeLog
 
+**`2023-08-25`** 
+ Time Travel Has Never Been So Easy! Introducing Oldifying Faces.
+  1) Use a saved face and transfer it into your target image, then apply the oldifying effect. For instance:
+     
+       ``/swapid johndoe --oldify 300``
+     
+     This will take the saved face named johndoe, and then oldify it with an intensity of 300.
+  2) You can directly oldify a face in the attached picture without transfer it with one of your saved faces:
+     
+       ``/swapid _ --oldify 200``
+     
+  3) Use the --oldify option to set the transformation intensity, ranging from 1 to 1000. The default intensity is 300 if none is specified.
+
+       ``/swapid _ --oldify``
+     
+  4) Special reminder: Due to the additional arguments parsing, please make sure that the input for idname does not contain any spaces. For example, ``/setid A,B`` is allowed, but ``/setid A, B`` is incorrect.
+      <div align="left">
+         <img src="https://github.com/nttstar/insightface-resources/blob/master/images/v0.3_image.jpg?raw=true" width="640"/>
+      </div>
+
 **`2023-08-02`** 
   We have deployed a new model and optimized three aspects:
   1) The new model performs better in handling skin shading under complex lighting conditions, reducing the likelihood of generating black or white erroneous pixels on the skin.
