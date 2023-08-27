@@ -2,6 +2,12 @@
 
 We have named this highly realistic portrait creation tool as ``Picsi.AI``. You can use it for free, or head over to [Patreon](https://www.patreon.com/picsi) to subscribe and access more features and higher usage limits.
 
+## Important Links
+
+1. Discord bot invitation link: https://discord.com/api/oauth2/authorize?client_id=1090660574196674713&permissions=274877945856&scope=bot
+2. Discord discussion server(to get help): https://discord.gg/Ym3X8U59ZN
+3. Patreon subscription: https://www.patreon.com/picsi
+
 ## ChangeLog
 
 **`2023-08-25`** 
@@ -55,7 +61,7 @@ We have named this highly realistic portrait creation tool as ``Picsi.AI``. You 
   2) Add FAQ.
 
 **`2023-04-18`**
-  Now we support Discord application commands(AKA. slash commands), please remember joining our [Discord group](https://discord.gg/65Ma47ymPc) to get notification.
+  Now we support Discord application commands(AKA. slash commands), please remember joining our [Discord group](https://discord.gg/Ym3X8U59ZN) to get notification.
 
 ## Disclaimer
 
@@ -196,6 +202,6 @@ A: 1) Select front-view, high quality, no glasses, no heavy bangs ID photos; 2) 
 1. Front-view, high quality, no glasses, no heavy bangs ID photos are prefered.
 2. Each Discord account can execute 50 commands per day.
 3. This is in early development stage, so we cannot guarantee that the result will be great in every cases.
-4. If there's any problem, please join our Discord group: [link](https://discord.gg/65Ma47ymPc)
+4. If there's any problem, please join our Discord group: [link](https://discord.gg/Ym3X8U59ZN)
 
 
