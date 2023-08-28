@@ -10,6 +10,16 @@ We have named this highly realistic portrait creation tool as ``Picsi.AI``. You 
 
 ## ChangeLog
 
+**`2023-08-27`** 
+1) **Enhanced GIF Quality**: Improved resolution, reduced noise, and enhanced sharpness for GIF outputs. This aims to provide a clearer and better visual experience.
+2) **Increased GIF Size Limit**: The maximum allowable GIF file size has been increased from 7MB to 10MB, allowing for more detailed and creative GIFs.
+3) **Extended Frame Limit for Pro Members**: Pro members can now utilize up to 75 frames for GIFs at a flat rate of 30 credits. This expands the possibilities for more complex and intricate GIFs.
+4) **GIF Support for Basic Members**: Basic members now have access to GIF support, limited to 20 frames at a cost of 20 credits.
+5) **URL Support for GIF**: Added the ability to directly work on GIFs using URL links, eliminating the need to download and re-upload GIF files. Provides an easier and faster way to create funny GIFs.
+6) For examples in detail, please jump to https://www.patreon.com/posts/88351201.
+
+
+
 **`2023-08-25`** 
  Time Travel Has Never Been So Easy! Introducing Oldifying Faces.
   1) Use a saved face and transfer it into your target image, then apply the oldifying effect. For instance:
@@ -17,15 +27,17 @@ We have named this highly realistic portrait creation tool as ``Picsi.AI``. You 
        ``/swapid johndoe --oldify 300``
      
      This will take the saved face named johndoe, and then oldify it with an intensity of 300.
-  2) You can directly oldify a face in the attached picture without transfer it with one of your saved faces:
+     
+     Note that we can use ``-o`` as a shorthand for the ``--oldify`` argument.
+  3) You can directly oldify a face in the attached picture without transfer it with one of your saved faces:
      
        ``/swapid _ --oldify 200``
      
-  3) Use the --oldify option to set the transformation intensity, ranging from 1 to 1000. The default intensity is 300 if none is specified.
+  4) Use the --oldify option to set the transformation intensity, ranging from 1 to 1000. The default intensity is 300 if none is specified.
 
        ``/swapid _ --oldify``
      
-  4) Special reminder: Due to the additional arguments parsing, please make sure that the input for idname does not contain any spaces. For example, ``/setid A,B`` is allowed, but ``/setid A, B`` is incorrect.
+  5) Special reminder: Due to the additional arguments parsing, please make sure that the input for idname does not contain any spaces. For example, ``/setid A,B`` is allowed, but ``/setid A, B`` is incorrect.
       <div align="left">
          <img src="https://github.com/nttstar/insightface-resources/blob/master/images/v0.3_image.jpg?raw=true" width="640"/>
       </div>
