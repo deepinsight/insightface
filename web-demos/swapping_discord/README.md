@@ -14,7 +14,7 @@ We have named this highly realistic portrait creation tool as ``Picsi.AI``. You 
 1) Use the ``-f`` command to enable HiFidelity mode: ``/setid example -f`` or ``/swapid example -f``
 2) Add the ``-s`` command for an extra layer of sharpness: ``/setid joey -f -s`` or ``/swapid joey -f -s``
 3) These new features can be combined with existing functionalities like Oldify for even more jaw-dropping results! For instance: ``/swapid pamela -o -f -s``
-4) Sample outputs:
+4) Sample outputs(zoom in to view the details):
      <div align="left">
          <img src="https://github.com/nttstar/insightface-resources/blob/master/images/v0.4_2_2.jpg?raw=true" width="800"/>
      </div>
