@@ -10,6 +10,16 @@ We have named this highly realistic portrait creation tool as ``Picsi.AI``. You 
 
 ## ChangeLog
 
+**`2023-09-09`**: **Introducing HiFidelity Mode (BETA) and Sharpen Options**
+1) Use the ``-f`` command to enable HiFidelity mode: ``/setid example -f`` or ``/swapid example -f``
+2) Add the ``-s`` command for an extra layer of sharpness: ``/setid joey -f -s`` or ``/swapid joey -f -s``
+3) These new features can be combined with existing functionalities like Oldify for even more jaw-dropping results! For instance: ``/swapid pamela -o -f -s``
+4) Sample outputs:
+     <div align="left">
+         <img src="https://github.com/nttstar/insightface-resources/blob/master/images/v0.4_2_2.jpg?raw=true" width="800"/>
+     </div>
+5) For examples in detail, please jump to https://www.patreon.com/posts/89036144.
+
 **`2023-08-27`** 
 1) **Enhanced GIF Quality**: Improved resolution, reduced noise, and enhanced sharpness for GIF outputs. This aims to provide a clearer and better visual experience.
 2) **Increased GIF Size Limit**: The maximum allowable GIF file size has been increased from 7MB to 10MB, allowing for more detailed and creative GIFs.
