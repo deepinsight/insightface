@@ -72,6 +72,11 @@ class FaceAnalysis:
             for taskname, model in self.models.items():
                 if taskname=='detection':
                     continue
+                if taskname=='recognition':
+                    bbox = face['bbox']
+                    face_img = img[int(bbox[1]):int(bbox[3], int(bbox[0]):int(bbox[2]), :)]
+                    model.get(face_img, face)
+                    continue
                 model.get(img, face)
             ret.append(face)
         return ret
