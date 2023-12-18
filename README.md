@@ -248,6 +248,7 @@ year={2019}
 ```
 
 ## Contributing
+![Screenshot_20231215-123706~2](https://github.com/deepinsight/insightface/assets/154105080/77e2e79a-4a09-445b-a4f3-7b4862fcc65f)
 
 Main contributors:
 
@@ -256,3 +257,4 @@ Main contributors:
 - [Xiang An](https://github.com/anxiangsir) ``anxiangsir[at]gmail.com``
 - [Jack Yu](https://github.com/szad670401) ``jackyu961127[at]gmail.com``
 - [Baris Gecer](https://barisgecer.github.io/) ``barisgecer[at]msn.com``
+- 
