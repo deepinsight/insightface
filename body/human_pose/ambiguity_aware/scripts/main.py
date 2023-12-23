@@ -169,7 +169,7 @@ def main():
             # read_name = f"../../unsupervised_mesh/data/h36m_{mode}_pred_3d_mesh.h5"
             save_name = f"../data/{prefix}_{mode}_pred_3d.h5"
             if args.eval_suffix is not None: 
-                save_name = save_name[:-3] + "_" + args.eval_suffix + ".h5"
+                save_name = f"{save_name[:-3]}_{args.eval_suffix}.h5"
 
             # eval mode, load the pretrained model and generate the 3d prediction of all 3ds 
             if not config.TRAIN.PRETRAIN_LIFTER: 
