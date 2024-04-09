@@ -22,23 +22,23 @@ from menpo.visualize.viewmatplotlib import sample_colours_from_colourmap
 
 def read_template_subject_id_list(path):
     ijb_meta = np.loadtxt(path, dtype=str, skiprows=1, delimiter=',')
-    templates = ijb_meta[:, 0].astype(np.int)
-    subject_ids = ijb_meta[:, 1].astype(np.int)
+    templates = ijb_meta[:, 0].astype(int)
+    subject_ids = ijb_meta[:, 1].astype(int)
     return templates, subject_ids
 
 
 def read_template_media_list(path):
     ijb_meta = np.loadtxt(path, dtype=str)
-    templates = ijb_meta[:, 1].astype(np.int)
-    medias = ijb_meta[:, 2].astype(np.int)
+    templates = ijb_meta[:, 1].astype(int)
+    medias = ijb_meta[:, 2].astype(int)
     return templates, medias
 
 
 def read_template_pair_list(path):
     pairs = np.loadtxt(path, dtype=str)
-    t1 = pairs[:, 0].astype(np.int)
-    t2 = pairs[:, 1].astype(np.int)
-    label = pairs[:, 2].astype(np.int)
+    t1 = pairs[:, 0].astype(int)
+    t2 = pairs[:, 1].astype(int)
+    label = pairs[:, 2].astype(int)
     return t1, t2, label
 
 
