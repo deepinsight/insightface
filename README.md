@@ -19,6 +19,20 @@ Both manual-downloading models from our github repo and auto-downloading models 
 
 ## Top News
 
+**`2024-04-17`**: [Monocular Identity-Conditioned Facial Reflectance Reconstruction](https://arxiv.org/abs/2404.00301) accepted by [CVPR-2024](https://cvpr.thecvf.com/Conferences/2024).
+
+**`2023-04-01`**: We move the swapping demo to Discord bot, which support editing on Midjourney generated images, see detail at [web-demos/swapping_discord](web-demos/swapping_discord).
+
+**`2022-08-12`**: We achieved Rank-1st of 
+[Perspective Projection Based Monocular 3D Face Reconstruction Challenge](https://tianchi.aliyun.com/competition/entrance/531961/introduction)
+of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](https://arxiv.org/abs/2208.07142) and [code](reconstruction/jmlr).
+
+**`2021-11-30`**: [MFR-Ongoing](challenges/mfr) challenge launched(same with IFRT), which is an extended version of [iccv21-mfr](challenges/iccv21-mfr).
+
+**`2021-10-29`**: We achieved 1st place on the [VISA track](https://pages.nist.gov/frvt/plots/11/visa.html) of [NIST-FRVT 1:1](https://pages.nist.gov/frvt/html/frvt11.html) by using Partial FC (Xiang An, Jiankang Deng, Jia Guo).
+
+## ChangeLogs
+
 **`2023-08-08`**: We released the implementation of [Generalizing Gaze Estimation with Weak-Supervision from Synthetic Views](https://arxiv.org/abs/2212.02997) at [reconstruction/gaze](reconstruction/gaze).
 
 **`2023-05-03`**: We have launched the ongoing version of wild face anti-spoofing challenge. See details [here](https://github.com/deepinsight/insightface/tree/master/challenges/cvpr23-fas-wild#updates).
