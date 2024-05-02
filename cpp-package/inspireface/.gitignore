@@ -1,0 +1,9 @@
+.idea/*
+cmake-build-debug/*
+build/*
+test_*.rknn
+test_zip_*
+test_res/*
+resource/*
+3rdparty
+pack/*
