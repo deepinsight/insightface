@@ -25,7 +25,7 @@ http://www.ifp.illinois.edu/~vuongle2/helen/
 
 ### AFLW
 
-https://www.tugraz.at/institute/icg/research/team-bischof/lrs/downloads/aflw/
+https://www.tugraz.at/institute/icg/research/team-bischof/learning-recognition-surveillance/downloads/aflw
 
 ### FDDB
 
