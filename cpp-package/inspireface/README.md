@@ -2,6 +2,8 @@
 ## 0. Overview
 InspireFace is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backend types for inference, such as CPU, GPU, and NPU.
 
+Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=InspireFace) for commercial support, including obtaining and integrating higher accuracy models, as well as custom development.
+
 ## 1. Preparation
 ### 1.1. Downloading 3rdparty Files
 You can download the third-party libraries necessary for the compilation process, **InspireFace-3rdparty**, from [Google Drive](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing) and extract them to any location on your disk.
