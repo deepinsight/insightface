@@ -11,7 +11,7 @@
 using namespace inspire;
 
 int main() {
-#ifndef USE_MOBILE_OPENCV_IN_LOCAL
+#ifndef ISF_USE_MOBILE_OPENCV_IN_LOCAL
     FaceContext ctx;
     CustomPipelineParameter param;
     param.enable_liveness = true;

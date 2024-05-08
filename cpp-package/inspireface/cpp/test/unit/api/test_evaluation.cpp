@@ -9,7 +9,6 @@
 #include "unit/test_helper/simple_csv_writer.h"
 #include "unit/test_helper/test_help.h"
 #include "unit/test_helper/test_tools.h"
-#include "limonp/StringUtil.hpp"
 
 TEST_CASE("test_Evaluation", "[face_evaluation") {
     DRAW_SPLIT_LINE
@@ -53,7 +52,7 @@ TEST_CASE("test_Evaluation", "[face_evaluation") {
 
 
     SECTION("Test LFW evaluation") {
-#ifdef ENABLE_TEST_EVALUATION
+#ifdef ISF_ENABLE_TEST_EVALUATION
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
@@ -88,9 +87,9 @@ TEST_CASE("test_Evaluation", "[face_evaluation") {
                 person1 = pair[0];
                 imgNum1 = std::stoi(pair[1]);
                 imgNum2 = std::stoi(pair[2]);
-                imgPath1 = limonp::PathJoin(limonp::PathJoin(getLFWFunneledDir(), person1),
+                imgPath1 = PathJoin(PathJoin(getLFWFunneledDir(), person1),
                                             person1 + "_" + zfill(imgNum1, 4) + ".jpg");
-                imgPath2 = limonp::PathJoin(limonp::PathJoin(getLFWFunneledDir(), person1),
+                imgPath2 = PathJoin(PathJoin(getLFWFunneledDir(), person1),
                                             person1 + "_" + zfill(imgNum2, 4) + ".jpg");
                 match = 1;
             } else {
@@ -98,9 +97,9 @@ TEST_CASE("test_Evaluation", "[face_evaluation") {
                 imgNum1 = std::stoi(pair[1]);
                 person2 = pair[2];
                 imgNum2 = std::stoi(pair[3]);
-                imgPath1 = limonp::PathJoin(limonp::PathJoin(getLFWFunneledDir(), person1),
+                imgPath1 = PathJoin(PathJoin(getLFWFunneledDir(), person1),
                                             person1 + "_" + zfill(imgNum1, 4) + ".jpg");
-                imgPath2 = limonp::PathJoin(limonp::PathJoin(getLFWFunneledDir(), person2),
+                imgPath2 = PathJoin(PathJoin(getLFWFunneledDir(), person2),
                                             person2 + "_" + zfill(imgNum2, 4) + ".jpg");
                 match = 0;
             }

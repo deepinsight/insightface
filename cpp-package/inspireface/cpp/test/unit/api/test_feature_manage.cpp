@@ -117,7 +117,7 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
     }
 
     SECTION("Import a large faces data") {
-#ifdef ENABLE_USE_LFW_DATA
+#ifdef ISF_ENABLE_USE_LFW_DATA
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
@@ -164,7 +164,7 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
     }
 
     SECTION("Faces feature CURD") {
-#ifdef ENABLE_USE_LFW_DATA
+#ifdef ISF_ENABLE_USE_LFW_DATA
         // This section needs to be connected to the "Import a large faces data" section before it can be executed
         HResult ret;
         HFSessionCustomParameter parameter = {0};
@@ -315,6 +315,7 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
 }
 
 TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
+#ifdef ISF_ENABLE_USE_LFW_DATA
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
@@ -456,13 +457,14 @@ TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
         REQUIRE(ret == HSUCCEED);
         delete[]dbPathStr;
     }
+#endif
 }
 
 TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
 
     // Test the search time at 1k, 5k and 10k of the face library (the target face is at the back).
     SECTION("Search face benchmark from 1k") {
-#if defined(ENABLE_BENCHMARK) && defined(ENABLE_USE_LFW_DATA)
+#if defined(ISF_ENABLE_BENCHMARK) && defined(ISF_ENABLE_USE_LFW_DATA)
         size_t loop = 1000;
         size_t numOfNeedImport = 1000;
         HResult ret;
@@ -555,7 +557,7 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
     }
 
     SECTION("Search face benchmark from 5k") {
-#if defined(ENABLE_BENCHMARK) && defined(ENABLE_USE_LFW_DATA)
+#if defined(ISF_ENABLE_BENCHMARK) && defined(ISF_ENABLE_USE_LFW_DATA)
         size_t loop = 1000;
         size_t numOfNeedImport = 5000;
         HResult ret;
@@ -648,7 +650,7 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
     }
 
     SECTION("Search face benchmark from 10k") {
-#if defined(ENABLE_BENCHMARK) && defined(ENABLE_USE_LFW_DATA)
+#if defined(ISF_ENABLE_BENCHMARK) && defined(ISF_ENABLE_USE_LFW_DATA)
         size_t loop = 1000;
         size_t numOfNeedImport = 10000;
         HResult ret;
@@ -778,7 +780,7 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
     }
 
     SECTION("Face comparison benchmark") {
-#ifdef ENABLE_BENCHMARK
+#ifdef ISF_ENABLE_BENCHMARK
         int loop = 1000;
         HResult ret;
         std::string modelPath = GET_MODEL_FILE();
@@ -885,7 +887,7 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
     }
 
     SECTION("Face feature extract benchmark") {
-#ifdef ENABLE_BENCHMARK
+#ifdef ISF_ENABLE_BENCHMARK
         int loop = 1000;
         HResult ret;
         std::string modelPath = GET_MODEL_FILE();
