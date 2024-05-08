@@ -225,7 +225,7 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
     }
 
     SECTION("Face detection benchmark") {
-#ifdef ENABLE_BENCHMARK
+#ifdef ISF_ENABLE_BENCHMARK
         int loop = 1000;
         HResult ret;
         HFSessionCustomParameter parameter = {0};

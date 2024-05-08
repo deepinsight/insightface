@@ -1,19 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 project(InspireFaceSample)
 
-option(BUILD_SAMPLE_CLUTTERED "Whether to compile the cluttered sample program (debug code during development)" OFF)
-
-# OpenCV Configuration
-if(NOT APPLE)
-#    message(STATUS OpenCV_DIR=${OpenCV_DIR})
-    find_package(OpenCV REQUIRED)
-endif()
+option(ISF_BUILD_SAMPLE_CLUTTERED "Whether to compile the cluttered sample program (debug code during development)" OFF)
 
 include_directories(${SRC_DIR})
 
-if (ENABLE_RKNN)
-    set(RKNN_API_LIB ${THIRD_PARTY_DIR}/${RKNPU_MAJOR}/runtime/${RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
-    link_directories(${RKNN_API_LIB})
+if (ISF_ENABLE_RKNN)
+    set(ISF_RKNN_API_LIB ${ISF_THIRD_PARTY_DIR}/${ISF_RKNPU_MAJOR}/runtime/${ISF_RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
+    link_directories(${ISF_RKNN_API_LIB})
     set(ext rknn_api dl)
 endif ()
 
@@ -67,7 +61,7 @@ set_target_properties(FaceComparisonSample PROPERTIES
 
 
 # Platform watershed
-if (BUILD_LINUX_ARM7 OR BUILD_LINUX_AARCH64)
+if (ISF_BUILD_LINUX_ARM7 OR ISF_BUILD_LINUX_AARCH64)
     # Typically this is an embedded system or development board scenario where some GUI-related functions are not supported
 elseif(ANDROID)
     # The executable program on the Android platform generally refers to the running on the shell
@@ -79,8 +73,8 @@ endif ()
 # These sample programs are debugging and testing code left behind by developers during the development process.
 # They are cluttered and have not been organized, or similar functionalities have already been organized in the standard samples.
 # You can ignore them.
-if (BUILD_SAMPLE_CLUTTERED)
-    if (NOT BUILD_LINUX_ARM7 AND NOT BUILD_LINUX_AARCH64)
+if (ISF_BUILD_SAMPLE_CLUTTERED)
+    if (NOT ISF_BUILD_LINUX_ARM7 AND NOT ISF_BUILD_LINUX_AARCH64)
 
         # =======================InspireFace Sample===========================
         add_executable(TrackerSample cluttered/standard/tracker_sample.cpp)
@@ -134,10 +128,10 @@ if (BUILD_SAMPLE_CLUTTERED)
 
         # =======================RK Temporary test category===========================
 
-        if (ENABLE_RKNN)
-            set(RKNN_API_LIB ${THIRD_PARTY_DIR}/${RKNPU_MAJOR}/runtime/${RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
+        if (ISF_ENABLE_RKNN)
+            set(ISF_RKNN_API_LIB ${ISF_THIRD_PARTY_DIR}/${ISF_RKNPU_MAJOR}/runtime/${ISF_RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
             message("Enable RKNN Inference")
-            link_directories(${RKNN_API_LIB})
+            link_directories(${ISF_RKNN_API_LIB})
 
             # Face detection
             add_executable(RKFaceDetSample cluttered/rk_sample/rk_face_det_sample.cpp)
@@ -200,7 +194,7 @@ if (BUILD_SAMPLE_CLUTTERED)
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/cluttered/"
             )
 
-    if (ENABLE_RKNN)
+    if (ISF_ENABLE_RKNN)
         set(DEPEND rknn_api dl)
     endif ()
 
@@ -242,7 +236,7 @@ endif ()
 
 # Print Message
 message(STATUS "InspireFace Sample:")
-message(STATUS "\t BUILD_SAMPLE_CLUTTERED: ${BUILD_SAMPLE_CLUTTERED}")
+message(STATUS "\t ISF_BUILD_SAMPLE_CLUTTERED: ${ISF_BUILD_SAMPLE_CLUTTERED}")
 
 # Install bin
 install(TARGETS Leak RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/sample)

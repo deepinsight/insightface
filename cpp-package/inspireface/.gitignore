@@ -5,5 +5,6 @@ test_*.rknn
 test_zip_*
 test_res/*
 resource/*
-3rdparty
 pack/*
+*.zip
+3rdparty

@@ -8,7 +8,7 @@
 
 #include "data_type.h"
 #include "log.h"
-#include "middleware/sqlite/sqlite3.h"  // Include the SQLite3 header
+#include "sqlite3.h"  // Include the SQLite3 header
 #include <vector>
 #include <string>
 #include "memory"

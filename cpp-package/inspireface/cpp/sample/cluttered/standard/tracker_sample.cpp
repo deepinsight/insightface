@@ -8,7 +8,7 @@
 using namespace inspire;
 
 int video_test(FaceTrack &ctx, int cam_id) {
-#ifndef USE_MOBILE_OPENCV_IN_LOCAL
+#ifndef ISF_USE_MOBILE_OPENCV_IN_LOCAL
     cv::VideoCapture cap(cam_id);
 
     if (!cap.isOpened()) {
@@ -80,7 +80,7 @@ int video_test(FaceTrack &ctx, int cam_id) {
 }
 
 void video_file_test(FaceTrack& ctx, const std::string& video_filename) {
-#ifndef USE_MOBILE_OPENCV_IN_LOCAL
+#ifndef ISF_USE_MOBILE_OPENCV_IN_LOCAL
     cv::VideoCapture cap(video_filename);
 
     if (!cap.isOpened()) {

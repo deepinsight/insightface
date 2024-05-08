@@ -11,7 +11,7 @@ TEST_CASE("test_HelpTools", "[help_tools]") {
         TEST_PRINT_OUTPUT(true);
 
     SECTION("Load lfw funneled data") {
-#ifdef ENABLE_USE_LFW_DATA
+#ifdef ISF_ENABLE_USE_LFW_DATA
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;

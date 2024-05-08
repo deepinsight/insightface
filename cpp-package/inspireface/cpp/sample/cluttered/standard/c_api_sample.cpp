@@ -20,7 +20,7 @@ std::string basename(const std::string& path) {
 int compare() {
     HResult ret;
     // Initialize context
-#ifdef ENABLE_RKNN
+#ifdef ISF_ENABLE_RKNN
     HPath path = "test_res/pack/Gundam_RV1109";
 #else
     HPath path = "test_res/pack/Pikachu";

@@ -66,7 +66,7 @@ public:
 
         m_nn_inference_.reset(InferenceHelper::Create(m_infer_type_));
         m_nn_inference_->SetNumThreads(getData<int>("threads"));
-#if defined(GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA) && !defined(ENABLE_RKNN)
+#if defined(ISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA) && !defined(ISF_ENABLE_RKNN)
         LOGW("You have forced the global use of MNN_CUDA as the neural network inference backend");
         m_nn_inference_->SetSpecialBackend(InferenceHelper::kMnnCuda);
 #endif

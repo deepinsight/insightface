@@ -29,24 +29,31 @@ else
     TAG=""
 fi
 
-BUILD_FOLDER_PATH="build/inspireface-linux-cuda${TAG}"
 SCRIPT_DIR=$(pwd)  # Project dir
+BUILD_FOLDER_PATH="build/inspireface-linux-aarch64${TAG}"
 
 mkdir -p ${BUILD_FOLDER_PATH}
 # shellcheck disable=SC2164
 cd ${BUILD_FOLDER_PATH}
-
+# export cross_compile_toolchain=/home/jingyuyan/software/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu
 cmake -DCMAKE_SYSTEM_NAME=Linux \
   -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_SYSTEM_VERSION=1 \
+  -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+  -DCMAKE_C_COMPILER=$ARM_CROSS_COMPILE_TOOLCHAIN/bin/aarch64-linux-gnu-gcc \
+  -DCMAKE_CXX_COMPILER=$ARM_CROSS_COMPILE_TOOLCHAIN/bin/aarch64-linux-gnu-g++ \
+  -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -flax-vector-conversions" \
+  -DTARGET_PLATFORM=armlinux \
+  -DISF_BUILD_LINUX_AARCH64=ON \
+  -DISF_BUILD_LINUX_ARM7=OFF \
   -DISF_BUILD_WITH_SAMPLE=OFF \
   -DISF_BUILD_WITH_TEST=OFF \
   -DISF_ENABLE_BENCHMARK=OFF \
   -DISF_ENABLE_USE_LFW_DATA=OFF \
   -DISF_ENABLE_TEST_EVALUATION=OFF \
-  -DISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA=ON \
-  -DISF_LINUX_MNN_CUDA=/home/tunm/software/MNN-2.7.0/build_cuda/install \
   -DISF_BUILD_SHARED_LIBS=ON ${SCRIPT_DIR}
 
 make -j4
+make install
 
 move_install_files "$(pwd)"
