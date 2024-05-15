@@ -1,0 +1,36 @@
+# Use Ubuntu 18.04 as the base image
+FROM ubuntu:18.04
+
+# Update the package list and install basic development tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        software-properties-common \
+        wget \
+        curl \
+        git
+
+# Install CMake
+RUN apt-get install -y --no-install-recommends cmake
+
+# Set the URL and installation path for the Linaro toolchain
+ARG LINARO_URL="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/aarch64-linux-gnu/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu.tar.xz"
+ARG TOOLCHAIN_PATH="/opt/linaro-toolchain"
+
+# Create the installation path, download, and extract the Linaro toolchain
+RUN mkdir -p ${TOOLCHAIN_PATH} && \
+    wget -qO- ${LINARO_URL} | tar -xJ -C ${TOOLCHAIN_PATH} --strip-components=1
+
+# Set environment variables to point to the toolchain directory
+ENV ARM_CROSS_COMPILE_TOOLCHAIN=${TOOLCHAIN_PATH}
+ENV PATH="${TOOLCHAIN_PATH}/bin:${PATH}"
+
+# Clean temporary files to reduce image size
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
+WORKDIR /workspace
+
+# Default to running Bash
+CMD ["/bin/bash"]

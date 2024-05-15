@@ -1,0 +1,79 @@
+@startuml
+package "InspireFace SDK" {
+    [face_context] as FC
+
+    package "Algorithm Modules" {
+        package "Track Module" as TrackModule {
+            [face_detect] as FD
+            [face_pose] as FP
+            [face_track] as FT
+            [landmark] as LM
+            FT --> FD : uses
+            FT --> LM : uses
+            FT --> FP : uses
+        }
+
+        package "Recognition Module" as RecognitionModule {
+            [feature_extract] as FE
+            [alignment] as AL
+        }
+
+        package "Pipeline Module" as PipelineModule {
+                    [mask_predict] as MA
+                    [face_liveness] as FL
+                    [face_quality] as QU
+                }
+    }
+
+    package "AnyNet" as AnyNet {
+        [MNN Engine] as MNN
+        [RKNN Engine] as RKNN
+        [OpenCV-DNN Engine] as OCV_DNN
+        [AnyNet Module] as ANY
+        ANY -down-> MNN : supports
+        ANY -down-> RKNN : supports
+        ANY -down-> OCV_DNN : supports
+    }
+
+    package "FeatureHub" as FHM{
+        package "Feature Blocks" {
+            [None Engine] as NE
+            [OpenCV Engine] as OCV
+            [Eigen Engine] as EIG
+            [Feature Block] as FB
+            FB -up-> NE : implements
+            FB -up-> OCV : implements
+            FB -up-> EIG : implements
+        }
+
+        package "Persistence Module" as PM{
+            [SQLite Engine] as SQL
+            [Persistence] as PS
+            PS -right-> SQL : uses
+        }
+
+        [feature_hub] as FH
+        FH -down-> FB : includes
+        FH -down-> PM : includes
+    }
+
+    package "Initialization Module" {
+        [inspire_archive] as IA
+        [resource_decode] as RD
+        [Launch] as MH
+        MH -down-> IA : contains
+        MH -down-> RD : contains
+    }
+
+    FC --> TrackModule : uses
+    FC --> RecognitionModule : uses
+    FC --> PipelineModule : uses
+    FC --> AnyNet : depends on
+    FC --> FH : uses
+    FC --> MH : initializes
+
+    [log] as LG
+    FC ..> LG : logs activities
+}
+
+@enduml

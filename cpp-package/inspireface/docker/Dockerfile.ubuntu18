@@ -1,0 +1,39 @@
+# Use Ubuntu 18.04 as the base image
+FROM ubuntu:18.04
+# FROM skybro/ubuntu-cn:18
+
+ARG https_proxy
+ARG http_proxy
+ARG all_proxy
+
+RUN apt-get update
+
+# Install OpenCV dependency
+RUN apt-get install -y --no-install-recommends libgtk-3-dev
+RUN apt-get install -y --no-install-recommends libavcodec-dev
+RUN apt-get install -y --no-install-recommends libavformat-dev
+RUN apt-get install -y --no-install-recommends libswscale-dev
+RUN apt-get install -y --no-install-recommends libjpeg-dev
+RUN apt-get install -y --no-install-recommends libpng-dev
+
+# Update the package list and install basic development tools
+RUN apt-get install -y --no-install-recommends build-essential
+RUN apt-get install -y --no-install-recommends software-properties-common
+RUN apt-get install -y --no-install-recommends wget
+RUN apt-get install -y --no-install-recommends curl
+RUN apt-get install -y --no-install-recommends git
+RUN apt-get install -y --no-install-recommends vim
+
+# Install CMake
+RUN apt-get install -y --no-install-recommends cmake
+
+
+# Clean temporary files to reduce image size
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
+WORKDIR /workspace
+
+# Default to running Bash
+CMD ["/bin/bash"]

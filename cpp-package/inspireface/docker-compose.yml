@@ -1,0 +1,42 @@
+version: '3'
+services:
+  build-ubuntu18:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ubuntu18  # Use the Ubuntu18.04
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace  # Mount the project root directory to the container
+    command: bash command/build_linux_ubuntu18.sh
+  build-cross-rv1109rv1126-armhf:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.arm-linux-gnueabihf  # Use the arm-linux-gnueabihf tool chain
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace  # Mount the project root directory to the container
+    command: bash command/build_cross_rv1109rv1126_armhf.sh
+  build-cross-armv7-armhf:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.arm-linux-gnueabihf  # Use the arm-linux-gnueabihf tool chain
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace  # Mount the project root directory to the container
+    command: bash command/build_cross_armv7_armhf.sh
+  build-cross-aarch64:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.arm-linux-aarch64  # Use the arm-linux-gnueabihf tool chain
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace  # Mount the project root directory to the container
+    command: bash command/build_cross_aarch64.sh

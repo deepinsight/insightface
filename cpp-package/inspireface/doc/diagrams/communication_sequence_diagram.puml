@@ -1,0 +1,88 @@
+@startuml
+title Communication
+actor User
+participant "Client Application" as Client
+participant "InspireFace SDK" as SDK
+database "FeatureHub" as Database
+
+User -> Client : Start application
+activate Client
+
+Client -> SDK : Initialize SDK\nHFLaunchInspireFace()
+activate SDK
+SDK -> Client : Return initialization result
+deactivate SDK
+
+Client -> SDK : Create session\nHFCreateInspireFaceSession()
+activate SDK
+SDK -> Client : Return session handle
+deactivate SDK
+
+User -> Client : Send image or video data stream
+activate Client
+
+Client -> Client : Process data stream
+Client -> SDK : Create image stream\nHFCreateImageStream()
+activate SDK
+SDK -> Client : Return image stream handle
+deactivate SDK
+
+Client -> SDK : Request face detection\nHFExecuteFaceTrack()
+activate SDK
+SDK -> Client : Return detection results\n(detectedNum, faceRect[])
+deactivate SDK
+
+Client -> SDK : Perform face pipeline processing\nHFMultipleFacePipelineProcess()
+activate SDK
+SDK -> Client : Return processing results
+deactivate SDK
+
+Client -> SDK : Get RGB liveness confidence\nHFGetRGBLivenessConfidence()
+activate SDK
+SDK -> Client : Return liveness detection results
+deactivate SDK
+
+Client -> SDK : Get mask detection confidence\nHFGetFaceMaskConfidence()
+activate SDK
+SDK -> Client : Return mask detection results
+deactivate SDK
+
+Client -> SDK : Get face quality prediction confidence\nHFGetFaceQualityConfidence()
+activate SDK
+SDK -> Client : Return face quality results
+deactivate SDK
+
+alt Liveness confirmed and no mask and good quality
+    loop Each qualified face
+        Client -> SDK : Request face feature extraction\nHFFaceFeatureExtract()
+        activate SDK
+        SDK -> Client : Return feature data
+        deactivate SDK
+
+        Client -> SDK : Search for matching face features\nHFFeatureHubFaceSearch()
+        activate SDK
+        SDK -> Database : Request search matching
+        activate Database
+        Database -> SDK : Return match results\n(customId, tag, confidence)
+        deactivate Database
+        SDK -> Client : Send match results
+        deactivate SDK
+    end
+else
+    Client -> User : Display faces do not meet search criteria
+end
+
+Client -> SDK : Release image stream\nHFReleaseImageStream()
+activate SDK
+SDK -> Client : Confirm image stream release
+deactivate SDK
+
+Client -> User : Display face recognition results
+deactivate Client
+
+Client -> SDK : Release session\nHFReleaseInspireFaceSession()
+activate SDK
+SDK -> Client : Confirm session release
+deactivate SDK
+
+@enduml
