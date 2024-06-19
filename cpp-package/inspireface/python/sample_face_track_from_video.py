@@ -26,7 +26,7 @@ def case_face_tracker_from_video(resource_path, source, show):
 
     # Optional features, loaded during session creation based on the modules specified.
     opt = HF_ENABLE_NONE
-    session = ifac.InspireFaceSession(opt, HF_DETECT_MODE_VIDEO)    # Use video mode
+    session = ifac.InspireFaceSession(opt, HF_DETECT_MODE_LIGHT_TRACK)    # Use video mode
 
     # Determine if the source is a digital webcam index or a video file path.
     try:

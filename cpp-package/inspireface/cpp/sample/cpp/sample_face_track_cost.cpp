@@ -29,12 +29,12 @@ int main(int argc, char* argv[]) {
     // Enable the functions in the pipeline: mask detection, live detection, and face quality detection
     HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
     // Non-video or frame sequence mode uses IMAGE-MODE, which is always face detection without tracking
-    HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+    HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
     // Maximum number of faces detected
-    HInt32 maxDetectNum = 5;
+    HInt32 maxDetectNum = 50;
     // Handle of the current face SDK algorithm context
     HFSession session = {0};
-    ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, &session);
+    ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, -1, -1, &session);
     if (ret != HSUCCEED) {
         std::cout << "Create FaceContext error: " << ret << std::endl;
         return ret;
@@ -61,20 +61,22 @@ int main(int argc, char* argv[]) {
         std::cout << "Create ImageStream error: " << ret << std::endl;
         return ret;
     }
+    
+    for (int i = 0; i < 100; i++) {
+        auto current_time = (double) cv::getTickCount();
 
-    auto current_time = (double) cv::getTickCount();
+        // Execute HF_FaceContextRunFaceTrack captures face information in an image
+        HFMultipleFaceData multipleFaceData = {0};
+        ret = HFExecuteFaceTrack(session, imageHandle, &multipleFaceData);
+        if (ret != HSUCCEED) {
+            std::cout << "Execute HFExecuteFaceTrack error: " << ret << std::endl;
+            return ret;
+        }
 
-    // Execute HF_FaceContextRunFaceTrack captures face information in an image
-    HFMultipleFaceData multipleFaceData = {0};
-    ret = HFExecuteFaceTrack(session, imageHandle, &multipleFaceData);
-    if (ret != HSUCCEED) {
-        std::cout << "Execute HFExecuteFaceTrack error: " << ret << std::endl;
-        return ret;
+        auto cost = ((double) cv::getTickCount() - current_time) / cv::getTickFrequency() * 1000;
+
+        std::cout << "coes: " <<  cost << std::endl;
     }
-
-    auto cost = ((double) cv::getTickCount() - current_time) / cv::getTickFrequency() * 1000;
-
-    std::cout << "coes: " <<  cost << std::endl;
 
 
     ret = HFReleaseImageStream(imageHandle);

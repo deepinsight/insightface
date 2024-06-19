@@ -5,19 +5,42 @@
 #include "face_track.h"
 #include "log.h"
 #include "landmark/mean_shape.h"
+#include <algorithm>
+#include <cstddef>
 #include <opencv2/opencv.hpp>
 #include "middleware/costman.h"
 #include "middleware/model_archive/inspire_archive.h"
+#include "middleware/utils.h"
 #include "herror.h"
 
 namespace inspire {
 
-FaceTrack::FaceTrack(int max_detected_faces, int detection_interval, int track_preview_size) :
-                                                                        max_detected_faces_(max_detected_faces),
-                                                                        detection_interval_(detection_interval),
-                                                                        track_preview_size_(track_preview_size){
+FaceTrack::FaceTrack(DetectMode mode, 
+                    int max_detected_faces, 
+                    int detection_interval, 
+                    int track_preview_size, 
+                    int dynamic_detection_input_level,
+                    int TbD_mode_fps) :
+                    m_mode_(mode), 
+                    max_detected_faces_(max_detected_faces),
+                    detection_interval_(detection_interval),
+                    track_preview_size_(track_preview_size),
+                    m_dynamic_detection_input_level_(dynamic_detection_input_level){
     detection_index_ = -1;
     tracking_idx_ = 0;
+    if (TbD_mode_fps < 0) {
+        TbD_mode_fps = 30;
+    }
+
+    if (m_mode_ == DETECT_MODE_TRACK_BY_DETECT) {
+#ifdef ISF_ENABLE_TRACKING_BY_DETECTION
+        m_TbD_tracker_ = std::make_shared<BYTETracker>(TbD_mode_fps, 30);
+#else 
+        m_mode_ = DETECT_MODE_ALWAYS_DETECT;
+        INSPIRE_LOGW("If you want to use tracking-by-detection in this release, you must turn on the option symbol ISF_ENABLE_TRACKING_BY_DETECTION at compile time");
+#endif
+    }
+
 }
 
 
@@ -77,7 +100,8 @@ bool FaceTrack::TrackFace(CameraStream &image, FaceObject &face) {
 //    LOGD("get affine crop ok");
     double time1 = (double) cv::getTickCount();
     crop = image.GetAffineRGBImage(affine, 112, 112);
-
+//    cv::imshow("w", crop);
+//    cv::waitKey(0);
     cv::Mat affine_inv;
     cv::invertAffineTransform(affine, affine_inv);
     double _diff =
@@ -139,7 +163,6 @@ bool FaceTrack::TrackFace(CameraStream &image, FaceObject &face) {
             face.setTransMatrix(trans_m);
             face.EnableTracking();
 //            LOGD("ready face TrackFace state %d  ", face.TrackingState());
-
         }
     }
 
@@ -211,16 +234,17 @@ bool FaceTrack::TrackFace(CameraStream &image, FaceObject &face) {
     return true;
 }
 
-void FaceTrack::UpdateStream(CameraStream &image, bool is_detect) {
+void FaceTrack::UpdateStream(CameraStream &image) {
     auto timeStart = (double) cv::getTickCount();
     detection_index_ += 1;
-    if (is_detect)
+    if (m_mode_ == DETECT_MODE_ALWAYS_DETECT || m_mode_ == DETECT_MODE_TRACK_BY_DETECT)
         trackingFace.clear();
 //    LOGD("%d, %d", detection_index_, detection_interval_);
-    if (detection_index_ % detection_interval_ == 0 || is_detect) {
+    if (detection_index_ % detection_interval_ == 0 || m_mode_ == DETECT_MODE_ALWAYS_DETECT || m_mode_ == DETECT_MODE_TRACK_BY_DETECT) {
 //        Timer t_blacking;
         image.SetPreviewSize(track_preview_size_);
         cv::Mat image_detect = image.GetPreviewImage(true);
+
         nms();
         for (auto const &face: trackingFace) {
             cv::Rect m_mask_rect = face.GetRectSquare();
@@ -240,26 +264,24 @@ void FaceTrack::UpdateStream(CameraStream &image, bool is_detect) {
         auto timeStart = (double) cv::getTickCount();
         DetectFace(image_detect, image.GetPreviewScale());
         det_use_time_ = ((double) cv::getTickCount() - timeStart) / cv::getTickFrequency() * 1000;
-//        LOGD("detect track");
     }
 
     if (!candidate_faces_.empty()) {
-//        LOGD("push track face");
         for (int i = 0; i < candidate_faces_.size(); i++) {
             trackingFace.push_back(candidate_faces_[i]);
         }
         candidate_faces_.clear();
     }
 
-//    Timer t_track;
     for (std::vector<FaceObject>::iterator iter = trackingFace.begin();
-         iter != trackingFace.end();) {
+        iter != trackingFace.end();) {
         if (!TrackFace(image, *iter)) {
             iter = trackingFace.erase(iter);
         } else {
             iter++;
         }
     }
+    
 
 //    LOGD("Track Cost %f", t_track.GetCostTimeUpdate());
     track_total_use_time_ = ((double) cv::getTickCount() - timeStart) / cv::getTickFrequency() * 1000;
@@ -305,25 +327,70 @@ void FaceTrack::BlackingTrackingRegion(cv::Mat &image, cv::Rect &rect_mask) {
 
 void FaceTrack::DetectFace(const cv::Mat &input, float scale) {
     std::vector<FaceLoc> boxes = (*m_face_detector_)(input);
-    std::vector<cv::Rect> bbox;
-    bbox.resize(boxes.size());
-    for (int i = 0; i < boxes.size(); i++) {
-        bbox[i] = cv::Rect(cv::Point(static_cast<int>(boxes[i].x1), static_cast<int>(boxes[i].y1)),
-                           cv::Point(static_cast<int>(boxes[i].x2), static_cast<int>(boxes[i].y2)));
-        tracking_idx_ = tracking_idx_ + 1;
-        FaceObject faceinfo(tracking_idx_, bbox[i], FaceLandmark::NUM_OF_LANDMARK);
-        faceinfo.detect_bbox_ = bbox[i];
+//    for (auto box: boxes) {
+//        cv::Rect r(cv::Point2f(box.x1, box.y1), cv::Point2f(box.x2, box.y2));
+//        cv::rectangle(input, r, cv::Scalar(255, 0, 0), 3);
+//    }
+//    cv::imshow("w", input);
+//    cv::waitKey(0);
+    if (m_mode_ == DETECT_MODE_TRACK_BY_DETECT) {
 
-        // Control that the number of faces detected does not exceed the maximum limit
-        if (candidate_faces_.size() < max_detected_faces_) {
+#ifdef ISF_ENABLE_TRACKING_BY_DETECTION
+        std::vector<Object> objects;
+        auto num_of_effective = std::min(boxes.size(), (size_t )max_detected_faces_);
+        for (size_t i = 0; i < num_of_effective; i++) {
+            Object obj;
+            const auto box = boxes[i];
+            obj.rect = Rect_<float>(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
+            if (!isShortestSideGreaterThan<float>(obj.rect, filter_minimum_face_px_size)) {
+                // Filter too small face detection box
+                continue;
+            }
+            obj.label = 0; // assuming all detections are faces
+            obj.prob = box.score;
+            objects.push_back(obj);
+        }
+        vector<STrack> output_stracks = m_TbD_tracker_->update(objects);
+        for (const auto &st_track : output_stracks) {
+            cv::Rect rect = cv::Rect_<float>(st_track.tlwh[0], st_track.tlwh[1], st_track.tlwh[2], st_track.tlwh[3]);
+            FaceObject faceinfo(st_track.track_id, rect, FaceLandmark::NUM_OF_LANDMARK);
+            faceinfo.detect_bbox_ = rect;
             candidate_faces_.push_back(faceinfo);
-        } else {
-            // If the maximum limit is exceeded, you can choose to discard the currently detected face or choose the face to discard according to the policy
-            // For example, face confidence can be compared and faces with lower confidence can be discarded
-            // Take the example of simply discarding the last face
-            candidate_faces_.pop_back();
+        }
+#endif
+    } else {
+        std::vector<cv::Rect> bbox;
+        bbox.resize(boxes.size());
+        for (int i = 0; i < boxes.size(); i++) {
+            bbox[i] = cv::Rect(cv::Point(static_cast<int>(boxes[i].x1), static_cast<int>(boxes[i].y1)),
+                            cv::Point(static_cast<int>(boxes[i].x2), static_cast<int>(boxes[i].y2)));
+
+            if (!isShortestSideGreaterThan<float>(bbox[i], filter_minimum_face_px_size)) {
+                // Filter too small face detection box
+                continue;
+            }
+            if (m_mode_ == DETECT_MODE_ALWAYS_DETECT) {
+                // Always detect mode without assigning an id
+                tracking_idx_ = -1;
+            } else {
+                tracking_idx_ = tracking_idx_ + 1;
+            }
+            
+            FaceObject faceinfo(tracking_idx_, bbox[i], FaceLandmark::NUM_OF_LANDMARK);
+            faceinfo.detect_bbox_ = bbox[i];
+
+            // Control that the number of faces detected does not exceed the maximum limit
+            if (candidate_faces_.size() < max_detected_faces_) {
+                candidate_faces_.push_back(faceinfo);
+            } else {
+                // If the maximum limit is exceeded, you can choose to discard the currently detected face or choose the face to discard according to the policy
+                // For example, face confidence can be compared and faces with lower confidence can be discarded
+                // Take the example of simply discarding the last face
+                candidate_faces_.pop_back();
+            }
         }
     }
+    
 }
 
 int FaceTrack::Configuration(inspire::InspireArchive &archive) {
@@ -376,9 +443,22 @@ int FaceTrack::InitLandmarkModel(InspireModel &model) {
 }
 
 int FaceTrack::InitDetectModel(InspireModel &model) {
-    auto input_size = model.Config().get<std::vector<int>>("input_size");
+    std::vector<int> input_size;
+    if (m_dynamic_detection_input_level_ != -1) {
+        if (m_dynamic_detection_input_level_ % 160 != 0 || m_dynamic_detection_input_level_ < 160) {
+            INSPIRE_LOGE("The input size '%d' for the custom detector is not valid.  \
+            Please use a multiple of 160 (minimum 160) for the input dimensions, such as 320 or 640.", m_dynamic_detection_input_level_);
+            return HERR_INVALID_DETECTION_INPUT;
+        }
+        // Wide-Range mode temporary value
+        input_size = {m_dynamic_detection_input_level_, m_dynamic_detection_input_level_};
+        model.Config().set<std::vector<int>>("input_size", input_size);
+    } else {
+        input_size = model.Config().get<std::vector<int>>("input_size");
+    }
+    bool dym = true;
     m_face_detector_ = std::make_shared<FaceDetect>(input_size[0]);
-    auto ret = m_face_detector_->loadData(model, model.modelType);
+    auto ret = m_face_detector_->loadData(model, model.modelType, dym);
     if (ret != InferenceHelper::kRetOk) {
         return HERR_ARCHIVE_LOAD_FAILURE;
     }
@@ -407,12 +487,16 @@ void FaceTrack::SetDetectThreshold(float value) {
     m_face_detector_->SetClsThreshold(value);
 }
 
+void FaceTrack::SetMinimumFacePxSize(float value) {
+    filter_minimum_face_px_size = value;
+}
+
 double FaceTrack::GetTrackTotalUseTime() const {
     return track_total_use_time_;
 }
 
 void FaceTrack::SetTrackPreviewSize(int preview_size) {
-    track_preview_size_ = preview_size;
+        track_preview_size_ = preview_size;
 }
 
 

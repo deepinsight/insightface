@@ -15,9 +15,9 @@ TEST_CASE("test_HelpTools", "[help_tools]") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");

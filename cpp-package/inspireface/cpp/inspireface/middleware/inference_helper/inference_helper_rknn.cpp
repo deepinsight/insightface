@@ -259,5 +259,10 @@ std::vector<std::string> InferenceHelperRKNN::GetInputNames() {
     return input_names_;
 }
 
+int32_t InferenceHelperRKNN::ResizeInput(const std::vector<InputTensorInfo>& input_tensor_info_list) {
+    // The function is not supported
+    return 0;
+}
+
 
 #endif // INFERENCE_HELPER_ENABLE_RKNN

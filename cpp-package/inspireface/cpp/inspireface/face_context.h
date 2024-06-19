@@ -27,16 +27,6 @@
 namespace inspire {
 
 /**
- * @enum DetectMode
- * @brief Enumeration for different detection modes.
- */
-enum DetectMode {
-    DETECT_MODE_IMAGE = 0,      ///< Image detection mode: Always detect
-    DETECT_MODE_VIDEO,          ///< Image detection mode: Face track
-
-};
-
-/**
  * @struct CustomPipelineParameter
  * @brief Structure to hold custom parameters for the face detection and processing pipeline.
  *
@@ -77,7 +67,11 @@ public:
      * @param param Custom parameters for the face pipeline.
      * @return int32_t Returns 0 on success, non-zero for any error.
      */
-    int32_t Configuration(DetectMode detect_mode, int32_t max_detect_face, CustomPipelineParameter param);
+    int32_t Configuration(DetectMode detect_mode, 
+                        int32_t max_detect_face, 
+                        CustomPipelineParameter param, 
+                        int32_t detect_level_px = -1,
+                        int32_t track_by_detect_mode_fps = -1);
 
     /**
      * @brief Performs face detection and tracking on a given image stream.
@@ -154,6 +148,13 @@ public:
      * @return int32_t Status code of the operation.
      */
     int32_t SetTrackPreviewSize(int32_t preview_size);
+
+    /**
+     * @brief Filter the minimum face pixel size.
+     * @param minSize The minimum pixel value.
+     * @return int32_t Status code of the operation.
+     */
+    int32_t SetTrackFaceMinimumSize(int32_t minSize);
 
     /**
      * @brief Sets the mode for face detection.

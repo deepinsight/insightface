@@ -5,7 +5,7 @@ from inspireface.modules.core.native import HF_ENABLE_NONE, HF_ENABLE_FACE_RECOG
     HF_ENABLE_MASK_DETECT, HF_ENABLE_AGE_PREDICT, HF_ENABLE_GENDER_PREDICT, HF_ENABLE_QUALITY, HF_ENABLE_INTERACTION
 
 # Face track mode
-from inspireface.modules.core.native import HF_DETECT_MODE_IMAGE, HF_DETECT_MODE_VIDEO
+from inspireface.modules.core.native import HF_DETECT_MODE_ALWAYS_DETECT, HF_DETECT_MODE_LIGHT_TRACK, HF_DETECT_MODE_TRACK_BY_DETECTION
 
 # Image format
 from inspireface.modules.core.native import HF_STREAM_RGB, HF_STREAM_BGR, HF_STREAM_RGBA, HF_STREAM_BGRA, HF_STREAM_YUV_NV12, HF_STREAM_YUV_NV21

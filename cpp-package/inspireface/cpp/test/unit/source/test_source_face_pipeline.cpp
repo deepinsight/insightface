@@ -16,7 +16,7 @@ TEST_CASE("test_FacePipeline", "[face_pipe") {
     SECTION("FaceContextInit") {
         FaceContext ctx;
         CustomPipelineParameter param;
-        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_IMAGE, 1, param);
+        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_ALWAYS_DETECT, 1, param);
         REQUIRE(ret == HSUCCEED);
     }
 
@@ -24,7 +24,7 @@ TEST_CASE("test_FacePipeline", "[face_pipe") {
         FaceContext ctx;
         CustomPipelineParameter param;
         param.enable_mask_detect = true;
-        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_IMAGE, 1, param);
+        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_ALWAYS_DETECT, 1, param);
         REQUIRE(ret == HSUCCEED);
 
         {
@@ -67,7 +67,7 @@ TEST_CASE("test_FacePipeline", "[face_pipe") {
             FaceContext ctx;
             CustomPipelineParameter param;
             param.enable_liveness = true;
-            auto ret = ctx.Configuration(DetectMode::DETECT_MODE_IMAGE, 1, param);
+            auto ret = ctx.Configuration(DetectMode::DETECT_MODE_ALWAYS_DETECT, 1, param);
             REQUIRE(ret == HSUCCEED);
 
             {

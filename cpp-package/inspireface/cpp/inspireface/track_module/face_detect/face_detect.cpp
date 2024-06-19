@@ -19,23 +19,27 @@ FaceLocList FaceDetect::operator()(const Matrix &bgr) {
     int ori_h = bgr.rows;
     int w, h;
     float scale;
+
+    cv::Mat pad;
+    if (ori_w == m_input_size_ && ori_h == m_input_size_) {
+        // If the input image already matches the desired size, no need to resize, just pad
+        cv::copyMakeBorder(bgr, pad, 0, 0, 0, 0, cv::BORDER_CONSTANT, 0.0f);
+    }
+
     if (ori_w > ori_h) {
-        scale = (float) m_input_size_ /
-                ori_w;
+        scale = static_cast<float>(m_input_size_) / ori_w;
         w = m_input_size_;
         h = ori_h * scale;
     } else {
-        scale = (float) m_input_size_ /
-                ori_h;
+        scale = static_cast<float>(m_input_size_) / ori_h;
         h = m_input_size_;
         w = ori_w * scale;
     }
     int wpad = m_input_size_ - w;
     int hpad = m_input_size_ - h;
     cv::Mat resized_img;
-    cv::resize(bgr,resized_img,cv::Size(w, h));
-    cv::Mat pad;
-    cv::copyMakeBorder(resized_img, pad, 0, hpad, 0, wpad, cv::BORDER_CONSTANT,0.0f);
+    cv::resize(bgr, resized_img, cv::Size(w, h));
+    cv::copyMakeBorder(resized_img, pad, 0, hpad, 0, wpad, cv::BORDER_CONSTANT, 0.0f);
 
 //    LOGD("Prepare");
     AnyTensorOutputs outputs;

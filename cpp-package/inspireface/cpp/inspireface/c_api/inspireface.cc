@@ -76,7 +76,7 @@ HResult HFReleaseInspireFaceSession(HFSession handle) {
 }
 
 
-HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectMode detectMode, HInt32 maxDetectFaceNum, HFSession *handle) {
+HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectMode detectMode, HInt32 maxDetectFaceNum, HInt32 detectPixelLevel, HInt32 trackByDetectModeFPS, HFSession *handle) {
     inspire::ContextCustomParameter param;
     param.enable_mask_detect = parameter.enable_mask_detect;
     param.enable_age = parameter.enable_age;
@@ -86,13 +86,15 @@ HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectM
     param.enable_interaction_liveness = parameter.enable_interaction_liveness;
     param.enable_ir_liveness = parameter.enable_ir_liveness;
     param.enable_recognition = parameter.enable_recognition;
-    inspire::DetectMode detMode = inspire::DETECT_MODE_IMAGE;
-    if (detectMode == HF_DETECT_MODE_VIDEO) {
-        detMode = inspire::DETECT_MODE_VIDEO;
+    inspire::DetectMode detMode = inspire::DETECT_MODE_ALWAYS_DETECT;
+    if (detectMode == HF_DETECT_MODE_LIGHT_TRACK) {
+        detMode = inspire::DETECT_MODE_LIGHT_TRACK;
+    } else if (detectMode == HF_DETECT_MODE_TRACK_BY_DETECTION) {
+        detMode = inspire::DETECT_MODE_TRACK_BY_DETECT;
     }
 
     HF_FaceAlgorithmSession *ctx = new HF_FaceAlgorithmSession();
-    auto ret = ctx->impl.Configuration(detMode, maxDetectFaceNum, param);
+    auto ret = ctx->impl.Configuration(detMode, maxDetectFaceNum, param, detectPixelLevel, trackByDetectModeFPS);
     if (ret != HSUCCEED) {
         delete ctx;
         *handle = nullptr;
@@ -104,7 +106,7 @@ HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectM
     return ret;
 }
 
-HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode detectMode, HInt32 maxDetectFaceNum, HFSession *handle) {
+HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode detectMode, HInt32 maxDetectFaceNum, HInt32 detectPixelLevel, HInt32 trackByDetectModeFPS, HFSession *handle) {
     inspire::ContextCustomParameter param;
     if (customOption & HF_ENABLE_FACE_RECOGNITION) {
         param.enable_recognition = true;
@@ -130,12 +132,15 @@ HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode de
     if (customOption & HF_ENABLE_INTERACTION) {
         param.enable_interaction_liveness = true;
     }
-    inspire::DetectMode detMode = inspire::DETECT_MODE_IMAGE;
-    if (detectMode == HF_DETECT_MODE_VIDEO) {
-        detMode = inspire::DETECT_MODE_VIDEO;
+    inspire::DetectMode detMode = inspire::DETECT_MODE_ALWAYS_DETECT;
+    if (detectMode == HF_DETECT_MODE_LIGHT_TRACK) {
+        detMode = inspire::DETECT_MODE_LIGHT_TRACK;
+    } else if (detectMode == HF_DETECT_MODE_TRACK_BY_DETECTION) {
+        detMode = inspire::DETECT_MODE_TRACK_BY_DETECT;
     }
+    
     HF_FaceAlgorithmSession *ctx = new HF_FaceAlgorithmSession();
-    auto ret = ctx->impl.Configuration(detMode, maxDetectFaceNum, param);
+    auto ret = ctx->impl.Configuration(detMode, maxDetectFaceNum, param, detectPixelLevel, trackByDetectModeFPS);
     if (ret != HSUCCEED) {
         delete ctx;
         *handle = nullptr;
@@ -178,6 +183,17 @@ HResult HFSessionSetTrackPreviewSize(HFSession session, HInt32 previewSize) {
     return ctx->impl.SetTrackPreviewSize(previewSize);
 }
 
+HResult HFSessionSetFilterMinimumFacePixelSize(HFSession session, HInt32 minSize) {
+    if (session == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    HF_FaceAlgorithmSession *ctx = (HF_FaceAlgorithmSession* ) session;
+    if (ctx == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    return ctx->impl.SetTrackFaceMinimumSize(minSize);
+}
+
 HResult HFSessionSetFaceTrackMode(HFSession session, HFDetectMode detectMode) {
     if (session == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
@@ -186,9 +202,9 @@ HResult HFSessionSetFaceTrackMode(HFSession session, HFDetectMode detectMode) {
     if (ctx == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
     }
-    inspire::DetectMode detMode = inspire::DETECT_MODE_IMAGE;
-    if (detectMode == HF_DETECT_MODE_VIDEO) {
-        detMode = inspire::DETECT_MODE_VIDEO;
+    inspire::DetectMode detMode = inspire::DETECT_MODE_ALWAYS_DETECT;
+    if (detectMode == HF_DETECT_MODE_LIGHT_TRACK) {
+        detMode = inspire::DETECT_MODE_LIGHT_TRACK;
     }
     return ctx->impl.SetDetectMode(detMode);
 }
@@ -620,6 +636,6 @@ HResult HFSetLogLevel(HFLogLevel level) {
 }
 
 HResult HFLogDisable() {
-    INSPIRE_SET_LOG_LEVEL(inspire::LOG_NONE);
+    INSPIRE_SET_LOG_LEVEL(inspire::ISF_LOG_NONE);
     return HSUCCEED;
 }

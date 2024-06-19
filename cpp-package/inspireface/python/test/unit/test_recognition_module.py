@@ -12,13 +12,12 @@ class FaceRecognitionBaseCase(unittest.TestCase):
 
     def setUp(self) -> None:
         # Prepare material
-        track_mode = HF_DETECT_MODE_IMAGE
+        track_mode = HF_DETECT_MODE_ALWAYS_DETECT
         param = ifac.SessionCustomParameter()
         param.enable_recognition = True
         self.engine = ifac.InspireFaceSession(param, track_mode, 10)
 
     def test_face_feature_extraction(self):
-        self.engine.set_track_mode(mode=HF_DETECT_MODE_IMAGE)
         # Prepare a image
         image = cv2.imread(get_test_data("bulk/kun.jpg"))
         self.assertIsNotNone(image)
@@ -38,7 +37,6 @@ class FaceRecognitionBaseCase(unittest.TestCase):
         self.assertIsNotNone(feature)
 #
     def test_face_comparison(self):
-        self.engine.set_track_mode(mode=HF_DETECT_MODE_IMAGE)
         # Prepare two pictures of someone
         images_path_list = [get_test_data("bulk/kun.jpg"), get_test_data("bulk/jntm.jpg")]
         self.assertEqual(len(images_path_list), 2, "Only 2 photos can be used for the 1v1 scene.")
@@ -89,7 +87,7 @@ class FaceRecognitionCRUDMemoryCase(unittest.TestCase):
             search_threshold=TEST_FACE_COMPARISON_IMAGE_THRESHOLD,
         )
         ifac.feature_hub_enable(config)
-        track_mode = HF_DETECT_MODE_IMAGE
+        track_mode = HF_DETECT_MODE_ALWAYS_DETECT
         param = ifac.SessionCustomParameter()
         param.enable_recognition = True
         cls.engine = ifac.InspireFaceSession(param, track_mode)
@@ -188,7 +186,7 @@ class FaceRecognitionFeatureExtractCase(unittest.TestCase):
         self.stream = ifac.ImageStream.load_from_cv_image(image)
         self.assertIsNotNone(self.stream)
         # Prepare material
-        track_mode = HF_DETECT_MODE_IMAGE
+        track_mode = HF_DETECT_MODE_ALWAYS_DETECT
         param = ifac.SessionCustomParameter()
         param.enable_recognition = True
         self.engine = ifac.InspireFaceSession(param, track_mode)
@@ -207,7 +205,6 @@ class FaceRecognitionFeatureExtractCase(unittest.TestCase):
 
     @benchmark(test_name="Feature Extract", loop=1000)
     def test_benchmark_feature_extract(self):
-        self.engine.set_track_mode(HF_DETECT_MODE_IMAGE)
         for _ in range(self.loop):
             feature = self.engine.face_feature_extract(self.stream, self.face)
             self.assertEqual(TEST_MODEL_FACE_FEATURE_LENGTH, feature.size)

@@ -40,3 +40,23 @@ services:
     volumes:
       - .:/workspace  # Mount the project root directory to the container
     command: bash command/build_cross_aarch64.sh
+  build-cross-android:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.android  # Use the arm-linux-gnueabihf tool chain
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace  # Mount the project root directory to the container
+    command: bash command/build_android.sh
+  build-cuda-ubuntu20:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.cuda.ubuntu20
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace  # Mount the project root directory to the container
+    command: bash command/build_linux_cuda.sh

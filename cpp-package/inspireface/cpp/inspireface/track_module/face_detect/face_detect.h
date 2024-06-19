@@ -24,7 +24,7 @@ public:
      * @param nms_threshold The threshold for non-maximum suppression.
      * @param cls_threshold The threshold for classification score.
      */
-    explicit FaceDetect(int input_size = 160, float nms_threshold = 0.5f, float cls_threshold = 0.5f);
+    explicit FaceDetect(int input_size = 160, float nms_threshold = 0.4f, float cls_threshold = 0.5f);
 
     /**
      * @brief Detects faces in a given image.

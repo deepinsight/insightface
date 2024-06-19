@@ -641,6 +641,16 @@ inline cv::Rect GetNewBox(int src_w, int src_h, cv::Rect bbox, float scale) {
     return new_bbox;
 }
 
+
+template<typename T>
+inline bool isShortestSideGreaterThan(const cv::Rect_<T>& rect, T value) {
+    // Find the shortest edge
+    T shortestSide = std::min(rect.width, rect.height);
+    // Determines whether the shortest edge is greater than the given value
+    return shortestSide > value;
+}
+
+
 }   // namespace inspire
 
 #endif

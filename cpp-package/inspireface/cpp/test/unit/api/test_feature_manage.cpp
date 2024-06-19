@@ -17,9 +17,9 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");
@@ -38,7 +38,7 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         REQUIRE(ret == HSUCCEED);
 
         // Get a face picture
-        cv::Mat kunImage = cv::imread(GET_DATA("images/kun.jpg"));
+        cv::Mat kunImage = cv::imread(GET_DATA("data/bulk/kun.jpg"));
         HFImageData imageData = {0};
         imageData.data = kunImage.data;
         imageData.height = kunImage.rows;
@@ -121,9 +121,9 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");
@@ -169,9 +169,9 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
 
         // Face track
@@ -323,9 +323,9 @@ TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");
@@ -470,9 +470,9 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");
@@ -565,9 +565,9 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         HPath path = modelPath.c_str();
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");
@@ -658,9 +658,9 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         HPath path = modelPath.c_str();
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");
@@ -787,9 +787,9 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         HPath path = modelPath.c_str();
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3,  -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");
@@ -894,9 +894,9 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         HPath path = modelPath.c_str();
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3,-1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");

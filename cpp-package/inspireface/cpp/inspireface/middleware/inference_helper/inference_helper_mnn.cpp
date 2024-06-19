@@ -84,11 +84,13 @@ int32_t InferenceHelperMnn::ParameterInitialization(std::vector<InputTensorInfo>
                 if ((input_tensor->channel() == input_tensor_info.GetChannel()) && (input_tensor->height() == input_tensor_info.GetHeight()) && (input_tensor->width() == input_tensor_info.GetWidth())) {
                     /* OK */
                 } else {
-                    PRINT_E("W: %d != %d\n", input_tensor->width() , input_tensor_info.GetWidth());
-                    PRINT_E("H: %d != %d\n", input_tensor->height() , input_tensor_info.GetHeight());
-                    PRINT_E("C: %d != %d\n", input_tensor->channel() , input_tensor_info.GetChannel());
-                    PRINT_E("Incorrect input tensor size\n");
-                    return kRetErr;
+                    INSPIRE_LOGW("W: %d != %d", input_tensor->width() , input_tensor_info.GetWidth());
+                    INSPIRE_LOGW("H: %d != %d", input_tensor->height() , input_tensor_info.GetHeight());
+                    INSPIRE_LOGW("C: %d != %d", input_tensor->channel() , input_tensor_info.GetChannel());
+                    INSPIRE_LOGW("There may be some risk of input that is not used by model default");
+                    net_->resizeTensor(input_tensor, { 1, input_tensor_info.GetChannel(), input_tensor_info.GetHeight(), input_tensor_info.GetWidth() });
+                    net_->resizeSession(session_);
+                    return kRetOk;
                 }
             } else {
                 PRINT("Input tensor size is set from the model\n");
@@ -103,6 +105,7 @@ int32_t InferenceHelperMnn::ParameterInitialization(std::vector<InputTensorInfo>
                 /* In case the input size  is not fixed */
                 net_->resizeTensor(input_tensor, { 1, input_tensor_info.GetChannel(), input_tensor_info.GetHeight(), input_tensor_info.GetWidth() });
                 net_->resizeSession(session_);
+                INSPIRE_LOGE("GO RESIZE");
             } else {
                 PRINT_E("Model input size is not set\n");
                 return kRetErr;
@@ -156,21 +159,22 @@ int32_t InferenceHelperMnn::Initialize(char* model_buffer, int model_size, std::
         PRINT_E("Failed to load model model buffer\n");
         return kRetErr;
     }
-
     MNN::ScheduleConfig scheduleConfig;
+    scheduleConfig.numThread = num_threads_;    // it seems, setting 1 has better performance on Android
+    MNN::BackendConfig bnconfig;
+    bnconfig.power = MNN::BackendConfig::Power_High;
+    bnconfig.precision = MNN::BackendConfig::Precision_High;
     if (special_backend_ == kMnnCuda) {
         INSPIRE_LOGD("Enable CUDA");
         scheduleConfig.type = MNN_FORWARD_CUDA;
+        bnconfig.power = MNN::BackendConfig::Power_Normal;
+        bnconfig.precision = MNN::BackendConfig::Precision_Normal;
     } else {
         scheduleConfig.type = MNN_FORWARD_CPU;
     }
-    scheduleConfig.numThread = num_threads_;    // it seems, setting 1 has better performance on Android
-     MNN::BackendConfig bnconfig;
-     bnconfig.power = MNN::BackendConfig::Power_High;
-     bnconfig.precision = MNN::BackendConfig::Precision_High;
-     scheduleConfig.backendConfig = &bnconfig;
+    scheduleConfig.backendConfig = &bnconfig;
+
     session_ = net_->createSession(scheduleConfig);
-//    LOG_INFO("fuck");
 //    LOG_INFO("-INPUT: {}", net_->getSessionInputAll(session_).size());
 //    PRINT("-INPUT: %lu", net_->getSessionInputAll(session_).size());
 //    LOGD("-INPUT: %lu", net_->getSessionInputAll(session_).size());
@@ -347,4 +351,13 @@ int32_t InferenceHelperMnn::Process(std::vector<OutputTensorInfo>& output_tensor
 
 std::vector<std::string> InferenceHelperMnn::GetInputNames() {
     return input_names_;
+}
+
+int32_t InferenceHelperMnn::ResizeInput(const std::vector<InputTensorInfo>& input_tensor_info_list) {
+    for (const auto& input_tensor_info : input_tensor_info_list) {
+        auto input_tensor = net_->getSessionInput(session_, input_tensor_info.name.c_str());
+        net_->resizeTensor(input_tensor, { 1, input_tensor_info.GetChannel(), input_tensor_info.GetHeight(), input_tensor_info.GetWidth() });
+        net_->resizeSession(session_);
+    }
+    return 0;
 }

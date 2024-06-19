@@ -14,8 +14,11 @@ namespace inspire {
 
 FaceContext::FaceContext() = default;
 
-int32_t FaceContext::Configuration(DetectMode detect_mode, int32_t max_detect_face,
-                                   CustomPipelineParameter param) {
+int32_t FaceContext::Configuration(DetectMode detect_mode, 
+                                    int32_t max_detect_face,
+                                    CustomPipelineParameter param, 
+                                    int32_t detect_level_px, 
+                                    int32_t track_by_detect_mode_fps) {
     m_detect_mode_ = detect_mode;
     m_max_detect_face_ = max_detect_face;
     m_parameter_ = param;
@@ -26,9 +29,9 @@ int32_t FaceContext::Configuration(DetectMode detect_mode, int32_t max_detect_fa
         return HERR_ARCHIVE_LOAD_FAILURE;
     }
 
-    m_face_track_ = std::make_shared<FaceTrack>(m_max_detect_face_);
+    m_face_track_ = std::make_shared<FaceTrack>(m_detect_mode_, m_max_detect_face_, 20, 192, detect_level_px, track_by_detect_mode_fps);
     m_face_track_->Configuration(INSPIRE_LAUNCH->getMArchive());
-    SetDetectMode(m_detect_mode_);
+    // SetDetectMode(m_detect_mode_);
 
     m_face_recognition_ = std::make_shared<FeatureExtraction>(INSPIRE_LAUNCH->getMArchive(), m_parameter_.enable_recognition);
     if (m_face_recognition_->QueryStatus() != HSUCCEED) {
@@ -62,7 +65,7 @@ int32_t FaceContext::FaceDetectAndTrack(CameraStream &image) {
     if (m_face_track_ == nullptr) {
         return HERR_SESS_TRACKER_FAILURE;
     }
-    m_face_track_->UpdateStream(image, m_always_detect_);
+    m_face_track_->UpdateStream(image);
     for (int i = 0; i < m_face_track_->trackingFace.size(); ++i) {
         auto &face = m_face_track_->trackingFace[i];
         HyperFaceData data = FaceObjectToHyperFaceData(face, i);
@@ -255,7 +258,7 @@ int32_t FaceContext::FaceQualityDetect(FaceBasicData& data, float &result) {
 
 int32_t FaceContext::SetDetectMode(DetectMode mode) {
     m_detect_mode_ = mode;
-    if (m_detect_mode_ == DetectMode::DETECT_MODE_IMAGE) {
+    if (m_detect_mode_ == DetectMode::DETECT_MODE_ALWAYS_DETECT) {
         m_always_detect_ = true;
     } else {
         m_always_detect_ = false;
@@ -263,8 +266,13 @@ int32_t FaceContext::SetDetectMode(DetectMode mode) {
     return HSUCCEED;
 }
 
-    int32_t FaceContext::SetTrackPreviewSize(const int32_t preview_size) {
+int32_t FaceContext::SetTrackPreviewSize(const int32_t preview_size) {
     m_face_track_->SetTrackPreviewSize(preview_size);
+    return HSUCCEED;
+}
+
+int32_t FaceContext::SetTrackFaceMinimumSize(int32_t minSize) {
+    m_face_track_->SetMinimumFacePxSize(minSize);
     return HSUCCEED;
 }
 
