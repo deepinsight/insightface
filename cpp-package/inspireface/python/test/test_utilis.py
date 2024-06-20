@@ -181,7 +181,6 @@ def lfw_generator(directory_path):
 
 
 def batch_import_lfw_faces(lfw_path, engine: ifac.InspireFaceSession, num_of_faces: int):
-    engine.set_track_mode(HF_DETECT_MODE_IMAGE)
     generator = lfw_generator(lfw_path)
     registered_faces = 0
 

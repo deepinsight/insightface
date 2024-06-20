@@ -33,7 +33,7 @@ TEST_FACE_COMPARISON_IMAGE_THRESHOLD = 0.45
 TEST_PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Current project path
-CURRENT_PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+CURRENT_PROJECT_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Main project path
 MAIN_PROJECT_PATH = os.path.dirname(CURRENT_PROJECT_PATH)

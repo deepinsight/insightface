@@ -131,7 +131,6 @@ class ImageStream(object):
         return self._handle
 
 
-
 # == Session API ==
 
 @dataclass
@@ -234,6 +233,7 @@ class SessionCustomParameter:
 
         return custom_param
 
+
 class InspireFaceSession(object):
     """
     Manages a session for face detection and recognition processes using the InspireFace library.
@@ -244,8 +244,9 @@ class InspireFaceSession(object):
         param (int or SessionCustomParameter): Configuration parameters or flags for the session.
 
     """
-    def __init__(self, param, detect_mode: int = HF_DETECT_MODE_IMAGE,
-                 max_detect_num: int = 10):
+
+    def __init__(self, param, detect_mode: int = HF_DETECT_MODE_ALWAYS_DETECT,
+                 max_detect_num: int = 10, detect_pixel_level=-1, track_by_detect_mode_fps=-1):
         """
         Initializes a new session with the provided configuration parameters.
         Args:
@@ -259,9 +260,11 @@ class InspireFaceSession(object):
         self._sess = HFSession()
         self.param = param
         if isinstance(self.param, SessionCustomParameter):
-            ret = HFCreateInspireFaceSession(self.param._c_struct(), detect_mode, max_detect_num, self._sess)
+            ret = HFCreateInspireFaceSession(self.param._c_struct(), detect_mode, max_detect_num, detect_pixel_level,
+                                             track_by_detect_mode_fps, self._sess)
         elif isinstance(self.param, int):
-            ret = HFCreateInspireFaceSessionOptional(self.param, detect_mode, max_detect_num, self._sess)
+            ret = HFCreateInspireFaceSessionOptional(self.param, detect_mode, max_detect_num, detect_pixel_level,
+                                                     track_by_detect_mode_fps, self._sess)
         else:
             raise NotImplemented("")
         if ret != 0:
@@ -314,20 +317,6 @@ class InspireFaceSession(object):
         else:
             return []
 
-    def set_track_mode(self, mode: int):
-        """
-        Sets the tracking mode for the face detection session.
-
-        Args:
-            mode (int): An integer representing the tracking mode to be used.
-
-        Notes:
-            If setting the mode fails, an error is logged with the returned status code.
-        """
-        ret = HFSessionSetFaceTrackMode(self._sess, mode)
-        if ret != 0:
-            logger.error(f"Set track mode error: {ret}")
-
     def set_track_preview_size(self, size=192):
         """
         Sets the preview size for the face tracking session.
@@ -341,6 +330,12 @@ class InspireFaceSession(object):
         ret = HFSessionSetTrackPreviewSize(self._sess, size)
         if ret != 0:
             logger.error(f"Set track preview size error: {ret}")
+
+    def set_filter_minimum_face_pixel_size(self, min_size=32):
+        ret = HFSessionSetFilterMinimumFacePixelSize(self._sess, min_size)
+        if ret != 0:
+            logger.error(f"Set filter minimum face pixel size error: {ret}")
+
 
     def face_pipeline(self, image, faces: List[FaceInformation], exec_param) -> List[FaceExtended]:
         """
@@ -494,6 +489,7 @@ class InspireFaceSession(object):
     def __del__(self):
         self.release()
 
+
 # == Global API ==
 def launch(resource_path: str) -> bool:
     """
@@ -623,7 +619,6 @@ def feature_comparison(feature1: np.ndarray, feature2: np.ndarray) -> float:
     return float(comparison_result.value)
 
 
-
 class FaceIdentity(object):
     """
     Represents an identity based on facial features, associating the features with a custom ID and a tag.
@@ -688,6 +683,7 @@ class FaceIdentity(object):
             feature=PHFFaceFeature(feature)
         )
 
+
 def feature_hub_set_search_threshold(threshold: float):
     """
     Sets the search threshold for face matching in the FeatureHub.
@@ -696,6 +692,7 @@ def feature_hub_set_search_threshold(threshold: float):
         threshold (float): The similarity threshold for determining a match.
     """
     HFFeatureHubFaceSearchThresholdSetting(threshold)
+
 
 def feature_hub_face_insert(face_identity: FaceIdentity) -> bool:
     """
@@ -716,6 +713,7 @@ def feature_hub_face_insert(face_identity: FaceIdentity) -> bool:
         return False
     return True
 
+
 @dataclass
 class SearchResult:
     """
@@ -727,6 +725,7 @@ class SearchResult:
     """
     confidence: float
     similar_identity: FaceIdentity
+
 
 def feature_hub_face_search(data: np.ndarray) -> SearchResult:
     """
@@ -755,6 +754,7 @@ def feature_hub_face_search(data: np.ndarray) -> SearchResult:
         none = FaceIdentity(np.zeros(0), most_similar.customId, "None")
         return SearchResult(confidence=confidence.value, similar_identity=none)
 
+
 def feature_hub_face_search_top_k(data: np.ndarray, top_k: int) -> List[Tuple]:
     """
     Searches for the top 'k' most similar face identities in the feature hub based on provided facial features.
@@ -780,6 +780,7 @@ def feature_hub_face_search_top_k(data: np.ndarray, top_k: int) -> List[Tuple]:
             outputs.append((confidence, customId))
     return outputs
 
+
 def feature_hub_face_update(face_identity: FaceIdentity) -> bool:
     """
     Updates an existing face identity in the feature hub.
@@ -799,6 +800,7 @@ def feature_hub_face_update(face_identity: FaceIdentity) -> bool:
         return False
     return True
 
+
 def feature_hub_face_remove(custom_id: int) -> bool:
     """
     Removes a face identity from the feature hub using its custom ID.
@@ -817,6 +819,7 @@ def feature_hub_face_remove(custom_id: int) -> bool:
         logger.error(f"Failed to remove face feature data from FeatureHub: {ret}")
         return False
     return True
+
 
 def feature_hub_get_face_identity(custom_id: int):
     """
@@ -839,6 +842,7 @@ def feature_hub_get_face_identity(custom_id: int):
 
     return FaceIdentity.from_ctypes(identify)
 
+
 def feature_hub_get_face_count() -> int:
     """
     Retrieves the total count of face identities stored in the feature hub.
@@ -856,6 +860,7 @@ def feature_hub_get_face_count() -> int:
 
     return int(count.value)
 
+
 def view_table_in_terminal():
     """
     Displays the database table of face identities in the terminal.
@@ -866,6 +871,7 @@ def view_table_in_terminal():
     ret = HFFeatureHubViewDBTable()
     if ret != 0:
         logger.error(f"Failed to view DB: {ret}")
+
 
 def version() -> str:
     """
@@ -878,6 +884,7 @@ def version() -> str:
     HFQueryInspireFaceVersion(PHFInspireFaceVersion(ver))
     return f"{ver.major}.{ver.minor}.{ver.patch}"
 
+
 def set_logging_level(level: int) -> None:
     """
     Sets the logging level of the InspireFace library.
@@ -886,6 +893,7 @@ def set_logging_level(level: int) -> None:
         level (int): The level to set the logging to.
     """
     HFSetLogLevel(level)
+
 
 def disable_logging() -> None:
     """

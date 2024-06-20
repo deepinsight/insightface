@@ -11,8 +11,23 @@
 #include "middleware/camera_stream/camera_stream.h"
 #include "quality/face_pose_quality.h"
 #include "middleware/model_archive/inspire_archive.h"
+#ifdef ISF_ENABLE_TRACKING_BY_DETECTION
+#include "tracker_optional/bytetrack/BYTETracker.h"
+#endif
 
 namespace inspire {
+
+
+/**
+ * @enum DetectMode
+ * @brief Enumeration for different detection modes.
+ */
+enum DetectMode {
+    DETECT_MODE_ALWAYS_DETECT = 0,      ///< Detection mode: Always detect
+    DETECT_MODE_LIGHT_TRACK,            ///< Detection mode: Light face track
+    DETECT_MODE_TRACK_BY_DETECT,        ///< Detection mode: Tracking by detection
+
+};
 
 /**
  * @class FaceTrack
@@ -29,8 +44,9 @@ public:
      * @param max_detected_faces Maximum number of faces to be detected.
      * @param detection_interval Interval between detections to track faces.
      * @param track_preview_size Size of the preview for tracking.
+     * @param dynamic_detection_input_level Change the detector input size.
      */
-    explicit FaceTrack(int max_detected_faces = 1, int detection_interval = 20, int track_preview_size = 192);
+    explicit FaceTrack(DetectMode mode, int max_detected_faces = 1, int detection_interval = 20, int track_preview_size = 192, int dynamic_detection_input_level = -1, int TbD_mode_fps=30);
 
     /**
      * @brief Configures the face tracking with models.
@@ -44,7 +60,7 @@ public:
      * @param image Camera stream to process.
      * @param is_detect Flag to enable/disable face detection.
      */
-    void UpdateStream(CameraStream &image, bool is_detect);
+    void UpdateStream(CameraStream &image);
 
     /**
      * @brief Sets the preview size for tracking.
@@ -122,7 +138,6 @@ private:
      */
     int InitFacePoseModel(InspireModel& model);
 
-
 public:
 
     /**
@@ -136,19 +151,25 @@ public:
      * */
     void SetDetectThreshold(float value);
 
+    /**
+     * @brief Fix detect threshold
+     * */
+    void SetMinimumFacePxSize(float value);
+
 public:
 
     std::vector<FaceObject> trackingFace;                   ///< Vector of FaceObjects currently being tracked.
 
 private:
+    const int max_detected_faces_;                          ///< Maximum number of faces to detect.
     std::vector<FaceObject> candidate_faces_;               ///< Vector of candidate FaceObjects for tracking.
     int detection_index_;                                   ///< Current detection index.
     int detection_interval_;                                ///< Interval between detections.
     int tracking_idx_;                                      ///< Current tracking index.
     double det_use_time_;                                   ///< Time used for detection.
     double track_total_use_time_;                           ///< Total time used for tracking.
-    const int max_detected_faces_;                          ///< Maximum number of faces to detect.
     int track_preview_size_;                                ///< Size of the tracking preview.
+    int filter_minimum_face_px_size = 24;                   ///< Minimum face pixel allowed to be retained (take the edge with the smallest Rect).
 
 private:
 
@@ -156,7 +177,14 @@ private:
     std::shared_ptr<FaceLandmark> m_landmark_predictor_;   ///< Shared pointer to the landmark predictor.
     std::shared_ptr<RNet> m_refine_net_;                   ///< Shared pointer to the RNet model.
     std::shared_ptr<FacePoseQuality> m_face_quality_;      ///< Shared pointer to the face pose quality assessor.
+#ifdef ISF_ENABLE_TRACKING_BY_DETECTION
+    std::shared_ptr<BYTETracker> m_TbD_tracker_;           ///< Shared pointer to the Bytetrack.
+#endif
+    int m_dynamic_detection_input_level_ = -1;             ///< Detector size class for dynamic input.
 
+    DetectMode m_mode_;                                    ///< Detect mode
+
+    
 };
 
 }   // namespace hyper

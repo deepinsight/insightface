@@ -19,7 +19,7 @@ TEST_CASE("test_FaceRecognition", "[face_rec]") {
         FaceContext ctx;
         CustomPipelineParameter param;
         param.enable_recognition = true;
-        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_IMAGE, 1, param);
+        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_ALWAYS_DETECT, 1, param);
         REQUIRE(ret == HSUCCEED);
     }
 
@@ -27,7 +27,7 @@ TEST_CASE("test_FaceRecognition", "[face_rec]") {
         FaceContext ctx;
         CustomPipelineParameter param;
         param.enable_recognition = false;       // Disable the face recognition function
-        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_IMAGE, 1, param);
+        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_ALWAYS_DETECT, 1, param);
         REQUIRE(ret == HSUCCEED);
 
         auto image = cv::imread(GET_DATA("images/cxk.jpg"));
@@ -49,7 +49,7 @@ TEST_CASE("test_FaceRecognition", "[face_rec]") {
         FaceContext ctx;
         CustomPipelineParameter param;
         param.enable_recognition = true;
-        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_IMAGE, 1, param);
+        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_ALWAYS_DETECT, 1, param);
         REQUIRE(ret == HSUCCEED);
 
         std::vector<std::string> list = {

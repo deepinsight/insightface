@@ -29,17 +29,22 @@ int main(int argc, char* argv[]) {
     // Enable the functions in the pipeline: mask detection, live detection, and face quality detection
     HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
     // Non-video or frame sequence mode uses IMAGE-MODE, which is always face detection without tracking
-    HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+    HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
     // Maximum number of faces detected
     HInt32 maxDetectNum = 5;
+    // Face detection image input level
+    HInt32 detectPixelLevel = 640;
     // Handle of the current face SDK algorithm context
     HFSession session = {0};
-    ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, &session);
+    ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, detectPixelLevel, -1, &session);
     if (ret != HSUCCEED) {
         std::cout << "Create FaceContext error: " << ret << std::endl;
         return ret;
     }
 
+    HFSessionSetTrackPreviewSize(session, 640);
+    HFSessionSetFilterMinimumFacePixelSize(session, 32);
+    
     // Load a image
     cv::Mat image = cv::imread(sourcePath);
     if (image.empty()) {
@@ -81,7 +86,7 @@ int main(int argc, char* argv[]) {
         // Use OpenCV's Rect to receive face bounding boxes
         auto rect = cv::Rect(multipleFaceData.rects[index].x, multipleFaceData.rects[index].y,
                                  multipleFaceData.rects[index].width, multipleFaceData.rects[index].height);
-        cv::rectangle(draw, rect, cv::Scalar(0, 100, 255), 1);
+        cv::rectangle(draw, rect, cv::Scalar(0, 100, 255), 4);
 
         // Print FaceID, In IMAGE-MODE it is changing, in VIDEO-MODE it is fixed, but it may be lost
         std::cout << "FaceID: " << multipleFaceData.trackIds[index] << std::endl;

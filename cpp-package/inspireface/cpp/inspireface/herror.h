@@ -20,6 +20,7 @@
 #define HERR_INVALID_BUFFER_SIZE          	(HERR_BASIC_BASE+33)			// Invalid copy token
 #define HERR_INVALID_IMAGE_STREAM_PARAM      (HERR_BASIC_BASE+34)			// Invalid image param
 #define HERR_INVALID_SERIALIZATION_FAILED    (HERR_BASIC_BASE+35)			// Invalid face serialization failed
+#define HERR_INVALID_DETECTION_INPUT        (HERR_BASIC_BASE+36)			// Failed to modify detector input size
 
 #define HERR_SESS_BASE				        0X500					         // Session error types
 #define HERR_SESS_FUNCTION_UNUSABLE           (HERR_SESS_BASE+2)               // Function not usable

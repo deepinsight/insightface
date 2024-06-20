@@ -17,7 +17,7 @@ TEST_CASE("test_FaceDetectTrack", "[face_track]") {
         FaceContext ctx;
         CustomPipelineParameter param;
         param.enable_face_quality = true;
-        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_VIDEO, 1, param);
+        auto ret = ctx.Configuration(DetectMode::DETECT_MODE_LIGHT_TRACK, 1, param);
         REQUIRE(ret == HSUCCEED);
 
         // Prepare a picture of a face

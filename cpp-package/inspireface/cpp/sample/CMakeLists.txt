@@ -38,6 +38,13 @@ set_target_properties(MTFaceTrackSample PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/"
 )
 
+# Examples of face detection and tracking
+add_executable(FaceTrackVideoSample cpp/sample_face_track_video.cpp)
+target_link_libraries(FaceTrackVideoSample InspireFace ${ext})
+set_target_properties(FaceTrackVideoSample PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/"
+)
+
 # Examples of face recognition
 add_executable(FaceRecognitionSample cpp/sample_face_recognition.cpp)
 target_link_libraries(FaceRecognitionSample InspireFace ${ext})
@@ -56,6 +63,14 @@ set_target_properties(FaceSearchSample PROPERTIES
 add_executable(FaceComparisonSample cpp/sample_face_comparison.cpp)
 target_link_libraries(FaceComparisonSample InspireFace ${ext})
 set_target_properties(FaceComparisonSample PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/"
+)
+
+
+# Examples of face recognition
+add_executable(FaceDetect cpp/face_detect.cpp)
+target_link_libraries(FaceDetect InspireFace ${ext})
+set_target_properties(FaceDetect PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/"
 )
 

@@ -16,7 +16,7 @@ class CameraStreamCase(unittest.TestCase):
 
     def test_stream_rotation(self) -> None:
         # Prepare material
-        engine = ifac.InspireFaceSession(HF_ENABLE_NONE, HF_DETECT_MODE_IMAGE)
+        engine = ifac.InspireFaceSession(HF_ENABLE_NONE, HF_DETECT_MODE_ALWAYS_DETECT)
         # Prepare rotation images
         rotation_images_filenames = ["rotate/rot_0.jpg", "rotate/rot_90.jpg", "rotate/rot_180.jpg","rotate/rot_270.jpg"]
         rotation_images = [cv2.imread(get_test_data(path)) for path in rotation_images_filenames]

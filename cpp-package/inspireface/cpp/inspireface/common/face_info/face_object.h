@@ -308,6 +308,10 @@ public:
 
     std::vector<Point2f> keyPointFive;
 
+    void setId(int id) {
+        face_id_ = id;
+    }
+
 private:
     TRACK_STATE tracking_state_;
 //  std::shared_ptr<FaceAction> face_action_;

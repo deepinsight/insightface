@@ -7,4 +7,9 @@ test_res/*
 resource/*
 pack/*
 *.zip
-3rdparty
+3rdparty/
+.macos_cache/
+*.framework
+.cache/*
+.vscode/*
+build_local/*

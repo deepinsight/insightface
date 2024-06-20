@@ -6,9 +6,12 @@ We have named this highly realistic portrait creation tool as ``Picsi.AI``. You 
 
 1. Discord bot invitation link: https://discord.com/api/oauth2/authorize?client_id=1090660574196674713&permissions=274877945856&scope=bot
 2. Discord discussion server(to get help): https://discord.gg/Ym3X8U59ZN
-3. Patreon subscription: https://www.patreon.com/picsi
+3. Product homepage: https://picsi.ai
+4. Patreon subscription: https://www.patreon.com/picsi
 
 ## ChangeLog
+
+**`2024-06-07`**: Please visit https://www.patreon.com/picsi to view all recent feature updates.
 
 **`2023-09-09`**: **Introducing HiFidelity Mode (BETA) and Sharpen Options**
 1) Use the ``-f`` command to enable HiFidelity mode: ``/setid example -f`` or ``/swapid example -f``

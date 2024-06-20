@@ -8,6 +8,12 @@ If you require further information on tracking development branches, CI/CD proce
 
 Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=InspireFace) for commercial support, including obtaining and integrating higher accuracy models, as well as custom development.
 
+##  Top News
+
+**`2024-06-18`** Added face detection feature with tracking-by-detection mode.
+
+**`2024-06-01`** Adapted for accelerated inference on CUDA-enabled devices.
+
 ## 1. Preparation
 ### 1.1. Clone 3rdparty
 
@@ -105,12 +111,12 @@ We have completed the adaptation and testing of the software across various oper
 | 2       |                      | ARMv8                 | -                          | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) | ![test](https://img.shields.io/badge/OFFLINE-PASSING-blue?style=for-the-badge) |
 | 3       |                      | x86/x86_64            | -                          | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) | [![test](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/test_ubuntu_x86_Pikachu.yaml?style=for-the-badge&label=Test&color=blue)](https://github.com/HyperInspire/InspireFace/actions/workflows/test_ubuntu_x86_Pikachu.yaml) |
 | 4       |                      | ARMv7                 | RV1109RV1126               | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) | ![test](https://img.shields.io/badge/OFFLINE-PASSING-blue?style=for-the-badge) |
-| 5       |                      | x86/x86_64            | CUDA                       | ![build](https://img.shields.io/badge/OFFLINE-PASSING-green?style=for-the-badge) |  |
+| 5       |                      | x86/x86_64            | CUDA                       | ![build](https://img.shields.io/badge/OFFLINE-PASSING-green?style=for-the-badge) | ![test](https://img.shields.io/badge/OFFLINE-PASSING-blue?style=for-the-badge) |
 | 6       | **macOS**            | Intel x86             | -                          | ![build](https://img.shields.io/badge/OFFLINE-PASSING-green?style=for-the-badge) | ![test](https://img.shields.io/badge/OFFLINE-PASSING-blue?style=for-the-badge) |
 | 7       |                      | Apple Silicon         | -                          | ![build](https://img.shields.io/badge/OFFLINE-PASSING-green?style=for-the-badge) | ![test](https://img.shields.io/badge/OFFLINE-PASSING-blue?style=for-the-badge) |
-| 8       | **iOS**              | ARM                   | -                          |  |  |
-| 9       | **Android**          | ARMv7                 | -                          |  |  |
-| 10      |                      | ARMv8                 | -                          |  |  |
+| 8       | **iOS**              | ARM                   | -                          | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |  |
+| 9       | **Android**          | ARMv7                 | -                          | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |  |
+| 10      |                      | ARMv8                 | -                          | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |  |
 
 - Complete compilation scripts and successful compilation.
 - Pass unit tests on physical devices.
@@ -128,6 +134,9 @@ build-cross-armv7-armhf
 
 # Build armv7 with support RV1109RV1126 device NPU cross-complie
 docker-compose up build-cross-rv1109rv1126-armhf
+
+# Build Android with support arm64-v8a and armeabi-v7a
+docker-compose up build-cross-android
 
 # Build all
 docker-compose up
@@ -154,7 +163,7 @@ HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
 HInt32 maxDetectNum = 5;
 // Handle of the current face SDK algorithm context
 HFSession session = {0};
-ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, &session);
+ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, -1, -1, &session);
 if (ret != HSUCCEED) {
     std::cout << "Create FaceContext error: " << ret << std::endl;
     return ret;
@@ -295,6 +304,22 @@ After compilation, you can find the executable program "**Test**" in `YOUR_BUILD
 During the process of building the test program using CMake, it will involve selecting CMake parameters. For specific details, you can refer to the parameter configuration table.
 
 **Note**: If you want to view the benchmark test report, you can click on the [link](doc/Benchmark-Remark(Updating).md).
+
+### Quick Test
+
+If you need to perform a quick test, you can use the script we provide. This script will automatically download the test file `test_res` and build the test program to run the test. 
+
+*Note: If you need to enable more comprehensive tests, you can adjust the options in the script as needed.*
+
+```bash
+# If you are using Ubuntu, you can execute this.
+bash ci/quick_test_linux_x86_usual.sh
+
+# If you are using another system (including Ubuntu), you can execute this.
+bash ci/quick_test_local.sh
+```
+
+Every time code is committed, tests are run on GitHub Actions.
 
 ## 5. Function Support
 The following functionalities and technologies are currently supported.
