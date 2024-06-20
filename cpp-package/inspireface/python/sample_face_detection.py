@@ -18,7 +18,7 @@ def case_face_detection_image(resource_path, image_path):
 
     # Optional features, loaded during session creation based on the modules specified.
     opt = HF_ENABLE_FACE_RECOGNITION | HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS
-    session = ifac.InspireFaceSession(opt, HF_DETECT_MODE_IMAGE)
+    session = ifac.InspireFaceSession(opt, HF_DETECT_MODE_ALWAYS_DETECT)
 
     # Load the image using OpenCV.
     image = cv2.imread(image_path)

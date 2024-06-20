@@ -5,6 +5,8 @@
 #ifndef HYPERFACEREPO_INFERENCE_HELPER_RKNN_ADAPTER_H
 #define HYPERFACEREPO_INFERENCE_HELPER_RKNN_ADAPTER_H
 
+#ifdef INFERENCE_HELPER_ENABLE_RKNN
+
 /* for general */
 #include <cstdint>
 #include <cmath>
@@ -31,11 +33,14 @@ public:
     int32_t ParameterInitialization(std::vector<InputTensorInfo>& input_tensor_info_list, std::vector<OutputTensorInfo>& output_tensor_info_list) override;
     std::vector<std::string> GetInputNames() override;
 
+    int32_t ResizeInput(const std::vector<InputTensorInfo>& input_tensor_info_list) override;
+
 private:
     std::shared_ptr<RKNNAdapter> net_;
     int32_t num_threads_;
 
 };
 
+#endif  // INFERENCE_HELPER_ENABLE_RKNN
 
 #endif //HYPERFACEREPO_INFERENCE_HELPER_RKNN_ADAPTER_H

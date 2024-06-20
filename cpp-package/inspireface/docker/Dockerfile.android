@@ -1,0 +1,56 @@
+# Use Ubuntu 18.04 as the base image
+FROM ubuntu:18.04
+
+# Update the package list and install basic development tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        software-properties-common \
+        wget \
+        curl \
+        git \
+        unzip
+
+# Download and install CMake
+ARG CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.17.0-rc3/cmake-3.17.0-rc3-Linux-x86_64.sh"
+RUN mkdir /opt/cmake && \
+    wget -qO /opt/cmake/install-cmake.sh ${CMAKE_URL} && \
+    chmod +x /opt/cmake/install-cmake.sh && \
+    /opt/cmake/install-cmake.sh --skip-license --prefix=/usr/local && \
+    rm /opt/cmake/install-cmake.sh
+
+# Set the URL for the Android NDK and OpenCV Android SDK
+ARG ANDROID_NDK_URL="https://dl.google.com/android/repository/android-ndk-r18b-linux-x86_64.zip"
+ARG OPENCV_URL="https://github.com/opencv/opencv/releases/download/4.5.1/opencv-4.5.1-android-sdk.zip"
+
+# Set the installation path for the Android NDK and OpenCV Android SDK
+ARG ANDROID_NDK_PATH="/opt/android-ndk-r18b"
+ARG OPENCV_PATH="/opt/opencv-android-sdk"
+
+# Download and extract the Android NDK
+RUN mkdir -p ${ANDROID_NDK_PATH} && \
+    wget -qO /tmp/android-ndk.zip ${ANDROID_NDK_URL} && \
+    unzip /tmp/android-ndk.zip -d /opt && \
+    rm /tmp/android-ndk.zip
+
+# Set environment variable to point to the NDK directory
+ENV ANDROID_NDK=${ANDROID_NDK_PATH}
+
+# Download and extract the OpenCV Android SDK
+RUN mkdir -p ${OPENCV_PATH} && \
+    wget -qO /tmp/opencv-android-sdk.zip ${OPENCV_URL} && \
+    unzip /tmp/opencv-android-sdk.zip -d ${OPENCV_PATH} && \
+    rm /tmp/opencv-android-sdk.zip
+
+# Set environment variable to point to the OpenCV SDK directory
+ENV OPENCV_DIR=${OPENCV_PATH}/OpenCV-android-sdk/sdk/native/jni
+
+# Clean temporary files to reduce image size
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
+WORKDIR /workspace
+
+# Default to running Bash
+CMD ["/bin/bash"]

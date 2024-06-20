@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
     // Create a session for face recognition
     HOption option = HF_ENABLE_FACE_RECOGNITION;
     HFSession session;
-    ret = HFCreateInspireFaceSessionOptional(option, HF_DETECT_MODE_IMAGE, 1, &session);
+    ret = HFCreateInspireFaceSessionOptional(option, HF_DETECT_MODE_ALWAYS_DETECT, 1, -1, -1, &session);
     if (ret != HSUCCEED) {
         std::cout << "Create session error: " << ret << std::endl;
         return ret;

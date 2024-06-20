@@ -273,6 +273,8 @@ public:
         return kRetOk;
     };
 
+    virtual int32_t ResizeInput(const std::vector<InputTensorInfo>& input_tensor_info_list) = 0;
+
     virtual std::vector<std::string> GetInputNames() = 0;
 
 protected:

@@ -16,19 +16,20 @@
 
 #ifdef ANDROID
 // Android platform log macros
-const std::string TAG = "InspireFace";
-#define INSPIRE_LOGD(...) inspire::LogManager::getInstance()->logAndroid(inspire::LOG_DEBUG, TAG, __VA_ARGS__)
-#define INSPIRE_LOGI(...) inspire::LogManager::getInstance()->logAndroid(inspire::LOG_INFO, TAG, __VA_ARGS__)
-#define INSPIRE_LOGW(...) inspire::LogManager::getInstance()->logAndroid(inspire::LOG_WARN, TAG, __VA_ARGS__)
-#define INSPIRE_LOGE(...) inspire::LogManager::getInstance()->logAndroid(inspire::LOG_ERROR, TAG, __VA_ARGS__)
-#define INSPIRE_LOGF(...) inspire::LogManager::getInstance()->logAndroid(inspire::LOG_FATAL, TAG, __VA_ARGS__)
+#include <android/log.h>
+#define INSPIRE_ANDROID_LOG_TAG "InspireFace"
+#define INSPIRE_LOGD(...) inspire::LogManager::getInstance()->logAndroid(inspire::ISF_LOG_DEBUG, INSPIRE_ANDROID_LOG_TAG, __VA_ARGS__)
+#define INSPIRE_LOGI(...) inspire::LogManager::getInstance()->logAndroid(inspire::ISF_LOG_INFO, INSPIRE_ANDROID_LOG_TAG, __VA_ARGS__)
+#define INSPIRE_LOGW(...) inspire::LogManager::getInstance()->logAndroid(inspire::ISF_LOG_WARN, INSPIRE_ANDROID_LOG_TAG, __VA_ARGS__)
+#define INSPIRE_LOGE(...) inspire::LogManager::getInstance()->logAndroid(inspire::ISF_LOG_ERROR, INSPIRE_ANDROID_LOG_TAG, __VA_ARGS__)
+#define INSPIRE_LOGF(...) inspire::LogManager::getInstance()->logAndroid(inspire::ISF_LOG_FATAL, INSPIRE_ANDROID_LOG_TAG, __VA_ARGS__)
 #else
 // Standard platform log macros
-#define INSPIRE_LOGD(...) inspire::LogManager::getInstance()->logStandard(inspire::LOG_DEBUG, __FILENAME__, __FUNCTION__, __LINE__, __VA_ARGS__)
-#define INSPIRE_LOGI(...) inspire::LogManager::getInstance()->logStandard(inspire::LOG_INFO, "", "", -1, __VA_ARGS__)
-#define INSPIRE_LOGW(...) inspire::LogManager::getInstance()->logStandard(inspire::LOG_WARN, __FILENAME__, "", __LINE__, __VA_ARGS__)
-#define INSPIRE_LOGE(...) inspire::LogManager::getInstance()->logStandard(inspire::LOG_ERROR, __FILENAME__, "", __LINE__, __VA_ARGS__)
-#define INSPIRE_LOGF(...) inspire::LogManager::getInstance()->logStandard(inspire::LOG_FATAL, __FILENAME__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define INSPIRE_LOGD(...) inspire::LogManager::getInstance()->logStandard(inspire::ISF_LOG_DEBUG, __FILENAME__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define INSPIRE_LOGI(...) inspire::LogManager::getInstance()->logStandard(inspire::ISF_LOG_INFO, "", "", -1, __VA_ARGS__)
+#define INSPIRE_LOGW(...) inspire::LogManager::getInstance()->logStandard(inspire::ISF_LOG_WARN, __FILENAME__, "", __LINE__, __VA_ARGS__)
+#define INSPIRE_LOGE(...) inspire::LogManager::getInstance()->logStandard(inspire::ISF_LOG_ERROR, __FILENAME__, "", __LINE__, __VA_ARGS__)
+#define INSPIRE_LOGF(...) inspire::LogManager::getInstance()->logStandard(inspire::ISF_LOG_FATAL, __FILENAME__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #endif
 
 
@@ -39,12 +40,12 @@ namespace inspire {
 
 // Log levels
 enum LogLevel {
-    LOG_NONE = 0,
-    LOG_DEBUG,
-    LOG_INFO,
-    LOG_WARN,
-    LOG_ERROR,
-    LOG_FATAL
+    ISF_LOG_NONE = 0,
+    ISF_LOG_DEBUG,
+    ISF_LOG_INFO,
+    ISF_LOG_WARN,
+    ISF_LOG_ERROR,
+    ISF_LOG_FATAL
 };
 
 class INSPIRE_API LogManager {
@@ -54,7 +55,7 @@ private:
     static std::mutex mutex;
 
     // Private constructor
-    LogManager() : currentLevel(LOG_DEBUG) {}  // Default log level is DEBUG
+    LogManager() : currentLevel(ISF_LOG_DEBUG) {}  // Default log level is DEBUG
 
 public:
     // Disable copy construction and assignment
@@ -83,15 +84,15 @@ public:
 #ifdef ANDROID
     // Method for logging on the Android platform
     void logAndroid(LogLevel level, const char* tag, const char* format, ...) const {
-        if (level < currentLevel) return;
+        if (currentLevel == ISF_LOG_NONE || level < currentLevel) return;
 
         int androidLevel;
         switch (level) {
-            case LOG_DEBUG: androidLevel = ANDROID_LOG_DEBUG; break;
-            case LOG_INFO: androidLevel = ANDROID_LOG_INFO; break;
-            case LOG_WARN: androidLevel = ANDROID_LOG_WARN; break;
-            case LOG_ERROR: androidLevel = ANDROID_LOG_ERROR; break;
-            case LOG_FATAL: androidLevel = ANDROID_LOG_FATAL; break;
+            case ISF_LOG_DEBUG: androidLevel = ANDROID_LOG_DEBUG; break;
+            case ISF_LOG_INFO: androidLevel = ANDROID_LOG_INFO; break;
+            case ISF_LOG_WARN: androidLevel = ANDROID_LOG_WARN; break;
+            case ISF_LOG_ERROR: androidLevel = ANDROID_LOG_ERROR; break;
+            case ISF_LOG_FATAL: androidLevel = ANDROID_LOG_FATAL; break;
             default: androidLevel = ANDROID_LOG_DEFAULT;
         }
 
@@ -104,7 +105,7 @@ public:
     // Method for standard platform logging
     void logStandard(LogLevel level, const char* filename, const char* function, int line, const char* format, ...) const {
         // Check whether the current level is LOG NONE or the log level is not enough to log
-        if (currentLevel == LOG_NONE || level < currentLevel) return;
+        if (currentLevel == ISF_LOG_NONE || level < currentLevel) return;
 
         // Build log prefix dynamically based on available data
         bool hasPrintedPrefix = false;
@@ -127,9 +128,9 @@ public:
         }
 
         // Set text color for different log levels
-        if (level == LOG_ERROR || level == LOG_FATAL) {
+        if (level == ISF_LOG_ERROR || level == ISF_LOG_FATAL) {
             printf("\033[1;31m");  // Red color for errors and fatal issues
-        } else if (level == LOG_WARN) {
+        } else if (level == ISF_LOG_WARN) {
             printf("\033[1;33m");  // Yellow color for warnings
         }
 
@@ -140,7 +141,7 @@ public:
         va_end(args);
 
         // Reset text color if needed
-        if (level == LOG_ERROR || level == LOG_WARN || level == LOG_FATAL) {
+        if (level == ISF_LOG_ERROR || level == ISF_LOG_WARN || level == ISF_LOG_FATAL) {
             printf("\033[0m");  // Reset color
         }
 

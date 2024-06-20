@@ -20,7 +20,7 @@ def case_face_recognition(resource_path, test_data_folder):
 
     # Enable face recognition features.
     opt = HF_ENABLE_FACE_RECOGNITION
-    session = ifac.InspireFaceSession(opt, HF_DETECT_MODE_IMAGE)
+    session = ifac.InspireFaceSession(opt, HF_DETECT_MODE_ALWAYS_DETECT)
 
     # Configure the feature management system.
     feature_hub_config = ifac.FeatureHubConfiguration(

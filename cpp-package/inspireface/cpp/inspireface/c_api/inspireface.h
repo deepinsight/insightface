@@ -136,8 +136,10 @@ typedef struct HFSessionCustomParameter {
  * @brief Enumeration for face detection modes.
  */
 typedef enum HFDetectMode {
-    HF_DETECT_MODE_IMAGE,   ///< Image detection mode, always detect.
-    HF_DETECT_MODE_VIDEO,   ///< Video detection mode, face tracking.
+    HF_DETECT_MODE_ALWAYS_DETECT,            ///< Image detection mode, always detect, applicable to images.
+    HF_DETECT_MODE_LIGHT_TRACK,              ///< Video detection mode, face tracking, applicable to video streaming, front camera.
+    HF_DETECT_MODE_TRACK_BY_DETECTION,       ///< Video detection mode, face tracking, applicable to high resolution, monitoring, capturing 
+                                             //   (You need a specific option turned on at compile time to use it).
 } HFDetectMode;
 
 /**
@@ -146,6 +148,10 @@ typedef enum HFDetectMode {
  * @param parameter Custom parameters for session.
  * @param detectMode Detection mode to be used.
  * @param maxDetectFaceNum Maximum number of faces to detect.
+ * @param detectPixelLevel Modify the input resolution level of the detector, the larger the better, 
+ *          the need to input a multiple of 160, such as 160, 320, 640, the default value -1 is 160.
+ * @param trackByDetectModeFPS If you are using the MODE_TRACK_BY_DETECTION tracking mode, 
+ *          this value is used to set the fps frame rate of your current incoming video stream, which defaults to -1 at 30fps.
  * @param handle Pointer to the context handle that will be returned.
  * @return HResult indicating the success or failure of the operation.
  */
@@ -153,6 +159,8 @@ HYPER_CAPI_EXPORT extern HResult HFCreateInspireFaceSession(
         HFSessionCustomParameter parameter,
         HFDetectMode detectMode,
         HInt32 maxDetectFaceNum,
+        HInt32 detectPixelLevel,
+        HInt32 trackByDetectModeFPS,
         HFSession *handle
 );
 
@@ -162,6 +170,10 @@ HYPER_CAPI_EXPORT extern HResult HFCreateInspireFaceSession(
  * @param customOption Custom option for additional configuration.
  * @param detectMode Detection mode to be used.
  * @param maxDetectFaceNum Maximum number of faces to detect.
+ * @param detectPixelLevel Modify the input resolution level of the detector, the larger the better, 
+ *          the need to input a multiple of 160, such as 160, 320, 640, the default value -1 is 160.
+ * @param trackByDetectModeFPS If you are using the MODE_TRACK_BY_DETECTION tracking mode, 
+ *          this value is used to set the fps frame rate of your current incoming video stream, which defaults to -1 at 30fps.
  * @param handle Pointer to the context handle that will be returned.
  * @return HResult indicating the success or failure of the operation.
  */
@@ -169,6 +181,8 @@ HYPER_CAPI_EXPORT extern HResult HFCreateInspireFaceSessionOptional(
         HOption customOption,
         HFDetectMode detectMode,
         HInt32 maxDetectFaceNum,
+        HInt32 detectPixelLevel,
+        HInt32 trackByDetectModeFPS,
         HFSession *handle
 );
 
@@ -211,8 +225,8 @@ typedef struct HFMultipleFaceData {
     HInt32 detectedNum;                             ///< Number of faces detected.
     HFaceRect *rects;                               ///< Array of bounding rectangles for each face.
     HInt32 *trackIds;                               ///< Array of track IDs for each face.
-    HFFaceEulerAngle angles;                       ///< Euler angles for each face.
-    PHFFaceBasicToken tokens;                   ///< Tokens associated with each face.
+    HFFaceEulerAngle angles;                        ///< Euler angles for each face.
+    PHFFaceBasicToken tokens;                       ///< Tokens associated with each face.
 } HFMultipleFaceData, *PHFMultipleFaceData;
 
 /**
@@ -226,13 +240,13 @@ typedef struct HFMultipleFaceData {
 HYPER_CAPI_EXPORT extern HResult HFSessionSetTrackPreviewSize(HFSession session, HInt32 previewSize);
 
 /**
- * @brief Set the face track mode in the session.
+ * @brief Set the minimum number of face pixels that the face detector can capture, and people below this number will be filtered.
  *
  * @param session Handle to the session.
- * @param detectMode The mode of the detection mode for tracking.
+ * @param minSize The minimum pixel value, default value is 24.
  * @return HResult indicating the success or failure of the operation.
  */
-HYPER_CAPI_EXPORT extern HResult HFSessionSetFaceTrackMode(HFSession session, HFDetectMode detectMode);
+HYPER_CAPI_EXPORT extern HResult HFSessionSetFilterMinimumFacePixelSize(HFSession session, HInt32 minSize);
 
 /**
  * @brief Set the face detect threshold in the session.

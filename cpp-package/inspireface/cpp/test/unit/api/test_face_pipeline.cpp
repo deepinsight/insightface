@@ -15,14 +15,14 @@ TEST_CASE("test_FacePipeline", "[face_pipeline]") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_liveness = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
 
         // Get a face picture
         HFImageStream img1Handle;
-        auto img1 = cv::imread(GET_DATA("images/image_T1.jpeg"));
+        auto img1 = cv::imread(GET_DATA("data/bulk/image_T1.jpeg"));
         ret = CVImageToImageStream(img1, img1Handle);
         REQUIRE(ret == HSUCCEED);
 
@@ -47,7 +47,7 @@ TEST_CASE("test_FacePipeline", "[face_pipeline]") {
 
         // fake face
         HFImageStream img2Handle;
-        auto img2 = cv::imread(GET_DATA("images/rgb_fake.jpg"));
+        auto img2 = cv::imread(GET_DATA("data/bulk/rgb_fake.jpg"));
         ret = CVImageToImageStream(img2, img2Handle);
         REQUIRE(ret == HSUCCEED);
         ret = HFExecuteFaceTrack(session, img2Handle, &multipleFaceData);
@@ -75,14 +75,14 @@ TEST_CASE("test_FacePipeline", "[face_pipeline]") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_mask_detect = 1;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
 
         // Get a face picture
         HFImageStream img1Handle;
-        auto img1 = cv::imread(GET_DATA("images/mask2.jpg"));
+        auto img1 = cv::imread(GET_DATA("data/bulk/mask2.jpg"));
         ret = CVImageToImageStream(img1, img1Handle);
         REQUIRE(ret == HSUCCEED);
 
@@ -107,7 +107,7 @@ TEST_CASE("test_FacePipeline", "[face_pipeline]") {
 
         // no mask face
         HFImageStream img2Handle;
-        auto img2 = cv::imread(GET_DATA("images/face_sample.png"));
+        auto img2 = cv::imread(GET_DATA("data/bulk/face_sample.png"));
         ret = CVImageToImageStream(img2, img2Handle);
         REQUIRE(ret == HSUCCEED);
         ret = HFExecuteFaceTrack(session, img2Handle, &multipleFaceData);
@@ -132,15 +132,15 @@ TEST_CASE("test_FacePipeline", "[face_pipeline]") {
 
     SECTION("face quality") {
         HResult ret;
-        HFDetectMode detMode = HF_DETECT_MODE_IMAGE;
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HInt32 option = HF_ENABLE_QUALITY;
         HFSession session;
-        ret = HFCreateInspireFaceSessionOptional(option, detMode, 3, &session);
+        ret = HFCreateInspireFaceSessionOptional(option, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
 
         // Get a face picture
         HFImageStream superiorHandle;
-        auto superior = cv::imread(GET_DATA("images/yifei.jpg"));
+        auto superior = cv::imread(GET_DATA("data/bulk/yifei.jpg"));
         ret = CVImageToImageStream(superior, superiorHandle);
         REQUIRE(ret == HSUCCEED);
 
@@ -160,7 +160,7 @@ TEST_CASE("test_FacePipeline", "[face_pipeline]") {
 
         // blur image
         HFImageStream blurHandle;
-        auto blur = cv::imread(GET_DATA("images/blur.jpg"));
+        auto blur = cv::imread(GET_DATA("data/bulk/blur.jpg"));
         ret = CVImageToImageStream(blur, blurHandle);
         REQUIRE(ret == HSUCCEED);
 
