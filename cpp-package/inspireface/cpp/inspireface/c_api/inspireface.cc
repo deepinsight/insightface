@@ -66,6 +66,27 @@ void HFDeBugImageStreamImShow(HFImageStream streamHandle) {
 #endif
 }
 
+HResult HFDeBugImageStreamDecodeSave(HFImageStream streamHandle, HPath savePath) {
+    if (streamHandle == nullptr) {
+        INSPIRE_LOGE("Handle error");
+        return HERR_INVALID_IMAGE_STREAM_HANDLE;
+    }
+    HF_CameraStream *stream = (HF_CameraStream* ) streamHandle;
+    if (stream == nullptr) {
+        INSPIRE_LOGE("Image error");
+        return HERR_INVALID_IMAGE_STREAM_HANDLE;
+    }
+    auto image = stream->impl.GetScaledImage(1.0f, true);
+    auto ret = cv::imwrite(savePath, image);
+    if (ret) {
+        INSPIRE_LOGE("Image saved successfully to %s", savePath);
+        return HSUCCEED;
+    } else {
+        INSPIRE_LOGE("Failed to save image to %s", savePath);
+        return -1;
+    }
+}
+
 
 HResult HFReleaseInspireFaceSession(HFSession handle) {
     if (handle == nullptr) {

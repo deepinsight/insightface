@@ -676,6 +676,19 @@ HYPER_CAPI_EXPORT extern HResult HFLogDisable();
  */
 HYPER_CAPI_EXPORT extern void HFDeBugImageStreamImShow(HFImageStream streamHandle);
 
+/**
+ * @brief Decode the image from ImageStream and store it to a disk path.
+ *
+ * It is used to verify whether there is a problem with image codec, and can quickly perform bug analysis.
+ *
+ * @param streamHandle Handle to the data buffer representing the camera stream component.
+ * @param savePath The path to which the image is written.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFDeBugImageStreamDecodeSave(HFImageStream streamHandle, HPath savePath);
+
+
+
 
 #ifdef __cplusplus
 }

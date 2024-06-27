@@ -8,7 +8,9 @@ If you require further information on tracking development branches, CI/CD proce
 
 Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=InspireFace) for commercial support, including obtaining and integrating higher accuracy models, as well as custom development.
 
-##  Top News
+## ChangeLogs
+
+**`2024-06-27`** Verified iOS usability and fixed some bugs.
 
 **`2024-06-18`** Added face detection feature with tracking-by-detection mode.
 
@@ -71,7 +73,7 @@ The '3rdparty' directory already includes the MNN library and specifies a partic
     - Adjust and select versions currently supported for specific requirements.
 
 ## 2. Compilation
-CMake option are used to control the various details of the compilation phase. Please select according to your actual requirements. [Parameter table](doc/CMake-Option.md).
+CMake option are used to control the various details of the compilation phase. Please select according to your actual requirements. [CMake Option](doc/CMake-Option.md).
 
 ### 2.1. Local Compilation
 Make sure OpenCV is installed, you can begin the compilation process.  If you are using macOS or Linux, you can quickly compile using the shell scripts provided in the `command` folder at the project root:
@@ -114,7 +116,7 @@ We have completed the adaptation and testing of the software across various oper
 | 5       |                      | x86/x86_64            | CUDA                       | ![build](https://img.shields.io/badge/OFFLINE-PASSING-green?style=for-the-badge) | ![test](https://img.shields.io/badge/OFFLINE-PASSING-blue?style=for-the-badge) |
 | 6       | **macOS**            | Intel x86             | -                          | ![build](https://img.shields.io/badge/OFFLINE-PASSING-green?style=for-the-badge) | ![test](https://img.shields.io/badge/OFFLINE-PASSING-blue?style=for-the-badge) |
 | 7       |                      | Apple Silicon         | -                          | ![build](https://img.shields.io/badge/OFFLINE-PASSING-green?style=for-the-badge) | ![test](https://img.shields.io/badge/OFFLINE-PASSING-blue?style=for-the-badge) |
-| 8       | **iOS**              | ARM                   | -                          | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |  |
+| 8       | **iOS**              | ARM                   | -                          | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) | ![test](https://img.shields.io/badge/OFFLINE-PASSING-blue?style=for-the-badge) |
 | 9       | **Android**          | ARMv7                 | -                          | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |  |
 | 10      |                      | ARMv8                 | -                          | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |  |
 
