@@ -77,16 +77,16 @@ def extract(model_file, dataset):
 
 def read_template_media_list(path):
     ijb_meta = pd.read_csv(path, sep=' ', header=None).values
-    templates = ijb_meta[:, 1].astype(np.int)
-    medias = ijb_meta[:, 2].astype(np.int)
+    templates = ijb_meta[:, 1].astype(np.int32)
+    medias = ijb_meta[:, 2].astype(np.int32)
     return templates, medias
 
 
 def read_template_pair_list(path):
     pairs = pd.read_csv(path, sep=' ', header=None).values
-    t1 = pairs[:, 0].astype(np.int)
-    t2 = pairs[:, 1].astype(np.int)
-    label = pairs[:, 2].astype(np.int)
+    t1 = pairs[:, 0].astype(np.int32)
+    t2 = pairs[:, 1].astype(np.int32)
+    label = pairs[:, 2].astype(np.int32)
     return t1, t2, label
 
 
