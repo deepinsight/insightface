@@ -39,14 +39,14 @@ reorganize_structure() {
                     ;;
                 sample)
                     # Copy the sample directory
-                    if [ -d "$arch_dir/sample" ]; then
-                        cp -r "$arch_dir/sample/"* "$base_path/$main_dir/$arch/"
+                    if [ -d "$arch_dir/InspireFace/sample" ]; then
+                        cp -r "$arch_dir/InspireFace/sample/"* "$base_path/$main_dir/$arch/"
                     fi
                     ;;
                 test)
                     # Copy the test directory
-                    if [ -d "$arch_dir/test" ]; then
-                        cp -r "$arch_dir/test/"* "$base_path/$main_dir/$arch/"
+                    if [ -d "$arch_dir/InspireFace/test" ]; then
+                        cp -r "$arch_dir/InspireFace/test/"* "$base_path/$main_dir/$arch/"
                     fi
                     ;;
             esac

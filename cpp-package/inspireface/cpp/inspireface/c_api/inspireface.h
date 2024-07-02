@@ -171,7 +171,7 @@ HYPER_CAPI_EXPORT extern HResult HFCreateInspireFaceSession(
  * @param detectMode Detection mode to be used.
  * @param maxDetectFaceNum Maximum number of faces to detect.
  * @param detectPixelLevel Modify the input resolution level of the detector, the larger the better, 
- *          the need to input a multiple of 160, such as 160, 320, 640, the default value -1 is 160.
+ *          the need to input a multiple of 160, such as 160, 320, 640, the default value -1 is 320.
  * @param trackByDetectModeFPS If you are using the MODE_TRACK_BY_DETECTION tracking mode, 
  *          this value is used to set the fps frame rate of your current incoming video stream, which defaults to -1 at 30fps.
  * @param handle Pointer to the context handle that will be returned.

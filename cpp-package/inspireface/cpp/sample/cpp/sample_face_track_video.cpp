@@ -48,9 +48,9 @@ int main(int argc, char* argv[]) {
     // Video or frame sequence mode uses VIDEO-MODE, which is face detection with tracking
     HFDetectMode detMode = HF_DETECT_MODE_TRACK_BY_DETECTION;
     // Maximum number of faces detected
-    HInt32 maxDetectNum = 5;
+    HInt32 maxDetectNum = 20;
     // Face detection image input level
-    HInt32 detectPixelLevel = 640;
+    HInt32 detectPixelLevel = 320;
     // fps in tracking-by-detection mode
     HInt32 trackByDetectFps = 20;
     HFSession session = {0};
@@ -61,8 +61,8 @@ int main(int argc, char* argv[]) {
         return ret;
     }
 
-    HFSessionSetTrackPreviewSize(session, 640);
-    HFSessionSetFilterMinimumFacePixelSize(session, 32);
+    HFSessionSetTrackPreviewSize(session, detectPixelLevel);
+    HFSessionSetFilterMinimumFacePixelSize(session, 0);
 
     // Open the video file
     cv::VideoCapture cap(videoPath);
