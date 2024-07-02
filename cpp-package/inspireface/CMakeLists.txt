@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 # Current version
 set(INSPIRE_FACE_VERSION_MAJOR 1)
 set(INSPIRE_FACE_VERSION_MINOR 1)
-set(INSPIRE_FACE_VERSION_PATCH 1)
+set(INSPIRE_FACE_VERSION_PATCH 2)
 
 # Converts the version number to a string
 string(CONCAT INSPIRE_FACE_VERSION_MAJOR_STR ${INSPIRE_FACE_VERSION_MAJOR})
@@ -108,6 +108,7 @@ if (APPLE)
     endif ()
 else()
     if (ISF_BUILD_LINUX_ARM7 OR ISF_BUILD_LINUX_AARCH64)
+        set(DISABLE_GUI ON)
         add_definitions("-DDISABLE_GUI")
         #        set(OpenCV_DIR ${ISF_THIRD_PARTY_DIR}/opencv/opencv-linux-armhf/share/OpenCV)
         #        set(OpenCV_STATIC_INCLUDE_DIR ${PATH_3RDPARTY}/opencv/opencv-linux-armhf/include/)

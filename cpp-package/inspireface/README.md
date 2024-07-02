@@ -8,7 +8,9 @@ If you require further information on tracking development branches, CI/CD proce
 
 Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=InspireFace) for commercial support, including obtaining and integrating higher accuracy models, as well as custom development.
 
-## ChangeLogs
+## Change Logs
+
+**`2024-07-02`** Fixed several bugs in the face detector with multi-level input.
 
 **`2024-06-27`** Verified iOS usability and fixed some bugs.
 
@@ -69,6 +71,9 @@ The '3rdparty' directory already includes the MNN library and specifies a partic
         - Prepare the cross-compilation toolchain in advance, such as gcc-arm-8.3-2019.03-x86_64-arm-linux-gnueabihf
 - CUDA (version 10.1 or higher)
     - GPU-based inference requires installing NVIDIA's CUDA dependencies on the device.
+- Eigen3
+    - If you need to use the tracking-by-detection feature, you must have Eigen3 installed in advance.
+
 - RKNN
     - Adjust and select versions currently supported for specific requirements.
 
@@ -104,7 +109,18 @@ export ARM_CROSS_COMPILE_TOOLCHAIN=YOUR_DIR/gcc-arm-8.3-2019.03-x86_64-arm-linux
 bash command/build_cross_rv1109rv1126_armhf.sh
 ```
 After the compilation is complete, you can find the compiled results in the `build/inspireface-linux-armv7-rv1109rv1126-armhf` directory.
-### 2.3. Supported Platforms and Architectures
+
+### 2.3. iOS Compilation
+
+To compile for iOS, ensure you are using a Mac device. The script will automatically download third-party dependencies into the `.macos_cache` directory.
+
+```
+bash command/build_ios.sh
+```
+
+After the compilation is complete, `inspireface.framework` will be placed in the `build/inspireface-ios` directory.
+
+### 2.4. Supported Platforms and Architectures
 We have completed the adaptation and testing of the software across various operating systems and CPU architectures. This includes compatibility verification for platforms such as Linux, macOS, iOS, and Android, as well as testing for specific hardware support to ensure stable operation in diverse environments.
 
 | **No.** | **Operating System** | **CPU Architecture** | **Special Device Support** | **Adapted** | **Passed Tests** |
@@ -124,7 +140,7 @@ We have completed the adaptation and testing of the software across various oper
 - Pass unit tests on physical devices.
 - Meet all performance benchmarks in tests.
 
-#### 2.4. Multi-platform compilation using Docker
+### 2.5. Multi-platform compilation using Docker
 
 We offer a method for rapid multi-platform compilation using Docker, provided that Docker is installed beforehand, and the appropriate commands are executed:
 ```Bash
@@ -346,7 +362,7 @@ For different scenarios, we currently provide several Packs, each containing mul
 
 | Name | Supported Devices | Note | Link |
 | --- | --- | --- | --- |
-| Pikachu | CPU | Lightweight edge-side model | [GDrive](https://drive.google.com/file/d/1i4uC-dZTQxdVgn2rP0ZdfJTMkJIXgYY4/view?usp=drive_link) |
-| Megatron | CPU, GPU | Local or server-side model | [GDrive](https://drive.google.com/file/d/1i4uC-dZTQxdVgn2rP0ZdfJTMkJIXgYY4/view?usp=drive_link) |
-| Gundam-RV1109 | RKNPU | Supports RK1109 and RK1126 | [GDrive](https://drive.google.com/file/d/1i4uC-dZTQxdVgn2rP0ZdfJTMkJIXgYY4/view?usp=drive_link) |
+| Pikachu | CPU | Lightweight edge-side model | [GDrive](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing) |
+| Megatron | CPU, GPU | Local or server-side model | [GDrive](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing) |
+| Gundam-RV1109 | RKNPU | Supports RK1109 and RK1126 | [GDrive](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing) |
 

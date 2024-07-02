@@ -6,7 +6,7 @@ option(ISF_BUILD_SAMPLE_CLUTTERED "Whether to compile the cluttered sample progr
 include_directories(${SRC_DIR})
 
 if (ISF_ENABLE_RKNN)
-    set(ISF_RKNN_API_LIB ${ISF_THIRD_PARTY_DIR}/${ISF_RKNPU_MAJOR}/runtime/${ISF_RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
+        set(ISF_RKNN_API_LIB ${ISF_THIRD_PARTY_DIR}/inspireface-precompile/rknn/${ISF_RKNPU_MAJOR}/runtime/${ISF_RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
     link_directories(${ISF_RKNN_API_LIB})
     set(ext rknn_api dl)
 endif ()
@@ -38,12 +38,16 @@ set_target_properties(MTFaceTrackSample PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/"
 )
 
-# Examples of face detection and tracking
-add_executable(FaceTrackVideoSample cpp/sample_face_track_video.cpp)
-target_link_libraries(FaceTrackVideoSample InspireFace ${ext})
-set_target_properties(FaceTrackVideoSample PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/"
-)
+if(NOT DISABLE_GUI)
+        # Examples of face detection and tracking
+        add_executable(FaceTrackVideoSample cpp/sample_face_track_video.cpp)
+        target_link_libraries(FaceTrackVideoSample InspireFace ${ext})
+        set_target_properties(FaceTrackVideoSample PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/"
+        )
+endif()
+
+
 
 # Examples of face recognition
 add_executable(FaceRecognitionSample cpp/sample_face_recognition.cpp)

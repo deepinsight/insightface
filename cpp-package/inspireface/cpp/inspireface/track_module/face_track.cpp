@@ -342,7 +342,7 @@ void FaceTrack::DetectFace(const cv::Mat &input, float scale) {
             Object obj;
             const auto box = boxes[i];
             obj.rect = Rect_<float>(box.x1, box.y1, box.x2 - box.x1, box.y2 - box.y1);
-            if (!isShortestSideGreaterThan<float>(obj.rect, filter_minimum_face_px_size)) {
+            if (!isShortestSideGreaterThan<float>(obj.rect, filter_minimum_face_px_size, scale)) {
                 // Filter too small face detection box
                 continue;
             }
@@ -364,8 +364,8 @@ void FaceTrack::DetectFace(const cv::Mat &input, float scale) {
         for (int i = 0; i < boxes.size(); i++) {
             bbox[i] = cv::Rect(cv::Point(static_cast<int>(boxes[i].x1), static_cast<int>(boxes[i].y1)),
                             cv::Point(static_cast<int>(boxes[i].x2), static_cast<int>(boxes[i].y2)));
-
-            if (!isShortestSideGreaterThan<float>(bbox[i], filter_minimum_face_px_size)) {
+    
+            if (!isShortestSideGreaterThan<float>(bbox[i], filter_minimum_face_px_size, scale)) {
                 // Filter too small face detection box
                 continue;
             }
@@ -378,16 +378,14 @@ void FaceTrack::DetectFace(const cv::Mat &input, float scale) {
             
             FaceObject faceinfo(tracking_idx_, bbox[i], FaceLandmark::NUM_OF_LANDMARK);
             faceinfo.detect_bbox_ = bbox[i];
-
+            
             // Control that the number of faces detected does not exceed the maximum limit
-            if (candidate_faces_.size() < max_detected_faces_) {
-                candidate_faces_.push_back(faceinfo);
-            } else {
-                // If the maximum limit is exceeded, you can choose to discard the currently detected face or choose the face to discard according to the policy
-                // For example, face confidence can be compared and faces with lower confidence can be discarded
-                // Take the example of simply discarding the last face
-                candidate_faces_.pop_back();
+            if (candidate_faces_.size() >= max_detected_faces_)
+            {
+                continue;
             }
+            
+            candidate_faces_.push_back(faceinfo);
         }
     }
     
@@ -396,9 +394,10 @@ void FaceTrack::DetectFace(const cv::Mat &input, float scale) {
 int FaceTrack::Configuration(inspire::InspireArchive &archive) {
     // Initialize the detection model
     InspireModel detModel;
-    auto ret = archive.LoadModel("face_detect", detModel);
+    auto scheme = ChoiceMultiLevelDetectModel(m_dynamic_detection_input_level_);
+    auto ret = archive.LoadModel(scheme, detModel);
     if (ret != SARC_SUCCESS) {
-        INSPIRE_LOGE("Load %s error: %d", "face_detect", ret);
+        INSPIRE_LOGE("Load %s error: %d", "face_detect_320", ret);
         return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
     }
     InitDetectModel(detModel);
@@ -444,21 +443,9 @@ int FaceTrack::InitLandmarkModel(InspireModel &model) {
 
 int FaceTrack::InitDetectModel(InspireModel &model) {
     std::vector<int> input_size;
-    if (m_dynamic_detection_input_level_ != -1) {
-        if (m_dynamic_detection_input_level_ % 160 != 0 || m_dynamic_detection_input_level_ < 160) {
-            INSPIRE_LOGE("The input size '%d' for the custom detector is not valid.  \
-            Please use a multiple of 160 (minimum 160) for the input dimensions, such as 320 or 640.", m_dynamic_detection_input_level_);
-            return HERR_INVALID_DETECTION_INPUT;
-        }
-        // Wide-Range mode temporary value
-        input_size = {m_dynamic_detection_input_level_, m_dynamic_detection_input_level_};
-        model.Config().set<std::vector<int>>("input_size", input_size);
-    } else {
-        input_size = model.Config().get<std::vector<int>>("input_size");
-    }
-    bool dym = true;
+    input_size = model.Config().get<std::vector<int>>("input_size");
     m_face_detector_ = std::make_shared<FaceDetect>(input_size[0]);
-    auto ret = m_face_detector_->loadData(model, model.modelType, dym);
+    auto ret = m_face_detector_->loadData(model, model.modelType, false);
     if (ret != InferenceHelper::kRetOk) {
         return HERR_ARCHIVE_LOAD_FAILURE;
     }
@@ -499,5 +486,41 @@ void FaceTrack::SetTrackPreviewSize(int preview_size) {
         track_preview_size_ = preview_size;
 }
 
+std::string FaceTrack::ChoiceMultiLevelDetectModel(const int32_t pixel_size) {
+    const int32_t supported_sizes[] = {160, 320, 640};
+    const std::string scheme_names[] = {"face_detect_160", "face_detect_320", "face_detect_640"};
+    const int32_t num_sizes = sizeof(supported_sizes) / sizeof(supported_sizes[0]);
+
+    if (pixel_size == -1)
+    {
+        return scheme_names[1];
+    }
+
+    // Check for exact match
+    for (int i = 0; i < num_sizes; ++i) {
+        if (pixel_size == supported_sizes[i]) {
+            return scheme_names[i];
+        }
+    }
+
+    // Find the closest match
+    int32_t closest_size = supported_sizes[0];
+    std::string closest_scheme = scheme_names[0];
+    int32_t min_diff = std::abs(pixel_size - supported_sizes[0]);
+
+    for (int i = 1; i < num_sizes; ++i) {
+        int32_t diff = std::abs(pixel_size - supported_sizes[i]);
+        if (diff < min_diff) {
+            min_diff = diff;
+            closest_size = supported_sizes[i];
+            closest_scheme = scheme_names[i];
+        }
+    }
+
+    INSPIRE_LOGW("Input pixel size %d is not supported. Choosing the closest scheme: %s closest_scheme for size %d.", 
+            pixel_size, closest_scheme.c_str(), closest_size);
+
+    return closest_scheme;
+}
 
 }   // namespace hyper

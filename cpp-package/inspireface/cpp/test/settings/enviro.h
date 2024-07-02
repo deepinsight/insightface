@@ -18,6 +18,7 @@ public:
     void operator=(Enviro const&) = delete;
 
     std::string getPackName() const { return packName; }
+    
     void setPackName(const std::string& name) { packName = name; }
 
     const std::string &getTestResDir() const { return testResDir; }
