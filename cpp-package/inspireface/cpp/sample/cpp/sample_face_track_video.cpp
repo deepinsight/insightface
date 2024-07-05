@@ -44,13 +44,13 @@ int main(int argc, char* argv[]) {
     }
 
     // Enable the functions in the pipeline: mask detection, live detection, and face quality detection
-    HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
+    HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_INTERACTION;
     // Video or frame sequence mode uses VIDEO-MODE, which is face detection with tracking
-    HFDetectMode detMode = HF_DETECT_MODE_TRACK_BY_DETECTION;
+    HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
     // Maximum number of faces detected
     HInt32 maxDetectNum = 20;
     // Face detection image input level
-    HInt32 detectPixelLevel = 320;
+    HInt32 detectPixelLevel = 160;
     // fps in tracking-by-detection mode
     HInt32 trackByDetectFps = 20;
     HFSession session = {0};
@@ -122,7 +122,25 @@ int main(int argc, char* argv[]) {
 
         // Draw detection mode on the frame
         drawMode(draw, detMode);
+        if (faceNum > 0) {
+            ret = HFMultipleFacePipelineProcessOptional(session, imageHandle, &multipleFaceData, option);
+            if (ret != HSUCCEED)
+            {   
+                std::cout << "HFMultipleFacePipelineProcessOptional error: " << ret << std::endl;
+                return ret;
+            }
+            HFFaceIntereactionResult result;
+            ret = HFGetFaceIntereactionResult(session, &result);
+             if (ret != HSUCCEED)
+            {   
+                std::cout << "HFGetFaceIntereactionResult error: " << ret << std::endl;
+                return ret;
+            }
+            std::cout << "Left eye status: " << result.leftEyeStatusConfidence[0] << std::endl;
+            std::cout << "Righ eye status: " << result.rightEyeStatusConfidence[0] << std::endl;
 
+        }
+        
         for (int index = 0; index < faceNum; ++index) {
             // std::cout << "========================================" << std::endl;
             // std::cout << "Process face index: " << index << std::endl;
@@ -143,8 +161,21 @@ int main(int argc, char* argv[]) {
             // Add TrackID to the drawing
             cv::putText(draw, "ID: " + std::to_string(trackId), cv::Point(rect.x, rect.y - 10),
                         cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-        }
 
+            HInt32 numOfLmk;
+            HFGetNumOfFaceDenseLandmark(&numOfLmk);
+            HPoint2f denseLandmarkPoints[numOfLmk];
+            ret = HFGetFaceDenseLandmarkFromFaceToken(multipleFaceData.tokens[index], denseLandmarkPoints, numOfLmk);
+            if (ret != HSUCCEED) {
+                std::cerr << "HFGetFaceDenseLandmarkFromFaceToken error!!" << std::endl;
+                return -1;
+            }
+            for (size_t i = 0; i < numOfLmk; i++) {
+                cv::Point2f p(denseLandmarkPoints[i].x, denseLandmarkPoints[i].y);
+                cv::circle(draw, p, 0, (0, 0, 255), 2);
+            }
+        }
+        
         cv::imshow("w", draw);
         cv::waitKey(1);
 

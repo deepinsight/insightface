@@ -31,5 +31,9 @@ typedef struct HFaceRect {
     HInt32 height;        ///< Height of the rectangle.
 } HFaceRect;         ///< Rectangle representing a face region.
 
+typedef struct HPoint2f{
+    HFloat x;          ///< X-coordinate
+    HFloat y;          ///< Y-coordinate
+} HPoint2f;
 
 #endif //HYPERFACEREPO_INTYPEDEF_H

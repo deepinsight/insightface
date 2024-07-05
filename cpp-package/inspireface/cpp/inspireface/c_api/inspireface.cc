@@ -100,13 +100,13 @@ HResult HFReleaseInspireFaceSession(HFSession handle) {
 HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectMode detectMode, HInt32 maxDetectFaceNum, HInt32 detectPixelLevel, HInt32 trackByDetectModeFPS, HFSession *handle) {
     inspire::ContextCustomParameter param;
     param.enable_mask_detect = parameter.enable_mask_detect;
-    param.enable_age = parameter.enable_age;
+    param.enable_face_attribute = parameter.enable_face_quality;
     param.enable_liveness = parameter.enable_liveness;
     param.enable_face_quality = parameter.enable_face_quality;
-    param.enable_gender = parameter.enable_gender;
     param.enable_interaction_liveness = parameter.enable_interaction_liveness;
     param.enable_ir_liveness = parameter.enable_ir_liveness;
     param.enable_recognition = parameter.enable_recognition;
+    param.enable_face_attribute = parameter.enable_face_attribute;
     inspire::DetectMode detMode = inspire::DETECT_MODE_ALWAYS_DETECT;
     if (detectMode == HF_DETECT_MODE_LIGHT_TRACK) {
         detMode = inspire::DETECT_MODE_LIGHT_TRACK;
@@ -138,11 +138,8 @@ HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode de
     if (customOption & HF_ENABLE_IR_LIVENESS) {
         param.enable_ir_liveness = true;
     }
-    if (customOption & HF_ENABLE_AGE_PREDICT) {
-        param.enable_age = true;
-    }
-    if (customOption & HF_ENABLE_GENDER_PREDICT) {
-        param.enable_gender = true;
+    if (customOption & HF_ENABLE_FACE_ATTRIBUTE) {
+        param.enable_face_attribute = true;
     }
     if (customOption & HF_ENABLE_MASK_DETECT) {
         param.enable_mask_detect = true;
@@ -278,6 +275,33 @@ HResult HFCopyFaceBasicToken(HFFaceBasicToken token, HPBuffer buffer, HInt32 buf
 
 HResult HFGetFaceBasicTokenSize(HPInt32 bufferSize) {
     *bufferSize = sizeof(inspire::HyperFaceData);
+    return HSUCCEED;
+}
+
+HResult HFGetNumOfFaceDenseLandmark(HPInt32 num) {
+    *num = 106;
+    return HSUCCEED;
+}
+
+HResult HFGetFaceDenseLandmarkFromFaceToken(HFFaceBasicToken singleFace, HPoint2f* landmarks, HInt32 num) {
+    if (num != 106) {
+        return HERR_SESS_LANDMARK_NUM_NOT_MATCH;
+    }
+    inspire::FaceBasicData data;
+    data.dataSize = singleFace.size;
+    data.data = singleFace.data;
+    HyperFaceData face = {0};
+    HInt32 ret;
+    ret = DeserializeHyperFaceData((char* )data.data, data.dataSize, face);
+    if (ret != HSUCCEED) {
+        return ret;
+    }
+    for (size_t i = 0; i < num; i++)
+    {
+        landmarks[i].x = face.densityLandmark[i].x;
+        landmarks[i].y = face.densityLandmark[i].y;
+    }
+    
     return HSUCCEED;
 }
 
@@ -481,13 +505,13 @@ HResult HFMultipleFacePipelineProcess(HFSession session, HFImageStream streamHan
     }
     inspire::ContextCustomParameter param;
     param.enable_mask_detect = parameter.enable_mask_detect;
-    param.enable_age = parameter.enable_age;
+    param.enable_face_attribute = parameter.enable_face_quality;
     param.enable_liveness = parameter.enable_liveness;
     param.enable_face_quality = parameter.enable_face_quality;
-    param.enable_gender = parameter.enable_gender;
     param.enable_interaction_liveness = parameter.enable_interaction_liveness;
     param.enable_ir_liveness = parameter.enable_ir_liveness;
     param.enable_recognition = parameter.enable_recognition;
+    param.enable_face_attribute = parameter.enable_face_attribute;
 
     HResult ret;
     std::vector<inspire::HyperFaceData> data;
@@ -535,11 +559,8 @@ HResult HFMultipleFacePipelineProcessOptional(HFSession session, HFImageStream s
     if (customOption & HF_ENABLE_IR_LIVENESS) {
         param.enable_ir_liveness = true;
     }
-    if (customOption & HF_ENABLE_AGE_PREDICT) {
-        param.enable_age = true;
-    }
-    if (customOption & HF_ENABLE_GENDER_PREDICT) {
-        param.enable_gender = true;
+    if (customOption & HF_ENABLE_FACE_ATTRIBUTE) {
+        param.enable_face_attribute = true;
     }
     if (customOption & HF_ENABLE_MASK_DETECT) {
         param.enable_mask_detect = true;
@@ -549,7 +570,7 @@ HResult HFMultipleFacePipelineProcessOptional(HFSession session, HFImageStream s
     }
     if (customOption & HF_ENABLE_INTERACTION) {
         param.enable_interaction_liveness = true;
-    }
+    } 
 
 
     HResult ret;
@@ -631,6 +652,38 @@ HResult HFFaceQualityDetect(HFSession session, HFFaceBasicToken singleFace, HFlo
 
     return ret;
 
+}
+
+HResult HFGetFaceIntereactionResult(HFSession session, PHFFaceIntereactionResult result) {
+     if (session == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    HF_FaceAlgorithmSession *ctx = (HF_FaceAlgorithmSession* ) session;
+    if (ctx == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    result->num = ctx->impl.GetFaceInteractionLeftEyeStatusCache().size();
+    result->leftEyeStatusConfidence = (HFloat* )ctx->impl.GetFaceInteractionLeftEyeStatusCache().data();
+    result->rightEyeStatusConfidence = (HFloat* )ctx->impl.GetFaceInteractionRightEyeStatusCache().data();
+
+    return HSUCCEED;
+}
+
+HResult HFGetFaceAttributeResult(HFSession session, PHFFaceAttributeResult results) {
+    if (session == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    HF_FaceAlgorithmSession *ctx = (HF_FaceAlgorithmSession* ) session;
+    if (ctx == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+
+    results->num = ctx->impl.GetFaceAgeBracketResultsCache().size();
+    results->race = (HPInt32 )ctx->impl.GetFaceRaceResultsCache().data();
+    results->gender = (HPInt32 )ctx->impl.GetFaceGenderResultsCache().data();
+    results->ageBracket = (HPInt32 )ctx->impl.GetFaceAgeBracketResultsCache().data();
+
+    return HSUCCEED;
 }
 
 HResult HFFeatureHubGetFaceCount(HInt32* count) {

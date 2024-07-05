@@ -7,32 +7,28 @@
 #include "log.h"
 #include "track_module/landmark/face_landmark.h"
 #include "recognition_module/extract/alignment.h"
+#include "middleware/utils.h"
 #include "herror.h"
 
 namespace inspire {
 
-FacePipeline::FacePipeline(InspireArchive &archive, bool enableLiveness, bool enableMaskDetect, bool enableAge,
-                           bool enableGender, bool enableInteractionLiveness)
+FacePipeline::FacePipeline(InspireArchive &archive, bool enableLiveness, bool enableMaskDetect, bool enableAttribute, 
+                    bool enableInteractionLiveness)
         : m_enable_liveness_(enableLiveness),
           m_enable_mask_detect_(enableMaskDetect),
-          m_enable_age_(enableAge),
-          m_enable_gender_(enableGender),
+          m_enable_attribute_(enableAttribute),
           m_enable_interaction_liveness_(enableInteractionLiveness) {
 
-    if (m_enable_age_) {
-        InspireModel ageModel;
-        auto ret = InitAgePredict(ageModel);
+    if (m_enable_attribute_) {
+        InspireModel attrModel;
+        auto ret = archive.LoadModel("face_attribute", attrModel);
+        if (ret != 0) {
+            INSPIRE_LOGE("Load Face attribute model: %d", ret);
+        }
+
+        ret = InitFaceAttributePredict(attrModel);
         if (ret != 0) {
             INSPIRE_LOGE("InitAgePredict error.");
-        }
-    }
-
-    // Initialize the gender prediction model (assuming Index is 0)
-    if (m_enable_gender_) {
-        InspireModel genderModel;
-        auto ret = InitGenderPredict(genderModel);
-        if (ret != 0) {
-            INSPIRE_LOGE("InitGenderPredict error.");
         }
     }
 
@@ -62,12 +58,17 @@ FacePipeline::FacePipeline(InspireArchive &archive, bool enableLiveness, bool en
         }
     }
 
-    // Initializing the model for in-vivo detection (assuming Index is 0)
+    // There may be a combination of algorithms for facial interaction
     if (m_enable_interaction_liveness_) {
-        InspireModel actLivenessModel;
-        auto ret = InitLivenessInteraction(actLivenessModel);
+        // Blink model
+        InspireModel blinkModel;
+        auto ret = archive.LoadModel("blink_predict", blinkModel);
         if (ret != 0) {
-            INSPIRE_LOGE("InitLivenessInteraction error.");
+            INSPIRE_LOGE("Load Blink model error.");
+        }
+        ret = InitBlinkFromLivenessInteraction(blinkModel);
+        if (ret != 0) {
+            INSPIRE_LOGE("InitBlinkFromLivenessInteraction error.");
         }
     }
 
@@ -75,6 +76,8 @@ FacePipeline::FacePipeline(InspireArchive &archive, bool enableLiveness, bool en
 
 
 int32_t FacePipeline::Process(CameraStream &image, const HyperFaceData &face, FaceProcessFunction proc) {
+    cv::Mat originImage;
+    cv::Mat crop112;
     switch (proc) {
         case PROCESS_MASK: {
             if (m_mask_predict_ == nullptr) {
@@ -91,12 +94,16 @@ int32_t FacePipeline::Process(CameraStream &image, const HyperFaceData &face, Fa
 //            }
 //            cv::imshow("wqwe", img);
 //            cv::waitKey(0);
-            auto trans = getTransformMatrix112(pointsFive);
-            trans.convertTo(trans, CV_64F);
-            auto crop = image.GetAffineRGBImage(trans, 112, 112);
+            if (crop112.empty())
+            {
+                auto trans = getTransformMatrix112(pointsFive);
+                trans.convertTo(trans, CV_64F);
+                crop112 = image.GetAffineRGBImage(trans, 112, 112);
+            }
+            
 //            cv::imshow("wq", crop);
 //            cv::waitKey(0);
-            auto mask_score = (*m_mask_predict_)(crop);
+            auto mask_score = (*m_mask_predict_)(crop112);
             faceMaskCache = mask_score;
             break;
         }
@@ -107,11 +114,12 @@ int32_t FacePipeline::Process(CameraStream &image, const HyperFaceData &face, Fa
 //            auto trans27 = getTransformMatrixSafas(pointsFive);
 //            trans27.convertTo(trans27, CV_64F);
 //            auto align112x27 = image.GetAffineRGBImage(trans27, 112, 112);
-
-            auto img = image.GetScaledImage(1.0, true);
+            if (originImage.empty()) {
+                originImage = image.GetScaledImage(1.0, true);
+            }
             cv::Rect oriRect(face.rect.x, face.rect.y, face.rect.width, face.rect.height);
-            auto rect = GetNewBox(img.cols, img.rows, oriRect, 2.7f);
-            auto crop = img(rect);
+            auto rect = GetNewBox(originImage.cols, originImage.rows, oriRect, 2.7f);
+            auto crop = originImage(rect);
 //            cv::imwrite("crop.jpg", crop);
             auto score = (*m_rgb_anti_spoofing_)(crop);
 //            auto i = cv::imread("zsb.jpg");
@@ -119,16 +127,45 @@ int32_t FacePipeline::Process(CameraStream &image, const HyperFaceData &face, Fa
             faceLivenessCache = score;
             break;
         }
-        case PROCESS_AGE: {
-            if (m_age_predict_ == nullptr) {
+        case PROCESS_INTERACTION: {
+            if (m_blink_predict_ == nullptr) {
                 return HERR_SESS_PIPELINE_FAILURE;       // uninitialized
+            }
+            if (originImage.empty()) {
+                originImage = image.GetScaledImage(1.0, true);
+            }
+            std::vector<std::vector<int>> order_list = {HLMK_LEFT_EYE_POINTS_INDEX, HLMK_RIGHT_EYE_POINTS_INDEX};
+            eyesStatusCache = {0, 0};
+            for (size_t i = 0; i < order_list.size(); i++)
+            {   
+                const auto &index = order_list[i];
+                std::vector<cv::Point2f> points;
+                for (const auto &idx: index)
+                {   
+                    points.emplace_back(face.densityLandmark[idx].x, face.densityLandmark[idx].y);
+                }
+                cv::Rect2f rect = cv::boundingRect(points);
+                auto affine_scale = ComputeCropMatrix(rect, BlinkPredict::BLINK_EYE_INPUT_SIZE, BlinkPredict::BLINK_EYE_INPUT_SIZE);
+                affine_scale.convertTo(affine_scale, CV_64F);
+                auto pre_crop = image.GetAffineRGBImage(affine_scale, BlinkPredict::BLINK_EYE_INPUT_SIZE, BlinkPredict::BLINK_EYE_INPUT_SIZE);
+                auto eyeStatus = (*m_blink_predict_)(pre_crop);
+                eyesStatusCache[i] = eyeStatus;
             }
             break;
         }
-        case PROCESS_GENDER: {
-            if (m_gender_predict_ == nullptr) {
+        case PROCESS_ATTRIBUTE: {
+            if (m_attribute_predict_ == nullptr) {
                 return HERR_SESS_PIPELINE_FAILURE;       // uninitialized
             }
+            std::vector<cv::Point2f> pointsFive;
+            for (const auto &p: face.keyPoints) {
+                pointsFive.push_back(HPointToPoint2f(p));
+            }
+            auto trans = getTransformMatrix112(pointsFive);
+            trans.convertTo(trans, CV_64F);
+            auto crop = image.GetAffineRGBImage(trans, 112, 112);
+            auto outputs = (*m_attribute_predict_)(crop);
+            faceAttributeCache = cv::Vec3i(outputs[0], outputs[1], outputs[2]);
             break;
         }
     }
@@ -173,16 +210,15 @@ int32_t FacePipeline::Process(CameraStream &image, FaceObject &face) {
     return HSUCCEED;
 }
 
-
-int32_t FacePipeline::InitAgePredict(InspireModel &) {
-
-    return 0;
+int32_t FacePipeline::InitFaceAttributePredict(InspireModel &model) {
+    m_attribute_predict_ = std::make_shared<FaceAttributePredict>();
+    auto ret = m_attribute_predict_->loadData(model, model.modelType);
+    if (ret != InferenceHelper::kRetOk) {
+        return HERR_ARCHIVE_LOAD_FAILURE;
+    }
+    return HSUCCEED;
 }
 
-
-int32_t FacePipeline::InitGenderPredict(InspireModel &model) {
-    return 0;
-}
 
 int32_t FacePipeline::InitMaskPredict(InspireModel &model) {
     m_mask_predict_ = std::make_shared<MaskPredict>();
@@ -203,8 +239,13 @@ int32_t FacePipeline::InitRBGAntiSpoofing(InspireModel &model) {
     return HSUCCEED;
 }
 
-int32_t FacePipeline::InitLivenessInteraction(InspireModel &model) {
-    return 0;
+int32_t FacePipeline::InitBlinkFromLivenessInteraction(InspireModel &model) {
+    m_blink_predict_ = std::make_shared<BlinkPredict>();
+    auto ret = m_blink_predict_->loadData(model, model.modelType);
+    if (ret != InferenceHelper::kRetOk) {
+        return HERR_ARCHIVE_LOAD_FAILURE;
+    }
+    return HSUCCEED;
 }
 
 const std::shared_ptr<RBGAntiSpoofing> &FacePipeline::getMRgbAntiSpoofing() const {

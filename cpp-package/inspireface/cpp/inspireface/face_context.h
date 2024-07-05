@@ -37,8 +37,7 @@ typedef struct CustomPipelineParameter {
     bool enable_liveness = false;                 ///< Enable RGB liveness detection feature
     bool enable_ir_liveness = false;              ///< Enable IR (Infrared) liveness detection feature
     bool enable_mask_detect = false;              ///< Enable mask detection feature
-    bool enable_age = false;                      ///< Enable age prediction feature
-    bool enable_gender = false;                   ///< Enable gender prediction feature
+    bool enable_face_attribute = false;           ///< Enable face attribute prediction feature
     bool enable_face_quality = false;             ///< Enable face quality assessment feature
     bool enable_interaction_liveness = false;     ///< Enable interactive liveness detection feature
 
@@ -233,6 +232,36 @@ public:
     const std::vector<float>& GetFaceQualityScoresResultsCache() const;
 
     /**
+     * @brief Gets the cache of left eye status predict results.
+     * @return A const reference to a vector containing eye status predict results.
+     */
+    const std::vector<float>& GetFaceInteractionLeftEyeStatusCache() const;
+
+    /**
+     * @brief Gets the cache of right eye status predict results.
+     * @return A const reference to a vector containing eye status predict results.
+     */
+    const std::vector<float>& GetFaceInteractionRightEyeStatusCache() const;
+
+    /**
+     * @brief Gets the cache of face attribute rece results.
+     * @return A const reference to a vector containing face attribute rece results.
+     */
+    const std::vector<int>& GetFaceRaceResultsCache() const;
+
+    /**
+     * @brief Gets the cache of face attribute gender results.
+     * @return A const reference to a vector containing face attribute gender results.
+     */
+    const std::vector<int>& GetFaceGenderResultsCache() const;
+
+    /**
+     * @brief Gets the cache of face attribute age bracket results.
+     * @return A const reference to a vector containing face attribute age bracket results.
+     */
+    const std::vector<int>& GetFaceAgeBracketResultsCache() const;
+
+    /**
      * @brief Gets the cache of the current face features.
      * @return A const reference to the Embedded object containing current face feature data.
      */
@@ -263,6 +292,11 @@ private:
     std::vector<float> m_mask_results_cache_;                       ///< Cache for mask detection results
     std::vector<float> m_rgb_liveness_results_cache_;               ///< Cache for RGB liveness detection results
     std::vector<float> m_quality_score_results_cache_;               ///< Cache for RGB face quality score results
+    std::vector<float> m_react_left_eye_results_cache_;               ///< Cache for Left eye state in face interaction
+    std::vector<float> m_react_right_eye_results_cache_;               ///< Cache for Right eye state in face interaction
+    std::vector<int> m_attribute_race_results_cache_;
+    std::vector<int> m_attribute_gender_results_cache_;
+    std::vector<int> m_attribute_age_results_cache_;
     Embedded m_face_feature_cache_;                                ///< Cache for current face feature data
 
     std::mutex m_mtx_;                                             ///< Mutex for thread safety.

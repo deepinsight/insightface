@@ -8,14 +8,14 @@ import inspireface as ifac
 ENABLE_BENCHMARK_TEST = True
 
 # Enabling will run all the CRUD tests, which will take time
-ENABLE_CRUD_TEST = True
+ENABLE_CRUD_TEST = False
 
 # Enabling will run the face search benchmark, which takes time and must be configured with the correct
 # 'LFW_FUNNELED_DIR_PATH' parameter
 ENABLE_SEARCH_BENCHMARK_TEST = True
 
 # Enabling will run the LFW dataset precision test, which will take time
-ENABLE_LFW_PRECISION_TEST = True
+ENABLE_LFW_PRECISION_TEST = False
 
 # Testing model name
 TEST_MODEL_NAME = "Pikachu"

@@ -2,7 +2,7 @@ import click
 import cv2
 import inspireface as ifac
 from inspireface.param import *
-
+import numpy as np
 
 @click.command()
 @click.argument("resource_path")
@@ -51,8 +51,34 @@ def case_face_tracker_from_video(resource_path, source, show):
         # Process frame here (e.g., face detection/tracking).
         faces = session.face_detection(frame)
         for idx, face in enumerate(faces):
+            print(f"{'==' * 20}")
+            print(f"idx: {idx}")
+            # Print Euler angles of the face.
+            print(f"roll: {face.roll}, yaw: {face.yaw}, pitch: {face.pitch}")
+
+            # Get face bounding box
             x1, y1, x2, y2 = face.location
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+            # Calculate center, size, and angle
+            center = ((x1 + x2) / 2, (y1 + y2) / 2)
+            size = (x2 - x1, y2 - y1)
+            angle = face.roll  # 这里使用 roll 角度
+
+            # Get rotation matrix
+            rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+            # Apply rotation to the bounding box corners
+            rect = ((center[0], center[1]), (size[0], size[1]), angle)
+            box = cv2.boxPoints(rect)
+            box = box.astype(int)
+
+            # Draw the rotated bounding box
+            cv2.drawContours(frame, [box], 0, (100, 180, 29), 2)
+
+            # Draw landmarks
+            lmk = session.get_face_dense_landmark(face)
+            for x, y in lmk.astype(int):
+                cv2.circle(frame, (x, y), 0, (220, 100, 0), 2)
 
         if show:
             cv2.imshow("Face Tracker", frame)

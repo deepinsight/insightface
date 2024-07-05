@@ -6,7 +6,6 @@
 #define HYPERFACEREPO_ATTRIBUTE_ALL_H
 
 #include "mask_predict.h"
-#include "gender_predict.h"
-#include "age_predict.h"
+#include "face_attribute.h"
 
 #endif //HYPERFACEREPO_ATTRIBUTE_ALL_H

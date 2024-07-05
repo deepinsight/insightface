@@ -484,3 +484,59 @@ TEST_CASE("test_MultipleLevelFaceDetect", "[face_detect]") {
 
 
 }
+
+TEST_CASE("test_FaceShowLandmark", "[face_landmark]") {
+    DRAW_SPLIT_LINE
+    TEST_PRINT_OUTPUT(true);
+
+    std::vector<std::string> images_path = {
+        GET_DATA("data/reaction/close_open_eyes.jpeg"),
+        GET_DATA("data/reaction/open_eyes.png"),
+        GET_DATA("data/reaction/close_eyes.jpeg"),
+    };
+
+    HResult ret;
+    HFSessionCustomParameter parameter = {0};
+    HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
+    HFSession session;
+    HInt32 detectPixelLevel = 160;
+    ret = HFCreateInspireFaceSession(parameter, detMode, 20, detectPixelLevel, -1, &session);
+    REQUIRE(ret == HSUCCEED);
+    HFSessionSetTrackPreviewSize(session, detectPixelLevel);
+    HFSessionSetFilterMinimumFacePixelSize(session, 0);
+
+    for (size_t i = 0; i < images_path.size(); i++)
+    {
+        HFImageStream imgHandle;
+        auto image = cv::imread(images_path[i]);
+        ret = CVImageToImageStream(image, imgHandle);
+        REQUIRE(ret == HSUCCEED);
+        
+        // Extract basic face information from photos
+        HFMultipleFaceData multipleFaceData = {0};
+        ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
+        REQUIRE(ret == HSUCCEED);
+
+        REQUIRE(multipleFaceData.detectedNum > 0);
+
+
+        HInt32 numOfLmk;
+        HFGetNumOfFaceDenseLandmark(&numOfLmk);
+        HPoint2f denseLandmarkPoints[numOfLmk];
+        ret = HFGetFaceDenseLandmarkFromFaceToken(multipleFaceData.tokens[0], denseLandmarkPoints, numOfLmk);
+        REQUIRE(ret == HSUCCEED);
+        for (size_t i = 0; i < numOfLmk; i++) {
+            cv::Point2f p(denseLandmarkPoints[i].x, denseLandmarkPoints[i].y);
+            cv::circle(image, p, 0, (0, 0, 255), 2);
+        }
+
+        cv::imwrite("lml_" + std::to_string(i) + ".jpg", image);
+
+        ret = HFReleaseImageStream(imgHandle);
+        REQUIRE(ret == HSUCCEED);
+
+    }
+    ret = HFReleaseInspireFaceSession(session);
+    REQUIRE(ret == HSUCCEED);
+
+}

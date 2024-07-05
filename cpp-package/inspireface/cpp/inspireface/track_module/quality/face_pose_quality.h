@@ -44,12 +44,6 @@ public:
      */
     FacePoseQualityResult operator()(const Matrix& bgr_affine);
 
-    /**
-     * @brief Computes the affine transformation matrix for face cropping.
-     * @param rect Rectangle representing the face in the image.
-     * @return cv::Mat The computed affine transformation matrix.
-     */
-    static cv::Mat ComputeCropMatrix(const cv::Rect2f &rect);
 
 public:
     const static int INPUT_WIDTH = 96;   ///< Width of the input image for the network.
