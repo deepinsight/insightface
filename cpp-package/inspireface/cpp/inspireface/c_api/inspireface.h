@@ -636,7 +636,7 @@ HYPER_CAPI_EXPORT extern HResult HFFaceQualityDetect(HFSession session, HFFaceBa
 
 
 /**
- * @brief Some facial states in the face interaction module.
+ * @brief Facial states in the face interaction module.
  */
 typedef struct HFFaceIntereactionResult {
     HInt32 num;                             ///< Number of faces detected.
@@ -644,6 +644,11 @@ typedef struct HFFaceIntereactionResult {
     HPFloat rightEyeStatusConfidence;       ///< Right eye state: confidence close to 1 means open, close to 0 means closed.
 } HFFaceIntereactionResult, *PHFFaceIntereactionResult;
 
+/**
+ * @brief Get the prediction results of face interaction.
+ * @param session Handle to the session.
+ * @param result Facial state prediction results in the face interaction module.
+ */
 HYPER_CAPI_EXPORT extern HResult HFGetFaceIntereactionResult(HFSession session, PHFFaceIntereactionResult result);
 
 /**

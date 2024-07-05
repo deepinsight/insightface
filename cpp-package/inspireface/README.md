@@ -9,6 +9,8 @@ If you require further information on tracking development branches, CI/CD proce
 
 Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=InspireFace) for commercial support, including obtaining and integrating higher accuracy models, as well as custom development.
 
+<img src="images/banner.jpg" alt="banner" style="zoom:80%;" />
+
 ## Change Logs
 
 **`2024-07-05`** Fixed some bugs in the python ctypes interface.

@@ -48,10 +48,7 @@ def case_face_detection_image(resource_path, image_path):
         # Calculate center, size, and angle
         center = ((x1 + x2) / 2, (y1 + y2) / 2)
         size = (x2 - x1, y2 - y1)
-        angle = face.roll  # 这里使用 roll 角度
-
-        # Get rotation matrix
-        rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
+        angle = face.roll
 
         # Apply rotation to the bounding box corners
         rect = ((center[0], center[1]), (size[0], size[1]), angle)
