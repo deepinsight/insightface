@@ -10,7 +10,7 @@
 #include "herror.h"
 
 #if defined(_WIN32)
-#ifdef HYPER_BUILD_SHARED_LIB
+#ifdef ISF_BUILD_SHARED_LIBS
 #define HYPER_CAPI_EXPORT __declspec(dllexport)
 #else
 #define HYPER_CAPI_EXPORT
@@ -29,8 +29,8 @@ extern "C" {
 #define HF_ENABLE_LIVENESS                  0x00000004  ///< Flag to enable RGB liveness detection feature.
 #define HF_ENABLE_IR_LIVENESS               0x00000008  ///< Flag to enable IR (Infrared) liveness detection feature.
 #define HF_ENABLE_MASK_DETECT               0x00000010  ///< Flag to enable mask detection feature.
-#define HF_ENABLE_AGE_PREDICT               0x00000020  ///< Flag to enable age prediction feature.
-#define HF_ENABLE_GENDER_PREDICT            0x00000040  ///< Flag to enable gender prediction feature.
+#define HF_ENABLE_FACE_ATTRIBUTE            0x00000020  ///< Flag to enable face attribute prediction feature.
+#define HF_ENABLE_PLACEHOLDER_              0x00000040  ///< - 
 #define HF_ENABLE_QUALITY                   0x00000080  ///< Flag to enable face quality assessment feature.
 #define HF_ENABLE_INTERACTION               0x00000100  ///< Flag to enable interaction feature.
 
@@ -125,9 +125,8 @@ typedef struct HFSessionCustomParameter {
     HInt32 enable_liveness;                  ///< Enable RGB liveness detection feature.
     HInt32 enable_ir_liveness;               ///< Enable IR liveness detection feature.
     HInt32 enable_mask_detect;               ///< Enable mask detection feature.
-    HInt32 enable_age;                       ///< Enable age prediction feature.
-    HInt32 enable_gender;                    ///< Enable gender prediction feature.
     HInt32 enable_face_quality;              ///< Enable face quality detection feature.
+    HInt32 enable_face_attribute;            ///< Enable face attribute prediction feature.
     HInt32 enable_interaction_liveness;      ///< Enable interaction for liveness detection feature.
 } HFSessionCustomParameter, *PHFSessionCustomParameter;
 
@@ -149,7 +148,7 @@ typedef enum HFDetectMode {
  * @param detectMode Detection mode to be used.
  * @param maxDetectFaceNum Maximum number of faces to detect.
  * @param detectPixelLevel Modify the input resolution level of the detector, the larger the better, 
- *          the need to input a multiple of 160, such as 160, 320, 640, the default value -1 is 160.
+ *          the need to input a multiple of 160, such as 160, 320, 640, the default value -1 is 320.
  * @param trackByDetectModeFPS If you are using the MODE_TRACK_BY_DETECTION tracking mode, 
  *          this value is used to set the fps frame rate of your current incoming video stream, which defaults to -1 at 30fps.
  * @param handle Pointer to the context handle that will be returned.
@@ -297,6 +296,23 @@ HYPER_CAPI_EXPORT extern HResult HFCopyFaceBasicToken(HFFaceBasicToken token, HP
  *         if the operation was successful, or an error code if it failed.
  */
 HYPER_CAPI_EXPORT extern HResult HFGetFaceBasicTokenSize(HPInt32 bufferSize);
+
+/**
+ * @brief Retrieve the number of dense facial landmarks.
+ * @param num Number of dense facial landmarks
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFGetNumOfFaceDenseLandmark(HPInt32 num);
+
+/**
+ * @brief When you pass in a valid facial token, you can retrieve a set of dense facial landmarks. 
+ *          The memory for the dense landmarks must be allocated by you.
+ * @param singleFace Basic token representing a single face.
+ * @param landmarks Pre-allocated memory address of the array for 2D floating-point coordinates.
+ * @param num Number of landmark points
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFGetFaceDenseLandmarkFromFaceToken(HFFaceBasicToken singleFace, HPoint2f* landmarks, HInt32 num);
 
 /************************************************************************
 * Face Recognition
@@ -617,6 +633,59 @@ HYPER_CAPI_EXPORT extern HResult HFGetFaceQualityConfidence(HFSession session, P
  * @return HResult indicating the success or failure of the operation.
  */
 HYPER_CAPI_EXPORT extern HResult HFFaceQualityDetect(HFSession session, HFFaceBasicToken singleFace, HFloat *confidence);
+
+
+/**
+ * @brief Some facial states in the face interaction module.
+ */
+typedef struct HFFaceIntereactionResult {
+    HInt32 num;                             ///< Number of faces detected.
+    HPFloat leftEyeStatusConfidence;        ///< Left eye state: confidence close to 1 means open, close to 0 means closed.
+    HPFloat rightEyeStatusConfidence;       ///< Right eye state: confidence close to 1 means open, close to 0 means closed.
+} HFFaceIntereactionResult, *PHFFaceIntereactionResult;
+
+HYPER_CAPI_EXPORT extern HResult HFGetFaceIntereactionResult(HFSession session, PHFFaceIntereactionResult result);
+
+/**
+ * @brief Struct representing face attribute results.
+ *
+ * This struct holds the race, gender, and age bracket attributes for a detected face.
+ */
+typedef struct HFFaceAttributeResult {
+    HInt32 num;             ///< Number of faces detected.
+    HPInt32 race;           ///< Race of the detected face.
+                            ///< 0: Black; 
+                            ///< 1: Asian; 
+                            ///< 2: Latino/Hispanic; 
+                            ///< 3: Middle Eastern; 
+                            ///< 4: White;
+    HPInt32 gender;         ///< Gender of the detected face.
+                            ///< 0: Female; 
+                            ///< 1: Male;
+    HPInt32 ageBracket;     ///< Age bracket of the detected face.
+                            ///< 0: 0-2 years old; 
+                            ///< 1: 3-9 years old; 
+                            ///< 2: 10-19 years old; 
+                            ///< 3: 20-29 years old; 
+                            ///< 4: 30-39 years old; 
+                            ///< 5: 40-49 years old; 
+                            ///< 6: 50-59 years old; 
+                            ///< 7: 60-69 years old; 
+                            ///< 8: more than 70 years old;
+} HFFaceAttributeResult, *PHFFaceAttributeResult;
+
+/**
+ * @brief Get the face attribute results.
+ *
+ * This function retrieves the attribute results such as race, gender, and age bracket
+ * for faces detected in the current context.
+ *
+ * @param session Handle to the session.
+ * @param results Pointer to the structure where face attribute results will be stored.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFGetFaceAttributeResult(HFSession session, PHFFaceAttributeResult results);
+
 
 /************************************************************************
 * System Function

@@ -7,16 +7,27 @@
 
 int main(int argc, char* argv[]) {
     // Check whether the number of parameters is correct
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <pack_path> <source_path>\n";
+    if (argc < 3 || argc > 4) {
+        std::cerr << "Usage: " << argv[0] << " <pack_path> <source_path> [rotation]\n";
         return 1;
     }
 
     auto packPath = argv[1];
     auto sourcePath = argv[2];
+    int rotation = 0;
+
+    // If rotation is provided, check and set the value
+    if (argc == 4) {
+        rotation = std::atoi(argv[3]);
+        if (rotation != 0 && rotation != 90 && rotation != 180 && rotation != 270) {
+            std::cerr << "Invalid rotation value. Allowed values are 0, 90, 180, 270.\n";
+            return 1;
+        }
+    }
 
     std::cout << "Pack file Path: " << packPath << std::endl;
     std::cout << "Source file Path: " << sourcePath << std::endl;
+    std::cout << "Rotation: " << rotation << std::endl;
 
     HResult ret;
     // The resource file must be loaded before it can be used
@@ -55,9 +66,26 @@ int main(int argc, char* argv[]) {
     HFImageData imageParam = {0};
     imageParam.data = image.data;       // Data buffer
     imageParam.width = image.cols;      // Target view width
-    imageParam.height = image.rows;      // Target view width
-    imageParam.rotation = HF_CAMERA_ROTATION_0;      // Data source rotate
-    imageParam.format = HF_STREAM_BGR;      // Data source format
+    imageParam.height = image.rows;     // Target view width
+
+    // Set rotation based on input parameter
+    switch (rotation) {
+        case 90:
+            imageParam.rotation = HF_CAMERA_ROTATION_90;
+            break;
+        case 180:
+            imageParam.rotation = HF_CAMERA_ROTATION_180;
+            break;
+        case 270:
+            imageParam.rotation = HF_CAMERA_ROTATION_270;
+            break;
+        case 0:
+        default:
+            imageParam.rotation = HF_CAMERA_ROTATION_0;
+            break;
+    }
+
+    imageParam.format = HF_STREAM_BGR;  // Data source format
 
     // Create an image data stream
     HFImageStream imageHandle = {0};
@@ -82,10 +110,11 @@ int main(int argc, char* argv[]) {
     cv::Mat draw = image.clone();
     for (int index = 0; index < faceNum; ++index) {
         std::cout << "========================================" << std::endl;
+        std::cout << "Token size: " << multipleFaceData.tokens[index].size << std::endl;
         std::cout << "Process face index: " << index << std::endl;
         // Use OpenCV's Rect to receive face bounding boxes
         auto rect = cv::Rect(multipleFaceData.rects[index].x, multipleFaceData.rects[index].y,
-                                 multipleFaceData.rects[index].width, multipleFaceData.rects[index].height);
+                             multipleFaceData.rects[index].width, multipleFaceData.rects[index].height);
         cv::rectangle(draw, rect, cv::Scalar(0, 100, 255), 4);
 
         // Print FaceID, In IMAGE-MODE it is changing, in VIDEO-MODE it is fixed, but it may be lost
@@ -93,9 +122,21 @@ int main(int argc, char* argv[]) {
 
         // Print Head euler angle, It can often be used to judge the quality of a face by the Angle of the head
         std::cout << "Roll: " << multipleFaceData.angles.roll[index]
-                    << ", Yaw: " << multipleFaceData.angles.roll[index]
-                    << ", Pitch: " << multipleFaceData.angles.pitch[index] << std::endl;
+                  << ", Yaw: " << multipleFaceData.angles.roll[index]
+                  << ", Pitch: " << multipleFaceData.angles.pitch[index] << std::endl;
 
+        HInt32 numOfLmk;
+        HFGetNumOfFaceDenseLandmark(&numOfLmk);
+        HPoint2f denseLandmarkPoints[numOfLmk];
+        ret = HFGetFaceDenseLandmarkFromFaceToken(multipleFaceData.tokens[index], denseLandmarkPoints, numOfLmk);
+        if (ret != HSUCCEED) {
+            std::cerr << "HFGetFaceDenseLandmarkFromFaceToken error!!" << std::endl;
+            return -1;
+        }
+        for (size_t i = 0; i < numOfLmk; i++) {
+            cv::Point2f p(denseLandmarkPoints[i].x, denseLandmarkPoints[i].y);
+            cv::circle(draw, p, 0, (0, 0, 255), 2);
+        }
     }
     cv::imwrite("draw_detected.jpg", draw);
 
@@ -116,7 +157,6 @@ int main(int argc, char* argv[]) {
         std::cout << "Get mask detect result error: " << ret << std::endl;
         return -1;
     }
-
 
     // Get face quality results from the pipeline cache
     HFFaceQualityConfidence qualityConfidence = {0};
@@ -151,7 +191,6 @@ int main(int argc, char* argv[]) {
         printf("Release session error: %lu\n", ret);
         return ret;
     }
-
 
     return 0;
 }

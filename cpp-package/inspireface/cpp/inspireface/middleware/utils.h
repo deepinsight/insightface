@@ -481,11 +481,9 @@ inline cv::Mat ScaleAffineMatrix(const cv::Mat &affine, float scale,
     return m;
 }
 
-template<typename T>
-inline int ArgMax(const std::vector<T> data, int start, int end) {
-    int diff = std::max_element(data.begin() + start, data.begin() + end) -
-               (data.begin() + start);
-    return diff;
+template<class ForwardIterator>
+inline size_t argmax(ForwardIterator first, ForwardIterator last) {
+    return std::distance(first, std::max_element(first, last));
 }
 
 inline void RotPoints(std::vector<cv::Point2f> &pts, float angle) {
@@ -648,6 +646,52 @@ inline bool isShortestSideGreaterThan(const cv::Rect_<T>& rect, T value, float s
     T shortestSide = std::min(rect.width / scale, rect.height / scale);
     // Determines whether the shortest edge is greater than the given value
     return shortestSide > value;
+}
+
+/**
+ * @brief Computes the affine transformation matrix for face cropping.
+ * @param rect Rectangle representing the face in the image.
+ * @return cv::Mat The computed affine transformation matrix.
+ */
+inline cv::Mat ComputeCropMatrix(const cv::Rect2f &rect, int width, int height) {
+    float x = rect.x;
+    float y = rect.y;
+    float w = rect.width;
+    float h = rect.height;
+    float cx = x + w / 2;
+    float cy = y + h / 2;
+    float length = std::max(w, h) * 1.5 / 2;
+    float x1 = cx - length;
+    float y1 = cy - length;
+    float x2 = cx + length;
+    float y2 = cy + length;
+    cv::Rect2f padding_rect(x1, y1, x2 - x1, y2 - y1);
+    std::vector<cv::Point2f> rect_pts = Rect2Points(padding_rect);
+    rect_pts.erase(rect_pts.end() - 1);
+    std::vector<cv::Point2f> dst_pts = {{0, 0}, {(float )width, 0}, {(float )width, (float )height}};
+    cv::Mat m = cv::getAffineTransform(rect_pts, dst_pts);
+
+    return m;
+}
+
+
+// Exponential Moving Average (EMA) filter function
+inline float EmaFilter(float currentProb, std::vector<float>& history, int max, float alpha = 0.2f) {
+    // Add current probability to history
+    history.push_back(currentProb);
+
+    // Trim history if it exceeds max size
+    if (history.size() > max) {
+        history.erase(history.begin(), history.begin() + (history.size() - max));
+    }
+
+    // Compute EMA
+    float ema = history[0];  // Initial value
+    for (size_t i = 1; i < history.size(); ++i) {
+        ema = alpha * history[i] + (1 - alpha) * ema;
+    }
+
+    return ema;
 }
 
 }   // namespace inspire

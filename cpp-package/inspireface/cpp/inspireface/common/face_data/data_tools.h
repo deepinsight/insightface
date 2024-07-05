@@ -96,6 +96,15 @@ inline HyperFaceData INSPIRE_API FaceObjectToHyperFaceData(const FaceObject& obj
     data.face3DAngle.pitch = obj.high_result.pitch;
     data.face3DAngle.roll = obj.high_result.roll;
     data.face3DAngle.yaw = obj.high_result.yaw;
+    
+
+    const auto &lmk = obj.landmark_smooth_aux_.back();
+    for (size_t i = 0; i < lmk.size(); i++)
+    {
+        data.densityLandmark[i].x = lmk[i].x;
+        data.densityLandmark[i].y = lmk[i].y;
+    }
+    
 
     return data;
 }

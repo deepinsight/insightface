@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Set log level
-    HFSetLogLevel(HF_LOG_ERROR);
+    HFSetLogLevel(HF_LOG_INFO);
 
     return session.run();
 }

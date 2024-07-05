@@ -1,3 +1,5 @@
+import ctypes
+
 import cv2
 import numpy as np
 from .core import *
@@ -146,6 +148,11 @@ class FaceExtended:
     rgb_liveness_confidence: float
     mask_confidence: float
     quality_confidence: float
+    left_eye_status_confidence: float
+    right_eye_status_confidence: float
+    race: int
+    gender: int
+    age_bracket: int
 
 
 class FaceInformation:
@@ -208,8 +215,7 @@ class SessionCustomParameter:
     enable_liveness: bool = False
     enable_ir_liveness: bool = False
     enable_mask_detect: bool = False
-    enable_age: bool = False
-    enable_gender: bool = False
+    enable_face_attribute: bool = False
     enable_face_quality: bool = False
     enable_interaction_liveness: bool = False
 
@@ -225,8 +231,7 @@ class SessionCustomParameter:
             enable_liveness=int(self.enable_liveness),
             enable_ir_liveness=int(self.enable_ir_liveness),
             enable_mask_detect=int(self.enable_mask_detect),
-            enable_age=int(self.enable_age),
-            enable_gender=int(self.enable_gender),
+            enable_face_attribute=int(self.enable_face_attribute),
             enable_face_quality=int(self.enable_face_quality),
             enable_interaction_liveness=int(self.enable_interaction_liveness)
         )
@@ -317,6 +322,21 @@ class InspireFaceSession(object):
         else:
             return []
 
+    def get_face_dense_landmark(self, single_face: FaceInformation):
+        num_landmarks = HInt32()
+        HFGetNumOfFaceDenseLandmark(byref(num_landmarks))
+        landmarks_array = (HPoint2f * num_landmarks.value)()
+        ret = HFGetFaceDenseLandmarkFromFaceToken(single_face._token, landmarks_array, num_landmarks)
+        if ret != 0:
+            logger.error(f"An error occurred obtaining a dense landmark for a single face: {ret}")
+
+        landmark = []
+        for point in landmarks_array:
+            landmark.append(point.x)
+            landmark.append(point.y)
+
+        return np.asarray(landmark).reshape(-1, 2)
+
     def set_track_preview_size(self, size=192):
         """
         Sets the preview size for the face tracking session.
@@ -367,10 +387,12 @@ class InspireFaceSession(object):
             logger.error(f"Face pipeline error: {ret}")
             return []
 
-        extends = [FaceExtended(-1.0, -1.0, -1.0) for _ in range(len(faces))]
+        extends = [FaceExtended(-1.0, -1.0, -1.0, -1.0, -1.0, -1, -1, -1) for _ in range(len(faces))]
         self._update_mask_confidence(exec_param, flag, extends)
         self._update_rgb_liveness_confidence(exec_param, flag, extends)
         self._update_face_quality_confidence(exec_param, flag, extends)
+        self._update_face_attribute_confidence(exec_param, flag, extends)
+        self._update_face_interact_confidence(exec_param, flag, extends)
 
         return extends
 
@@ -431,6 +453,18 @@ class InspireFaceSession(object):
             else:
                 logger.error(f"Get mask result error: {ret}")
 
+    def _update_face_interact_confidence(self, exec_param, flag, extends):
+        if (flag == "object" and exec_param.enable_interaction_liveness) or (
+                flag == "bitmask" and exec_param & HF_ENABLE_INTERACTION):
+            results = HFFaceIntereactionResult()
+            ret = HFGetFaceIntereactionResult(self._sess, PHFFaceIntereactionResult(results))
+            if ret == 0:
+                for i in range(results.num):
+                    extends[i].left_eye_status_confidence = results.leftEyeStatusConfidence[i]
+                    extends[i].right_eye_status_confidence = results.rightEyeStatusConfidence[i]
+            else:
+                logger.error(f"Get face interact result error: {ret}")
+
     def _update_rgb_liveness_confidence(self, exec_param, flag, extends: List[FaceExtended]):
         if (flag == "object" and exec_param.enable_liveness) or (
                 flag == "bitmask" and exec_param & HF_ENABLE_LIVENESS):
@@ -441,6 +475,19 @@ class InspireFaceSession(object):
                     extends[i].rgb_liveness_confidence = liveness_results.confidence[i]
             else:
                 logger.error(f"Get rgb liveness result error: {ret}")
+
+    def _update_face_attribute_confidence(self, exec_param, flag, extends: List[FaceExtended]):
+        if (flag == "object" and exec_param.enable_face_attribute) or (
+                flag == "bitmask" and exec_param & HF_ENABLE_FACE_ATTRIBUTE):
+            attribute_results = HFFaceAttributeResult()
+            ret = HFGetFaceAttributeResult(self._sess, PHFFaceAttributeResult(attribute_results))
+            if ret == 0:
+                for i in range(attribute_results.num):
+                    extends[i].gender = attribute_results.gender[i]
+                    extends[i].age_bracket = attribute_results.ageBracket[i]
+                    extends[i].race = attribute_results.race[i]
+            else:
+                logger.error(f"Get face attribute result error: {ret}")
 
     def _update_face_quality_confidence(self, exec_param, flag, extends: List[FaceExtended]):
         if (flag == "object" and exec_param.enable_face_quality) or (

@@ -1,6 +1,7 @@
 # InspireFace
 [![GitHub release](https://img.shields.io/github/v/release/HyperInspire/InspireFace.svg?style=for-the-badge&color=blue)](https://github.com/HyperInspire/InspireFace/releases/latest)
 [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=build)
+[![test](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=test)](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/test_ubuntu_x86_Pikachu.yaml?&style=for-the-badge&label=test)
 
 InspireFace is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backend types for inference, such as CPU, GPU, and NPU.
 
@@ -9,6 +10,10 @@ If you require further information on tracking development branches, CI/CD proce
 Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=InspireFace) for commercial support, including obtaining and integrating higher accuracy models, as well as custom development.
 
 ## Change Logs
+
+**`2024-07-05`** Fixed some bugs in the python ctypes interface.
+
+**`2024-07-03`** Add the blink detection algorithm of face interaction module.
 
 **`2024-07-02`** Fixed several bugs in the face detector with multi-level input.
 
@@ -52,7 +57,7 @@ You can download the model package files containing models and configurations ne
 If you intend to use the SDK locally or on a server, ensure that OpenCV is installed on the host device beforehand to enable successful linking during the compilation process. For cross-compilation targets like Android or ARM embedded boards, you can use the pre-compiled OpenCV libraries provided by **3rdparty/inspireface-precompile/opencv/**.
 
 ### 1.4. Installing MNN
-The '3rdparty' directory already includes the MNN library and specifies a particular version as the stable version. If you need to enable or disable additional configuration options during compilation, you can refer to the CMake Options provided by MNN. If you need to use your own precompiled version, feel free to replace it.
+The '**3rdparty**' directory already includes the MNN library and specifies a particular version as the stable version. If you need to enable or disable additional configuration options during compilation, you can refer to the CMake Options provided by MNN. If you need to use your own precompiled version, feel free to replace it.
 
 ### 1.5. Requirements
 
@@ -298,14 +303,14 @@ In the project, there is a subproject called cpp/test. To compile it, you need t
 ```bash
 cmake -DISF_BUILD_WITH_TEST=ON ..
 ```
-If you need to run test cases, you will need to download the required [resource files](https://drive.google.com/file/d/1i4uC-dZTQxdVgn2rP0ZdfJTMkJIXgYY4/view?usp=sharing), which are **test_res** and **Model Package** respectively. Unzip the pack file into the test_res folder. The directory structure of test_res should be prepared as follows before testing:
+If you need to run test cases, you will need to download the required [resource files](https://drive.google.com/file/d/1i4uC-dZTQxdVgn2rP0ZdfJTMkJIXgYY4/view?usp=sharing): **test_res**. Unzip the test_res folder. The directory structure of test_res should be prepared as follows before testing:
 
 ```bash
 
 test_res
 ├── data
 ├── images
-├── pack		<- unzip pack.zip
+├── pack	<-- The model package files are here
 ├── save
 ├── valid_lfw_funneled.txt
 ├── video
@@ -352,17 +357,17 @@ The following functionalities and technologies are currently supported.
 | 6 | Silent Liveness Detection | ![Static Badge](https://img.shields.io/badge/STABLE-blue?style=for-the-badge) | MiniVision |
 | 7 | Face Quality Detection | ![Static Badge](https://img.shields.io/badge/STABLE-blue?style=for-the-badge) |  |
 | 8 | Face Pose Estimation | ![Static Badge](https://img.shields.io/badge/STABLE-blue?style=for-the-badge) |  |
-| 9 | Age Prediction | ![Static Badge](https://img.shields.io/badge/PENDING-yellow?style=for-the-badge) |  |
-| 10 | Cooperative Liveness Detection | ![Static Badge](https://img.shields.io/badge/PENDING-yellow?style=for-the-badge) |  |
+| 9 | Face Attribute Prediction | ![Static Badge](https://img.shields.io/badge/STABLE-blue?style=for-the-badge) | Age, Race, Gender |
+| 10 | Cooperative Liveness Detection | ![Static Badge](https://img.shields.io/badge/DEVELOP-green?style=for-the-badge) | Blink |
 
 
 ## 6. Models Package List
 
-For different scenarios, we currently provide several Packs, each containing multiple models and configurations.
+For different scenarios, we currently provide several Packs, each containing multiple models and configurations.The package file is placed in the **pack** subdirectory under the **test_res** directory.
 
 | Name | Supported Devices | Note | Link |
 | --- | --- | --- | --- |
-| Pikachu | CPU | Lightweight edge-side model | [GDrive](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing) |
-| Megatron | CPU, GPU | Local or server-side model | [GDrive](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing) |
+| Pikachu | CPU | Lightweight edge-side models | [GDrive](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing) |
+| Megatron | CPU, GPU | Mobile and server models | [GDrive](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing) |
 | Gundam-RV1109 | RKNPU | Supports RK1109 and RK1126 | [GDrive](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing) |
 

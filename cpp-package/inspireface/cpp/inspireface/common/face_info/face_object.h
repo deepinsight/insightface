@@ -312,6 +312,10 @@ public:
         face_id_ = id;
     }
 
+    std::vector<float> left_eye_status_;
+    
+    std::vector<float> right_eye_status_;
+
 private:
     TRACK_STATE tracking_state_;
 //  std::shared_ptr<FaceAction> face_action_;
