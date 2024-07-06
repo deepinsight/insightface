@@ -62,7 +62,7 @@ def case_face_tracker_from_video(resource_path, source, show):
             # Calculate center, size, and angle
             center = ((x1 + x2) / 2, (y1 + y2) / 2)
             size = (x2 - x1, y2 - y1)
-            angle = face.roll  # 这里使用 roll 角度
+            angle = face.roll 
 
             # Get rotation matrix
             rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
