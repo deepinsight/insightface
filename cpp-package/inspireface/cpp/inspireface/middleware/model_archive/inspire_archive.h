@@ -4,7 +4,7 @@
 
 #ifndef MODELLOADERTAR_INSPIREARCHIVE_H
 #define MODELLOADERTAR_INSPIREARCHIVE_H
-#include "sample_archive.h"
+#include "simple_archive.h"
 #include "inspire_model/inspire_model.h"
 #include "yaml-cpp/yaml.h"
 #include "fstream"
@@ -64,6 +64,11 @@ public:
 
     void PublicPrintSubFiles() {
         PrintSubFiles();
+    }
+
+    void Release() {
+        m_status_ = NOT_READ;
+        Close();
     }
 
 private:

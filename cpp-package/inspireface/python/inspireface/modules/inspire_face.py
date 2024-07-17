@@ -150,6 +150,11 @@ class FaceExtended:
     quality_confidence: float
     left_eye_status_confidence: float
     right_eye_status_confidence: float
+    action_normal: int
+    action_jaw_open: int
+    action_shake: int
+    action_blink: int
+    action_head_raise: int
     race: int
     gender: int
     age_bracket: int
@@ -356,7 +361,6 @@ class InspireFaceSession(object):
         if ret != 0:
             logger.error(f"Set filter minimum face pixel size error: {ret}")
 
-
     def face_pipeline(self, image, faces: List[FaceInformation], exec_param) -> List[FaceExtended]:
         """
         Processes detected faces to extract additional attributes based on the provided execution parameters.
@@ -387,7 +391,7 @@ class InspireFaceSession(object):
             logger.error(f"Face pipeline error: {ret}")
             return []
 
-        extends = [FaceExtended(-1.0, -1.0, -1.0, -1.0, -1.0, -1, -1, -1) for _ in range(len(faces))]
+        extends = [FaceExtended(-1.0, -1.0, -1.0, -1.0, -1.0, 0, 0, 0, 0, 0, -1, -1, -1) for _ in range(len(faces))]
         self._update_mask_confidence(exec_param, flag, extends)
         self._update_rgb_liveness_confidence(exec_param, flag, extends)
         self._update_face_quality_confidence(exec_param, flag, extends)
@@ -456,14 +460,25 @@ class InspireFaceSession(object):
     def _update_face_interact_confidence(self, exec_param, flag, extends):
         if (flag == "object" and exec_param.enable_interaction_liveness) or (
                 flag == "bitmask" and exec_param & HF_ENABLE_INTERACTION):
-            results = HFFaceIntereactionResult()
-            ret = HFGetFaceIntereactionResult(self._sess, PHFFaceIntereactionResult(results))
+            results = HFFaceIntereactionState()
+            ret = HFGetFaceIntereactionStateResult(self._sess, PHFFaceIntereactionState(results))
             if ret == 0:
                 for i in range(results.num):
                     extends[i].left_eye_status_confidence = results.leftEyeStatusConfidence[i]
                     extends[i].right_eye_status_confidence = results.rightEyeStatusConfidence[i]
             else:
                 logger.error(f"Get face interact result error: {ret}")
+            actions = HFFaceIntereactionsActions()
+            ret = HFGetFaceIntereactionActionsResult(self._sess, PHFFaceIntereactionsActions(actions))
+            if ret == 0:
+                for i in range(results.num):
+                    extends[i].action_normal = actions.normal[i]
+                    extends[i].action_shake = actions.shake[i]
+                    extends[i].action_jaw_open = actions.jawOpen[i]
+                    extends[i].action_head_raise = actions.headRiase[i]
+                    extends[i].action_blink = actions.blink[i]
+            else:
+                logger.error(f"Get face action result error: {ret}")
 
     def _update_rgb_liveness_confidence(self, exec_param, flag, extends: List[FaceExtended]):
         if (flag == "object" and exec_param.enable_liveness) or (

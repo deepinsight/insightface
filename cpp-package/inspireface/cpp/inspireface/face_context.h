@@ -2,6 +2,7 @@
 // Created by Tunm-Air13 on 2023/9/7.
 //
 #pragma once
+#include <vector>
 #ifndef HYPERFACEREPO_FACE_CONTEXT_H
 #define HYPERFACEREPO_FACE_CONTEXT_H
 
@@ -262,6 +263,36 @@ public:
     const std::vector<int>& GetFaceAgeBracketResultsCache() const;
 
     /**
+     * @brief Gets the cache of face action normal results.
+     * @return A const reference to a vector containing face action normal results.
+     */
+    const std::vector<int>& GetFaceNormalAactionsResultCache() const;
+    
+    /**
+     * @brief Gets the cache of face action jaw open results.
+     * @return A const reference to a vector containing face action jaw open results.
+     */
+    const std::vector<int>& GetFaceJawOpenAactionsResultCache() const;
+
+    /**
+     * @brief Gets the cache of face action blink results.
+     * @return A const reference to a vector containing face action blink results.
+     */
+    const std::vector<int>& GetFaceBlinkAactionsResultCache() const;
+
+    /**
+     * @brief Gets the cache of face action shake results.
+     * @return A const reference to a vector containing face action shake results.
+     */
+    const std::vector<int>& GetFaceShakeAactionsResultCache() const;
+
+    /**
+     * @brief Gets the cache of face action raise head results.
+     * @return A const reference to a vector containing face action raise head results.
+     */
+    const std::vector<int>& GetFaceRaiseHeadAactionsResultCache() const;
+
+    /**
      * @brief Gets the cache of the current face features.
      * @return A const reference to the Embedded object containing current face feature data.
      */
@@ -294,6 +325,13 @@ private:
     std::vector<float> m_quality_score_results_cache_;               ///< Cache for RGB face quality score results
     std::vector<float> m_react_left_eye_results_cache_;               ///< Cache for Left eye state in face interaction
     std::vector<float> m_react_right_eye_results_cache_;               ///< Cache for Right eye state in face interaction
+
+    std::vector<int> m_action_normal_results_cache_;                ///< Cache for normal action in face interaction
+    std::vector<int> m_action_shake_results_cache_;                 ///< Cache for shake action in face interaction
+    std::vector<int> m_action_blink_results_cache_;                 ///< Cache for blink action in face interaction
+    std::vector<int> m_action_jaw_open_results_cache_;              ///< Cache for jaw open action in face interaction
+    std::vector<int> m_action_raise_head_results_cache_;            ///< Cache for raise head action in face interaction
+
     std::vector<int> m_attribute_race_results_cache_;
     std::vector<int> m_attribute_gender_results_cache_;
     std::vector<int> m_attribute_age_results_cache_;

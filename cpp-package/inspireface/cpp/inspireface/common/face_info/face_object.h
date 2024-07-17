@@ -10,6 +10,7 @@
 #include "data_type.h"
 #include "face_process.h"
 #include "track_module/quality/face_pose_quality.h"
+#include "face_action.h"
 
 namespace inspire {
 
@@ -28,7 +29,7 @@ public:
         tracking_count_ = 0;
         pose_euler_angle_.resize(3);
         keyPointFive.resize(5);
-//    face_action_ = std::make_shared<FaceAction>(10);
+        face_action_ = std::make_shared<FaceActionAnalyse>(10);
     }
 
     void UpdateMatrix(const cv::Mat &matrix) {
@@ -137,9 +138,11 @@ public:
         return box_square;
     }
 
-    void UpdateFaceAction() {
-//    face_action_->RecordActionFrame(landmark_, euler_angle_);
-//    face_action_->AnalysisFaceAction();
+    FaceActions UpdateFaceAction() {
+        cv::Vec3f euler(high_result.pitch, high_result.yaw, high_result.roll);
+        cv::Vec2f eyes(left_eye_status_.back(), right_eye_status_.back());
+        face_action_->RecordActionFrame(landmark_, euler, eyes);
+        return face_action_->AnalysisFaceAction();
     }
 
     void DisableTracking() { tracking_state_ = UNTRACKING; }
@@ -318,7 +321,7 @@ public:
 
 private:
     TRACK_STATE tracking_state_;
-//  std::shared_ptr<FaceAction> face_action_;
+    std::shared_ptr<FaceActionAnalyse> face_action_;
     int face_id_;
 };
 

@@ -13,6 +13,10 @@ Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=In
 
 ## Change Logs
 
+**`2024-07-17`** Add global resource statistics monitoring to prevent memory leaks.
+
+**`2024-07-07`** Add some face action detection to the face interaction module.
+
 **`2024-07-05`** Fixed some bugs in the python ctypes interface.
 
 **`2024-07-03`** Add the blink detection algorithm of face interaction module.
@@ -64,7 +68,7 @@ The '**3rdparty**' directory already includes the MNN library and specifies a pa
 ### 1.5. Requirements
 
 - CMake (version 3.10 or higher)
-- OpenCV (version 4.20 or higher)
+- OpenCV (version 3.5 or higher)
     - Use the specific OpenCV-SDK supported by each target platform such as Android, iOS, and Linux.
 - NDK (version 16 or higher, only required for Android)
 - MNN (version 1.4.0 or higher)
