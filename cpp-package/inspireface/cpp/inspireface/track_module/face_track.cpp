@@ -230,7 +230,6 @@ bool FaceTrack::TrackFace(CameraStream &image, FaceObject &face) {
     }
 
     face.SetConfidence(score);
-    face.UpdateFaceAction();
     return true;
 }
 
@@ -308,14 +307,24 @@ void FaceTrack::nms(float th) {
             float inter = w * h;
             float ovr = inter / (area[i] + area[j] - inter);
             if (ovr >= th) {
-                trackingFace.erase(trackingFace.begin() + j);
-                area.erase(area.begin() + j);
+                // Compare tracking IDs to decide which to keep
+                if (trackingFace[i].GetTrackingId() < trackingFace[j].GetTrackingId()) {
+                    trackingFace.erase(trackingFace.begin() + j);
+                    area.erase(area.begin() + j);
+                } else {
+                    trackingFace.erase(trackingFace.begin() + i);
+                    area.erase(area.begin() + i);
+                    // If we erase i, we need to break the inner loop
+                    // and start over with a new i, because the indexes shifted.
+                    break;
+                }
             } else {
                 j++;
             }
         }
     }
 }
+
 
 void FaceTrack::BlackingTrackingRegion(cv::Mat &image, cv::Rect &rect_mask) {
     int height = image.rows;

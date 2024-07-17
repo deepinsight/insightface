@@ -89,13 +89,20 @@ public:
         return m_subfiles_names_;
     }
 
-    ~SimpleArchive() {
+    ~SimpleArchive() { 
+        Close();
+    }
+        
+
+    void Close() {
         if (m_tar_.get() != nullptr) {
             mtar_close(m_tar_.get());
         }
         m_tar_.reset();
+        m_load_file_status_ = SARC_NOT_LOAD;
+        m_subfiles_names_.clear();
     }
-
+    
 
     void PrintSubFiles() {
         std::cout << "Subfiles: " << m_subfiles_names_.size() << std::endl;

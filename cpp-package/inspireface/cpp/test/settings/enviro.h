@@ -25,11 +25,17 @@ public:
 
     void setTestResDir(const std::string &dir) { Enviro::testResDir = dir; }
 
+    const std::string &getTestRuntimeFullPath() const { return runtimeFullPath; }
+
+    void setTestRuntimeFullPath(const std::string &path) { Enviro::runtimeFullPath = path; }
+
 private:
     Enviro() {}
 
     std::string packName = "Pikachu";
     std::string testResDir = "test_res";
+
+    std::string runtimeFullPath = "";
 };
 
 #endif //INSPIREFACE_ENVIRO_H

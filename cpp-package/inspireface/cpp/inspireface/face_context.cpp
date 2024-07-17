@@ -63,6 +63,13 @@ int32_t FaceContext::FaceDetectAndTrack(CameraStream &image) {
     m_quality_score_results_cache_.clear();
     m_react_left_eye_results_cache_.clear();
     m_react_right_eye_results_cache_.clear();
+
+    m_action_normal_results_cache_.clear();
+    m_action_shake_results_cache_.clear();
+    m_action_blink_results_cache_.clear();
+    m_action_jaw_open_results_cache_.clear();
+    m_action_raise_head_results_cache_.clear();
+
     m_quality_score_results_cache_.clear();
     m_attribute_race_results_cache_.clear();
     m_attribute_gender_results_cache_.clear();
@@ -138,6 +145,11 @@ int32_t FaceContext::FacesProcess(CameraStream &image, const std::vector<HyperFa
     m_attribute_race_results_cache_.resize(faces.size(), -1);
     m_attribute_gender_results_cache_.resize(faces.size(), -1);
     m_attribute_age_results_cache_.resize(faces.size(), -1);
+    m_action_normal_results_cache_.resize(faces.size(), -1);
+    m_action_jaw_open_results_cache_.resize(faces.size(), -1);
+    m_action_blink_results_cache_.resize(faces.size(), -1);
+    m_action_raise_head_results_cache_.resize(faces.size(), -1);
+    m_action_shake_results_cache_.resize(faces.size(), -1);
     for (int i = 0; i < faces.size(); ++i) {
         const auto &face = faces[i];
         // RGB Liveness Detect
@@ -190,7 +202,12 @@ int32_t FaceContext::FacesProcess(CameraStream &image, const std::vector<HyperFa
                             m_react_left_eye_results_cache_[i] = new_eye_left;
                             m_react_right_eye_results_cache_[i] = new_eye_right;
                         }
-                        
+                        const auto actions = target.UpdateFaceAction();
+                        m_action_normal_results_cache_[i] = actions.normal;
+                        m_action_jaw_open_results_cache_[i] = actions.jawOpen;
+                        m_action_blink_results_cache_[i] = actions.blink;
+                        m_action_raise_head_results_cache_[i] = actions.raiseHead;
+                        m_action_shake_results_cache_[i] = actions.shake;
                     } else {
                         INSPIRE_LOGD("Serialized objects cannot connect to trace objects in memory, and there may be some problems");
                     }
@@ -272,6 +289,26 @@ const std::vector<int>& FaceContext::GetFaceGenderResultsCache() const {
 
 const std::vector<int>& FaceContext::GetFaceAgeBracketResultsCache() const {
     return m_attribute_age_results_cache_;
+}
+
+const std::vector<int>& FaceContext::GetFaceNormalAactionsResultCache() const {
+    return m_action_normal_results_cache_;
+}
+
+const std::vector<int>& FaceContext::GetFaceJawOpenAactionsResultCache() const {
+    return m_action_jaw_open_results_cache_;
+}
+
+const std::vector<int>& FaceContext::GetFaceBlinkAactionsResultCache() const {
+    return m_action_blink_results_cache_;
+}
+
+const std::vector<int>& FaceContext::GetFaceShakeAactionsResultCache() const {
+    return m_action_shake_results_cache_;
+}
+
+const std::vector<int>& FaceContext::GetFaceRaiseHeadAactionsResultCache() const {
+    return m_action_raise_head_results_cache_;
 }
 
 int32_t FaceContext::FaceFeatureExtract(CameraStream &image, FaceBasicData& data) {

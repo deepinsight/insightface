@@ -43,4 +43,16 @@ bool Launch::isMLoad() const {
     return m_load_;
 }
 
+void Launch::Unload() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (m_load_) {
+        // Assuming InspireArchive has a method to clear its resources
+        m_archive_.Release(); 
+        m_load_ = false;
+        INSPIRE_LOGI("All resources have been successfully unloaded and system is reset.");
+    } else {
+        INSPIRE_LOGW("Unload called but system was not loaded.");
+    }
+}
+
 }   // namespace inspire

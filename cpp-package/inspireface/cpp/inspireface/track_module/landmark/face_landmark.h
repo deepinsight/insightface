@@ -42,6 +42,8 @@ public:
     const static int NOSE_CORNER = 69;          ///< Landmark index for the tip of the nose.
     const static int MOUTH_LEFT_CORNER = 45;    ///< Landmark index for the left corner of the mouth.
     const static int MOUTH_RIGHT_CORNER = 50;   ///< Landmark index for the right corner of the mouth.
+    const static int MOUTH_LOWER = 37 - 1;
+    const static int MOUTH_UPPER = 104 - 1;
 
     const static int NUM_OF_LANDMARK = 106;     ///< Total number of landmarks detected.
 

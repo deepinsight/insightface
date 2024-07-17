@@ -33,6 +33,9 @@ public:
     // Checks if the resources have been successfully loaded.
     bool isMLoad() const;
 
+    // Unloads the resources and resets the system to its initial state.
+    void Unload();
+
 private:
     Launch() : m_load_(false) {} ///< Private constructor for the singleton pattern.
 
