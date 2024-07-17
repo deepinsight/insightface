@@ -13,6 +13,8 @@ Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=In
 
 ## Change Logs
 
+**`2024-07-17`** Add global resource statistics monitoring to prevent memory leaks.
+
 **`2024-07-07`** Add some face action detection to the face interaction module.
 
 **`2024-07-05`** Fixed some bugs in the python ctypes interface.
