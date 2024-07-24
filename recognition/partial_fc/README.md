@@ -151,7 +151,7 @@ The Glint360K would not have been possible without the invaluable contributions 
 | Contributor      | Emial    |
 |------------------|----------|
 | **Bin Qin**    | skyqin@gmail.com     |
-| **Lan Wu**     |          |
+| **Lan Wu**     | bah-wl@hotmail.com   |
 
 
 
