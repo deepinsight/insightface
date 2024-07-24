@@ -148,7 +148,7 @@ The torrent has been released.
 
 The Glint360K would not have been possible without the invaluable contributions of the following individuals, who have been instrumental in data scraping, downloading, merging, and cleaning. Their efforts have provided the foundation for our work and have been essential to our success:
 
-- [**Bin Qin**]()  
+- [**Bin Qin**](skyqin@gmail.com)  
 - [**Lan Wu**]()
 
 Thank you to all the contributors for their hard work and dedication!
