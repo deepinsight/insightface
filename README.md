@@ -223,13 +223,19 @@ If you find *InsightFace* useful in your research, please consider to cite the f
   year={2021}
 }
 
-@inproceedings{an2020partical_fc,
-  title={Partial FC: Training 10 Million Identities on a Single Machine},
-  author={An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and
-  Zhang, Debing and Fu Ying},
-  booktitle={Arxiv 2010.05222},
-  year={2020}
+@inproceedings{an_2022_pfc_cvpr,
+  title={Killing Two Birds with One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
+  author={An, Xiang and Deng, Jiangkang and Guo, Jia and Feng, Ziyong and Zhu, Xuhan and Jing, Yang and Tongliang, Liu},
+  booktitle={CVPR},
+  year={2022}
 }
+@inproceedings{an_2021_pfc_iccvw,
+  title={Partial FC: Training 10 Million Identities on a Single Machine},
+  author={An, Xiang and Zhu, Xuhan and Gao, Yuan and Xiao, Yang and Zhao, Yongle and Feng, Ziyong and Wu, Lan and Qin, Bin and Zhang, Ming and Zhang, Debing and Fu, Ying},
+  booktitle={ICCVW},
+  year={2021},
+}
+
 
 @inproceedings{deng2020subcenter,
   title={Sub-center ArcFace: Boosting Face Recognition by Large-scale Noisy Web Faces},
