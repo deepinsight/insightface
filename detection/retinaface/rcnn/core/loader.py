@@ -247,7 +247,7 @@ class CropLoader(mx.io.DataIter):
                 print('DEBUG SHAPE', data['data'].shape,
                       label['gt_boxes'].shape)
 
-                box = label['gt_boxes'].copy()[0][0:4].astype(np.int)
+                box = label['gt_boxes'].copy()[0][0:4].astype(np.int32)
                 cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]),
                               (0, 255, 0), 2)
                 filename = './debugout/%d.png' % (self._debug_id)
