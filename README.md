@@ -19,9 +19,9 @@ Both manual-downloading models from our github repo and auto-downloading models 
 
 ## Top News
 
-**`2024-05-04`** We have added [InspireFace](cpp-package/inspireface), which is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backends. 
+**`2024-08-01`** We have integrated our most advanced face-swapping models, **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai face-swapping](https://www.picsi.ai) service. These models outperform almost all similar commercial products and our open-source model inswapper\_128. Please visit the [Picsi.Ai](https://www.picsi.ai) website to use the service and get help.
 
-**`2024-04-17`**: [Monocular Identity-Conditioned Facial Reflectance Reconstruction](https://arxiv.org/abs/2404.00301) accepted by [CVPR-2024](https://cvpr.thecvf.com/Conferences/2024).
+**`2024-05-04`** We have added [InspireFace](cpp-package/inspireface), which is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backends. 
 
 **`2023-04-01`**: We move the swapping demo to Discord bot, which support editing on Midjourney generated images, see detail at [web-demos/swapping_discord](web-demos/swapping_discord).
 
@@ -34,6 +34,8 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 **`2021-10-29`**: We achieved 1st place on the [VISA track](https://pages.nist.gov/frvt/plots/11/visa.html) of [NIST-FRVT 1:1](https://pages.nist.gov/frvt/html/frvt11.html) by using Partial FC (Xiang An, Jiankang Deng, Jia Guo).
 
 ## ChangeLogs
+
+**`2024-08-01`** We have integrated our most advanced face-swapping models, **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai face-swapping](https://www.picsi.ai) service. These models outperform almost all similar commercial products and our open-source model inswapper\_128. Please visit the [Picsi.Ai](https://www.picsi.ai) website to use the service and get help.
 
 **`2024-05-04`** We have added [InspireFace](cpp-package/inspireface), which is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backends. 
 
