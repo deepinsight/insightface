@@ -1,6 +1,6 @@
 # Using Midjourney and the Picsi.AI by InsightFaceSwap Bot to create a personalized portrait and do face swapping
 
-We have integrated our most advanced face-swapping models: inswapper_cyn and inswapper_dax, into the [Picsi.Ai face-swapping](https://www.picsi.ai) service. These models outperform almost all similar commercial products and our open-source model inswapper_128. Please visit the [Picsi.Ai](https://www.picsi.ai) website to use the service and get help.
+We have integrated our most advanced face-swapping models: **inswapper_cyn** and **inswapper_dax**, into the [Picsi.Ai face-swapping](https://www.picsi.ai) service. These models outperform almost all similar commercial products and our open-source model inswapper_128. Please visit the [Picsi.Ai](https://www.picsi.ai) website to use the service and get help.
 
 ## Important Links
 
