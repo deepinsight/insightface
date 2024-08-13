@@ -19,11 +19,11 @@ Both manual-downloading models from our github repo and auto-downloading models 
 
 ## Top News
 
+**`2024-08-01`** We have integrated our most advanced face-swapping models: **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai face-swapping](https://www.picsi.ai) service. These models outperform almost all similar commercial products and our open-source model inswapper\_128. Please visit the [Picsi.Ai](https://www.picsi.ai) website to use the service and get help.
+
 **`2024-05-04`** We have added [InspireFace](cpp-package/inspireface), which is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backends. 
 
-**`2024-04-17`**: [Monocular Identity-Conditioned Facial Reflectance Reconstruction](https://arxiv.org/abs/2404.00301) accepted by [CVPR-2024](https://cvpr.thecvf.com/Conferences/2024).
-
-**`2023-04-01`**: We move the swapping demo to Discord bot, which support editing on Midjourney generated images, see detail at [web-demos/swapping_discord](web-demos/swapping_discord).
+**`2023-04-01`**: We integrated our most advanced face-swapping models: **inswapper\_cyn** and **inswapper\_dax** and move the service to Discord bot, which also support editing on Midjourney generated images, see detail at [web-demos/swapping_discord](web-demos/swapping_discord) and our [Picsi.Ai](https://www.picsi.ai) website.
 
 **`2022-08-12`**: We achieved Rank-1st of 
 [Perspective Projection Based Monocular 3D Face Reconstruction Challenge](https://tianchi.aliyun.com/competition/entrance/531961/introduction)
@@ -35,6 +35,8 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 
 ## ChangeLogs
 
+**`2024-08-01`** We have integrated our most advanced face-swapping models: **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai face-swapping](https://www.picsi.ai) service. These models outperform almost all similar commercial products and our open-source model inswapper\_128. Please visit the [Picsi.Ai](https://www.picsi.ai) website to use the service and get help.
+
 **`2024-05-04`** We have added [InspireFace](cpp-package/inspireface), which is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backends. 
 
 **`2024-04-17`**: [Monocular Identity-Conditioned Facial Reflectance Reconstruction](https://arxiv.org/abs/2404.00301) accepted by [CVPR-2024](https://cvpr.thecvf.com/Conferences/2024).
@@ -43,7 +45,7 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 
 **`2023-05-03`**: We have launched the ongoing version of wild face anti-spoofing challenge. See details [here](https://github.com/deepinsight/insightface/tree/master/challenges/cvpr23-fas-wild#updates).
 
-**`2023-04-01`**: We move the swapping demo to Discord bot, which support editing on Midjourney generated images, see detail at [web-demos/swapping_discord](web-demos/swapping_discord).
+**`2023-04-01`**: We integrated our most advanced face-swapping models: **inswapper\_cyn** and **inswapper\_dax** and move the service to Discord bot, which also support editing on Midjourney generated images, see detail at [web-demos/swapping_discord](web-demos/swapping_discord) and our [Picsi.Ai](https://www.picsi.ai) website.
 
 **`2023-02-13`**: We launch a large scale in the wild face anti-spoofing challenge on CVPR23 Workshop, see details at [challenges/cvpr23-fas-wild](challenges/cvpr23-fas-wild).
 
@@ -223,13 +225,19 @@ If you find *InsightFace* useful in your research, please consider to cite the f
   year={2021}
 }
 
-@inproceedings{an2020partical_fc,
-  title={Partial FC: Training 10 Million Identities on a Single Machine},
-  author={An, Xiang and Zhu, Xuhan and Xiao, Yang and Wu, Lan and Zhang, Ming and Gao, Yuan and Qin, Bin and
-  Zhang, Debing and Fu Ying},
-  booktitle={Arxiv 2010.05222},
-  year={2020}
+@inproceedings{an_2022_pfc_cvpr,
+  title={Killing Two Birds with One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
+  author={An, Xiang and Deng, Jiangkang and Guo, Jia and Feng, Ziyong and Zhu, Xuhan and Jing, Yang and Tongliang, Liu},
+  booktitle={CVPR},
+  year={2022}
 }
+@inproceedings{an_2021_pfc_iccvw,
+  title={Partial FC: Training 10 Million Identities on a Single Machine},
+  author={An, Xiang and Zhu, Xuhan and Gao, Yuan and Xiao, Yang and Zhao, Yongle and Feng, Ziyong and Wu, Lan and Qin, Bin and Zhang, Ming and Zhang, Debing and Fu, Ying},
+  booktitle={ICCVW},
+  year={2021},
+}
+
 
 @inproceedings{deng2020subcenter,
   title={Sub-center ArcFace: Boosting Face Recognition by Large-scale Noisy Web Faces},

@@ -57,15 +57,16 @@ typedef struct TransMatrix {
 * Struct to represent hyper face data.
 */
 typedef struct HyperFaceData {
-    int trackState;         ///< Track state
-    int inGroupIndex;       ///< Index within a group
-    int trackId;            ///< Track ID
-    int trackCount;         ///< Track count
-    FaceRect rect;          ///< Face rectangle
-    TransMatrix trans;      ///< Transformation matrix
-    Point2F keyPoints[5];   ///< Key points (e.g., landmarks)
-    Face3DAngle face3DAngle; ///< 3D face angles
-    float quality[5];       ///< Quality values for key points
+    int trackState;                 ///< Track state
+    int inGroupIndex;               ///< Index within a group
+    int trackId;                    ///< Track ID
+    int trackCount;                 ///< Track count
+    FaceRect rect;                  ///< Face rectangle
+    TransMatrix trans;              ///< Transformation matrix
+    Point2F keyPoints[5];           ///< Key points (e.g., landmarks)
+    Face3DAngle face3DAngle;        ///< 3D face angles
+    float quality[5];               ///< Quality values for key points
+    Point2F densityLandmark[106];   ///< Face density landmark
 } HyperFaceData;
 
 } // namespace inspire

@@ -21,8 +21,8 @@ namespace inspire {
 typedef enum FaceProcessFunction {
     PROCESS_MASK = 0,               ///< Mask detection.
     PROCESS_RGB_LIVENESS,           ///< RGB liveness detection.
-    PROCESS_AGE,                    ///< Age estimation.
-    PROCESS_GENDER,                 ///< Gender prediction.
+    PROCESS_ATTRIBUTE,              ///< Face attribute estimation.
+    PROCESS_INTERACTION,            ///< Face interaction.
 } FaceProcessFunction;
 
 /**
@@ -40,12 +40,11 @@ public:
      * @param archive Model archive instance for model loading.
      * @param enableLiveness Whether RGB liveness detection is enabled.
      * @param enableMaskDetect Whether mask detection is enabled.
-     * @param enableAge Whether age estimation is enabled.
-     * @param enableGender Whether gender prediction is enabled.
+     * @param enableAttributee Whether face attribute estimation is enabled.
      * @param enableInteractionLiveness Whether interaction liveness detection is enabled.
      */
-    explicit FacePipeline(InspireArchive &archive, bool enableLiveness, bool enableMaskDetect, bool enableAge,
-                          bool enableGender, bool enableInteractionLiveness);
+    explicit FacePipeline(InspireArchive &archive, bool enableLiveness, bool enableMaskDetect, bool enableAttribute, 
+            bool enableInteractionLiveness);
 
     /**
      * @brief Processes a face using the specified FaceProcessFunction.
@@ -70,20 +69,12 @@ public:
 
 private:
     /**
-     * @brief Initializes the AgePredict model.
+     * @brief Initializes the FaceAttributePredict model.
      *
-     * @param model Pointer to the AgePredict model.
+     * @param model Pointer to the FaceAttributePredict model.
      * @return int32_t Status code indicating success (0) or failure.
      */
-    int32_t InitAgePredict(InspireModel &model);
-
-    /**
-     * @brief Initializes the GenderPredict model.
-     *
-     * @param model Pointer to the GenderPredict model.
-     * @return int32_t Status code indicating success (0) or failure.
-     */
-    int32_t InitGenderPredict(InspireModel &model);
+    int32_t InitFaceAttributePredict(InspireModel &model);
 
     /**
      * @brief Initializes the MaskPredict model.
@@ -102,29 +93,29 @@ private:
     int32_t InitRBGAntiSpoofing(InspireModel &model);
 
     /**
-     * @brief Initializes the LivenessInteraction model.
+     * @brief Initializes the Blink predict model.
      *
-     * @param model Pointer to the LivenessInteraction model.
+     * @param model Pointer to the Blink predict model.
      * @return int32_t Status code indicating success (0) or failure.
      */
-    int32_t InitLivenessInteraction(InspireModel &model);
+    int32_t InitBlinkFromLivenessInteraction(InspireModel &model);
 
 private:
     const bool m_enable_liveness_ = false;                 ///< Whether RGB liveness detection is enabled.
     const bool m_enable_mask_detect_ = false;              ///< Whether mask detection is enabled.
-    const bool m_enable_age_ = false;                      ///< Whether age estimation is enabled.
-    const bool m_enable_gender_ = false;                   ///< Whether gender prediction is enabled.
+    const bool m_enable_attribute_ = false;                ///< Whether face attribute is enabled.
     const bool m_enable_interaction_liveness_ = false;     ///< Whether interaction liveness detection is enabled.
 
-    std::shared_ptr<AgePredict> m_age_predict_;            ///< Pointer to AgePredict instance.
-    std::shared_ptr<GenderPredict> m_gender_predict_;      ///< Pointer to GenderPredict instance.
+    std::shared_ptr<FaceAttributePredict> m_attribute_predict_;   ///< Pointer to Face attribute prediction instance.
     std::shared_ptr<MaskPredict> m_mask_predict_;          ///< Pointer to MaskPredict instance.
     std::shared_ptr<RBGAntiSpoofing> m_rgb_anti_spoofing_;   ///< Pointer to RBGAntiSpoofing instance.
-    std::shared_ptr<LivenessInteraction> m_liveness_interaction_spoofing_; ///< Pointer to LivenessInteraction instance.
+    std::shared_ptr<BlinkPredict> m_blink_predict_;         ///< Pointer to Blink predict instance.
 
 public:
     float faceMaskCache;    ///< Cache for face mask detection result.
     float faceLivenessCache; ///< Cache for face liveness detection result.
+    cv::Vec2f eyesStatusCache;  ///< Cache for blink predict result.
+    cv::Vec3i faceAttributeCache; ///< Cache for face attribute predict result.
 };
 
 }

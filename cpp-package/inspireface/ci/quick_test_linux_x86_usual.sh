@@ -54,8 +54,14 @@ cmake -DCMAKE_BUILD_TYPE=Release \
 # Compile the project using 4 parallel jobs
 make -j4
 
-# Create a symbolic link to the extracted test data directory
-ln -s ${FULL_TEST_DIR} .
+# Check if the symbolic link or directory already exists
+if [ ! -e "$(basename ${FULL_TEST_DIR})" ]; then
+    # Create a symbolic link to the extracted test data directory
+    ln -s ${FULL_TEST_DIR} .
+    echo "Symbolic link to '${TARGET_DIR}' created."
+else
+    echo "Symbolic link or directory '$(basename ${FULL_TEST_DIR})' already exists. Skipping creation."
+fi
 
 # Check if the test executable file exists
 if [ ! -f "$TEST_EXECUTABLE" ]; then

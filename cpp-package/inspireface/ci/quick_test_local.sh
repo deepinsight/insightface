@@ -66,3 +66,5 @@ else
     echo "Test executable found. Running tests..."
     "$TEST_EXECUTABLE"
 fi
+
+# Executing python scripts

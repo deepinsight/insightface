@@ -20,7 +20,7 @@ endif ()
 
 if (ISF_ENABLE_RKNN)
     set(DEPEND rknn_api dl)
-    set(ISF_RKNN_API_LIB ${ISF_THIRD_PARTY_DIR}/${ISF_RKNPU_MAJOR}/runtime/${ISF_RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
+    set(ISF_RKNN_API_LIB ${ISF_THIRD_PARTY_DIR}/inspireface-precompile/rknn/${ISF_RKNPU_MAJOR}/runtime/${ISF_RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
     message("Enable RKNN Inference")
     link_directories(${ISF_RKNN_API_LIB})
     set(DEPEND rknn_api dl)

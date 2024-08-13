@@ -2,6 +2,8 @@
 #include "c_api/intypedef.h"
 #include "opencv2/opencv.hpp"
 #include "inspireface/c_api/inspireface.h"
+#include <unordered_map>
+#include <functional>
 
 void drawMode(cv::Mat& frame, HFDetectMode mode) {
     std::string modeText;
@@ -19,8 +21,25 @@ void drawMode(cv::Mat& frame, HFDetectMode mode) {
             modeText = "Mode: Unknown";
             break;
     }
-    cv::putText(frame, modeText, cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(255, 255, 255), 2);
+    cv::putText(frame, modeText, cv::Point(10, 30), cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(90, 100, 255), 2);
 }
+
+cv::Scalar generateColor(int id) {
+    int maxID = 100;
+    id = id % maxID;
+
+    int hue = (id * 360 / maxID) % 360; 
+    int saturation = 255; 
+    int value = 200;
+
+    cv::Mat hsv(1, 1, CV_8UC3, cv::Scalar(hue, saturation, value));
+    cv::Mat rgb;
+    cv::cvtColor(hsv, rgb, cv::COLOR_HSV2BGR);
+
+    cv::Vec3b rgbColor = rgb.at<cv::Vec3b>(0, 0);
+    return cv::Scalar(rgbColor[0], rgbColor[1], rgbColor[2]);
+}
+
 
 int main(int argc, char* argv[]) {
     // Check whether the number of parameters is correct
@@ -44,11 +63,11 @@ int main(int argc, char* argv[]) {
     }
 
     // Enable the functions in the pipeline: mask detection, live detection, and face quality detection
-    HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
+    HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_INTERACTION;
     // Video or frame sequence mode uses VIDEO-MODE, which is face detection with tracking
     HFDetectMode detMode = HF_DETECT_MODE_TRACK_BY_DETECTION;
     // Maximum number of faces detected
-    HInt32 maxDetectNum = 5;
+    HInt32 maxDetectNum = 20;
     // Face detection image input level
     HInt32 detectPixelLevel = 640;
     // fps in tracking-by-detection mode
@@ -61,8 +80,8 @@ int main(int argc, char* argv[]) {
         return ret;
     }
 
-    HFSessionSetTrackPreviewSize(session, 640);
-    HFSessionSetFilterMinimumFacePixelSize(session, 32);
+    HFSessionSetTrackPreviewSize(session, detectPixelLevel);
+    HFSessionSetFilterMinimumFacePixelSize(session, 0);
 
     // Open the video file
     cv::VideoCapture cap(videoPath);
@@ -122,17 +141,36 @@ int main(int argc, char* argv[]) {
 
         // Draw detection mode on the frame
         drawMode(draw, detMode);
+        if (faceNum > 0) {
+            ret = HFMultipleFacePipelineProcessOptional(session, imageHandle, &multipleFaceData, option);
+            if (ret != HSUCCEED)
+            {   
+                std::cout << "HFMultipleFacePipelineProcessOptional error: " << ret << std::endl;
+                return ret;
+            }
+            HFFaceIntereactionState result;
+            ret = HFGetFaceIntereactionStateResult(session, &result);
+             if (ret != HSUCCEED)
+            {   
+                std::cout << "HFGetFaceIntereactionStateResult error: " << ret << std::endl;
+                return ret;
+            }
+            std::cout << "Left eye status: " << result.leftEyeStatusConfidence[0] << std::endl;
+            std::cout << "Righ eye status: " << result.rightEyeStatusConfidence[0] << std::endl;
 
+        }
+        
         for (int index = 0; index < faceNum; ++index) {
             // std::cout << "========================================" << std::endl;
             // std::cout << "Process face index: " << index << std::endl;
+            // Print FaceID, In VIDEO-MODE it is fixed, but it may be lost
+            auto trackId = multipleFaceData.trackIds[index];
+
             // Use OpenCV's Rect to receive face bounding boxes
             auto rect = cv::Rect(multipleFaceData.rects[index].x, multipleFaceData.rects[index].y,
                                  multipleFaceData.rects[index].width, multipleFaceData.rects[index].height);
-            cv::rectangle(draw, rect, cv::Scalar(0, 100, 255), 5);
+            cv::rectangle(draw, rect, generateColor(trackId), 3);
 
-            // Print FaceID, In VIDEO-MODE it is fixed, but it may be lost
-            auto trackId = multipleFaceData.trackIds[index];
             // std::cout << "FaceID: " << trackId << std::endl;
 
             // Print Head euler angle, It can often be used to judge the quality of a face by the Angle of the head
@@ -142,9 +180,22 @@ int main(int argc, char* argv[]) {
 
             // Add TrackID to the drawing
             cv::putText(draw, "ID: " + std::to_string(trackId), cv::Point(rect.x, rect.y - 10),
-                        cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
-        }
+                        cv::FONT_HERSHEY_SIMPLEX, 0.5, generateColor(trackId), 2);
 
+            HInt32 numOfLmk;
+            HFGetNumOfFaceDenseLandmark(&numOfLmk);
+            HPoint2f denseLandmarkPoints[numOfLmk];
+            ret = HFGetFaceDenseLandmarkFromFaceToken(multipleFaceData.tokens[index], denseLandmarkPoints, numOfLmk);
+            if (ret != HSUCCEED) {
+                std::cerr << "HFGetFaceDenseLandmarkFromFaceToken error!!" << std::endl;
+                return -1;
+            }
+            for (size_t i = 0; i < numOfLmk; i++) {
+                cv::Point2f p(denseLandmarkPoints[i].x, denseLandmarkPoints[i].y);
+                cv::circle(draw, p, 0, generateColor(trackId), 2);
+            }
+        }
+        
         cv::imshow("w", draw);
         cv::waitKey(1);
 

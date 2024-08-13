@@ -18,17 +18,24 @@ public:
     void operator=(Enviro const&) = delete;
 
     std::string getPackName() const { return packName; }
+    
     void setPackName(const std::string& name) { packName = name; }
 
     const std::string &getTestResDir() const { return testResDir; }
 
     void setTestResDir(const std::string &dir) { Enviro::testResDir = dir; }
 
+    const std::string &getTestRuntimeFullPath() const { return runtimeFullPath; }
+
+    void setTestRuntimeFullPath(const std::string &path) { Enviro::runtimeFullPath = path; }
+
 private:
     Enviro() {}
 
     std::string packName = "Pikachu";
     std::string testResDir = "test_res";
+
+    std::string runtimeFullPath = "";
 };
 
 #endif //INSPIREFACE_ENVIRO_H

@@ -249,6 +249,15 @@ int32_t InferenceHelperMnn::PreProcess(const std::vector<InputTensorInfo>& input
             /* Convert color type */
 //            LOGD("input_tensor_info.image_info.channel: %d", input_tensor_info.image_info.channel);
 //            LOGD("input_tensor_info.GetChannel(): %d", input_tensor_info.GetChannel());
+
+            // !!!!!! BUG !!!!!!!!!
+            // When initializing, setting the image channel to 3 and the tensor channel to 1, 
+            // and configuring the processing to convert the color image to grayscale may cause some bugs. 
+            // For example, the image channel might automatically change to 1. 
+            // This issue has not been fully investigated, 
+            // so it's necessary to manually convert the image to grayscale before input.
+            // !!!!!! BUG !!!!!!!!!
+
             if ((input_tensor_info.image_info.channel == 3) && (input_tensor_info.GetChannel() == 3)) {
                 image_processconfig.sourceFormat = (input_tensor_info.image_info.is_bgr) ? MNN::CV::BGR : MNN::CV::RGB;
                 if (input_tensor_info.image_info.swap_color) {

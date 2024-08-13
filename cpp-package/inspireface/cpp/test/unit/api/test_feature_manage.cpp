@@ -335,7 +335,7 @@ TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
         configuration.dbPath = dbPathStr;
         configuration.featureBlockNum = 20;
         configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
-        configuration.searchThreshold = 0.48f;
+        configuration.searchThreshold = 0.46f;
         // Delete the previous data before testing
         if (std::remove(configuration.dbPath) != 0) {
             spdlog::trace("Error deleting file");

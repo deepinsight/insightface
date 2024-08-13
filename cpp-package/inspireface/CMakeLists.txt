@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
 project(InspireFace)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 # Current version
 set(INSPIRE_FACE_VERSION_MAJOR 1)
 set(INSPIRE_FACE_VERSION_MINOR 1)
-set(INSPIRE_FACE_VERSION_PATCH 0)
+set(INSPIRE_FACE_VERSION_PATCH 6)
 
 # Converts the version number to a string
 string(CONCAT INSPIRE_FACE_VERSION_MAJOR_STR ${INSPIRE_FACE_VERSION_MAJOR})
@@ -108,6 +109,7 @@ if (APPLE)
     endif ()
 else()
     if (ISF_BUILD_LINUX_ARM7 OR ISF_BUILD_LINUX_AARCH64)
+        set(DISABLE_GUI ON)
         add_definitions("-DDISABLE_GUI")
         #        set(OpenCV_DIR ${ISF_THIRD_PARTY_DIR}/opencv/opencv-linux-armhf/share/OpenCV)
         #        set(OpenCV_STATIC_INCLUDE_DIR ${PATH_3RDPARTY}/opencv/opencv-linux-armhf/include/)

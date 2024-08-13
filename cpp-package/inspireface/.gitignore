@@ -13,3 +13,4 @@ pack/*
 .cache/*
 .vscode/*
 build_local/*
+local_build/*

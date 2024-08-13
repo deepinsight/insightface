@@ -55,6 +55,7 @@ set(SOURCE_FILES ${SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/middleware/model_ar
 link_directories(${MNN_LIBS})
 
 if(ISF_BUILD_SHARED_LIBS)
+    add_definitions("-DISF_BUILD_SHARED_LIBS")
     add_library(InspireFace SHARED ${SOURCE_FILES})
 else()
     add_library(InspireFace STATIC ${SOURCE_FILES})

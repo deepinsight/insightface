@@ -2,7 +2,7 @@
 
 ## Update
 
-Please use our discord web demo instead. This python example is temporarily removed.
+Please use our [Picsi.Ai face swapping product](https://www.picsi.ai) instead for higher resolution face swapping. This model and demo code is no longer maintained.
 
 
 In this example, we provide one-line simple code for subject agnostic identity transfer from source face to the target face.

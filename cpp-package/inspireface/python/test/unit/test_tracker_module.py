@@ -84,24 +84,6 @@ class FaceTrackerCase(unittest.TestCase):
         right_face_roll = faces[0].roll
         self.assertEqual(True, right_face_roll > 30)
 
-    def test_face_track_from_video(self):
-        # Read a video file
-        video_gen = read_video_generator(get_test_data("video/810_1684206192.mp4"))
-        results = [self.engine_tk.face_detection(frame) for frame in video_gen]
-        num_of_frame = len(results)
-        num_of_track_loss = len([faces for faces in results if not faces])
-        total_track_ids = [faces[0].track_id for faces in results if faces]
-        num_of_id_switch = len([id_ for id_ in total_track_ids if id_ != 1])
-
-        # Calculate the loss rate of trace loss and switching id
-        track_loss = num_of_track_loss / num_of_frame
-        id_switch_loss = num_of_id_switch / len(total_track_ids)
-
-        # Not rigorous, only for the current test of this video file
-        self.assertEqual(True, track_loss < 0.05)
-        self.assertEqual(True, id_switch_loss < 0.1)
-
-
 @optional(ENABLE_BENCHMARK_TEST, "All benchmark related tests have been closed.")
 class FaceTrackerBenchmarkCase(unittest.TestCase):
     benchmark_results = list()

@@ -3,9 +3,12 @@ Partial FC is a distributed deep learning training framework for face recognitio
 
 ![Image text](https://github.com/nttstar/insightface-resources/blob/master/images/partial_speed1.png)
 
+## Paper
+- [Partial FC: Training 10 Million Identities on a Single Machine](https://openaccess.thecvf.com/content/ICCV2021W/MFR/html/An_Partial_FC_Training_10_Million_Identities_on_a_Single_Machine_ICCVW_2021_paper.html) in **MFR 2021**
+- [Killing Two Birds With One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC](https://openaccess.thecvf.com/content/CVPR2022/html/An_Killing_Two_Birds_With_One_Stone_Efficient_and_Robust_Training_CVPR_2022_paper.html) in **CVPR 2022**
 
 ## Contents
-[Partial FC](https://arxiv.org/abs/2203.15565)
+Partial FC
 - [Largest Face Recognition Dataset: **Glint360k**](#Glint360K)
 - [Docker](#Docker)
 - [Performance On Million Identities](#Benchmark)
@@ -141,16 +144,36 @@ In the latest Glint360k, this bug has been fixed.
 The torrent has been released.
 
 
-## Citation
-If you find Partial-FC or Glint360K useful in your research, please consider to cite the following related paper: 
+## Dataset Contributors
 
-[Partial FC](https://arxiv.org/abs/2203.15565)
+The Glint360K would not have been possible without the invaluable contributions of the following individuals, who have been instrumental in data scraping, downloading, merging, and cleaning. Their efforts have provided the foundation for our work and have been essential to our success:
+
+| Contributor      | Emial    |
+|------------------|----------|
+| **Bin Qin**    | skyqin@gmail.com     |
+| **Lan Wu**     | bah-wl@hotmail.com   |
+
+
+
+Thank you to all the contributors for their hard work and dedication!
+
+
+## Citation
+If you find [Partial-FC](https://arxiv.org/abs/2203.15565) or Glint360K useful in your research, please consider to cite the following related paper: 
+
+
 ```
-@inproceedings{an2022pfc,
-  title={Killing Two Birds with One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
-  author={An, Xiang and Deng, Jiangkang and Guo, Jia and Feng, Ziyong and Zhu, Xuhan and Jing, Yang and Tongliang, Liu},
-  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
-  year={2022}
+@inproceedings{an_2022_pfc_cvpr,
+    title={Killing Two Birds with One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
+    author={An, Xiang and Deng, Jiangkang and Guo, Jia and Feng, Ziyong and Zhu, Xuhan and Jing, Yang and Tongliang, Liu},
+    booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
+    year={2022}
+}
+@inproceedings{an_2021_pfc_iccvw,
+    title={Partial FC: Training 10 Million Identities on a Single Machine},
+    author={An, Xiang and Zhu, Xuhan and Gao, Yuan and Xiao, Yang and Zhao, Yongle and Feng, Ziyong and Wu, Lan and Qin, Bin and Zhang, Ming and Zhang, Debing and Fu, Ying},
+    booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV) Workshops},
+    year={2021},
 }
 
 ```
