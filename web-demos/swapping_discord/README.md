@@ -7,7 +7,7 @@ We have integrated our most advanced face-swapping models: **inswapper_cyn** and
 1. InsightFace(insightfaceswap) Discord bot invitation link: https://discord.com/api/oauth2/authorize?client_id=1090660574196674713&permissions=274877945856&scope=bot
 2. Discord discussion server(to get help): https://discord.gg/Ym3X8U59ZN
 3. Product homepage: https://www.picsi.ai
-4. Patreon subscription: https://www.patreon.com/picsi
+4. Subscribe to unlock advanced features: https://www.picsi.ai/subscribe
 
 ## ChangeLog
 
