@@ -311,7 +311,7 @@ In the project, there is a subproject called cpp/test. To compile it, you need t
 ```bash
 cmake -DISF_BUILD_WITH_TEST=ON ..
 ```
-If you need to run test cases, you will need to download the required [resource files](https://drive.google.com/file/d/1i4uC-dZTQxdVgn2rP0ZdfJTMkJIXgYY4/view?usp=sharing): **test_res**. Unzip the test_res folder. The directory structure of test_res should be prepared as follows before testing:
+If you need to run test cases, you will need to download the required [resource files](https://drive.google.com/drive/folders/1krmv9Pj0XEZXR1GRPHjW_Sl7t4l0dNSS?usp=sharing): **test_res**. Unzip the test_res folder. The directory structure of test_res should be prepared as follows before testing:
 
 ```bash
 
