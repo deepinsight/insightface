@@ -29,7 +29,7 @@ The benchmark tests will be continuously updated.
 
 **Note**: The above data inference backend uses CoreML.
 
-## Pikachu
+## Pikachu(CPU)
 ### Device: Macbook pro 16-inch, 2019 2.6 GHz Intel Core i7
 | **Benchmark** | **Loops** | **Total Time** | **Average Time** |
 | --- | --- | --- | --- |
@@ -43,7 +43,7 @@ The benchmark tests will be continuously updated.
 | Search Face from 5k | 1000 | 364.21ms | **0.36ms** |
 | Search Face from 10k | 1000 | 1193.26ms | **1.19ms** |
 
-## Gundam_RV1109
+## Gundam_RV1109(RKNPU)
 ### Device: RV1126
 | **Benchmark** | **Loops** | **Total Time** | **Average Time** |
 | --- | --- | --- | --- |
