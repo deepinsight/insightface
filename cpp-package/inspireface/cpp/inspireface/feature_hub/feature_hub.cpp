@@ -94,7 +94,7 @@ int32_t FeatureHub::EnableHub(const DatabaseConfiguration &configuration, Matrix
         std::vector<FaceFeatureInfo> infos;
         ret = m_db_->GetTotalFeatures(infos);
         if (ret == HSUCCEED) {
-            if (infos.empty()) {
+            if (!infos.empty()) {
                 for (auto const &info: infos) {
                     ret = InsertFaceFeature(info.feature, info.tag, info.customId);
                     if (ret != HSUCCEED) {
