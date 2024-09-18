@@ -133,7 +133,6 @@ HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectM
                                    HInt32 trackByDetectModeFPS, HFSession *handle) {
     inspire::ContextCustomParameter param;
     param.enable_mask_detect = parameter.enable_mask_detect;
-    param.enable_face_attribute = parameter.enable_face_quality;
     param.enable_liveness = parameter.enable_liveness;
     param.enable_face_quality = parameter.enable_face_quality;
     param.enable_interaction_liveness = parameter.enable_interaction_liveness;
