@@ -102,18 +102,16 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         REQUIRE(ret == HSUCCEED);
         CHECK(num == 0);
 
-
         // Finish
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
-
 
         ret = HFReleaseImageStream(imgHandle);
         REQUIRE(ret == HSUCCEED);
 
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
-        delete[]dbPathStr;
+        delete[] dbPathStr;
     }
 
     SECTION("Import a large faces data") {
@@ -151,12 +149,11 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         REQUIRE(ret == HSUCCEED);
         CHECK(count == numOfNeedImport);
 
-
         // Finish
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
 
-        delete[]dbPathStr;
+        delete[] dbPathStr;
 
 #else
         TEST_PRINT("The test case that uses LFW is not enabled, so it will be skipped.");
@@ -165,7 +162,8 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
 
     SECTION("Faces feature CURD") {
 #ifdef ISF_ENABLE_USE_LFW_DATA
-        // This section needs to be connected to the "Import a large faces data" section before it can be executed
+        // This section needs to be connected to the "Import a large faces data" section before it
+        // can be executed
         HResult ret;
         HFSessionCustomParameter parameter = {0};
         parameter.enable_recognition = 1;
@@ -213,7 +211,7 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         REQUIRE(ret == HSUCCEED);
         // Search again
         ret = HFFeatureHubFaceSearch(feature, &confidence, &searchedIdentity);
-//        spdlog::info("{}", confidence);
+        //        spdlog::info("{}", confidence);
         REQUIRE(ret == HSUCCEED);
         CHECK(searchedIdentity.customId == -1);
 
@@ -224,7 +222,6 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         againIdentity.feature = &feature;
         ret = HFFeatureHubInsertFeature(againIdentity);
         REQUIRE(ret == HSUCCEED);
-
 
         // Search again
         HFFaceFeatureIdentity searchedAgainIdentity = {0};
@@ -267,7 +264,7 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         ret = HFFeatureHubFaceUpdate(updateIdentity);
         REQUIRE(ret == HSUCCEED);
 
-//
+        //
         // Prepare a zy query image
         cv::Mat zyImageQuery = cv::imread(GET_DATA("data/bulk/woman_search.jpeg"));
         HFImageData imageDataZyQuery = {0};
@@ -279,16 +276,17 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         HFImageStream imgHandleZyQuery;
         ret = HFCreateImageStream(&imageDataZyQuery, &imgHandleZyQuery);
         REQUIRE(ret == HSUCCEED);
-//
+        //
         // Extract basic face information from photos
         HFMultipleFaceData multipleFaceDataZyQuery = {0};
         ret = HFExecuteFaceTrack(session, imgHandleZyQuery, &multipleFaceDataZyQuery);
         REQUIRE(ret == HSUCCEED);
         REQUIRE(multipleFaceDataZyQuery.detectedNum > 0);
-//
+        //
         // Extract face feature
         HFFaceFeature featureZyQuery = {0};
-        ret = HFFaceFeatureExtract(session, imgHandleZyQuery, multipleFaceDataZyQuery.tokens[0], &featureZyQuery);
+        ret = HFFaceFeatureExtract(session, imgHandleZyQuery, multipleFaceDataZyQuery.tokens[0],
+                                   &featureZyQuery);
         REQUIRE(ret == HSUCCEED);
 
         ret = HFReleaseImageStream(imgHandleZyQuery);
@@ -311,7 +309,6 @@ TEST_CASE("test_FeatureManage", "[feature_manage]") {
         TEST_PRINT("The test case that uses LFW is not enabled, so it will be skipped.");
 #endif
     }
-
 }
 
 TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
@@ -356,16 +353,22 @@ TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
 
         // Prepare multiple photos of a person
         std::vector<std::string> photos = {
-                GET_DATA("data/RD/d1.jpeg"),
-                GET_DATA("data/RD/d2.jpeg"),
-                GET_DATA("data/RD/d3.jpeg"),
-                GET_DATA("data/RD/d4.jpeg"),
+          GET_DATA("data/RD/d1.jpeg"),
+          GET_DATA("data/RD/d2.jpeg"),
+          GET_DATA("data/RD/d3.jpeg"),
+          GET_DATA("data/RD/d4.jpeg"),
         };
         std::vector<std::string> tags = {
-                "d1", "d2", "d3", "d4",
+          "d1",
+          "d2",
+          "d3",
+          "d4",
         };
         std::vector<HInt32> updateIds = {
-                5, 163, 670, 971,
+          5,
+          163,
+          670,
+          971,
         };
         REQUIRE(photos.size() == tags.size());
         REQUIRE(updateIds.size() == tags.size());
@@ -395,8 +398,8 @@ TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
             ret = HFFaceFeatureExtract(session, imgHandle, multipleFaceData.tokens[0], &feature);
             REQUIRE(ret == HSUCCEED);
 
-            char* cstr = new char[tags[i].size() + 1]; // Dynamically allocate memory for the name
-            strcpy(cstr, tags[i].c_str()); // Copy the name into the allocated memory
+            char* cstr = new char[tags[i].size() + 1];  // Dynamically allocate memory for the name
+            strcpy(cstr, tags[i].c_str());              // Copy the name into the allocated memory
 
             // Create identity
             HFFaceFeatureIdentity identity = {0};
@@ -410,7 +413,7 @@ TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
 
             ret = HFReleaseImageStream(imgHandle);
             REQUIRE(ret == HSUCCEED);
-            delete[] cstr; // Clean up the dynamically allocated memory
+            delete[] cstr;  // Clean up the dynamically allocated memory
         }
 
         // Prepare a target photo for a face top-k search
@@ -443,7 +446,8 @@ TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
         CHECK(topk.size == photos.size());
         for (int i = 0; i < topk.size; ++i) {
             TEST_PRINT("Top-{} -> id: {}, {}", i + 1, topk.customIds[i], topk.confidence[i]);
-            CHECK(std::find(updateIds.begin(), updateIds.end(), topk.customIds[i]) != updateIds.end());
+            CHECK(std::find(updateIds.begin(), updateIds.end(), topk.customIds[i]) !=
+                  updateIds.end());
         }
 
         ret = HFReleaseImageStream(imgHandle);
@@ -455,13 +459,12 @@ TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
 
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
-        delete[]dbPathStr;
+        delete[] dbPathStr;
     }
 #endif
 }
 
 TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
-
     // Test the search time at 1k, 5k and 10k of the face library (the target face is at the back).
     SECTION("Search face benchmark from 1k") {
 #if defined(ISF_ENABLE_BENCHMARK) && defined(ISF_ENABLE_USE_LFW_DATA)
@@ -492,7 +495,7 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
 
         auto lfwDir = getLFWFunneledDir();
         auto dataList = LoadLFWFunneledValidData(lfwDir, getTestLFWFunneledTxt());
-//        TEST_PRINT("{}", dataList.size());
+        //        TEST_PRINT("{}", dataList.size());
         auto importStatus = ImportLFWFunneledValidData(session, dataList, numOfNeedImport);
         REQUIRE(importStatus);
         HInt32 count;
@@ -526,17 +529,20 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         // Search for a face
         HFloat confidence;
         HFFaceFeatureIdentity searchedIdentity = {0};
-        auto start = (double) cv::getTickCount();
+        auto start = (double)cv::getTickCount();
         for (int i = 0; i < loop; ++i) {
             ret = HFFeatureHubFaceSearch(feature, &confidence, &searchedIdentity);
         }
-        auto cost = ((double) cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
+        auto cost = ((double)cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
 
         REQUIRE(ret == HSUCCEED);
         REQUIRE(searchedIdentity.customId == 999);
         REQUIRE(std::string(searchedIdentity.tag) == "Teresa_Williams");
 
-        TEST_PRINT("<Benchmark> Search Face from 1k -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms", loop, cost, cost / loop);
+        TEST_PRINT(
+          "<Benchmark> Search Face from 1k -> Loop: {}, Total Time: {:.5f}ms, Average Time: "
+          "{:.5f}ms",
+          loop, cost, cost / loop);
 
         BenchmarkRecord record(getBenchmarkRecordFile());
         record.insertBenchmarkData("Search Face from 1k", loop, cost, cost / loop);
@@ -544,15 +550,15 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
 
-
         ret = HFReleaseImageStream(imgHandle);
         REQUIRE(ret == HSUCCEED);
 
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
-        delete []dbPathStr;
+        delete[] dbPathStr;
 #else
-        TEST_PRINT("Skip face search benchmark test, you need to enable both lfw and benchmark test.");
+        TEST_PRINT(
+          "Skip face search benchmark test, you need to enable both lfw and benchmark test.");
 #endif
     }
 
@@ -620,17 +626,20 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         // Search for a face
         HFloat confidence;
         HFFaceFeatureIdentity searchedIdentity = {0};
-        auto start = (double) cv::getTickCount();
+        auto start = (double)cv::getTickCount();
         for (int i = 0; i < loop; ++i) {
             ret = HFFeatureHubFaceSearch(feature, &confidence, &searchedIdentity);
         }
-        auto cost = ((double) cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
+        auto cost = ((double)cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
 
         REQUIRE(ret == HSUCCEED);
         REQUIRE(searchedIdentity.customId == 4998);
         REQUIRE(std::string(searchedIdentity.tag) == "Mary_Katherine_Smart");
 
-        TEST_PRINT("<Benchmark> Search Face from 5k -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms", loop, cost, cost / loop);
+        TEST_PRINT(
+          "<Benchmark> Search Face from 5k -> Loop: {}, Total Time: {:.5f}ms, Average Time: "
+          "{:.5f}ms",
+          loop, cost, cost / loop);
 
         BenchmarkRecord record(getBenchmarkRecordFile());
         record.insertBenchmarkData("Search Face from 5k", loop, cost, cost / loop);
@@ -643,9 +652,10 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
 
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
-        delete []dbPathStr;
+        delete[] dbPathStr;
 #else
-        TEST_PRINT("Skip face search benchmark test, you need to enable both lfw and benchmark test.");
+        TEST_PRINT(
+          "Skip face search benchmark test, you need to enable both lfw and benchmark test.");
 #endif
     }
 
@@ -680,7 +690,7 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
 
         auto lfwDir = getLFWFunneledDir();
         auto dataList = LoadLFWFunneledValidData(lfwDir, getTestLFWFunneledTxt());
-//        TEST_PRINT("{}", dataList.size());
+        //        TEST_PRINT("{}", dataList.size());
         auto importStatus = ImportLFWFunneledValidData(session, dataList, numOfNeedImport);
         REQUIRE(importStatus);
         HInt32 count;
@@ -748,17 +758,20 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         // Search for a face
         HFloat confidence;
         HFFaceFeatureIdentity searchedIdentity = {0};
-        auto start = (double) cv::getTickCount();
+        auto start = (double)cv::getTickCount();
         for (int i = 0; i < loop; ++i) {
             ret = HFFeatureHubFaceSearch(feature, &confidence, &searchedIdentity);
         }
-        auto cost = ((double) cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
+        auto cost = ((double)cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
 
         REQUIRE(ret == HSUCCEED);
         REQUIRE(searchedIdentity.customId == updateId);
         REQUIRE(std::string(searchedIdentity.tag) == "ZY");
 
-        TEST_PRINT("<Benchmark> Search Face from 10k -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms", loop, cost, cost / loop);
+        TEST_PRINT(
+          "<Benchmark> Search Face from 10k -> Loop: {}, Total Time: {:.5f}ms, Average Time: "
+          "{:.5f}ms",
+          loop, cost, cost / loop);
 
         BenchmarkRecord record(getBenchmarkRecordFile());
         record.insertBenchmarkData("Search Face from 10k", loop, cost, cost / loop);
@@ -767,15 +780,15 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
 
-
         ret = HFReleaseImageStream(imgHandle);
         REQUIRE(ret == HSUCCEED);
 
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
-        delete []dbPathStr;
+        delete[] dbPathStr;
 #else
-        TEST_PRINT("Skip face search benchmark test, you need to enable both lfw and benchmark test.");
+        TEST_PRINT(
+          "Skip face search benchmark test, you need to enable both lfw and benchmark test.");
 #endif
     }
 
@@ -789,7 +802,7 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         parameter.enable_recognition = 1;
         HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3,  -1, -1, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");
@@ -829,7 +842,8 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
 
         // Extract face feature
         HFloat featureCacheZy[featureNum];
-        ret = HFFaceFeatureExtractCpy(session, imgHandleZy, multipleFaceDataZy.tokens[0], featureCacheZy);
+        ret = HFFaceFeatureExtractCpy(session, imgHandleZy, multipleFaceDataZy.tokens[0],
+                                      featureCacheZy);
         HFFaceFeature featureZy = {0};
         featureZy.size = featureNum;
         featureZy.data = featureCacheZy;
@@ -845,29 +859,32 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         HFImageStream imgHandleZyQuery;
         ret = HFCreateImageStream(&imageDataZyQuery, &imgHandleZyQuery);
         REQUIRE(ret == HSUCCEED);
-//
+        //
         // Extract basic face information from photos
         HFMultipleFaceData multipleFaceDataZyQuery = {0};
         ret = HFExecuteFaceTrack(session, imgHandleZyQuery, &multipleFaceDataZyQuery);
         REQUIRE(ret == HSUCCEED);
         REQUIRE(multipleFaceDataZyQuery.detectedNum > 0);
-//
+        //
         // Extract face feature
         HFloat featureCacheZyQuery[featureNum];
-        ret = HFFaceFeatureExtractCpy(session, imgHandleZyQuery, multipleFaceDataZyQuery.tokens[0], featureCacheZyQuery);
+        ret = HFFaceFeatureExtractCpy(session, imgHandleZyQuery, multipleFaceDataZyQuery.tokens[0],
+                                      featureCacheZyQuery);
         HFFaceFeature featureZyQuery = {0};
         featureZyQuery.data = featureCacheZyQuery;
         featureZyQuery.size = featureNum;
         REQUIRE(ret == HSUCCEED);
 
-        auto start = (double) cv::getTickCount();
+        auto start = (double)cv::getTickCount();
         for (int i = 0; i < loop; ++i) {
             HFloat compRes;
             ret = HFFaceComparison(featureZy, featureZyQuery, &compRes);
         }
-        auto cost = ((double) cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
+        auto cost = ((double)cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
         REQUIRE(ret == HSUCCEED);
-        TEST_PRINT("<Benchmark> Face Comparison -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms", loop, cost, cost / loop);
+        TEST_PRINT(
+          "<Benchmark> Face Comparison -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms",
+          loop, cost, cost / loop);
 
         BenchmarkRecord record(getBenchmarkRecordFile());
         record.insertBenchmarkData("Face Comparison", loop, cost, cost / loop);
@@ -880,7 +897,7 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         REQUIRE(ret == HSUCCEED);
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
-        delete []dbPathStr;
+        delete[] dbPathStr;
 #else
         TEST_PRINT("The benchmark is not enabled, so all relevant test cases are skipped.");
 #endif
@@ -896,7 +913,7 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         parameter.enable_recognition = 1;
         HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
-        ret = HFCreateInspireFaceSession(parameter, detMode, 3,-1, -1, &session);
+        ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
         REQUIRE(ret == HSUCCEED);
         HFFeatureHubConfiguration configuration = {0};
         auto dbPath = GET_SAVE_DATA(".test");
@@ -934,13 +951,15 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
 
         // Extract face feature
         HFFaceFeature feature = {0};
-        auto start = (double) cv::getTickCount();
+        auto start = (double)cv::getTickCount();
         for (int i = 0; i < loop; ++i) {
             ret = HFFaceFeatureExtract(session, imgHandle, multipleFaceData.tokens[0], &feature);
         }
-        auto cost = ((double) cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
+        auto cost = ((double)cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
         REQUIRE(ret == HSUCCEED);
-        TEST_PRINT("<Benchmark> Face Extract -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms", loop, cost, cost / loop);
+        TEST_PRINT(
+          "<Benchmark> Face Extract -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms",
+          loop, cost, cost / loop);
 
         BenchmarkRecord record(getBenchmarkRecordFile());
         record.insertBenchmarkData("Face Extract", loop, cost, cost / loop);
@@ -951,9 +970,11 @@ TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
         REQUIRE(ret == HSUCCEED);
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
-        delete []dbPathStr;
+        delete[] dbPathStr;
 #else
-        TEST_PRINT("Skip the face feature extraction benchmark test. To run it, you need to turn on the benchmark test.");
+        TEST_PRINT(
+          "Skip the face feature extraction benchmark test. To run it, you need to turn on the "
+          "benchmark test.");
 #endif
     }
 }

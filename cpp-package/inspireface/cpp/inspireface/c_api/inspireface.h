@@ -242,7 +242,7 @@ HYPER_CAPI_EXPORT extern HResult HFSessionSetTrackPreviewSize(HFSession session,
  * this number will be filtered.
  *
  * @param session Handle to the session.
- * @param minSize The minimum pixel value, default value is 24.
+ * @param minSize The minimum pixel value, default value is 0.
  * @return HResult indicating the success or failure of the operation.
  */
 HYPER_CAPI_EXPORT extern HResult HFSessionSetFilterMinimumFacePixelSize(HFSession session,
