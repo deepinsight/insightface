@@ -103,8 +103,8 @@ for idx, joints_3d_pre in tqdm(enumerate(all_joints_3d_pre), total=len(all_joint
         else: 
             color = "darkorange"
             cv_color = (89, 141, 252)
-        x1, y1 = joints_2d[i].astype(np.int)
-        x2, y2 = joints_2d[j].astype(np.int)
+        x1, y1 = joints_2d[i].astype(np.int32)
+        x2, y2 = joints_2d[j].astype(np.int32)
         
         cv2.line(image, (x1, y1), (x2, y2), cv_color, 2)
         x1, y1, z1 = joints_3d_pre[i]
