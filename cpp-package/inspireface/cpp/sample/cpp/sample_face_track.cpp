@@ -37,9 +37,11 @@ int main(int argc, char* argv[]) {
         return ret;
     }
 
-    // Enable the functions in the pipeline: mask detection, live detection, and face quality detection
+    // Enable the functions in the pipeline: mask detection, live detection, and face quality
+    // detection
     HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
-    // Non-video or frame sequence mode uses IMAGE-MODE, which is always face detection without tracking
+    // Non-video or frame sequence mode uses IMAGE-MODE, which is always face detection without
+    // tracking
     HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
     // Maximum number of faces detected
     HInt32 maxDetectNum = 20;
@@ -47,7 +49,8 @@ int main(int argc, char* argv[]) {
     HInt32 detectPixelLevel = 160;
     // Handle of the current face SDK algorithm context
     HFSession session = {0};
-    ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, detectPixelLevel, -1, &session);
+    ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, detectPixelLevel, -1,
+                                             &session);
     if (ret != HSUCCEED) {
         std::cout << "Create FaceContext error: " << ret << std::endl;
         return ret;
@@ -55,7 +58,7 @@ int main(int argc, char* argv[]) {
 
     HFSessionSetTrackPreviewSize(session, detectPixelLevel);
     HFSessionSetFilterMinimumFacePixelSize(session, 32);
-    
+
     // Load a image
     cv::Mat image = cv::imread(sourcePath);
     if (image.empty()) {
@@ -64,9 +67,9 @@ int main(int argc, char* argv[]) {
     }
     // Prepare an image parameter structure for configuration
     HFImageData imageParam = {0};
-    imageParam.data = image.data;       // Data buffer
-    imageParam.width = image.cols;      // Target view width
-    imageParam.height = image.rows;     // Target view width
+    imageParam.data = image.data;    // Data buffer
+    imageParam.width = image.cols;   // Target view width
+    imageParam.height = image.rows;  // Target view width
 
     // Set rotation based on input parameter
     switch (rotation) {
@@ -113,22 +116,25 @@ int main(int argc, char* argv[]) {
         std::cout << "Token size: " << multipleFaceData.tokens[index].size << std::endl;
         std::cout << "Process face index: " << index << std::endl;
         // Use OpenCV's Rect to receive face bounding boxes
-        auto rect = cv::Rect(multipleFaceData.rects[index].x, multipleFaceData.rects[index].y,
-                             multipleFaceData.rects[index].width, multipleFaceData.rects[index].height);
+        auto rect =
+          cv::Rect(multipleFaceData.rects[index].x, multipleFaceData.rects[index].y,
+                   multipleFaceData.rects[index].width, multipleFaceData.rects[index].height);
         cv::rectangle(draw, rect, cv::Scalar(0, 100, 255), 4);
 
         // Print FaceID, In IMAGE-MODE it is changing, in VIDEO-MODE it is fixed, but it may be lost
         std::cout << "FaceID: " << multipleFaceData.trackIds[index] << std::endl;
 
-        // Print Head euler angle, It can often be used to judge the quality of a face by the Angle of the head
+        // Print Head euler angle, It can often be used to judge the quality of a face by the Angle
+        // of the head
         std::cout << "Roll: " << multipleFaceData.angles.roll[index]
-                  << ", Yaw: " << multipleFaceData.angles.roll[index]
+                  << ", Yaw: " << multipleFaceData.angles.yaw[index]
                   << ", Pitch: " << multipleFaceData.angles.pitch[index] << std::endl;
 
         HInt32 numOfLmk;
         HFGetNumOfFaceDenseLandmark(&numOfLmk);
         HPoint2f denseLandmarkPoints[numOfLmk];
-        ret = HFGetFaceDenseLandmarkFromFaceToken(multipleFaceData.tokens[index], denseLandmarkPoints, numOfLmk);
+        ret = HFGetFaceDenseLandmarkFromFaceToken(multipleFaceData.tokens[index],
+                                                  denseLandmarkPoints, numOfLmk);
         if (ret != HSUCCEED) {
             std::cerr << "HFGetFaceDenseLandmarkFromFaceToken error!!" << std::endl;
             return -1;
@@ -137,14 +143,19 @@ int main(int argc, char* argv[]) {
             cv::Point2f p(denseLandmarkPoints[i].x, denseLandmarkPoints[i].y);
             cv::circle(draw, p, 0, (0, 0, 255), 2);
         }
+        auto& rt = multipleFaceData.rects[index];
+        float area = ((float)(rt.height * rt.width)) / (imageParam.width * imageParam.height);
+        std::cout << "area: " << area << std::endl;
     }
     cv::imwrite("draw_detected.jpg", draw);
 
     // Run pipeline function
-    // Select the pipeline function that you want to execute, provided that it is already enabled when FaceContext is created!
+    // Select the pipeline function that you want to execute, provided that it is already enabled
+    // when FaceContext is created!
     auto pipelineOption = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
     // In this loop, all faces are processed
-    ret = HFMultipleFacePipelineProcessOptional(session, imageHandle, &multipleFaceData, pipelineOption);
+    ret = HFMultipleFacePipelineProcessOptional(session, imageHandle, &multipleFaceData,
+                                                pipelineOption);
     if (ret != HSUCCEED) {
         std::cout << "Execute Pipeline error: " << ret << std::endl;
         return ret;
@@ -171,14 +182,13 @@ int main(int argc, char* argv[]) {
         std::cout << "Process face index from pipeline: " << index << std::endl;
         std::cout << "Mask detect result: " << maskConfidence.confidence[index] << std::endl;
         std::cout << "Quality predict result: " << qualityConfidence.confidence[index] << std::endl;
-        // We set the threshold of wearing a mask as 0.85. If it exceeds the threshold, it will be judged as wearing a mask.
-        // The threshold can be adjusted according to the scene
+        // We set the threshold of wearing a mask as 0.85. If it exceeds the threshold, it will be
+        // judged as wearing a mask. The threshold can be adjusted according to the scene
         if (maskConfidence.confidence[index] > 0.85) {
             std::cout << "Mask" << std::endl;
         } else {
             std::cout << "Non Mask" << std::endl;
         }
-
     }
 
     ret = HFReleaseImageStream(imageHandle);

@@ -32,7 +32,7 @@ TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
 
-        delete []dbPathStr;
+        delete[] dbPathStr;
     }
 
     SECTION("FeatureHub search top-k") {
@@ -115,13 +115,14 @@ TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
 
         REQUIRE(coverIds.size() == results.size);
         for (int i = 0; i < results.size; ++i) {
-            REQUIRE(std::find(coverIds.begin(), coverIds.end(), results.customIds[i]) != coverIds.end());
+            REQUIRE(std::find(coverIds.begin(), coverIds.end(), results.customIds[i]) !=
+                    coverIds.end());
         }
 
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
 
-        delete []dbPathStr;
+        delete[] dbPathStr;
     }
 
     SECTION("Repeat the enable and disable tests") {
@@ -135,7 +136,6 @@ TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
         configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
         configuration.searchThreshold = 0.48f;
 
-
         ret = HFFeatureHubDataEnable(configuration);
         REQUIRE(ret == HSUCCEED);
 
@@ -148,7 +148,7 @@ TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HERR_FT_HUB_DISABLE_REPETITION);
 
-        delete []dbPathStr;
+        delete[] dbPathStr;
     }
 
     SECTION("Only memory storage is used") {
@@ -162,9 +162,7 @@ TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
 
         ret = HFFeatureHubDataDisable();
         REQUIRE(ret == HSUCCEED);
-
     }
-
 }
 
 TEST_CASE("test_ConcurrencyInsertion", "[FeatureHub][Concurrency]") {
@@ -212,7 +210,8 @@ TEST_CASE("test_ConcurrencyInsertion", "[FeatureHub][Concurrency]") {
                 feature.data = feat.data();
                 HFFaceFeatureIdentity featureIdentity = {0};
                 featureIdentity.feature = &feature;
-                featureIdentity.customId = beginGenId + j + i * insertsPerThread; // 确保 customId 唯一
+                featureIdentity.customId =
+                  beginGenId + j + i * insertsPerThread;  // 确保 customId 唯一
                 featureIdentity.tag = nameBuffer.data();
                 auto ret = HFFeatureHubInsertFeature(featureIdentity);
                 REQUIRE(ret == HSUCCEED);
@@ -227,14 +226,15 @@ TEST_CASE("test_ConcurrencyInsertion", "[FeatureHub][Concurrency]") {
     HInt32 count;
     ret = HFFeatureHubGetFaceCount(&count);
     REQUIRE(ret == HSUCCEED);
-    REQUIRE(count == baseNum + numThreads * insertsPerThread); // Ensure that the previous base data is added to the newly inserted data
+    REQUIRE(count ==
+            baseNum + numThreads * insertsPerThread);  // Ensure that the previous base data is
+                                                       // added to the newly inserted data
 
     ret = HFFeatureHubDataDisable();
     REQUIRE(ret == HSUCCEED);
 
-    delete []dbPathStr;
+    delete[] dbPathStr;
 }
-
 
 TEST_CASE("test_ConcurrencyRemove", "[FeatureHub][Concurrency]") {
     DRAW_SPLIT_LINE
@@ -311,8 +311,7 @@ TEST_CASE("test_ConcurrencyRemove", "[FeatureHub][Concurrency]") {
     ret = HFFeatureHubDataDisable();
     REQUIRE(ret == HSUCCEED);
 
-    delete []dbPathStr;
-
+    delete[] dbPathStr;
 }
 
 TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency]") {
@@ -375,7 +374,8 @@ TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency]") {
         HFFaceFeatureIdentity identity = {0};
         ret = HFFeatureHubGetFaceIdentity(index, &identity);
         REQUIRE(ret == HSUCCEED);
-        std::vector<HFloat> feature(identity.feature->data, identity.feature->data + identity.feature->size);
+        std::vector<HFloat> feature(identity.feature->data,
+                                    identity.feature->data + identity.feature->size);
         auto simFeat = SimulateSimilarVector(feature);
         HFFaceFeature simFeature = {0};
         simFeature.data = simFeat.data();
@@ -388,7 +388,6 @@ TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency]") {
         REQUIRE(ret == HSUCCEED);
         REQUIRE(cosine > 0.80f);
         similarFeatures.push_back(feature);
-
     }
     REQUIRE(similarFeatures.size() == numberOfSimilar);
 
@@ -419,7 +418,7 @@ TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency]") {
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_int_distribution<> dis(0, preDataSample - 1);
-            for (int j = 0; j < 50; ++j) { // Each thread performs 50 similar searches
+            for (int j = 0; j < 50; ++j) {  // Each thread performs 50 similar searches
                 int idx = dis(gen);
                 auto targetId = targetIds[idx];
                 HFFaceFeature feature = {0};
@@ -449,10 +448,8 @@ TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency]") {
     ret = HFFeatureHubDataDisable();
     REQUIRE(ret == HSUCCEED);
 
-
-    delete []dbPathStr;
+    delete[] dbPathStr;
 }
-
 
 TEST_CASE("test_FeatureCache", "[FeatureHub][Concurrency]") {
     DRAW_SPLIT_LINE
@@ -492,7 +489,6 @@ TEST_CASE("test_FeatureCache", "[FeatureHub][Concurrency]") {
     simFeature.data = simVec.data();
     simFeature.size = simVec.size();
 
-
     for (int i = 0; i < 10; ++i) {
         HFFaceFeatureIdentity capture = {0};
         ret = HFFeatureHubGetFaceIdentity(12, &capture);
@@ -506,12 +502,116 @@ TEST_CASE("test_FeatureCache", "[FeatureHub][Concurrency]") {
         ret = HFFaceComparison(target, simFeature, &cosine);
         REQUIRE(cosine > 0.8f);
         REQUIRE(ret == HSUCCEED);
-
     }
 
     ret = HFFeatureHubDataDisable();
     REQUIRE(ret == HSUCCEED);
 
-    delete []dbPathStr;
+    delete[] dbPathStr;
+}
 
+TEST_CASE("test_DataPersistence", "[feature_manage]") {
+    DRAW_SPLIT_LINE
+    TEST_PRINT_OUTPUT(true);
+
+    // Generate 10 random feature
+    std::vector<std::vector<HFloat>> features;
+    std::vector<std::string> identities;
+    for (int i = 0; i < 10; ++i) {
+        auto feat = GenerateRandomFeature(512);
+        features.push_back(feat);
+        identities.push_back("id_" + std::to_string(i));
+    }
+
+    SECTION("Insert") {
+        HResult ret;
+        HFFeatureHubConfiguration configuration = {0};
+        auto dbPath = GET_SAVE_DATA(".test");
+        HString dbPathStr = new char[dbPath.size() + 1];
+        std::strcpy(dbPathStr, dbPath.c_str());
+        configuration.enablePersistence = 1;
+        configuration.dbPath = dbPathStr;
+        configuration.featureBlockNum = 20;
+        configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
+        configuration.searchThreshold = 0.48f;
+
+        if (std::remove(configuration.dbPath) != 0) {
+            spdlog::trace("Maybe the file does not exist");
+        }
+
+        ret = HFFeatureHubDataEnable(configuration);
+        REQUIRE(ret == HSUCCEED);
+
+        for (size_t i = 0; i < features.size(); i++) {
+            HFFaceFeature feature = {0};
+            feature.data = features[i].data();
+            feature.size = features[i].size();
+            HFFaceFeatureIdentity identity = {0};
+            identity.feature = &feature;
+            identity.tag = const_cast<char *>(identities[i].c_str());
+            identity.customId = i;
+
+            ret = HFFeatureHubInsertFeature(identity);
+            REQUIRE(ret == HSUCCEED);
+
+            // Get the feature from the database
+            HFFaceFeatureIdentity capture = {0};
+            ret = HFFeatureHubGetFaceIdentity(i, &capture);
+            REQUIRE(ret == HSUCCEED);
+
+            // Check the feature
+            HFFaceFeature target = {0};
+            target.data = capture.feature->data;
+            target.size = capture.feature->size;
+            HFloat cosine;
+            ret = HFFaceComparison(target, feature, &cosine);
+            REQUIRE(ret == HSUCCEED);
+            REQUIRE(cosine > 0.99f);
+        }
+        // Check number of faces
+        HInt32 count;
+        ret = HFFeatureHubGetFaceCount(&count);
+        REQUIRE(ret == HSUCCEED);
+        REQUIRE(count == features.size());
+
+        ret = HFFeatureHubDataDisable();
+        REQUIRE(ret == HSUCCEED);
+
+        delete[] dbPathStr;
+    }
+
+    SECTION("Check") {
+        HResult ret;
+        HFFeatureHubConfiguration configuration = {0};
+        auto dbPath = GET_SAVE_DATA(".test");
+        HString dbPathStr = new char[dbPath.size() + 1];
+        std::strcpy(dbPathStr, dbPath.c_str());
+        configuration.enablePersistence = 1;
+        configuration.dbPath = dbPathStr;
+        configuration.featureBlockNum = 20;
+
+        ret = HFFeatureHubDataEnable(configuration);
+        REQUIRE(ret == HSUCCEED);
+
+        // Check number of faces
+        HInt32 count;
+        ret = HFFeatureHubGetFaceCount(&count);
+        REQUIRE(ret == HSUCCEED);
+        REQUIRE(count == features.size());
+
+        // Check every face vector
+        for (size_t i = 0; i < features.size(); i++) {
+            HFFaceFeatureIdentity identity = {0};
+            ret = HFFeatureHubGetFaceIdentity(i, &identity);
+            REQUIRE(ret == HSUCCEED);
+            REQUIRE(identity.customId == i);
+            REQUIRE(std::string(identity.tag) == identities[i]);
+            REQUIRE(identity.feature->size == features[i].size());
+        }
+
+        ret = HFFeatureHubDataDisable();
+        REQUIRE(ret == HSUCCEED);
+
+        delete[] dbPathStr;
+    }
 }

@@ -13,6 +13,8 @@ Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=In
 
 ## Change Logs
 
+**`2024-09-30`** Fixed some bugs in the feature hub.
+
 **`2024-08-18`** Updating [Benchmark](doc/Benchmark-Remark(Updating).md): Using CoreML with Apple's Neural Engine (ANE) on the iPhone 13, the combined processes of **Face Detection** + **Alignment** + **Feature Extraction** take less than **2ms**.
 
 **`2024-07-17`** Add global resource statistics monitoring to prevent memory leaks.

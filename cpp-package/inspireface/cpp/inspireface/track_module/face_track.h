@@ -176,7 +176,7 @@ private:
     double det_use_time_;                                   ///< Time used for detection.
     double track_total_use_time_;                           ///< Total time used for tracking.
     int track_preview_size_;                                ///< Size of the tracking preview.
-    int filter_minimum_face_px_size = 24;                   ///< Minimum face pixel allowed to be retained (take the edge with the smallest Rect).
+    int filter_minimum_face_px_size = 0;                    ///< Minimum face pixel allowed to be retained (take the edge with the smallest Rect).
 
 private:
 
