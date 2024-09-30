@@ -127,8 +127,8 @@ class CascadeRefineOperator(mx.operator.CustomOp):
         if gt_boxes.size > 0:
             # overlap between the anchors and the gt boxes
             # overlaps (ex, gt)
-            overlaps = bbox_overlaps(anchors.astype(np.float),
-                                     gt_boxes.astype(np.float))
+            overlaps = bbox_overlaps(anchors.astype(np.float32),
+                                     gt_boxes.astype(np.float32))
             argmax_overlaps = overlaps.argmax(axis=1)
             #print('AAA', argmax_overlaps.shape)
             max_overlaps = overlaps[np.arange(num_anchors), argmax_overlaps]
@@ -344,13 +344,13 @@ class CascadeRefineOperator(mx.operator.CustomOp):
                 assert anchors_t1.shape[0] == self.ori_anchors.shape[0]
 
                 #for i in range(_gt_boxes.shape[0]):
-                #  box = _gt_boxes[i].astype(np.int)
+                #  box = _gt_boxes[i].astype(np.int32)
                 #  print('%d: gt%d'%(self.nbatch, i), box)
                 #  #color = (0,0,255)
                 #  #cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), color, 2)
                 #for i in range(anchors_t1.shape[0]):
-                #  box1 = self.ori_anchors[i].astype(np.int)
-                #  box2 = anchors_t1[i].astype(np.int)
+                #  box1 = self.ori_anchors[i].astype(np.int32)
+                #  box2 = anchors_t1[i].astype(np.int32)
                 #  print('%d %d: anchorscompare %d'%(self.nbatch, self.stride, i), box1, box2)
                 #color = (255,255,0)
                 #cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), color, 2)

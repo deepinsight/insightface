@@ -49,8 +49,8 @@ class Criterion(nn.Module):
         
         # binary edge
         input_binary_labels = target[1].data.cpu().numpy().astype(np.int64)
-        binary_pos_num = np.sum(input_binary_labels==1).astype(np.float)
-        binary_neg_num = np.sum(input_binary_labels==0).astype(np.float)
+        binary_pos_num = np.sum(input_binary_labels==1).astype(np.float32)
+        binary_neg_num = np.sum(input_binary_labels==0).astype(np.float32)
 
         binary_weight_pos = binary_neg_num/(binary_pos_num + binary_neg_num)
         binary_weight_neg = binary_pos_num/(binary_pos_num + binary_neg_num)
@@ -67,11 +67,11 @@ class Criterion(nn.Module):
         # semantic edge
         input_semantic_labels = target[2].data.cpu().numpy().astype(np.int64)
         semantic_weights = []
-        semantic_pos_num = np.sum(input_semantic_labels>0).astype(np.float)
-        semantic_neg_num = np.sum(input_semantic_labels==0).astype(np.float)
+        semantic_pos_num = np.sum(input_semantic_labels>0).astype(np.float32)
+        semantic_neg_num = np.sum(input_semantic_labels==0).astype(np.float32)
 
         for lbl in range(self.num_classes):
-            lbl_num = np.sum(input_semantic_labels==lbl).astype(np.float)
+            lbl_num = np.sum(input_semantic_labels==lbl).astype(np.float32)
             weight_lbl = lbl_num/(semantic_pos_num + semantic_neg_num)
             semantic_weights.append(weight_lbl)
         semantic_weights = torch.from_numpy(np.array(semantic_weights)).float().cuda()

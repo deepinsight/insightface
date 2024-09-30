@@ -109,7 +109,7 @@ def uv_stiching(img_uv_list, angle_uv_list, smoothing_sigma = 10, seamless_clone
 
             im_clone = cv.seamlessClone(dst, mixed, mask_inv, (512,512), cv.NORMAL_CLONE)
             dst = (im_clone * (1-mask_g/255) +  dst* (mask_g/255)).astype(np.uint8)
-        final_uv = Image(np.transpose(dst.astype(np.float)/255,[2,0,1]))
+        final_uv = Image(np.transpose(dst.astype(np.float32)/255,[2,0,1]))
     else:
         final_uv = Image(np.sum(all_uvs * max_ind_one_hot_g, axis=0))
 
@@ -120,7 +120,7 @@ def im_menpo2PIL(menpo_im):
     return PIL.Image.fromarray((menpo_im.pixels_with_channels_at_back() * 255).astype(np.uint8))
 
 def im_PIL2menpo(pil_im):
-    return Image.init_from_channels_at_back(np.array(pil_im).astype(np.float) / 255)
+    return Image.init_from_channels_at_back(np.array(pil_im).astype(np.float32) / 255)
 
 def fill_UV(UV):
     mask = np.sum(UV.pixels, 0) == 0

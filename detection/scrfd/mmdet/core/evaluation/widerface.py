@@ -52,7 +52,7 @@ from scipy.io import loadmat
 def bbox_overlaps(boxes, query_boxes):
     n_ = boxes.shape[0]
     k_ = query_boxes.shape[0]
-    overlaps = np.zeros((n_, k_), dtype=np.float)
+    overlaps = np.zeros((n_, k_), dtype=np.float32)
     for k in range(k_):
         query_box_area = (query_boxes[k, 2] - query_boxes[k, 0] +
                           1) * (query_boxes[k, 3] - query_boxes[k, 1] + 1)
@@ -317,7 +317,7 @@ def image_eval(pred, gt, ignore, iou_thresh, mpp):
 
 def img_pr_info(thresh_num, pred_info, proposal_list, pred_recall):
     pr_info = np.zeros((thresh_num, 2)).astype('float')
-    fp = np.zeros((pred_info.shape[0],), dtype=np.int)
+    fp = np.zeros((pred_info.shape[0],), dtype=np.int32)
     last_info = [-1, -1]
     for t in range(thresh_num):
 
@@ -429,7 +429,7 @@ def wider_evaluation(pred, gt_path, iou_thresh=0.5, debug=False):
                 #if len(keep_index) != 0:
                 #    ignore[keep_index-1] = 1
                 #assert len(keep_index)>0
-                ignore = np.zeros(gt_boxes.shape[0], dtype=np.int)
+                ignore = np.zeros(gt_boxes.shape[0], dtype=np.int32)
                 if len(keep_index) != 0:
                     ignore[keep_index-1] = 1
                 pred_info = np_round(pred_info,1)
@@ -523,7 +523,7 @@ def get_widerface_gts(gt_path):
                 #if len(keep_index) != 0:
                 #    ignore[keep_index-1] = 1
                 #assert len(keep_index)>0
-                #ignore = np.zeros(gt_boxes.shape[0], dtype=np.int)
+                #ignore = np.zeros(gt_boxes.shape[0], dtype=np.int32)
                 #if len(keep_index) != 0:
                 #    ignore[keep_index-1] = 1
                 #print('ignore:', len(ignore), len(np.where(ignore==1)[0]))
