@@ -26,6 +26,9 @@ def case_face_detection_image(resource_path, image_path):
     opt = HF_ENABLE_FACE_RECOGNITION | HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS | HF_ENABLE_INTERACTION | HF_ENABLE_FACE_ATTRIBUTE
     session = ifac.InspireFaceSession(opt, HF_DETECT_MODE_ALWAYS_DETECT)
 
+    # Set detection confidence threshold
+    session.set_detection_confidence_threshold(0.5)
+
     # Load the image using OpenCV.
     image = cv2.imread(image_path)
     assert image is not None, "Please check that the image path is correct."
@@ -33,12 +36,13 @@ def case_face_detection_image(resource_path, image_path):
     # Perform face detection on the image.
     faces = session.face_detection(image)
     print(f"face detection: {len(faces)} found")
-
+    
     # Copy the image for drawing the bounding boxes.
     draw = image.copy()
     for idx, face in enumerate(faces):
         print(f"{'==' * 20}")
         print(f"idx: {idx}")
+        print(f"detection confidence: {face.detection_confidence}")
         # Print Euler angles of the face.
         print(f"roll: {face.roll}, yaw: {face.yaw}, pitch: {face.pitch}")
 

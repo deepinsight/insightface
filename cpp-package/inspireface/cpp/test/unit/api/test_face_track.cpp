@@ -10,7 +10,6 @@
 #include "unit/test_helper/test_help.h"
 #include "unit/test_helper/test_tools.h"
 
-
 TEST_CASE("test_FaceTrack", "[face_track]") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
@@ -67,7 +66,6 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
 
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
-
     }
 
     SECTION("Face tracking stability from frames") {
@@ -92,7 +90,7 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
             HFMultipleFaceData multipleFaceData = {0};
             ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
             REQUIRE(ret == HSUCCEED);
-//            CHECK(multipleFaceData.detectedNum == 1);
+            //            CHECK(multipleFaceData.detectedNum == 1);
             if (multipleFaceData.detectedNum != 1) {
                 count_loss++;
                 continue;
@@ -103,7 +101,7 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
             std::string save = GET_SAVE_DATA("data/video_frames") + "/" + std::to_string(i) + ".jpg";
             cv::imwrite(save, image);
             auto id = multipleFaceData.trackIds[0];
-//            TEST_PRINT("{}", id);
+            //            TEST_PRINT("{}", id);
             if (id != expectedId) {
                 count_loss++;
             }
@@ -111,9 +109,9 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
             ret = HFReleaseImageStream(imgHandle);
             REQUIRE(ret == HSUCCEED);
         }
-        float loss = (float )count_loss / filenames.size();
+        float loss = (float)count_loss / filenames.size();
         // The face track loss is allowed to have an error of 5%
-//        CHECK(loss == Approx(0.0f).epsilon(0.05));
+        //        CHECK(loss == Approx(0.0f).epsilon(0.05));
 
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
@@ -220,7 +218,6 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
         //  finish
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
-
     }
 
 #ifdef ISF_ENABLE_BENCHMARK
@@ -243,11 +240,11 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
 
         REQUIRE(ret == HSUCCEED);
         HFMultipleFaceData multipleFaceData = {0};
-        auto start = (double) cv::getTickCount();
+        auto start = (double)cv::getTickCount();
         for (int i = 0; i < loop; ++i) {
             ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
         }
-        auto cost = ((double) cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
+        auto cost = ((double)cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
         REQUIRE(ret == HSUCCEED);
         REQUIRE(multipleFaceData.detectedNum == 1);
         TEST_PRINT("<Benchmark> Face Detect@160 -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms", loop, cost, cost / loop);
@@ -258,7 +255,6 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
 
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
-
     }
 
     SECTION("Face detection benchmark@320") {
@@ -280,11 +276,11 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
 
         REQUIRE(ret == HSUCCEED);
         HFMultipleFaceData multipleFaceData = {0};
-        auto start = (double) cv::getTickCount();
+        auto start = (double)cv::getTickCount();
         for (int i = 0; i < loop; ++i) {
             ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
         }
-        auto cost = ((double) cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
+        auto cost = ((double)cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
         REQUIRE(ret == HSUCCEED);
         REQUIRE(multipleFaceData.detectedNum == 1);
         TEST_PRINT("<Benchmark> Face Detect@320 -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms", loop, cost, cost / loop);
@@ -295,9 +291,7 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
 
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
-
     }
-
 
     SECTION("Face detection benchmark@640") {
         int loop = 1000;
@@ -318,11 +312,11 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
 
         REQUIRE(ret == HSUCCEED);
         HFMultipleFaceData multipleFaceData = {0};
-        auto start = (double) cv::getTickCount();
+        auto start = (double)cv::getTickCount();
         for (int i = 0; i < loop; ++i) {
             ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
         }
-        auto cost = ((double) cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
+        auto cost = ((double)cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
         REQUIRE(ret == HSUCCEED);
         REQUIRE(multipleFaceData.detectedNum == 1);
         TEST_PRINT("<Benchmark> Face Detect@640 -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms", loop, cost, cost / loop);
@@ -333,7 +327,6 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
 
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
-
     }
 #else
     TEST_PRINT("Skip the face detection benchmark test. To run it, you need to turn on the benchmark test.");
@@ -359,11 +352,11 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
         // Case: Execute the benchmark using the VIDEO mode(Track)
         REQUIRE(ret == HSUCCEED);
         HFMultipleFaceData multipleFaceData = {0};
-        auto start = (double) cv::getTickCount();
+        auto start = (double)cv::getTickCount();
         for (int i = 0; i < loop; ++i) {
             ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
         }
-        auto cost = ((double) cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
+        auto cost = ((double)cv::getTickCount() - start) / cv::getTickFrequency() * 1000;
         REQUIRE(ret == HSUCCEED);
         REQUIRE(multipleFaceData.detectedNum > 0);
         TEST_PRINT("<Benchmark> Face Track -> Loop: {}, Total Time: {:.5f}ms, Average Time: {:.5f}ms", loop, cost, cost / loop);
@@ -377,15 +370,13 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
 #else
         TEST_PRINT("Skip the face light track benchmark test. To run it, you need to turn on the benchmark test.");
 #endif
-
     }
-
 }
 
 TEST_CASE("test_MultipleLevelFaceDetect", "[face_detect]") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
-    
+
     SECTION("Detect input 160px") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
@@ -417,7 +408,7 @@ TEST_CASE("test_MultipleLevelFaceDetect", "[face_detect]") {
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
     }
-    
+
     SECTION("Detect input 320px") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
@@ -449,7 +440,7 @@ TEST_CASE("test_MultipleLevelFaceDetect", "[face_detect]") {
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
     }
-    
+
     SECTION("Detect input 640px") {
         HResult ret;
         HFSessionCustomParameter parameter = {0};
@@ -481,8 +472,6 @@ TEST_CASE("test_MultipleLevelFaceDetect", "[face_detect]") {
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
     }
-
-
 }
 
 TEST_CASE("test_FaceShowLandmark", "[face_landmark]") {
@@ -490,9 +479,9 @@ TEST_CASE("test_FaceShowLandmark", "[face_landmark]") {
     TEST_PRINT_OUTPUT(true);
 
     std::vector<std::string> images_path = {
-        GET_DATA("data/reaction/close_open_eyes.jpeg"),
-        GET_DATA("data/reaction/open_eyes.png"),
-        GET_DATA("data/reaction/close_eyes.jpeg"),
+      GET_DATA("data/reaction/close_open_eyes.jpeg"),
+      GET_DATA("data/reaction/open_eyes.png"),
+      GET_DATA("data/reaction/close_eyes.jpeg"),
     };
 
     HResult ret;
@@ -505,20 +494,18 @@ TEST_CASE("test_FaceShowLandmark", "[face_landmark]") {
     HFSessionSetTrackPreviewSize(session, detectPixelLevel);
     HFSessionSetFilterMinimumFacePixelSize(session, 0);
 
-    for (size_t i = 0; i < images_path.size(); i++)
-    {
+    for (size_t i = 0; i < images_path.size(); i++) {
         HFImageStream imgHandle;
         auto image = cv::imread(images_path[i]);
         ret = CVImageToImageStream(image, imgHandle);
         REQUIRE(ret == HSUCCEED);
-        
+
         // Extract basic face information from photos
         HFMultipleFaceData multipleFaceData = {0};
         ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
         REQUIRE(ret == HSUCCEED);
 
         REQUIRE(multipleFaceData.detectedNum > 0);
-
 
         HInt32 numOfLmk;
         HFGetNumOfFaceDenseLandmark(&numOfLmk);
@@ -534,9 +521,111 @@ TEST_CASE("test_FaceShowLandmark", "[face_landmark]") {
 
         ret = HFReleaseImageStream(imgHandle);
         REQUIRE(ret == HSUCCEED);
-
     }
     ret = HFReleaseInspireFaceSession(session);
     REQUIRE(ret == HSUCCEED);
+}
 
+TEST_CASE("test_FaceDetectConfidence", "[face_track]") {
+    DRAW_SPLIT_LINE
+    TEST_PRINT_OUTPUT(true);
+
+    SECTION("DetectConfidenceSchedule-1") {
+        // Schedule 1:
+        HFloat threshold = 0.4f;
+        HInt32 detectPixelLevel = 160;
+        HInt32 maxDetectNum = 20;
+
+        HResult ret;
+        HFSessionCustomParameter parameter = {0};
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
+        HFSession session;
+        ret = HFCreateInspireFaceSession(parameter, detMode, maxDetectNum, detectPixelLevel, -1, &session);
+        REQUIRE(ret == HSUCCEED);
+        ret = HFSessionSetFaceDetectThreshold(session, threshold);
+        REQUIRE(ret == HSUCCEED);
+        // Prepare an image
+        HFImageStream imgHandle;
+        auto image = cv::imread(GET_DATA("data/bulk/pedestrian.png"));
+        ret = CVImageToImageStream(image, imgHandle);
+        REQUIRE(ret == HSUCCEED);
+
+        // Extract basic face information from photos
+        HFMultipleFaceData multipleFaceData = {0};
+        ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
+        REQUIRE(ret == HSUCCEED);
+        for (int i = 0; i < multipleFaceData.detectedNum; i++) {
+            CHECK(multipleFaceData.detConfidence[i] >= threshold);
+        }
+        ret = HFReleaseImageStream(imgHandle);
+        REQUIRE(ret == HSUCCEED);
+        ret = HFReleaseInspireFaceSession(session);
+        REQUIRE(ret == HSUCCEED);
+    }
+
+    SECTION("DetectConfidenceSchedule-2") {
+        // Schedule 2:
+        HFloat threshold = 0.7f;
+        HInt32 detectPixelLevel = 320;
+        HInt32 maxDetectNum = 10;
+
+        HResult ret;
+        HFSessionCustomParameter parameter = {0};
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
+        HFSession session;
+        ret = HFCreateInspireFaceSession(parameter, detMode, maxDetectNum, detectPixelLevel, -1, &session);
+        REQUIRE(ret == HSUCCEED);
+        ret = HFSessionSetFaceDetectThreshold(session, threshold);
+        REQUIRE(ret == HSUCCEED);
+        // Prepare an image
+        HFImageStream imgHandle;
+        auto image = cv::imread(GET_DATA("data/bulk/pedestrian.png"));
+        ret = CVImageToImageStream(image, imgHandle);
+        REQUIRE(ret == HSUCCEED);
+
+        // Extract basic face information from photos
+        HFMultipleFaceData multipleFaceData = {0};
+        ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
+        REQUIRE(ret == HSUCCEED);
+        for (int i = 0; i < multipleFaceData.detectedNum; i++) {
+            CHECK(multipleFaceData.detConfidence[i] >= threshold);
+        }
+        ret = HFReleaseImageStream(imgHandle);
+        REQUIRE(ret == HSUCCEED);
+        ret = HFReleaseInspireFaceSession(session);
+        REQUIRE(ret == HSUCCEED);
+    }
+
+    SECTION("DetectConfidenceSchedule-3") {
+        // Schedule 3:
+        HFloat threshold = 0.80f;
+        HInt32 detectPixelLevel = 640;
+        HInt32 maxDetectNum = 20;
+
+        HResult ret;
+        HFSessionCustomParameter parameter = {0};
+        HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
+        HFSession session;
+        ret = HFCreateInspireFaceSession(parameter, detMode, maxDetectNum, detectPixelLevel, -1, &session);
+        REQUIRE(ret == HSUCCEED);
+        ret = HFSessionSetFaceDetectThreshold(session, threshold);
+        REQUIRE(ret == HSUCCEED);
+        // Prepare an image
+        HFImageStream imgHandle;
+        auto image = cv::imread(GET_DATA("data/bulk/pedestrian.png"));
+        ret = CVImageToImageStream(image, imgHandle);
+        REQUIRE(ret == HSUCCEED);
+
+        // Extract basic face information from photos
+        HFMultipleFaceData multipleFaceData = {0};
+        ret = HFExecuteFaceTrack(session, imgHandle, &multipleFaceData);
+        REQUIRE(ret == HSUCCEED);
+        for (int i = 0; i < multipleFaceData.detectedNum; i++) {
+            CHECK(multipleFaceData.detConfidence[i] >= threshold);
+        }
+        ret = HFReleaseImageStream(imgHandle);
+        REQUIRE(ret == HSUCCEED);
+        ret = HFReleaseInspireFaceSession(session);
+        REQUIRE(ret == HSUCCEED);
+    }
 }

@@ -34,13 +34,13 @@ namespace inspire {
  * Includes options for enabling various features such as recognition, liveness detection, and quality assessment.
  */
 typedef struct CustomPipelineParameter {
-    bool enable_recognition = false;              ///< Enable face recognition feature
-    bool enable_liveness = false;                 ///< Enable RGB liveness detection feature
-    bool enable_ir_liveness = false;              ///< Enable IR (Infrared) liveness detection feature
-    bool enable_mask_detect = false;              ///< Enable mask detection feature
-    bool enable_face_attribute = false;           ///< Enable face attribute prediction feature
-    bool enable_face_quality = false;             ///< Enable face quality assessment feature
-    bool enable_interaction_liveness = false;     ///< Enable interactive liveness detection feature
+    bool enable_recognition = false;           ///< Enable face recognition feature
+    bool enable_liveness = false;              ///< Enable RGB liveness detection feature
+    bool enable_ir_liveness = false;           ///< Enable IR (Infrared) liveness detection feature
+    bool enable_mask_detect = false;           ///< Enable mask detection feature
+    bool enable_face_attribute = false;        ///< Enable face attribute prediction feature
+    bool enable_face_quality = false;          ///< Enable face quality assessment feature
+    bool enable_interaction_liveness = false;  ///< Enable interactive liveness detection feature
 
 } ContextCustomParameter;
 
@@ -49,11 +49,11 @@ typedef struct CustomPipelineParameter {
  * @brief Manages the context for face detection, tracking, and feature extraction in the HyperFaceRepo project.
  *
  * Provides interfaces to configure face detection modes, manage face tracking, perform recognition,
- * and handle other face-related features. Integrates with various modules such as FaceTrack, FaceRecognition, and FacePipeline.
+ * and handle other face-related features. Integrates with various modules such as FaceTrack, FaceRecognition, and
+ * FacePipeline.
  */
 class INSPIRE_API FaceContext {
 public:
-
     /**
      * @brief Constructor for the FaceContext class.
      */
@@ -67,18 +67,15 @@ public:
      * @param param Custom parameters for the face pipeline.
      * @return int32_t Returns 0 on success, non-zero for any error.
      */
-    int32_t Configuration(DetectMode detect_mode, 
-                        int32_t max_detect_face, 
-                        CustomPipelineParameter param, 
-                        int32_t detect_level_px = -1,
-                        int32_t track_by_detect_mode_fps = -1);
+    int32_t Configuration(DetectMode detect_mode, int32_t max_detect_face, CustomPipelineParameter param, int32_t detect_level_px = -1,
+                          int32_t track_by_detect_mode_fps = -1);
 
     /**
      * @brief Performs face detection and tracking on a given image stream.
      * @param image The camera stream to process for face detection and tracking.
      * @return int32_t Returns the number of faces detected and tracked.
      */// Method for face detection and tracking
-    int32_t FaceDetectAndTrack(CameraStream &image);
+    int32_t FaceDetectAndTrack(CameraStream& image);
 
     /**
      * @brief Set the threshold of face detection function, which only acts on the detection model
@@ -100,7 +97,7 @@ public:
      * @param param Custom pipeline parameters.
      * @return int32_t Status code of the processing.
      */
-    int32_t FacesProcess(CameraStream &image, const std::vector<HyperFaceData> &faces, const CustomPipelineParameter& param);
+    int32_t FacesProcess(CameraStream& image, const std::vector<HyperFaceData>& faces, const CustomPipelineParameter& param);
 
     /**
      * @brief Retrieves the face recognition module.
@@ -126,13 +123,13 @@ public:
      * @param data FaceBasicData to store extracted features.
      * @return int32_t Status code of the feature extraction.
      */
-    int32_t FaceFeatureExtract(CameraStream &image, FaceBasicData& data);
+    int32_t FaceFeatureExtract(CameraStream& image, FaceBasicData& data);
 
     /**
      * @brief Retrieves the custom pipeline parameters.
      * @return CustomPipelineParameter Current custom pipeline parameters.
      */
-    const CustomPipelineParameter &getMParameter() const;
+    const CustomPipelineParameter& getMParameter() const;
 
     /**
      * @brief Static method for detecting face quality.
@@ -140,7 +137,7 @@ public:
      * @param result Float to store the face quality result.
      * @return int32_t Status code of the quality detection.
      */
-    static int32_t FaceQualityDetect(FaceBasicData& data, float &result);
+    static int32_t FaceQualityDetect(FaceBasicData& data, float& result);
 
     /**
      * @brief Sets the preview size for face tracking.
@@ -200,7 +197,6 @@ public:
      * @return std::vector<float> Cache of yaw results.
      */
     const std::vector<float>& GetYawResultsCache() const;
-
 
     /**
      * @brief Gets the cache of pitch results from face pose estimation.
@@ -267,7 +263,7 @@ public:
      * @return A const reference to a vector containing face action normal results.
      */
     const std::vector<int>& GetFaceNormalAactionsResultCache() const;
-    
+
     /**
      * @brief Gets the cache of face action jaw open results.
      * @return A const reference to a vector containing face action jaw open results.
@@ -298,49 +294,54 @@ public:
      */
     const Embedded& GetFaceFeatureCache() const;
 
+    /**
+     * @brief Gets the cache of face detection confidence.
+     * @return A const reference to a vector containing face detection confidence.
+     */
+    const std::vector<float>& GetDetConfidenceCache() const;
 
 private:
     // Private member variables
-    CustomPipelineParameter m_parameter_;                 ///< Stores custom parameters for the pipeline
-    int32_t m_max_detect_face_{};                         ///< Maximum number of faces that can be detected
-    DetectMode m_detect_mode_;                             ///< Current detection mode (image or video)
-    bool m_always_detect_{};                               ///< Flag to determine if detection should always occur
+    CustomPipelineParameter m_parameter_;  ///< Stores custom parameters for the pipeline
+    int32_t m_max_detect_face_{};          ///< Maximum number of faces that can be detected
+    DetectMode m_detect_mode_;             ///< Current detection mode (image or video)
+    bool m_always_detect_{};               ///< Flag to determine if detection should always occur
 
-    std::shared_ptr<FaceTrack> m_face_track_;              ///< Shared pointer to the FaceTrack object
+    std::shared_ptr<FaceTrack> m_face_track_;                ///< Shared pointer to the FaceTrack object
     std::shared_ptr<FeatureExtraction> m_face_recognition_;  ///< Shared pointer to the FaceRecognition object
-    std::shared_ptr<FacePipeline> m_face_pipeline_;        ///< Shared pointer to the FacePipeline object
+    std::shared_ptr<FacePipeline> m_face_pipeline_;          ///< Shared pointer to the FacePipeline object
 
 private:
     // Cache data
-    std::vector<ByteArray> m_detect_cache_;                        ///< Cache for storing serialized detected face data
-    std::vector<FaceBasicData> m_face_basic_data_cache_;           ///< Cache for basic face data extracted from detection
-    std::vector<FaceRect> m_face_rects_cache_;                     ///< Cache for face rectangle data from detection
-    std::vector<int32_t> m_track_id_cache_;                        ///< Cache for tracking IDs of detected faces
-    std::vector<float> m_roll_results_cache_;                       ///< Cache for storing roll results from face pose estimation
-    std::vector<float> m_yaw_results_cache_;                        ///< Cache for storing yaw results from face pose estimation
-    std::vector<float> m_pitch_results_cache_;                      ///< Cache for storing pitch results from face pose estimation
-    std::vector<FacePoseQualityResult> m_quality_results_cache_;   ///< Cache for face pose quality results
-    std::vector<float> m_mask_results_cache_;                       ///< Cache for mask detection results
-    std::vector<float> m_rgb_liveness_results_cache_;               ///< Cache for RGB liveness detection results
-    std::vector<float> m_quality_score_results_cache_;               ///< Cache for RGB face quality score results
-    std::vector<float> m_react_left_eye_results_cache_;               ///< Cache for Left eye state in face interaction
-    std::vector<float> m_react_right_eye_results_cache_;               ///< Cache for Right eye state in face interaction
+    std::vector<ByteArray> m_detect_cache_;                       ///< Cache for storing serialized detected face data
+    std::vector<FaceBasicData> m_face_basic_data_cache_;          ///< Cache for basic face data extracted from detection
+    std::vector<FaceRect> m_face_rects_cache_;                    ///< Cache for face rectangle data from detection
+    std::vector<int32_t> m_track_id_cache_;                       ///< Cache for tracking IDs of detected faces
+    std::vector<float> m_det_confidence_cache_;                   ///< Cache for face detection confidence of detected faces
+    std::vector<float> m_roll_results_cache_;                     ///< Cache for storing roll results from face pose estimation
+    std::vector<float> m_yaw_results_cache_;                      ///< Cache for storing yaw results from face pose estimation
+    std::vector<float> m_pitch_results_cache_;                    ///< Cache for storing pitch results from face pose estimation
+    std::vector<FacePoseQualityResult> m_quality_results_cache_;  ///< Cache for face pose quality results
+    std::vector<float> m_mask_results_cache_;                     ///< Cache for mask detection results
+    std::vector<float> m_rgb_liveness_results_cache_;             ///< Cache for RGB liveness detection results
+    std::vector<float> m_quality_score_results_cache_;            ///< Cache for RGB face quality score results
+    std::vector<float> m_react_left_eye_results_cache_;           ///< Cache for Left eye state in face interaction
+    std::vector<float> m_react_right_eye_results_cache_;          ///< Cache for Right eye state in face interaction
 
-    std::vector<int> m_action_normal_results_cache_;                ///< Cache for normal action in face interaction
-    std::vector<int> m_action_shake_results_cache_;                 ///< Cache for shake action in face interaction
-    std::vector<int> m_action_blink_results_cache_;                 ///< Cache for blink action in face interaction
-    std::vector<int> m_action_jaw_open_results_cache_;              ///< Cache for jaw open action in face interaction
-    std::vector<int> m_action_raise_head_results_cache_;            ///< Cache for raise head action in face interaction
+    std::vector<int> m_action_normal_results_cache_;      ///< Cache for normal action in face interaction
+    std::vector<int> m_action_shake_results_cache_;       ///< Cache for shake action in face interaction
+    std::vector<int> m_action_blink_results_cache_;       ///< Cache for blink action in face interaction
+    std::vector<int> m_action_jaw_open_results_cache_;    ///< Cache for jaw open action in face interaction
+    std::vector<int> m_action_raise_head_results_cache_;  ///< Cache for raise head action in face interaction
 
     std::vector<int> m_attribute_race_results_cache_;
     std::vector<int> m_attribute_gender_results_cache_;
     std::vector<int> m_attribute_age_results_cache_;
-    Embedded m_face_feature_cache_;                                ///< Cache for current face feature data
+    Embedded m_face_feature_cache_;  ///< Cache for current face feature data
 
-    std::mutex m_mtx_;                                             ///< Mutex for thread safety.
-
+    std::mutex m_mtx_;  ///< Mutex for thread safety.
 };
 
-}   // namespace hyper
+}  // namespace inspire
 
-#endif //HYPERFACEREPO_FACE_CONTEXT_H
+#endif  // HYPERFACEREPO_FACE_CONTEXT_H
