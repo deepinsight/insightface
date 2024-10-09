@@ -179,6 +179,7 @@ class FaceInformation:
 
     def __init__(self,
                  track_id: int,
+                 detection_confidence: float,
                  location: Tuple,
                  roll: float,
                  yaw: float,
@@ -186,6 +187,7 @@ class FaceInformation:
                  _token: HFFaceBasicToken,
                  _feature: np.array = None):
         self.track_id = track_id
+        self.detection_confidence = detection_confidence
         self.location = location
         self.roll = roll
         self.yaw = yaw
@@ -312,6 +314,7 @@ class InspireFaceSession(object):
                 pitch = euler_angle[idx][2]
                 track_id = track_ids[idx]
                 _token = tokens[idx]
+                detection_confidence = self.multiple_faces.detConfidence[idx]
 
                 info = FaceInformation(
                     location=(top_left[0], top_left[1], bottom_right[0], bottom_right[1]),
@@ -320,6 +323,7 @@ class InspireFaceSession(object):
                     pitch=pitch,
                     track_id=track_id,
                     _token=_token,
+                    detection_confidence=detection_confidence,
                 )
                 infos.append(info)
 
@@ -341,6 +345,20 @@ class InspireFaceSession(object):
             landmark.append(point.y)
 
         return np.asarray(landmark).reshape(-1, 2)
+    
+    def set_detection_confidence_threshold(self, threshold: float):
+        """
+        Sets the detection confidence threshold for the face detection session.
+
+        Args:
+            threshold (float): The confidence threshold for face detection.
+
+        Notes:
+            If setting the detection confidence threshold fails, an error is logged with the returned status code.
+        """
+        ret = HFSessionSetFaceDetectThreshold(self._sess, threshold)
+        if ret != 0:
+            logger.error(f"Set detection confidence threshold error: {ret}")
 
     def set_track_preview_size(self, size=192):
         """
@@ -962,3 +980,9 @@ def disable_logging() -> None:
     Disables all logging from the InspireFace library.
     """
     HFLogDisable()
+
+def show_system_resource_statistics():
+    """
+    Displays the system resource information.
+    """
+    HFDeBugShowResourceStatistics()

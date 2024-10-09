@@ -2,9 +2,12 @@ cmake_minimum_required(VERSION 3.10)
 project(HyperFaceTest)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+# If you want to test the benchmark, you need to set this to ON
 option(ISF_ENABLE_BENCHMARK "Enable the benchmark test cases." ON)
-option(ISF_ENABLE_USE_LFW_DATA "Enable test cases for LFW data sets." ON)
-option(ISF_ENABLE_TEST_EVALUATION "Enable evaluation function test cases." ON)
+# If you want to test the LFW data set, you need to set this to ON
+option(ISF_ENABLE_USE_LFW_DATA "Enable test cases for LFW data sets." OFF)
+# If you want to test the evaluation function, you need to set this to ON, need LFW data set.
+option(ISF_ENABLE_TEST_EVALUATION "Enable evaluation function test cases." OFF)
 
 if (ISF_ENABLE_BENCHMARK)
     add_definitions("-DISF_ENABLE_BENCHMARK")

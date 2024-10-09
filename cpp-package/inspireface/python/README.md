@@ -50,6 +50,8 @@ draw = image.copy()
 for idx, face in enumerate(faces):
     print(f"{'==' * 20}")
     print(f"idx: {idx}")
+    # Print detection confidence.
+    print(f"detection confidence: {face.detection_confidence}")
     # Print Euler angles of the face.
     print(f"roll: {face.roll}, yaw: {face.yaw}, pitch: {face.pitch}")
     # Draw bounding box around the detected face.

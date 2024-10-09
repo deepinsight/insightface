@@ -1,1 +1,1 @@
-InspireFace Version: 1.1.6
+InspireFace Version: 1.1.7

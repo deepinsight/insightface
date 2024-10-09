@@ -11,14 +11,10 @@
 
 namespace inspire {
 
-
 FaceContext::FaceContext() = default;
 
-int32_t FaceContext::Configuration(DetectMode detect_mode, 
-                                    int32_t max_detect_face,
-                                    CustomPipelineParameter param, 
-                                    int32_t detect_level_px, 
-                                    int32_t track_by_detect_mode_fps) {
+int32_t FaceContext::Configuration(DetectMode detect_mode, int32_t max_detect_face, CustomPipelineParameter param,
+                                   int32_t detect_level_px, int32_t track_by_detect_mode_fps) {
     m_detect_mode_ = detect_mode;
     m_max_detect_face_ = max_detect_face;
     m_parameter_ = param;
@@ -29,28 +25,25 @@ int32_t FaceContext::Configuration(DetectMode detect_mode,
         return HERR_ARCHIVE_LOAD_FAILURE;
     }
 
-    m_face_track_ = std::make_shared<FaceTrack>(m_detect_mode_, m_max_detect_face_, 20, 192, detect_level_px, track_by_detect_mode_fps);
+    m_face_track_ = std::make_shared<FaceTrack>(m_detect_mode_, m_max_detect_face_, 20, 192, detect_level_px,
+                                                track_by_detect_mode_fps);
     m_face_track_->Configuration(INSPIRE_LAUNCH->getMArchive());
     // SetDetectMode(m_detect_mode_);
 
-    m_face_recognition_ = std::make_shared<FeatureExtraction>(INSPIRE_LAUNCH->getMArchive(), m_parameter_.enable_recognition);
+    m_face_recognition_ =
+      std::make_shared<FeatureExtraction>(INSPIRE_LAUNCH->getMArchive(), m_parameter_.enable_recognition);
     if (m_face_recognition_->QueryStatus() != HSUCCEED) {
         return m_face_recognition_->QueryStatus();
     }
 
-    m_face_pipeline_ = std::make_shared<FacePipeline>(
-            INSPIRE_LAUNCH->getMArchive(),
-            param.enable_liveness,
-            param.enable_mask_detect,
-            param.enable_face_attribute,
-            param.enable_interaction_liveness
-    );
+    m_face_pipeline_ =
+      std::make_shared<FacePipeline>(INSPIRE_LAUNCH->getMArchive(), param.enable_liveness, param.enable_mask_detect,
+                                     param.enable_face_attribute, param.enable_interaction_liveness);
 
     return HSUCCEED;
 }
 
-
-int32_t FaceContext::FaceDetectAndTrack(CameraStream &image) {
+int32_t FaceContext::FaceDetectAndTrack(CameraStream& image) {
     std::lock_guard<std::mutex> lock(m_mtx_);
     m_detect_cache_.clear();
     m_face_basic_data_cache_.clear();
@@ -73,18 +66,20 @@ int32_t FaceContext::FaceDetectAndTrack(CameraStream &image) {
     m_quality_score_results_cache_.clear();
     m_attribute_race_results_cache_.clear();
     m_attribute_gender_results_cache_.clear();
+    m_det_confidence_cache_.clear();
     if (m_face_track_ == nullptr) {
         return HERR_SESS_TRACKER_FAILURE;
     }
     m_face_track_->UpdateStream(image);
     for (int i = 0; i < m_face_track_->trackingFace.size(); ++i) {
-        auto &face = m_face_track_->trackingFace[i];
+        auto& face = m_face_track_->trackingFace[i];
         HyperFaceData data = FaceObjectToHyperFaceData(face, i);
         ByteArray byteArray;
         auto ret = SerializeHyperFaceData(data, byteArray);
         if (ret != HSUCCEED) {
             return HERR_INVALID_SERIALIZATION_FAILED;
         }
+        m_det_confidence_cache_.push_back(face.GetConfidence());
         m_detect_cache_.push_back(byteArray);
         m_track_id_cache_.push_back(face.GetTrackingId());
         m_face_rects_cache_.push_back(data.rect);
@@ -98,19 +93,18 @@ int32_t FaceContext::FaceDetectAndTrack(CameraStream &image) {
             avg += data.quality[j];
         }
         avg /= 5.0f;
-        float quality_score = 1.0f - avg;    // reversal
+        float quality_score = 1.0f - avg;  // reversal
         m_quality_score_results_cache_.push_back(quality_score);
     }
     // ptr face_basic
     m_face_basic_data_cache_.resize(m_face_track_->trackingFace.size());
     for (int i = 0; i < m_face_basic_data_cache_.size(); ++i) {
-        auto &basic = m_face_basic_data_cache_[i];
+        auto& basic = m_face_basic_data_cache_[i];
         basic.dataSize = m_detect_cache_[i].size();
         basic.data = m_detect_cache_[i].data();
     }
 
-
-//    LOGD("Track COST: %f", m_face_track_->GetTrackTotalUseTime());
+    //    LOGD("Track COST: %f", m_face_track_->GetTrackTotalUseTime());
     return HSUCCEED;
 }
 
@@ -131,12 +125,12 @@ const std::shared_ptr<FacePipeline>& FaceContext::FacePipelineModule() {
     return m_face_pipeline_;
 }
 
-
 const int32_t FaceContext::GetNumberOfFacesCurrentlyDetected() const {
     return m_face_track_->trackingFace.size();
 }
 
-int32_t FaceContext::FacesProcess(CameraStream &image, const std::vector<HyperFaceData> &faces, const CustomPipelineParameter &param) {
+int32_t FaceContext::FacesProcess(CameraStream& image, const std::vector<HyperFaceData>& faces,
+                                  const CustomPipelineParameter& param) {
     std::lock_guard<std::mutex> lock(m_mtx_);
     m_mask_results_cache_.resize(faces.size(), -1.0f);
     m_rgb_liveness_results_cache_.resize(faces.size(), -1.0f);
@@ -151,7 +145,7 @@ int32_t FaceContext::FacesProcess(CameraStream &image, const std::vector<HyperFa
     m_action_raise_head_results_cache_.resize(faces.size(), -1);
     m_action_shake_results_cache_.resize(faces.size(), -1);
     for (int i = 0; i < faces.size(); ++i) {
-        const auto &face = faces[i];
+        const auto& face = faces[i];
         // RGB Liveness Detect
         if (param.enable_liveness) {
             auto ret = m_face_pipeline_->Process(image, face, PROCESS_RGB_LIVENESS);
@@ -189,14 +183,15 @@ int32_t FaceContext::FacesProcess(CameraStream &image, const std::vector<HyperFa
             m_react_left_eye_results_cache_[i] = m_face_pipeline_->eyesStatusCache[0];
             m_react_right_eye_results_cache_[i] = m_face_pipeline_->eyesStatusCache[1];
             // Special handling:  ff it is a tracking state, it needs to be filtered
-            if (face.trackState > 0)
-            {   
+            if (face.trackState > 0) {
                 auto idx = face.inGroupIndex;
                 if (idx < m_face_track_->trackingFace.size()) {
                     auto& target = m_face_track_->trackingFace[idx];
                     if (target.GetTrackingId() == face.trackId) {
-                        auto new_eye_left = EmaFilter(m_face_pipeline_->eyesStatusCache[0], target.left_eye_status_, 8, 0.2f);
-                        auto new_eye_right = EmaFilter(m_face_pipeline_->eyesStatusCache[1], target.right_eye_status_, 8, 0.2f);
+                        auto new_eye_left =
+                          EmaFilter(m_face_pipeline_->eyesStatusCache[0], target.left_eye_status_, 8, 0.2f);
+                        auto new_eye_right =
+                          EmaFilter(m_face_pipeline_->eyesStatusCache[1], target.right_eye_status_, 8, 0.2f);
                         if (face.trackState > 1) {
                             // The filtered value can be obtained only in the tracking state
                             m_react_left_eye_results_cache_[i] = new_eye_left;
@@ -209,19 +204,21 @@ int32_t FaceContext::FacesProcess(CameraStream &image, const std::vector<HyperFa
                         m_action_raise_head_results_cache_[i] = actions.raiseHead;
                         m_action_shake_results_cache_[i] = actions.shake;
                     } else {
-                        INSPIRE_LOGD("Serialized objects cannot connect to trace objects in memory, and there may be some problems");
+                        INSPIRE_LOGD(
+                          "Serialized objects cannot connect to trace objects in memory, and there may be some "
+                          "problems");
                     }
                 } else {
-                    INSPIRE_LOGW("The index of the trace object does not match the trace list in memory, and there may be some problems");
+                    INSPIRE_LOGW(
+                      "The index of the trace object does not match the trace list in memory, and there may be some "
+                      "problems");
                 }
             }
         }
-
     }
 
     return 0;
 }
-
 
 const std::vector<ByteArray>& FaceContext::GetDetectCache() const {
     return m_detect_cache_;
@@ -279,6 +276,10 @@ const Embedded& FaceContext::GetFaceFeatureCache() const {
     return m_face_feature_cache_;
 }
 
+const std::vector<float>& FaceContext::GetDetConfidenceCache() const {
+    return m_det_confidence_cache_;
+}
+
 const std::vector<int>& FaceContext::GetFaceRaceResultsCache() const {
     return m_attribute_race_results_cache_;
 }
@@ -311,11 +312,11 @@ const std::vector<int>& FaceContext::GetFaceRaiseHeadAactionsResultCache() const
     return m_action_raise_head_results_cache_;
 }
 
-int32_t FaceContext::FaceFeatureExtract(CameraStream &image, FaceBasicData& data) {
+int32_t FaceContext::FaceFeatureExtract(CameraStream& image, FaceBasicData& data) {
     std::lock_guard<std::mutex> lock(m_mtx_);
     int32_t ret;
     HyperFaceData face = {0};
-    ret = DeserializeHyperFaceData((char* )data.data, data.dataSize, face);
+    ret = DeserializeHyperFaceData((char*)data.data, data.dataSize, face);
     if (ret != HSUCCEED) {
         return ret;
     }
@@ -325,17 +326,15 @@ int32_t FaceContext::FaceFeatureExtract(CameraStream &image, FaceBasicData& data
     return ret;
 }
 
-
-const CustomPipelineParameter &FaceContext::getMParameter() const {
+const CustomPipelineParameter& FaceContext::getMParameter() const {
     return m_parameter_;
 }
 
-
-int32_t FaceContext::FaceQualityDetect(FaceBasicData& data, float &result) {
+int32_t FaceContext::FaceQualityDetect(FaceBasicData& data, float& result) {
     int32_t ret;
     HyperFaceData face = {0};
-    ret = DeserializeHyperFaceData((char* )data.data, data.dataSize, face);
-//    PrintHyperFaceData(face);
+    ret = DeserializeHyperFaceData((char*)data.data, data.dataSize, face);
+    //    PrintHyperFaceData(face);
     if (ret != HSUCCEED) {
         return ret;
     }
@@ -344,11 +343,10 @@ int32_t FaceContext::FaceQualityDetect(FaceBasicData& data, float &result) {
         avg += face.quality[i];
     }
     avg /= 5.0f;
-    result = 1.0f - avg;    // reversal
+    result = 1.0f - avg;  // reversal
 
     return ret;
 }
-
 
 int32_t FaceContext::SetDetectMode(DetectMode mode) {
     m_detect_mode_ = mode;
@@ -370,4 +368,4 @@ int32_t FaceContext::SetTrackFaceMinimumSize(int32_t minSize) {
     return HSUCCEED;
 }
 
-}   // namespace hyper
+}  // namespace inspire

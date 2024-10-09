@@ -128,8 +128,7 @@ HResult HFReleaseInspireFaceSession(HFSession handle) {
     return HSUCCEED;
 }
 
-HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectMode detectMode,
-                                   HInt32 maxDetectFaceNum, HInt32 detectPixelLevel,
+HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectMode detectMode, HInt32 maxDetectFaceNum, HInt32 detectPixelLevel,
                                    HInt32 trackByDetectModeFPS, HFSession *handle) {
     inspire::ContextCustomParameter param;
     param.enable_mask_detect = parameter.enable_mask_detect;
@@ -147,8 +146,7 @@ HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectM
     }
 
     HF_FaceAlgorithmSession *ctx = new HF_FaceAlgorithmSession();
-    auto ret = ctx->impl.Configuration(detMode, maxDetectFaceNum, param, detectPixelLevel,
-                                       trackByDetectModeFPS);
+    auto ret = ctx->impl.Configuration(detMode, maxDetectFaceNum, param, detectPixelLevel, trackByDetectModeFPS);
     if (ret != HSUCCEED) {
         delete ctx;
         *handle = nullptr;
@@ -161,8 +159,7 @@ HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectM
     return ret;
 }
 
-HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode detectMode,
-                                           HInt32 maxDetectFaceNum, HInt32 detectPixelLevel,
+HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode detectMode, HInt32 maxDetectFaceNum, HInt32 detectPixelLevel,
                                            HInt32 trackByDetectModeFPS, HFSession *handle) {
     inspire::ContextCustomParameter param;
     if (customOption & HF_ENABLE_FACE_RECOGNITION) {
@@ -194,8 +191,7 @@ HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode de
     }
 
     HF_FaceAlgorithmSession *ctx = new HF_FaceAlgorithmSession();
-    auto ret = ctx->impl.Configuration(detMode, maxDetectFaceNum, param, detectPixelLevel,
-                                       trackByDetectModeFPS);
+    auto ret = ctx->impl.Configuration(detMode, maxDetectFaceNum, param, detectPixelLevel, trackByDetectModeFPS);
     if (ret != HSUCCEED) {
         delete ctx;
         *handle = nullptr;
@@ -224,8 +220,7 @@ HResult HFFeatureHubDataDisable() {
 
 HResult HFFeatureHubDataEnable(HFFeatureHubConfiguration configuration) {
     inspire::DatabaseConfiguration param;
-    param.db_path =
-      (configuration.dbPath != nullptr) ? std::string(configuration.dbPath) : std::string();
+    param.db_path = (configuration.dbPath != nullptr) ? std::string(configuration.dbPath) : std::string();
     param.enable_use_db = configuration.enablePersistence;
     param.feature_block_num = configuration.featureBlockNum;
     param.recognition_threshold = configuration.searchThreshold;
@@ -283,8 +278,7 @@ HResult HFSessionSetFaceDetectThreshold(HFSession session, HFloat threshold) {
     return ctx->impl.SetFaceDetectThreshold(threshold);
 }
 
-HResult HFExecuteFaceTrack(HFSession session, HFImageStream streamHandle,
-                           PHFMultipleFaceData results) {
+HResult HFExecuteFaceTrack(HFSession session, HFImageStream streamHandle, PHFMultipleFaceData results) {
     if (session == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
     }
@@ -303,6 +297,7 @@ HResult HFExecuteFaceTrack(HFSession session, HFImageStream streamHandle,
     results->detectedNum = ctx->impl.GetNumberOfFacesCurrentlyDetected();
     results->rects = (HFaceRect *)ctx->impl.GetFaceRectsCache().data();
     results->trackIds = (HInt32 *)ctx->impl.GetTrackIDCache().data();
+    results->detConfidence = (HFloat *)ctx->impl.GetDetConfidenceCache().data();
     results->angles.pitch = (HFloat *)ctx->impl.GetPitchResultsCache().data();
     results->angles.roll = (HFloat *)ctx->impl.GetRollResultsCache().data();
     results->angles.yaw = (HFloat *)ctx->impl.GetYawResultsCache().data();
@@ -329,8 +324,7 @@ HResult HFGetNumOfFaceDenseLandmark(HPInt32 num) {
     return HSUCCEED;
 }
 
-HResult HFGetFaceDenseLandmarkFromFaceToken(HFFaceBasicToken singleFace, HPoint2f *landmarks,
-                                            HInt32 num) {
+HResult HFGetFaceDenseLandmarkFromFaceToken(HFFaceBasicToken singleFace, HPoint2f *landmarks, HInt32 num) {
     if (num != 106) {
         return HERR_SESS_LANDMARK_NUM_NOT_MATCH;
     }
@@ -356,8 +350,7 @@ HResult HFFeatureHubFaceSearchThresholdSetting(float threshold) {
     return HSUCCEED;
 }
 
-HResult HFFaceFeatureExtract(HFSession session, HFImageStream streamHandle,
-                             HFFaceBasicToken singleFace, PHFFaceFeature feature) {
+HResult HFFaceFeatureExtract(HFSession session, HFImageStream streamHandle, HFFaceBasicToken singleFace, PHFFaceFeature feature) {
     if (session == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
     }
@@ -385,8 +378,7 @@ HResult HFFaceFeatureExtract(HFSession session, HFImageStream streamHandle,
     return ret;
 }
 
-HResult HFFaceFeatureExtractCpy(HFSession session, HFImageStream streamHandle,
-                                HFFaceBasicToken singleFace, HPFloat feature) {
+HResult HFFaceFeatureExtractCpy(HFSession session, HFImageStream streamHandle, HFFaceBasicToken singleFace, HPFloat feature) {
     if (session == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
     }
@@ -452,8 +444,7 @@ HResult HFFeatureHubInsertFeature(HFFaceFeatureIdentity featureIdentity) {
     return ret;
 }
 
-HResult HFFeatureHubFaceSearch(HFFaceFeature searchFeature, HPFloat confidence,
-                               PHFFaceFeatureIdentity mostSimilar) {
+HResult HFFeatureHubFaceSearch(HFFaceFeature searchFeature, HPFloat confidence, PHFFaceFeatureIdentity mostSimilar) {
     if (searchFeature.data == nullptr) {
         return HERR_INVALID_FACE_FEATURE;
     }
@@ -474,8 +465,7 @@ HResult HFFeatureHubFaceSearch(HFFaceFeature searchFeature, HPFloat confidence,
     return ret;
 }
 
-HResult HFFeatureHubFaceSearchTopK(HFFaceFeature searchFeature, HInt32 topK,
-                                   PHFSearchTopKResults results) {
+HResult HFFeatureHubFaceSearchTopK(HFFaceFeature searchFeature, HInt32 topK, PHFSearchTopKResults results) {
     if (searchFeature.data == nullptr) {
         return HERR_INVALID_FACE_FEATURE;
     }
@@ -530,9 +520,7 @@ HResult HFFeatureHubGetFaceIdentity(HInt32 customId, PHFFaceFeatureIdentity iden
     return ret;
 }
 
-HResult HFMultipleFacePipelineProcess(HFSession session, HFImageStream streamHandle,
-                                      PHFMultipleFaceData faces,
-                                      HFSessionCustomParameter parameter) {
+HResult HFMultipleFacePipelineProcess(HFSession session, HFImageStream streamHandle, PHFMultipleFaceData faces, HFSessionCustomParameter parameter) {
     if (session == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
     }
@@ -580,8 +568,7 @@ HResult HFMultipleFacePipelineProcess(HFSession session, HFImageStream streamHan
     return ret;
 }
 
-HResult HFMultipleFacePipelineProcessOptional(HFSession session, HFImageStream streamHandle,
-                                              PHFMultipleFaceData faces, HInt32 customOption) {
+HResult HFMultipleFacePipelineProcessOptional(HFSession session, HFImageStream streamHandle, PHFMultipleFaceData faces, HInt32 customOption) {
     if (session == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
     }
@@ -714,10 +701,8 @@ HResult HFGetFaceIntereactionStateResult(HFSession session, PHFFaceIntereactionS
         return HERR_INVALID_CONTEXT_HANDLE;
     }
     result->num = ctx->impl.GetFaceInteractionLeftEyeStatusCache().size();
-    result->leftEyeStatusConfidence =
-      (HFloat *)ctx->impl.GetFaceInteractionLeftEyeStatusCache().data();
-    result->rightEyeStatusConfidence =
-      (HFloat *)ctx->impl.GetFaceInteractionRightEyeStatusCache().data();
+    result->leftEyeStatusConfidence = (HFloat *)ctx->impl.GetFaceInteractionLeftEyeStatusCache().data();
+    result->rightEyeStatusConfidence = (HFloat *)ctx->impl.GetFaceInteractionRightEyeStatusCache().data();
 
     return HSUCCEED;
 }
@@ -786,5 +771,31 @@ HResult HFLogDisable() {
 
 HResult HFDeBugShowResourceStatistics() {
     RESOURCE_MANAGE->printResourceStatistics();
+    return HSUCCEED;
+}
+
+HResult HFDeBugGetUnreleasedSessionsCount(HInt32 *count) {
+    *count = RESOURCE_MANAGE->getUnreleasedSessions().size();
+    return HSUCCEED;
+}
+
+HResult HFDeBugGetUnreleasedSessions(HFSession *sessions, HInt32 count) {
+    std::vector<long> unreleasedSessions = RESOURCE_MANAGE->getUnreleasedSessions();
+    for (int i = 0; i < count; ++i) {
+        sessions[i] = (HFSession)unreleasedSessions[i];
+    }
+    return HSUCCEED;
+}
+
+HResult HFDeBugGetUnreleasedStreamsCount(HInt32 *count) {
+    *count = RESOURCE_MANAGE->getUnreleasedStreams().size();
+    return HSUCCEED;
+}
+
+HResult HFDeBugGetUnreleasedStreams(HFImageStream *streams, HInt32 count) {
+    std::vector<long> unreleasedStreams = RESOURCE_MANAGE->getUnreleasedStreams();
+    for (int i = 0; i < count; ++i) {
+        streams[i] = (HFImageStream)unreleasedStreams[i];
+    }
     return HSUCCEED;
 }

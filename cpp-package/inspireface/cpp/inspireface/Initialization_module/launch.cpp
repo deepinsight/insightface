@@ -6,7 +6,6 @@
 #include "log.h"
 #include "herror.h"
 
-
 namespace inspire {
 
 std::mutex Launch::mutex_;
@@ -24,7 +23,7 @@ std::shared_ptr<Launch> Launch::GetInstance() {
     return instance_;
 }
 
-int32_t Launch::Load(const std::string &path) {
+int32_t Launch::Load(const std::string& path) {
     if (!m_load_) {
         m_archive_.ReLoad(path);
         if (m_archive_.QueryStatus() == SARC_SUCCESS) {
@@ -34,7 +33,8 @@ int32_t Launch::Load(const std::string &path) {
             return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
         }
     } else {
-        INSPIRE_LOGW("There is no need to call launch more than once, as subsequent calls will not affect the initialization.");
+        INSPIRE_LOGW(
+          "There is no need to call launch more than once, as subsequent calls will not affect the initialization.");
         return HSUCCEED;
     }
 }
@@ -47,7 +47,7 @@ void Launch::Unload() {
     std::lock_guard<std::mutex> lock(mutex_);
     if (m_load_) {
         // Assuming InspireArchive has a method to clear its resources
-        m_archive_.Release(); 
+        m_archive_.Release();
         m_load_ = false;
         INSPIRE_LOGI("All resources have been successfully unloaded and system is reset.");
     } else {
@@ -55,4 +55,4 @@ void Launch::Unload() {
     }
 }
 
-}   // namespace inspire
+}  // namespace inspire

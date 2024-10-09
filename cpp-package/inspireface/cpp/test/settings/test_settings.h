@@ -9,31 +9,56 @@
 #include <iostream>
 #include "enviro.h"
 
+// Define the test model file
+#define TEST_MODEL_FILE Enviro::getInstance().getPackName()
 
-#define TEST_MODEL_FILE Enviro::getInstance().getPackName()                       // Optional model file
+// Set the pack name
 #define SET_PACK_NAME(name) Enviro::getInstance().setPackName(name)
+
+// Set the test directory
 #define SET_TEST_DIR(dir) Enviro::getInstance().setTestResDir(dir)
+// Set the runtime full path
 #define SET_RUNTIME_FULLPATH_NAME(name) Enviro::getInstance().setTestRuntimeFullPath(name)
+// Get the runtime full path
 #define GET_RUNTIME_FULLPATH_NAME Enviro::getInstance().getTestRuntimeFullPath()
 
-#define TEST_LFW_FUNNELED_TXT "valid_lfw_funneled.txt"     // LFW Index txt file
-#define LFW_FUNNELED_DIR ""                                // LFW funneled data dir
+// Define the LFW funneled index txt file
+#define TEST_LFW_FUNNELED_TXT "valid_lfw_funneled.txt"
+// Define the LFW funneled data directory
+#define LFW_FUNNELED_DIR ""
+// Define the LFW evaluation txt file
 #define TEST_LFW_EVALUATION_TXT "pairs.txt"
+// Define the benchmark record file
 #define TEST_BENCHMARK_RECORD "benchmark.csv"
+// Define the evaluation record file
 #define TEST_EVALUATION_RECORD "evaluation.csv"
 
 using namespace Catch::Detail;
 
+// Print test message
 #define TEST_PRINT(...) SPDLOG_LOGGER_CALL(spdlog::get("TEST"), spdlog::level::trace, __VA_ARGS__)
+// Print test message output
 #define TEST_PRINT_OUTPUT(open) TestMessageBroadcast test_msg_broadcast_##open(open)
+// Set the log output level
 #define LOG_OUTPUT_LEVEL(level) LogLevelBroadcast log_level_broadcast_##level(level);
 
+// Get the test data directory
 #define GET_DIR getTestDataDir()
+// Get the test data
 #define GET_DATA(filename) getTestData(filename)
+// Get the test models file
 #define GET_MODEL_FILE() getTestModelsFile()
+// Get the LFW funneled index txt file
 #define GET_LFW_FUNNELED_TXT() getTestLFWFunneledTxt()
-
+// Get the LFW funneled evaluation txt file
+#define GET_LFW_FUNNELED_EVA_TXT() getTestLFWFunneledEvaTxt()
+// Get the LFW funneled directory
+#define GET_LFW_FUNNELED_DIR() getLFWFunneledDir()
+// Get the benchmark record file
+#define GET_BENCHMARK_RECORD_FILE() getBenchmarkRecordFile()
+// Get the evaluation record file
 #define GET_SAVE_DIR getTestSaveDir()
+// Get the test save data
 #define GET_SAVE_DATA(filename) getTestSaveData(filename)
 
 std::string getTestDataDir();
@@ -87,14 +112,22 @@ public:
         spdlog::get("TEST")->set_level(m_old_level);
     }
 
-
 private:
     spdlog::level::level_enum m_old_level;
 };
 
-
+/**
+ * @class LogLevelBroadcast
+ * @brief A class for broadcasting log level changes.
+ *
+ * This class is used to set the log level for the logger.
+ */
 class LogLevelBroadcast {
 public:
+    /**
+     * @brief Constructor for LogLevelBroadcast.
+     * @param level The log level to set.
+     */
     explicit LogLevelBroadcast(LOG_LEVEL level) {
         m_oldLevel = level;
         spdlog::set_level(spdlog::level::level_enum(level));
@@ -108,18 +141,12 @@ private:
     LOG_LEVEL m_oldLevel;
 };
 
-
-
 struct test_case_split {
     ~test_case_split() {
-        std::cout
-                << "==============================================================================="
-                << std::endl;
+        std::cout << "===============================================================================" << std::endl;
     }
 
-
 #define DRAW_SPLIT_LINE test_case_split split_line_x;
-
 };
 
-#endif //BIGGUYSMAIN_TEST_SETTINGS_H
+#endif  // BIGGUYSMAIN_TEST_SETTINGS_H

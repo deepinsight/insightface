@@ -7,35 +7,53 @@
 
 #include <string>
 
+/**
+ * @class Enviro
+ * @brief A singleton class for managing environment-specific configurations.
+ *
+ * This class provides methods to set and get various environment-specific configurations
+ * such as the resource pack name, test result directory, and runtime full path.
+ */
 class Enviro {
 public:
-    static Enviro& getInstance() {
+    static Enviro &getInstance() {
         static Enviro instance;
         return instance;
     }
 
-    Enviro(Enviro const&) = delete;
-    void operator=(Enviro const&) = delete;
+    Enviro(Enviro const &) = delete;
+    void operator=(Enviro const &) = delete;
 
-    std::string getPackName() const { return packName; }
-    
-    void setPackName(const std::string& name) { packName = name; }
+    std::string getPackName() const {
+        return packName;
+    }
 
-    const std::string &getTestResDir() const { return testResDir; }
+    void setPackName(const std::string &name) {
+        packName = name;
+    }
 
-    void setTestResDir(const std::string &dir) { Enviro::testResDir = dir; }
+    const std::string &getTestResDir() const {
+        return testResDir;
+    }
 
-    const std::string &getTestRuntimeFullPath() const { return runtimeFullPath; }
+    void setTestResDir(const std::string &dir) {
+        Enviro::testResDir = dir;
+    }
 
-    void setTestRuntimeFullPath(const std::string &path) { Enviro::runtimeFullPath = path; }
+    const std::string &getTestRuntimeFullPath() const {
+        return runtimeFullPath;
+    }
+
+    void setTestRuntimeFullPath(const std::string &path) {
+        Enviro::runtimeFullPath = path;
+    }
 
 private:
     Enviro() {}
 
-    std::string packName = "Pikachu";
-    std::string testResDir = "test_res";
-
-    std::string runtimeFullPath = "";
+    std::string packName{"Pikachu"};
+    std::string testResDir{"test_res"};
+    std::string runtimeFullPath;
 };
 
-#endif //INSPIREFACE_ENVIRO_H
+#endif  // INSPIREFACE_ENVIRO_H

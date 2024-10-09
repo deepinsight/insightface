@@ -49,8 +49,7 @@ int main(int argc, char* argv[]) {
     HInt32 detectPixelLevel = 160;
     // Handle of the current face SDK algorithm context
     HFSession session = {0};
-    ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, detectPixelLevel, -1,
-                                             &session);
+    ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, detectPixelLevel, -1, &session);
     if (ret != HSUCCEED) {
         std::cout << "Create FaceContext error: " << ret << std::endl;
         return ret;
@@ -115,10 +114,10 @@ int main(int argc, char* argv[]) {
         std::cout << "========================================" << std::endl;
         std::cout << "Token size: " << multipleFaceData.tokens[index].size << std::endl;
         std::cout << "Process face index: " << index << std::endl;
+        std::cout << "DetConfidence: " << multipleFaceData.detConfidence[index] << std::endl;
         // Use OpenCV's Rect to receive face bounding boxes
-        auto rect =
-          cv::Rect(multipleFaceData.rects[index].x, multipleFaceData.rects[index].y,
-                   multipleFaceData.rects[index].width, multipleFaceData.rects[index].height);
+        auto rect = cv::Rect(multipleFaceData.rects[index].x, multipleFaceData.rects[index].y,
+                             multipleFaceData.rects[index].width, multipleFaceData.rects[index].height);
         cv::rectangle(draw, rect, cv::Scalar(0, 100, 255), 4);
 
         // Print FaceID, In IMAGE-MODE it is changing, in VIDEO-MODE it is fixed, but it may be lost
@@ -126,15 +125,13 @@ int main(int argc, char* argv[]) {
 
         // Print Head euler angle, It can often be used to judge the quality of a face by the Angle
         // of the head
-        std::cout << "Roll: " << multipleFaceData.angles.roll[index]
-                  << ", Yaw: " << multipleFaceData.angles.yaw[index]
+        std::cout << "Roll: " << multipleFaceData.angles.roll[index] << ", Yaw: " << multipleFaceData.angles.yaw[index]
                   << ", Pitch: " << multipleFaceData.angles.pitch[index] << std::endl;
 
         HInt32 numOfLmk;
         HFGetNumOfFaceDenseLandmark(&numOfLmk);
         HPoint2f denseLandmarkPoints[numOfLmk];
-        ret = HFGetFaceDenseLandmarkFromFaceToken(multipleFaceData.tokens[index],
-                                                  denseLandmarkPoints, numOfLmk);
+        ret = HFGetFaceDenseLandmarkFromFaceToken(multipleFaceData.tokens[index], denseLandmarkPoints, numOfLmk);
         if (ret != HSUCCEED) {
             std::cerr << "HFGetFaceDenseLandmarkFromFaceToken error!!" << std::endl;
             return -1;
@@ -154,8 +151,7 @@ int main(int argc, char* argv[]) {
     // when FaceContext is created!
     auto pipelineOption = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
     // In this loop, all faces are processed
-    ret = HFMultipleFacePipelineProcessOptional(session, imageHandle, &multipleFaceData,
-                                                pipelineOption);
+    ret = HFMultipleFacePipelineProcessOptional(session, imageHandle, &multipleFaceData, pipelineOption);
     if (ret != HSUCCEED) {
         std::cout << "Execute Pipeline error: " << ret << std::endl;
         return ret;

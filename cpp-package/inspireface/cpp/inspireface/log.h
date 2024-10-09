@@ -32,22 +32,21 @@
 #define INSPIRE_LOGF(...) inspire::LogManager::getInstance()->logStandard(inspire::ISF_LOG_FATAL, __FILENAME__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #endif
 
-
 // Macro to set the global log level
 #define INSPIRE_SET_LOG_LEVEL(level) inspire::LogManager::getInstance()->setLogLevel(level)
 
 namespace inspire {
 
 // Log levels
-enum LogLevel {
-    ISF_LOG_NONE = 0,
-    ISF_LOG_DEBUG,
-    ISF_LOG_INFO,
-    ISF_LOG_WARN,
-    ISF_LOG_ERROR,
-    ISF_LOG_FATAL
-};
+enum LogLevel { ISF_LOG_NONE = 0, ISF_LOG_DEBUG, ISF_LOG_INFO, ISF_LOG_WARN, ISF_LOG_ERROR, ISF_LOG_FATAL };
 
+/**
+ * @class LogManager
+ * @brief A singleton class for logging messages to the console or Android logcat.
+ *
+ * This class provides methods to log messages of different severity levels (DEBUG, INFO, WARN, ERROR, FATAL)
+ * to the console or Android logcat based on the current log level setting.
+ */
 class INSPIRE_API LogManager {
 private:
     LogLevel currentLevel;
@@ -84,16 +83,28 @@ public:
 #ifdef ANDROID
     // Method for logging on the Android platform
     void logAndroid(LogLevel level, const char* tag, const char* format, ...) const {
-        if (currentLevel == ISF_LOG_NONE || level < currentLevel) return;
+        if (currentLevel == ISF_LOG_NONE || level < currentLevel)
+            return;
 
         int androidLevel;
         switch (level) {
-            case ISF_LOG_DEBUG: androidLevel = ANDROID_LOG_DEBUG; break;
-            case ISF_LOG_INFO: androidLevel = ANDROID_LOG_INFO; break;
-            case ISF_LOG_WARN: androidLevel = ANDROID_LOG_WARN; break;
-            case ISF_LOG_ERROR: androidLevel = ANDROID_LOG_ERROR; break;
-            case ISF_LOG_FATAL: androidLevel = ANDROID_LOG_FATAL; break;
-            default: androidLevel = ANDROID_LOG_DEFAULT;
+            case ISF_LOG_DEBUG:
+                androidLevel = ANDROID_LOG_DEBUG;
+                break;
+            case ISF_LOG_INFO:
+                androidLevel = ANDROID_LOG_INFO;
+                break;
+            case ISF_LOG_WARN:
+                androidLevel = ANDROID_LOG_WARN;
+                break;
+            case ISF_LOG_ERROR:
+                androidLevel = ANDROID_LOG_ERROR;
+                break;
+            case ISF_LOG_FATAL:
+                androidLevel = ANDROID_LOG_FATAL;
+                break;
+            default:
+                androidLevel = ANDROID_LOG_DEFAULT;
         }
 
         va_list args;
@@ -105,7 +116,8 @@ public:
     // Method for standard platform logging
     void logStandard(LogLevel level, const char* filename, const char* function, int line, const char* format, ...) const {
         // Check whether the current level is LOG NONE or the log level is not enough to log
-        if (currentLevel == ISF_LOG_NONE || level < currentLevel) return;
+        if (currentLevel == ISF_LOG_NONE || level < currentLevel)
+            return;
 
         // Build log prefix dynamically based on available data
         bool hasPrintedPrefix = false;
@@ -145,14 +157,12 @@ public:
             printf("\033[0m");  // Reset color
         }
 
-        printf("\n"); // New line after log message
+        printf("\n");  // New line after log message
     }
 
-
 #endif
-
 };
 
-}   // namespace inspire
+}  // namespace inspire
 
-#endif // LOG_MANAGER_H
+#endif  // LOG_MANAGER_H
