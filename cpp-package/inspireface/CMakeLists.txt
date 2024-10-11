@@ -69,7 +69,7 @@ if (ISF_ENABLE_RKNN)
     message(STATUS "Use ${ISF_RKNPU_MAJOR}")
 endif ()
 
-
+# Platform configuration
 option(ISF_BUILD_LINUX_ARM7 "Platform Armv7." OFF)
 option(ISF_BUILD_LINUX_AARCH64 "Platform Armv8." OFF)
 option(ISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA "The global inference backend uses MNN CUDA." OFF)
@@ -82,7 +82,10 @@ if (ISF_BUILD_LINUX_AARCH64)
     set(CPU_ARCH "aarch64")
 endif()
 
+# If you want to build the unit-test, you need to set this to ON
 option(ISF_BUILD_WITH_TEST "Open Build Unit-Test." ON)
+
+# If you want to build the sample, you need to set this to ON
 option(ISF_BUILD_WITH_SAMPLE "Open Build Sample Exec." ON)
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpp/)
@@ -143,6 +146,7 @@ else()
     find_package(OpenCV REQUIRED)
 endif ()
 
+# If you need using CUDA-enabled MNN, you need to manually configure the pre-compiled CUDA-enabled MNN library path
 set(ISF_LINUX_MNN_CUDA "" CACHE STRING "Path to CUDA directory")
 
 if (ISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA)
@@ -181,16 +185,19 @@ else ()
 endif ()
 
 
-# Set install path
+# Set the installation directory to the build directory
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
 
-add_subdirectory(cpp/inspireface)  # Add a child project: InspireFace Source
+# Add a child project: InspireFace Source
+add_subdirectory(cpp/inspireface)
 get_property(InspireFace TARGET InspireFace PROPERTY InspireFace)
 
+# Add a child project: Samples
 if (ISF_BUILD_WITH_SAMPLE)
     add_subdirectory(cpp/sample)  # Add a child project: Samples
 endif ()
 
+# Add a child project: Unit-Test
 if (ISF_BUILD_WITH_TEST)
     add_subdirectory(cpp/test)  # Add a child project: Unit-Test
 endif ()

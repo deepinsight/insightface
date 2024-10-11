@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <memory>
 #include <iomanip>  // For std::setw and std::left
-
+#include <vector>
 #ifndef INSPIRE_API
 #define INSPIRE_API
 #endif
@@ -16,7 +16,12 @@
 
 namespace inspire {
 
-class ResourceManager {
+/**
+ * @brief ResourceManager is a singleton class that manages the creation and release of sessions and image streams.
+ * It uses hash tables to store session and image stream handles, and provides methods to create, release, and query these resources.
+ * The ResourceManager class is designed to be used in a multi-threaded environment, and it uses a mutex to synchronize access to its data structures.
+ */
+class INSPIRE_API ResourceManager {
 private:
     // Private static instance pointer
     static std::unique_ptr<ResourceManager> instance;
@@ -79,12 +84,35 @@ public:
                        // released
     }
 
+    // Gets a list of unreleased session handles
+    std::vector<long> getUnreleasedSessions() {
+        std::lock_guard<std::mutex> lock(mutex);
+        std::vector<long> unreleasedSessions;
+        for (const auto& entry : sessionMap) {
+            if (!entry.second) {
+                unreleasedSessions.push_back(entry.first);
+            }
+        }
+        return unreleasedSessions;
+    }
+
+    // Gets a list of unreleased image stream handles
+    std::vector<long> getUnreleasedStreams() {
+        std::lock_guard<std::mutex> lock(mutex);
+        std::vector<long> unreleasedStreams;
+        for (const auto& entry : streamMap) {
+            if (!entry.second) {
+                unreleasedStreams.push_back(entry.first);
+            }
+        }
+        return unreleasedStreams;
+    }
+
     // Method to print resource management statistics
     void printResourceStatistics() {
         std::lock_guard<std::mutex> lock(mutex);
-        std::cout << std::left << std::setw(15) << "Resource Name" << std::setw(15)
-                  << "Total Created" << std::setw(15) << "Total Released" << std::setw(15)
-                  << "Not Released" << std::endl;
+        std::cout << std::left << std::setw(15) << "Resource Name" << std::setw(15) << "Total Created" << std::setw(15) << "Total Released"
+                  << std::setw(15) << "Not Released" << std::endl;
 
         // Print session statistics
         int totalSessionsCreated = sessionMap.size();
@@ -96,9 +124,8 @@ public:
             if (!entry.second)
                 ++sessionsNotReleased;
         }
-        std::cout << std::left << std::setw(15) << "Session" << std::setw(15)
-                  << totalSessionsCreated << std::setw(15) << totalSessionsReleased << std::setw(15)
-                  << sessionsNotReleased << std::endl;
+        std::cout << std::left << std::setw(15) << "Session" << std::setw(15) << totalSessionsCreated << std::setw(15) << totalSessionsReleased
+                  << std::setw(15) << sessionsNotReleased << std::endl;
 
         // Print stream statistics
         int totalStreamsCreated = streamMap.size();
@@ -110,9 +137,8 @@ public:
             if (!entry.second)
                 ++streamsNotReleased;
         }
-        std::cout << std::left << std::setw(15) << "Stream" << std::setw(15) << totalStreamsCreated
-                  << std::setw(15) << totalStreamsReleased << std::setw(15) << streamsNotReleased
-                  << std::endl;
+        std::cout << std::left << std::setw(15) << "Stream" << std::setw(15) << totalStreamsCreated << std::setw(15) << totalStreamsReleased
+                  << std::setw(15) << streamsNotReleased << std::endl;
     }
 };
 

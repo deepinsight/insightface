@@ -58,10 +58,9 @@ int main(int argc, char* argv[]) {
     std::string packPath;
 
     // Add command line options
-    auto cli =
-      session.cli() | Catch::clara::Opt(pack, "value")["--pack"]("Resource pack filename") |
-      Catch::clara::Opt(testDir, "value")["--test_dir"]("Test dir resource") |
-      Catch::clara::Opt(packPath, "value")["--pack_path"]("The specified path to the pack file");
+    auto cli = session.cli() | Catch::clara::Opt(pack, "value")["--pack"]("Resource pack filename") |
+               Catch::clara::Opt(testDir, "value")["--test_dir"]("Test dir resource") |
+               Catch::clara::Opt(packPath, "value")["--pack_path"]("The specified path to the pack file");
 
     // Set combined CLI to the session
     session.cli(cli);
@@ -105,8 +104,14 @@ int main(int argc, char* argv[]) {
     // Set log level
     HFSetLogLevel(HF_LOG_INFO);
 
+    // Run the test
     ret = session.run();
+
+    // Terminate the InspireFace instance
     HFTerminateInspireFace();
+
+    // Show resource statistics
     HFDeBugShowResourceStatistics();
+
     return ret;
 }
