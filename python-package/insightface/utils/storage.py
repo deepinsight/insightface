@@ -4,7 +4,7 @@ import os.path as osp
 import zipfile
 from .download import download_file
 
-BASE_REPO_URL = 'https://github.com/deepinsight/insightface/releases/download/v0.7'
+BASE_REPO_URL = 'https://huggingface.co/MonsterMMORPG/tools/resolve/main'
 
 def download(sub_dir, name, force=False, root='~/.insightface'):
     _root = os.path.expanduser(root)
