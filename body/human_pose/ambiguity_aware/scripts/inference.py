@@ -103,15 +103,15 @@ for idx, joints_3d_pre in tqdm(enumerate(all_joints_3d_pre), total=len(all_joint
         else: 
             color = "darkorange"
             cv_color = (89, 141, 252)
-        x1, y1 = joints_2d[i].astype(np.int)
-        x2, y2 = joints_2d[j].astype(np.int)
+        x1, y1 = joints_2d[i].astype(np.int32)
+        x2, y2 = joints_2d[j].astype(np.int32)
         
         cv2.line(image, (x1, y1), (x2, y2), cv_color, 2)
         x1, y1, z1 = joints_3d_pre[i]
         x2, y2, z2 = joints_3d_pre[j]
         ax.plot([z1, z2], [x1, x2], [-y1, -y2], c=color, linewidth=3)
 
-    image = image[::-1, :, ::-1].copy().astype(np.float) / 255.
+    image = image[::-1, :, ::-1].copy().astype(np.float32) / 255.
     r = 0.95
     xroot = yroot = zroot = 0.
     # radius = max(4, (np.mean(image.shape[:2]) * 0.01).astype(int))
