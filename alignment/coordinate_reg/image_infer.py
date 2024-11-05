@@ -15,7 +15,7 @@ if __name__ == '__main__':
     color = (200, 160, 75)
     for face in faces:
         lmk = face.landmark_2d_106
-        lmk = np.round(lmk).astype(np.int)
+        lmk = np.round(lmk).astype(np.int32)
         for i in range(lmk.shape[0]):
             p = tuple(lmk[i])
             cv2.circle(tim, p, 1, color, 1, cv2.LINE_AA)

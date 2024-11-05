@@ -11,8 +11,8 @@ assert insightface.__version__>='0.4'
 
 def detect_person(img, detector):
     bboxes, kpss = detector.detect(img)
-    bboxes = np.round(bboxes[:,:4]).astype(np.int)
-    kpss = np.round(kpss).astype(np.int)
+    bboxes = np.round(bboxes[:,:4]).astype(np.int32)
+    kpss = np.round(kpss).astype(np.int32)
     kpss[:,:,0] = np.clip(kpss[:,:,0], 0, img.shape[1])
     kpss[:,:,1] = np.clip(kpss[:,:,1], 0, img.shape[0])
     vbboxes = bboxes.copy()
