@@ -196,23 +196,19 @@ More details see
 @inproceedings{deng2019arcface,
   title={Arcface: Additive angular margin loss for deep face recognition},
   author={Deng, Jiankang and Guo, Jia and Xue, Niannan and Zafeiriou, Stefanos},
-  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition},
-  pages={4690--4699},
+  booktitle={CVPR},
   year={2019}
 }
-@inproceedings{An_2022_CVPR,
+@inproceedings{an2022partialfc,
     author={An, Xiang and Deng, Jiankang and Guo, Jia and Feng, Ziyong and Zhu, XuHan and Yang, Jing and Liu, Tongliang},
     title={Killing Two Birds With One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
-    booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-    month={June},
+    booktitle={CVPR},
     year={2022},
-    pages={4042-4051}
 }
 @inproceedings{zhu2021webface260m,
   title={Webface260m: A benchmark unveiling the power of million-scale deep face recognition},
   author={Zhu, Zheng and Huang, Guan and Deng, Jiankang and Ye, Yun and Huang, Junjie and Chen, Xinze and Zhu, Jiagang and Yang, Tian and Lu, Jiwen and Du, Dalong and Zhou, Jie},
-  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
-  pages={10492--10502},
+  booktitle={CVPR},
   year={2021}
 }
 ```
