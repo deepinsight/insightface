@@ -46,7 +46,7 @@ if faces is not None:
     for i in range(faces.shape[0]):
         #print('score', faces[i][4])
         face = faces[i]
-        box = face[0:4].astype(np.int)
+        box = face[0:4].astype(np.int32)
         mask = face[5]
         print(i, box, mask)
         #color = (255,0,0)
@@ -55,7 +55,7 @@ if faces is not None:
         else:
             color = (0, 255, 0)
         cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), color, 2)
-        landmark5 = landmarks[i].astype(np.int)
+        landmark5 = landmarks[i].astype(np.int32)
         #print(landmark.shape)
         for l in range(landmark5.shape[0]):
             color = (255, 0, 0)

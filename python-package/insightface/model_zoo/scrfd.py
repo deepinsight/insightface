@@ -335,12 +335,12 @@ if __name__ == '__main__':
             print(kpss.shape)
         for i in range(bboxes.shape[0]):
             bbox = bboxes[i]
-            x1,y1,x2,y2,score = bbox.astype(np.int)
+            x1,y1,x2,y2,score = bbox.astype(np.int32)
             cv2.rectangle(img, (x1,y1)  , (x2,y2) , (255,0,0) , 2)
             if kpss is not None:
                 kps = kpss[i]
                 for kp in kps:
-                    kp = kp.astype(np.int)
+                    kp = kp.astype(np.int32)
                     cv2.circle(img, tuple(kp) , 1, (0,0,255) , 2)
         filename = img_path.split('/')[-1]
         print('output:', filename)
