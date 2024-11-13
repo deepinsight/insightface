@@ -8,6 +8,7 @@ We have integrated our most advanced face-swapping models: **inswapper_cyn** and
 2. Discord discussion server(to get help): https://discord.gg/Ym3X8U59ZN
 3. Product homepage: https://www.picsi.ai
 4. Subscribe to unlock advanced features: https://www.picsi.ai/subscribe
+5. User guide: https://www.picsi.ai/docs
 
 ## ChangeLog
 
