@@ -622,7 +622,7 @@ class FeatureHubConfiguration:
             HFFeatureHubConfiguration: A C-structure for feature hub configuration.
         """
         return HFFeatureHubConfiguration(
-            enableUseDb=int(self.enable_use_db),
+            enablePersistence=int(self.enable_use_db),
             dbPath=String(bytes(self.db_path, encoding="utf8")),
             featureBlockNum=self.feature_block_num,
             searchThreshold=self.search_threshold,
