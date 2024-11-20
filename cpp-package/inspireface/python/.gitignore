@@ -28,3 +28,4 @@ share/python-wheels/
 
 
 .idea/
+*.db
