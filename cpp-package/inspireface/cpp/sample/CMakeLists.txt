@@ -39,13 +39,13 @@ set_target_properties(MTFaceTrackSample PROPERTIES
 )
 
 if(NOT DISABLE_GUI)
-        # Examples of face detection and tracking
-        add_executable(FaceTrackVideoSample cpp/sample_face_track_video.cpp)
-        target_link_libraries(FaceTrackVideoSample InspireFace ${ext})
-        set_target_properties(FaceTrackVideoSample PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/"
-        )
-endif()
+    # Examples of face detection and tracking
+    add_executable(FaceTrackVideoSample cpp/sample_face_track_video.cpp)
+    target_link_libraries(FaceTrackVideoSample InspireFace ${ext})
+    set_target_properties(FaceTrackVideoSample PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/sample/"
+    )
+endif ()
 
 
 
@@ -265,4 +265,4 @@ install(TARGETS MTFaceTrackSample RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/sa
 install(TARGETS FaceRecognitionSample RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/sample)
 install(TARGETS FaceSearchSample RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/sample)
 install(TARGETS FaceComparisonSample RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/sample)
-
+install(TARGETS FaceTrackVideoSample RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/sample)
