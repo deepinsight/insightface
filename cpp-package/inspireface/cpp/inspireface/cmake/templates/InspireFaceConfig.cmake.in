@@ -1,0 +1,25 @@
+# ===================================================================================
+#  The InspireFace CMake configuration file
+#
+#             ** File generated automatically, do not modify **
+#  Usage from an external project:
+#    In your CMakeLists.txt, add these lines:
+#
+#    find_package(InspireFace REQUIRED)
+#    include_directories(${InspireFace_INCLUDE_DIRS}) # Not needed for CMake >= 2.8.11
+#    target_link_libraries(MY_TARGET_NAME ${InspireFace_LIBS})
+#
+#
+#
+#    This file will define the following variables:
+#      - InspireFace_LIBS                     : The list of all imported targets for InspireFace modules.
+#      - InspireFace_INCLUDE_DIRS             : The InspireFace include directories.
+#
+#
+@PACKAGE_INIT@
+
+set(InspireFace_LIBS "")
+file(GLOB LIBS "@CMAKE_BINARY_DIR@/InspireFace/lib/*.*")
+
+list(APPEND InspireFace_LIBS ${LIBS})
+set(InspireFace_INCLUDE_DIRS "@CMAKE_BINARY_DIR@/InspireFace/include")
