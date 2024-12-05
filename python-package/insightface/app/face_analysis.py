@@ -55,10 +55,10 @@ class FaceAnalysis:
             else:
                 model.prepare(ctx_id)
 
-    def get(self, img, max_num=0):
+    def get(self, img, max_num=0, det_metric='default'):
         bboxes, kpss = self.det_model.detect(img,
                                              max_num=max_num,
-                                             metric='default')
+                                             metric=det_metric)
         if bboxes.shape[0] == 0:
             return []
         ret = []
