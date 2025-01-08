@@ -8,6 +8,7 @@ import os
 import os.path as osp
 import glob
 import onnxruntime
+import importlib
 from .arcface_onnx import *
 from .retinaface import *
 #from .scrfd import *
@@ -68,7 +69,12 @@ def find_onnx_file(dir_path):
     return paths[-1]
 
 def get_default_providers():
-    return ['CUDAExecutionProvider', 'CPUExecutionProvider']
+    # In Ascend NPU, acl is a base module, if the module `acl` exists, the codes runs in Ascend device.
+    if importlib.util.find_spec("acl") is not None:
+        providers = ["CANNExecutionProvider","CPUExecutionProvider"]
+    else:
+        providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+    return providers
 
 def get_default_provider_options():
     return None
