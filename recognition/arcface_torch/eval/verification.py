@@ -206,7 +206,7 @@ def load_bin(path, image_size):
             bins, issame_list = pickle.load(f, encoding='bytes')  # py3
     data_list = []
     for flip in [0, 1]:
-        data = torch.empty((len(issame_list) * 2, 3, image_size[0], image_size[1]))
+        data = torch.zeros((len(issame_list) * 2, 3, image_size[0], image_size[1]), dtype=torch.uint8)
         data_list.append(data)
     for idx in range(len(issame_list) * 2):
         _bin = bins[idx]
