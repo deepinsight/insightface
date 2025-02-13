@@ -1,5 +1,9 @@
 # MFR Ongoing
 
+
+💡 **Due to GPU resource constraints, we are temporarily taking this service offline. If any companies or individuals are interested in hosting this service, please contact me via email: ``guojia AT insightface.ai``**
+
+
 This is the ongoing version of [ICCV-2021 Masked Face Recognition Challenge & Workshop(MFR)](https://ibug.doc.ic.ac.uk/resources/masked-face-recognition-challenge-workshop-iccv-21/). We also extend it to involve some public available and popular benchmarks such as IJBC, LFW, CFPFP and AgeDB.
 
 
