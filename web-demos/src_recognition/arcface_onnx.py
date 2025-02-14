@@ -42,7 +42,7 @@ class ArcFaceONNX:
         self.input_std = input_std
         #print('input mean and std:', self.input_mean, self.input_std)
         if self.session is None:
-            self.session = onnxruntime.InferenceSession(self.model_file, providers=['CUDAExecutionProvider'])
+            self.session = onnxruntime.InferenceSession(self.model_file, providers=['CUDAExecutionProvider', 'CANNExecutionProvider'])
         input_cfg = self.session.get_inputs()[0]
         input_shape = input_cfg.shape
         input_name = input_cfg.name
