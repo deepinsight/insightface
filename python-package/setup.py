@@ -53,6 +53,7 @@ requirements = [
     'cython',
     'albumentations',
     'prettytable',
+    'mxnet',
 ]
 
 extensions = [
