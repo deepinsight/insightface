@@ -6,6 +6,9 @@ import numpy
 import re
 import shutil
 import sys
+import subprocess
+import platform
+import logging
 from setuptools import setup, find_packages
 from distutils.core import Extension
 from Cython.Distutils import build_ext
@@ -73,6 +76,38 @@ data_files += [ ('insightface/data/objects', data_objects) ]
 data_files += [ ('insightface/thirdparty/face3d/mesh/cython', data_mesh) ]
 
 ext_modules=cythonize(extensions)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+# Check if running on macOS (Darwin)
+if platform.system() == "Darwin":
+    logging.info("Detected macOS. Checking if Homebrew, LLVM, and OpenMP are installed...")
+
+    # Check if Homebrew is installed
+    brew_check = subprocess.run(["which", "brew"], capture_output=True, text=True)
+    if brew_check.returncode != 0:
+        logging.warning("Homebrew is not installed. You may need to manually install dependencies.")
+        logging.warning("   Install Homebrew: https://brew.sh/")
+        logging.warning("   Then, run: brew install llvm libomp")
+        logging.info("Proceeding without setting the compiler.")
+    
+    else:
+        # Check if LLVM is installed
+        llvm_check = subprocess.run(["brew", "--prefix", "llvm"], capture_output=True, text=True)
+        if llvm_check.returncode != 0:
+            logging.warning("LLVM is not installed. This may cause installation issues.")
+            logging.warning("   To install, run: brew install llvm libomp")
+            logging.warning("   Then, restart the installation process.")
+            logging.info("Proceeding without setting the compiler.")
+
+        else:
+            # Set compiler dynamically if LLVM is installed
+            llvm_path = subprocess.getoutput("brew --prefix llvm")
+            os.environ["CC"] = f"{llvm_path}/bin/clang"
+            os.environ["CXX"] = f"{llvm_path}/bin/clang++"
+            logging.info(f"Using compiler: {os.environ['CC']}")
+
 setup(
     # Metadata
     name='insightface',
