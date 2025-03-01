@@ -14,7 +14,7 @@ For ``insightface<=0.1.5``, we use MXNet as inference backend.
 
 Starting from insightface>=0.2, we use onnxruntime as inference backend.
 
-You have to install ``onnxruntime-gpu`` manually to enable GPU inference, or install ``onnxruntime`` to use CPU only inference.
+You have to install ``onnxruntime-gpu`` manually to enable GPU inference, install ``onnxruntime-cann`` manually to enable Ascend NPU inference, or install ``onnxruntime`` to use CPU only inference.
 
 ## Change Log
 
