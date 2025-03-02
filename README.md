@@ -19,23 +19,23 @@ Both manual-downloading models from our github repo and auto-downloading models 
 
 ## Top News
 
-**`2024-08-01`** We have integrated our most advanced face-swapping models: **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai face-swapping](https://www.picsi.ai) service. These models outperform almost all similar commercial products and our open-source model inswapper\_128. Please visit the [Picsi.Ai](https://www.picsi.ai) website to use the service and get help.
+**`2025-03-02`** [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) launched.
+
+**`2024-08-01`** We’ve integrated our most advanced face-swapping models, **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai](https://www.picsi.ai) face-swapping service. These models outperform nearly all commercial alternatives and our previous open-source model (inswapper_128).
 
 **`2024-05-04`** We have added [InspireFace](cpp-package/inspireface), which is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backends. 
-
-**`2023-04-01`**: We integrated our most advanced face-swapping models: **inswapper\_cyn** and **inswapper\_dax** and move the service to Discord bot, which also support editing on Midjourney generated images, see detail at [web-demos/swapping_discord](web-demos/swapping_discord) and our [Picsi.Ai](https://www.picsi.ai) website.
 
 **`2022-08-12`**: We achieved Rank-1st of 
 [Perspective Projection Based Monocular 3D Face Reconstruction Challenge](https://tianchi.aliyun.com/competition/entrance/531961/introduction)
 of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](https://arxiv.org/abs/2208.07142) and [code](reconstruction/jmlr).
 
-**`2021-11-30`**: [MFR-Ongoing](challenges/mfr) challenge launched(same with IFRT), which is an extended version of [iccv21-mfr](challenges/iccv21-mfr).
-
 **`2021-10-29`**: We achieved 1st place on the [VISA track](https://pages.nist.gov/frvt/plots/11/visa.html) of [NIST-FRVT 1:1](https://pages.nist.gov/frvt/html/frvt11.html) by using Partial FC (Xiang An, Jiankang Deng, Jia Guo).
 
 ## ChangeLogs
 
-**`2024-08-01`** We have integrated our most advanced face-swapping models: **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai face-swapping](https://www.picsi.ai) service. These models outperform almost all similar commercial products and our open-source model inswapper\_128. Please visit the [Picsi.Ai](https://www.picsi.ai) website to use the service and get help.
+**`2025-03-02`** [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) launched.
+
+**`2024-08-01`** We’ve integrated our most advanced face-swapping models, **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai](https://www.picsi.ai) face-swapping service. These models outperform nearly all commercial alternatives and our previous open-source model (inswapper_128).
 
 **`2024-05-04`** We have added [InspireFace](cpp-package/inspireface), which is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backends. 
 
