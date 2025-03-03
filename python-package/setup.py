@@ -75,12 +75,12 @@ data_files += [ ('insightface/thirdparty/face3d/mesh/cython', data_mesh) ]
 ext_modules=cythonize(extensions)
 setup(
     # Metadata
-    name='insightface',
+    name='intangles-insightface',
     version=VERSION,
     author='InsightFace Contributors',
-    author_email='contact@insightface.ai',
-    url='https://github.com/deepinsight/insightface',
-    description='InsightFace Python Library',
+    author_email='ssatyam4753@gmail.com',
+    url='https://github.com/Intangles/intangles-insightface',
+    description='Intangles-InsightFace Python Library forked by Intangles',
     long_description=long_description,
     long_description_content_type='text/markdown',
     license='MIT',

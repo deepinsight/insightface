@@ -17,6 +17,14 @@ Starting from insightface>=0.2, we use onnxruntime as inference backend.
 You have to install ``onnxruntime-gpu`` manually to enable GPU inference, or install ``onnxruntime`` to use CPU only inference.
 
 ## Change Log
+### [0.7.3.1] - 2025-03-03
+
+#### Changed
+
+- Forked repository from https://github.com/deepinsight/insightface
+- added functionality of clahe preprocessing
+- added provision of providing min_perimeter for face
+- added provision of generating encodings only for dominant face
 
 ### [0.7.1] - 2022-12-14
   

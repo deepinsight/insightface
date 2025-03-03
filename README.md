@@ -1,11 +1,12 @@
 
-# InsightFace: 2D and 3D Face Analysis Project
+# Intangles-InsightFace: 2D and 3D Face Analysis Project maintained by Intangles
 
 <div align="left">
   <img src="https://insightface.ai/assets/img/custom/logo3.jpg" width="240"/>
 </div>
 
-[InsightFace](https://insightface.ai) project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) and [Jiankang Deng](https://jiankangdeng.github.io/). 
+[InsightFace](https://insightface.ai) project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) and [Jiankang Deng](https://jiankangdeng.github.io/).
+This is a fork from version '0.7.3' of main branch, maintained by [Intangles](mailto:ssatyam4753@gmail.com?subject=[GitHub]%20InsightFace%20Project)
 
 For all main contributors, please check [contributing](#contributing).
 
