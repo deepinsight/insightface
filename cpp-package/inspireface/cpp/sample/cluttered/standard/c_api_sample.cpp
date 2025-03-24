@@ -1,6 +1,7 @@
-//
-// Created by tunm on 2023/10/3.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #include <iostream>
 #include "inspireface/c_api/inspireface.h"
 #include "opencv2/opencv.hpp"
@@ -8,7 +9,7 @@
 
 using namespace inspire;
 
-std::string basename(const std::string& path) {
+std::string basename(const std::string &path) {
     size_t lastSlash = path.find_last_of("/\\");  // Take into account the cross-platform separator
     if (lastSlash == std::string::npos) {
         return path;  // Without the slash, the entire path is the base name
@@ -30,7 +31,7 @@ int compare() {
     parameter.enable_mask_detect = 1;
     parameter.enable_recognition = 1;
     parameter.enable_face_quality = 1;
-    HF_DetectMode detMode = HF_DETECT_MODE_IMAGE;   // Selecting the image mode is always detection
+    HF_DetectMode detMode = HF_DETECT_MODE_IMAGE;  // Selecting the image mode is always detection
     HContextHandle session;
     ret = HF_CreateFaceContextFromResourceFile(path, parameter, detMode, 3, &session);
     if (ret != HSUCCEED) {
@@ -38,13 +39,13 @@ int compare() {
     }
 
     std::vector<std::string> names = {
-            "/Users/tunm/datasets/lfw_funneled/Abel_Pacheco/Abel_Pacheco_0001.jpg",
-            "/Users/tunm/datasets/lfw_funneled/Abel_Pacheco/Abel_Pacheco_0004.jpg",
+      "/Users/tunm/datasets/lfw_funneled/Abel_Pacheco/Abel_Pacheco_0001.jpg",
+      "/Users/tunm/datasets/lfw_funneled/Abel_Pacheco/Abel_Pacheco_0004.jpg",
     };
     HInt32 featureNum;
     HF_GetFeatureLength(&featureNum);
     INSPIRE_LOGD("Feature length: %d", featureNum);
-    HFloat featuresCache[names.size()][featureNum];     // Store the cached vector
+    HFloat featuresCache[names.size()][featureNum];  // Store the cached vector
 
     for (int i = 0; i < names.size(); ++i) {
         auto &name = names[i];
@@ -63,7 +64,7 @@ int compare() {
         HImageHandle imageSteamHandle;
         ret = HF_CreateImageStream(&imageData, &imageSteamHandle);
         if (ret == HSUCCEED) {
-            INSPIRE_LOGD("image handle: %ld", (long )imageSteamHandle);
+            INSPIRE_LOGD("image handle: %ld", (long)imageSteamHandle);
         }
 
         HF_MultipleFaceData multipleFaceData = {0};
@@ -71,9 +72,11 @@ int compare() {
         INSPIRE_LOGD("Number of faces detected: %d", multipleFaceData.detectedNum);
 
         for (int i = 0; i < multipleFaceData.detectedNum; ++i) {
-            cv::Rect rect = cv::Rect(multipleFaceData.rects[i].x, multipleFaceData.rects[i].y, multipleFaceData.rects[i].width, multipleFaceData.rects[i].height);
+            cv::Rect rect =
+              cv::Rect(multipleFaceData.rects[i].x, multipleFaceData.rects[i].y, multipleFaceData.rects[i].width, multipleFaceData.rects[i].height);
             cv::rectangle(image, rect, cv::Scalar(0, 255, 200), 2);
-            INSPIRE_LOGD("%d, track_id: %d, pitch: %f, yaw: %f, roll: %f", i, multipleFaceData.trackIds[i], multipleFaceData.angles.pitch[i], multipleFaceData.angles.yaw[i], multipleFaceData.angles.roll[i]);
+            INSPIRE_LOGD("%d, track_id: %d, pitch: %f, yaw: %f, roll: %f", i, multipleFaceData.trackIds[i], multipleFaceData.angles.pitch[i],
+                         multipleFaceData.angles.yaw[i], multipleFaceData.angles.roll[i]);
             INSPIRE_LOGD("token size: %d", multipleFaceData.tokens->size);
         }
 #ifndef DISABLE_GUI
@@ -89,16 +92,16 @@ int compare() {
             return -1;
         }
 
-//        for (int j = 0; j < 512; ++j) {
-//            std::cout << featuresCache[0][j] << ", ";
-//        }
-//        std::cout << std::endl;
+        //        for (int j = 0; j < 512; ++j) {
+        //            std::cout << featuresCache[0][j] << ", ";
+        //        }
+        //        std::cout << std::endl;
 
-//        HSize size;
-//        HF_GetFaceBasicTokenSize(&size);
-//        LOGD("in size: %ld", size);
-//
-//        LOGD("o size %d", multipleFaceData.tokens[0].size);
+        //        HSize size;
+        //        HF_GetFaceBasicTokenSize(&size);
+        //        LOGD("in size: %ld", size);
+        //
+        //        LOGD("o size %d", multipleFaceData.tokens[0].size);
 
         HBuffer buffer[multipleFaceData.tokens[0].size];
         HF_CopyFaceBasicToken(multipleFaceData.tokens[0], buffer, multipleFaceData.tokens[0].size);
@@ -108,7 +111,7 @@ int compare() {
         token.data = buffer;
 
         HFloat quality;
-//        ret = HF_FaceQualityDetect(session, multipleFaceData.tokens[0], &quality);
+        //        ret = HF_FaceQualityDetect(session, multipleFaceData.tokens[0], &quality);
         ret = HF_FaceQualityDetect(session, token, &quality);
         INSPIRE_LOGD("RET : %d", ret);
         INSPIRE_LOGD("Q: %f", quality);
@@ -120,7 +123,6 @@ int compare() {
         } else {
             INSPIRE_LOGE("image release error: %ld", ret);
         }
-
     }
 
     HFloat compResult;
@@ -147,7 +149,6 @@ int compare() {
 
 int search() {
     HResult ret;
-    // 初始化context
     HString path = "test_res/pack/Pikachu";
     HF_ContextCustomParameter parameter = {0};
     parameter.enable_liveness = 1;
@@ -185,7 +186,7 @@ int search() {
         HImageHandle imageSteamHandle;
         ret = HF_CreateImageStream(&imageData, &imageSteamHandle);
         if (ret != HSUCCEED) {
-            INSPIRE_LOGE("image handle error: %ld", (long )imageSteamHandle);
+            INSPIRE_LOGE("image handle error: %ld", (long)imageSteamHandle);
             return -1;
         }
 
@@ -214,16 +215,15 @@ int search() {
 
         ret = HF_FeatureHubInsertFeature(identity);
         if (ret != HSUCCEED) {
-            INSPIRE_LOGE("插入失败: %ld", ret);
+            INSPIRE_LOGE("Insert failed: %ld", ret);
             return -1;
         }
 
-
-//        // 在插入一次测试一下重复操作问题
-//        ret = HF_FeaturesGroupInsertFeature(session, identity);
-//        if (ret != HSUCCEED) {
-//            LOGE("不能重复id插入: %ld", ret);
-//        }
+        //        // Test duplicate insertion operation
+        //        ret = HF_FeaturesGroupInsertFeature(session, identity);
+        //        if (ret != HSUCCEED) {
+        //            INSPIRE_LOGE("Cannot insert duplicate ID: %ld", ret);
+        //        }
 
         delete[] tagName;
 
@@ -247,7 +247,7 @@ int search() {
     HImageHandle imageSteamHandle;
     ret = HF_CreateImageStream(&imageData, &imageSteamHandle);
     if (ret != HSUCCEED) {
-        INSPIRE_LOGE("image handle error: %ld", (long )imageSteamHandle);
+        INSPIRE_LOGE("image handle error: %ld", (long)imageSteamHandle);
         return -1;
     }
     HF_MultipleFaceData multipleFaceData = {0};
@@ -265,10 +265,10 @@ int search() {
         return -1;
     }
 
-//    ret = HF_FaceContextFeatureRemove(session, 3);
-//    if (ret != HSUCCEED) {
-//        LOGE("delete failed: %ld", ret);
-//    }
+    //    ret = HF_FaceContextFeatureRemove(session, 3);
+    //    if (ret != HSUCCEED) {
+    //        LOGE("delete failed: %ld", ret);
+    //    }
 
     std::string newName = "Six";
     char *newTagName = new char[newName.size() + 1];
@@ -283,10 +283,9 @@ int search() {
     }
     delete[] newTagName;
 
-
     HF_FaceFeatureIdentity searchIdentity = {0};
-//    HF_FaceFeature featureSearched = {0};
-//    searchIdentity.feature = &featureSearched;
+    //    HF_FaceFeature featureSearched = {0};
+    //    searchIdentity.feature = &featureSearched;
     HFloat confidence;
     ret = HF_FeatureHubFaceSearch(feature, &confidence, &searchIdentity);
     if (ret != HSUCCEED) {
@@ -297,7 +296,6 @@ int search() {
     INSPIRE_LOGD("Search for confidence: %f", confidence);
     INSPIRE_LOGD("The matched tag: %s", searchIdentity.tag);
     INSPIRE_LOGD("The matched customId: %d", searchIdentity.customId);
-
 
     // Face Pipeline
     ret = HF_MultipleFacePipelineProcess(session, imageSteamHandle, &multipleFaceData, parameter);
@@ -331,7 +329,6 @@ int search() {
 
     HF_FeatureHubViewDBTable();
 
-
     HF_FaceFeatureIdentity identity;
     ret = HF_FeatureHubGetFaceIdentity(100, &identity);
     if (ret != HSUCCEED) {
@@ -350,47 +347,44 @@ int search() {
 }
 
 int opiton() {
-//    HInt32 mask = HF_ENABLE_FACE_RECOGNITION | HF_ENABLE_LIVENESS;
+    //    HInt32 mask = HF_ENABLE_FACE_RECOGNITION | HF_ENABLE_LIVENESS;
 
     return 0;
 }
 
 int main() {
-
     HResult ret;
 
-//    {
-//        // 测试ImageStream
-//        cv::Mat image = cv::imread("test_res/images/kun.jpg");
-//        HF_ImageData imageData = {0};
-//        imageData.data = image.data;
-//        imageData.height = image.rows;
-//        imageData.width = image.cols;
-//        imageData.rotation = CAMERA_ROTATION_0;
-//        imageData.format = STREAM_BGR;
-//
-//        HImageHandle imageSteamHandle;
-//        ret = HF_CreateImageStream(&imageData, &imageSteamHandle);
-//        if (ret == HSUCCEED) {
-//            LOGD("image handle: %ld", (long )imageSteamHandle);
-//        }
-//        HF_DeBugImageStreamImShow(imageSteamHandle);
-//
-//        ret = HF_ReleaseImageStream(imageSteamHandle);
-//        if (ret == HSUCCEED) {
-//            imageSteamHandle = nullptr;
-//            LOGD("image released");
-//        } else {
-//            LOGE("image release error: %ld", ret);
-//        }
-//
-//    }
+    //    {
+    //        // TestImageStream
+    //        cv::Mat image = cv::imread("test_res/images/kun.jpg");
+    //        HF_ImageData imageData = {0};
+    //        imageData.data = image.data;
+    //        imageData.height = image.rows;
+    //        imageData.width = image.cols;
+    //        imageData.rotation = CAMERA_ROTATION_0;
+    //        imageData.format = STREAM_BGR;
+    //
+    //        HImageHandle imageSteamHandle;
+    //        ret = HF_CreateImageStream(&imageData, &imageSteamHandle);
+    //        if (ret == HSUCCEED) {
+    //            LOGD("image handle: %ld", (long )imageSteamHandle);
+    //        }
+    //        HF_DeBugImageStreamImShow(imageSteamHandle);
+    //
+    //        ret = HF_ReleaseImageStream(imageSteamHandle);
+    //        if (ret == HSUCCEED) {
+    //            imageSteamHandle = nullptr;
+    //            LOGD("image released");
+    //        } else {
+    //            LOGE("image release error: %ld", ret);
+    //        }
+    //
+    //    }
 
-
-//    compare();
+    //    compare();
 
     search();
-
 
     opiton();
 }

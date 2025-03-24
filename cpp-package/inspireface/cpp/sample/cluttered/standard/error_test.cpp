@@ -1,15 +1,15 @@
-//
-// Created by Tunm-Air13 on 2024/4/10.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 #include <iostream>
 #include "inspireface/c_api/inspireface.h"
 #include "inspireface/middleware/camera_stream/camera_stream.h"
 
 void non_file_test() {
-
     HResult ret;
-    HPath path = "test_res/pack/abc";     // Use error path
+    HPath path = "test_res/pack/abc";  // Use error path
     HF_ContextCustomParameter parameter = {0};
     HF_DetectMode detMode = HF_DETECT_MODE_IMAGE;
     HContextHandle session;
@@ -28,7 +28,6 @@ void camera_test() {
     stream.SetDataFormat(inspire::NV12);
     stream.SetDataBuffer(image.data, image.rows, image.cols);
     auto decode = stream.GetScaledImage(1.0f, true);
-
 }
 
 int main() {

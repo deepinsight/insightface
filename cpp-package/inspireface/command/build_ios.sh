@@ -25,7 +25,6 @@ move_install_files() {
 
 # Define download URLs
 MNN_IOS_URL="https://github.com/alibaba/MNN/releases/download/2.8.1/mnn_2.8.1_ios_armv82_cpu_metal_coreml.zip"
-OPENCV_IOS_URL="https://github.com/opencv/opencv/releases/download/4.5.1/opencv-4.5.1-ios-framework.zip"
 
 # Set the cache directory
 MACOS_CACHE="$PWD/.macos_cache/"
@@ -74,7 +73,6 @@ download_and_unzip() {
 download_and_unzip "$MNN_IOS_URL" "$MACOS_CACHE" "MNN.framework"
 
 # Download and unzip OpenCV iOS package
-download_and_unzip "$OPENCV_IOS_URL" "$MACOS_CACHE" "opencv2.framework"
 
 if [ -n "$VERSION" ]; then
     TAG="-$VERSION"
@@ -154,3 +152,5 @@ cat <<EOF >$FRAMEWORK_DIR/Resources/Info.plist
 EOF
 
 echo "Framework $FRAMEWORK_NAME.framework has been created at $FRAMEWORK_DIR"
+
+cp -r $MACOS_CACHE/MNN.framework $BUILD_DIR/

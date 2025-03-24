@@ -37,26 +37,30 @@ def parse_and_calculate_error_codes(header_content):
 
     # Process each line
     for line in lines:
-        # Check if the line starts with #define
-        if line.strip().startswith('#define'):
-            parts = line.split('//')
-            define_part = parts[0].strip()
-            comment_part = parts[1].strip() if len(parts) > 1 else ''
+        line = line.strip()
+        # Skip empty lines and lines that don't start with #define
+        if not line or not line.startswith('#define'):
+            continue
+            
+        # Split by comment marker and handle cases with no comment
+        parts = line.split('//')
+        define_part = parts[0].strip()
+        comment_part = parts[1].strip() if len(parts) > 1 else ''
 
-            # Extract the error name and code
-            define_parts = define_part.split()
-            if len(define_parts) == 3:
-                error_name = define_parts[1]
-                error_code_str = define_parts[2].strip('()')
+        # Extract the error name and code, handling parentheses
+        define_parts = define_part.split(None, 2)  # Split into max 3 parts
+        if len(define_parts) >= 2:  # Changed from == 3
+            error_name = define_parts[1]
+            error_code_str = define_parts[2].strip('()') if len(define_parts) > 2 else ''
 
-                # Calculate the actual error code value
-                error_code_value = calculate_error_code_value(error_code_str, error_definitions)
+            # Calculate the actual error code value
+            error_code_value = calculate_error_code_value(error_code_str, error_definitions)
 
-                # Store the calculated error code value
-                error_definitions[error_name] = error_code_value
+            # Store the calculated error code value
+            error_definitions[error_name] = error_code_value
 
-                # Append the extracted information to the error_codes list
-                error_codes.append((error_name, error_code_value, comment_part))
+            # Append the extracted information to the error_codes list
+            error_codes.append((error_name, error_code_value, comment_part))
 
     return error_codes
 
@@ -72,8 +76,14 @@ def process_header(header_path, output_path):
     # Parse and calculate the error codes from the header content
     parsed_error_codes = parse_and_calculate_error_codes(header_content)
 
+    md_table = """# Error Feedback Codes
+
+During the use of InspireFace, some error feedback codes may be generated. Here is a table of error feedback codes.
+
+"""
+
     # Prepare the Markdown table header
-    md_table = " | Index | Name | Code | Comment | \n"
+    md_table += " | Index | Name | Code | Comment | \n"
     md_table += " | --- | --- | --- | --- | \n"
 
     # Fill the Markdown table with parsed error codes
@@ -82,6 +92,7 @@ def process_header(header_path, output_path):
 
     # Write the Markdown table to the output file
     with open(output_path, 'w', encoding='utf-8') as md_file:
+        print(md_table)
         md_file.write(md_table)
 
     click.echo(f"Markdown table of error codes has been written to {output_path}")

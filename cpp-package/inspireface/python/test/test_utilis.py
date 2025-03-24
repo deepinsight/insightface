@@ -119,7 +119,7 @@ def print_benchmark_table(benchmark_results):
     header_format = "{:<20} | {:<10} | {:<15} | {:<15}"
     row_format = "{:<20} | {:<10} | {:>10.2f} ms | {:>10.4f} ms"
     print(header_format.format('Benchmark', 'Loops', 'Total Time', 'Avg Time'))
-    print("-" * 70)  # 调整分割线长度以匹配标题长度
+    print("-" * 70)  
 
     for name, loops, total_time in benchmark_results:
         avg_time = total_time / loops

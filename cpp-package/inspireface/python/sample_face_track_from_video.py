@@ -2,8 +2,7 @@ import time
 
 import click
 import cv2
-import inspireface as ifac
-from inspireface.param import *
+import inspireface as isf
 import numpy as np
 
 
@@ -17,6 +16,10 @@ def generate_color(id):
     Returns:
         tuple: A tuple representing the color in BGR format.
     """
+    # Handle invalid ID (-1)
+    if id < 0:
+        return (128, 128, 128)  # Return gray color for invalid ID
+        
     max_id = 50  # Number of unique colors
     id = id % max_id
 
@@ -31,11 +34,10 @@ def generate_color(id):
     return (int(rgb_color[0]), int(rgb_color[1]), int(rgb_color[2]))
 
 @click.command()
-@click.argument("resource_path")
 @click.argument('source')
 @click.option('--show', is_flag=True, help='Display the video stream or video file in a window.')
 @click.option('--out', type=str, default=None, help='Path to save the processed video.')
-def case_face_tracker_from_video(resource_path, source, show, out):
+def case_face_tracker_from_video(source, show, out):
     """
     Launch a face tracking process from a video source. The 'source' can either be a webcam index (0, 1, ...)
     or a path to a video file. Use the --show option to display the video.
@@ -46,25 +48,19 @@ def case_face_tracker_from_video(resource_path, source, show, out):
         show (bool): If set, the video will be displayed in a window.
         out (str): Path to save the processed video.
     """
-    # Initialize the face tracker or other resources.
-    print(f"Initializing with resources from: {resource_path}")
-    # Step 1: Initialize the SDK and load the algorithm resource files.
-    ret = ifac.launch(resource_path)
-    assert ret, "Launch failure. Please ensure the resource path is correct."
-
     # Optional features, loaded during session creation based on the modules specified.
-    opt = HF_ENABLE_NONE | HF_ENABLE_INTERACTION
-    session = ifac.InspireFaceSession(opt, HF_DETECT_MODE_ALWAYS_DETECT, max_detect_num=25, detect_pixel_level=320)    # Use video mode
+    opt = isf.HF_ENABLE_NONE | isf.HF_ENABLE_INTERACTION
+    session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_LIGHT_TRACK, max_detect_num=25, detect_pixel_level=320)    # Use video mode
     session.set_filter_minimum_face_pixel_size(0)
     # Determine if the source is a digital webcam index or a video file path.
     try:
         source_index = int(source)  # Try to convert source to an integer.
-        cap = cv2.VideoCapture(source_index)
         print(f"Using webcam at index {source_index}.")
+        cap = cv2.VideoCapture(source_index)
     except ValueError:
         # If conversion fails, treat source as a file path.
-        cap = cv2.VideoCapture(source)
         print(f"Opening video file at {source}.")
+        cap = cv2.VideoCapture(source)
 
     if not cap.isOpened():
         print("Error: Could not open video source.")
@@ -88,8 +84,7 @@ def case_face_tracker_from_video(resource_path, source, show, out):
         # Process frame here (e.g., face detection/tracking).
         faces = session.face_detection(frame)
 
-        exts = session.face_pipeline(frame, faces, HF_ENABLE_INTERACTION)
-        print(exts)
+        exts = session.face_pipeline(frame, faces, isf.HF_ENABLE_INTERACTION)
 
         for idx, face in enumerate(faces):
             # Get face bounding box
@@ -105,6 +100,19 @@ def case_face_tracker_from_video(resource_path, source, show, out):
             box = cv2.boxPoints(rect)
             box = box.astype(int)
 
+            actions = []
+            if exts[idx].action_normal:
+                actions.append("Normal")
+            if exts[idx].action_jaw_open:
+                actions.append("Jaw Open") 
+            if exts[idx].action_shake:
+                actions.append("Shake")
+            if exts[idx].action_blink:
+                actions.append("Blink")
+            if exts[idx].action_head_raise:
+                actions.append("Head Raise")
+            print("Actions:", actions)
+            
             color = generate_color(face.track_id)
 
             # Draw the rotated bounding box
@@ -114,6 +122,10 @@ def case_face_tracker_from_video(resource_path, source, show, out):
             lmk = session.get_face_dense_landmark(face)
             for x, y in lmk.astype(int):
                 cv2.circle(frame, (x, y), 0, color, 4)
+
+            five_key_points = session.get_face_five_key_points(face)
+            for x, y in five_key_points.astype(int):
+                cv2.circle(frame, (x, y), 0, (255-color[0], 255-color[1], 255-color[2]), 6)
 
             # Draw track ID at the top of the bounding box
             text = f"ID: {face.track_id}"
@@ -126,7 +138,7 @@ def case_face_tracker_from_video(resource_path, source, show, out):
 
         if show:
             cv2.imshow("Face Tracker", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(25) & 0xFF == ord('q'):
                 break  # Exit loop if 'q' is pressed.
 
         if out:

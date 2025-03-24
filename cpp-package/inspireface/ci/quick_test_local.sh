@@ -4,8 +4,8 @@
 set -e
 
 TARGET_DIR="test_res"
-DOWNLOAD_URL="https://github.com/tunmx/inspireface-store/raw/main/resource/test_res-lite.zip"
-ZIP_FILE="test_res-lite.zip"
+DOWNLOAD_URL="https://github.com/tunmx/inspireface-store/raw/main/resource/test_res-lite2.zip"
+ZIP_FILE="test_res-lite2.zip"
 BUILD_DIRNAME="quick_test_build"
 TEST_DIR="./build/${BUILD_DIRNAME}/test"
 TEST_EXECUTABLE="./test/Test"

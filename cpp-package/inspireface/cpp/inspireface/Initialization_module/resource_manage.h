@@ -1,4 +1,7 @@
-// Created by tunm on 2024/07/16.
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #pragma once
 #ifndef INSPIREFACE_RESOURCE_MANAGE_H
 #define INSPIREFACE_RESOURCE_MANAGE_H
@@ -8,6 +11,7 @@
 #include <memory>
 #include <iomanip>  // For std::setw and std::left
 #include <vector>
+#include "log.h"
 #ifndef INSPIRE_API
 #define INSPIRE_API
 #endif
@@ -30,6 +34,7 @@ private:
     // Use hash tables to store session and image stream handles
     std::unordered_map<long, bool> sessionMap;
     std::unordered_map<long, bool> streamMap;
+    std::unordered_map<long, bool> imageBitmapMap;
 
     // The private constructor guarantees singletons
     ResourceManager() {}
@@ -84,6 +89,23 @@ public:
                        // released
     }
 
+    // Create and record image bitmaps
+    void createImageBitmap(long handle) {
+        std::lock_guard<std::mutex> lock(mutex);
+        imageBitmapMap[handle] = false;  // false indicates that it is not released
+    }
+
+    // Release image bitmap
+    bool releaseImageBitmap(long handle) {
+        std::lock_guard<std::mutex> lock(mutex);
+        auto it = imageBitmapMap.find(handle);
+        if (it != imageBitmapMap.end() && !it->second) {
+            it->second = true;  // Mark as released
+            return true;
+        }
+        return false;  // Release failed, possibly because the handle could not be found or was released
+    }
+
     // Gets a list of unreleased session handles
     std::vector<long> getUnreleasedSessions() {
         std::lock_guard<std::mutex> lock(mutex);
@@ -108,11 +130,22 @@ public:
         return unreleasedStreams;
     }
 
+    // Gets a list of unreleased image bitmap handles
+    std::vector<long> getUnreleasedImageBitmaps() {
+        std::lock_guard<std::mutex> lock(mutex);
+        std::vector<long> unreleasedImageBitmaps;
+        for (const auto& entry : imageBitmapMap) {
+            if (!entry.second) {
+                unreleasedImageBitmaps.push_back(entry.first);
+            }
+        }
+        return unreleasedImageBitmaps;
+    }
+
     // Method to print resource management statistics
     void printResourceStatistics() {
         std::lock_guard<std::mutex> lock(mutex);
-        std::cout << std::left << std::setw(15) << "Resource Name" << std::setw(15) << "Total Created" << std::setw(15) << "Total Released"
-                  << std::setw(15) << "Not Released" << std::endl;
+        INSPIRE_LOGI("%-15s%-15s%-15s%-15s", "Resource Name", "Total Created", "Total Released", "Not Released");
 
         // Print session statistics
         int totalSessionsCreated = sessionMap.size();
@@ -124,8 +157,7 @@ public:
             if (!entry.second)
                 ++sessionsNotReleased;
         }
-        std::cout << std::left << std::setw(15) << "Session" << std::setw(15) << totalSessionsCreated << std::setw(15) << totalSessionsReleased
-                  << std::setw(15) << sessionsNotReleased << std::endl;
+        INSPIRE_LOGI("%-15s%-15d%-15d%-15d", "Session", totalSessionsCreated, totalSessionsReleased, sessionsNotReleased);
 
         // Print stream statistics
         int totalStreamsCreated = streamMap.size();
@@ -137,8 +169,19 @@ public:
             if (!entry.second)
                 ++streamsNotReleased;
         }
-        std::cout << std::left << std::setw(15) << "Stream" << std::setw(15) << totalStreamsCreated << std::setw(15) << totalStreamsReleased
-                  << std::setw(15) << streamsNotReleased << std::endl;
+        INSPIRE_LOGI("%-15s%-15d%-15d%-15d", "Stream", totalStreamsCreated, totalStreamsReleased, streamsNotReleased);
+
+        // Print bitmap statistics
+        int totalBitmapsCreated = imageBitmapMap.size();
+        int totalBitmapsReleased = 0;
+        int bitmapsNotReleased = 0;
+        for (const auto& entry : imageBitmapMap) {
+            if (entry.second)
+                ++totalBitmapsReleased;
+            if (!entry.second)
+                ++bitmapsNotReleased;
+        }
+        INSPIRE_LOGI("%-15s%-15d%-15d%-15d", "Bitmap", totalBitmapsCreated, totalBitmapsReleased, bitmapsNotReleased);
     }
 };
 

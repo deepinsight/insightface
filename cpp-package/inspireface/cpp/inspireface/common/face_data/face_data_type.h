@@ -1,15 +1,16 @@
-//
-// Created by tunm on 2023/9/17.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 // Include guard to prevent double inclusion of this header file
 #pragma once
-#ifndef HYPERFACEREPO_FACEDATATYPE_H
-#define HYPERFACEREPO_FACEDATATYPE_H
+#ifndef INSPIRE_FACE_FACEDATATYPE_H
+#define INSPIRE_FACE_FACEDATATYPE_H
 
 // Include the necessary header files
 #include "../../data_type.h"
-#include "../face_info/face_object.h"
+#include "../face_info/face_object_internal.h"
 
 // Define the namespace "inspire" for encapsulation
 namespace inspire {
@@ -24,8 +25,8 @@ typedef struct Face3DAngle {
 } Face3DAngle;
 
 /**
-* Struct to represent the rectangle coordinates of a face.
-*/
+ * Struct to represent the rectangle coordinates of a face.
+ */
 typedef struct FaceRect {
     int x;       ///< X-coordinate of the top-left corner
     int y;       ///< Y-coordinate of the top-left corner
@@ -34,16 +35,16 @@ typedef struct FaceRect {
 } FaceRect;
 
 /**
-* Struct to represent 2D point coordinates.
-*/
+ * Struct to represent 2D point coordinates.
+ */
 typedef struct Point2F {
     float x;  ///< X-coordinate
     float y;  ///< Y-coordinate
 } HPoint;
 
 /**
-* Struct to represent a 2D transformation matrix.
-*/
+ * Struct to represent a 2D transformation matrix.
+ */
 typedef struct TransMatrix {
     double m00;  ///< Element (0,0) of the matrix
     double m01;  ///< Element (0,1) of the matrix
@@ -54,21 +55,22 @@ typedef struct TransMatrix {
 } TransMatrix;
 
 /**
-* Struct to represent hyper face data.
-*/
+ * Struct to represent hyper face data.
+ */
 typedef struct HyperFaceData {
-    int trackState;                 ///< Track state
-    int inGroupIndex;               ///< Index within a group
-    int trackId;                    ///< Track ID
-    int trackCount;                 ///< Track count
-    FaceRect rect;                  ///< Face rectangle
-    TransMatrix trans;              ///< Transformation matrix
-    Point2F keyPoints[5];           ///< Key points (e.g., landmarks)
-    Face3DAngle face3DAngle;        ///< 3D face angles
-    float quality[5];               ///< Quality values for key points
-    Point2F densityLandmark[106];   ///< Face density landmark
+    int trackState;                ///< Track state
+    int inGroupIndex;              ///< Index within a group
+    int trackId;                   ///< Track ID
+    int trackCount;                ///< Track count
+    FaceRect rect;                 ///< Face rectangle
+    TransMatrix trans;             ///< Transformation matrix
+    Point2F keyPoints[5];          ///< Key points (e.g., landmarks)
+    Face3DAngle face3DAngle;       ///< 3D face angles
+    float quality[5];              ///< Quality values for key points
+    Point2F densityLandmark[106];  ///< Face density landmark
+    int densityLandmarkEnable;     ///< Density landmark enable
 } HyperFaceData;
 
-} // namespace inspire
+}  // namespace inspire
 
-#endif //HYPERFACEREPO_FACEDATATYPE_H
+#endif  // INSPIRE_FACE_FACEDATATYPE_H

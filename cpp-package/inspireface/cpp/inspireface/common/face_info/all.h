@@ -1,10 +1,13 @@
-//
-// Created by tunm on 2023/8/29.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #pragma once
-#ifndef HYPERFACEREPO_FO_ALL_H
-#define HYPERFACEREPO_FO_ALL_H
+#ifndef INSPIRE_FACE_FO_ALL_H
+#define INSPIRE_FACE_FO_ALL_H
 
-#include "face_object.h"
+#include "face_object_internal.h"
+#include "face_action_data.h"
+#include "face_process.h"
 
-#endif //HYPERFACEREPO_FO_ALL_H
+#endif  // INSPIRE_FACE_FO_ALL_H

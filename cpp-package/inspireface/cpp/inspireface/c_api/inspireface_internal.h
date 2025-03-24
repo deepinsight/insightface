@@ -1,19 +1,23 @@
-//
-// Created by tunm on 2023/10/3.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
-#ifndef HYPERFACEREPO_INSPIREFACE_INTERNAL_H
-#define HYPERFACEREPO_INSPIREFACE_INTERNAL_H
+#ifndef INSPIREFACE_INTERNAL_H
+#define INSPIREFACE_INTERNAL_H
 
-#include "face_context.h"
+#include "face_session.h"
 
 typedef struct HF_FaceAlgorithmSession {
-    inspire::FaceContext impl; ///< Implementation of the face context.
-} HF_FaceAlgorithmSession; ///< Handle for managing face context.
+    inspire::FaceSession impl;  ///< Implementation of the face context.
+} HF_FaceAlgorithmSession;      ///< Handle for managing face context.
 
 typedef struct HF_CameraStream {
-    inspire::CameraStream impl; ///< Implementation of the camera stream.
-} HF_CameraStream; ///< Handle for managing camera stream.
+    inspirecv::InspireImageProcess impl;  ///< Implementation of the camera stream.
+} HF_CameraStream;                        ///< Handle for managing camera stream.
 
+typedef struct HF_ImageBitmap {
+    inspirecv::Image impl;  ///< Implementation of the image bitmap.
+} HF_ImageBitmap;           ///< Handle for managing image bitmap.
 
-#endif //HYPERFACEREPO_INSPIREFACE_INTERNAL_H
+#endif  // INSPIREFACE_INTERNAL_H

@@ -1,0 +1,40 @@
+# Use Ubuntu 18.04 as the base image
+FROM nvidia/cuda:12.0.0-devel-ubuntu22.04
+
+ARG https_proxy
+ARG http_proxy
+ARG all_proxy
+
+RUN apt-get update 
+
+# Update the package list and install basic development tools
+RUN apt-get install -y --no-install-recommends build-essential
+RUN apt-get install -y --no-install-recommends software-properties-common
+RUN apt-get install -y --no-install-recommends curl
+
+# Install CMake
+RUN apt-get install -y --no-install-recommends cmake 
+
+# Clean temporary files to reduce image size
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* 
+
+# Download TensorRT-10.8
+WORKDIR /
+RUN curl -L https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/10.8.0/tars/TensorRT-10.8.0.43.Linux.x86_64-gnu.cuda-12.8.tar.gz -o TensorRT.tar.gz && \
+    tar -zxvf TensorRT.tar.gz && \
+    rm TensorRT.tar.gz
+
+# Set environment variables
+RUN echo 'export TENSORRT_ROOT=/TensorRT-10.8.0.43/' >> /root/.bashrc && \
+    echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TENSORRT_ROOT/lib' >> /root/.bashrc
+
+# Set environment variables
+ENV TENSORRT_ROOT=/TensorRT-10.8.0.43/
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TENSORRT_ROOT/lib
+
+# Set the working directory
+WORKDIR /workspace
+
+# Default to running Bash
+CMD ["/bin/bash"]

@@ -45,8 +45,7 @@ cmake -DCMAKE_SYSTEM_NAME=Linux \
   -DISF_ENABLE_TEST_EVALUATION=ON \
   -DMNN_CUDA=ON \
   -DISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA=ON \
-  -DISF_LINUX_MNN_CUDA=/host/softwate/MNN-2.7.2/build_cuda \
-  -DOpenCV_DIR=3rdparty/inspireface-precompile/opencv/4.5.1/opencv-ubuntu18-x86/lib/cmake/opencv4  ${SCRIPT_DIR}
+  -DISF_LINUX_MNN_CUDA=/host/softwate/MNN-2.7.2/build_cuda ${SCRIPT_DIR}
 
 make -j4
 

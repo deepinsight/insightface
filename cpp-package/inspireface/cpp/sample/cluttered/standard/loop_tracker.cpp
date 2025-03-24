@@ -1,6 +1,7 @@
-//
-// Created by tunm on 2024/4/6.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #include <iostream>
 #include "track_module/face_track.h"
 #include "inspireface/recognition_module/face_feature_extraction.h"
@@ -12,7 +13,7 @@ int main() {
     InspireArchive archive("test_res/pack/Pikachu");
 
     FaceTrack track;
-//    FaceRecognition recognition(archive, true);
+    //    FaceRecognition recognition(archive, true);
 
     auto ret = track.Configuration(archive);
     INSPIRE_LOGD("ret=%d", ret);
@@ -27,12 +28,11 @@ int main() {
         track.UpdateStream(stream, true);
     }
 
-
-//    InspireModel model;
-//    ret = archive.LoadModel("mask_detect", model);
-//    std::cout << ret << std::endl;
-//
-//    archive.PublicPrintSubFiles();
+    //    InspireModel model;
+    //    ret = archive.LoadModel("mask_detect", model);
+    //    std::cout << ret << std::endl;
+    //
+    //    archive.PublicPrintSubFiles();
 
     return 0;
 }

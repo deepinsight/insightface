@@ -4,31 +4,15 @@
 set -e
 
 TARGET_DIR="test_res"
-DOWNLOAD_URL="https://github.com/tunmx/inspireface-store/raw/main/resource/test_res-lite.zip"
-ZIP_FILE="test_res-lite.zip"
 BUILD_DIRNAME="ci_ubuntu18"
 TEST_DIR="./build/${BUILD_DIRNAME}/test"
 TEST_EXECUTABLE="./test/Test"
 
-# Check if the target directory already exists
-if [ ! -d "$TARGET_DIR" ]; then
-    echo "Directory '$TARGET_DIR' does not exist. Downloading..."
+# Make dir
+mkdir -p ${TARGET_DIR}/save/video_frames
 
-    # Download the dataset zip file
-    wget -q "$DOWNLOAD_URL" -O "$ZIP_FILE"
-
-    echo "Extracting '$ZIP_FILE' to '$TARGET_DIR'..."
-    # Unzip the downloaded file
-    unzip "$ZIP_FILE"
-
-    # Remove the downloaded zip file and unnecessary folders
-    rm "$ZIP_FILE"
-    rm -rf "__MACOSX"
-
-    echo "Download and extraction complete."
-else
-    echo "Directory '$TARGET_DIR' already exists. Skipping download."
-fi
+# Download models
+bash command/download_models_general.sh Pikachu
 
 # Get the absolute path of the target directory
 FULL_TEST_DIR="$(realpath ${TARGET_DIR})"
@@ -48,7 +32,6 @@ cmake -DCMAKE_BUILD_TYPE=Release \
   -DISF_ENABLE_BENCHMARK=ON \
   -DISF_ENABLE_USE_LFW_DATA=OFF \
   -DISF_ENABLE_TEST_EVALUATION=OFF \
-  -DOpenCV_DIR=3rdparty/inspireface-precompile/opencv/4.5.1/opencv-ubuntu18-x86/lib/cmake/opencv4 \
   -DISF_BUILD_SHARED_LIBS=OFF ../../
 
 # Compile the project using 4 parallel jobs

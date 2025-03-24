@@ -1,6 +1,7 @@
-//
-// Created by tunm on 2023/9/10.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 #include <iostream>
 #include "face_context.h"
@@ -11,7 +12,7 @@
 
 using namespace inspire;
 
-std::string GetFileNameWithoutExtension(const std::string& filePath) {
+std::string GetFileNameWithoutExtension(const std::string &filePath) {
     size_t slashPos = filePath.find_last_of("/\\");
     if (slashPos != std::string::npos) {
         std::string fileName = filePath.substr(slashPos + 1);
@@ -52,7 +53,6 @@ int comparison1v1(FaceContext &ctx) {
             return -1;
         }
         ctx.FaceRecognitionModule()->FaceExtract(stream, faces[0], feature_1);
-
     }
 
     {
@@ -68,7 +68,6 @@ int comparison1v1(FaceContext &ctx) {
             return -1;
         }
         ctx.FaceRecognitionModule()->FaceExtract(stream, faces[0], feature_2);
-
     }
 
     float rec;
@@ -78,14 +77,11 @@ int comparison1v1(FaceContext &ctx) {
     return 0;
 }
 
-
 int search(FaceContext &ctx) {
+    //    std::shared_ptr<FeatureBlock> block;
+    //    block.reset(FeatureBlock::Create(hyper::MC_OPENCV));
 
-//    std::shared_ptr<FeatureBlock> block;
-//    block.reset(FeatureBlock::Create(hyper::MC_OPENCV));
-
-    std::vector<String> files_list = {
-    };
+    std::vector<String> files_list = {};
     for (int i = 0; i < files_list.size(); ++i) {
         auto image = cv::imread(files_list[i]);
         CameraStream stream;
@@ -103,11 +99,11 @@ int search(FaceContext &ctx) {
         FEATURE_HUB->RegisterFaceFeature(feature, i, GetFileNameWithoutExtension(files_list[i]), 1000 + i);
     }
 
-//    ctx.FaceRecognitionModule()->PrintMatrix();
+    //    ctx.FaceRecognitionModule()->PrintMatrix();
 
-//    auto ret = block->DeleteFeature(3);
-//    LOGD("DEL: %d", ret);
-//    block->PrintMatrix();
+    //    auto ret = block->DeleteFeature(3);
+    //    LOGD("DEL: %d", ret);
+    //    block->PrintMatrix();
 
     FEATURE_HUB->DeleteFaceFeature(2);
 
@@ -129,8 +125,8 @@ int search(FaceContext &ctx) {
         }
         ctx.FaceRecognitionModule()->FaceExtract(stream, faces[0], feature);
 
-//        block->UpdateFeature(4, feature);
-//        block->AddFeature(feature);
+        //        block->UpdateFeature(4, feature);
+        //        block->AddFeature(feature);
     }
 
     // Prepare an image to search
@@ -150,18 +146,17 @@ int search(FaceContext &ctx) {
         ctx.FaceRecognitionModule()->FaceExtract(stream, faces[0], feature);
 
         SearchResult result;
-        auto timeStart = (double) cv::getTickCount();
+        auto timeStart = (double)cv::getTickCount();
         FEATURE_HUB->SearchFaceFeature(feature, result);
-        double cost = ((double) cv::getTickCount() - timeStart) / cv::getTickFrequency() * 1000;
+        double cost = ((double)cv::getTickCount() - timeStart) / cv::getTickFrequency() * 1000;
         INSPIRE_LOGD("Search time: %f", cost);
         INSPIRE_LOGD("Top1: %d, %f, %s %d", result.index, result.score, result.tag.c_str(), result.customId);
     }
 
-
     return 0;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     FaceContext ctx;
     CustomPipelineParameter param;
     param.enable_recognition = true;
@@ -170,11 +165,10 @@ int main(int argc, char** argv) {
         INSPIRE_LOGE("Initialization error");
         return -1;
     }
-    
+
     comparison1v1(ctx);
 
-//    search(ctx);
+    //    search(ctx);
 
     return 0;
-
 }

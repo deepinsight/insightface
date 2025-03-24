@@ -1,12 +1,12 @@
-//
-// Created by tunm on 2023/8/29.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
-#ifndef HYPERFACEREPO_FD_ALL_H
-#define HYPERFACEREPO_FD_ALL_H
+#ifndef INSPIRE_FACE_FD_ALL_H
+#define INSPIRE_FACE_FD_ALL_H
 
-#include "rnet.h"
-#include "face_detect.h"
-#include "face_pose.h"
+#include "rnet_adapt.h"
+#include "face_detect_adapt.h"
 
-#endif //HYPERFACEREPO_FD_ALL_H
+#endif  // INSPIRE_FACE_FD_ALL_H

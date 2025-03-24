@@ -1,6 +1,7 @@
-//
-// Created by Tunm-Air13 on 2024/3/22.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 #ifndef INSPIREFACE_SIMPLE_CSV_WRITER_H
 #define INSPIREFACE_SIMPLE_CSV_WRITER_H
@@ -9,7 +10,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <iomanip> // Used to set the output format
+#include <iomanip>  // Used to set the output format
 
 class SimpleCSVWriter {
 public:
@@ -28,39 +29,39 @@ public:
         this->filepath = filepath;
     }
 
-    virtual ~SimpleCSVWriter() {} // Add a virtual destructor to ensure correct destructor behavior
+    virtual ~SimpleCSVWriter() {}  // Add a virtual destructor to ensure correct destructor behavior
 
 protected:
     std::string filepath;
 
     void insertData(const std::vector<std::string>& data) {
-        std::ofstream file(this->filepath, std::ios_base::app); // Open the file in append mode
+        std::ofstream file(this->filepath, std::ios_base::app);  // Open the file in append mode
         if (!file.is_open()) {
             std::cerr << "Failed to open file: " << this->filepath << std::endl;
             return;
         }
         for (const auto& datum : data) {
             file << datum;
-            if (&datum != &data.back()) { // If it is not the last element, add a comma separation
+            if (&datum != &data.back()) {  // If it is not the last element, add a comma separation
                 file << ",";
             }
         }
-        file << "\n"; // Add a newline character after each inserted row of data
+        file << "\n";  // Add a newline character after each inserted row of data
         file.close();
     }
 };
 
 class BenchmarkRecord : public SimpleCSVWriter {
 public:
-    BenchmarkRecord(const std::string& filepath, const std::string &name = "Benchmark") : SimpleCSVWriter(filepath) {
+    BenchmarkRecord(const std::string& filepath, const std::string& name = "Benchmark") : SimpleCSVWriter(filepath) {
         std::ifstream file(this->filepath);
-        if (file.peek() == std::ifstream::traits_type::eof()) { // If the file is empty, insert header data
+        if (file.peek() == std::ifstream::traits_type::eof()) {  // If the file is empty, insert header data
             std::vector<std::string> header = {name, "Loops", "Total Time(ms)", "Average Time(ms)"};
             SimpleCSVWriter::insertData(header);
         }
     }
 
-    void insertBenchmarkData(const std::string &caseName, int loops, double totalCost, double avgCost) {
+    void insertBenchmarkData(const std::string& caseName, int loops, double totalCost, double avgCost) {
         std::ofstream file(this->filepath, std::ios_base::app);
         if (!file.is_open()) {
             std::cerr << "Failed to open file: " << this->filepath << std::endl;
@@ -73,18 +74,17 @@ public:
     }
 };
 
-
 class EvaluationRecord : public SimpleCSVWriter {
 public:
     EvaluationRecord(const std::string& filepath) : SimpleCSVWriter(filepath) {
         std::ifstream file(this->filepath);
-        if (file.peek() == std::ifstream::traits_type::eof()) { // If the file is empty, insert header data
+        if (file.peek() == std::ifstream::traits_type::eof()) {  // If the file is empty, insert header data
             std::vector<std::string> header = {"Resource Version", "Dataset", "Accuracy", "Best Threshold"};
             SimpleCSVWriter::insertData(header);
         }
     }
 
-    void insertEvaluationData(const std::string &modelName, const std::string &dataset, double accuracy, double bestThreshold) {
+    void insertEvaluationData(const std::string& modelName, const std::string& dataset, double accuracy, double bestThreshold) {
         std::ofstream file(this->filepath, std::ios_base::app);
         if (!file.is_open()) {
             std::cerr << "Failed to open file: " << this->filepath << std::endl;
@@ -97,5 +97,4 @@ public:
     }
 };
 
-
-#endif //INSPIREFACE_SIMPLE_CSV_WRITER_H
+#endif  // INSPIREFACE_SIMPLE_CSV_WRITER_H

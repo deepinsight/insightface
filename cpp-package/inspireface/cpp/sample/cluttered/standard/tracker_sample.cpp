@@ -1,13 +1,14 @@
-//
-// Created by tunm on 2023/8/29.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #include <iostream>
 #include "inspireface/track_module/face_track.h"
 #include "opencv2/opencv.hpp"
 
 using namespace inspire;
 
-int video_test(FaceTrack &ctx, int cam_id) {
+int video_test(FaceTrack& ctx, int cam_id) {
 #ifndef ISF_USE_MOBILE_OPENCV_IN_LOCAL
     cv::VideoCapture cap(cam_id);
 
@@ -37,8 +38,8 @@ int video_test(FaceTrack &ctx, int cam_id) {
 
         INSPIRE_LOGD("Track Cost: %f", ctx.GetTrackTotalUseTime());
 
-        auto const &faces = ctx.trackingFace;
-        for (auto const &face: faces) {
+        auto const& faces = ctx.trackingFace;
+        for (auto const& face : faces) {
             auto rect = face.GetRect();
             int track_id = face.GetTrackingId();
             int track_count = face.GetTrackingCount();
@@ -51,7 +52,7 @@ int video_test(FaceTrack &ctx, int cam_id) {
 
             const auto& pose_and_quality = face.high_result;
             std::vector<float> euler = {pose_and_quality.yaw, pose_and_quality.roll, pose_and_quality.pitch};
-            std::string pose_text = "P: " + std::to_string(euler[0]) + ",Yaw: " + std::to_string(euler[1]) + ",roll:" +std::to_string(euler[2]);
+            std::string pose_text = "P: " + std::to_string(euler[0]) + ",Yaw: " + std::to_string(euler[1]) + ",roll:" + std::to_string(euler[2]);
 
             cv::Point pose_position(rect.x, rect.y + rect.height + 20);
 
@@ -63,7 +64,6 @@ int video_test(FaceTrack &ctx, int cam_id) {
             cv::putText(frame, text, text_position, font_face, font_scale, font_color, font_thickness);
             cv::putText(frame, pose_text, pose_position, font_face, font_scale, font_color, font_thickness);
         }
-
 
         cv::imshow("Webcam", frame);
 
@@ -107,8 +107,8 @@ void video_file_test(FaceTrack& ctx, const std::string& video_filename) {
         ctx.UpdateStream(stream, false);
         INSPIRE_LOGD("Track Cost: %f", ctx.GetTrackTotalUseTime());
 
-        auto const &faces = ctx.trackingFace;
-        for (auto const &face: faces) {
+        auto const& faces = ctx.trackingFace;
+        for (auto const& face : faces) {
             auto rect = face.GetRect();
             int track_id = face.GetTrackingId();
             int track_count = face.GetTrackingCount();
@@ -116,7 +116,7 @@ void video_file_test(FaceTrack& ctx, const std::string& video_filename) {
             cv::rectangle(frame, rect, cv::Scalar(0, 0, 255), 2, 1);
 
             auto lmk = face.GetLanmdark();
-            for (auto & p : lmk) {
+            for (auto& p : lmk) {
                 cv::circle(frame, p, 0, cv::Scalar(0, 0, 242), 2);
             }
 
@@ -125,7 +125,8 @@ void video_file_test(FaceTrack& ctx, const std::string& video_filename) {
             cv::Point text_position(rect.x, rect.y - 10);
 
             const auto& euler = face.high_result;
-            std::string pose_text = "pitch: " + std::to_string(euler.pitch) + ",Yaw: " + std::to_string(euler.yaw) + ",roll:" +std::to_string(euler.roll);
+            std::string pose_text =
+              "pitch: " + std::to_string(euler.pitch) + ",Yaw: " + std::to_string(euler.yaw) + ",roll:" + std::to_string(euler.roll);
 
             cv::Point pose_position(rect.x, rect.y + rect.height + 20);
 
@@ -163,8 +164,8 @@ int main(int argc, char** argv) {
 
     const std::string folder = "test_res/pack/Pikachu";
     INSPIRE_LOGD("%s", folder.c_str());
-//    ModelLoader loader;
-//    loader.Reset(folder);
+    //    ModelLoader loader;
+    //    loader.Reset(folder);
 
     InspireArchive archive;
     archive.ReLoad(folder);
@@ -183,7 +184,7 @@ int main(int argc, char** argv) {
     } else if (source == "image") {
         cv::Mat image = cv::imread(input);
         if (!image.empty()) {
-//            image_test(ctx, image);
+            //            image_test(ctx, image);
         } else {
             std::cerr << "Unable to open the image file." << std::endl;
         }

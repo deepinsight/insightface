@@ -1,6 +1,7 @@
-//
-// Created by Tunm-Air13 on 2023/9/22.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 #include "opencv2/opencv.hpp"
 
@@ -12,18 +13,14 @@ using namespace inspire;
 int main() {
     FaceContext ctx;
     CustomPipelineParameter param;
-    int32_t ret = ctx.Configuration(
-            "test_res/pack/Gundam_RV1109",
-            DetectMode::DETECT_MODE_VIDEO,
-            3,
-            param);
+    int32_t ret = ctx.Configuration("test_res/pack/Gundam_RV1109", DetectMode::DETECT_MODE_VIDEO, 3, param);
     if (ret != HSUCCEED) {
         LOGE("Initiate error");
     }
     cv::Mat frame;
     std::string imageFolder = "test_res/video_frames/";
 
-//    auto video_frame_num = 10;
+    //    auto video_frame_num = 10;
     auto video_frame_num = 288;
     for (int i = 0; i < video_frame_num; ++i) {
         auto index = i + 1;
@@ -45,7 +42,7 @@ int main() {
         LOGD("track id: %d", ctx.GetTrackingFaceList()[0].GetTrackingId());
 
         auto &face = ctx.GetTrackingFaceList()[0];
-        for (auto &p: face.landmark_) {
+        for (auto &p : face.landmark_) {
             cv::circle(frame, p, 0, cv::Scalar(0, 0, 255), 3);
         }
 
@@ -55,7 +52,8 @@ int main() {
 
         cv::rectangle(frame, rect, cv::Scalar(0, 0, 255), 2, 1);
 
-        std::string text = "ID: " + std::to_string(track_id) + " Count: " + std::to_string(track_count) + " Cf: " + std::to_string(face.GetConfidence());
+        std::string text =
+          "ID: " + std::to_string(track_id) + " Count: " + std::to_string(track_count) + " Cf: " + std::to_string(face.GetConfidence());
 
         cv::Point text_position(rect.x, rect.y - 10);
         int font_face = cv::FONT_HERSHEY_SIMPLEX;
@@ -69,8 +67,6 @@ int main() {
         saveFile << "track_frames/" << "result-" << std::setw(4) << std::setfill('0') << index << ".jpg";
         cv::imwrite(saveFile.str(), frame);
     }
-
-
 
     return 0;
 }

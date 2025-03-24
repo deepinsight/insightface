@@ -1,6 +1,7 @@
-//
-// Created by tunm on 2024/4/2.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 #ifndef MODELLOADERTAR_INSPIRE_MODEL_H
 #define MODELLOADERTAR_INSPIRE_MODEL_H
@@ -9,12 +10,26 @@
 #include "yaml-cpp/yaml.h"
 #include "middleware/configurable.h"
 #include "log.h"
-#include "middleware/inference_helper/inference_helper.h"
+#include "middleware/inference_wrapper/inference_wrapper.h"
 
 namespace inspire {
 
+typedef enum {
+    InspireInferBackendAuto = 10,
+    InspireInferBackendCPU = 0,
+    InspireInferBackendRKNPU = 1,
+    InspireInferBackendCUDA = 2,
+} InspireInferBackend;
+
+typedef enum {
+    InspireInferEngineMNN = 0,
+    InspireInferEngineRKNN = 1,
+    InspireInferEngineCoreML = 2,
+    InspireInferEngineTensorRT = 3,
+} InspireInferEngine;
+
 class INSPIRE_API InspireModel {
-CONFIGURABLE_SUPPORT
+    CONFIGURABLE_SUPPORT
 public:
     explicit InspireModel(const YAML::Node &node) {
         Reset(node);
@@ -37,33 +52,51 @@ public:
         if (node["model_type"]) {
             auto type = node["model_type"].as<std::string>();
             if (type == "MNN") {
-                modelType = InferenceHelper::kMnn;
+                modelType = InferenceWrapper::INFER_MNN;
             } else if (type == "RKNN") {
-                modelType = InferenceHelper::kRknn;
+                modelType = InferenceWrapper::INFER_RKNN;
+            } else if (type == "COREML") {
+                modelType = InferenceWrapper::INFER_COREML;
+                // Special handling, the binary model is not loaded by default
+                loadFilePath = 1;
+            } else if (type == "TensorRT") {
+                modelType = InferenceWrapper::INFER_TENSORRT;
             }
         }
         if (node["infer_engine"]) {
             auto type = node["infer_engine"].as<std::string>();
             if (type == "MNN") {
-                inferEngine = InferenceHelper::kMnn;
+                inferEngine = InferenceWrapper::INFER_MNN;
             } else if (type == "RKNN") {
-                inferEngine = InferenceHelper::kRknn;
+                inferEngine = InferenceWrapper::INFER_RKNN;
+            } else if (type == "COREML") {
+                inferEngine = InferenceWrapper::INFER_COREML;
+            } else if (type == "TensorRT") {
+                inferEngine = InferenceWrapper::INFER_TENSORRT;
             }
         }
         if (node["infer_device"]) {
             auto type = node["infer_device"].as<std::string>();
             if (type == "MNN") {
-                inferDevice = 0;
+                inferDevice = InspireInferEngineMNN;
             } else if (type == "RKNPU") {
-                inferDevice = 1;
+                inferDevice = InspireInferEngineRKNN;
+            } else if (type == "COREML") {
+                inferDevice = InspireInferEngineCoreML;
+            } else if (type == "CUDA") {
+                inferDevice = InspireInferEngineTensorRT;
             }
         }
         if (node["infer_backend"]) {
             auto type = node["infer_backend"].as<std::string>();
             if (type == "CPU") {
-                inferBackend = 0;
+                inferBackend = InspireInferBackendCPU;
             } else if (type == "RKNPU") {
-                inferBackend = 1;
+                inferBackend = InspireInferBackendRKNPU;
+            } else if (type == "AUTO") {
+                inferBackend = InspireInferBackendAuto;
+            } else if (type == "CUDA") {
+                inferBackend = InspireInferBackendCUDA;
             }
         }
         return decode(node);
@@ -73,17 +106,16 @@ public:
         INSPIRE_LOGD("%s", m_configuration.toString().c_str());
     }
 
-    void SetBuffer(std::vector<char>& modelBuffer, size_t size) {
+    void SetBuffer(std::vector<char> &modelBuffer, size_t size) {
         buffer = modelBuffer.data();
         bufferSize = size;
     }
 
-    Configurable& Config() {
+    Configurable &Config() {
         return m_configuration;
     }
 
 private:
-
     int32_t decode(const YAML::Node &node) {
         try {
             if (node["input_channel"]) {
@@ -101,43 +133,43 @@ private:
             if (node["data_type"]) {
                 auto type = node["data_type"].as<std::string>();
                 if (type == "image") {
-                    setData<int>("data_type", InputTensorInfo::InputTensorInfo::kDataTypeImage);
-                } else if(type == "data_nhwc") {
-                    setData<int>("data_type", InputTensorInfo::InputTensorInfo::kDataTypeBlobNhwc);
-                } else if(type == "data_nchw") {
-                    setData<int>("data_type", InputTensorInfo::InputTensorInfo::kDataTypeBlobNchw);
+                    setData<int>("data_type", InputTensorInfo::InputTensorInfo::DataTypeImage);
+                } else if (type == "data_nhwc") {
+                    setData<int>("data_type", InputTensorInfo::InputTensorInfo::DataTypeBlobNhwc);
+                } else if (type == "data_nchw") {
+                    setData<int>("data_type", InputTensorInfo::InputTensorInfo::DataTypeBlobNchw);
                 }
             }
             if (node["input_tensor_type"]) {
                 auto type = node["input_tensor_type"].as<std::string>();
                 if (type == "none") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeNone);
-                } else if(type == "uint8") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeUint8);
-                } else if(type == "int8") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeInt8);
-                } else if(type == "float32") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeFp32);
-                } else if(type == "int32") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeInt32);
-                } else if(type == "int64") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeInt64);
+                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeNone);
+                } else if (type == "uint8") {
+                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeUint8);
+                } else if (type == "int8") {
+                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt8);
+                } else if (type == "float32") {
+                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeFp32);
+                } else if (type == "int32") {
+                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt32);
+                } else if (type == "int64") {
+                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt64);
                 }
             }
             if (node["output_tensor_type"]) {
                 auto type = node["output_tensor_type"].as<std::string>();
                 if (type == "none") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeNone);
-                } else if(type == "uint8") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeUint8);
-                } else if(type == "int8") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeInt8);
-                } else if(type == "float32") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeFp32);
-                } else if(type == "int32") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeInt32);
-                } else if(type == "int64") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::kTensorTypeInt64);
+                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeNone);
+                } else if (type == "uint8") {
+                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeUint8);
+                } else if (type == "int8") {
+                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt8);
+                } else if (type == "float32") {
+                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeFp32);
+                } else if (type == "int32") {
+                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt32);
+                } else if (type == "int64") {
+                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt64);
                 }
             }
             if (node["threads"]) {
@@ -178,7 +210,7 @@ private:
                 }
                 setData<std::vector<float>>("norm", norm);
             }
-        } catch (const YAML::Exception& e) {
+        } catch (const YAML::Exception &e) {
             INSPIRE_LOGE("An error occurred parsing the interpretation file in archive: %s", e.what());
             return -1;
         }
@@ -189,16 +221,16 @@ public:
     std::string name;
     std::string fullname;
     std::string version;
-    InferenceHelper::HelperType modelType;
+    InferenceWrapper::EngineType modelType;
     int inferEngine;
     int inferDevice;
     int inferBackend;
+    int loadFilePath{0};
 
     char *buffer;
     size_t bufferSize;
-
 };
 
-};   // namespace inspire
+};  // namespace inspire
 
-#endif //MODELLOADERTAR_INSPIRE_MODEL_H
+#endif  // MODELLOADERTAR_INSPIRE_MODEL_H

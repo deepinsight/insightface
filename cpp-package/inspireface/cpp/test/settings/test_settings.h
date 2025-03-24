@@ -1,6 +1,7 @@
-//
-// Created by Tunm-Air13 on 2023/5/24.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #pragma once
 #ifndef BIGGUYSMAIN_TEST_SETTINGS_H
 #define BIGGUYSMAIN_TEST_SETTINGS_H
@@ -8,6 +9,8 @@
 #include <spdlog/spdlog.h>
 #include <iostream>
 #include "enviro.h"
+#include "check.h"
+#include "inspireface/middleware/system.h"
 
 // Define the test model file
 #define TEST_MODEL_FILE Enviro::getInstance().getPackName()
@@ -41,6 +44,8 @@ using namespace Catch::Detail;
 #define TEST_PRINT_OUTPUT(open) TestMessageBroadcast test_msg_broadcast_##open(open)
 // Set the log output level
 #define LOG_OUTPUT_LEVEL(level) LogLevelBroadcast log_level_broadcast_##level(level);
+// Print test error message
+#define TEST_ERROR_PRINT(...) SPDLOG_LOGGER_CALL(spdlog::get("TEST"), spdlog::level::err, __VA_ARGS__)
 
 // Get the test data directory
 #define GET_DIR getTestDataDir()

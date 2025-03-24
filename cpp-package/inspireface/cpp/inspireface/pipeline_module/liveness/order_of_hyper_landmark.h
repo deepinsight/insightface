@@ -1,20 +1,21 @@
-//
-// Created by Tunm-Air13 on 2024/7/3.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #pragma once
-#ifndef HYPERFACEREPO_ORDER_HYPERLANDMARK_H
-#define HYPERFACEREPO_ORDER_HYPERLANDMARK_H
+#ifndef INSPIREFACE_ORDER_HYPERLANDMARK_H
+#define INSPIREFACE_ORDER_HYPERLANDMARK_H
 #include <iostream>
 #include <vector>
 
 namespace inspire {
 
 // HyperLandmark left eye contour points sequence of dense facial landmarks.
-const std::vector<int> HLMK_LEFT_EYE_POINTS_INDEX = {1, 34, 53, 59, 67, 3, 12, 94};
+const std::vector<int> HLMK_LEFT_EYE_POINTS_INDEX = {51, 52, 53, 54, 55, 56, 57, 58};
 
 // HyperLandmark right eye contour points sequence of dense facial landmarks.
-const std::vector<int> HLMK_RIGHT_EYE_POINTS_INDEX = {27, 104, 41, 85, 20, 47, 43, 51};
+const std::vector<int> HLMK_RIGHT_EYE_POINTS_INDEX = {59, 60, 61, 62, 63, 64, 65, 66};
 
-} // namespace inspire
+}  // namespace inspire
 
-#endif //HYPERFACEREPO_ORDER_HYPERLANDMARK_H
+#endif  // INSPIREFACE_ORDER_HYPERLANDMARK_H

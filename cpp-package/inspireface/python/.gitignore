@@ -23,9 +23,7 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
 .pytest_cache/
-
-
 .idea/
 *.db
+version.txt
