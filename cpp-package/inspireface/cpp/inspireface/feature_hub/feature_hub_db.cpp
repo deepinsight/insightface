@@ -250,12 +250,8 @@ int32_t FeatureHubDB::FaceFeatureUpdate(const std::vector<float> &feature, int32
         INSPIRE_LOGE("FeatureHub is disabled, please enable it before it can be served");
         return HERR_FT_HUB_DISABLE;
     }
-    try {
-        EMBEDDING_DB::GetInstance().UpdateVector(customId, feature);
-    } catch (const std::exception &e) {
-        INSPIRE_LOGW("Failed to update face feature, id: %d", customId);
-        return HERR_FT_HUB_NOT_FOUND_FEATURE;
-    }
+
+    EMBEDDING_DB::GetInstance().UpdateVector(customId, feature);
 
     return HSUCCEED;
 }
@@ -283,10 +279,9 @@ int32_t FeatureHubDB::GetFaceFeature(int32_t id, std::vector<float> &feature) {
         INSPIRE_LOGW("FeatureHub is disabled, please enable it before it can be served");
         return HERR_FT_HUB_DISABLE;
     }
-    try {
-        feature = EMBEDDING_DB::GetInstance().GetVector(id);
-    } catch (const std::exception &e) {
-        INSPIRE_LOGW("Failed to get face feature, id: %d", id);
+
+    feature = EMBEDDING_DB::GetInstance().GetVector(id);
+    if (feature.empty()) {
         return HERR_FT_HUB_NOT_FOUND_FEATURE;
     }
     return HSUCCEED;
