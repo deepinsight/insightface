@@ -10,7 +10,7 @@
 #include "face_detect/rnet_adapt.h"
 #include "landmark/face_landmark_adapt.h"
 #include "common/face_info/face_object_internal.h"
-#include "middleware/inspirecv_image_process.h"
+#include "middleware/frame_process.h"
 #include "quality/face_pose_quality_adapt.h"
 #include "middleware/model_archive/inspire_archive.h"
 #include "tracker_optional/bytetrack/BYTETracker.h"
@@ -60,7 +60,7 @@ public:
      * @param image Camera stream to process.
      * @param is_detect Flag to enable/disable face detection.
      */
-    void UpdateStream(inspirecv::InspireImageProcess &image);
+    void UpdateStream(inspirecv::FrameProcess &image);
 
     /**
      * @brief Sets the preview size for tracking.
@@ -85,7 +85,7 @@ private:
      * @param face FaceObject to be tracked.
      * @return bool Status of face tracking.
      */
-    bool TrackFace(inspirecv::InspireImageProcess &image, FaceObjectInternal &face);
+    bool TrackFace(inspirecv::FrameProcess &image, FaceObjectInternal &face);
 
     /**
      * @brief Blacks out the region specified in the image for tracking.

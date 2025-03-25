@@ -17,7 +17,7 @@
 #define INSPIRE_API
 #endif
 
-#define INSPIRE_LAUNCH inspire::Launch::GetInstance()
+#define APP_CONTEXT inspire::Launch::GetInstance()
 
 namespace inspire {
 

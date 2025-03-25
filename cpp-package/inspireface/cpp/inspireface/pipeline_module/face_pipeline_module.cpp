@@ -73,7 +73,7 @@ FacePipelineModule::FacePipelineModule(InspireArchive &archive, bool enableLiven
     }
 }
 
-int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, const HyperFaceData &face, FaceProcessFunctionOption proc) {
+int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const HyperFaceData &face, FaceProcessFunctionOption proc) {
     inspirecv::Image originImage;
     inspirecv::Image scaleImage;
     switch (proc) {
@@ -190,7 +190,7 @@ int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, c
     return HSUCCEED;
 }
 
-int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, FaceObjectInternal &face) {
+int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, FaceObjectInternal &face) {
     // In the tracking state, the count meets the requirements or the pipeline is executed in the detection state
     auto lmk = face.keyPointFive;
     std::vector<inspirecv::Point2f> lmk_5 = {lmk[FaceLandmarkAdapt::LEFT_EYE_CENTER], lmk[FaceLandmarkAdapt::RIGHT_EYE_CENTER],

@@ -6,7 +6,7 @@
 #ifndef INSPIRE_FACE_PIPELINE_MODULE_H
 #define INSPIRE_FACE_PIPELINE_MODULE_H
 
-#include "middleware/inspirecv_image_process.h"
+#include "middleware/frame_process.h"
 #include "common/face_info/face_object_internal.h"
 #include "attribute/face_attribute_adapt.h"
 #include "attribute/mask_predict_adapt.h"
@@ -56,7 +56,7 @@ public:
      * @param face FaceObject representing the detected face.
      * @return int32_t Status code indicating success (0) or failure.
      */
-    int32_t Process(inspirecv::InspireImageProcess &processor, FaceObjectInternal &face);
+    int32_t Process(inspirecv::FrameProcess &processor, FaceObjectInternal &face);
 
     /**
      * @brief Processes a face using the specified FaceProcessFunction.
@@ -66,7 +66,7 @@ public:
      * @param proc The FaceProcessFunction to apply to the face.
      * @return int32_t Status code indicating success (0) or failure.
      */
-    int32_t Process(inspirecv::InspireImageProcess &processor, const HyperFaceData &face, FaceProcessFunctionOption proc);
+    int32_t Process(inspirecv::FrameProcess &processor, const HyperFaceData &face, FaceProcessFunctionOption proc);
 
     /**
      * @brief Get Rgb AntiSpoofing module

@@ -1,7 +1,7 @@
 #include <inspirecv/inspirecv.h>
 #include <inspireface/pipeline_module/attribute/face_attribute_adapt.h>
 #include "inspireface/initialization_module/launch.h"
-#include <inspireface/middleware/inspirecv_image_process.h>
+#include <inspireface/middleware/frame_process.h>
 #include <inspirecv/time_spend.h>
 #include <log.h>
 
@@ -10,8 +10,8 @@ using namespace inspire;
 int main() {
     INSPIRE_SET_LOG_LEVEL(ISF_LOG_DEBUG);
     std::string expansion_path = "";
-    INSPIRE_LAUNCH->Load("test_res/pack/Gundam_RV1106");
-    auto archive = INSPIRE_LAUNCH->getMArchive();
+    APP_CONTEXT->Load("test_res/pack/Gundam_RV1106");
+    auto archive = APP_CONTEXT->getMArchive();
     InspireModel detModel;
     auto ret = archive.LoadModel("face_attribute", detModel);
     if (ret != SARC_SUCCESS) {

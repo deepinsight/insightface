@@ -14,7 +14,7 @@
 #include "pipeline_module/face_pipeline_module.h"
 #include "middleware/model_archive/inspire_archive.h"
 #include "recognition_module/face_feature_extraction_module.h"
-#include "middleware/inspirecv_image_process.h"
+#include "middleware/frame_process.h"
 #include "common/face_data/face_serialize_tools.h"
 
 namespace inspire {
@@ -68,7 +68,7 @@ public:
      * @param image The camera stream to process for face detection and tracking.
      * @return int32_t Returns the number of faces detected and tracked.
      */// Method for face detection and tracking
-    int32_t FaceDetectAndTrack(inspirecv::InspireImageProcess& process);
+    int32_t FaceDetectAndTrack(inspirecv::FrameProcess& process);
 
     /**
      * @brief Set the threshold of face detection function, which only acts on the detection model
@@ -90,7 +90,7 @@ public:
      * @param param Custom pipeline parameters.
      * @return int32_t Status code of the processing.
      */
-    int32_t FacesProcess(inspirecv::InspireImageProcess& process, const std::vector<HyperFaceData>& faces, const CustomPipelineParameter& param);
+    int32_t FacesProcess(inspirecv::FrameProcess& process, const std::vector<HyperFaceData>& faces, const CustomPipelineParameter& param);
 
     /**
      * @brief Retrieves the face recognition module.
@@ -116,7 +116,7 @@ public:
      * @param data FaceBasicData to store extracted features.
      * @return int32_t Status code of the feature extraction.
      */
-    int32_t FaceFeatureExtract(inspirecv::InspireImageProcess& process, FaceBasicData& data);
+    int32_t FaceFeatureExtract(inspirecv::FrameProcess& process, FaceBasicData& data);
 
     /**
      * @brief Gets the face alignment image.
@@ -125,7 +125,7 @@ public:
      * @param image The output image.
      * @return int32_t The status code of the operation.
      */
-    int32_t FaceGetFaceAlignmentImage(inspirecv::InspireImageProcess& process, FaceBasicData& data, inspirecv::Image& image);
+    int32_t FaceGetFaceAlignmentImage(inspirecv::FrameProcess& process, FaceBasicData& data, inspirecv::Image& image);
 
     /**
      * @brief Retrieves the custom pipeline parameters.

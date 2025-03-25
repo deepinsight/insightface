@@ -109,7 +109,7 @@ private:
             channels = c;
             buffer_size = width * height * channels;
 
-            int ret = dma_buf_alloc(INSPIRE_LAUNCH->GetRockchipDmaHeapPath().c_str(), buffer_size, &dma_fd, &virtual_addr);
+            int ret = dma_buf_alloc(APP_CONTEXT->GetRockchipDmaHeapPath().c_str(), buffer_size, &dma_fd, &virtual_addr);
             if (ret < 0) {
                 INSPIRECV_LOG(ERROR) << "Failed to allocate DMA buffer: " << ret;
                 return false;

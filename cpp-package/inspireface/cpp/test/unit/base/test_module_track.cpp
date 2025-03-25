@@ -7,14 +7,14 @@
 #include "track_module/face_detect/all.h"
 #include "inspireface/initialization_module/launch.h"
 #include "track_module/face_track_module.h"
-#include "middleware/inspirecv_image_process.h"
+#include "middleware/frame_process.h"
 
 using namespace inspire;
 
 TEST_CASE("test_FaceDetect", "[track_module") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
-    auto archive = INSPIRE_LAUNCH->getMArchive();
+    auto archive = APP_CONTEXT->getMArchive();
     const std::vector<int32_t> supported_sizes = {160, 320, 640};
     const std::vector<std::string> scheme_names = {"face_detect_160", "face_detect_320", "face_detect_640"};
     for (size_t i = 0; i < scheme_names.size(); i++) {
@@ -33,7 +33,7 @@ TEST_CASE("test_FaceDetect", "[track_module") {
 TEST_CASE("test_RefineNet", "[track_module") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
-    auto archive = INSPIRE_LAUNCH->getMArchive();
+    auto archive = APP_CONTEXT->getMArchive();
     InspireModel model;
     auto ret = archive.LoadModel("refine_net", model);
     REQUIRE(ret == 0);
@@ -52,7 +52,7 @@ TEST_CASE("test_RefineNet", "[track_module") {
 TEST_CASE("test_Landmark", "[track_module") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
-    auto archive = INSPIRE_LAUNCH->getMArchive();
+    auto archive = APP_CONTEXT->getMArchive();
     InspireModel model;
     auto ret = archive.LoadModel("landmark", model);
     REQUIRE(ret == 0);
@@ -68,7 +68,7 @@ TEST_CASE("test_Landmark", "[track_module") {
 TEST_CASE("test_Quality", "[track_module") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
-    auto archive = INSPIRE_LAUNCH->getMArchive();
+    auto archive = APP_CONTEXT->getMArchive();
     InspireModel model;
     auto ret = archive.LoadModel("pose_quality", model);
     REQUIRE(ret == 0);
@@ -85,7 +85,7 @@ TEST_CASE("test_Quality", "[track_module") {
 TEST_CASE("test_FaceTrackModule", "[track_module") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
-    auto archive = INSPIRE_LAUNCH->getMArchive();
+    auto archive = APP_CONTEXT->getMArchive();
 
     SECTION("Test face detect rotate 0") {
         auto mode = DetectModuleMode::DETECT_MODE_ALWAYS_DETECT;
@@ -93,7 +93,7 @@ TEST_CASE("test_FaceTrackModule", "[track_module") {
         FaceTrackModule face_track(mode, max_detected_faces);
         face_track.Configuration(archive);
         inspirecv::Image img = inspirecv::Image::Create(GET_DATA("data/bulk/kun.jpg"));
-        inspirecv::InspireImageProcess image = inspirecv::InspireImageProcess::Create(img.Data(), img.Height(), img.Width(), inspirecv::BGR);
+        inspirecv::FrameProcess image = inspirecv::FrameProcess::Create(img.Data(), img.Height(), img.Width(), inspirecv::BGR);
         face_track.UpdateStream(image);
         REQUIRE(face_track.trackingFace.size() == 1);
     }
@@ -104,8 +104,8 @@ TEST_CASE("test_FaceTrackModule", "[track_module") {
         FaceTrackModule face_track(mode, max_detected_faces);
         face_track.Configuration(archive);
         inspirecv::Image img = inspirecv::Image::Create(GET_DATA("data/bulk/r90.jpg"));
-        inspirecv::InspireImageProcess image =
-          inspirecv::InspireImageProcess::Create(img.Data(), img.Height(), img.Width(), inspirecv::BGR, inspirecv::ROTATION_90);
+        inspirecv::FrameProcess image =
+          inspirecv::FrameProcess::Create(img.Data(), img.Height(), img.Width(), inspirecv::BGR, inspirecv::ROTATION_90);
         face_track.UpdateStream(image);
         REQUIRE(face_track.trackingFace.size() == 1);
     }

@@ -55,7 +55,7 @@ void FaceTrackModule::SparseLandmarkPredict(const inspirecv::Image &raw_face_cro
     score = (*m_refine_net_)(raw_face_crop);
 }
 
-bool FaceTrackModule::TrackFace(inspirecv::InspireImageProcess &image, FaceObjectInternal &face) {
+bool FaceTrackModule::TrackFace(inspirecv::FrameProcess &image, FaceObjectInternal &face) {
     COST_TIME_SIMPLE(TrackFace);
     // If the face confidence level is below 0.1, disable tracking
     if (face.GetConfidence() < 0.1) {
@@ -212,7 +212,7 @@ bool FaceTrackModule::TrackFace(inspirecv::InspireImageProcess &image, FaceObjec
     return true;
 }
 
-void FaceTrackModule::UpdateStream(inspirecv::InspireImageProcess &image) {
+void FaceTrackModule::UpdateStream(inspirecv::FrameProcess &image) {
     inspirecv::TimeSpend total("UpdateStream");
     total.Start();
     COST_TIME_SIMPLE(FaceTrackUpdateStream);
