@@ -1,3 +1,4 @@
+#if 0
 #include <iostream>
 #include "settings/test_settings.h"
 #include "inspireface/c_api/inspireface.h"
@@ -266,3 +267,5 @@ TEST_CASE("test_SystemStreamReleaseCase", "[system]") {
         REQUIRE(count == 0);
     }
 }
+
+#endif

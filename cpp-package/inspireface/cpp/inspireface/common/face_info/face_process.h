@@ -1,11 +1,12 @@
-//
-// Created by tunm on 2023/9/12.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 // Include guard to prevent double inclusion of this header file
 #pragma once
-#ifndef HYPERFACEREPO_FACEPROCESS_H
-#define HYPERFACEREPO_FACEPROCESS_H
+#ifndef INSPIRE_FACE_FACEPROCESS_H
+#define INSPIRE_FACE_FACEPROCESS_H
 
 // Include the necessary header file "data_type.h"
 #include "data_type.h"
@@ -23,8 +24,8 @@ typedef enum MaskInfo {
 } MaskInfo;
 
 /**
-* Enumeration to represent different RGB liveness information.
-*/
+ * Enumeration to represent different RGB liveness information.
+ */
 typedef enum RGBLivenessInfo {
     UNKNOWN_RGB_LIVENESS = -1,  ///< Unknown RGB liveness status
     LIVENESS_FAKE = 0,          ///< Fake liveness
@@ -32,8 +33,8 @@ typedef enum RGBLivenessInfo {
 } RGBLivenessInfo;
 
 /**
-* Class definition for FaceProcess.
-*/
+ * Class definition for FaceProcess.
+ */
 class INSPIRE_API FaceProcess {
 public:
     /**
@@ -45,9 +46,8 @@ public:
      * Member variable to store RGB liveness information, initialized to UNKNOWN_RGB_LIVENESS.
      */
     RGBLivenessInfo rgbLivenessInfo = UNKNOWN_RGB_LIVENESS;
-
 };
 
-} // namespace hyper
+}  // namespace inspire
 
-#endif //HYPERFACEREPO_FACEPROCESS_H
+#endif  // INSPIRE_FACE_FACEPROCESS_H

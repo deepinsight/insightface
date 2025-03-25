@@ -1,8 +1,9 @@
-//
-// Created by Tunm-Air13 on 2023/9/20.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #include "opencv2/opencv.hpp"
-//#include "inspireface/middleware/model_loader/model_loader.h"
+// #include "inspireface/middleware/model_loader/model_loader.h"
 #include "inspireface/track_module/face_detect/all.h"
 
 #include "inspireface/middleware/costman.h"
@@ -30,8 +31,7 @@ int main() {
 
     std::shared_ptr<FaceDetect> m_face_detector_;
     m_face_detector_ = std::make_shared<FaceDetect>(320);
-    m_face_detector_->loadData(model, InferenceHelper::kRknn);
-
+    m_face_detector_->loadData(model, InferenceWrapper::INFER_RKNN);
 
     // Load a image
     cv::Mat image = cv::imread("test_res/images/face_sample.png");
@@ -42,11 +42,10 @@ int main() {
 
     LOGD("Faces: %ld", locs.size());
 
-    for (auto &loc: locs) {
+    for (auto &loc : locs) {
         cv::rectangle(image, cv::Point2f(loc.x1, loc.y1), cv::Point2f(loc.x2, loc.y2), cv::Scalar(0, 0, 255), 3);
     }
     cv::imwrite("det.jpg", image);
-
 
     return 0;
 }

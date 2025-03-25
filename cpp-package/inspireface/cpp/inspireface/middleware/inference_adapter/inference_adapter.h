@@ -9,14 +9,13 @@
 
 class XOutputData {
 public:
-
     XOutputData() : size(0), data(nullptr) {}
 
     std::vector<float> CopyToFloatArray() {
         if (!buffer.empty()) {
             return buffer;
         }
-        
+
         std::vector<float> floatArray;
         floatArray.resize(size);
         std::memcpy(floatArray.data(), data, size * sizeof(float));
@@ -25,7 +24,7 @@ public:
 
 public:
     size_t size;
-    float *data;                // Use pointer
+    float* data;                // Use pointer
     std::vector<float> buffer;  // Use copy
 };
 
@@ -33,7 +32,6 @@ typedef std::vector<XOutputData> XOutputDataList;
 
 class XTransform {
 public:
-
     XTransform() : swap_color(false) {
         std::fill(std::begin(normalize.mean), std::end(normalize.mean), 0.0f);
         std::fill(std::begin(normalize.norm), std::end(normalize.norm), 1.0f);
@@ -57,9 +55,8 @@ public:
     int32_t height;
     int32_t width;
     int32_t channel;
-    uint8_t *data;
+    uint8_t* data;
 };
-
 
 typedef enum {
     xEngineMNN,
@@ -73,19 +70,18 @@ public:
         xRetErr = -1,
     };
 
-    typedef enum {
-        xDefaultCPU,
-        xMNNCuda,
-    } SpecialBackend;
+    typedef enum { xDefaultCPU, xMNNCuda, xCoreML } SpecialBackend;
 
 public:
     virtual ~InferenceAdapter() {};
     virtual int32_t SetNumThreads(const int32_t num_threads) = 0;
-    virtual int32_t Initialize(const std::string& model_filename, const XTransform& transform, const std::string& input_name, const std::vector<std::string> &outputs_name) = 0;
-    virtual int32_t Initialize(char* model_buffer, int model_size, const std::string& input_name, const XTransform& transform, const std::vector<std::string> &outputs_name) = 0;
+    virtual int32_t Initialize(const std::string& model_filename, const XTransform& transform, const std::string& input_name,
+                               const std::vector<std::string>& outputs_name) = 0;
+    virtual int32_t Initialize(char* model_buffer, int model_size, const std::string& input_name, const XTransform& transform,
+                               const std::vector<std::string>& outputs_name) = 0;
     virtual int32_t Finalize(void) = 0;
     virtual int32_t SetInputsData(const std::vector<XInputData>& batch, ) = 0;
-    virtual int32_t Forward(std::vector<XOutputDataList> &batch_outputs) = 0;
+    virtual int32_t Forward(std::vector<XOutputDataList>& batch_outputs) = 0;
 
     virtual int32_t ResizeInputs() = 0;
 
@@ -97,9 +93,6 @@ public:
 protected:
     EngineType engine_type_;
     SpecialBackend special_backend_ = xDefaultCPU;
-    
 };
-
-
 
 #endif  // INSPIREFACE_OMNI_INFERENACE__

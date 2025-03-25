@@ -1,6 +1,7 @@
-//
-// Created by tunm on 2023/10/11.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #include <string>
 #define CATCH_CONFIG_RUNNER
 
@@ -57,6 +58,8 @@ int main(int argc, char* argv[]) {
     std::string testDir;
     std::string packPath;
 
+    HInt32 ret;
+
     // Add command line options
     auto cli = session.cli() | Catch::clara::Opt(pack, "value")["--pack"]("Resource pack filename") |
                Catch::clara::Opt(testDir, "value")["--test_dir"]("Test dir resource") |
@@ -77,6 +80,21 @@ int main(int argc, char* argv[]) {
         TEST_PRINT("Using default test dir: {}", getTestDataDir());
     }
 
+#if defined(ISF_ENABLE_TENSORRT)
+    HInt32 support_cuda;
+    ret = HFCheckCudaDeviceSupport(&support_cuda);
+    if (ret != HSUCCEED) {
+        TEST_ERROR_PRINT("An error occurred while checking CUDA device support: {}", ret);
+        return ret;
+    }
+    if (!support_cuda) {
+        TEST_ERROR_PRINT("CUDA device support is not available");
+        return HERR_DEVICE_CUDA_NOT_SUPPORT;
+    }
+
+    HFPrintCudaDeviceInfo();
+#endif
+
     std::string fullPath;
     // Check whether custom parameters are set
     if (!pack.empty()) {
@@ -94,10 +112,10 @@ int main(int argc, char* argv[]) {
         SET_RUNTIME_FULLPATH_NAME(fullPath);
     }
 
-    std::cout << fullPath << std::endl;
-    auto ret = HFLaunchInspireFace(fullPath.c_str());
+    TEST_PRINT("Launching InspireFace with path: {}", fullPath);
+    ret = HFLaunchInspireFace(fullPath.c_str());
     if (ret != HSUCCEED) {
-        spdlog::error("An error occurred while starting InspireFace: {}", ret);
+        TEST_ERROR_PRINT("An error occurred while starting InspireFace: {}", ret);
         return ret;
     }
 

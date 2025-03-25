@@ -1,6 +1,7 @@
-//
-// Created by tunm on 2023/9/8.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #include <iostream>
 #include "track_module/face_detect/face_pose.h"
 
@@ -14,12 +15,14 @@ int main(int argc, char** argv) {
 
     Configurable param;
     param.set<std::string>("input_layer", "data");
-    param.set<std::vector<std::string>>("outputs_layers", {"ip3_pose", });
+    param.set<std::vector<std::string>>("outputs_layers", {
+                                                            "ip3_pose",
+                                                          });
     param.set<std::vector<int>>("input_size", {112, 112});
     param.set<std::vector<float>>("mean", {0.0f, 0.0f, 0.0f});
     param.set<std::vector<float>>("norm", {1.0f, 1.0f, 1.0f});
     param.set<int>("input_channel", 1);        // Input Gray
-    param.set<int>("input_image_channel", 1);        // BGR 2 Gray
+    param.set<int>("input_image_channel", 1);  // BGR 2 Gray
 
     auto m_pose_net_ = std::make_shared<FacePose>();
     InspireModel model;

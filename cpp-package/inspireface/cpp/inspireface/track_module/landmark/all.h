@@ -1,11 +1,12 @@
-//
-// Created by tunm on 2023/8/29.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
-#ifndef HYPERFACEREPO_LMK_ALL_H
-#define HYPERFACEREPO_LMK_ALL_H
+#ifndef INSPIREFACE_LMK_ALL_H
+#define INSPIREFACE_LMK_ALL_H
 
-#include "face_landmark.h"
+#include "face_landmark_adapt.h"
 #include "mean_shape.h"
 
-#endif //HYPERFACEREPO_LMK_ALL_H
+#endif  // INSPIREFACE_LMK_ALL_H

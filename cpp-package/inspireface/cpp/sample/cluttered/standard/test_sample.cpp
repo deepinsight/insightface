@@ -1,6 +1,7 @@
-//
-// Created by tunm on 2023/9/7.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 #include <iostream>
 #include "face_context.h"
@@ -31,12 +32,12 @@ int main(int argc, char** argv) {
 
     std::vector<HyperFaceData> faces;
     for (int i = 0; i < ctx.GetNumberOfFacesCurrentlyDetected(); ++i) {
-//        const ByteArray &byteArray = ctx.GetDetectCache()[i];
+        //        const ByteArray &byteArray = ctx.GetDetectCache()[i];
         HyperFaceData face = {0};
-//        ret = DeserializeHyperFaceData(byteArray, face);
+        //        ret = DeserializeHyperFaceData(byteArray, face);
 
-        const FaceBasicData &faceBasic = ctx.GetFaceBasicDataCache()[i];
-        ret = DeserializeHyperFaceData((char* )faceBasic.data, faceBasic.dataSize, face);
+        const FaceBasicData& faceBasic = ctx.GetFaceBasicDataCache()[i];
+        ret = DeserializeHyperFaceData((char*)faceBasic.data, faceBasic.dataSize, face);
         INSPIRE_LOGD("OK!");
 
         if (ret != HSUCCEED) {
@@ -48,16 +49,15 @@ int main(int argc, char** argv) {
         std::cout << rect << std::endl;
         cv::rectangle(rot90, rect, cv::Scalar(0, 0, 233), 2);
 
-        for (auto &p: face.keyPoints) {
+        for (auto& p : face.keyPoints) {
             cv::Point2f point(p.x, p.y);
             cv::circle(rot90, point, 0, cv::Scalar(0, 0, 255), 5);
         }
     }
 
-//    cv::imshow("wq", rot90);
-//    cv::waitKey(0);
+    //    cv::imshow("wq", rot90);
+    //    cv::waitKey(0);
     cv::imwrite("wq.png", rot90);
-
 
     ret = ctx.FacesProcess(stream, faces, param);
     if (ret != HSUCCEED) {

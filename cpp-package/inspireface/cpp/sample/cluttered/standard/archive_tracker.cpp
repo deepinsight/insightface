@@ -1,6 +1,7 @@
-//
-// Created by tunm on 2024/4/6.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #include <iostream>
 #include "track_module/face_track.h"
 #include "inspireface/recognition_module/face_feature_extraction.h"
@@ -13,7 +14,7 @@ int main() {
     archive.ReLoad("test_res/pack/Gundam_RV1109");
 
     FaceTrack track;
-//    FaceRecognition recognition(archive, true);
+    //    FaceRecognition recognition(archive, true);
 
     auto ret = track.Configuration(archive);
     INSPIRE_LOGD("ret=%d", ret);
@@ -29,13 +30,13 @@ int main() {
 
     track.UpdateStream(stream, true);
 
-//    if (!track.trackingFace.empty()) {
-//        auto const &face = track.trackingFace[0];
-//        cv::rectangle(image, face.GetRectSquare(), cv::Scalar(200, 0, 20), 2);
-//    }
-//
-//    cv::imshow("w", image);
-//    cv::waitKey(0);
+    //    if (!track.trackingFace.empty()) {
+    //        auto const &face = track.trackingFace[0];
+    //        cv::rectangle(image, face.GetRectSquare(), cv::Scalar(200, 0, 20), 2);
+    //    }
+    //
+    //    cv::imshow("w", image);
+    //    cv::waitKey(0);
 
     InspireModel model;
     ret = archive.LoadModel("mask_detect", model);

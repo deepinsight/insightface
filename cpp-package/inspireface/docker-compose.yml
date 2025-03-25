@@ -3,53 +3,83 @@ services:
   build-ubuntu18:
     build:
       context: .
-      dockerfile: docker/Dockerfile.ubuntu18  # Use the Ubuntu18.04
+      dockerfile: docker/Dockerfile.ubuntu18 # Use the Ubuntu18.04
     environment:
       - VERSION=${VERSION}
     working_dir: /workspace
     volumes:
-      - .:/workspace  # Mount the project root directory to the container
+      - .:/workspace # Mount the project root directory to the container
     command: bash command/build_linux_ubuntu18.sh
   build-cross-rv1109rv1126-armhf:
     build:
       context: .
-      dockerfile: docker/Dockerfile.arm-linux-gnueabihf  # Use the arm-linux-gnueabihf tool chain
+      dockerfile: docker/Dockerfile.arm-linux-gnueabihf # Use the arm-linux-gnueabihf tool chain
     environment:
       - VERSION=${VERSION}
     working_dir: /workspace
     volumes:
-      - .:/workspace  # Mount the project root directory to the container
+      - .:/workspace # Mount the project root directory to the container
     command: bash command/build_cross_rv1109rv1126_armhf.sh
   build-cross-armv7-armhf:
     build:
       context: .
-      dockerfile: docker/Dockerfile.arm-linux-gnueabihf  # Use the arm-linux-gnueabihf tool chain
+      dockerfile: docker/Dockerfile.arm-linux-gnueabihf # Use the arm-linux-gnueabihf tool chain
     environment:
       - VERSION=${VERSION}
     working_dir: /workspace
     volumes:
-      - .:/workspace  # Mount the project root directory to the container
+      - .:/workspace # Mount the project root directory to the container
     command: bash command/build_cross_armv7_armhf.sh
+  build-cross-rv1106-armhf-uclibc:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.arm-linux-rockchip830-armhf-uclibc
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace # Mount the project root directory to the container
+    command: bash command/build_cross_rv1106_armhf_uclibc.sh
   build-cross-aarch64:
     build:
       context: .
-      dockerfile: docker/Dockerfile.arm-linux-aarch64  # Use the arm-linux-gnueabihf tool chain
+      dockerfile: docker/Dockerfile.arm-linux-aarch64 # Use the arm-linux-gnueabihf tool chain
     environment:
       - VERSION=${VERSION}
     working_dir: /workspace
     volumes:
-      - .:/workspace  # Mount the project root directory to the container
+      - .:/workspace # Mount the project root directory to the container
     command: bash command/build_cross_aarch64.sh
+  build-cross-rk356x-rk3588-aarch64:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.arm-linux-aarch64 # Use the arm-linux-gnueabihf tool chain
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace # Mount the project root directory to the container
+    command: bash command/build_cross_rk356x_rk3588_aarch64.sh
   build-cross-android:
     build:
       context: .
-      dockerfile: docker/Dockerfile.android  # Use the arm-linux-gnueabihf tool chain
+      dockerfile: docker/Dockerfile.android # Use the arm-linux-gnueabihf tool chain
     environment:
       - VERSION=${VERSION}
     working_dir: /workspace
     volumes:
-      - .:/workspace  # Mount the project root directory to the container
+      - .:/workspace # Mount the project root directory to the container
     command: bash command/build_android.sh
+  build-cross-android-rk356x-rk3588:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.android # Use the arm-linux-gnueabihf tool chain
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace # Mount the project root directory to the container
+    command: bash command/build_cross_rk356x_rk3588_aarch64.sh
   build-cuda-ubuntu20:
     build:
       context: .
@@ -58,5 +88,26 @@ services:
       - VERSION=${VERSION}
     working_dir: /workspace
     volumes:
-      - .:/workspace  # Mount the project root directory to the container
+      - .:/workspace # Mount the project root directory to the container
     command: bash command/build_linux_cuda.sh
+  build-manylinux2014-x86:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.manylinux2014-x86
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace # Mount the project root directory to the container
+    command: bash command/build_wheel_manylinux2014_x86.sh
+  build-tensorrt-cuda12-ubuntu22:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.cuda12_ubuntu22
+    environment:
+      - VERSION=${VERSION}
+      - CUDA_TAG=cuda12.2_ubuntu22.04
+    working_dir: /workspace
+    volumes:
+      - .:/workspace # Mount the project root directory to the container
+    command: bash command/build_linux_tensorrt.sh

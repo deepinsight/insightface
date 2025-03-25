@@ -1,0 +1,33 @@
+# Use Ubuntu 18.04 as the base image
+FROM ubuntu:18.04
+
+# Update the package list and install basic development tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        software-properties-common \
+        wget \
+        curl \
+        git \
+        vim \
+        unzip
+
+# Install CMake
+RUN apt-get install -y --no-install-recommends cmake
+
+# Clone RV1106 toolchain repository
+RUN git clone https://github.com/tunmx/arm-rockchip830-linux-uclibcgnueabihf.git /opt/toolchain
+
+# Set environment variables to point to the toolchain directory
+ENV ARM_CROSS_COMPILE_TOOLCHAIN=/opt/toolchain
+ENV PATH="/opt/toolchain/bin:${PATH}"
+
+# Clean temporary files to reduce image size
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
+WORKDIR /workspace
+
+# Default to running Bash
+CMD ["/bin/bash"]

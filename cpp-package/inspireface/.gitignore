@@ -3,7 +3,12 @@ cmake-build-debug/*
 build/*
 test_*.rknn
 test_zip_*
-test_res/*
+test_res/pack/*
+test_res/save/*
+!test_res/save/.gitkeep
+# !test_res/save/video_frames/
+test_res/save/video_frames/*
+!test_res/save/video_frames/.gitkeep
 resource/*
 pack/*
 *.zip
@@ -14,3 +19,12 @@ pack/*
 .vscode/*
 build_local/*
 local_build/*
+cpp/inspireface/information.h
+cpp/inspireface/version.txt
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+.rknpu2_cache/
+test_res/data/video_frames/
+*.mp4

@@ -1,7 +1,7 @@
-//
-// Created by tunm on 2023/9/15.
-//
-
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 #include <iostream>
 #include "face_context.h"
@@ -46,10 +46,10 @@ int main() {
 
         ctx.FaceDetectAndTrack(stream);
 
-//        LOGD("Track Cost: %f", ctx.GetTrackTotalUseTime());
+        //        LOGD("Track Cost: %f", ctx.GetTrackTotalUseTime());
 
         auto &faces = ctx.GetTrackingFaceList();
-        for (auto &face: faces) {
+        for (auto &face : faces) {
             auto rect = face.GetRect();
             int track_id = face.GetTrackingId();
             int track_count = face.GetTrackingCount();
@@ -60,18 +60,17 @@ int main() {
 
             cv::Point text_position(rect.x, rect.y - 10);
 
-            const auto& pose_and_quality = face.high_result;
+            const auto &pose_and_quality = face.high_result;
             float mean_quality = 0.0f;
             for (int i = 0; i < pose_and_quality.lmk_quality.size(); ++i) {
                 mean_quality += pose_and_quality.lmk_quality[i];
             }
             mean_quality /= pose_and_quality.lmk_quality.size();
             mean_quality = 1 - mean_quality;
-            std::string pose_text = "pitch: " + std::to_string(pose_and_quality.pitch) + ",Yaw: " + std::to_string(pose_and_quality.yaw) + ",roll:" +std::to_string(pose_and_quality.roll) + ", q: " +
-                    std::to_string(mean_quality);
+            std::string pose_text = "pitch: " + std::to_string(pose_and_quality.pitch) + ",Yaw: " + std::to_string(pose_and_quality.yaw) +
+                                    ",roll:" + std::to_string(pose_and_quality.roll) + ", q: " + std::to_string(mean_quality);
 
             cv::Point pose_position(rect.x, rect.y + rect.height + 20);
-
 
             int font_face = cv::FONT_HERSHEY_SIMPLEX;
             double font_scale = 0.5;
@@ -81,7 +80,6 @@ int main() {
             cv::putText(frame, text, text_position, font_face, font_scale, font_color, font_thickness);
             cv::putText(frame, pose_text, pose_position, font_face, font_scale, font_color, font_thickness);
         }
-
 
         cv::imshow("Webcam", frame);
 

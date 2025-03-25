@@ -1,6 +1,7 @@
-//
-// Created by tunm on 2024/4/8.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #include "log.h"
 
 namespace inspire {
@@ -9,4 +10,4 @@ namespace inspire {
 LogManager* LogManager::instance = nullptr;
 std::mutex LogManager::mutex;
 
-}   // namespace inspire
+}  // namespace inspire

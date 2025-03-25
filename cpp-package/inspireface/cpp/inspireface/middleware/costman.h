@@ -1,37 +1,37 @@
-//
-// Created by Tunm-Air13 on 2023/9/21.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #pragma once
-#ifndef HYPERFACEREPO_TIMER_H
-#define HYPERFACEREPO_TIMER_H
-#include <opencv2/opencv.hpp>
+#ifndef INSPIRE_FACE_COSTMAN_H
+#define INSPIRE_FACE_COSTMAN_H
+#include <chrono>
 
 namespace inspire {
 
 class Timer {
 public:
-
     Timer() {
-        current_time = (double) cv::getTickCount();
+        current_time = std::chrono::high_resolution_clock::now();
     }
 
     double GetCostTime() const {
-        return ((double) cv::getTickCount() - current_time) / cv::getTickFrequency() * 1000;
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(now - current_time);
+        return duration.count() / 1000000.0;  // Convert to milliseconds
     }
 
     double GetCostTimeUpdate() {
-        auto cost = ((double) cv::getTickCount() - current_time) / cv::getTickFrequency() * 1000;
-        current_time = (double) cv::getTickCount();
-
-        return cost;
+        auto now = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(now - current_time);
+        current_time = now;
+        return duration.count() / 1000000.0;  // Convert to milliseconds
     }
 
 private:
-
-    double current_time;
-
+    std::chrono::time_point<std::chrono::high_resolution_clock> current_time;
 };
 
-}
+}  // namespace inspire
 
-#endif //HYPERFACEREPO_TIMER_H
+#endif  // INSPIRE_FACE_COSTMAN_H

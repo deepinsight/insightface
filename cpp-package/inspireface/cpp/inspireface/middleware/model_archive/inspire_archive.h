@@ -1,13 +1,16 @@
-//
-// Created by tunm on 2024/3/30.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 #ifndef MODELLOADERTAR_INSPIREARCHIVE_H
 #define MODELLOADERTAR_INSPIREARCHIVE_H
-#include "simple_archive.h"
+
+#include "core_archive/core_archive.h"
 #include "inspire_model/inspire_model.h"
 #include "yaml-cpp/yaml.h"
 #include "fstream"
+#include "recognition_module/similarity_converter.h"
 
 namespace inspire {
 
@@ -19,22 +22,46 @@ enum {
     NOT_READ = -15,
 };
 
-class INSPIRE_API InspireArchive: SimpleArchive {
+class INSPIRE_API InspireArchive {
 public:
-    InspireArchive() : SimpleArchive() {
+    InspireArchive() : m_archive_(std::make_shared<CoreArchive>()) {
         m_status_ = NOT_READ;
     }
 
-    explicit InspireArchive(const std::string& archiveFile) : SimpleArchive(archiveFile) {
-        m_status_ = QueryStatus();
+    explicit InspireArchive(const std::string& archiveFile) : m_archive_(std::make_shared<CoreArchive>(archiveFile)) {
+        m_status_ = m_archive_->QueryLoadStatus();
         if (m_status_ == SARC_SUCCESS) {
             m_status_ = loadManifestFile();
         }
     }
 
+    InspireArchive(const InspireArchive& other)
+    : m_archive_(other.m_archive_),
+      m_config_(other.m_config_),
+      m_status_(other.m_status_),
+      m_tag_(other.m_tag_),
+      m_version_(other.m_version_),
+      m_major_(other.m_major_),
+      m_release_time_(other.m_release_time_) {}
+
+    InspireArchive& operator=(const InspireArchive& other) {
+        if (this != &other) {
+            m_archive_ = other.m_archive_;
+            m_config_ = other.m_config_;
+            m_status_ = other.m_status_;
+            m_tag_ = other.m_tag_;
+            m_version_ = other.m_version_;
+            m_major_ = other.m_major_;
+            m_release_time_ = other.m_release_time_;
+        }
+        return *this;
+    }
+
     int32_t ReLoad(const std::string& archiveFile) {
-        auto ret = Reset(archiveFile);
+        auto ret = m_archive_->Reset(archiveFile);
         if (ret != SARC_SUCCESS) {
+            m_archive_->Close();
+            m_status_ = ret;
             return ret;
         }
         m_status_ = loadManifestFile();
@@ -45,13 +72,17 @@ public:
         return m_status_;
     }
 
-    int32_t LoadModel(const std::string &name, InspireModel &model) {
+    int32_t LoadModel(const std::string& name, InspireModel& model) {
         if (m_config_[name]) {
             auto ret = model.Reset(m_config_[name]);
             if (ret != 0) {
                 return ret;
             }
-            auto &buffer = GetFileContent(model.name);
+            if (model.loadFilePath) {
+                // No model files are loaded, only configuration files are loaded for extension modules such as CoreML.
+                return SARC_SUCCESS;
+            }
+            auto& buffer = m_archive_->GetFileContent(model.name);
             if (buffer.empty()) {
                 return ERROR_MODEL_BUFFER;
             }
@@ -62,20 +93,27 @@ public:
         }
     }
 
-    void PublicPrintSubFiles() {
-        PrintSubFiles();
+    void PrintSubFiles() {
+        m_archive_->PrintSubFiles();
+    }
+
+    const std::vector<std::string>& GetSubfilesNames() const {
+        return m_archive_->GetSubfilesNames();
     }
 
     void Release() {
         m_status_ = NOT_READ;
-        Close();
+        m_archive_->Close();
+    }
+
+    std::vector<char>& GetFileContent(const std::string& filename) {
+        return m_archive_->GetFileContent(filename);
     }
 
 private:
-
     int32_t loadManifestFile() {
-        if (QueryLoadStatus() == SARC_SUCCESS) {
-            auto configBuffer = GetFileContent(MANIFEST_FILE);
+        if (m_archive_->QueryLoadStatus() == SARC_SUCCESS) {
+            auto configBuffer = m_archive_->GetFileContent(MANIFEST_FILE);
             configBuffer.push_back('\0');
             if (configBuffer.empty()) {
                 return MISS_MANIFEST;
@@ -86,12 +124,44 @@ private:
             }
             m_tag_ = m_config_["tag"].as<std::string>();
             m_version_ = m_config_["version"].as<std::string>();
-            INSPIRE_LOGI("== %s %s ==", m_tag_.c_str(), m_version_.c_str());
+            if (m_config_["major"]) {
+                m_major_ = m_config_["major"].as<std::string>();
+            } else {
+                m_major_ = "unknown";
+            }
+            if (m_config_["release"]) {
+                m_release_time_ = m_config_["release"].as<std::string>();
+            } else {
+                m_release_time_ = "unknown";
+            }
+            INSPIRE_LOGI("== Load %s-%s, Version: %s, Release: %s ==", m_tag_.c_str(), m_major_.c_str(), m_version_.c_str(), m_release_time_.c_str());
+            // Load similarity converter config
+            if (m_config_["similarity_converter"]) {
+                SimilarityConverterConfig config;
+                config.threshold = m_config_["similarity_converter"]["threshold"].as<double>();
+                config.middleScore = m_config_["similarity_converter"]["middle_score"].as<double>();
+                config.steepness = m_config_["similarity_converter"]["steepness"].as<double>();
+                config.outputMin = m_config_["similarity_converter"]["output_min"].as<double>();
+                config.outputMax = m_config_["similarity_converter"]["output_max"].as<double>();
+                SIMILARITY_CONVERTER_UPDATE_CONFIG(config);
+                INSPIRE_LOGI(
+                  "Successfully loaded similarity converter config: \n \t threshold: %f \n \t middle_score: %f \n \t steepness: %f \n \t output_min: "
+                  "%f \n \t output_max: %f",
+                  config.threshold, config.middleScore, config.steepness, config.outputMin, config.outputMax);
+                SIMILARITY_CONVERTER_SET_RECOMMENDED_COSINE_THRESHOLD(config.threshold);
+            } else {
+                INSPIRE_LOGW("No similarity converter config found, use default config: ");
+                auto config = SIMILARITY_CONVERTER_GET_CONFIG();
+                INSPIRE_LOGI("threshold: %f \n \t middle_score: %f \n \t steepness: %f \n \t output_min: %f \n \t output_max: %f", config.threshold,
+                             config.middleScore, config.steepness, config.outputMin, config.outputMax);
+                SIMILARITY_CONVERTER_SET_RECOMMENDED_COSINE_THRESHOLD(config.threshold);
+            }
         }
         return 0;
     }
 
 private:
+    std::shared_ptr<CoreArchive> m_archive_;
     YAML::Node m_config_;
 
     int32_t m_status_;
@@ -100,9 +170,10 @@ private:
 
     std::string m_tag_;
     std::string m_version_;
-
+    std::string m_major_;
+    std::string m_release_time_;
 };
 
-}   // namespace inspire
+}  // namespace inspire
 
-#endif //MODELLOADERTAR_INSPIREARCHIVE_H
+#endif  // MODELLOADERTAR_INSPIREARCHIVE_H

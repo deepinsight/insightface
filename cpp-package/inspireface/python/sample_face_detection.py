@@ -1,7 +1,6 @@
 import os
 import cv2
-import inspireface as ifac
-from inspireface.param import *
+import inspireface as isf
 import click
 import numpy as np
 
@@ -11,20 +10,15 @@ age_bracket_tags = ["0-2 years old", "3-9 years old", "10-19 years old", "20-29 
                     "40-49 years old", "50-59 years old", "60-69 years old", "more than 70 years old"]
 
 @click.command()
-@click.argument("resource_path")
 @click.argument('image_path')
-def case_face_detection_image(resource_path, image_path):
+def case_face_detection_image(image_path):
     """
     This is a sample application for face detection and tracking using an image.
     It also includes pipeline extensions such as RGB liveness, mask detection, and face quality evaluation.
     """
-    # Step 1: Initialize the SDK and load the algorithm resource files.
-    ret = ifac.launch(resource_path)
-    assert ret, "Launch failure. Please ensure the resource path is correct."
-
     # Optional features, loaded during session creation based on the modules specified.
-    opt = HF_ENABLE_FACE_RECOGNITION | HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS | HF_ENABLE_INTERACTION | HF_ENABLE_FACE_ATTRIBUTE
-    session = ifac.InspireFaceSession(opt, HF_DETECT_MODE_ALWAYS_DETECT)
+    opt = isf.HF_ENABLE_FACE_RECOGNITION | isf.HF_ENABLE_QUALITY | isf.HF_ENABLE_MASK_DETECT | isf.HF_ENABLE_LIVENESS | isf.HF_ENABLE_INTERACTION | isf.HF_ENABLE_FACE_ATTRIBUTE
+    session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_ALWAYS_DETECT)
 
     # Set detection confidence threshold
     session.set_detection_confidence_threshold(0.5)
@@ -68,7 +62,7 @@ def case_face_detection_image(resource_path, image_path):
             cv2.circle(draw, (x, y), 0, (220, 100, 0), 2)
 
     # Features must be enabled during session creation to use them here.
-    select_exec_func = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS | HF_ENABLE_INTERACTION | HF_ENABLE_FACE_ATTRIBUTE
+    select_exec_func = isf.HF_ENABLE_QUALITY | isf.HF_ENABLE_MASK_DETECT | isf.HF_ENABLE_LIVENESS | isf.HF_ENABLE_INTERACTION | isf.HF_ENABLE_FACE_ATTRIBUTE
     # Execute the pipeline to obtain richer face information.
     extends = session.face_pipeline(image, faces, select_exec_func)
     for idx, ext in enumerate(extends):

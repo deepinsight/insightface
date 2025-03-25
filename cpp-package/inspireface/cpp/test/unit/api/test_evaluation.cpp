@@ -1,11 +1,10 @@
-//
-// Created by Tunm-Air13 on 2024/3/26.
-//
-
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 #include <iostream>
 #include "settings/test_settings.h"
 #include "inspireface/c_api/inspireface.h"
-#include "opencv2/opencv.hpp"
 #include "unit/test_helper/simple_csv_writer.h"
 #include "unit/test_helper/test_help.h"
 #include "unit/test_helper/test_tools.h"
@@ -24,24 +23,15 @@ TEST_CASE("test_Evaluation", "[face_evaluation") {
         REQUIRE(ret == HSUCCEED);
 
         float mostSim = -1.0f;
-        auto succ = FindMostSimilarScoreFromTwoPic(session,
-                                                   GET_DATA("data/bulk/jntm.jpg"),
-                                                   GET_DATA("data/bulk/kun.jpg"),
-                                                   mostSim);
+        auto succ = FindMostSimilarScoreFromTwoPic(session, GET_DATA("data/bulk/jntm.jpg"), GET_DATA("data/bulk/kun.jpg"), mostSim);
         CHECK(succ);
         TEST_PRINT("kun v kun :{}", mostSim);
 
-        succ = FindMostSimilarScoreFromTwoPic(session,
-                                              GET_DATA("data/bulk/jntm.jpg"),
-                                              GET_DATA("data/bulk/Rob_Lowe_0001.jpg"),
-                                              mostSim);
+        succ = FindMostSimilarScoreFromTwoPic(session, GET_DATA("data/bulk/jntm.jpg"), GET_DATA("data/bulk/Rob_Lowe_0001.jpg"), mostSim);
         CHECK(succ);
         TEST_PRINT("kun v other :{}", mostSim);
 
-        succ = FindMostSimilarScoreFromTwoPic(session,
-                                              GET_DATA("data/bulk/kun.jpg"),
-                                              GET_DATA("data/bulk/view.jpg"),
-                                              mostSim);
+        succ = FindMostSimilarScoreFromTwoPic(session, GET_DATA("data/bulk/kun.jpg"), GET_DATA("data/bulk/view.jpg"), mostSim);
         CHECK(!succ);
         TEST_PRINT("kun v other :{}", mostSim);
 
@@ -49,7 +39,6 @@ TEST_CASE("test_Evaluation", "[face_evaluation") {
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
     }
-
 
     SECTION("Test LFW evaluation") {
 #ifdef ISF_ENABLE_TEST_EVALUATION
@@ -65,14 +54,12 @@ TEST_CASE("test_Evaluation", "[face_evaluation") {
         auto pairs = ReadPairs(getTestLFWFunneledEvaTxt());
         // Hide cursor
         show_console_cursor(false);
-        BlockProgressBar bar{
-                option::BarWidth{60},
-                option::Start{"["},
-                option::End{"]"},
-                option::PostfixText{"Extracting face features"},
-                option::ForegroundColor{Color::white}  ,
-                option::FontStyles{std::vector<FontStyle>{FontStyle::bold}}
-        };
+        BlockProgressBar bar{option::BarWidth{60},
+                             option::Start{"["},
+                             option::End{"]"},
+                             option::PostfixText{"Extracting face features"},
+                             option::ForegroundColor{Color::white},
+                             option::FontStyles{std::vector<FontStyle>{FontStyle::bold}}};
         auto progress = 0.0f;
 
         for (int i = 0; i < pairs.size(); ++i) {
@@ -87,20 +74,16 @@ TEST_CASE("test_Evaluation", "[face_evaluation") {
                 person1 = pair[0];
                 imgNum1 = std::stoi(pair[1]);
                 imgNum2 = std::stoi(pair[2]);
-                imgPath1 = PathJoin(PathJoin(getLFWFunneledDir(), person1),
-                                            person1 + "_" + zfill(imgNum1, 4) + ".jpg");
-                imgPath2 = PathJoin(PathJoin(getLFWFunneledDir(), person1),
-                                            person1 + "_" + zfill(imgNum2, 4) + ".jpg");
+                imgPath1 = PathJoin(PathJoin(getLFWFunneledDir(), person1), person1 + "_" + zfill(imgNum1, 4) + ".jpg");
+                imgPath2 = PathJoin(PathJoin(getLFWFunneledDir(), person1), person1 + "_" + zfill(imgNum2, 4) + ".jpg");
                 match = 1;
             } else {
                 person1 = pair[0];
                 imgNum1 = std::stoi(pair[1]);
                 person2 = pair[2];
                 imgNum2 = std::stoi(pair[3]);
-                imgPath1 = PathJoin(PathJoin(getLFWFunneledDir(), person1),
-                                            person1 + "_" + zfill(imgNum1, 4) + ".jpg");
-                imgPath2 = PathJoin(PathJoin(getLFWFunneledDir(), person2),
-                                            person2 + "_" + zfill(imgNum2, 4) + ".jpg");
+                imgPath1 = PathJoin(PathJoin(getLFWFunneledDir(), person1), person1 + "_" + zfill(imgNum1, 4) + ".jpg");
+                imgPath2 = PathJoin(PathJoin(getLFWFunneledDir(), person2), person2 + "_" + zfill(imgNum2, 4) + ".jpg");
                 match = 0;
             }
 
@@ -132,5 +115,4 @@ TEST_CASE("test_Evaluation", "[face_evaluation") {
         REQUIRE(ret == HSUCCEED);
 #endif
     }
-
 }

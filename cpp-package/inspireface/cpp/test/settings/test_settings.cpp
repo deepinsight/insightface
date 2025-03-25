@@ -1,9 +1,9 @@
-//
-// Created by Tunm-Air13 on 2023/5/24.
-//
+/**
+ * Created by Jingyu Yan
+ * @date 2024-10-01
+ */
 
 #include "test_settings.h"
-
 
 std::string getTestDataDir() {
     return Enviro::getInstance().getTestResDir();

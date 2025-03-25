@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(HyperFaceTest)
+project(InspireFaceTest)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 # If you want to test the benchmark, you need to set this to ON
@@ -22,11 +22,26 @@ if (ISF_ENABLE_TEST_EVALUATION)
 endif ()
 
 if (ISF_ENABLE_RKNN)
+    if (ISF_RKNPU_MAJOR STREQUAL "rknpu1")
     set(DEPEND rknn_api dl)
-    set(ISF_RKNN_API_LIB ${ISF_THIRD_PARTY_DIR}/inspireface-precompile/rknn/${ISF_RKNPU_MAJOR}/runtime/${ISF_RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
-    message("Enable RKNN Inference")
-    link_directories(${ISF_RKNN_API_LIB})
-    set(DEPEND rknn_api dl)
+    set(ISF_RKNN_API_LIB ${ISF_THIRD_PARTY_DIR}/inspireface-precompile-lite/rknn/${ISF_RKNPU_MAJOR}/runtime/${ISF_RK_DEVICE_TYPE}/Linux/librknn_api/${CPU_ARCH}/)
+        message("Enable RKNN Inference")
+        link_directories(${ISF_RKNN_API_LIB})
+        set(DEPEND rknn_api dl)
+    elseif(ISF_RKNPU_MAJOR STREQUAL "rknpu2" AND ISF_RK_COMPILER_TYPE STREQUAL "aarch64")
+        set(DEPEND rknnrt dl)
+        if(ANDROID)
+        set(RK_PLATFORM "Android")
+        else()
+            set(RK_PLATFORM "Linux")
+        endif()
+        set(ISF_RKNN_API_LIB ${ISF_THIRD_PARTY_DIR}/inspireface-precompile-lite/rknn/${ISF_RKNPU_MAJOR}/runtime/${RK_PLATFORM}/librknn_api/${ISF_RK_COMPILER_TYPE}/)
+        message("ISF_RKNN_API_LIB: ${ISF_RKNN_API_LIB}")
+        link_directories(${ISF_RKNN_API_LIB})
+        set(DEPEND rknnrt dl)
+    else()
+        set(DEPEND dl)
+    endif()
 endif ()
 
 include_directories(${SRC_DIR})
@@ -35,20 +50,22 @@ include_directories(${SRC_DIR})
 set(TEST_COMMON_FILES ${CMAKE_CURRENT_SOURCE_DIR}/settings/test_settings.cpp)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/settings)
 
-# =======================Internal Import Tests===========================
-file(GLOB_RECURSE INTERNAL_TEST_INTERNAL_FILES unit/source/*.cpp)
-add_executable(TestSource ${CMAKE_CURRENT_SOURCE_DIR}/test_source.cpp ${INTERNAL_TEST_INTERNAL_FILES} ${TEST_COMMON_FILES})
-target_link_libraries(TestSource InspireFace ${DEPEND})
-target_include_directories(TestSource PUBLIC
+# =======================Internal Base Import Tests===========================
+file(GLOB_RECURSE INTERNAL_TEST_INTERNAL_FILES unit/base/*.cpp)
+add_executable(TestBase ${CMAKE_CURRENT_SOURCE_DIR}/test_base.cpp ${INTERNAL_TEST_INTERNAL_FILES} ${TEST_COMMON_FILES})
+target_link_libraries(TestBase InspireFace ${DEPEND})
+target_include_directories(TestBase PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/
         ${ISF_THIRD_PARTY_DIR}/spdlog/include
         ${ISF_THIRD_PARTY_DIR}/Catch2/single_include/
         ${ISF_THIRD_PARTY_DIR}/indicators/include/
         ${SRC_DIR}
+        ${INSPIRECV_INCLUDE_PATH}
 )
 
-set_target_properties(TestSource PROPERTIES
+set_target_properties(TestBase PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/test/")
+
 
 
 # =======================External API Testing===========================
@@ -69,6 +86,7 @@ set_target_properties(Test PROPERTIES
 
 
 # Print Message
+message(STATUS ">>>>>>>>>>>>>")
 message(STATUS "InspireFace Test:")
 message(STATUS "\t ISF_ENABLE_BENCHMARK: ${ISF_ENABLE_BENCHMARK}")
 message(STATUS "\t ISF_ENABLE_USE_LFW_DATA: ${ISF_ENABLE_USE_LFW_DATA}")
@@ -76,4 +94,4 @@ message(STATUS "\t ISF_ENABLE_TEST_EVALUATION: ${ISF_ENABLE_TEST_EVALUATION}")
 
 # Install bin
 install(TARGETS Test RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/test)
-install(TARGETS TestSource RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/test)
+# install(TARGETS TestSource RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/test)
