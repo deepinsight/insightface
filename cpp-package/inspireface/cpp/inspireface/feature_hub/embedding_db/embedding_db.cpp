@@ -118,20 +118,13 @@ std::vector<int64_t> EmbeddingDB::BatchInsertVectors(const std::vector<VectorDat
     std::vector<int64_t> insertedIds;
     insertedIds.reserve(vectors.size());
 
-    try {
-        for (const auto &data : vectors) {
-            int64_t id = 0;
-            bool ret = InsertVector(data.id, data.vector, id);
-            if (!ret) {
-                throw std::runtime_error("Failed to insert vector");
-            }
-            insertedIds.push_back(id);
-        }
-        ExecuteSQL("COMMIT");
-    } catch (...) {
-        ExecuteSQL("ROLLBACK");
-        throw;
+    for (const auto &data : vectors) {
+        int64_t id = 0;
+        bool ret = InsertVector(data.id, data.vector, id);
+        INSPIREFACE_CHECK_MSG(ret, "Failed to insert vector");
+        insertedIds.push_back(id);
     }
+    ExecuteSQL("COMMIT");
 
     return insertedIds;
 }
@@ -141,20 +134,13 @@ std::vector<int64_t> EmbeddingDB::BatchInsertVectors(const std::vector<std::vect
     std::vector<int64_t> insertedIds;
     insertedIds.reserve(vectors.size());
 
-    try {
-        for (const auto &vector : vectors) {
-            int64_t id = 0;
-            bool ret = InsertVector(0, vector, id);
-            if (!ret) {
-                throw std::runtime_error("Failed to insert vector");
-            }
-            insertedIds.push_back(id);
-        }
-        ExecuteSQL("COMMIT");
-    } catch (...) {
-        ExecuteSQL("ROLLBACK");
-        throw;
+    for (const auto &vector : vectors) {
+        int64_t id = 0;
+        bool ret = InsertVector(0, vector, id);
+        INSPIREFACE_CHECK_MSG(ret, "Failed to insert vector");
+        insertedIds.push_back(id);
     }
+    ExecuteSQL("COMMIT");
 
     return insertedIds;
 }
