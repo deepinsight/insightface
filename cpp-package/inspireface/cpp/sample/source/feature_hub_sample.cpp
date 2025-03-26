@@ -1,7 +1,7 @@
 #include <inspirecv/inspirecv.h>
 #include <inspireface/track_module/face_track_module.h>
 #include "inspireface/initialization_module/launch.h"
-#include <inspireface/middleware/inspirecv_image_process.h>
+#include <inspireface/middleware/frame_process.h>
 #include <inspireface/pipeline_module/face_pipeline_module.h>
 #include <inspireface/common/face_data/face_serialize_tools.h>
 #include <inspireface/feature_hub/feature_hub_db.h>
@@ -60,7 +60,7 @@ static std::vector<float> FT = {
 
 int main() {
     std::string expansion_path = "";
-    INSPIRE_LAUNCH->Load("test_res/pack/Pikachu");
+    APP_CONTEXT->Load("test_res/pack/Pikachu");
 
     DatabaseConfiguration configuration;
     configuration.primary_key_mode = PrimaryKeyMode::MANUAL_INPUT;

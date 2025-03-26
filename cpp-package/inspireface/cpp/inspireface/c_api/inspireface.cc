@@ -427,21 +427,21 @@ HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode de
 
 HResult HFLaunchInspireFace(HPath resourcePath) {
     std::string path(resourcePath);
-    return INSPIRE_LAUNCH->Load(resourcePath);
+    return APP_CONTEXT->Load(resourcePath);
 }
 
 HResult HFReloadInspireFace(HPath resourcePath) {
     std::string path(resourcePath);
-    return INSPIRE_LAUNCH->Reload(resourcePath);
+    return APP_CONTEXT->Reload(resourcePath);
 }
 
 HResult HFTerminateInspireFace() {
-    INSPIRE_LAUNCH->Unload();
+    APP_CONTEXT->Unload();
     return HSUCCEED;
 }
 
 HResult HFQueryInspireFaceLaunchStatus(HInt32 *status) {
-    *status = INSPIRE_LAUNCH->isMLoad();
+    *status = APP_CONTEXT->isMLoad();
     return HSUCCEED;
 }
 
@@ -450,33 +450,33 @@ HResult HFFeatureHubDataDisable() {
 }
 
 HResult HFSetExpansiveHardwareRockchipDmaHeapPath(HPath path) {
-    INSPIRE_LAUNCH->SetRockchipDmaHeapPath(path);
+    APP_CONTEXT->SetRockchipDmaHeapPath(path);
     return HSUCCEED;
 }
 
 HResult HFQueryExpansiveHardwareRockchipDmaHeapPath(HString path) {
-    strcpy(path, INSPIRE_LAUNCH->GetRockchipDmaHeapPath().c_str());
+    strcpy(path, APP_CONTEXT->GetRockchipDmaHeapPath().c_str());
     return HSUCCEED;
 }
 
 HResult HFSetAppleCoreMLInferenceMode(HFAppleCoreMLInferenceMode mode) {
     if (mode == HF_APPLE_COREML_INFERENCE_MODE_CPU) {
-        INSPIRE_LAUNCH->SetGlobalCoreMLInferenceMode(InferenceWrapper::COREML_CPU);
+        APP_CONTEXT->SetGlobalCoreMLInferenceMode(InferenceWrapper::COREML_CPU);
     } else if (mode == HF_APPLE_COREML_INFERENCE_MODE_GPU) {
-        INSPIRE_LAUNCH->SetGlobalCoreMLInferenceMode(InferenceWrapper::COREML_GPU);
+        APP_CONTEXT->SetGlobalCoreMLInferenceMode(InferenceWrapper::COREML_GPU);
     } else if (mode == HF_APPLE_COREML_INFERENCE_MODE_ANE) {
-        INSPIRE_LAUNCH->SetGlobalCoreMLInferenceMode(InferenceWrapper::COREML_ANE);
+        APP_CONTEXT->SetGlobalCoreMLInferenceMode(InferenceWrapper::COREML_ANE);
     }
     return HSUCCEED;
 }
 
 HResult HFSetCudaDeviceId(int32_t device_id) {
-    INSPIRE_LAUNCH->SetCudaDeviceId(device_id);
+    APP_CONTEXT->SetCudaDeviceId(device_id);
     return HSUCCEED;
 }
 
 HResult HFGetCudaDeviceId(int32_t *device_id) {
-    *device_id = INSPIRE_LAUNCH->GetCudaDeviceId();
+    *device_id = APP_CONTEXT->GetCudaDeviceId();
     return HSUCCEED;
 }
 
@@ -841,7 +841,7 @@ HResult HFFaceComparison(HFFaceFeature feature1, HFFaceFeature feature2, HPFloat
 }
 
 HResult HFGetRecommendedCosineThreshold(HPFloat threshold) {
-    if (!INSPIRE_LAUNCH->isMLoad()) {
+    if (!APP_CONTEXT->isMLoad()) {
         INSPIRE_LOGW("Inspireface is not launched, using default threshold 0.48");
     }
     *threshold = SIMILARITY_CONVERTER_GET_RECOMMENDED_COSINE_THRESHOLD();
@@ -849,7 +849,7 @@ HResult HFGetRecommendedCosineThreshold(HPFloat threshold) {
 }
 
 HResult HFCosineSimilarityConvertToPercentage(HFloat similarity, HPFloat result) {
-    if (!INSPIRE_LAUNCH->isMLoad()) {
+    if (!APP_CONTEXT->isMLoad()) {
         INSPIRE_LOGW("Inspireface is not launched.");
     }
     *result = SIMILARITY_CONVERTER_RUN(similarity);
@@ -857,7 +857,7 @@ HResult HFCosineSimilarityConvertToPercentage(HFloat similarity, HPFloat result)
 }
 
 HResult HFUpdateCosineSimilarityConverter(HFSimilarityConverterConfig config) {
-    if (!INSPIRE_LAUNCH->isMLoad()) {
+    if (!APP_CONTEXT->isMLoad()) {
         INSPIRE_LOGW("Inspireface is not launched.");
     }
     inspire::SimilarityConverterConfig cfg;
@@ -871,7 +871,7 @@ HResult HFUpdateCosineSimilarityConverter(HFSimilarityConverterConfig config) {
 }
 
 HResult HFGetCosineSimilarityConverter(PHFSimilarityConverterConfig config) {
-    if (!INSPIRE_LAUNCH->isMLoad()) {
+    if (!APP_CONTEXT->isMLoad()) {
         INSPIRE_LOGW("Inspireface is not launched.");
     }
     inspire::SimilarityConverterConfig cfg = SIMILARITY_CONVERTER_GET_CONFIG();

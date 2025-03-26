@@ -78,7 +78,7 @@ public:
         m_nn_inference_->SetNumThreads(getData<int>("threads"));
 
         if (m_infer_type_ == InferenceWrapper::INFER_TENSORRT) {
-            m_nn_inference_->SetDevice(INSPIRE_LAUNCH->GetCudaDeviceId());
+            m_nn_inference_->SetDevice(APP_CONTEXT->GetCudaDeviceId());
         }
 
 #if defined(ISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA) && !defined(ISF_ENABLE_RKNN)
@@ -87,7 +87,7 @@ public:
 #endif
 
 #if defined(ISF_ENABLE_APPLE_EXTENSION)
-        m_nn_inference_->SetSpecialBackend(INSPIRE_LAUNCH->GetGlobalCoreMLInferenceMode());
+        m_nn_inference_->SetSpecialBackend(APP_CONTEXT->GetGlobalCoreMLInferenceMode());
 #endif
 
         m_output_tensor_info_list_.clear();
@@ -99,7 +99,7 @@ public:
         }
         int32_t ret;
         if (model.loadFilePath) {
-            auto extensionPath = INSPIRE_LAUNCH->GetExtensionPath();
+            auto extensionPath = APP_CONTEXT->GetExtensionPath();
             if (extensionPath.empty()) {
                 INSPIRE_LOGE("Extension path is empty");
                 return InferenceWrapper::WrapperError;

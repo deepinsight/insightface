@@ -415,7 +415,7 @@ TEST_CASE("test_TrackModeFaceAction", "[face_action]") {
     ret = HFCreateInspireFaceSession(parameter, detMode, 3, -1, -1, &session);
     REQUIRE(ret == HSUCCEED);
 
-#if 0
+#if 0  // Temporarily shut down the processing of frame related cases to prevent excessive data from occupying the github memory
     SECTION("Action Blink") {
         auto start = 130, end = 150;
         std::vector<std::string> filenames = generateFilenames("frame-%04d.jpg", start, end);
@@ -449,7 +449,7 @@ TEST_CASE("test_TrackModeFaceAction", "[face_action]") {
     }
 #endif
 
-#if 0
+#if 0  // Temporarily shut down the processing of frame related cases to prevent excessive data from occupying the github memory
     SECTION("Action Jaw Open") {
         auto start = 110, end = 150;
         std::vector<std::string> filenames = generateFilenames("frame-%04d.jpg", start, end);

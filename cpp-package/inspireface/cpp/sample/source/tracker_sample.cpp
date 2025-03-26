@@ -1,20 +1,20 @@
 #include <inspirecv/inspirecv.h>
 #include <inspireface/track_module/face_track_module.h>
 #include "inspireface/initialization_module/launch.h"
-#include <inspireface/middleware/inspirecv_image_process.h>
+#include <inspireface/middleware/frame_process.h>
 
 using namespace inspire;
 
 int main() {
     std::string expansion_path = "";
-    INSPIRE_LAUNCH->Load("test_res/pack/Pikachu");
-    auto archive = INSPIRE_LAUNCH->getMArchive();
+    APP_CONTEXT->Load("test_res/pack/Pikachu");
+    auto archive = APP_CONTEXT->getMArchive();
     auto mode = inspire::DetectModuleMode::DETECT_MODE_ALWAYS_DETECT;
     FaceTrackModule tracker(mode, 10, 20, 320, -1);
     tracker.Configuration(archive, expansion_path);
 
     auto image = inspirecv::Image::Create("test_res/data/bulk/r0.jpg");
-    inspirecv::InspireImageProcess processor;
+    inspirecv::FrameProcess processor;
     processor.SetDataBuffer(image.Data(), image.Height(), image.Width());
     processor.SetDataFormat(inspirecv::DATA_FORMAT::BGR);
     processor.SetRotationMode(inspirecv::ROTATION_MODE::ROTATION_0);

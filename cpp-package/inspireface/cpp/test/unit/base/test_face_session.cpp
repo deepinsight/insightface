@@ -5,7 +5,7 @@
 #include "feature_hub/feature_hub_db.h"
 #include "middleware/costman.h"
 #include "inspireface/initialization_module/launch.h"
-#include "middleware/inspirecv_image_process.h"
+#include "middleware/frame_process.h"
 #include "inspireface/face_session.h"
 #include "inspireface/feature_hub/feature_hub_db.h"
 
@@ -29,12 +29,10 @@ TEST_CASE("test_FaceSession", "[face_session") {
 
     inspirecv::Image kun1 = inspirecv::Image::Create(GET_DATA("data/bulk/kun.jpg"));
     inspirecv::Image kun2 = inspirecv::Image::Create(GET_DATA("data/bulk/jntm.jpg"));
-    inspirecv::InspireImageProcess proc1 =
-      inspirecv::InspireImageProcess::Create(kun1.Data(), kun1.Height(), kun1.Width(), inspirecv::BGR, inspirecv::ROTATION_0);
-    inspirecv::InspireImageProcess proc2 =
-      inspirecv::InspireImageProcess::Create(kun2.Data(), kun2.Height(), kun2.Width(), inspirecv::BGR, inspirecv::ROTATION_0);
+    inspirecv::FrameProcess proc1 = inspirecv::FrameProcess::Create(kun1.Data(), kun1.Height(), kun1.Width(), inspirecv::BGR, inspirecv::ROTATION_0);
+    inspirecv::FrameProcess proc2 = inspirecv::FrameProcess::Create(kun2.Data(), kun2.Height(), kun2.Width(), inspirecv::BGR, inspirecv::ROTATION_0);
     std::vector<std::vector<float>> features;
-    std::vector<inspirecv::InspireImageProcess> processes = {proc1, proc2};
+    std::vector<inspirecv::FrameProcess> processes = {proc1, proc2};
     for (auto &process : processes) {
         ret = session.FaceDetectAndTrack(process);
         REQUIRE(ret == HSUCCEED);
@@ -59,8 +57,8 @@ TEST_CASE("test_FaceSession", "[face_session") {
     REQUIRE(res > 0.5f);
 
     inspirecv::Image other = inspirecv::Image::Create(GET_DATA("data/bulk/woman.png"));
-    inspirecv::InspireImageProcess proc3 =
-      inspirecv::InspireImageProcess::Create(other.Data(), other.Height(), other.Width(), inspirecv::BGR, inspirecv::ROTATION_0);
+    inspirecv::FrameProcess proc3 =
+      inspirecv::FrameProcess::Create(other.Data(), other.Height(), other.Width(), inspirecv::BGR, inspirecv::ROTATION_0);
     ret = session.FaceDetectAndTrack(proc3);
     REQUIRE(ret == HSUCCEED);
     if (session.GetDetectCache().size() > 0) {

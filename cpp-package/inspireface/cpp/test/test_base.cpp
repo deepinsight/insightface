@@ -30,7 +30,7 @@ int init_test_logger() {
 int main(int argc, char* argv[]) {
     init_test_logger();
 
-    auto ret = INSPIRE_LAUNCH->Load("test_res/pack/Pikachu");
+    auto ret = APP_CONTEXT->Load("test_res/pack/Pikachu");
     if (ret != 0) {
         std::cerr << "Load error" << std::endl;
         return -1;
