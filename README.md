@@ -3,7 +3,7 @@
 
 <div align="left">
   <img src="https://insightface.ai/assets/img/custom/logo3.jpg" width="240"/>
-</div>
+</div> 
 
 [InsightFace](https://insightface.ai) project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) and [Jiankang Deng](https://jiankangdeng.github.io/). 
 
