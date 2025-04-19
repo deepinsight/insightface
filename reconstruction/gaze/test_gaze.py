@@ -87,7 +87,7 @@ class GazeHandler():
         #trf_crp.pseudoinverse().apply(PointCloud(eye_r[iris_idx_481]).with_dims([0, 1])).view(1)
 
         for _eye in [eye_l, eye_r]:
-            _kps = _eye[self.iris_idx_481,:].astype(np.int)
+            _kps = _eye[self.iris_idx_481,:].astype(np.int32)
             for l in range(_kps.shape[0]):
                 color = (0, 255, 0)
                 cv2.circle(eimg, (_kps[l][1], _kps[l][0]), 4, color, 4)
@@ -97,8 +97,8 @@ class GazeHandler():
                 for k in range(3):
                     ix = _tri[k]
                     iy = _tri[(k+1)%3]
-                    x = _eye[ix,:2].astype(np.int)[::-1]
-                    y = _eye[iy,:2].astype(np.int)[::-1]
+                    x = _eye[ix,:2].astype(np.int32)[::-1]
+                    y = _eye[iy,:2].astype(np.int32)[::-1]
                     cv2.line(eimg, x, y, color, 1)
 
         theta_x_l, theta_y_l, vec_l = angles_and_vec_from_eye(eye_l, self.iris_idx_481)
@@ -126,8 +126,8 @@ class GazeHandler():
         y = x.copy()
         y[0] += dx
         y[1] += dy
-        x = x.astype(np.int)
-        y = y.astype(np.int)
+        x = x.astype(np.int32)
+        y = y.astype(np.int32)
         color = (0,255,255)
         cv2.line(eimg, x, y, color, 2)
 
@@ -138,8 +138,8 @@ class GazeHandler():
         y = x.copy()
         y[0] += dx
         y[1] += dy
-        x = x.astype(np.int)
-        y = y.astype(np.int)
+        x = x.astype(np.int32)
+        y = y.astype(np.int32)
         color = (0,255,255)
         cv2.line(eimg, x, y, color, 2)
         return eimg

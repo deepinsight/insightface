@@ -411,7 +411,7 @@ def crop_image(img, center, scale, res, base=384):
     # Upper left point
     ul = np.floor(t.apply([0,0]))
     # Bottom right point
-    br = np.ceil(t.apply(res).astype(np.int))
+    br = np.ceil(t.apply(res).astype(np.int32))
 
     # crop and rescale
 
