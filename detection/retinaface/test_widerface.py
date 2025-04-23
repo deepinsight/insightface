@@ -128,7 +128,7 @@ def get_boxes(roi, pyramid):
         font = cv2.FONT_HERSHEY_SIMPLEX
         for i in range(boxes.shape[0]):
             box = boxes[i]
-            ibox = box[0:4].copy().astype(np.int)
+            ibox = box[0:4].copy().astype(np.int32)
             cv2.rectangle(im, (ibox[0], ibox[1]), (ibox[2], ibox[3]),
                           (255, 0, 0), 2)
             #print('box', ibox)
@@ -191,8 +191,8 @@ def test(args):
                         1) * (gt_boxes[:, 3] - gt_boxes[:, 1] + 1)
             num_pos += gt_boxes.shape[0]
 
-            overlaps = bbox_overlaps(boxes.astype(np.float),
-                                     gt_boxes.astype(np.float))
+            overlaps = bbox_overlaps(boxes.astype(np.float32),
+                                     gt_boxes.astype(np.float32))
             #print(im_info, gt_boxes.shape, boxes.shape, overlaps.shape, file=sys.stderr)
 
             _gt_overlaps = np.zeros((gt_boxes.shape[0]))

@@ -16,7 +16,7 @@ def bbox_overlaps_py(boxes, query_boxes):
     """
     n_ = boxes.shape[0]
     k_ = query_boxes.shape[0]
-    overlaps = np.zeros((n_, k_), dtype=np.float)
+    overlaps = np.zeros((n_, k_), dtype=np.float32)
     for k in range(k_):
         query_box_area = (query_boxes[k, 2] - query_boxes[k, 0] +
                           1) * (query_boxes[k, 3] - query_boxes[k, 1] + 1)
@@ -129,7 +129,7 @@ def nonlinear_pred(boxes, box_deltas):
     if boxes.shape[0] == 0:
         return np.zeros((0, box_deltas.shape[1]))
 
-    boxes = boxes.astype(np.float, copy=False)
+    boxes = boxes.astype(np.float32, copy=False)
     widths = boxes[:, 2] - boxes[:, 0] + 1.0
     heights = boxes[:, 3] - boxes[:, 1] + 1.0
     ctr_x = boxes[:, 0] + 0.5 * (widths - 1.0)
@@ -161,7 +161,7 @@ def nonlinear_pred(boxes, box_deltas):
 def landmark_pred(boxes, landmark_deltas):
     if boxes.shape[0] == 0:
         return np.zeros((0, landmark_deltas.shape[1]))
-    boxes = boxes.astype(np.float, copy=False)
+    boxes = boxes.astype(np.float32, copy=False)
     widths = boxes[:, 2] - boxes[:, 0] + 1.0
     heights = boxes[:, 3] - boxes[:, 1] + 1.0
     ctr_x = boxes[:, 0] + 0.5 * (widths - 1.0)
@@ -194,7 +194,7 @@ def iou_pred(boxes, box_deltas):
     if boxes.shape[0] == 0:
         return np.zeros((0, box_deltas.shape[1]))
 
-    boxes = boxes.astype(np.float, copy=False)
+    boxes = boxes.astype(np.float32, copy=False)
     x1 = boxes[:, 0]
     y1 = boxes[:, 1]
     x2 = boxes[:, 2]

@@ -238,8 +238,8 @@ def test_proposals(predictor, test_data, imdb, roidb, vis=False):
                                                             gt_boxes[:, 1] + 1)
         num_pos += gt_boxes.shape[0]
 
-        overlaps = bbox_overlaps(boxes.astype(np.float),
-                                 gt_boxes.astype(np.float))
+        overlaps = bbox_overlaps(boxes.astype(np.float32),
+                                 gt_boxes.astype(np.float32))
         #print(im_info, gt_boxes.shape, boxes.shape, overlaps.shape, file=sys.stderr)
 
         _gt_overlaps = np.zeros((gt_boxes.shape[0]))
