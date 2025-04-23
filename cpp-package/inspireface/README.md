@@ -53,6 +53,12 @@ Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=In
 
 **`2024-06-18`** Added face detection feature with tracking-by-detection mode.
 
+
+## License
+
+The licensing of the open-source models employed by InspireFace adheres to the same requirements as InsightFace, specifying their use solely for academic purposes and explicitly prohibiting commercial applications.
+
+
 ## Quick Start
 
 For Python users on Linux and MacOS, InspireFace can be quickly installed via pip:
