@@ -8,7 +8,7 @@
 
 void test_face_detect() {
     inspire::InspireModel model;
-    INSPIRE_LAUNCH->getMArchive().LoadModel("face_detect_160", model);
+    APP_CONTEXT->getMArchive().LoadModel("face_detect_160", model);
     auto input_size = 160;
     inspire::FaceDetectAdapt faceDetectAdapt(input_size);
     faceDetectAdapt.loadData(model, model.modelType);
@@ -31,7 +31,7 @@ void test_face_detect() {
 
 void test_landmark() {
     inspire::InspireModel model;
-    INSPIRE_LAUNCH->getMArchive().LoadModel("landmark", model);
+    APP_CONTEXT->getMArchive().LoadModel("landmark", model);
     auto input_size = 112;
     inspire::FaceLandmarkAdapt landmarkAdapt(input_size);
     landmarkAdapt.loadData(model, model.modelType);
@@ -54,7 +54,7 @@ void test_landmark() {
 
 void test_quality() {
     inspire::InspireModel model;
-    INSPIRE_LAUNCH->getMArchive().LoadModel("pose_quality", model);
+    APP_CONTEXT->getMArchive().LoadModel("pose_quality", model);
     auto input_size = 96;
     inspire::FacePoseQualityAdapt poseQualityAdapt;
     poseQualityAdapt.loadData(model, model.modelType);
@@ -79,7 +79,7 @@ void test_quality() {
 
 void test_feature() {
     inspire::InspireModel model;
-    INSPIRE_LAUNCH->getMArchive().LoadModel("feature", model);
+    APP_CONTEXT->getMArchive().LoadModel("feature", model);
     auto input_size = 112;
     inspire::ExtractAdapt extractAdapt;
     extractAdapt.loadData(model, model.modelType);
@@ -100,7 +100,7 @@ void test_feature() {
 
 int main() {
     std::string archivePath = "test_res/pack/Pikachu_Apple";
-    INSPIRE_LAUNCH->Load(archivePath);
+    APP_CONTEXT->Load(archivePath);
     // Test face detect
     test_face_detect();
 

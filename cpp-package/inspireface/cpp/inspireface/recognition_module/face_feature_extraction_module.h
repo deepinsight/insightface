@@ -10,7 +10,7 @@
 #include "common/face_info/face_object_internal.h"
 #include "common/face_data/face_data_type.h"
 #include "middleware/model_archive/inspire_archive.h"
-#include "middleware/inspirecv_image_process.h"
+#include "middleware/frame_process.h"
 
 namespace inspire {
 
@@ -35,23 +35,22 @@ public:
     /**
      * @brief Extracts a facial feature from an image and stores it in the provided 'embedded'.
      *
-     * @param processor inspirecv::InspireImageProcess instance containing the image.
+     * @param processor inspirecv::FrameProcess instance containing the image.
      * @param face FaceObject representing the detected face.
      * @param embedded Output parameter to store the extracted facial feature.
      * @return int32_t Status code indicating success (0) or failure.
      */
-    int32_t FaceExtract(inspirecv::InspireImageProcess &processor, const FaceObjectInternal &face, Embedded &embedded, float &norm,
-                        bool normalize = false);
+    int32_t FaceExtract(inspirecv::FrameProcess &processor, const FaceObjectInternal &face, Embedded &embedded, float &norm, bool normalize = false);
 
     /**
      * @brief Extracts a facial feature from an image and stores it in the provided 'embedded'.
      *
-     * @param processor inspirecv::InspireImageProcess instance containing the image.
+     * @param processor inspirecv::FrameProcess instance containing the image.
      * @param face HyperFaceData representing the detected face.
      * @param embedded Output parameter to store the extracted facial feature.
      * @return int32_t Status code indicating success (0) or failure.
      */
-    int32_t FaceExtract(inspirecv::InspireImageProcess &processor, const HyperFaceData &face, Embedded &embedded, float &norm, bool normalize = true);
+    int32_t FaceExtract(inspirecv::FrameProcess &processor, const HyperFaceData &face, Embedded &embedded, float &norm, bool normalize = true);
 
     /**
      * @brief Gets the Extract instance associated with this FaceRecognition.

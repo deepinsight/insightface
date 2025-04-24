@@ -70,6 +70,7 @@ TEST_CASE("test_FaceTrack", "[face_track]") {
         REQUIRE(ret == HSUCCEED);
     }
 
+// Temporarily shut down the processing of frame related cases to prevent excessive data from occupying the github memory
 #if 0
     SECTION("Face tracking stability from frames") {
         HResult ret;

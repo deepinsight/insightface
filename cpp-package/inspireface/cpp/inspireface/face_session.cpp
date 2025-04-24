@@ -20,10 +20,10 @@ int32_t FaceSession::Configuration(DetectModuleMode detect_mode, int32_t max_det
     m_detect_mode_ = detect_mode;
     m_max_detect_face_ = max_detect_face;
     m_parameter_ = param;
-    if (!INSPIRE_LAUNCH->isMLoad()) {
+    if (!APP_CONTEXT->isMLoad()) {
         return HERR_ARCHIVE_NOT_LOAD;
     }
-    if (INSPIRE_LAUNCH->getMArchive().QueryStatus() != SARC_SUCCESS) {
+    if (APP_CONTEXT->getMArchive().QueryStatus() != SARC_SUCCESS) {
         return HERR_ARCHIVE_LOAD_FAILURE;
     }
 
@@ -33,22 +33,22 @@ int32_t FaceSession::Configuration(DetectModuleMode detect_mode, int32_t max_det
 
     m_face_track_ = std::make_shared<FaceTrackModule>(m_detect_mode_, m_max_detect_face_, 20, 192, detect_level_px, track_by_detect_mode_fps,
                                                       m_parameter_.enable_detect_mode_landmark);
-    m_face_track_->Configuration(INSPIRE_LAUNCH->getMArchive());
+    m_face_track_->Configuration(APP_CONTEXT->getMArchive());
     // SetDetectMode(m_detect_mode_);
 
-    m_face_recognition_ = std::make_shared<FeatureExtractionModule>(INSPIRE_LAUNCH->getMArchive(), m_parameter_.enable_recognition);
+    m_face_recognition_ = std::make_shared<FeatureExtractionModule>(APP_CONTEXT->getMArchive(), m_parameter_.enable_recognition);
     if (m_face_recognition_->QueryStatus() != HSUCCEED) {
         return m_face_recognition_->QueryStatus();
     }
 
-    m_face_pipeline_ = std::make_shared<FacePipelineModule>(INSPIRE_LAUNCH->getMArchive(), param.enable_liveness, param.enable_mask_detect,
+    m_face_pipeline_ = std::make_shared<FacePipelineModule>(APP_CONTEXT->getMArchive(), param.enable_liveness, param.enable_mask_detect,
                                                             param.enable_face_attribute, param.enable_interaction_liveness);
     m_face_track_cost_ = std::make_shared<inspirecv::TimeSpend>("FaceTrack");
 
     return HSUCCEED;
 }
 
-int32_t FaceSession::FaceDetectAndTrack(inspirecv::InspireImageProcess& process) {
+int32_t FaceSession::FaceDetectAndTrack(inspirecv::FrameProcess& process) {
     std::lock_guard<std::mutex> lock(m_mtx_);
     if (m_enable_track_cost_spend_) {
         m_face_track_cost_->Start();
@@ -139,8 +139,7 @@ const int32_t FaceSession::GetNumberOfFacesCurrentlyDetected() const {
     return m_face_track_->trackingFace.size();
 }
 
-int32_t FaceSession::FacesProcess(inspirecv::InspireImageProcess& process, const std::vector<HyperFaceData>& faces,
-                                  const CustomPipelineParameter& param) {
+int32_t FaceSession::FacesProcess(inspirecv::FrameProcess& process, const std::vector<HyperFaceData>& faces, const CustomPipelineParameter& param) {
     std::lock_guard<std::mutex> lock(m_mtx_);
     m_mask_results_cache_.resize(faces.size(), -1.0f);
     m_rgb_liveness_results_cache_.resize(faces.size(), -1.0f);
@@ -324,7 +323,7 @@ const std::vector<int>& FaceSession::GetFaceRaiseHeadAactionsResultCache() const
     return m_action_raise_head_results_cache_;
 }
 
-int32_t FaceSession::FaceFeatureExtract(inspirecv::InspireImageProcess& process, FaceBasicData& data) {
+int32_t FaceSession::FaceFeatureExtract(inspirecv::FrameProcess& process, FaceBasicData& data) {
     std::lock_guard<std::mutex> lock(m_mtx_);
     int32_t ret;
     HyperFaceData face = {0};
@@ -338,7 +337,7 @@ int32_t FaceSession::FaceFeatureExtract(inspirecv::InspireImageProcess& process,
     return ret;
 }
 
-int32_t FaceSession::FaceGetFaceAlignmentImage(inspirecv::InspireImageProcess& process, FaceBasicData& data, inspirecv::Image& image) {
+int32_t FaceSession::FaceGetFaceAlignmentImage(inspirecv::FrameProcess& process, FaceBasicData& data, inspirecv::Image& image) {
     std::lock_guard<std::mutex> lock(m_mtx_);
     int32_t ret;
     HyperFaceData face = {0};

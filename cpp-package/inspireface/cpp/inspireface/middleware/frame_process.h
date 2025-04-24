@@ -1,5 +1,5 @@
-#ifndef INSPIRECV_IMAGE_PROCESS_H
-#define INSPIRECV_IMAGE_PROCESS_H
+#ifndef INSPIREFACE_FRAME_PROCESS_H
+#define INSPIREFACE_FRAME_PROCESS_H
 
 #include <memory>
 #include <inspirecv/inspirecv.h>
@@ -22,18 +22,18 @@ enum DATA_FORMAT { NV21 = 0, NV12 = 1, RGBA = 2, RGB = 3, BGR = 4, BGRA = 5 };
 /**
  * @brief A class to handle camera stream and image processing.
  */
-class InspireImageProcess {
+class FrameProcess {
 public:
-    static InspireImageProcess Create(const uint8_t *data_buffer, int height, int width, DATA_FORMAT data_format = BGR,
-                                      ROTATION_MODE rotation_mode = ROTATION_0) {
-        InspireImageProcess process;
+    static FrameProcess Create(const uint8_t *data_buffer, int height, int width, DATA_FORMAT data_format = BGR,
+                               ROTATION_MODE rotation_mode = ROTATION_0) {
+        FrameProcess process;
         process.SetDataBuffer(data_buffer, height, width);
         process.SetDataFormat(data_format);
         process.SetRotationMode(rotation_mode);
         return process;
     }
 
-    InspireImageProcess() {
+    FrameProcess() {
         SetDataFormat(NV21);
         SetDestFormat(BGR);
         config_.filterType = MNN::CV::BILINEAR;
@@ -389,4 +389,4 @@ private:
 
 }  // namespace inspirecv
 
-#endif  // INSPIRECV_IMAGE_PROCESS_H
+#endif  // INSPIREFACE_FRAME_PROCESS_H
