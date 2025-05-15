@@ -2,6 +2,7 @@ import sys
 import os
 import os.path as osp
 from pathlib import Path
+from loguru import logger
 import pickle
 
 def get_object(name):
@@ -16,9 +17,9 @@ def get_object(name):
         name = name + ".pkl"
 
     filepath = osp.join(objects_dir, name)
-    
+
     if not osp.exists(filepath):
-        print(f"[Error] File not found: {filepath}")
+        logger.error(f"[Error] File not found: {filepath}")
         return None
 
     with open(filepath, 'rb') as f:

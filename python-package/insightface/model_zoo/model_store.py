@@ -8,6 +8,7 @@ import os
 import zipfile
 import glob
 
+from loguru import logger
 from ..utils import download, check_sha1
 
 _model_sha1 = {
@@ -72,11 +73,11 @@ def get_model_file(name, root=os.path.join('~', '.insightface', 'models')):
         if check_sha1(file_path, sha1_hash):
             return file_path
         else:
-            print(
+            logger.debug(
                 'Mismatch in the content of model file detected. Downloading again.'
             )
     else:
-        print('Model file is not found. Downloading.')
+        logger.debug('Model file is not found. Downloading.')
 
     if not os.path.exists(root):
         os.makedirs(root)
