@@ -27,35 +27,37 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
-pypandoc_enabled = True
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+
+# Handle long description conversion
 try:
     import pypandoc
-    print('pandoc enabled')
+    logging.info('Converting README.md to RST format...')
     long_description = pypandoc.convert_file('README.md', 'rst')
-except (IOError, ImportError, ModuleNotFoundError):
-    print('WARNING: pandoc not enabled')
+    pypandoc_enabled = True
+except (IOError, ImportError, ModuleNotFoundError) as e:
+    logging.warning(f'pypandoc not available: {str(e)}')
+    logging.info('Using raw README.md content instead')
     long_description = open('README.md').read()
     pypandoc_enabled = False
 
-#import pypandoc
-#long_description = pypandoc.convert('README.md', 'rst')
 VERSION = find_version('insightface', '__init__.py')
 
 requirements = [
-    'numpy',
-    'onnx',
-    'tqdm',
-    'requests',
-    'matplotlib',
-    'Pillow',
-    'scipy',
-    #'opencv-python',
-    'scikit-learn',
-    'scikit-image',
-    'easydict',
-    'cython',
-    'albumentations',
-    'prettytable',
+    'numpy>=1.22.3',
+    'onnx>=1.12.0',
+    'tqdm>=4.50.0',
+    'requests>=2.25.0',
+    'matplotlib>=3.5.0',
+    'Pillow>=9.0.0',
+    'scipy>=1.7.0',
+    'scikit-learn>=1.0.0',
+    'scikit-image>=0.19.0',
+    'easydict>=1.9.0',
+    'cython>=0.29.28',
+    'albumentations>=1.3.0',
+    'prettytable>=2.5.0',
 ]
 
 extensions = [
@@ -76,9 +78,6 @@ data_files += [ ('insightface/data/objects', data_objects) ]
 data_files += [ ('insightface/thirdparty/face3d/mesh/cython', data_mesh) ]
 
 ext_modules=cythonize(extensions)
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 # Check if running on macOS (Darwin)
 if platform.system() == "Darwin":
@@ -129,7 +128,18 @@ setup(
     headers=['insightface/thirdparty/face3d/mesh/cython/mesh_core.h'],
     ext_modules=ext_modules,
     include_dirs=numpy.get_include(),
+    python_requires='>=3.7',
+    classifiers=[
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+    ],
 )
 
-print('pypandoc enabled:', pypandoc_enabled)
+logging.info(f'pypandoc enabled: {pypandoc_enabled}')
 

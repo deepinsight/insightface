@@ -1,3 +1,9 @@
 Cython>=0.29.28
 cmake>=3.22.3    
 numpy>=1.22.3
+torch>=1.6.0
+torchvision>=0.7.0
+opencv-python>=4.5.0
+scipy>=1.7.0
+tqdm>=4.50.0
+requests>=2.25.0
