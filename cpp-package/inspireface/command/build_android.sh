@@ -18,7 +18,14 @@ reorganize_structure() {
     done
 
     # Find all architecture directories (e.g., arm64-v8a, armeabi-v7a)
-    local arch_dirs=($(find "$base_path" -maxdepth 1 -type d -name "arm*"))
+    local arch_dirs=()
+    for d in "$base_path"/*; do
+        [[ -d "$d" ]] || continue
+        name=$(basename "$d")
+        if [[ "$name" != "lib" && "$name" != "sample" && "$name" != "test" && "$name" != "." && "$name" != ".." ]]; then
+            arch_dirs+=("$d")
+        fi
+    done
 
     for arch_dir in "${arch_dirs[@]}"; do
         # Get the architecture name (e.g., arm64-v8a)
@@ -58,10 +65,21 @@ reorganize_structure() {
         fi
     done
 
+        # Copy include once from a valid arch
+    for arch_dir in "${arch_dirs[@]}"; do
+        if [ -d "$arch_dir/InspireFace/include" ]; then
+            mkdir -p "$base_path/include"
+            cp -r "$arch_dir/InspireFace/include/"* "$base_path/include/"
+            echo "Copied include from $arch_dir"
+            break
+        fi
+    done
+
     # Delete the original architecture directories
     for arch_dir in "${arch_dirs[@]}"; do
         rm -rf "$arch_dir"
     done
+
 
     echo "Reorganization complete."
 }
@@ -98,6 +116,7 @@ build() {
     cmake ${SCRIPT_DIR} \
         -G "Unix Makefiles" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
         -DCMAKE_C_FLAGS="-g0 ${CMAKE_C_FLAGS}" \
         -DCMAKE_CXX_FLAGS="-g0 ${CMAKE_CXX_FLAGS}" \
         -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
@@ -111,7 +130,8 @@ build() {
         -DISF_ENABLE_BENCHMARK=OFF \
         -DISF_ENABLE_USE_LFW_DATA=OFF \
         -DISF_ENABLE_TEST_EVALUATION=OFF \
-        -DISF_BUILD_SHARED_LIBS=ON 
+        -DISF_BUILD_SHARED_LIBS=ON \
+        -Wno-dev
     make -j4
     make install
     popd
@@ -129,6 +149,7 @@ BUILD_FOLDER_PATH="build/inspireface-android${TAG}"
 
 build arm64-v8a 21
 build armeabi-v7a 21
+build x86_64 21
 
 reorganize_structure "${BUILD_FOLDER_PATH}"
 

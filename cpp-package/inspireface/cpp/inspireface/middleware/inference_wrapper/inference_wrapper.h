@@ -223,6 +223,12 @@ public:
     virtual int32_t Process(std::vector<OutputTensorInfo>& output_tensor_info_list) = 0;
     virtual int32_t ParameterInitialization(std::vector<InputTensorInfo>& input_tensor_info_list,
                                             std::vector<OutputTensorInfo>& output_tensor_info_list) = 0;
+    
+#ifdef BATCH_FORWARD_IMPLEMENTED
+    virtual int32_t PreProcessBatch(const std::vector<std::vector<InputTensorInfo>>& input_tensor_info_list) = 0;
+    virtual int32_t ProcessBatch(std::vector<std::vector<OutputTensorInfo>>& output_tensor_info_list) = 0;
+    virtual int32_t PostProcessBatch(std::vector<std::vector<OutputTensorInfo>>& output_tensor_info_list) = 0;
+#endif
 
     virtual int32_t SetSpecialBackend(SpecialBackend backend) {
         special_backend_ = backend;

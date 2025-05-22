@@ -19,7 +19,7 @@ pack/*
 .vscode/*
 build_local/*
 local_build/*
-cpp/inspireface/information.h
+cpp/inspireface/include/inspireface/information.h
 cpp/inspireface/version.txt
 .DS_Store
 ._.DS_Store

@@ -1,12 +1,12 @@
 #include <iostream>
 #include <inspirecv/inspirecv.h>
-#include "inspireface/initialization_module/launch.h"
-#include <inspireface/middleware/inspirecv_image_process.h>
+#include <inspireface/include/inspireface/launch.h>
+#include <inspireface/include/inspireface/frame_process.h>
 #include "inspireface/track_module/landmark/face_landmark_adapt.h"
 int main() {
     std::string expansion_path = "";
-    INSPIRE_LAUNCH->Load("test_res/pack/Pikachu-t4");
-    auto archive = INSPIRE_LAUNCH->getMArchive();
+    INSPIREFACE_CONTEXT->Load("test_res/pack/Pikachu-t4");
+    auto archive = INSPIREFACE_CONTEXT->getMArchive();
 
     inspire::InspireModel lmkModel;
     auto ret = archive.LoadModel("landmark", lmkModel);
@@ -16,7 +16,7 @@ int main() {
     }
 
     inspire::FaceLandmarkAdapt lmk;
-    lmk.loadData(lmkModel, lmkModel.modelType);
+    lmk.LoadData(lmkModel, lmkModel.modelType);
 
     auto image = inspirecv::Image::Create("test_res/data/crop/crop.png");
     auto data = image.Resize(112, 112);

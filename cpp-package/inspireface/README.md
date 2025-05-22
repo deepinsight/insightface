@@ -5,6 +5,8 @@
 [![JitPack](https://img.shields.io/jitpack/v/github/HyperInspire/inspireface-android-sdk?style=for-the-badge&color=green&label=JitPack&logo=android)](https://jitpack.io/#HyperInspire/inspireface-android-sdk)
 [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=building&logo=cmake)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml)
 [![test](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=testing&logo=c)](https://github.com/HyperInspire/InspireFace/actions/workflows/test_ubuntu_x86_Pikachu.yaml)
+[![Document](https://img.shields.io/badge/Document-Building-blue?style=for-the-badge&logo=readthedocs)](https://doc.inspireface.online/)
+
 
 
 InspireFace is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backend types for inference, such as CPU, GPU, and NPU.
@@ -15,7 +17,14 @@ Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=In
 
 <img src="images/banner.jpg" alt="banner" style="zoom:80%;" />
 
+---
+
+📘 [Documentation](https://doc.inspireface.online/) is a **work in progress**.  
+We welcome your questions💬, they help guide and accelerate its development.
+
 ## Change Logs
+
+**`2025-04-27`** Optimize some issues and provide a stable version.
 
 **`2025-03-16`** Acceleration using NVIDIA-GPU (**CUDA**) devices is already supported.
 
@@ -49,25 +58,17 @@ Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=In
 
 **`2024-07-02`** Fixed several bugs in the face detector with multi-level input.
 
-**`2024-06-27`** Verified iOS usability and fixed some bugs.
-
-**`2024-06-18`** Added face detection feature with tracking-by-detection mode.
-
-
 ## License
 
 The licensing of the open-source models employed by InspireFace adheres to the same requirements as InsightFace, specifying their use solely for academic purposes and explicitly prohibiting commercial applications.
 
-
 ## Quick Start
 
-For Python users on Linux and MacOS, InspireFace can be quickly installed via pip:
+For Python users on **Linux and MacOS**, InspireFace can be quickly installed via pip:
 
 ```bash
 pip install inspireface
 ```
-
-_⚠️Windows support is **not available yet**, but will be coming soon!_
 
 After installation, you can use inspireface like this:
 
@@ -176,7 +177,7 @@ The '**3rdparty**' directory already includes the MNN library and specifies a pa
 
 ### Requirements
 
-- CMake (version 3.10 or higher)
+- CMake (version 3.20 or higher)
 - NDK (version 16 or higher, only required for Android) [**Optional**]
 - MNN (version 1.4.0 or higher)
 - C++ Compiler
@@ -210,7 +211,10 @@ After compilation, you can find the local file in the build directory, which con
 inspireface-linux
    ├── include
    │   ├── herror.h
-   │   └── inspireface.h
+   │   ├── intypedef.h
+   │   ├── inspireface.h
+   │   ├── inspirecv/
+   │   └── inspireface/
    └── lib
        └── libInspireFace.so
 ```
@@ -218,6 +222,9 @@ inspireface-linux
 - **libInspireFace.so**：Compiled dynamic linking library.
 - **inspireface.h**：Header file definition.
 - **herror.h**：Reference error number definition.
+- **intypedef.h**: Type definition file.
+- **inspirecv**: Simple cv library CPP header file folder.
+- **inspireface**: inspireface cpp header folder.
 ### Cross Compilation
 Cross compilation requires you to prepare the target platform's cross-compilation toolchain on the host machine in advance. Here, compiling for Rockchip's embedded devices RV1106 is used as an example:
 ```bash
@@ -272,6 +279,10 @@ docker-compose up build-tensorrt-cuda12-ubuntu22
 
 If you want to use pre-compiled libraries, you can use **[FindTensorRT.cmake](toolchain/FindTensorRT.cmake)** to create links to CUDA and TensorRT.
 
+### React Native
+
+For Android and iOS, in addition to the native interface, you can use the React Native library powered by Nitro Modules and JSI—providing ultra-fast, seamless bindings to the InspireFace SDK. For more details, check out the [react-native-nitro-inspire-face](https://github.com/ronickg/react-native-nitro-inspire-face) repository or the [documentation](https://ronickg.github.io/react-native-nitro-inspire-face). Author: ronickg.
+
 ### Supported Platforms and Architectures
 
 We have completed the adaptation and testing of the software across various operating systems and CPU architectures. This includes compatibility verification for platforms such as Linux, macOS, iOS, and Android, as well as testing for specific hardware support to ensure stable operation in diverse environments.
@@ -292,10 +303,11 @@ We have completed the adaptation and testing of the software across various oper
 | 12     | **iOS**              | ARM                   | CPU/Metal/**ANE**         | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
 | 13     | **Android**          | ARMv7                 | -                          | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
 | 14     |                      | ARMv8                 | -                          | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
-| 15 | **Android**<sup><br/>(Rockchip) | ARMv8 | RK3566/RK3568 | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
-| 16 |  | ARMv8 | RK3588 | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
-| 17 | **HarmonyOS** | ARMv8 | - | - | - | - |
-| 18 | **Linux**<sup><br/>(Jetson series) | ARMv8 | Jetson series | - | - | - |
+| 15 | | x86_64 | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
+| 16 | **Android**<sup><br/>(Rockchip) | ARMv8 | RK3566/RK3568 | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
+| 17 |  | ARMv8 | RK3588 | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
+| 18 | **HarmonyOS** | ARMv8 | - | - | - | - |
+| 19 | **Linux**<sup><br/>(Jetson series) | ARMv8 | Jetson series | - | - | - |
 
 - **Device**: Some special device support, primarily focused on computing power devices.
 - **Supported**: The solution has been fully developed and successfully verified on offline devices.
@@ -332,15 +344,20 @@ docker-compose up
 ```
 
 ## Example
-### C/C++ Sample
-To integrate InspireFace into a C/C++ project, you simply need to link the InspireFace library and include the appropriate header files. Below is a basic example demonstrating face detection:
+### C/C++ Sample: Use the recommended CAPI interface
+To integrate InspireFace into a C/C++ project, you simply need to link the InspireFace library and include the appropriate header files(We recommend using the more compatible **CAPI** headers). Below is a basic example demonstrating face detection:
 
 ```c
+#include <inspireface.h>
+#include <herror.h>
+
+...
+  
 HResult ret;
 // The resource file must be loaded before it can be used
 ret = HFLaunchInspireFace(packPath);
 if (ret != HSUCCEED) {
-    std::cout << "Load Resource error: " << ret << std::endl;
+    HFLogPrint(HF_LOG_ERROR, "Load Resource error: %d", ret);
     return ret;
 }
 
@@ -358,10 +375,11 @@ HInt32 detectPixelLevel = 160;
 HFSession session = {0};
 ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, detectPixelLevel, -1, &session);
 if (ret != HSUCCEED) {
-    std::cout << "Create FaceContext error: " << ret << std::endl;
+    HFLogPrint(HF_LOG_ERROR, "Create FaceContext error: %d", ret);
     return ret;
 }
 
+// Configure some detection parameters
 HFSessionSetTrackPreviewSize(session, detectPixelLevel);
 HFSessionSetFilterMinimumFacePixelSize(session, 4);
 
@@ -369,14 +387,14 @@ HFSessionSetFilterMinimumFacePixelSize(session, 4);
 HFImageBitmap image;
 ret = HFCreateImageBitmapFromFilePath(sourcePath, 3, &image);
 if (ret != HSUCCEED) {
-    std::cout << "The source entered is not a picture or read error." << std::endl;
+    HFLogPrint(HF_LOG_ERROR, "The source entered is not a picture or read error.");
     return ret;
 }
 // Prepare an image parameter structure for configuration
 HFImageStream imageHandle = {0};
 ret = HFCreateImageStreamFromImageBitmap(image, rotation_enum, &imageHandle);
 if (ret != HSUCCEED) {
-    std::cout << "Create ImageStream error: " << ret << std::endl;
+    HFLogPrint(HF_LOG_ERROR, "Create ImageStream error: %d", ret);
     return ret;
 }
 
@@ -384,35 +402,116 @@ if (ret != HSUCCEED) {
 HFMultipleFaceData multipleFaceData = {0};
 ret = HFExecuteFaceTrack(session, imageHandle, &multipleFaceData);
 if (ret != HSUCCEED) {
-    std::cout << "Execute HFExecuteFaceTrack error: " << ret << std::endl;
+    HFLogPrint(HF_LOG_ERROR, "Execute HFExecuteFaceTrack error: %d", ret);
     return ret;
 }
+
 // Print the number of faces detected
 auto faceNum = multipleFaceData.detectedNum;
-std::cout << "Num of face: " << faceNum << std::endl;
+HFLogPrint(HF_LOG_INFO, "Num of face: %d", faceNum);
 
 // The memory must be freed at the end of the program
 ret = HFReleaseImageBitmap(image);
 if (ret != HSUCCEED) {
-    printf("Release image bitmap error: %lu\n", ret);
+    HFLogPrint(HF_LOG_ERROR, "Release image bitmap error: %d", ret);
     return ret;
 }
 
 ret = HFReleaseImageStream(imageHandle);
 if (ret != HSUCCEED) {
-    printf("Release image stream error: %lu\n", ret);
+    HFLogPrint(HF_LOG_ERROR, "Release image stream error: %d", ret);
 }
+
 ret = HFReleaseInspireFaceSession(session);
 if (ret != HSUCCEED) {
-    printf("Release session error: %lu\n", ret);
+    HFLogPrint(HF_LOG_ERROR, "Release session error: %d", ret);
     return ret;
 }
+
+...
 ```
 For more examples, you can refer to the `cpp/sample` sub-project located in the root directory. You can compile these sample executables by enabling the `ISF_BUILD_WITH_SAMPLE` option during the compilation process.
 
-- **More detailed cases**: [C/C++ Sample](cpp/sample/api/)
-
 **Note**: For each error code feedback, you can click on this [link](doc/Error-Feedback-Codes.md) to view detailed explanations.
+
+### C++ Sample: Use the C++ version of the header files
+
+If you want to use C++ header files, then you need to enable **ISF_INSTALL_CPP_HEADER** during compilation. Executing the install command will add the C++ header files.
+
+```c++
+#include <iostream>
+#include <memory>
+#include <inspireface/inspireface.hpp>
+
+...
+
+// Set log level to info
+INSPIRE_SET_LOG_LEVEL(inspire::LogLevel::ISF_LOG_INFO);
+
+int32_t ret = 0;
+// Global init(you only need to call once)
+ret = INSPIREFACE_CONTEXT->Load("Pikachu");
+INSPIREFACE_CHECK_MSG(ret == HSUCCEED, "Load model failed");
+
+// Create face algorithm session
+inspire::ContextCustomParameter custom_param;
+custom_param.enable_recognition = true;
+auto max_detect_face = 5;
+auto detect_level_px = 320; // 160, 320, 640
+
+// Create a face algorithm session
+std::shared_ptr<inspire::Session> session(
+    inspire::Session::CreatePtr(inspire::DETECT_MODE_ALWAYS_DETECT, max_detect_face, custom_param, detect_level_px));
+
+// Load image(default format is BGR)
+inspirecv::Image image = inspirecv::Image::Create("face.jpg");
+
+// Create frame process
+inspirecv::FrameProcess process =
+    inspirecv::FrameProcess::Create(image, inspirecv::BGR, inspirecv::ROTATION_0);
+
+// Detect face
+std::vector<inspire::FaceTrackWrap> detect_results;
+ret = session->FaceDetectAndTrack(process, detect_results);
+INSPIRE_LOGI("Number of faces detected: %d", detect_results.size());
+if (detect_results.size() == 0)
+{
+    INSPIRE_LOGW("No face detected");
+    return -1;
+}
+
+// Copy image
+inspirecv::Image image_copy = image.Clone();
+// Draw face
+auto thickness = 2;
+for (auto &face : detect_results)
+{
+    auto rect = session->GetFaceBoundingBox(face);
+    auto lmk = session->GetNumOfFaceDenseLandmark(face);
+    image_copy.DrawRect(rect, inspirecv::Color::Red, thickness);
+    for (auto &point : lmk)
+    {
+        image_copy.DrawCircle(point.As<int>(), 0, inspirecv::Color::Orange, thickness);
+    }
+}
+// Save draw image
+image_copy.Write("result.jpg");
+
+// Face Embedding extract
+inspire::FaceEmbedding face_embedding;
+// Extract the first face feature
+ret = session->FaceFeatureExtract(process, detect_results[0], face_embedding);
+INSPIRE_LOGI("Length of face embedding: %d", face_embedding.embedding.size());
+
+...
+```
+
+Please note that the C++ interface has not been fully tested. It is recommended to use the **CAPI** interface as the primary option.
+
+**More detailed cases**:
+
+- [C Sample](cpp/sample/api/)
+- [C/C++ Sample](cpp/sample/cpp_api/)
 
 ### Python Native Sample
 
@@ -453,7 +552,7 @@ ret = isf.reload()
 assert ret, "Launch failure. Please ensure the resource path is correct."
 
 # Optional features, loaded during session creation based on the modules specified.
-opt = isf.HF_ENABLE_NONE
+opt = isf.HF_ENABLE_FACE_POSE
 session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_ALWAYS_DETECT)
 
 # Load the image using OpenCV.
@@ -488,6 +587,7 @@ We have an [Android SDK project](https://github.com/HyperInspire/inspireface-and
 Precompiled library support: 
 - arm64-v8a
 - armeabi-v7a
+- x86_64
 
 #### a. Quick to use in Android
 
@@ -652,7 +752,7 @@ For different scenarios, we currently provide several Packs, each containing mul
 | --- | --- | --- | --- | --- |
 | Pikachu | CPU | Lightweight edge-side models | Feb 20, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Pikachu) |
 | Megatron | CPU, GPU | Mobile and server models | Feb 20, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Megatron) |
-| Megatron_TRT | GPU | Cuda-based server models | Mar 16, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Megatron_TRT) |
+| Megatron_TRT | GPU | CUDA-based server models | Mar 16, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Megatron_TRT) |
 | Gundam-RV1109 | RKNPU | Supports RK1109 and RK1126 | Feb 20, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RV1109) |
 | Gundam-RV1106 | RKNPU | Supports RV1103 and RV1106 | Feb 20, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RV1106) |
 | Gundam-RK356X | RKNPU | Supports RK3566 and RK3568 | Feb 20, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RK356X) |
@@ -661,7 +761,8 @@ For different scenarios, we currently provide several Packs, each containing mul
 ## Short-Term Plan
 
 - [x] Add TensorRT backend support.
-- [ ] Add the RKNPU backend support for Android .
+- [x] Add Add c++ style header files.
+- [x] Add the RKNPU backend support for Android .
 - [ ] Example app project for Android and iOS samples.
 - [ ] Add the batch forward feature.
 

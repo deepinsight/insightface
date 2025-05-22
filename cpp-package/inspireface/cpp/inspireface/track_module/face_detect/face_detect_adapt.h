@@ -6,9 +6,9 @@
 #pragma once
 #ifndef INSPIRE_FACE_TRACK_MODULE_FACE_DETECT_FACE_DETECT_ADAPT_H
 #define INSPIRE_FACE_TRACK_MODULE_FACE_DETECT_FACE_DETECT_ADAPT_H
-#include "../../data_type.h"
+#include "data_type.h"
 #include "middleware/any_net_adapter.h"
-#include "middleware/nexus_processor/image_processor.h"
+#include "image_process/nexus_processor/image_processor.h"
 
 namespace inspire {
 
@@ -40,6 +40,12 @@ public:
 
     /** @brief Set face classification threshold */
     void SetClsThreshold(float mClsThreshold);
+
+    /**
+     * @brief Get the input size
+     * @return int The input size
+     */
+    int GetInputSize() const;
 
 private:
     /**

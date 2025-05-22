@@ -11,7 +11,14 @@ RUN apt-get update && \
         git
 
 # Install CMake
-RUN apt-get install -y --no-install-recommends cmake
+RUN apt-get install -y --no-install-recommends
+
+# Install CMake 3.20.6
+RUN cd /opt && \
+    wget https://github.com/Kitware/CMake/releases/download/v3.20.6/cmake-3.20.6-linux-x86_64.tar.gz && \
+    tar -zxvf cmake-3.20.6-linux-x86_64.tar.gz && \
+    ln -s /opt/cmake-3.20.6-linux-x86_64/bin/* /usr/local/bin/ && \
+    rm cmake-3.20.6-linux-x86_64.tar.gz
 
 # Set the URL and installation path for the Linaro toolchain
 ARG LINARO_URL="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/aarch64-linux-gnu/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu.tar.xz"

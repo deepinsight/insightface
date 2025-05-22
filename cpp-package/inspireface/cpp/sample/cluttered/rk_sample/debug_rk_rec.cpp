@@ -91,7 +91,7 @@ int main() {
         m_extract_ = std::make_shared<Extract>();
         InspireModel model;
         loader.LoadModel("feature", model);
-        m_extract_->loadData(model, InferenceWrapper::INFER_RKNN);
+        m_extract_->LoadData(model, InferenceWrapper::INFER_RKNN);
 
         cv::Mat image = cv::imread(names[0]);
         //        cv::Mat rgb;

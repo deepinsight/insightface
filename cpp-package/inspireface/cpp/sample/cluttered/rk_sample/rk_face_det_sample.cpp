@@ -31,7 +31,7 @@ int main() {
 
     std::shared_ptr<FaceDetect> m_face_detector_;
     m_face_detector_ = std::make_shared<FaceDetect>(320);
-    m_face_detector_->loadData(model, InferenceWrapper::INFER_RKNN);
+    m_face_detector_->LoadData(model, InferenceWrapper::INFER_RKNN);
 
     // Load a image
     cv::Mat image = cv::imread("test_res/images/face_sample.png");

@@ -38,6 +38,7 @@ cd ${BUILD_FOLDER_PATH}
 # export cross_compile_toolchain=/home/jingyuyan/software/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu
 cmake -DCMAKE_SYSTEM_NAME=Linux \
   -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
   -DCMAKE_SYSTEM_VERSION=1 \
   -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
   -DCMAKE_C_COMPILER=$ARM_CROSS_COMPILE_TOOLCHAIN/bin/aarch64-linux-gnu-gcc \
@@ -51,6 +52,7 @@ cmake -DCMAKE_SYSTEM_NAME=Linux \
   -DISF_ENABLE_BENCHMARK=OFF \
   -DISF_ENABLE_USE_LFW_DATA=OFF \
   -DISF_ENABLE_TEST_EVALUATION=OFF \
+  -Wno-dev \
   -DISF_BUILD_SHARED_LIBS=ON ${SCRIPT_DIR}
 
 make -j4

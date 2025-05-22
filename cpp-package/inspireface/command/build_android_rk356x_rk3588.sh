@@ -99,6 +99,7 @@ build() {
     cmake ${SCRIPT_DIR} \
         -G "Unix Makefiles" \
         -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
         -DCMAKE_C_FLAGS="-g0 ${CMAKE_C_FLAGS}" \
         -DCMAKE_CXX_FLAGS="-g0 ${CMAKE_CXX_FLAGS}" \
         -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
@@ -117,7 +118,8 @@ build() {
         -DISF_ENABLE_BENCHMARK=OFF \
         -DISF_ENABLE_USE_LFW_DATA=OFF \
         -DISF_ENABLE_TEST_EVALUATION=OFF \
-        -DISF_BUILD_SHARED_LIBS=ON 
+        -DISF_BUILD_SHARED_LIBS=ON \
+        -Wno-dev
     make -j4
     make install
     popd

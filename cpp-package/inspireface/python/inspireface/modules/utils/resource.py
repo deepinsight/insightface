@@ -34,7 +34,22 @@ class ResourceManager:
                 "url": "https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Megatron",
                 "filename": "Megatron",
                 "md5": "28f2284c5e7cf53b0e152ff524a416c966ab21e724002643b1304aedc4af6b06"
-            }
+            },
+            "Megatron_TRT": {
+                "url": "https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Megatron_TRT",
+                "filename": "Megatron_TRT",
+                "md5": "25fb4a585b73b0114ff0d64c2bc4071bd005a32a77149b66c474985077dc8f8a"
+            },
+            "Gundam_RK356X": {
+                "url": "https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RK356X",
+                "filename": "Gundam_RK356X",
+                "md5": "69ea23b89851a38c729b32bb0ed33cf62ebd3c891ea5d596afeadeb1f1c79c69"
+            },
+            "Gundam_RK3588": {
+                "url": "https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RK3588",
+                "filename": "Gundam_RK3588",
+                "md5": "030965798c5257aef11640657f85b89d82e9d170c3798d0b4f2b62ee6aa245ea"
+            },
         }
 
     def get_model(self, name: str, re_download: bool = False) -> str:

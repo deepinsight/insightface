@@ -7,14 +7,17 @@
 #include "intypedef.h"
 #include "inspireface_internal.h"
 #include "information.h"
-#include "feature_hub/feature_hub_db.h"
-#include "initialization_module/launch.h"
-#include "initialization_module/resource_manage.h"
-#include "recognition_module/similarity_converter.h"
+#include "feature_hub_db.h"
+#include <launch.h>
+#include "runtime_module/resource_manage.h"
+#include "similarity_converter.h"
 #include "middleware/inference_wrapper/inference_wrapper.h"
 #if defined(ISF_ENABLE_TENSORRT)
-#include "middleware/cuda_toolkit.h"
+#include "cuda_toolkit.h"
 #endif
+#include <cstdarg>
+
+#define FACE_FEATURE_SIZE 512  ///< Temporary setup
 
 using namespace inspire;
 
@@ -345,6 +348,31 @@ HResult HFReleaseInspireFaceSession(HFSession handle) {
     return HSUCCEED;
 }
 
+HResult HFSwitchLandmarkEngine(HFSessionLandmarkEngine engine) {
+    inspire::Launch::LandmarkEngine type;
+    if (engine == HF_LANDMARK_HYPLMV2_0_25) {
+        type = inspire::Launch::LANDMARK_HYPLMV2_0_25;
+    } else if (engine == HF_LANDMARK_HYPLMV2_0_50) {
+        type = inspire::Launch::LANDMARK_HYPLMV2_0_50;
+    } else if (engine == HF_LANDMARK_INSIGHTFACE_2D106_TRACK) {
+        type = inspire::Launch::LANDMARK_INSIGHTFACE_2D106_TRACK;
+    } else {
+        INSPIRE_LOGE("Unsupported Landmark engine.");
+        return HERR_INVALID_PARAM;
+    }
+    INSPIREFACE_CONTEXT->SwitchLandmarkEngine(type);
+    return HSUCCEED;
+}
+
+HResult HFQuerySupportedPixelLevelsForFaceDetection(PHFFaceDetectPixelList pixel_levels) {
+    auto ret = INSPIREFACE_CONTEXT->GetFaceDetectPixelList();
+    pixel_levels->size = ret.size();
+    for (int i = 0; i < ret.size(); i++) {
+        pixel_levels->pixel_level[i] = ret[i];
+    }
+    return HSUCCEED;
+}
+
 HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectMode detectMode, HInt32 maxDetectFaceNum, HInt32 detectPixelLevel,
                                    HInt32 trackByDetectModeFPS, HFSession *handle) {
     inspire::ContextCustomParameter param;
@@ -355,7 +383,7 @@ HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectM
     param.enable_ir_liveness = parameter.enable_ir_liveness;
     param.enable_recognition = parameter.enable_recognition;
     param.enable_face_attribute = parameter.enable_face_attribute;
-    param.enable_detect_mode_landmark = parameter.enable_detect_mode_landmark;
+    param.enable_face_pose = parameter.enable_face_pose;
     inspire::DetectModuleMode detMode = inspire::DETECT_MODE_ALWAYS_DETECT;
     if (detectMode == HF_DETECT_MODE_LIGHT_TRACK) {
         detMode = inspire::DETECT_MODE_LIGHT_TRACK;
@@ -401,8 +429,8 @@ HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode de
     if (customOption & HF_ENABLE_INTERACTION) {
         param.enable_interaction_liveness = true;
     }
-    if (customOption & HF_ENABLE_DETECT_MODE_LANDMARK) {
-        param.enable_detect_mode_landmark = true;
+    if (customOption & HF_ENABLE_FACE_POSE) {
+        param.enable_face_pose = true;
     }
     inspire::DetectModuleMode detMode = inspire::DETECT_MODE_ALWAYS_DETECT;
     if (detectMode == HF_DETECT_MODE_LIGHT_TRACK) {
@@ -427,56 +455,59 @@ HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode de
 
 HResult HFLaunchInspireFace(HPath resourcePath) {
     std::string path(resourcePath);
-    return INSPIRE_LAUNCH->Load(resourcePath);
+    return INSPIREFACE_CONTEXT->Load(resourcePath);
 }
 
 HResult HFReloadInspireFace(HPath resourcePath) {
     std::string path(resourcePath);
-    return INSPIRE_LAUNCH->Reload(resourcePath);
+    return INSPIREFACE_CONTEXT->Reload(resourcePath);
 }
 
 HResult HFTerminateInspireFace() {
-    INSPIRE_LAUNCH->Unload();
+    INSPIREFACE_CONTEXT->Unload();
     return HSUCCEED;
 }
 
 HResult HFQueryInspireFaceLaunchStatus(HInt32 *status) {
-    *status = INSPIRE_LAUNCH->isMLoad();
+    *status = INSPIREFACE_CONTEXT->isMLoad();
     return HSUCCEED;
 }
 
 HResult HFFeatureHubDataDisable() {
-    return FEATURE_HUB_DB->DisableHub();
+    return INSPIREFACE_FEATURE_HUB->DisableHub();
 }
 
 HResult HFSetExpansiveHardwareRockchipDmaHeapPath(HPath path) {
-    INSPIRE_LAUNCH->SetRockchipDmaHeapPath(path);
+    INSPIREFACE_CONTEXT->SetRockchipDmaHeapPath(path);
     return HSUCCEED;
 }
 
 HResult HFQueryExpansiveHardwareRockchipDmaHeapPath(HString path) {
-    strcpy(path, INSPIRE_LAUNCH->GetRockchipDmaHeapPath().c_str());
+    strcpy(path, INSPIREFACE_CONTEXT->GetRockchipDmaHeapPath().c_str());
     return HSUCCEED;
 }
 
 HResult HFSetAppleCoreMLInferenceMode(HFAppleCoreMLInferenceMode mode) {
     if (mode == HF_APPLE_COREML_INFERENCE_MODE_CPU) {
-        INSPIRE_LAUNCH->SetGlobalCoreMLInferenceMode(InferenceWrapper::COREML_CPU);
+        INSPIREFACE_CONTEXT->SetGlobalCoreMLInferenceMode(inspire::Launch::NN_INFERENCE_CPU);
     } else if (mode == HF_APPLE_COREML_INFERENCE_MODE_GPU) {
-        INSPIRE_LAUNCH->SetGlobalCoreMLInferenceMode(InferenceWrapper::COREML_GPU);
+        INSPIREFACE_CONTEXT->SetGlobalCoreMLInferenceMode(inspire::Launch::NN_INFERENCE_COREML_GPU);
     } else if (mode == HF_APPLE_COREML_INFERENCE_MODE_ANE) {
-        INSPIRE_LAUNCH->SetGlobalCoreMLInferenceMode(InferenceWrapper::COREML_ANE);
+        INSPIREFACE_CONTEXT->SetGlobalCoreMLInferenceMode(inspire::Launch::NN_INFERENCE_COREML_ANE);
+    } else {
+        INSPIRE_LOGE("Unsupported Apple CoreML inference mode.");
+        return HERR_INVALID_PARAM;
     }
     return HSUCCEED;
 }
 
 HResult HFSetCudaDeviceId(int32_t device_id) {
-    INSPIRE_LAUNCH->SetCudaDeviceId(device_id);
+    INSPIREFACE_CONTEXT->SetCudaDeviceId(device_id);
     return HSUCCEED;
 }
 
 HResult HFGetCudaDeviceId(int32_t *device_id) {
-    *device_id = INSPIRE_LAUNCH->GetCudaDeviceId();
+    *device_id = INSPIREFACE_CONTEXT->GetCudaDeviceId();
     return HSUCCEED;
 }
 
@@ -530,7 +561,7 @@ HResult HFFeatureHubDataEnable(HFFeatureHubConfiguration configuration) {
     param.enable_persistence = configuration.enablePersistence;
     param.recognition_threshold = configuration.searchThreshold;
     param.search_mode = (inspire::SearchMode)configuration.searchMode;
-    auto ret = FEATURE_HUB_DB->EnableHub(param);
+    auto ret = INSPIREFACE_FEATURE_HUB->EnableHub(param);
     return ret;
 }
 
@@ -544,6 +575,20 @@ HResult HFSessionSetTrackPreviewSize(HFSession session, HInt32 previewSize) {
     }
     return ctx->impl.SetTrackPreviewSize(previewSize);
 }
+
+HResult HFSessionGetTrackPreviewSize(HFSession session, HInt32 *previewSize) {
+    if (session == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    HF_FaceAlgorithmSession *ctx = (HF_FaceAlgorithmSession *)session;
+    if (ctx == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    *previewSize = ctx->impl.GetTrackPreviewSize();
+    return HSUCCEED;
+}
+
+
 
 HResult HFSessionSetFilterMinimumFacePixelSize(HFSession session, HInt32 minSize) {
     if (session == nullptr) {
@@ -615,6 +660,8 @@ HResult HFSessionSetTrackModeDetectInterval(HFSession session, HInt32 num) {
     return ctx->impl.SetTrackModeDetectInterval(num);
 }
 
+
+
 HResult HFExecuteFaceTrack(HFSession session, HFImageStream streamHandle, PHFMultipleFaceData results) {
     if (session == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
@@ -643,16 +690,28 @@ HResult HFExecuteFaceTrack(HFSession session, HFImageStream streamHandle, PHFMul
     return ret;
 }
 
+HResult HFSessionLastFaceDetectionGetDebugPreviewImageSize(HFSession session, HInt32 *size) {
+    if (session == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    HF_FaceAlgorithmSession *ctx = (HF_FaceAlgorithmSession *)session;
+    if (ctx == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    *size = ctx->impl.GetDebugPreviewImageSize();
+    return HSUCCEED;
+}
+
 HResult HFCopyFaceBasicToken(HFFaceBasicToken token, HPBuffer buffer, HInt32 bufferSize) {
-    if (bufferSize < sizeof(inspire::HyperFaceData)) {
+    if (bufferSize < sizeof(inspire::FaceTrackWrap)) {
         return HERR_INVALID_BUFFER_SIZE;
     }
-    std::memcpy(buffer, token.data, sizeof(inspire::HyperFaceData));
+    std::memcpy(buffer, token.data, sizeof(inspire::FaceTrackWrap));
     return HSUCCEED;
 }
 
 HResult HFGetFaceBasicTokenSize(HPInt32 bufferSize) {
-    *bufferSize = sizeof(inspire::HyperFaceData);
+    *bufferSize = sizeof(inspire::FaceTrackWrap);
     return HSUCCEED;
 }
 
@@ -668,7 +727,7 @@ HResult HFGetFaceDenseLandmarkFromFaceToken(HFFaceBasicToken singleFace, HPoint2
     inspire::FaceBasicData data;
     data.dataSize = singleFace.size;
     data.data = singleFace.data;
-    HyperFaceData face = {0};
+    FaceTrackWrap face = {0};
     HInt32 ret;
     ret = RunDeserializeHyperFaceData((char *)data.data, data.dataSize, face);
     if (ret != HSUCCEED) {
@@ -692,7 +751,7 @@ HResult HFGetFaceFiveKeyPointsFromFaceToken(HFFaceBasicToken singleFace, HPoint2
     inspire::FaceBasicData data;
     data.dataSize = singleFace.size;
     data.data = singleFace.data;
-    HyperFaceData face = {0};
+    FaceTrackWrap face = {0};
     HInt32 ret;
     ret = RunDeserializeHyperFaceData((char *)data.data, data.dataSize, face);
     if (ret != HSUCCEED) {
@@ -730,7 +789,7 @@ HResult HFSessionPrintTrackCostSpend(HFSession session) {
 }
 
 HResult HFFeatureHubFaceSearchThresholdSetting(float threshold) {
-    FEATURE_HUB_DB->SetRecognitionThreshold(threshold);
+    INSPIREFACE_FEATURE_HUB->SetRecognitionThreshold(threshold);
     return HSUCCEED;
 }
 
@@ -762,6 +821,35 @@ HResult HFFaceFeatureExtract(HFSession session, HFImageStream streamHandle, HFFa
     return ret;
 }
 
+HResult HFFaceFeatureExtractTo(HFSession session, HFImageStream streamHandle, HFFaceBasicToken singleFace, HFFaceFeature feature) {
+    if (session == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    if (streamHandle == nullptr) {
+        return HERR_INVALID_IMAGE_STREAM_HANDLE;
+    }
+    HF_FaceAlgorithmSession *ctx = (HF_FaceAlgorithmSession *)session;
+    if (ctx == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    HF_CameraStream *stream = (HF_CameraStream *)streamHandle;
+    if (stream == nullptr) {
+        return HERR_INVALID_IMAGE_STREAM_HANDLE;
+    }
+    if (singleFace.data == nullptr || singleFace.size <= 0) {
+        return HERR_INVALID_FACE_TOKEN;
+    }
+    inspire::FaceBasicData data;
+    data.dataSize = singleFace.size;
+    data.data = singleFace.data;
+    auto ret = ctx->impl.FaceFeatureExtract(stream->impl, data);
+    for (int i = 0; i < ctx->impl.GetFaceFeatureCache().size(); ++i) {
+        feature.data[i] = ctx->impl.GetFaceFeatureCache()[i];
+    }
+
+    return HSUCCEED;
+}
+
 HResult HFFaceFeatureExtractCpy(HFSession session, HFImageStream streamHandle, HFFaceBasicToken singleFace, HPFloat feature) {
     if (session == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
@@ -789,6 +877,25 @@ HResult HFFaceFeatureExtractCpy(HFSession session, HFImageStream streamHandle, H
     }
 
     return ret;
+}
+
+HResult HFCreateFaceFeature(PHFFaceFeature feature) {
+    if (feature == nullptr) {
+        return HERR_INVALID_FACE_FEATURE;
+    }
+    feature->size = FACE_FEATURE_SIZE;
+    feature->data = new HFloat[FACE_FEATURE_SIZE];
+    RESOURCE_MANAGE->createFaceFeature((long)feature);
+    return HSUCCEED;
+}
+
+HResult HFReleaseFaceFeature(PHFFaceFeature feature) {
+    if (feature == nullptr) {
+        return HERR_INVALID_FACE_FEATURE;
+    }
+    delete[] feature->data;
+    RESOURCE_MANAGE->releaseFaceFeature((long)feature);
+    return HSUCCEED;
 }
 
 HResult HFFaceGetFaceAlignmentImage(HFSession session, HFImageStream streamHandle, HFFaceBasicToken singleFace, HFImageBitmap *handle) {
@@ -824,6 +931,30 @@ HResult HFFaceGetFaceAlignmentImage(HFSession session, HFImageStream streamHandl
     return HSUCCEED;
 }
 
+HResult HFFaceFeatureExtractWithAlignmentImage(HFSession session, HFImageStream streamHandle, HFFaceFeature feature) {
+    if (session == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    if (streamHandle == nullptr) {
+        return HERR_INVALID_IMAGE_STREAM_HANDLE;
+    }
+    HF_FaceAlgorithmSession *ctx = (HF_FaceAlgorithmSession *)session;
+    if (ctx == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    HF_CameraStream *stream = (HF_CameraStream *)streamHandle;
+    if (stream == nullptr) {
+        return HERR_INVALID_IMAGE_STREAM_HANDLE;
+    }
+    Embedded embedded;
+    float norm;
+    auto ret = ctx->impl.FaceRecognitionModule()->FaceExtractWithAlignmentImage(stream->impl, embedded, norm);
+    for (int i = 0; i < embedded.size(); ++i) {
+        feature.data[i] = embedded[i];
+    }
+    return ret;
+}
+
 HResult HFFaceComparison(HFFaceFeature feature1, HFFaceFeature feature2, HPFloat result) {
     if (feature1.data == nullptr || feature2.data == nullptr) {
         return HERR_INVALID_FACE_FEATURE;
@@ -834,14 +965,14 @@ HResult HFFaceComparison(HFFaceFeature feature1, HFFaceFeature feature2, HPFloat
     }
     *result = 0.0f;
     float res = -1.0f;
-    auto ret = FEATURE_HUB_DB->CosineSimilarity(feature1.data, feature2.data, feature1.size, res);
+    auto ret = INSPIREFACE_FEATURE_HUB->CosineSimilarity(feature1.data, feature2.data, feature1.size, res);
     *result = res;
 
     return ret;
 }
 
 HResult HFGetRecommendedCosineThreshold(HPFloat threshold) {
-    if (!INSPIRE_LAUNCH->isMLoad()) {
+    if (!INSPIREFACE_CONTEXT->isMLoad()) {
         INSPIRE_LOGW("Inspireface is not launched, using default threshold 0.48");
     }
     *threshold = SIMILARITY_CONVERTER_GET_RECOMMENDED_COSINE_THRESHOLD();
@@ -849,7 +980,7 @@ HResult HFGetRecommendedCosineThreshold(HPFloat threshold) {
 }
 
 HResult HFCosineSimilarityConvertToPercentage(HFloat similarity, HPFloat result) {
-    if (!INSPIRE_LAUNCH->isMLoad()) {
+    if (!INSPIREFACE_CONTEXT->isMLoad()) {
         INSPIRE_LOGW("Inspireface is not launched.");
     }
     *result = SIMILARITY_CONVERTER_RUN(similarity);
@@ -857,7 +988,7 @@ HResult HFCosineSimilarityConvertToPercentage(HFloat similarity, HPFloat result)
 }
 
 HResult HFUpdateCosineSimilarityConverter(HFSimilarityConverterConfig config) {
-    if (!INSPIRE_LAUNCH->isMLoad()) {
+    if (!INSPIREFACE_CONTEXT->isMLoad()) {
         INSPIRE_LOGW("Inspireface is not launched.");
     }
     inspire::SimilarityConverterConfig cfg;
@@ -871,7 +1002,7 @@ HResult HFUpdateCosineSimilarityConverter(HFSimilarityConverterConfig config) {
 }
 
 HResult HFGetCosineSimilarityConverter(PHFSimilarityConverterConfig config) {
-    if (!INSPIRE_LAUNCH->isMLoad()) {
+    if (!INSPIREFACE_CONTEXT->isMLoad()) {
         INSPIRE_LOGW("Inspireface is not launched.");
     }
     inspire::SimilarityConverterConfig cfg = SIMILARITY_CONVERTER_GET_CONFIG();
@@ -884,7 +1015,7 @@ HResult HFGetCosineSimilarityConverter(PHFSimilarityConverterConfig config) {
 }
 
 HResult HFGetFeatureLength(HPInt32 num) {
-    *num = 512;
+    *num = FACE_FEATURE_SIZE;
 
     return HSUCCEED;
 }
@@ -898,7 +1029,7 @@ HResult HFFeatureHubInsertFeature(HFFaceFeatureIdentity featureIdentity, HPFaceI
     for (int i = 0; i < featureIdentity.feature->size; ++i) {
         feat.push_back(featureIdentity.feature->data[i]);
     }
-    HInt32 ret = FEATURE_HUB_DB->FaceFeatureInsert(feat, featureIdentity.id, *allocId);
+    HInt32 ret = INSPIREFACE_FEATURE_HUB->FaceFeatureInsert(feat, featureIdentity.id, *allocId);
 
     return ret;
 }
@@ -914,10 +1045,10 @@ HResult HFFeatureHubFaceSearch(HFFaceFeature searchFeature, HPFloat confidence, 
     }
     *confidence = -1.0f;
     inspire::FaceSearchResult result;
-    HInt32 ret = FEATURE_HUB_DB->SearchFaceFeature(feat, result);
-    mostSimilar->feature = (HFFaceFeature *)FEATURE_HUB_DB->GetFaceFeaturePtrCache().get();
-    mostSimilar->feature->data = (HFloat *)FEATURE_HUB_DB->GetSearchFaceFeatureCache().data();
-    mostSimilar->feature->size = FEATURE_HUB_DB->GetSearchFaceFeatureCache().size();
+    HInt32 ret = INSPIREFACE_FEATURE_HUB->SearchFaceFeature(feat, result);
+    mostSimilar->feature = (HFFaceFeature *)INSPIREFACE_FEATURE_HUB->GetFaceFeaturePtrCache().get();
+    mostSimilar->feature->data = (HFloat *)INSPIREFACE_FEATURE_HUB->GetSearchFaceFeatureCache().data();
+    mostSimilar->feature->size = INSPIREFACE_FEATURE_HUB->GetSearchFaceFeatureCache().size();
     mostSimilar->id = result.id;
     if (mostSimilar->id != -1) {
         *confidence = result.similarity;
@@ -935,18 +1066,18 @@ HResult HFFeatureHubFaceSearchTopK(HFFaceFeature searchFeature, HInt32 topK, PHF
     for (int i = 0; i < searchFeature.size; ++i) {
         feat.push_back(searchFeature.data[i]);
     }
-    HInt32 ret = FEATURE_HUB_DB->SearchFaceFeatureTopKCache(feat, topK);
+    HInt32 ret = INSPIREFACE_FEATURE_HUB->SearchFaceFeatureTopKCache(feat, topK);
     if (ret == HSUCCEED) {
-        results->size = FEATURE_HUB_DB->GetTopKConfidence().size();
-        results->confidence = FEATURE_HUB_DB->GetTopKConfidence().data();
-        results->ids = FEATURE_HUB_DB->GetTopKCustomIdsCache().data();
+        results->size = INSPIREFACE_FEATURE_HUB->GetTopKConfidence().size();
+        results->confidence = INSPIREFACE_FEATURE_HUB->GetTopKConfidence().data();
+        results->ids = INSPIREFACE_FEATURE_HUB->GetTopKCustomIdsCache().data();
     }
 
     return ret;
 }
 
 HResult HFFeatureHubFaceRemove(HFaceId id) {
-    auto ret = FEATURE_HUB_DB->FaceFeatureRemove(id);
+    auto ret = INSPIREFACE_FEATURE_HUB->FaceFeatureRemove(id);
     return ret;
 }
 
@@ -960,18 +1091,18 @@ HResult HFFeatureHubFaceUpdate(HFFaceFeatureIdentity featureIdentity) {
         feat.push_back(featureIdentity.feature->data[i]);
     }
 
-    auto ret = FEATURE_HUB_DB->FaceFeatureUpdate(feat, featureIdentity.id);
+    auto ret = INSPIREFACE_FEATURE_HUB->FaceFeatureUpdate(feat, featureIdentity.id);
 
     return ret;
 }
 
 HResult HFFeatureHubGetFaceIdentity(HFaceId id, PHFFaceFeatureIdentity identity) {
-    auto ret = FEATURE_HUB_DB->GetFaceFeature(id);
+    auto ret = INSPIREFACE_FEATURE_HUB->GetFaceFeature(id);
     if (ret == HSUCCEED) {
         identity->id = id;
-        identity->feature = (HFFaceFeature *)FEATURE_HUB_DB->GetFaceFeaturePtrCache().get();
-        identity->feature->data = (HFloat *)FEATURE_HUB_DB->GetFaceFeaturePtrCache()->data;
-        identity->feature->size = FEATURE_HUB_DB->GetFaceFeaturePtrCache()->dataSize;
+        identity->feature = (HFFaceFeature *)INSPIREFACE_FEATURE_HUB->GetFaceFeaturePtrCache().get();
+        identity->feature->data = (HFloat *)INSPIREFACE_FEATURE_HUB->GetFaceFeaturePtrCache()->data;
+        identity->feature->size = INSPIREFACE_FEATURE_HUB->GetFaceFeaturePtrCache()->dataSize;
     } else {
         identity->id = -1;
     }
@@ -1010,10 +1141,9 @@ HResult HFMultipleFacePipelineProcess(HFSession session, HFImageStream streamHan
     param.enable_ir_liveness = parameter.enable_ir_liveness;
     param.enable_recognition = parameter.enable_recognition;
     param.enable_face_attribute = parameter.enable_face_attribute;
-    param.enable_detect_mode_landmark = parameter.enable_detect_mode_landmark;
 
     HResult ret;
-    std::vector<inspire::HyperFaceData> data;
+    std::vector<inspire::FaceTrackWrap> data;
     data.resize(faces->detectedNum);
     for (int i = 0; i < faces->detectedNum; ++i) {
         auto &face = data[i];
@@ -1072,12 +1202,12 @@ HResult HFMultipleFacePipelineProcessOptional(HFSession session, HFImageStream s
     if (customOption & HF_ENABLE_INTERACTION) {
         param.enable_interaction_liveness = true;
     }
-    if (customOption & HF_ENABLE_DETECT_MODE_LANDMARK) {
-        param.enable_detect_mode_landmark = true;
+    if (customOption & HF_ENABLE_FACE_POSE) {
+        param.enable_face_pose = true;
     }
 
     HResult ret;
-    std::vector<inspire::HyperFaceData> data;
+    std::vector<inspire::FaceTrackWrap> data;
     data.resize(faces->detectedNum);
     for (int i = 0; i < faces->detectedNum; ++i) {
         auto &face = data[i];
@@ -1206,20 +1336,20 @@ HResult HFGetFaceAttributeResult(HFSession session, PHFFaceAttributeResult resul
 }
 
 HResult HFFeatureHubGetFaceCount(HInt32 *count) {
-    *count = FEATURE_HUB_DB->GetFaceFeatureCount();
+    *count = INSPIREFACE_FEATURE_HUB->GetFaceFeatureCount();
     return HSUCCEED;
 }
 
 HResult HFFeatureHubViewDBTable() {
-    FEATURE_HUB_DB->ViewDBTable();
+    INSPIREFACE_FEATURE_HUB->ViewDBTable();
     return HSUCCEED;
 }
 
 HResult HFFeatureHubGetExistingIds(PHFFeatureHubExistingIds ids) {
-    auto ret = FEATURE_HUB_DB->GetAllIds();
+    auto ret = INSPIREFACE_FEATURE_HUB->GetAllIds();
     if (ret == HSUCCEED) {
-        ids->size = FEATURE_HUB_DB->GetExistingIds().size();
-        ids->ids = FEATURE_HUB_DB->GetExistingIds().data();
+        ids->size = INSPIREFACE_FEATURE_HUB->GetExistingIds().size();
+        ids->ids = INSPIREFACE_FEATURE_HUB->GetExistingIds().data();
     }
     return ret;
 }

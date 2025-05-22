@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     void test() {
         InspireFaceVersion version = InspireFace.QueryInspireFaceVersion();
-        Log.i(TAG, "InspireFace Version: " + version.major + "." + version.minor + "." + version.patch + " " + version.information);
+        Log.i(TAG, "InspireFace Version: " + version.major + "." + version.minor + "." + version.patch);
         String dbPath = "/storage/emulated/0/Android/data/com.example.inspireface_example/files/f.db";
         FeatureHubConfiguration configuration = InspireFace.CreateFeatureHubConfiguration()
                 .setEnablePersistence(false)

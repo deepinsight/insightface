@@ -7,9 +7,9 @@
 
 #include "log.h"
 #include "track_module/landmark/face_landmark_adapt.h"
+#include "track_module/landmark/landmark_param.h"
 #include "recognition_module/dest_const.h"
 #include "herror.h"
-#include "liveness/order_of_hyper_landmark.h"
 
 namespace inspire {
 
@@ -31,7 +31,7 @@ FacePipelineModule::FacePipelineModule(InspireArchive &archive, bool enableLiven
             INSPIRE_LOGE("InitAgePredict error.");
         }
     }
-
+    m_landmark_param_ = archive.GetLandmarkParam();
     // Initialize the mask detection model
     if (m_enable_mask_detect_) {
         InspireModel maskModel;
@@ -73,9 +73,11 @@ FacePipelineModule::FacePipelineModule(InspireArchive &archive, bool enableLiven
     }
 }
 
-int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, const HyperFaceData &face, FaceProcessFunctionOption proc) {
+int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const FaceTrackWrap &face, FaceProcessFunctionOption proc) {
+    // Original image
     inspirecv::Image originImage;
     inspirecv::Image scaleImage;
+    std::vector<inspirecv::Point2f> stand_lmk;
     switch (proc) {
         case PROCESS_MASK: {
             if (m_mask_predict_ == nullptr) {
@@ -97,8 +99,29 @@ int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, c
             if (m_rgb_anti_spoofing_ == nullptr) {
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
+            // New scheme: padding differences cause errors in inference results
+            // inspirecv::TransformMatrix rotation_mode_affine = processor.GetAffineMatrix();
+            // if (stand_lmk.empty()) {
+            //     std::vector<inspirecv::Point2f> lmk;
+            //     for (const auto &p : face.densityLandmark) {
+            //         lmk.emplace_back(p.x, p.y);
+            //     }
+            //     stand_lmk = inspirecv::ApplyTransformToPoints(lmk, rotation_mode_affine.GetInverse());
+            // }
+
+            // auto rect_face = inspirecv::MinBoundingRect(stand_lmk);
+            // auto rect_pts = rect_face.Square(2.7f).As<float>().ToFourVertices();
+            // std::vector<inspirecv::Point2f> dst_pts = {{0, 0}, {112, 0}, {112, 112}, {0, 112}};
+            // std::vector<inspirecv::Point2f> camera_pts = inspirecv::ApplyTransformToPoints(rect_pts, rotation_mode_affine);
+
+            // auto affine = inspirecv::SimilarityTransformEstimate(camera_pts, dst_pts);
+            // auto image_affine = processor.ExecuteImageAffineProcessing(affine, 112, 112);
+            // image_affine.Write("liveness_affine.jpg");
 
             if (originImage.Empty()) {
+                // This is a poor approach that impacts performance, 
+                // but in order to capture clearer images and improve liveness detection accuracy, 
+                // we have to keep it.
                 originImage = processor.ExecuteImageScaleProcessing(1.0, true);
             }
             inspirecv::Rect2i oriRect(face.rect.x, face.rect.y, face.rect.width, face.rect.height);
@@ -106,6 +129,7 @@ int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, c
             auto crop = originImage.Crop(rect);
             auto score = (*m_rgb_anti_spoofing_)(crop);
             // crop.Show();
+            // crop.Resize(112, 112).Write("liveness.jpg");
             faceLivenessCache = score;
             break;
         }
@@ -113,61 +137,37 @@ int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, c
             if (m_blink_predict_ == nullptr) {
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
-            if (originImage.Empty()) {
-                originImage = processor.ExecuteImageScaleProcessing(1.0, true);
-            }
-            std::vector<std::vector<int>> order_list = {HLMK_LEFT_EYE_POINTS_INDEX, HLMK_RIGHT_EYE_POINTS_INDEX};
+            std::vector<std::vector<int>> order_list = {m_landmark_param_->semantic_index.left_eye_region, m_landmark_param_->semantic_index.right_eye_region};
             eyesStatusCache = {0, 0};
             inspirecv::Point2f left_eye = inspirecv::Point2f(face.keyPoints[0].x, face.keyPoints[0].y);
             inspirecv::Point2f right_eye = inspirecv::Point2f(face.keyPoints[1].x, face.keyPoints[1].y);
             std::vector<inspirecv::Point2f> eyes = {left_eye, right_eye};
-            auto new_eyes_points = inspirecv::ApplyTransformToPoints(eyes, processor.GetAffineMatrix().GetInverse());
+            // Get affine matrix
+            inspirecv::TransformMatrix rotation_mode_affine = processor.GetAffineMatrix();
+            // Get stand landmark
+            if (stand_lmk.empty()) {
+                std::vector<inspirecv::Point2f> lmk;
+                for (const auto &p : face.densityLandmark) {
+                    lmk.emplace_back(p.x, p.y);
+                }
+                stand_lmk = inspirecv::ApplyTransformToPoints(lmk, rotation_mode_affine.GetInverse());
+            }
             for (size_t i = 0; i < order_list.size(); i++) {
                 const auto &index = order_list[i];
                 std::vector<inspirecv::Point2i> points;
                 for (const auto &idx : index) {
-                    points.emplace_back(face.densityLandmark[idx].x, face.densityLandmark[idx].y);
+                    points.emplace_back(stand_lmk[idx].GetX(), stand_lmk[idx].GetY());
                 }
-                auto rect = inspirecv::MinBoundingRect(points);
-                auto mat = processor.GetAffineMatrix();
-                auto new_rect = inspirecv::ApplyTransformToRect(rect, mat.GetInverse()).Square(1.3f);
-                // Use more accurate 5 key point calibration
-                auto cx = new_eyes_points[i].GetX();
-                auto cy = new_eyes_points[i].GetY();
-                new_rect.SetX(cx - new_rect.GetWidth() / 2);
-                new_rect.SetY(cy - new_rect.GetHeight() / 2);
+                auto rect_eye = inspirecv::MinBoundingRect(points).Square(1.5f);
+                auto rect_pts_eye = rect_eye.As<float>().ToFourVertices();
+                std::vector<inspirecv::Point2f> dst_pts_eye = {{0, 0}, {64, 0}, {64, 64}, {0, 64}};
+                std::vector<inspirecv::Point2f> camera_pts_eye = inspirecv::ApplyTransformToPoints(rect_pts_eye, rotation_mode_affine);
 
-                // Ensure rect stays within image bounds while maintaining aspect ratio
-                float originalAspectRatio = new_rect.GetWidth() / new_rect.GetHeight();
-
-                // Adjust position and size to fit within image bounds
-                if (new_rect.GetX() < 0) {
-                    new_rect.SetWidth(new_rect.GetWidth() + new_rect.GetX());  // Reduce width by overflow amount
-                    new_rect.SetX(0);
-                }
-                if (new_rect.GetY() < 0) {
-                    new_rect.SetHeight(new_rect.GetHeight() + new_rect.GetY());  // Reduce height by overflow amount
-                    new_rect.SetY(0);
-                }
-
-                float rightOverflow = (new_rect.GetX() + new_rect.GetWidth()) - originImage.Width();
-                if (rightOverflow > 0) {
-                    new_rect.SetWidth(new_rect.GetWidth() - rightOverflow);
-                }
-
-                float bottomOverflow = (new_rect.GetY() + new_rect.GetHeight()) - originImage.Height();
-                if (bottomOverflow > 0) {
-                    new_rect.SetHeight(new_rect.GetHeight() - bottomOverflow);
-                }
-
-                // Maintain minimum size (e.g., 20x20 ixels)
-                const float minSize = 20.0f;
-                if (new_rect.GetWidth() < minSize || new_rect.GetHeight() < minSize) {
-                    continue;  // Skip this eye if the crop region is too small
-                }
-
-                auto crop = originImage.Crop(new_rect);
-                auto score = (*m_blink_predict_)(crop);
+                auto affine_eye = inspirecv::SimilarityTransformEstimate(camera_pts_eye, dst_pts_eye);
+                auto eye_affine = processor.ExecuteImageAffineProcessing(affine_eye, 64, 64);
+                // eye_affine.Write("eye_"+std::to_string(i)+".jpg");
+                // auto crop = originImage.Crop(new_rect);
+                auto score = (*m_blink_predict_)(eye_affine);
                 eyesStatusCache[i] = score;
             }
             break;
@@ -190,12 +190,12 @@ int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, c
     return HSUCCEED;
 }
 
-int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, FaceObjectInternal &face) {
+int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, FaceObjectInternal &face) {
     // In the tracking state, the count meets the requirements or the pipeline is executed in the detection state
     auto lmk = face.keyPointFive;
-    std::vector<inspirecv::Point2f> lmk_5 = {lmk[FaceLandmarkAdapt::LEFT_EYE_CENTER], lmk[FaceLandmarkAdapt::RIGHT_EYE_CENTER],
-                                             lmk[FaceLandmarkAdapt::NOSE_CORNER], lmk[FaceLandmarkAdapt::MOUTH_LEFT_CORNER],
-                                             lmk[FaceLandmarkAdapt::MOUTH_RIGHT_CORNER]};
+    std::vector<inspirecv::Point2f> lmk_5 = {lmk[m_landmark_param_->semantic_index.left_eye_center], lmk[m_landmark_param_->semantic_index.right_eye_center],
+                                             lmk[m_landmark_param_->semantic_index.nose_corner], lmk[m_landmark_param_->semantic_index.mouth_left_corner],
+                                             lmk[m_landmark_param_->semantic_index.mouth_right_corner]};
     auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, lmk_5);
     auto crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
     if (m_mask_predict_ != nullptr) {
@@ -225,7 +225,7 @@ int32_t FacePipelineModule::Process(inspirecv::InspireImageProcess &processor, F
 
 int32_t FacePipelineModule::InitFaceAttributePredict(InspireModel &model) {
     m_attribute_predict_ = std::make_shared<FaceAttributePredictAdapt>();
-    auto ret = m_attribute_predict_->loadData(model, model.modelType);
+    auto ret = m_attribute_predict_->LoadData(model, model.modelType);
     if (ret != InferenceWrapper::WrapperOk) {
         return HERR_ARCHIVE_LOAD_FAILURE;
     }
@@ -234,7 +234,7 @@ int32_t FacePipelineModule::InitFaceAttributePredict(InspireModel &model) {
 
 int32_t FacePipelineModule::InitMaskPredict(InspireModel &model) {
     m_mask_predict_ = std::make_shared<MaskPredictAdapt>();
-    auto ret = m_mask_predict_->loadData(model, model.modelType);
+    auto ret = m_mask_predict_->LoadData(model, model.modelType);
     if (ret != InferenceWrapper::WrapperOk) {
         return HERR_ARCHIVE_LOAD_FAILURE;
     }
@@ -248,7 +248,7 @@ int32_t FacePipelineModule::InitRBGAntiSpoofing(InspireModel &model) {
 #else
     m_rgb_anti_spoofing_ = std::make_shared<RBGAntiSpoofingAdapt>(input_size[0]);
 #endif
-    auto ret = m_rgb_anti_spoofing_->loadData(model, model.modelType);
+    auto ret = m_rgb_anti_spoofing_->LoadData(model, model.modelType);
     if (ret != InferenceWrapper::WrapperOk) {
         return HERR_ARCHIVE_LOAD_FAILURE;
     }
@@ -257,7 +257,7 @@ int32_t FacePipelineModule::InitRBGAntiSpoofing(InspireModel &model) {
 
 int32_t FacePipelineModule::InitBlinkFromLivenessInteraction(InspireModel &model) {
     m_blink_predict_ = std::make_shared<BlinkPredictAdapt>();
-    auto ret = m_blink_predict_->loadData(model, model.modelType);
+    auto ret = m_blink_predict_->LoadData(model, model.modelType);
     if (ret != InferenceWrapper::WrapperOk) {
         return HERR_ARCHIVE_LOAD_FAILURE;
     }

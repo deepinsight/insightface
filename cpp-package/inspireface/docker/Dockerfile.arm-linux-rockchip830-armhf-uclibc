@@ -13,7 +13,14 @@ RUN apt-get update && \
         unzip
 
 # Install CMake
-RUN apt-get install -y --no-install-recommends cmake
+RUN apt-get install -y --no-install-recommends
+
+# Install CMake 3.20.6
+RUN cd /opt && \
+    wget https://github.com/Kitware/CMake/releases/download/v3.20.6/cmake-3.20.6-linux-x86_64.tar.gz && \
+    tar -zxvf cmake-3.20.6-linux-x86_64.tar.gz && \
+    ln -s /opt/cmake-3.20.6-linux-x86_64/bin/* /usr/local/bin/ && \
+    rm cmake-3.20.6-linux-x86_64.tar.gz
 
 # Clone RV1106 toolchain repository
 RUN git clone https://github.com/tunmx/arm-rockchip830-linux-uclibcgnueabihf.git /opt/toolchain

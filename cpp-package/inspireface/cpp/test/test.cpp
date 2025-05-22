@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
         TEST_ERROR_PRINT("An error occurred while starting InspireFace: {}", ret);
         return ret;
     }
-
+    
     // Set log level
     HFSetLogLevel(HF_LOG_INFO);
 

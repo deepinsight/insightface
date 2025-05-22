@@ -48,7 +48,7 @@ public:
         index = 0;
     }
 
-    FaceActionList AnalysisFaceAction() {
+    FaceActionList AnalysisFaceAction(const SemanticIndex& semantic_index) {
         FaceActionList actionRecord;
         actions.clear();
         eye_state_list.clear();
@@ -64,8 +64,8 @@ public:
 
             // count mouth aspect ratio
 
-            float mouth_widthwise_d = record_list[0][FaceLandmarkAdapt::MOUTH_LEFT_CORNER].Distance(record_list[0][FaceLandmarkAdapt::MOUTH_RIGHT_CORNER]);
-            float mouth_heightwise_d = record_list[0][FaceLandmarkAdapt::MOUTH_UPPER].Distance(record_list[0][FaceLandmarkAdapt::MOUTH_LOWER]);
+            float mouth_widthwise_d = record_list[0][semantic_index.mouth_left_corner].Distance(record_list[0][semantic_index.mouth_right_corner]);
+            float mouth_heightwise_d = record_list[0][semantic_index.mouth_upper].Distance(record_list[0][semantic_index.mouth_lower]);
             float mouth_aspect_ratio = mouth_heightwise_d / mouth_widthwise_d;
             if (mouth_aspect_ratio > 0.3) {
                 actions.push_back(ACT_JAW_OPEN);

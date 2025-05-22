@@ -1,10 +1,10 @@
 #include <inspirecv/inspirecv.h>
 #include <inspireface/track_module/face_track_module.h>
-#include "inspireface/initialization_module/launch.h"
-#include <inspireface/middleware/inspirecv_image_process.h>
+#include <inspireface/include/inspireface/launch.h>
+#include <inspireface/include/inspireface/frame_process.h>
 #include <inspireface/pipeline_module/face_pipeline_module.h>
 #include <inspireface/common/face_data/face_serialize_tools.h>
-#include <inspireface/feature_hub/feature_hub_db.h>
+#include <inspireface/include/inspireface/feature_hub_db.h>
 
 using namespace inspire;
 
@@ -60,19 +60,19 @@ static std::vector<float> FT = {
 
 int main() {
     std::string expansion_path = "";
-    INSPIRE_LAUNCH->Load("test_res/pack/Pikachu");
+    INSPIREFACE_CONTEXT->Load("test_res/pack/Pikachu");
 
     DatabaseConfiguration configuration;
     configuration.primary_key_mode = PrimaryKeyMode::MANUAL_INPUT;
     configuration.enable_persistence = false;
     configuration.recognition_threshold = 0.48f;
 
-    FEATURE_HUB_DB->EnableHub(configuration);
+    INSPIREFACE_FEATURE_HUB->EnableHub(configuration);
 
     // std::vector<float> feature(512, 0.0f);
 
     int64_t result_id = 0;
-    auto ret = FEATURE_HUB_DB->FaceFeatureInsert(FT, 10086, result_id);
+    auto ret = INSPIREFACE_FEATURE_HUB->FaceFeatureInsert(FT, 10086, result_id);
     if (ret != HSUCCEED) {
         INSPIRE_LOGE("Failed to insert face feature");
         INSPIRE_LOGI("result id: %lld", result_id);
@@ -82,7 +82,7 @@ int main() {
 
     // std::vector<float> query_feature(512, 20.0f);
     FaceSearchResult search_result;
-    ret = FEATURE_HUB_DB->SearchFaceFeature(FT, search_result, true);
+    ret = INSPIREFACE_FEATURE_HUB->SearchFaceFeature(FT, search_result, true);
     if (ret != HSUCCEED) {
         INSPIRE_LOGE("Failed to search face feature");
     } else {

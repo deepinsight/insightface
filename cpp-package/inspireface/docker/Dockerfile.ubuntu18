@@ -1,36 +1,31 @@
 # Use Ubuntu 18.04 as the base image
 FROM ubuntu:18.04
-# FROM skybro/ubuntu-cn:18
 
+# Proxy settings
 ARG https_proxy
 ARG http_proxy
 ARG all_proxy
 
-RUN apt-get update
-
-# Install OpenCV dependency
-RUN apt-get install -y --no-install-recommends libgtk-3-dev
-RUN apt-get install -y --no-install-recommends libavcodec-dev
-RUN apt-get install -y --no-install-recommends libavformat-dev
-RUN apt-get install -y --no-install-recommends libswscale-dev
-RUN apt-get install -y --no-install-recommends libjpeg-dev
-RUN apt-get install -y --no-install-recommends libpng-dev
-
-# Update the package list and install basic development tools
-RUN apt-get install -y --no-install-recommends build-essential
-RUN apt-get install -y --no-install-recommends software-properties-common
-RUN apt-get install -y --no-install-recommends wget
-RUN apt-get install -y --no-install-recommends curl
-RUN apt-get install -y --no-install-recommends git
-RUN apt-get install -y --no-install-recommends vim
-
-# Install CMake
-RUN apt-get install -y --no-install-recommends cmake
-
-
-# Clean temporary files to reduce image size
-RUN apt-get clean && \
+# Base packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        software-properties-common \
+        wget \
+        curl \
+        git \
+        vim \
+        ca-certificates \
+        openssl && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Install CMake 3.20.6
+RUN cd /opt && \
+    wget https://github.com/Kitware/CMake/releases/download/v3.20.6/cmake-3.20.6-linux-x86_64.tar.gz && \
+    tar -zxvf cmake-3.20.6-linux-x86_64.tar.gz && \
+    ln -s /opt/cmake-3.20.6-linux-x86_64/bin/* /usr/local/bin/ && \
+    rm cmake-3.20.6-linux-x86_64.tar.gz
 
 # Set the working directory
 WORKDIR /workspace
