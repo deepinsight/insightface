@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     auto m_pose_net_ = std::make_shared<FacePose>();
     InspireModel model;
     loader.LoadModel("", model);
-    m_pose_net_->loadData(model);
+    m_pose_net_->LoadData(model);
 
     auto image = cv::imread("resource/images/crop.png");
 

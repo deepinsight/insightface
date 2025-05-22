@@ -1,7 +1,8 @@
 #include <inspirecv/inspirecv.h>
-#include <inspireface/middleware/nexus_processor/image_processor.h>
+#include <inspireface/image_process/nexus_processor/image_processor.h>
 #include "log.h"
-#include <inspirecv/time_spend.h>
+#include <inspireface/include/inspireface/spend_timer.h>
+#include <inspireface/include/inspireface/herror.h>
 
 using namespace inspire;
 
@@ -18,7 +19,7 @@ int main() {
     uint8_t* resized_data = nullptr;
     int resized_width = 100;
     int resized_height = 100;
-    inspirecv::TimeSpend time_spend("RGA resize");
+    inspire::SpendTimer time_spend("RGA resize");
     for (int i = 0; i < 10; i++) {
         time_spend.Start();
         auto ret = processor->Resize(img.Data(), img.Width(), img.Height(), img.Channels(), &resized_data, resized_width, resized_height);
@@ -37,7 +38,7 @@ int main() {
     processor->MarkDone();
 
     uint8_t* swapped_data = nullptr;
-    inspirecv::TimeSpend swap_time_spend("RGA swap color");
+    inspire::SpendTimer swap_time_spend("RGA swap color");
     for (int i = 0; i < 10; i++) {
         swap_time_spend.Start();
         auto ret = processor->SwapColor(resized_img.Data(), resized_img.Width(), resized_img.Height(), resized_img.Channels(), &swapped_data);
@@ -57,7 +58,7 @@ int main() {
     int bottom = 10;
     int left = 10;
     int right = 10;
-    inspirecv::TimeSpend padding_time_spend("RGA padding");
+    inspire::SpendTimer padding_time_spend("RGA padding");
     int padded_width = 0;
     int padded_height = 0;
     for (int i = 0; i < 10; i++) {
@@ -76,7 +77,7 @@ int main() {
 
     // inspirecv crop
     inspirecv::Rect2i rect(30, 30, 70, 70);
-    inspirecv::TimeSpend inspirecv_crop_time_spend("InspireCV crop");
+    inspire::SpendTimer inspirecv_crop_time_spend("InspireCV crop");
     inspirecv::Image inspirecv_cropped_img;
     for (int i = 0; i < 10; i++) {
         inspirecv_crop_time_spend.Start();
@@ -91,7 +92,7 @@ int main() {
     int dst_width = 320;
     int dst_height = 320;
     float scale = 0.0f;
-    inspirecv::TimeSpend padded_crop_time_spend("RGA padded and cropped");
+    inspire::SpendTimer padded_crop_time_spend("RGA padded and cropped");
     for (int i = 0; i < 10; i++) {
         padded_crop_time_spend.Start();
         auto ret = processor->ResizeAndPadding(image.Data(), image.Width(), image.Height(), image.Channels(), dst_width, dst_height,
@@ -110,7 +111,7 @@ int main() {
     uint8_t* resized_data_2 = nullptr;
     int resized_width_2 = 512;
     int resized_height_2 = 512;
-    inspirecv::TimeSpend time_spend_2("RGA resize 2");
+    inspire::SpendTimer time_spend_2("RGA resize 2");
     for (int i = 0; i < 10; i++) {
         time_spend_2.Start();
         auto ret = processor->Resize(padded_cropped_img.Data(), padded_cropped_img.Width(), padded_cropped_img.Height(),

@@ -23,13 +23,14 @@ FeatureExtractionModule::FeatureExtractionModule(InspireArchive &archive, bool e
             INSPIRE_LOGE("FaceRecognition error.");
         }
     }
+    m_landmark_param_ = archive.GetLandmarkParam();
 }
 
 int32_t FeatureExtractionModule::InitExtractInteraction(InspireModel &model) {
     try {
         auto input_size = model.Config().get<std::vector<int>>("input_size");
         m_extract_ = std::make_shared<ExtractAdapt>();
-        auto ret = m_extract_->loadData(model, model.modelType);
+        auto ret = m_extract_->LoadData(model, model.modelType);
         if (ret != InferenceWrapper::WrapperOk) {
             return HERR_ARCHIVE_LOAD_FAILURE;
         }
@@ -45,7 +46,7 @@ int32_t FeatureExtractionModule::QueryStatus() const {
     return m_status_code_;
 }
 
-int32_t FeatureExtractionModule::FaceExtract(inspirecv::InspireImageProcess &processor, const HyperFaceData &face, Embedded &embedded, float &norm,
+int32_t FeatureExtractionModule::FaceExtract(inspirecv::FrameProcess &processor, const FaceTrackWrap &face, Embedded &embedded, float &norm,
                                              bool normalize) {
     if (m_extract_ == nullptr) {
         return HERR_SESS_REC_EXTRACT_FAILURE;
@@ -64,16 +65,37 @@ int32_t FeatureExtractionModule::FaceExtract(inspirecv::InspireImageProcess &pro
     return 0;
 }
 
-int32_t FeatureExtractionModule::FaceExtract(inspirecv::InspireImageProcess &processor, const FaceObjectInternal &face, Embedded &embedded,
-                                             float &norm, bool normalize) {
+int32_t FeatureExtractionModule::FaceExtractWithAlignmentImage(inspirecv::FrameProcess &processor, Embedded &embedded, float &norm,
+                                             bool normalize) {
+    if (m_extract_ == nullptr) {
+        return HERR_SESS_REC_EXTRACT_FAILURE;
+    }
+    auto crop = processor.ExecuteImageScaleProcessing(1.0f, false);
+    embedded = (*m_extract_)(crop, norm, normalize);
+
+    return 0;
+}
+
+int32_t FeatureExtractionModule::FaceExtractWithAlignmentImage(const inspirecv::Image& wrapped, Embedded &embedded, float &norm,
+                                             bool normalize) {
+    if (m_extract_ == nullptr) {
+        return HERR_SESS_REC_EXTRACT_FAILURE;
+    }
+    embedded = (*m_extract_)(wrapped, norm, normalize);
+
+    return 0;
+}
+
+int32_t FeatureExtractionModule::FaceExtract(inspirecv::FrameProcess &processor, const FaceObjectInternal &face, Embedded &embedded, float &norm,
+                                             bool normalize) {
     if (m_extract_ == nullptr) {
         return HERR_SESS_REC_EXTRACT_FAILURE;
     }
 
     auto lmk = face.landmark_;
-    std::vector<inspirecv::Point2f> lmk_5 = {lmk[FaceLandmarkAdapt::LEFT_EYE_CENTER], lmk[FaceLandmarkAdapt::RIGHT_EYE_CENTER],
-                                             lmk[FaceLandmarkAdapt::NOSE_CORNER], lmk[FaceLandmarkAdapt::MOUTH_LEFT_CORNER],
-                                             lmk[FaceLandmarkAdapt::MOUTH_RIGHT_CORNER]};
+    std::vector<inspirecv::Point2f> lmk_5 = {lmk[m_landmark_param_->semantic_index.left_eye_center], lmk[m_landmark_param_->semantic_index.right_eye_center],
+                                             lmk[m_landmark_param_->semantic_index.nose_corner], lmk[m_landmark_param_->semantic_index.mouth_left_corner],
+                                             lmk[m_landmark_param_->semantic_index.mouth_right_corner]};
 
     auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, lmk_5);
     auto crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);

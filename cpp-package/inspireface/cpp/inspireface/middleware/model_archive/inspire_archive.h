@@ -10,7 +10,9 @@
 #include "inspire_model/inspire_model.h"
 #include "yaml-cpp/yaml.h"
 #include "fstream"
-#include "recognition_module/similarity_converter.h"
+#include "similarity_converter.h"
+#include "launch.h"
+#include "track_module/landmark/landmark_param.h"
 
 namespace inspire {
 
@@ -110,6 +112,17 @@ public:
         return m_archive_->GetFileContent(filename);
     }
 
+    const std::vector<int>& GetFaceDetectPixelList() const {
+        return m_face_detect_pixel_list_;
+    }
+
+    const std::vector<std::string>& GetFaceDetectModelList() const {
+        return m_face_detect_model_list_;
+    }
+
+    const std::shared_ptr<LandmarkParam>& GetLandmarkParam() const {
+        return m_landmark_param_;
+    }
 private:
     int32_t loadManifestFile() {
         if (m_archive_->QueryLoadStatus() == SARC_SUCCESS) {
@@ -156,9 +169,28 @@ private:
                              config.middleScore, config.steepness, config.outputMin, config.outputMax);
                 SIMILARITY_CONVERTER_SET_RECOMMENDED_COSINE_THRESHOLD(config.threshold);
             }
+            // Load face detect model
+            if (m_config_["face_detect_pixel_list"] && m_config_["face_detect_model_list"]) {
+                auto node_face_detect_pixel_list = m_config_["face_detect_pixel_list"];
+                for (std::size_t i = 0; i < node_face_detect_pixel_list.size(); ++i) {
+                    m_face_detect_pixel_list_.push_back(node_face_detect_pixel_list[i].as<int>());
+                }
+                auto node_face_detect_model_list = m_config_["face_detect_model_list"];
+                for (std::size_t i = 0; i < node_face_detect_model_list.size(); ++i) {
+                    m_face_detect_model_list_.push_back(node_face_detect_model_list[i].as<std::string>());
+                }
+                if (m_face_detect_pixel_list_.size() != m_face_detect_model_list_.size()) {
+                    return FORMAT_ERROR;
+                }
+            } else {
+                m_face_detect_pixel_list_ = {160, 320, 640};
+                m_face_detect_model_list_ = {"face_detect_160", "face_detect_320", "face_detect_640"};
+            }
+            m_landmark_param_ = std::make_shared<LandmarkParam>(m_config_["landmark_table"]);
         }
         return 0;
     }
+
 
 private:
     std::shared_ptr<CoreArchive> m_archive_;
@@ -172,6 +204,11 @@ private:
     std::string m_version_;
     std::string m_major_;
     std::string m_release_time_;
+
+    std::vector<int> m_face_detect_pixel_list_;
+    std::vector<std::string> m_face_detect_model_list_;
+
+    std::shared_ptr<LandmarkParam> m_landmark_param_;
 };
 
 }  // namespace inspire

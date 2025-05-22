@@ -35,7 +35,7 @@ void test_rnet() {
     InspireModel model;
     loader.LoadModel("refine_net", model);
     m_rnet_ = std::make_shared<RNet>();
-    m_rnet_->loadData(model, InferenceWrapper::INFER_RKNN);
+    m_rnet_->LoadData(model, InferenceWrapper::INFER_RKNN);
 
     {
         // Load a image
@@ -78,7 +78,7 @@ void test_mask() {
     m_mask_predict_ = std::make_shared<MaskPredict>();
     InspireModel model;
     loader.LoadModel("mask_detect", model);
-    m_mask_predict_->loadData(model, InferenceWrapper::INFER_RKNN);
+    m_mask_predict_->LoadData(model, InferenceWrapper::INFER_RKNN);
 
     {
         // Load a image
@@ -120,7 +120,7 @@ void test_quality() {
     m_face_quality_ = std::make_shared<FacePoseQuality>();
     InspireModel model;
     loader.LoadModel("pose_quality", model);
-    m_face_quality_->loadData(model, InferenceWrapper::INFER_RKNN);
+    m_face_quality_->LoadData(model, InferenceWrapper::INFER_RKNN);
 
     {
         std::vector<std::string> names = {
@@ -166,7 +166,7 @@ void test_landmark_mnn() {
     m_landmark_predictor_ = std::make_shared<FaceLandmark>(112);
     InspireModel model;
     loader.LoadModel("landmark", model);
-    m_landmark_predictor_->loadData(model);
+    m_landmark_predictor_->LoadData(model);
 
     cv::Mat image = cv::imread("test_res/images/test_data/crop.png");
     cv::resize(image, image, cv::Size(112, 112));
@@ -206,7 +206,7 @@ void test_landmark() {
     m_landmark_predictor_ = std::make_shared<FaceLandmark>(112);
     InspireModel model;
     loader.LoadModel("landmark", model);
-    m_landmark_predictor_->loadData(model, InferenceWrapper::INFER_RKNN);
+    m_landmark_predictor_->LoadData(model, InferenceWrapper::INFER_RKNN);
 
     cv::Mat image = cv::imread("test_res/images/test_data/0.jpg");
     cv::resize(image, image, cv::Size(112, 112));
@@ -248,7 +248,7 @@ void test_liveness() {
     InspireModel model;
     loader.LoadModel("rgb_anti_spoofing", model);
     m_rgb_anti_spoofing_ = std::make_shared<RBGAntiSpoofing>(80, true);
-    m_rgb_anti_spoofing_->loadData(model, InferenceWrapper::INFER_RKNN);
+    m_rgb_anti_spoofing_->LoadData(model, InferenceWrapper::INFER_RKNN);
 
     std::vector<std::string> names = {
       "test_res/images/test_data/real.jpg", "test_res/images/test_data/fake.jpg", "test_res/images/test_data/live.jpg",

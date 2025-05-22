@@ -13,8 +13,8 @@
 #include "configurable.h"
 #include "log.h"
 #include "model_archive/inspire_archive.h"
-#include "nexus_processor/image_processor.h"
-#include "initialization_module/launch.h"
+#include "image_process/nexus_processor/image_processor.h"
+#include <launch.h>
 #include "system.h"
 
 namespace inspire {
@@ -51,7 +51,7 @@ public:
      * @param type Type of the inference helper (default: INFER_MNN).
      * @return int32_t Status of the loading and initialization process.
      */
-    int32_t loadData(InspireModel &model, InferenceWrapper::EngineType type = InferenceWrapper::INFER_MNN, bool dynamic = false) {
+    int32_t LoadData(InspireModel &model, InferenceWrapper::EngineType type = InferenceWrapper::INFER_MNN, bool dynamic = false) {
         m_infer_type_ = type;
         // must
         pushData<int>(model.Config(), "model_index", 0);
@@ -78,7 +78,7 @@ public:
         m_nn_inference_->SetNumThreads(getData<int>("threads"));
 
         if (m_infer_type_ == InferenceWrapper::INFER_TENSORRT) {
-            m_nn_inference_->SetDevice(INSPIRE_LAUNCH->GetCudaDeviceId());
+            m_nn_inference_->SetDevice(INSPIREFACE_CONTEXT->GetCudaDeviceId());
         }
 
 #if defined(ISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA) && !defined(ISF_ENABLE_RKNN)
@@ -87,7 +87,13 @@ public:
 #endif
 
 #if defined(ISF_ENABLE_APPLE_EXTENSION)
-        m_nn_inference_->SetSpecialBackend(INSPIRE_LAUNCH->GetGlobalCoreMLInferenceMode());
+        if (INSPIREFACE_CONTEXT->GetGlobalCoreMLInferenceMode() == InferenceWrapper::COREML_CPU) {
+            m_nn_inference_->SetSpecialBackend(InferenceWrapper::COREML_CPU);
+        } else if (INSPIREFACE_CONTEXT->GetGlobalCoreMLInferenceMode() == InferenceWrapper::COREML_GPU) {
+            m_nn_inference_->SetSpecialBackend(InferenceWrapper::COREML_GPU);
+        } else if (INSPIREFACE_CONTEXT->GetGlobalCoreMLInferenceMode() == InferenceWrapper::COREML_ANE) {
+            m_nn_inference_->SetSpecialBackend(InferenceWrapper::COREML_ANE);
+        }
 #endif
 
         m_output_tensor_info_list_.clear();
@@ -99,7 +105,7 @@ public:
         }
         int32_t ret;
         if (model.loadFilePath) {
-            auto extensionPath = INSPIRE_LAUNCH->GetExtensionPath();
+            auto extensionPath = INSPIREFACE_CONTEXT->GetExtensionPath();
             if (extensionPath.empty()) {
                 INSPIRE_LOGE("Extension path is empty");
                 return InferenceWrapper::WrapperError;

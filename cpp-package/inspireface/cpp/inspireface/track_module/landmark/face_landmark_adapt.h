@@ -5,7 +5,7 @@
 #pragma once
 #ifndef INSPIRE_FACE_TRACK_MODULE_LANDMARK_FACE_LANDMARK_ADAPT_H
 #define INSPIRE_FACE_TRACK_MODULE_LANDMARK_FACE_LANDMARK_ADAPT_H
-#include "../../data_type.h"
+#include "data_type.h"
 #include "middleware/any_net_adapter.h"
 
 namespace inspire {
@@ -29,7 +29,7 @@ public:
      * @brief Constructor for the FaceLandmark class.
      * @param input_size The size of the input image for the neural network.
      */
-    explicit FaceLandmarkAdapt(int input_size = 112);
+    explicit FaceLandmarkAdapt(int input_size = 112, bool is_center_scaling = false);
 
     /**
      * @brief Gets the input size for the neural network model.
@@ -38,18 +38,12 @@ public:
     int getInputSize() const;
 
 public:
-    const static int LEFT_EYE_CENTER = 67;      ///< Landmark index for the center of the left eye.
-    const static int RIGHT_EYE_CENTER = 68;     ///< Landmark index for the center of the right eye.
-    const static int NOSE_CORNER = 100;         ///< Landmark index for the tip of the nose.
-    const static int MOUTH_LEFT_CORNER = 104;   ///< Landmark index for the left corner of the mouth.
-    const static int MOUTH_RIGHT_CORNER = 105;  ///< Landmark index for the right corner of the mouth.
-    const static int MOUTH_LOWER = 84;          ///< Landmark index for the lower corner of the mouth.
-    const static int MOUTH_UPPER = 87;          ///< Landmark index for the upper corner of the mouth.
 
     const static int NUM_OF_LANDMARK = 106;  ///< Total number of landmarks detected.
 
 private:
     const int m_input_size_;  ///< The input size for the neural network model.
+    bool m_is_center_scaling_;  ///< Whether to use center scaling.
 };
 
 }  //  namespace inspire

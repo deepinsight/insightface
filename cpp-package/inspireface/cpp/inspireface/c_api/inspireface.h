@@ -24,16 +24,19 @@
 extern "C" {
 #endif
 
-#define HF_ENABLE_NONE 0x00000000                  ///< Flag to enable no features.
-#define HF_ENABLE_FACE_RECOGNITION 0x00000002      ///< Flag to enable face recognition feature.
-#define HF_ENABLE_LIVENESS 0x00000004              ///< Flag to enable RGB liveness detection feature.
-#define HF_ENABLE_IR_LIVENESS 0x00000008           ///< Flag to enable IR (Infrared) liveness detection feature.
-#define HF_ENABLE_MASK_DETECT 0x00000010           ///< Flag to enable mask detection feature.
-#define HF_ENABLE_FACE_ATTRIBUTE 0x00000020        ///< Flag to enable face attribute prediction feature.
-#define HF_ENABLE_PLACEHOLDER_ 0x00000040          ///< -
-#define HF_ENABLE_QUALITY 0x00000080               ///< Flag to enable face quality assessment feature.
-#define HF_ENABLE_INTERACTION 0x00000100           ///< Flag to enable interaction feature.
-#define HF_ENABLE_DETECT_MODE_LANDMARK 0x00000200  ///< Flag to enable landmark detection in detection mode
+#define HF_STATUS_ENABLE 1   ///< The status of the feature is enabled.
+#define HF_STATUS_DISABLE 0  ///< The status of the feature is disabled.
+
+#define HF_ENABLE_NONE 0x00000000              ///< Flag to enable no features.
+#define HF_ENABLE_FACE_RECOGNITION 0x00000002  ///< Flag to enable face recognition feature.
+#define HF_ENABLE_LIVENESS 0x00000004          ///< Flag to enable RGB liveness detection feature.
+#define HF_ENABLE_IR_LIVENESS 0x00000008       ///< Flag to enable IR (Infrared) liveness detection feature.
+#define HF_ENABLE_MASK_DETECT 0x00000010       ///< Flag to enable mask detection feature.
+#define HF_ENABLE_FACE_ATTRIBUTE 0x00000020    ///< Flag to enable face attribute prediction feature.
+#define HF_ENABLE_PLACEHOLDER_ 0x00000040      ///< -
+#define HF_ENABLE_QUALITY 0x00000080           ///< Flag to enable face quality assessment feature.
+#define HF_ENABLE_INTERACTION 0x00000100       ///< Flag to enable interaction feature.
+#define HF_ENABLE_FACE_POSE 0x00000200         ///< Flag to enable face pose estimation feature.
 
 /**
  * Camera stream format.
@@ -385,6 +388,7 @@ typedef struct HFSessionCustomParameter {
     HInt32 enable_face_attribute;        ///< Enable face attribute prediction feature.
     HInt32 enable_interaction_liveness;  ///< Enable interaction for liveness detection feature.
     HInt32 enable_detect_mode_landmark;  ///< Enable landmark detection in detection mode
+    HInt32 enable_face_pose;             ///< Enable face pose estimation feature.
 } HFSessionCustomParameter, *PHFSessionCustomParameter;
 
 /**
@@ -399,6 +403,38 @@ typedef enum HFDetectMode {
                                         //   (You need a specific option turned on at compile time
                                         //   to use it).
 } HFDetectMode;
+
+/**
+ * @brief Enum for landmark engine.
+ */
+typedef enum HFSessionLandmarkEngine {
+    HF_LANDMARK_HYPLMV2_0_25 = 0,             ///< Hyplmkv2 0.25, default
+    HF_LANDMARK_HYPLMV2_0_50 = 1,             ///< Hyplmkv2 0.50
+    HF_LANDMARK_INSIGHTFACE_2D106_TRACK = 2,  ///< InsightFace 2d106 track
+} HFSessionLandmarkEngine;
+
+/**
+ * @brief Global switch the landmark engine. Set it globally before creating a session.
+ *  If it is changed, a new session needs to be created for it to be effective.
+ * @param engine The landmark engine to be set.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFSwitchLandmarkEngine(HFSessionLandmarkEngine engine);
+
+/**
+ * @brief Enum for supported pixel levels for face detection.
+ */
+typedef struct HFFaceDetectPixelList {
+    HInt32 pixel_level[20];
+    HInt32 size;
+} HFFaceDetectPixelList, *PHFFaceDetectPixelList;
+
+/**
+ * @brief Query the supported pixel levels for face detection. It must be used before starting.
+ * @param pixel_levels Pointer to the array of supported pixel levels.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFQuerySupportedPixelLevelsForFaceDetection(PHFFaceDetectPixelList pixel_levels);
 
 /**
  * @brief Create a session from a resource file.
@@ -489,6 +525,14 @@ typedef struct HFMultipleFaceData {
 HYPER_CAPI_EXPORT extern HResult HFSessionSetTrackPreviewSize(HFSession session, HInt32 previewSize);
 
 /**
+ * @brief Get the track preview size in the session.
+ * @param session Handle to the session.
+ * @param previewSize The size of the preview for tracking.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFSessionGetTrackPreviewSize(HFSession session, HInt32 *previewSize);
+
+/**
  * @brief Set the minimum number of face pixels that the face detector can capture, and people below
  * this number will be filtered.
  *
@@ -534,6 +578,7 @@ HYPER_CAPI_EXPORT extern HResult HFSessionSetTrackModeNumSmoothCacheFrame(HFSess
  */
 HYPER_CAPI_EXPORT extern HResult HFSessionSetTrackModeDetectInterval(HFSession session, HInt32 num);
 
+
 /**
  * @brief Run face tracking in the session.
  *
@@ -543,6 +588,14 @@ HYPER_CAPI_EXPORT extern HResult HFSessionSetTrackModeDetectInterval(HFSession s
  * @return HResult indicating the success or failure of the operation.
  */
 HYPER_CAPI_EXPORT extern HResult HFExecuteFaceTrack(HFSession session, HFImageStream streamHandle, PHFMultipleFaceData results);
+
+/**
+ * @brief Gets the size of the debug preview image for the last face detection in the session.
+ * @param session Handle to the session.
+ * @param size The size of the preview for tracking.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFSessionLastFaceDetectionGetDebugPreviewImageSize(HFSession session, HInt32 *size);
 
 /**
  * @brief Copies the data from a HF_FaceBasicToken to a specified buffer.
@@ -642,6 +695,17 @@ HYPER_CAPI_EXPORT extern HResult HFFaceFeatureExtract(HFSession session, HFImage
                                                       PHFFaceFeature feature);
 
 /**
+ * @brief Extract face features to the HFFaceFeature that has applied for memory in advance.
+ * @param session Handle to the session.
+ * @param streamHandle Handle to the data buffer representing the camera stream component.
+ * @param singleFace Basic token representing a single face.
+ * @param feature Pointer to the buffer where the extracted feature will be copied.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFFaceFeatureExtractTo(HFSession session, HFImageStream streamHandle, HFFaceBasicToken singleFace,
+                                                        HFFaceFeature feature);
+
+/**
  * @brief Extract a face feature from a given face and copy it to the provided feature buffer.
  *
  * @param session Handle to the session.
@@ -653,6 +717,20 @@ HYPER_CAPI_EXPORT extern HResult HFFaceFeatureExtract(HFSession session, HFImage
 HYPER_CAPI_EXPORT extern HResult HFFaceFeatureExtractCpy(HFSession session, HFImageStream streamHandle, HFFaceBasicToken singleFace, HPFloat feature);
 
 /**
+ * @brief Create a face feature. Will allocate memory.
+ * @param feature Pointer to the face feature.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFCreateFaceFeature(PHFFaceFeature feature);
+
+/**
+ * @brief Release a face feature. Only the features created through the HFCreateFaceFeature need to be processed.
+ * @param feature Pointer to the face feature.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFReleaseFaceFeature(PHFFaceFeature feature);
+
+/**
  * @brief Get the face alignment image.
  * @param session Handle to the session.
  * @param streamHandle Handle to the data buffer representing the camera stream component.
@@ -662,6 +740,15 @@ HYPER_CAPI_EXPORT extern HResult HFFaceFeatureExtractCpy(HFSession session, HFIm
  */
 HYPER_CAPI_EXPORT extern HResult HFFaceGetFaceAlignmentImage(HFSession session, HFImageStream streamHandle, HFFaceBasicToken singleFace,
                                                              HFImageBitmap *handle);
+
+/**
+ * @brief Use the aligned face image to extract face features to the HFFaceFeature that has applied memory in advance.
+ * @param session Handle to the session.
+ * @param streamHandle Handle to the data buffer representing the camera stream component.
+ * @param feature Pointer to the buffer where the extracted feature will be copied.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFFaceFeatureExtractWithAlignmentImage(HFSession session, HFImageStream streamHandle, HFFaceFeature feature);
 
 /************************************************************************
  * Feature Hub
@@ -851,7 +938,7 @@ HYPER_CAPI_EXPORT extern HResult HFFeatureHubFaceSearchTopK(HFFaceFeature search
 /**
  * @brief Remove a face feature from the features group based on custom ID.
  *
- * @param customId The custom ID of the feature to be removed.
+ * @param ID The custom ID of the feature to be removed.
  * @return HResult indicating the success or failure of the operation.
  */
 HYPER_CAPI_EXPORT extern HResult HFFeatureHubFaceRemove(HFaceId id);

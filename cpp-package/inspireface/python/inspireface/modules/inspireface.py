@@ -99,6 +99,14 @@ class ImageStream(object):
         if ret != 0:
             raise Exception("Error in creating ImageStream")
 
+    def write_to_file(self, file_path: str):
+        """
+        Write the image stream to a file. Like PATH/image.jpg
+        """
+        ret = HFDeBugImageStreamDecodeSave(self._handle, file_path)
+        if ret != 0:
+            logger.error(f"Write ImageStream to file error: {ret}")
+
     def release(self):
         """
         Release the resources associated with the ImageStream.
@@ -364,6 +372,16 @@ class InspireFaceSession(object):
             landmark.append(point.y)
 
         return np.asarray(landmark).reshape(-1, 2)
+    
+    def print_track_cost_spend(self):
+        ret = HFSessionPrintTrackCostSpend(self._sess)
+        if ret != 0:
+            logger.error(f"Print track cost spend error: {ret}")
+
+    def set_enable_track_cost_spend(self, enable: bool):
+        ret = HFSessionSetEnableTrackCostSpend(self._sess, enable)
+        if ret != 0:
+            logger.error(f"Set enable track cost spend error: {ret}")
     
     def set_detection_confidence_threshold(self, threshold: float):
         """
@@ -633,13 +651,6 @@ def launch(model_name: str = "Pikachu", resource_path: str = None) -> bool:
             return False
     return True
 
-def set_expansive_pack_path(path: str):
-    path_c = String(bytes(path, encoding="utf8"))
-    ret = HFSetExpansiveHardwareAppleCoreMLModelPath(path_c)
-    if ret != 0:
-        logger.error(f"Set expansive pack path error: {ret}")
-        return False
-    return True
 
 def pull_latest_model(model_name: str = "Pikachu") -> str:
     sm = ResourceManager()
@@ -675,6 +686,13 @@ def query_launch_status() -> bool:
         logger.error(f"Query launch status error: {ret}")
         return False
     return status.value == 1
+
+def switch_landmark_engine(engine: int):
+    ret = HFSwitchLandmarkEngine(engine)
+    if ret != 0:
+        logger.error(f"Switch landmark engine error: {ret}")
+        return False
+    return True
 
 @dataclass
 class FeatureHubConfiguration:
@@ -840,7 +858,7 @@ class FaceIdentity(object):
         feature.size = HInt32(self.feature.size)
         feature.data = data_ptr
         return HFFaceFeatureIdentity(
-            customId=HFaceId(self.id),
+            id=HFaceId(self.id),
             feature=PHFFaceFeature(feature)
         )
 
@@ -1109,7 +1127,6 @@ def set_logging_level(level: int) -> None:
     """
     HFSetLogLevel(level)
 
-
 def disable_logging() -> None:
     """
     Disables all logging from the InspireFace library.
@@ -1121,4 +1138,35 @@ def show_system_resource_statistics():
     Displays the system resource information.
     """
     HFDeBugShowResourceStatistics()
+
+def switch_apple_coreml_inference_mode(mode: int):
+    """
+    Switches the Apple CoreML inference mode.
+    """
+    ret = HFSetAppleCoreMLInferenceMode(mode)
+    if ret != 0:
+        logger.error(f"Failed to set Apple CoreML inference mode: {ret}")
+        return False
+    return True
+
+def set_expansive_hardware_rockchip_dma_heap_path(path: str):
+    """
+    Sets the path to the expansive hardware Rockchip DMA heap.
+    """
+    ret = HFSetExpansiveHardwareRockchipDmaHeapPath(path)
+    if ret != 0:
+        logger.error(f"Failed to set expansive hardware Rockchip DMA heap path: {ret}")
+        return False
+    return True
+
+def query_expansive_hardware_rockchip_dma_heap_path() -> str:
+    """
+    Queries the path to the expansive hardware Rockchip DMA heap.
+    """
+    path = HString()
+    ret = HFQueryExpansiveHardwareRockchipDmaHeapPath(path)
+    if ret != 0:
+        logger.error(f"Failed to query expansive hardware Rockchip DMA heap path: {ret}")
+        return None
+    return str(path.value)
 

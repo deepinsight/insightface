@@ -8,7 +8,7 @@
 #include "settings/test_settings.h"
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include "spdlog/spdlog.h"
-#include "initialization_module/launch.h"
+#include <inspireface/include/inspireface/launch.h>
 
 #define ENABLE_DRAW_SPLIT_LINE 1  // Whether dividers are printed during the test
 #define ENABLE_TEST_MSG 1         // TEST PRINT output
@@ -30,7 +30,7 @@ int init_test_logger() {
 int main(int argc, char* argv[]) {
     init_test_logger();
 
-    auto ret = INSPIRE_LAUNCH->Load("test_res/pack/Pikachu");
+    auto ret = INSPIREFACE_CONTEXT->Load("test_res/pack/Pikachu");
     if (ret != 0) {
         std::cerr << "Load error" << std::endl;
         return -1;

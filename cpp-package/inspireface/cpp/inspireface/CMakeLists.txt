@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 project(InspireFaceSDK)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -15,7 +15,7 @@ else()
     set(EXTENDED_INFORMATION "${EXTENDED_INFORMATION}@General")
 endif()
 set(EXTENDED_INFORMATION "${EXTENDED_INFORMATION} - Build Time: ${BUILD_TIMESTAMP}")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/information.h.in ${CMAKE_CURRENT_SOURCE_DIR}/information.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/information.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/inspireface/information.h)
 
 file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 set(SOURCE_FILES ${SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/c_api/inspireface.cc)        # Add C_API file
@@ -97,7 +97,6 @@ if(ISF_ENABLE_APPLE_EXTENSION)
     find_library(FOUNDATION_LIBRARY Foundation)
     find_library(COREML_LIBRARY CoreML)
     find_library(ACCELERATE_LIBRARY Accelerate)
-    find_package(OpenCV REQUIRED)
     set(LINK_THIRD_LIBS ${LINK_THIRD_LIBS} ${FOUNDATION_LIBRARY} ${COREML_LIBRARY} ${ACCELERATE_LIBRARY})
 
     # Add objective-c files
@@ -127,6 +126,9 @@ if (ISF_ENABLE_RKNN)
         set(NEED_INCLUDE ${NEED_INCLUDE} ${RGA_INCLUDE_DIRS})
     endif()
 endif ()
+
+# Add include directory
+set(NEED_INCLUDE ${NEED_INCLUDE} ${CMAKE_CURRENT_SOURCE_DIR}/include/inspireface)
 
 if (ISF_BUILD_LINUX_ARM7 OR ANDROID)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpu=neon")
@@ -221,7 +223,6 @@ if (ISF_ENABLE_TENSORRT)
     message(STATUS "\t CUDA_RUNTIME_LIBRARY: ${CUDA_RUNTIME_LIBRARY}")
 endif()
 
-
 # Install lib
 install(TARGETS InspireFace
         LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/lib
@@ -233,9 +234,16 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/c_api/inspireface.h DESTINATION ${CMAK
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/c_api/intypedef.h DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/include)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/herror.h DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/include)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/inspireface/herror.h DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/include)
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/version.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/)
+
+if(ISF_INSTALL_CPP_HEADER)
+    # Install cpp api header file
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/inspireface/ DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/include/inspireface/)
+
+    install(DIRECTORY ${INSPIRECV_INCLUDE_PATH}/inspirecv DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/include/)
+endif()
 
 if (ISF_ENABLE_RKNN AND ISF_RKNPU_MAJOR STREQUAL "rknpu1")
     # Install rknn 3rd lib

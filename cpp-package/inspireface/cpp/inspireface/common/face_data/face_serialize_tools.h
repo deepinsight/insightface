@@ -6,7 +6,7 @@
 #ifndef INSPIRE_FACE_SERIALIZE_TOOLS_H
 #define INSPIRE_FACE_SERIALIZE_TOOLS_H
 
-#include "face_data_type.h"
+#include "face_warpper.h"
 #include "../face_info/face_object_internal.h"
 #include "herror.h"
 #include "data_type.h"
@@ -27,10 +27,10 @@ inline void PrintTransformMatrix(const TransMatrix& matrix) {
 }
 
 /**
- * @brief Print HyperFaceData structure.
- * @param data The HyperFaceData structure to print.
+ * @brief Print FaceTrackWrap structure.
+ * @param data The FaceTrackWrap structure to print.
  */
-inline void INSPIRE_API PrintHyperFaceDataDetail(const HyperFaceData& data) {
+inline void INSPIRE_API PrintHyperFaceDataDetail(const FaceTrackWrap& data) {
     INSPIRE_LOGI("Track State: %d", data.trackState);
     INSPIRE_LOGI("In Group Index: %d", data.inGroupIndex);
     INSPIRE_LOGI("Track ID: %d", data.trackId);
@@ -43,13 +43,13 @@ inline void INSPIRE_API PrintHyperFaceDataDetail(const HyperFaceData& data) {
 }
 
 /**
- * @brief Convert a FaceObject to HyperFaceData.
+ * @brief Convert a FaceObject to FaceTrackWrap.
  * @param obj The FaceObject to convert.
  * @param group_index The group index.
- * @return The converted HyperFaceData structure.
+ * @return The converted FaceTrackWrap structure.
  */
-inline HyperFaceData INSPIRE_API FaceObjectInternalToHyperFaceData(const FaceObjectInternal& obj, int group_index = -1) {
-    HyperFaceData data;
+inline FaceTrackWrap INSPIRE_API FaceObjectInternalToHyperFaceData(const FaceObjectInternal& obj, int group_index = -1) {
+    FaceTrackWrap data;
     // Face rect
     data.rect.x = obj.bbox_.GetX();
     data.rect.y = obj.bbox_.GetY();
@@ -134,15 +134,15 @@ inline inspirecv::Point2f INSPIRE_API HPointToInternalPoint2f(const Point2F& poi
 }
 
 /**
- * @brief Serialize HyperFaceData to a byte stream.
- * @param data The HyperFaceData to serialize.
+ * @brief Serialize FaceTrackWrap to a byte stream.
+ * @param data The FaceTrackWrap to serialize.
  * @param byteArray The output byte stream.
  * @return The result code.
  */
-inline int32_t INSPIRE_API RunSerializeHyperFaceData(const HyperFaceData& data, ByteArray& byteArray) {
+inline int32_t INSPIRE_API RunSerializeHyperFaceData(const FaceTrackWrap& data, ByteArray& byteArray) {
     byteArray.reserve(sizeof(data));
 
-    // Serialize the HyperFaceData structure itself
+    // Serialize the FaceTrackWrap structure itself
     const char* dataBytes = reinterpret_cast<const char*>(&data);
     byteArray.insert(byteArray.end(), dataBytes, dataBytes + sizeof(data));
 
@@ -150,18 +150,18 @@ inline int32_t INSPIRE_API RunSerializeHyperFaceData(const HyperFaceData& data, 
 }
 
 /**
- * @brief Deserialize a byte stream to HyperFaceData.
+ * @brief Deserialize a byte stream to FaceTrackWrap.
  * @param byteArray The input byte stream.
- * @param data The output HyperFaceData structure.
+ * @param data The output FaceTrackWrap structure.
  * @return The result code.
  */
-inline int32_t INSPIRE_API RunDeserializeHyperFaceData(const ByteArray& byteArray, HyperFaceData& data) {
+inline int32_t INSPIRE_API RunDeserializeHyperFaceData(const ByteArray& byteArray, FaceTrackWrap& data) {
     // Check if the byte stream size is sufficient
     if (byteArray.size() >= sizeof(data)) {
-        // Copy data from the byte stream to the HyperFaceData structure
+        // Copy data from the byte stream to the FaceTrackWrap structure
         std::memcpy(&data, byteArray.data(), sizeof(data));
     } else {
-        INSPIRE_LOGE("The byte stream size is insufficient to restore HyperFaceData");
+        INSPIRE_LOGE("The byte stream size is insufficient to restore FaceTrackWrap");
         return HERR_SESS_FACE_DATA_ERROR;
     }
 
@@ -169,19 +169,19 @@ inline int32_t INSPIRE_API RunDeserializeHyperFaceData(const ByteArray& byteArra
 }
 
 /**
- * @brief Deserialize a byte stream to HyperFaceData.
+ * @brief Deserialize a byte stream to FaceTrackWrap.
  * @param byteArray The input byte stream as a character array.
  * @param byteCount The size of the byte stream.
- * @param data The output HyperFaceData structure.
+ * @param data The output FaceTrackWrap structure.
  * @return The result code.
  */
-inline int32_t INSPIRE_API RunDeserializeHyperFaceData(const char* byteArray, size_t byteCount, HyperFaceData& data) {
+inline int32_t INSPIRE_API RunDeserializeHyperFaceData(const char* byteArray, size_t byteCount, FaceTrackWrap& data) {
     // Check if the byte stream size is sufficient
     if (byteCount >= sizeof(data)) {
-        // Copy data from the byte stream to the HyperFaceData structure
+        // Copy data from the byte stream to the FaceTrackWrap structure
         std::memcpy(&data, byteArray, sizeof(data));
     } else {
-        INSPIRE_LOGE("The byte stream size is insufficient to restore HyperFaceData");
+        INSPIRE_LOGE("The byte stream size is insufficient to restore FaceTrackWrap");
         return HERR_SESS_FACE_DATA_ERROR;
     }
 

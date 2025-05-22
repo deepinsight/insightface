@@ -1,9 +1,7 @@
-#if 0
 #include <iostream>
 #include "settings/test_settings.h"
 #include "inspireface/c_api/inspireface.h"
-#include "inspireface/herror.h"
-#include "opencv2/opencv.hpp"
+#include "inspireface/include/inspireface/herror.h"
 #include "unit/test_helper/test_tools.h"
 #include <cstdio>
 
@@ -11,12 +9,17 @@ TEST_CASE("test_System", "[system]") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
-    // The global TEST environment has been started, so this side needs to be temporarily closed
-    // before testing
-    HFTerminateInspireFace();
+    HResult ret;
+    HInt32 status;
+    ret = HFQueryInspireFaceLaunchStatus(&status);
+    REQUIRE(ret == HSUCCEED);
+    if (status == HF_STATUS_ENABLE) {
+        // The global TEST environment has been started, so this side needs to be temporarily closed
+        // before testing
+        HFTerminateInspireFace();
+    }
 
     SECTION("Create a session test when it is not loaded") {
-        HResult ret;
         HFSessionCustomParameter parameter = {0};
         HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         HFSession session;
@@ -27,7 +30,7 @@ TEST_CASE("test_System", "[system]") {
     }
 
     // Restart and start InspireFace
-    auto ret = HFLaunchInspireFace(GET_RUNTIME_FULLPATH_NAME.c_str());
+    ret = HFLaunchInspireFace(GET_RUNTIME_FULLPATH_NAME.c_str());
     REQUIRE(ret == HSUCCEED);
 
     SECTION("Create a session test when it is reloaded") {
@@ -178,7 +181,7 @@ TEST_CASE("test_SystemStreamReleaseCase", "[system]") {
 
         for (int i = 0; i < createCount; ++i) {
             HFImageStream imgHandle;
-            auto image = cv::imread(GET_DATA("data/bulk/pedestrian.png"));
+            auto image = inspirecv::Image::Create(GET_DATA("data/bulk/pedestrian.png"));
             ret = CVImageToImageStream(image, imgHandle);
             REQUIRE(ret == HSUCCEED);
             streams[i] = imgHandle;
@@ -267,5 +270,3 @@ TEST_CASE("test_SystemStreamReleaseCase", "[system]") {
         REQUIRE(count == 0);
     }
 }
-
-#endif

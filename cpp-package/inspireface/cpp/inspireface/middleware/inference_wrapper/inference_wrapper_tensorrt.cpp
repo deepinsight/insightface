@@ -1,4 +1,5 @@
 #if INFERENCE_WRAPPER_ENABLE_TENSORRT
+#include <iostream>
 #include <cstdint>
 #include <cstdlib>
 #include <cmath>
@@ -40,7 +41,6 @@ int32_t InferenceWrapperTensorRT::Initialize(char* model_buffer, int model_size,
     net_->setDevice(device_id_);
     auto ret = net_->readFromBin(model_buffer, model_size);
     if (ret != WrapperOk) {
-        std::cout << "model_size: " << model_size << std::endl;
         PRINT_E("Failed to load TensorRT model\n");
         return WrapperError;
     }

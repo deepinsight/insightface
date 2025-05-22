@@ -30,10 +30,10 @@ int main(int argc, char** argv) {
     stream.SetDataBuffer(rot90.data, rot90.rows, rot90.cols);
     ctx.FaceDetectAndTrack(stream);
 
-    std::vector<HyperFaceData> faces;
+    std::vector<FaceTrackWrap> faces;
     for (int i = 0; i < ctx.GetNumberOfFacesCurrentlyDetected(); ++i) {
         //        const ByteArray &byteArray = ctx.GetDetectCache()[i];
-        HyperFaceData face = {0};
+        FaceTrackWrap face = {0};
         //        ret = DeserializeHyperFaceData(byteArray, face);
 
         const FaceBasicData& faceBasic = ctx.GetFaceBasicDataCache()[i];

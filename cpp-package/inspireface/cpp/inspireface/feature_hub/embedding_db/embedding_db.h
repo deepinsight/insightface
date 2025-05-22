@@ -19,17 +19,11 @@
 #include <memory>
 #include <stdexcept>
 #include <mutex>
+#include "data_type.h"
 
 #define EMBEDDING_DB inspire::EmbeddingDB
 
 namespace inspire {
-
-// Search for most similar vectors
-struct FaceSearchResult {
-    int64_t id;
-    double similarity;
-    std::vector<float> feature;
-};
 
 // Vector data structure
 struct VectorData {

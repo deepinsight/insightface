@@ -8,25 +8,16 @@
 #include <iostream>
 #include "face_detect/face_detect_adapt.h"
 #include "face_detect/rnet_adapt.h"
-#include "landmark/face_landmark_adapt.h"
+#include "landmark/all.h"
 #include "common/face_info/face_object_internal.h"
-#include "middleware/inspirecv_image_process.h"
+#include "frame_process.h"
 #include "quality/face_pose_quality_adapt.h"
 #include "middleware/model_archive/inspire_archive.h"
 #include "tracker_optional/bytetrack/BYTETracker.h"
+#include <data_type.h>
+#include "landmark/landmark_param.h"
 
 namespace inspire {
-
-/**
- * @enum DetectMode
- * @brief Enumeration for different detection modes.
- */
-enum DetectModuleMode {
-    DETECT_MODE_ALWAYS_DETECT = 0,  ///< Detection mode: Always detect
-    DETECT_MODE_LIGHT_TRACK,        ///< Detection mode: Light face track
-    DETECT_MODE_TRACK_BY_DETECT,    ///< Detection mode: Tracking by detection
-
-};
 
 /**
  * @class FaceTrack
@@ -44,7 +35,7 @@ public:
      * @param track_preview_size Size of the preview for tracking.
      * @param dynamic_detection_input_level Change the detector input size.
      */
-    explicit FaceTrackModule(DetectModuleMode mode, int max_detected_faces = 1, int detection_interval = 20, int track_preview_size = 192,
+    explicit FaceTrackModule(DetectModuleMode mode, int max_detected_faces = 1, int detection_interval = 20, int track_preview_size = -1,
                              int dynamic_detection_input_level = -1, int TbD_mode_fps = 30, bool detect_mode_landmark = true);
 
     /**
@@ -53,20 +44,26 @@ public:
      * @param expansion_path Expand the path if you need it.
      * @return int Status of the configuration.
      */
-    int Configuration(InspireArchive &archive, const std::string &expansion_path = "");
+    int Configuration(InspireArchive &archive, const std::string &expansion_path = "", bool enable_face_pose_and_quality = false);
 
     /**
      * @brief Updates the video stream for face tracking.
      * @param image Camera stream to process.
      * @param is_detect Flag to enable/disable face detection.
      */
-    void UpdateStream(inspirecv::InspireImageProcess &image);
+    void UpdateStream(inspirecv::FrameProcess &image);
 
     /**
      * @brief Sets the preview size for tracking.
      * @param preview_size Size of the preview for tracking.
      */
-    void SetTrackPreviewSize(int preview_size = 192);
+    void SetTrackPreviewSize(int preview_size = -1);
+
+    /**
+     * @brief Gets the preview size for tracking.
+     * @return Size of the preview for tracking.
+     */
+    int32_t GetTrackPreviewSize() const;
 
 private:
     /**
@@ -80,12 +77,19 @@ private:
                                float size = 112.0);
 
     /**
+     * @brief Predicts the tracking score for a cropped face image.
+     * @param raw_face_crop Cropped face image.
+     * @return float Tracking score.
+     */
+    float PredictTrackScore(const inspirecv::Image &raw_face_crop);
+
+    /**
      * @brief Tracks a face in the given image stream.
      * @param image Camera stream containing the face.
      * @param face FaceObject to be tracked.
      * @return bool Status of face tracking.
      */
-    bool TrackFace(inspirecv::InspireImageProcess &image, FaceObjectInternal &face);
+    bool TrackFace(inspirecv::FrameProcess &image, FaceObjectInternal &face);
 
     /**
      * @brief Blacks out the region specified in the image for tracking.
@@ -129,18 +133,18 @@ private:
     int InitRNetModel(InspireModel &model);
 
     /**
-     * @brief Initializes the face pose estimation model.
-     * @param model Pointer to the face pose model to be initialized.
+     * @brief Initializes the face pose and quality estimation model.
+     * @param model Pointer to the face pose and quality model to be initialized.
      * @return int Status of the initialization process. Returns 0 for success.
      */
-    int InitFacePoseModel(InspireModel &model);
+    int InitFacePoseAndQualityModel(InspireModel &model);
 
     /**
      * @brief Select the detection model scheme to be used according to the input pixel level.
      * @param pixel_size Currently, only 160, 320, and 640 pixel sizes are supported.
      * @return Return the corresponding scheme name, only ”face_detect_160”, ”face_detect_320”, ”face_detect_640” are supported.
      */
-    std::string ChoiceMultiLevelDetectModel(const int32_t pixel_size);
+    std::string ChoiceMultiLevelDetectModel(const int32_t pixel_size, int32_t &final_size);
 
 public:
     /**
@@ -177,8 +181,17 @@ public:
      */
     void SetTrackModeDetectInterval(int value);
 
+    /**
+     * @brief Set the multiscale landmark loop num
+     * @param value Multiscale landmark loop num
+     */
+    void SetMultiscaleLandmarkLoop(int value);
+
 public:
     std::vector<FaceObjectInternal> trackingFace;  ///< Vector of FaceObjects currently being tracked.
+
+public:
+    int32_t GetDebugPreviewImageSize() const;
 
 private:
     const int max_detected_faces_;                     ///< Maximum number of faces to detect.
@@ -188,6 +201,10 @@ private:
     int tracking_idx_;                                 ///< Current tracking index.
     int track_preview_size_;                           ///< Size of the tracking preview.
     int filter_minimum_face_px_size = 0;               ///< Minimum face pixel allowed to be retained (take the edge with the smallest Rect).
+
+private:
+    // Debug cache
+    int32_t m_debug_preview_image_size_{0};  ///< Debug preview image size
 
 private:
     std::shared_ptr<FaceDetectAdapt> m_face_detector_;         ///< Shared pointer to the face detector.
@@ -212,6 +229,14 @@ private:
     int m_track_mode_num_smooth_cache_frame_ = 5;  ///< Track mode number of smooth cache frame
 
     float m_track_mode_smooth_ratio_ = 0.05;  ///< Track mode smooth ratio
+
+    int m_multiscale_landmark_loop_num_ = 1;  ///< Multiscale landmark loop num
+
+    float m_landmark_crop_ratio_ = 1.1f;
+
+    std::vector<float> m_multiscale_landmark_scales_;
+
+    std::shared_ptr<LandmarkParam> m_landmark_param_;
 };
 
 }  // namespace inspire

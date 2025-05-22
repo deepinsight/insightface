@@ -78,6 +78,7 @@ cd ${BUILD_FOLDER_PATH}
 
 cmake -DCMAKE_SYSTEM_NAME=Linux \
   -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
   -DCMAKE_SYSTEM_VERSION=1 \
   -DCMAKE_SYSTEM_PROCESSOR=armv7 \
   -DCMAKE_C_COMPILER=$ARM_CROSS_COMPILE_TOOLCHAIN/bin/arm-rockchip830-linux-uclibcgnueabihf-gcc \
@@ -98,9 +99,10 @@ cmake -DCMAKE_SYSTEM_NAME=Linux \
   -DISF_ENABLE_BENCHMARK=OFF \
   -DISF_ENABLE_USE_LFW_DATA=OFF \
   -DISF_ENABLE_TEST_EVALUATION=OFF \
-  -DISF_BUILD_SHARED_LIBS=OFF ${SCRIPT_DIR}
+  -Wno-dev \
+  -DISF_BUILD_SHARED_LIBS=ON ${SCRIPT_DIR}
 
 make -j4
-# make install
+make install
 
-# move_install_files "$(pwd)"
+move_install_files "$(pwd)"

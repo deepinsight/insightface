@@ -5,7 +5,7 @@
 #include <iostream>
 #include "settings/test_settings.h"
 #include "unit/test_helper/test_help.h"
-#include "inspireface/recognition_module/similarity_converter.h"
+#include "inspireface/include/inspireface/similarity_converter.h"
 
 TEST_CASE("test_similarity_converter", "[similarity_converter]") {
     DRAW_SPLIT_LINE

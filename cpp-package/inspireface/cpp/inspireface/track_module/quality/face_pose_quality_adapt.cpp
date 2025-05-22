@@ -13,7 +13,14 @@ FacePoseQualityAdapt::FacePoseQualityAdapt() : AnyNetAdapter("FacePoseQuality") 
 FacePoseQualityAdaptResult FacePoseQualityAdapt::operator()(const inspirecv::Image &img) {
     FacePoseQualityAdaptResult res;
     AnyTensorOutputs outputs;
-    Forward(img, outputs);
+    if (img.Width() != INPUT_WIDTH || img.Height() != INPUT_HEIGHT) {
+        uint8_t* resized_data = nullptr;
+        m_processor_->Resize(img.Data(), img.Width(), img.Height(), img.Channels(), &resized_data, INPUT_WIDTH, INPUT_HEIGHT);
+        auto resized = inspirecv::Image::Create(INPUT_WIDTH, INPUT_HEIGHT, img.Channels(), resized_data, false);
+        Forward(resized, outputs);
+    } else {
+        Forward(img, outputs);
+    }
     const auto &output = outputs[0].second;
     res.pitch = output[0] * 90;
     res.yaw = output[1] * 90;

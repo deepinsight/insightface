@@ -9,6 +9,7 @@
 #include "face_process.h"
 #include "face_action_data.h"
 #include "track_module/quality/face_pose_quality_adapt.h"
+#include "track_module/landmark/landmark_param.h"
 
 namespace inspire {
 
@@ -109,11 +110,11 @@ public:
         return box_square;
     }
 
-    FaceActionList UpdateFaceAction() {
+    FaceActionList UpdateFaceAction(const SemanticIndex& semantic_index) {
         inspirecv::Vec3f euler{high_result.pitch, high_result.yaw, high_result.roll};
         inspirecv::Vec2f eyes{left_eye_status_.back(), right_eye_status_.back()};
         face_action_->RecordActionFrame(landmark_, euler, eyes);
-        return face_action_->AnalysisFaceAction();
+        return face_action_->AnalysisFaceAction(semantic_index);
     }
 
     void DisableTracking() {

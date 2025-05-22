@@ -43,7 +43,7 @@ TEST_CASE("test_SessionParallel", "[Session][Parallel]") {
         REQUIRE(ret == HSUCCEED);
 
         float similarity = 0.0f;
-        inspirecv::TimeSpend timeSpend("Serial loop: " + std::to_string(loop));
+        inspire::SpendTimer timeSpend("Serial loop: " + std::to_string(loop));
         timeSpend.Start();
         for (int i = 0; i < loop; ++i) {
             ret = CompareTwoFaces(session, image1, image2, similarity);
@@ -52,6 +52,7 @@ TEST_CASE("test_SessionParallel", "[Session][Parallel]") {
         }
         timeSpend.Stop();
         std::cout << timeSpend << std::endl;
+        ;
 
         ret = HFReleaseInspireFaceSession(session);
         REQUIRE(ret == HSUCCEED);
@@ -85,7 +86,7 @@ TEST_CASE("test_SessionParallel", "[Session][Parallel]") {
         float similaritySum = 0.0f;
         std::mutex similarityMutex;
 
-        inspirecv::TimeSpend timeSpend("Parallel loop: " + std::to_string(loop) + ", thread: " + std::to_string(N));
+        inspire::SpendTimer timeSpend("Parallel loop: " + std::to_string(loop) + ", thread: " + std::to_string(N));
         timeSpend.Start();
 
         // Start worker thread
@@ -119,6 +120,7 @@ TEST_CASE("test_SessionParallel", "[Session][Parallel]") {
 
         timeSpend.Stop();
         std::cout << timeSpend << std::endl;
+        ;
 
         // Optional: Output average similarity(stability)
         TEST_PRINT("Average similarity: {}", (similaritySum / loop));

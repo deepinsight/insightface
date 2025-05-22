@@ -11,6 +11,7 @@
 #include "enviro.h"
 #include "check.h"
 #include "inspireface/middleware/system.h"
+#include "inspireface/include/inspireface/spend_timer.h"
 
 // Define the test model file
 #define TEST_MODEL_FILE Enviro::getInstance().getPackName()

@@ -7,6 +7,8 @@ Here are the translation details for the compilation parameters as per your requ
 | ISF_THIRD_PARTY_DIR                   | 3rdparty | Path for required third-party libraries                                                                                                                    |
 | ISF_SANITIZE_ADDRESS                      | OFF | Enable AddressSanitizer for memory error detection                                                                                                         |
 | ISF_SANITIZE_LEAK                         | OFF | Enable LeakSanitizer to detect memory leaks                                                                                                                |
+| ISF_ENABLE_SYMBOL_HIDING | ON | Enable symbol hiding by default for better security and performance. Only symbols explicitly marked for export will be visible. |
+| ISF_INSTALL_CPP_HEADER | OFF | Whether to install the headers file for **CPP-API** (the default **C-API** with wider compatibility is recommended) |
 | ISF_ENABLE_RKNN                           | OFF | Enable RKNN for Rockchip embedded devices                                                                                                                  |
 | ISF_RK_DEVICE_TYPE                        | RV1109RV1126 | Target device model for Rockchip(Supports RV1109RV1126, RV1106, RV356X) |
 | ISF_RK_COMPILER_TYPE | armhf | The **armhf**, **armhf-uclibc** and aarch64 compilers are supported. Select one based on the actual situation |
@@ -19,6 +21,8 @@ Here are the translation details for the compilation parameters as per your requ
 | ISF_ENABLE_BENCHMARK                      | OFF | Enable Benchmark tests for test cases                                                                                                                      |
 | ISF_ENABLE_USE_LFW_DATA                   | OFF | Enable using LFW data for test cases                                                                                                                       |
 | ISF_ENABLE_TEST_EVALUATION                | OFF | Enable evaluation functionality for test cases, must be used together with ISF_ENABLE_USE_LFW_DATA                                                         |
+| ISF_ENABLE_TEST_INTERNAL | OFF | Enable test cases for some internal functions, requires disabling **ISF_ENABLE_SYMBOL_HIDING** for compilation. |
+| ISF_BUILD_SAMPLE_INTERNAL | OFF | Enable executable examples for some internal functions, requires disabling **ISF_ENABLE_SYMBOL_HIDING** for compilation. |
 | ISF_ENABLE_TENSORRT | OFF | Enable the backend of inference using TensorRT, Linux must be on **NVIDIA devices**, and **CUDA**, **TensorRT-10** must be installed |
 | TENSORRT_ROOT | /usr/local/TensorRT | **TensorRT-10** installation path |
 | ISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA | OFF | Enable global MNN_CUDA inference mode, requires device support for CUDA                                                                                    |
