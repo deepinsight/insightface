@@ -79,7 +79,10 @@ class SCRFD:
         if self.session is None:
             assert self.model_file is not None
             assert osp.exists(self.model_file)
-            self.session = onnxruntime.InferenceSession(self.model_file, None)
+            if (onnxruntime.get_device() == "GPU"):
+                self.session = onnxruntime.InferenceSession(self.model_file, None, providers=['CUDAExecutionProvider'])
+            if (onnxruntime.get_device() == "CPU"):
+                self.session = onnxruntime.InferenceSession(self.model_file, None, providers=['CPUExecutionProvider'])
         self.center_cache = {}
         self.nms_thresh = 0.4
         self.det_thresh = 0.5
