@@ -10,6 +10,7 @@ age_bracket_tags = [
     "0-2 years old", "3-9 years old", "10-19 years old", "20-29 years old", "30-39 years old",
     "40-49 years old", "50-59 years old", "60-69 years old", "more than 70 years old"
 ]
+emotion_tags = ["Neutral", "Happy", "Sad", "Surprise", "Fear", "Disgust", "Anger"]
 
 @click.command()
 @click.argument('image_path')
@@ -20,10 +21,9 @@ def case_face_detection_image(image_path, show):
     It also includes pipeline extensions such as RGB liveness, mask detection, and face quality evaluation.
     """
     opt = isf.HF_ENABLE_FACE_RECOGNITION | isf.HF_ENABLE_QUALITY | isf.HF_ENABLE_MASK_DETECT | \
-          isf.HF_ENABLE_LIVENESS | isf.HF_ENABLE_INTERACTION | isf.HF_ENABLE_FACE_ATTRIBUTE
+          isf.HF_ENABLE_LIVENESS | isf.HF_ENABLE_INTERACTION | isf.HF_ENABLE_FACE_ATTRIBUTE | isf.HF_ENABLE_FACE_EMOTION
     session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_ALWAYS_DETECT)
     session.set_detection_confidence_threshold(0.5)
-
     # Load image
     image = cv2.imread(image_path)
     assert image is not None, "Please check that the image path is correct."
@@ -37,6 +37,7 @@ def case_face_detection_image(image_path, show):
 
     # Detect faces
     faces = session.face_detection(image)
+    print(faces)
     print(f"face detection: {len(faces)} found")
 
     draw = image.copy()
@@ -67,9 +68,9 @@ def case_face_detection_image(image_path, show):
 
     # Execute extended functions (optional modules)
     select_exec_func = isf.HF_ENABLE_QUALITY | isf.HF_ENABLE_MASK_DETECT | \
-                       isf.HF_ENABLE_LIVENESS | isf.HF_ENABLE_INTERACTION | isf.HF_ENABLE_FACE_ATTRIBUTE
+                       isf.HF_ENABLE_LIVENESS | isf.HF_ENABLE_INTERACTION | isf.HF_ENABLE_FACE_ATTRIBUTE | isf.HF_ENABLE_FACE_EMOTION
     extends = session.face_pipeline(image, faces, select_exec_func)
-
+    print(extends)
     for idx, ext in enumerate(extends):
         print(f"{'==' * 20}")
         print(f"idx: {idx}")
@@ -80,6 +81,7 @@ def case_face_detection_image(image_path, show):
         print(f"gender: {gender_tags[ext.gender]}")
         print(f"race: {race_tags[ext.race]}")
         print(f"age: {age_bracket_tags[ext.age_bracket]}")
+        print(f"emotion: {emotion_tags[ext.emotion]}")
 
     # Save the annotated image
     save_path = os.path.join("tmp", "det.jpg")

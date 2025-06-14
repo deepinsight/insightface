@@ -37,6 +37,7 @@ extern "C" {
 #define HF_ENABLE_QUALITY 0x00000080           ///< Flag to enable face quality assessment feature.
 #define HF_ENABLE_INTERACTION 0x00000100       ///< Flag to enable interaction feature.
 #define HF_ENABLE_FACE_POSE 0x00000200         ///< Flag to enable face pose estimation feature.
+#define HF_ENABLE_FACE_EMOTION 0x00000400      ///< Flag to enable face emotion recognition feature.
 
 /**
  * Camera stream format.
@@ -49,6 +50,8 @@ typedef enum HFImageFormat {
     HF_STREAM_BGRA = 3,      ///< Image in BGR format with alpha channel.
     HF_STREAM_YUV_NV12 = 4,  ///< Image in YUV NV12 format.
     HF_STREAM_YUV_NV21 = 5,  ///< Image in YUV NV21 format.
+    HF_STREAM_I420 = 6,      ///< Image in I420 format.
+    HF_STREAM_GRAY = 7,      ///< Image in GRAY format.
 } HFImageFormat;
 
 /**
@@ -389,6 +392,7 @@ typedef struct HFSessionCustomParameter {
     HInt32 enable_interaction_liveness;  ///< Enable interaction for liveness detection feature.
     HInt32 enable_detect_mode_landmark;  ///< Enable landmark detection in detection mode
     HInt32 enable_face_pose;             ///< Enable face pose estimation feature.
+    HInt32 enable_face_emotion;          ///< Enable face emotion recognition feature.
 } HFSessionCustomParameter, *PHFSessionCustomParameter;
 
 /**
@@ -1181,6 +1185,29 @@ typedef struct HFFaceAttributeResult {
  * @return HResult indicating the success or failure of the operation.
  */
 HYPER_CAPI_EXPORT extern HResult HFGetFaceAttributeResult(HFSession session, PHFFaceAttributeResult results);
+
+/**
+ * @brief Struct representing face emotion results.
+ */
+typedef struct HFFaceEmotionResult {
+    HInt32 num;          ///< Number of faces detected.
+    HPInt32 emotion;     ///< Emotion of the detected face.
+                         ///< 0: Neutral;
+                         ///< 1: Happy;
+                         ///< 2: Sad;
+                         ///< 3: Surprise;
+                         ///< 4: Fear;
+                         ///< 5: Disgust;
+                         ///< 6: Anger;
+} HFFaceEmotionResult, *PHFFaceEmotionResult;
+
+/**
+ * @brief Get the face emotion result.
+ * @param session Handle to the session.
+ * @param result Pointer to the structure where face emotion results will be stored.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFGetFaceEmotionResult(HFSession session, PHFFaceEmotionResult result);
 
 /************************************************************************
  * System Function

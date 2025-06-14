@@ -466,8 +466,16 @@ std::string FaceTrackModule::ChoiceMultiLevelDetectModel(const int32_t pixel_siz
     const auto face_detect_model_list = Launch::GetInstance()->GetFaceDetectModelList();
     const int32_t num_sizes = face_detect_pixel_list.size();
     if (pixel_size == -1) {
-        final_size = face_detect_pixel_list[1];
-        return face_detect_model_list[1];
+        // Find index with value 320, use index 1 as fallback
+        int index = 1;
+        for (int i = 0; i < face_detect_pixel_list.size(); ++i) {
+            if (face_detect_pixel_list[i] == 320) {
+                index = i;
+                break;
+            }
+        }
+        final_size = face_detect_pixel_list[index];
+        return face_detect_model_list[index];
     }
 
     // Check for exact match

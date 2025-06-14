@@ -317,6 +317,12 @@ public:
     const std::vector<int>& GetFaceRaiseHeadAactionsResultCache() const;
 
     /**
+     * @brief Gets the cache of face emotion results.
+     * @return A const reference to a vector containing face emotion results.
+     */
+    const std::vector<int>& GetFaceEmotionResultsCache() const;
+
+    /**
      * @brief Gets the cache of the current face features.
      * @return A const reference to the Embedded object containing current face feature data.
      */
@@ -410,6 +416,9 @@ private:
     std::vector<int> m_attribute_race_results_cache_;    ///< Cache for face attribute race results
     std::vector<int> m_attribute_gender_results_cache_;  ///< Cache for face attribute gender results
     std::vector<int> m_attribute_age_results_cache_;     ///< Cache for face attribute age results
+
+    std::vector<int> m_face_emotion_results_cache_;      ///< Cache for face emotion classification results
+
     Embedded m_face_feature_cache_;                      ///< Cache for current face feature data
     float m_face_feature_norm_;                          ///< Cache for face feature norm
 

@@ -187,6 +187,7 @@ typedef struct CustomPipelineParameter {
     bool enable_face_quality = false;          ///< Enable face quality assessment feature
     bool enable_interaction_liveness = false;  ///< Enable interactive liveness detection feature
     bool enable_face_pose = false;             ///< Enable face pose estimation feature
+    bool enable_face_emotion = false;          ///< Enable face emotion recognition feature
 } ContextCustomParameter;
 
 /** @struct FaceLoc
@@ -294,6 +295,22 @@ struct FaceAttributeResult {
                          ///< 6: 50-59 years old;
                          ///< 7: 60-69 years old;
                          ///< 8: more than 70 years old;
+};
+
+/** @struct FaceEmotionResult
+ *  @brief Struct for face emotion result data.
+ *
+ *  Contains the results for face emotion.
+ */
+struct FaceEmotionResult {
+    int32_t emotion;     ///< Emotion of the detected face.
+                         ///< 0: Neutral;
+                         ///< 1: Happy;
+                         ///< 2: Sad;
+                         ///< 3: Surprise;
+                         ///< 4: Fear;
+                         ///< 5: Disgust;
+                         ///< 6: Anger;
 };
 
 /** @} */

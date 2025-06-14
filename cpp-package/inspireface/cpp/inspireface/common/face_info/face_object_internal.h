@@ -239,6 +239,8 @@ public:
         bbox_ = bbox;
     }
 
+    std::vector<std::vector<float>> face_emotion_history_;
+    
     inspirecv::TransformMatrix trans_matrix_;
     inspirecv::TransformMatrix trans_matrix_extensive_;
     float confidence_;

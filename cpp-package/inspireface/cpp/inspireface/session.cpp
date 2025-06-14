@@ -171,6 +171,17 @@ public:
         return face_attribute_result;
     }
 
+    std::vector<FaceEmotionResult> GetFaceEmotionResult() {
+        auto num = m_face_session_->GetFaceEmotionResultsCache().size();
+        std::vector<FaceEmotionResult> face_emotion_result;
+        face_emotion_result.resize(num);
+        for (size_t i = 0; i < num; ++i) {
+            face_emotion_result[i].emotion = m_face_session_->GetFaceEmotionResultsCache()[i];
+        }
+        return face_emotion_result;
+    }
+
+
     std::unique_ptr<FaceSession> m_face_session_;
 };
 
@@ -272,6 +283,10 @@ std::vector<FaceInteractionAction> Session::GetFaceInteractionAction() {
 
 std::vector<FaceAttributeResult> Session::GetFaceAttributeResult() {
     return pImpl->GetFaceAttributeResult();
+}
+
+std::vector<FaceEmotionResult> Session::GetFaceEmotionResult() {
+    return pImpl->GetFaceEmotionResult();
 }
 
 }  // namespace inspire

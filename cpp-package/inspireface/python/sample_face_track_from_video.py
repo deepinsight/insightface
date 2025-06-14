@@ -50,12 +50,11 @@ def case_face_tracker_from_video(source, show, out):
     """
     # Optional features, loaded during session creation based on the modules specified.
     opt = isf.HF_ENABLE_NONE | isf.HF_ENABLE_INTERACTION
-    session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_LIGHT_TRACK, max_detect_num=25, detect_pixel_level=160)    # Use video mode
+    session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_LIGHT_TRACK, max_detect_num=25, detect_pixel_level=320)    # Use video mode
     session.set_track_mode_smooth_ratio(0.06)
     session.set_track_mode_num_smooth_cache_frame(15)
     session.set_filter_minimum_face_pixel_size(0)
     session.set_track_model_detect_interval(0)
-    session.set_landmark_augmentation_num(1)
     session.set_enable_track_cost_spend(True)
     # Determine if the source is a digital webcam index or a video file path.
     try:

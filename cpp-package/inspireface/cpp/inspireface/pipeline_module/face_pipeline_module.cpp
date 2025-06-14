@@ -14,11 +14,12 @@
 namespace inspire {
 
 FacePipelineModule::FacePipelineModule(InspireArchive &archive, bool enableLiveness, bool enableMaskDetect, bool enableAttribute,
-                                       bool enableInteractionLiveness)
+                                       bool enableInteractionLiveness, bool enableFaceEmotion)
 : m_enable_liveness_(enableLiveness),
   m_enable_mask_detect_(enableMaskDetect),
   m_enable_attribute_(enableAttribute),
-  m_enable_interaction_liveness_(enableInteractionLiveness) {
+  m_enable_interaction_liveness_(enableInteractionLiveness),
+  m_enable_face_emotion_(enableFaceEmotion) {
     if (m_enable_attribute_) {
         InspireModel attrModel;
         auto ret = archive.LoadModel("face_attribute", attrModel);
@@ -71,12 +72,24 @@ FacePipelineModule::FacePipelineModule(InspireArchive &archive, bool enableLiven
             INSPIRE_LOGE("InitBlinkFromLivenessInteraction error.");
         }
     }
+
+    // Initialize the face emotion model
+    if (m_enable_face_emotion_) {
+        InspireModel faceEmotionModel;
+        auto ret = archive.LoadModel("face_emotion", faceEmotionModel);
+        if (ret != 0) {
+            INSPIRE_LOGE("Load Face emotion model error.");
+        }
+        ret = InitFaceEmotion(faceEmotionModel);
+        if (ret != 0) {
+            INSPIRE_LOGE("InitFaceEmotion error.");
+        }
+    }
 }
 
 int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const FaceTrackWrap &face, FaceProcessFunctionOption proc) {
     // Original image
     inspirecv::Image originImage;
-    inspirecv::Image scaleImage;
     std::vector<inspirecv::Point2f> stand_lmk;
     switch (proc) {
         case PROCESS_MASK: {
@@ -186,6 +199,20 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
             faceAttributeCache = inspirecv::Vec3i{outputs[0], outputs[1], outputs[2]};
             break;
         }
+        case PROCESS_FACE_EMOTION: {
+            if (m_face_emotion_ == nullptr) {
+                return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
+            }
+            std::vector<inspirecv::Point2f> pointsFive;
+            for (const auto &p : face.keyPoints) {
+                pointsFive.push_back(inspirecv::Point2f(p.x, p.y));
+            }
+            auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, pointsFive);
+            auto crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
+            // crop.Show();
+            faceEmotionCache = (*m_face_emotion_)(crop);
+            break;
+        }
     }
     return HSUCCEED;
 }
@@ -266,6 +293,15 @@ int32_t FacePipelineModule::InitBlinkFromLivenessInteraction(InspireModel &model
 
 int32_t FacePipelineModule::InitLivenessInteraction(InspireModel &model) {
     return 0;
+}
+
+int32_t FacePipelineModule::InitFaceEmotion(InspireModel &model) {
+    m_face_emotion_ = std::make_shared<FaceEmotionAdapt>();
+    auto ret = m_face_emotion_->LoadData(model, model.modelType);
+    if (ret != InferenceWrapper::WrapperOk) {
+        return HERR_ARCHIVE_LOAD_FAILURE;
+    }
+    return HSUCCEED;
 }
 
 const std::shared_ptr<RBGAntiSpoofingAdapt> &FacePipelineModule::getMRgbAntiSpoofing() const {

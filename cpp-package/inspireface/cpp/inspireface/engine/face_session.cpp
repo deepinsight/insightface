@@ -37,7 +37,7 @@ int32_t FaceSession::Configuration(DetectModuleMode detect_mode, int32_t max_det
     }
 
     m_face_pipeline_ = std::make_shared<FacePipelineModule>(INSPIREFACE_CONTEXT->getMArchive(), param.enable_liveness, param.enable_mask_detect,
-                                                            param.enable_face_attribute, param.enable_interaction_liveness);
+                                                            param.enable_face_attribute, param.enable_interaction_liveness, param.enable_face_emotion);
     m_face_track_cost_ = std::make_shared<inspire::SpendTimer>("FaceTrack");
 
     return HSUCCEED;
@@ -59,6 +59,7 @@ int32_t FaceSession::FaceDetectAndTrack(inspirecv::FrameProcess& process) {
     m_quality_score_results_cache_.clear();
     m_react_left_eye_results_cache_.clear();
     m_react_right_eye_results_cache_.clear();
+    m_face_emotion_results_cache_.clear();
 
     m_action_normal_results_cache_.clear();
     m_action_shake_results_cache_.clear();
@@ -153,6 +154,7 @@ int32_t FaceSession::FacesProcess(inspirecv::FrameProcess& process, const std::v
     m_action_blink_results_cache_.resize(faces.size(), -1);
     m_action_raise_head_results_cache_.resize(faces.size(), -1);
     m_action_shake_results_cache_.resize(faces.size(), -1);
+    m_face_emotion_results_cache_.resize(faces.size(), -1);
     for (int i = 0; i < faces.size(); ++i) {
         const auto& face = faces[i];
         // RGB Liveness Detect
@@ -212,6 +214,34 @@ int32_t FaceSession::FacesProcess(inspirecv::FrameProcess& process, const std::v
                         m_action_shake_results_cache_[i] = actions.shake;
                     } else {
                         INSPIRE_LOGD(
+                          "Serialized objects cannot connect to trace objects in memory, and there may be some "
+                          "problems");
+                    }
+                } else {
+                    INSPIRE_LOGW(
+                      "The index of the trace object does not match the trace list in memory, and there may be some "
+                      "problems");
+                }
+            }
+        }
+        // Face emotion recognition
+        if (param.enable_face_emotion) {
+            auto ret = m_face_pipeline_->Process(process, face, PROCESS_FACE_EMOTION);
+            if (ret != HSUCCEED) {
+                return ret;
+            }
+            // Default mode
+            m_face_emotion_results_cache_[i] = argmax(m_face_pipeline_->faceEmotionCache.begin(), m_face_pipeline_->faceEmotionCache.end());
+            if (face.trackState > 0) {
+                // Tracking mode
+                auto idx = face.inGroupIndex;
+                if (idx < m_face_track_->trackingFace.size()) {
+                    auto& target = m_face_track_->trackingFace[idx];
+                    if (target.GetTrackingId() == face.trackId) {
+                        auto new_emotion = VectorEmaFilter(m_face_pipeline_->faceEmotionCache, target.face_emotion_history_, 8, 0.4f);
+                        m_face_emotion_results_cache_[i] = argmax(new_emotion.begin(), new_emotion.end());
+                    } else { 
+                        INSPIRE_LOGW(
                           "Serialized objects cannot connect to trace objects in memory, and there may be some "
                           "problems");
                     }
@@ -321,6 +351,10 @@ const std::vector<int>& FaceSession::GetFaceShakeAactionsResultCache() const {
 
 const std::vector<int>& FaceSession::GetFaceRaiseHeadAactionsResultCache() const {
     return m_action_raise_head_results_cache_;
+}
+
+const std::vector<int>& FaceSession::GetFaceEmotionResultsCache() const {
+    return m_face_emotion_results_cache_;
 }
 
 int32_t FaceSession::FaceFeatureExtract(inspirecv::FrameProcess& process, FaceBasicData& data, bool normalize) {

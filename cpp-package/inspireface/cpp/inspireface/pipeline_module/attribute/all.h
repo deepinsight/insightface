@@ -8,5 +8,6 @@
 
 #include "mask_predict_adapt.h"
 #include "face_attribute_adapt.h"
+#include "face_emotion_adapt.h"
 
 #endif  // HYPERFACEREPO_ATTRIBUTE_ALL_H

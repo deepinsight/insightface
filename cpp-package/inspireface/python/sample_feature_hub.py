@@ -11,7 +11,7 @@ def case_feature_hub():
     db_path = "test.db"
     # Configure the feature management system.
     feature_hub_config = isf.FeatureHubConfiguration(
-        primary_key_mode=isf.HF_PK_MANUAL_INPUT,
+        primary_key_mode=isf.HF_PK_AUTO_INCREMENT,
         enable_persistence=True,
         persistence_db_path=db_path,
         search_threshold=0.48,
@@ -23,14 +23,15 @@ def case_feature_hub():
     for i in range(10):
         v = np.random.rand(512).astype(np.float32)
         feature = isf.FaceIdentity(v, i)
-        ret, new_id = isf.feature_hub_face_insert(feature)
+        ret, _ = isf.feature_hub_face_insert(feature)
         assert ret, "Failed to insert face feature data into FeatureHub."
-        assert new_id == i, "Failed to get the correct new id."
     feature = isf.FaceIdentity(gen, -1)
     isf.feature_hub_face_insert(feature)
     result = isf.feature_hub_face_search(gen)
     print(f"result: {result}")
     assert os.path.exists(db_path), "FeatureHub database file not found."
+    ids = isf.feature_hub_get_face_id_list()
+    print(f"ids: {ids}")
 
 
 
