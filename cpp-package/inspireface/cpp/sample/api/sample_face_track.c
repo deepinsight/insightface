@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
     /* Maximum number of faces detected */
     maxDetectNum = 20;
     /* Face detection image input level */
-    detectPixelLevel = 160;
+    detectPixelLevel = 320;
     /* Handle of the current face SDK algorithm context */
     session = NULL;
     ret = HFCreateInspireFaceSessionOptional(option, detMode, maxDetectNum, detectPixelLevel, -1, &session);
