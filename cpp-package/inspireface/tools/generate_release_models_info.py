@@ -6,6 +6,9 @@ import click
 need_models = [
     "Pikachu",
     "Megatron",
+    "Megatron_TRT",
+    "Gundam_RK356X",
+    "Gundam_RK3588",
 ]
 
 def get_file_hash_sha256(file_path):

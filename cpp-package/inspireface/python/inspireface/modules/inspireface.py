@@ -7,6 +7,13 @@ from dataclasses import dataclass
 from loguru import logger
 from .utils import ResourceManager
 
+# If True, the latest model will not be verified
+IGNORE_VERIFICATION_OF_THE_LATEST_MODEL = False
+
+def ignore_check_latest_model(ignore: bool):
+    global IGNORE_VERIFICATION_OF_THE_LATEST_MODEL
+    IGNORE_VERIFICATION_OF_THE_LATEST_MODEL = ignore
+
 class ImageStream(object):
     """
     ImageStream class handles the conversion of image data from various sources into a format compatible with the InspireFace library.
@@ -165,6 +172,10 @@ class FaceExtended:
     race: int
     gender: int
     age_bracket: int
+    emotion: int
+
+    def __repr__(self) -> str:
+        return f"FaceExtended(rgb_liveness_confidence={self.rgb_liveness_confidence}, mask_confidence={self.mask_confidence}, quality_confidence={self.quality_confidence}, left_eye_status_confidence={self.left_eye_status_confidence}, right_eye_status_confidence={self.right_eye_status_confidence}, action_normal={self.action_normal}, action_jaw_open={self.action_jaw_open}, action_shake={self.action_shake}, action_blink={self.action_blink}, action_head_raise={self.action_head_raise}, race={self.race}, gender={self.gender}, age_bracket={self.age_bracket}, emotion={self.emotion})"
 
 
 class FaceInformation:
@@ -214,6 +225,9 @@ class FaceInformation:
         self._token.size = buffer_size
         self._token.data = cast(addressof(self.buffer), c_void_p)
 
+    def __repr__(self) -> str:
+        return f"FaceInformation(track_id={self.track_id}, detection_confidence={self.detection_confidence}, location={self.location}, roll={self.roll}, yaw={self.yaw}, pitch={self.pitch})"
+
 
 @dataclass
 class SessionCustomParameter:
@@ -232,6 +246,7 @@ class SessionCustomParameter:
     enable_face_attribute: bool = False
     enable_face_quality: bool = False
     enable_interaction_liveness: bool = False
+    enable_face_emotion: bool = False
 
     def _c_struct(self):
         """
@@ -247,10 +262,14 @@ class SessionCustomParameter:
             enable_mask_detect=int(self.enable_mask_detect),
             enable_face_attribute=int(self.enable_face_attribute),
             enable_face_quality=int(self.enable_face_quality),
-            enable_interaction_liveness=int(self.enable_interaction_liveness)
+            enable_interaction_liveness=int(self.enable_interaction_liveness),
+            enable_face_emotion=int(self.enable_face_emotion)
         )
 
         return custom_param
+
+    def __repr__(self) -> str:
+        return f"SessionCustomParameter(enable_recognition={self.enable_recognition}, enable_liveness={self.enable_liveness}, enable_ir_liveness={self.enable_ir_liveness}, enable_mask_detect={self.enable_mask_detect}, enable_face_attribute={self.enable_face_attribute}, enable_face_quality={self.enable_face_quality}, enable_interaction_liveness={self.enable_interaction_liveness}, enable_face_emotion={self.enable_face_emotion})"
 
 
 class InspireFaceSession(object):
@@ -431,6 +450,11 @@ class InspireFaceSession(object):
         if ret != 0:
             logger.error(f"Set track model detect interval error: {ret}")
 
+    def set_landmark_augmentation_num(self, num=1):
+        ret = HFSessionSetLandmarkAugmentationNum(self._sess, num)
+        if ret != 0:
+            logger.error(f"Set landmark augmentation num error: {ret}")
+
     def face_pipeline(self, image, faces: List[FaceInformation], exec_param) -> List[FaceExtended]:
         """
         Processes detected faces to extract additional attributes based on the provided execution parameters.
@@ -461,12 +485,13 @@ class InspireFaceSession(object):
             logger.error(f"Face pipeline error: {ret}")
             return []
 
-        extends = [FaceExtended(-1.0, -1.0, -1.0, -1.0, -1.0, 0, 0, 0, 0, 0, -1, -1, -1) for _ in range(len(faces))]
+        extends = [FaceExtended(-1.0, -1.0, -1.0, -1.0, -1.0, 0, 0, 0, 0, 0, -1, -1, -1, -1) for _ in range(len(faces))]
         self._update_mask_confidence(exec_param, flag, extends)
         self._update_rgb_liveness_confidence(exec_param, flag, extends)
         self._update_face_quality_confidence(exec_param, flag, extends)
         self._update_face_attribute_confidence(exec_param, flag, extends)
         self._update_face_interact_confidence(exec_param, flag, extends)
+        self._update_face_emotion_confidence(exec_param, flag, extends)
 
         return extends
 
@@ -549,6 +574,17 @@ class InspireFaceSession(object):
                     extends[i].action_blink = actions.blink[i]
             else:
                 logger.error(f"Get face action result error: {ret}")
+
+    def _update_face_emotion_confidence(self, exec_param, flag, extends):
+        if (flag == "object" and exec_param.enable_face_emotion) or (
+                flag == "bitmask" and exec_param & HF_ENABLE_FACE_EMOTION):
+            emotion_results = HFFaceEmotionResult()
+            ret = HFGetFaceEmotionResult(self._sess, PHFFaceEmotionResult(emotion_results))
+            if ret == 0:
+                for i in range(emotion_results.num):
+                    extends[i].emotion = emotion_results.emotion[i]
+            else:
+                logger.error(f"Get face emotion result error: {ret}")
 
     def _update_rgb_liveness_confidence(self, exec_param, flag, extends: List[FaceExtended]):
         if (flag == "object" and exec_param.enable_liveness) or (
@@ -639,7 +675,7 @@ def launch(model_name: str = "Pikachu", resource_path: str = None) -> bool:
     """
     if resource_path is None:
         sm = ResourceManager()
-        resource_path = sm.get_model(model_name)
+        resource_path = sm.get_model(model_name, ignore_verification=IGNORE_VERIFICATION_OF_THE_LATEST_MODEL)
     path_c = String(bytes(resource_path, encoding="utf8"))
     ret = HFLaunchInspireFace(path_c)
     if ret != 0:
@@ -651,16 +687,31 @@ def launch(model_name: str = "Pikachu", resource_path: str = None) -> bool:
             return False
     return True
 
-
 def pull_latest_model(model_name: str = "Pikachu") -> str:
+    """
+    Pulls the latest model from the resource manager.
+
+    Args:
+        model_name (str): the name of the model to use.
+
+    Returns:
+    """
     sm = ResourceManager()
     resource_path = sm.get_model(model_name, re_download=True)
     return resource_path
 
 def reload(model_name: str = "Pikachu", resource_path: str = None) -> bool:
+    """
+    Reloads the InspireFace system with the specified resource directory.
+
+    Args:
+        model_name (str): the name of the model to use.
+        resource_path (str): if None, use the default model path.
+
+    Returns:
+    """
     if resource_path is None:
         sm = ResourceManager()
-        resource_path = sm.get_model(model_name)
     path_c = String(bytes(resource_path, encoding="utf8"))
     ret = HFReloadInspireFace(path_c)
     if ret != 0:
@@ -672,6 +723,20 @@ def reload(model_name: str = "Pikachu", resource_path: str = None) -> bool:
             return False
     return True
 
+def terminate() -> bool:
+    """
+    Terminates the InspireFace system.
+
+    Returns:
+        bool: True if the system was successfully terminated, False otherwise.
+
+    Notes:
+    """
+    ret = HFTerminateInspireFace()
+    if ret != 0:
+        logger.error(f"Terminate InspireFace failure: {ret}")
+        return False
+    return True
 
 def query_launch_status() -> bool:
     """
@@ -828,6 +893,9 @@ class FaceIdentity(object):
         self.feature = data
         self.id = id
 
+    def __repr__(self) -> str:
+        return f"FaceIdentity(id={self.id}, feature={self.feature})"
+
     @staticmethod
     def from_ctypes(raw_identity: HFFaceFeatureIdentity):
         """
@@ -906,6 +974,8 @@ class SearchResult:
     confidence: float
     similar_identity: FaceIdentity
 
+    def __repr__(self) -> str:
+        return f"SearchResult(confidence={self.confidence}, similar_identity={self.similar_identity})"
 
 def feature_hub_face_search(data: np.ndarray) -> SearchResult:
     """
@@ -1048,6 +1118,20 @@ def feature_hub_get_face_count() -> int:
     return int(count.value)
 
 
+def feature_hub_get_face_id_list() -> List[int]:
+    """
+    Retrieves a list of face IDs from the feature hub.
+
+    Returns:
+        List[int]: A list of face IDs.
+    """
+    ids = HFFeatureHubExistingIds()
+    ptr = PHFFeatureHubExistingIds(ids)
+    ret = HFFeatureHubGetExistingIds(ptr)
+    if ret != 0:
+        logger.error(f"Failed to get face id list: {ret}")
+    return [int(ids.ids[i]) for i in range(ids.size)]
+
 def view_table_in_terminal():
     """
     Displays the database table of face identities in the terminal.
@@ -1170,3 +1254,47 @@ def query_expansive_hardware_rockchip_dma_heap_path() -> str:
         return None
     return str(path.value)
 
+
+def set_cuda_device_id(device_id: int):
+    """
+    Sets the CUDA device ID.
+    """
+    ret = HFSetCudaDeviceId(device_id)
+    if ret != 0:
+        logger.error(f"Failed to set CUDA device ID: {ret}")
+
+def get_cuda_device_id() -> int:
+    """
+    Gets the CUDA device ID.
+    """
+    id = HInt32()
+    ret = HFGetCudaDeviceId(id)
+    if ret != 0:
+        logger.error(f"Failed to get CUDA device ID: {ret}")
+    return int(id.value)
+
+def print_cuda_device_info():
+    """
+    Prints the CUDA device information.
+    """
+    HFPrintCudaDeviceInfo()
+    
+def get_num_cuda_devices() -> int:
+    """
+    Gets the number of CUDA devices.
+    """
+    num = HInt32()
+    ret = HFGetNumCudaDevices(num)
+    if ret != 0:
+        logger.error(f"Failed to get number of CUDA devices: {ret}")
+    return int(num.value)
+
+def check_cuda_device_support() -> bool:
+    """
+    Checks if the CUDA device is supported.
+    """
+    is_support = HInt32()
+    ret = HFCheckCudaDeviceSupport(is_support)
+    if ret != 0:
+        logger.error(f"Failed to check CUDA device support: {ret}")
+    return bool(is_support.value)

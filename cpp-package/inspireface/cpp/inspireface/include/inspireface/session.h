@@ -189,6 +189,12 @@ public:
      */
     std::vector<FaceAttributeResult> GetFaceAttributeResult();
 
+    /**
+     * @brief Get the face emotion result.
+     * @return The face emotion result.
+     */
+    std::vector<FaceEmotionResult> GetFaceEmotionResult();
+
 private:
     class Impl;
     std::unique_ptr<Impl> pImpl;

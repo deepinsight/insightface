@@ -15,7 +15,7 @@ enum ROTATION_MODE { ROTATION_0 = 0, ROTATION_90 = 1, ROTATION_180 = 2, ROTATION
 /**
  * @brief Enum to represent data formats.
  */
-enum DATA_FORMAT { NV21 = 0, NV12 = 1, RGBA = 2, RGB = 3, BGR = 4, BGRA = 5 };
+enum DATA_FORMAT { NV21 = 0, NV12 = 1, RGBA = 2, RGB = 3, BGR = 4, BGRA = 5 , I420 = 6, GRAY = 7};
 
 /**
  * @brief A class to handle camera stream and image processing.

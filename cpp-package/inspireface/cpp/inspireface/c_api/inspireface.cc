@@ -60,6 +60,12 @@ HYPER_CAPI_EXPORT extern HResult HFCreateImageStream(PHFImageData data, HFImageS
         case HF_STREAM_YUV_NV21:
             stream->impl.SetDataFormat(inspirecv::NV21);
             break;
+        case HF_STREAM_I420:
+            stream->impl.SetDataFormat(inspirecv::I420);
+            break;
+        case HF_STREAM_GRAY:
+            stream->impl.SetDataFormat(inspirecv::GRAY);
+            break;
         default:
             return HERR_INVALID_IMAGE_STREAM_PARAM;  // Assume there's a return code for unsupported
                                                      // formats
@@ -134,6 +140,12 @@ HYPER_CAPI_EXPORT extern HResult HFImageStreamSetFormat(HFImageStream handle, HF
             break;
         case HF_STREAM_YUV_NV21:
             ((HF_CameraStream *)handle)->impl.SetDataFormat(inspirecv::NV21);
+            break;
+        case HF_STREAM_I420:
+            ((HF_CameraStream *)handle)->impl.SetDataFormat(inspirecv::I420);
+            break;
+        case HF_STREAM_GRAY:
+            ((HF_CameraStream *)handle)->impl.SetDataFormat(inspirecv::GRAY);
             break;
         default:
             return HERR_INVALID_IMAGE_STREAM_PARAM;  // Assume there's a return code for unsupported
@@ -384,6 +396,7 @@ HResult HFCreateInspireFaceSession(HFSessionCustomParameter parameter, HFDetectM
     param.enable_recognition = parameter.enable_recognition;
     param.enable_face_attribute = parameter.enable_face_attribute;
     param.enable_face_pose = parameter.enable_face_pose;
+    param.enable_face_emotion = parameter.enable_face_emotion;
     inspire::DetectModuleMode detMode = inspire::DETECT_MODE_ALWAYS_DETECT;
     if (detectMode == HF_DETECT_MODE_LIGHT_TRACK) {
         detMode = inspire::DETECT_MODE_LIGHT_TRACK;
@@ -431,6 +444,9 @@ HResult HFCreateInspireFaceSessionOptional(HOption customOption, HFDetectMode de
     }
     if (customOption & HF_ENABLE_FACE_POSE) {
         param.enable_face_pose = true;
+    }
+    if (customOption & HF_ENABLE_FACE_EMOTION) {
+        param.enable_face_emotion = true;
     }
     inspire::DetectModuleMode detMode = inspire::DETECT_MODE_ALWAYS_DETECT;
     if (detectMode == HF_DETECT_MODE_LIGHT_TRACK) {
@@ -588,8 +604,6 @@ HResult HFSessionGetTrackPreviewSize(HFSession session, HInt32 *previewSize) {
     return HSUCCEED;
 }
 
-
-
 HResult HFSessionSetFilterMinimumFacePixelSize(HFSession session, HInt32 minSize) {
     if (session == nullptr) {
         return HERR_INVALID_CONTEXT_HANDLE;
@@ -659,8 +673,6 @@ HResult HFSessionSetTrackModeDetectInterval(HFSession session, HInt32 num) {
     }
     return ctx->impl.SetTrackModeDetectInterval(num);
 }
-
-
 
 HResult HFExecuteFaceTrack(HFSession session, HFImageStream streamHandle, PHFMultipleFaceData results) {
     if (session == nullptr) {
@@ -1141,6 +1153,7 @@ HResult HFMultipleFacePipelineProcess(HFSession session, HFImageStream streamHan
     param.enable_ir_liveness = parameter.enable_ir_liveness;
     param.enable_recognition = parameter.enable_recognition;
     param.enable_face_attribute = parameter.enable_face_attribute;
+    param.enable_face_emotion = parameter.enable_face_emotion;
 
     HResult ret;
     std::vector<inspire::FaceTrackWrap> data;
@@ -1204,6 +1217,9 @@ HResult HFMultipleFacePipelineProcessOptional(HFSession session, HFImageStream s
     }
     if (customOption & HF_ENABLE_FACE_POSE) {
         param.enable_face_pose = true;
+    }
+    if (customOption & HF_ENABLE_FACE_EMOTION) {
+        param.enable_face_emotion = true;
     }
 
     HResult ret;
@@ -1331,6 +1347,21 @@ HResult HFGetFaceAttributeResult(HFSession session, PHFFaceAttributeResult resul
     results->race = (HPInt32)ctx->impl.GetFaceRaceResultsCache().data();
     results->gender = (HPInt32)ctx->impl.GetFaceGenderResultsCache().data();
     results->ageBracket = (HPInt32)ctx->impl.GetFaceAgeBracketResultsCache().data();
+
+    return HSUCCEED;
+}
+
+HResult HFGetFaceEmotionResult(HFSession session, PHFFaceEmotionResult result) {
+    if (session == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+    HF_FaceAlgorithmSession *ctx = (HF_FaceAlgorithmSession *)session;
+    if (ctx == nullptr) {
+        return HERR_INVALID_CONTEXT_HANDLE;
+    }
+
+    result->num = ctx->impl.GetFaceEmotionResultsCache().size();
+    result->emotion = (HPInt32)ctx->impl.GetFaceEmotionResultsCache().data();
 
     return HSUCCEED;
 }

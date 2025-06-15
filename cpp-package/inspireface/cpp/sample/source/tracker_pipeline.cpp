@@ -15,7 +15,7 @@ int main() {
     FaceTrackModule tracker(mode, 10, 20, 320, -1);
     tracker.Configuration(archive, expansion_path);
 
-    FacePipelineModule pipe(archive, true, true, true, true);
+    FacePipelineModule pipe(archive, true, true, true, true, true);
 
     auto image = inspirecv::Image::Create("test_res/data/bulk/r90.jpg");
     inspirecv::FrameProcess processor;

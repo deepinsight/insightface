@@ -33,6 +33,12 @@ public:
         if (data_format == BGRA) {
             config_.sourceFormat = MNN::CV::BGRA;
         }
+        if (data_format == I420) {
+            config_.sourceFormat = MNN::CV::YUV_I420;
+        }
+        if (data_format == GRAY) {
+            config_.sourceFormat = MNN::CV::GRAY;
+        }
     }
 
     void SetDestFormat(DATA_FORMAT data_format) {
@@ -53,6 +59,12 @@ public:
         }
         if (data_format == BGRA) {
             config_.destFormat = MNN::CV::BGRA;
+        }
+        if (data_format == I420) {
+            config_.destFormat = MNN::CV::YUV_I420;
+        }
+        if (data_format == GRAY) {
+            config_.destFormat = MNN::CV::GRAY;
         }
     }
 

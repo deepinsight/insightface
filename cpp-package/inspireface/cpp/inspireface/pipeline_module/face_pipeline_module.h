@@ -15,6 +15,8 @@
 #include "middleware/model_archive/inspire_archive.h"
 #include "face_warpper.h"
 #include "track_module/landmark/landmark_param.h"
+#include "attribute/face_emotion_adapt.h"
+
 namespace inspire {
 
 /**
@@ -26,6 +28,7 @@ typedef enum FaceProcessFunctionOption {
     PROCESS_RGB_LIVENESS,  ///< RGB liveness detection.
     PROCESS_ATTRIBUTE,     ///< Face attribute estimation.
     PROCESS_INTERACTION,   ///< Face interaction.
+    PROCESS_FACE_EMOTION,  ///< Face emotion recognition.
 } FaceProcessFunctionOption;
 
 /**
@@ -45,9 +48,10 @@ public:
      * @param enableMaskDetect Whether mask detection is enabled.
      * @param enableAttributee Whether face attribute estimation is enabled.
      * @param enableInteractionLiveness Whether interaction liveness detection is enabled.
+     * @param enableFaceEmotion Whether interaction emotion recognition is enabled.
      */
     explicit FacePipelineModule(InspireArchive &archive, bool enableLiveness, bool enableMaskDetect, bool enableAttribute,
-                                bool enableInteractionLiveness);
+                                bool enableInteractionLiveness, bool enableFaceEmotion);
 
     /**
      * @brief Processes a face using the specified FaceProcessFunction.
@@ -115,16 +119,26 @@ private:
      */
     int32_t InitBlinkFromLivenessInteraction(InspireModel &model);
 
+    /**
+     * @brief Initializes the FaceEmotion model.
+     *
+     * @param model Pointer to the FaceEmotion model.
+     * @return int32_t Status code indicating success (0) or failure.
+     */
+    int32_t InitFaceEmotion(InspireModel &model);
+
 private:
     const bool m_enable_liveness_ = false;              ///< Whether RGB liveness detection is enabled.
     const bool m_enable_mask_detect_ = false;           ///< Whether mask detection is enabled.
     const bool m_enable_attribute_ = false;             ///< Whether face attribute is enabled.
     const bool m_enable_interaction_liveness_ = false;  ///< Whether interaction liveness detection is enabled.
-
+    const bool m_enable_face_emotion_ = false;          ///< Whether face emotion is enabled.
+    
     std::shared_ptr<FaceAttributePredictAdapt> m_attribute_predict_;  ///< Pointer to AgePredict instance.
     std::shared_ptr<MaskPredictAdapt> m_mask_predict_;                ///< Pointer to MaskPredict instance.
     std::shared_ptr<RBGAntiSpoofingAdapt> m_rgb_anti_spoofing_;       ///< Pointer to RBGAntiSpoofing instance.
     std::shared_ptr<BlinkPredictAdapt> m_blink_predict_;              ///< Pointer to Blink predict instance.
+    std::shared_ptr<FaceEmotionAdapt> m_face_emotion_;                ///< Pointer to FaceEmotion instance.
     std::shared_ptr<LandmarkParam> m_landmark_param_;                ///< Pointer to LandmarkParam instance.
 
 public:
@@ -132,6 +146,7 @@ public:
     float faceLivenessCache;              ///< Cache for face liveness detection result.
     inspirecv::Vec2f eyesStatusCache;     ///< Cache for blink predict result.
     inspirecv::Vec3i faceAttributeCache;  ///< Cache for face attribute predict result.
+    std::vector<float> faceEmotionCache;   ///< Cache for face emotion recognition result.
 };
 
 }  // namespace inspire

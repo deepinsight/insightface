@@ -28,6 +28,7 @@ int main(int argc, char* argv[]) {
     HFFaceQualityConfidence qualityConfidence;
     HOption pipelineOption;
     HFFaceDetectPixelList pixelLevels;
+    HFFaceEmotionResult faceEmotionResult;
 
     /* Check whether the number of parameters is correct */
     if (argc < 3 || argc > 4) {
@@ -90,7 +91,7 @@ int main(int argc, char* argv[]) {
 
     /* Enable the functions in the pipeline: mask detection, live detection, and face quality
      * detection */
-    option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
+    option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS | HF_ENABLE_FACE_EMOTION;
     /* Non-video or frame sequence mode uses IMAGE-MODE, which is always face detection without
      * tracking */
     detMode = HF_DETECT_MODE_LIGHT_TRACK;
@@ -202,7 +203,7 @@ int main(int argc, char* argv[]) {
     /* Run pipeline function */
     /* Select the pipeline function that you want to execute, provided that it is already enabled
      * when FaceContext is created! */
-    pipelineOption = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
+    pipelineOption = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS | HF_ENABLE_FACE_EMOTION;
     /* In this loop, all faces are processed */
     ret = HFMultipleFacePipelineProcessOptional(session, imageHandle, &multipleFaceData, pipelineOption);
     if (ret != HSUCCEED) {
@@ -224,11 +225,18 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    ret = HFGetFaceEmotionResult(session, &faceEmotionResult);
+    if (ret != HSUCCEED) {
+        HFLogPrint(HF_LOG_ERROR, "Get face emotion result error: %d", ret);
+        return -1;
+    }
+
     for (index = 0; index < faceNum; ++index) {
         HFLogPrint(HF_LOG_INFO, "========================================");
         HFLogPrint(HF_LOG_INFO, "Process face index from pipeline: %d", index);
         HFLogPrint(HF_LOG_INFO, "Mask detect result: %f", maskConfidence.confidence[index]);
         HFLogPrint(HF_LOG_INFO, "Quality predict result: %f", qualityConfidence.confidence[index]);
+        HFLogPrint(HF_LOG_INFO, "Emotion result: %d", faceEmotionResult.emotion[index]);
         /* We set the threshold of wearing a mask as 0.85. If it exceeds the threshold, it will be
          * judged as wearing a mask. The threshold can be adjusted according to the scene */
         if (maskConfidence.confidence[index] > 0.85) {

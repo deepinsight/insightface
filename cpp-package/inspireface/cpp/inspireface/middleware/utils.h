@@ -170,6 +170,37 @@ inline float EmaFilter(float currentProb, std::vector<float> &history, int max, 
     return ema;
 }
 
+
+// Vector EMA filter function
+inline std::vector<float> VectorEmaFilter(const std::vector<float>& currentProbs, 
+                                         std::vector<std::vector<float>>& history, 
+                                         int max, 
+                                         float alpha = 0.2f) {
+    // Add current probability vector to history
+    history.push_back(currentProbs);
+    
+    // Trim history if it exceeds max size
+    if (history.size() > max) {
+        history.erase(history.begin(), history.begin() + (history.size() - max));
+    }
+    
+    // If only one sample, return it directly
+    if (history.size() == 1) {
+        return history[0];
+    }
+    
+    // Compute EMA for each dimension
+    std::vector<float> ema = history[0];  // Initial values
+    
+    for (size_t i = 1; i < history.size(); ++i) {
+        for (size_t j = 0; j < ema.size(); ++j) {
+            ema[j] = alpha * history[i][j] + (1 - alpha) * ema[j];
+        }
+    }
+    
+    return ema;
+}
+
 }  // namespace inspire
 
 #endif  // INSPIRE_FACE_UTILS_H
