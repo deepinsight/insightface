@@ -11,4 +11,4 @@
 #include "similarity_converter.h"
 #include "spend_timer.h"
 #include "information.h"
-#include "face_warpper.h"
+#include "face_wrapper.h"

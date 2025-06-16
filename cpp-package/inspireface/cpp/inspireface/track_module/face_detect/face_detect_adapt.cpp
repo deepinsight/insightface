@@ -22,7 +22,12 @@ FaceLocList FaceDetectAdapt::operator()(const inspirecv::Image &bgr) {
     inspirecv::Image pad;
 
     uint8_t *resized_data = nullptr;
-    m_processor_->ResizeAndPadding(bgr.Data(), bgr.Width(), bgr.Height(), bgr.Channels(), m_input_size_, m_input_size_, &resized_data, scale);
+    if (ori_w == m_input_size_ && ori_h == m_input_size_) {
+        scale = 1.0f;
+        resized_data = (uint8_t *)bgr.Data();
+    } else {
+        m_processor_->ResizeAndPadding(bgr.Data(), bgr.Width(), bgr.Height(), bgr.Channels(), m_input_size_, m_input_size_, &resized_data, scale);
+    }
 
     pad = inspirecv::Image::Create(m_input_size_, m_input_size_, bgr.Channels(), resized_data, false);
 

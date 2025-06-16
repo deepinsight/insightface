@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     HOption option = HF_ENABLE_QUALITY | HF_ENABLE_MASK_DETECT | HF_ENABLE_LIVENESS;
     /* Non-video or frame sequence mode uses IMAGE-MODE, which is always face detection without
      * tracking */
-    HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
+    HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
     /* Maximum number of faces detected */
     HInt32 maxDetectNum = 20;
     /* Face detection image input level */
@@ -112,20 +112,32 @@ int main(int argc, char* argv[]) {
     HFLogPrint(HF_LOG_INFO, "Number of Detection: %d", multipleFaceData.detectedNum);
     HFSessionPrintTrackCostSpend(session);
 
+    if (multipleFaceData.detectedNum > 0) {
+        HFLogPrint(HF_LOG_INFO, "========================================");
+        for (i = 0; i < multipleFaceData.detectedNum; i++) {
+            HFLogPrint(HF_LOG_INFO, "TrackId: %d", multipleFaceData.trackIds[i]);
+            HFLogPrint(HF_LOG_INFO, "TrackCount: %d", multipleFaceData.trackCounts[i]);
+        }
+    } else {
+        HFLogPrint(HF_LOG_WARN, "The face cannot be detected, and the tracking test results may be invalid!");
+    }
+
     ret = HFReleaseImageStream(imageHandle);
     if (ret != HSUCCEED) {
         HFLogPrint(HF_LOG_ERROR, "Release image stream error: %d", ret);
     }
-    /* The memory must be freed at the end of the program */
-    ret = HFReleaseInspireFaceSession(session);
-    if (ret != HSUCCEED) {
-        HFLogPrint(HF_LOG_ERROR, "Release session error: %d", ret);
-        return ret;
-    }
+
 
     ret = HFReleaseImageBitmap(image);
     if (ret != HSUCCEED) {
         HFLogPrint(HF_LOG_ERROR, "Release image bitmap error: %d", ret);
+        return ret;
+    }    
+    
+    /* The memory must be freed at the end of the program */
+    ret = HFReleaseInspireFaceSession(session);
+    if (ret != HSUCCEED) {
+        HFLogPrint(HF_LOG_ERROR, "Release session error: %d", ret);
         return ret;
     }
 

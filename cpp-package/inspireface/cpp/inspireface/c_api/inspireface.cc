@@ -694,6 +694,7 @@ HResult HFExecuteFaceTrack(HFSession session, HFImageStream streamHandle, PHFMul
     results->rects = (HFaceRect *)ctx->impl.GetFaceRectsCache().data();
     results->trackIds = (HInt32 *)ctx->impl.GetTrackIDCache().data();
     results->detConfidence = (HFloat *)ctx->impl.GetDetConfidenceCache().data();
+    results->trackCounts = (HInt32 *)ctx->impl.GetTrackCountCache().data();
     results->angles.pitch = (HFloat *)ctx->impl.GetPitchResultsCache().data();
     results->angles.roll = (HFloat *)ctx->impl.GetRollResultsCache().data();
     results->angles.yaw = (HFloat *)ctx->impl.GetYawResultsCache().data();

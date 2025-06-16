@@ -197,6 +197,7 @@ class FaceInformation:
 
     def __init__(self,
                  track_id: int,
+                 track_count: int,
                  detection_confidence: float,
                  location: Tuple,
                  roll: float,
@@ -205,6 +206,7 @@ class FaceInformation:
                  _token: HFFaceBasicToken,
                  _feature: np.array = None):
         self.track_id = track_id
+        self.track_count = track_count
         self.detection_confidence = detection_confidence
         self.location = location
         self.roll = roll
@@ -226,7 +228,7 @@ class FaceInformation:
         self._token.data = cast(addressof(self.buffer), c_void_p)
 
     def __repr__(self) -> str:
-        return f"FaceInformation(track_id={self.track_id}, detection_confidence={self.detection_confidence}, location={self.location}, roll={self.roll}, yaw={self.yaw}, pitch={self.pitch})"
+        return f"FaceInformation(track_id={self.track_id}, track_count={self.track_count}, detection_confidence={self.detection_confidence}, location={self.location}, roll={self.roll}, yaw={self.yaw}, pitch={self.pitch})"
 
 
 @dataclass
@@ -336,6 +338,7 @@ class InspireFaceSession(object):
             track_ids = self._get_faces_track_ids()
             euler_angle = self._get_faces_euler_angle()
             tokens = self._get_faces_tokens()
+            track_counts = self._get_faces_track_counts()
 
             infos = list()
             for idx in range(self.multiple_faces.detectedNum):
@@ -347,6 +350,7 @@ class InspireFaceSession(object):
                 track_id = track_ids[idx]
                 _token = tokens[idx]
                 detection_confidence = self.multiple_faces.detConfidence[idx]
+                track_count = track_counts[idx]
 
                 info = FaceInformation(
                     location=(top_left[0], top_left[1], bottom_right[0], bottom_right[1]),
@@ -354,6 +358,7 @@ class InspireFaceSession(object):
                     yaw=yaw,
                     pitch=pitch,
                     track_id=track_id,
+                    track_count=track_count,
                     _token=_token,
                     detection_confidence=detection_confidence,
                 )
@@ -641,6 +646,12 @@ class InspireFaceSession(object):
         angles = [(euler_angle.roll[i], euler_angle.yaw[i], euler_angle.pitch[i]) for i in range(num_of_faces)]
 
         return angles
+     
+    def _get_faces_track_counts(self) -> List:
+        num_of_faces = self.multiple_faces.detectedNum
+        track_counts_ptr = self.multiple_faces.trackCounts
+        track_counts = [track_counts_ptr[i] for i in range(num_of_faces)]
+        return track_counts
 
     def _get_faces_tokens(self) -> List[HFFaceBasicToken]:
         num_of_faces = self.multiple_faces.detectedNum

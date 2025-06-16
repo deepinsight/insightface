@@ -768,6 +768,14 @@ For different scenarios, we currently provide several Packs, each containing mul
 - [x] Add the RKNPU backend support for Android .
 - [ ] Example app project for Android and iOS samples.
 - [ ] Add the batch forward feature.
+- [ ] Design a scheme that can be adapted to multiple CUDA devices.
+
+- Continue to provide more support for Rockchip NPU2 devices:
+- [ ] RK3576 Series
+- [ ] RK3562 Series
+- [ ] RV1103B/RV1106B
+- [ ] RV1126B
+- [ ] RK2118
 
 ## Acknowledgement
 

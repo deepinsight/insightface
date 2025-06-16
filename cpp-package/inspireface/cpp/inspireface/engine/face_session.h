@@ -215,6 +215,12 @@ public:
     const std::vector<int32_t>& GetTrackIDCache() const;
 
     /**
+     * @brief Retrieves the cache of tracking count.
+     * @return std::vector<int32_t> Cache of tracking count.
+     */
+    const std::vector<int32_t>& GetTrackCountCache() const; 
+
+    /**
      * @brief Retrieves the cache of roll results from face pose estimation.
      * @return std::vector<float> Cache of roll results.
      */
@@ -396,6 +402,7 @@ private:
     std::vector<FaceBasicData> m_face_basic_data_cache_;               ///< Cache for basic face data extracted from detection
     std::vector<FaceRect> m_face_rects_cache_;                         ///< Cache for face rectangle data from detection
     std::vector<int32_t> m_track_id_cache_;                            ///< Cache for tracking IDs of detected faces
+    std::vector<int32_t> m_track_count_cache_;                         ///< Cache for tracking count of detected faces
     std::vector<float> m_det_confidence_cache_;                        ///< Cache for face detection confidence of detected faces
     std::vector<float> m_roll_results_cache_;                          ///< Cache for storing roll results from face pose estimation
     std::vector<float> m_yaw_results_cache_;                           ///< Cache for storing yaw results from face pose estimation

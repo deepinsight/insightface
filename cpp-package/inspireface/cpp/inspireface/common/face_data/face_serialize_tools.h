@@ -6,7 +6,7 @@
 #ifndef INSPIRE_FACE_SERIALIZE_TOOLS_H
 #define INSPIRE_FACE_SERIALIZE_TOOLS_H
 
-#include "face_warpper.h"
+#include "face_wrapper.h"
 #include "../face_info/face_object_internal.h"
 #include "herror.h"
 #include "data_type.h"
