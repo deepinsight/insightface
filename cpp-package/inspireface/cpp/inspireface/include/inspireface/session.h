@@ -3,7 +3,7 @@
 #include <memory>
 #include "data_type.h"
 #include "frame_process.h"
-#include "face_warpper.h"
+#include "face_wrapper.h"
 
 namespace inspire {
 

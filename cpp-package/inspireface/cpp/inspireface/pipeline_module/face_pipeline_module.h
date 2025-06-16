@@ -13,7 +13,7 @@
 #include "liveness/rgb_anti_spoofing_adapt.h"
 #include "liveness/blink_predict_adapt.h"
 #include "middleware/model_archive/inspire_archive.h"
-#include "face_warpper.h"
+#include "face_wrapper.h"
 #include "track_module/landmark/landmark_param.h"
 #include "attribute/face_emotion_adapt.h"
 

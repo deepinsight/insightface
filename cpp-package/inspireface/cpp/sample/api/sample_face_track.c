@@ -156,6 +156,7 @@ int main(int argc, char* argv[]) {
         HFLogPrint(HF_LOG_INFO, "Token size: %d", multipleFaceData.tokens[index].size);
         HFLogPrint(HF_LOG_INFO, "Process face index: %d", index);
         HFLogPrint(HF_LOG_INFO, "DetConfidence: %f", multipleFaceData.detConfidence[index]);
+        HFLogPrint(HF_LOG_INFO, "TrackCount: %d", multipleFaceData.trackCounts[index]);
         
         HFImageBitmapDrawRect(drawImage, multipleFaceData.rects[index], (HColor){0, 100, 255}, 4);
 

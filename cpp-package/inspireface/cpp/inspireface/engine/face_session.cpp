@@ -52,6 +52,7 @@ int32_t FaceSession::FaceDetectAndTrack(inspirecv::FrameProcess& process) {
     m_face_basic_data_cache_.clear();
     m_face_rects_cache_.clear();
     m_track_id_cache_.clear();
+    m_track_count_cache_.clear();
     m_quality_results_cache_.clear();
     m_roll_results_cache_.clear();
     m_yaw_results_cache_.clear();
@@ -86,6 +87,7 @@ int32_t FaceSession::FaceDetectAndTrack(inspirecv::FrameProcess& process) {
         m_det_confidence_cache_.push_back(face.GetConfidence());
         m_detect_cache_.push_back(byteArray);
         m_track_id_cache_.push_back(face.GetTrackingId());
+        m_track_count_cache_.push_back(face.GetTrackingCount());
         m_face_rects_cache_.push_back(data.rect);
         m_quality_results_cache_.push_back(face.high_result);
         m_roll_results_cache_.push_back(face.high_result.roll);
@@ -271,6 +273,10 @@ const std::vector<FaceRect>& FaceSession::GetFaceRectsCache() const {
 
 const std::vector<int32_t>& FaceSession::GetTrackIDCache() const {
     return m_track_id_cache_;
+}
+
+const std::vector<int32_t>& FaceSession::GetTrackCountCache() const {
+    return m_track_count_cache_;
 }
 
 const std::vector<float>& FaceSession::GetRollResultsCache() const {

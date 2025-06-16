@@ -451,9 +451,9 @@ void FaceTrackModule::SetTrackPreviewSize(int preview_size) {
     track_preview_size_ = preview_size;
     if (track_preview_size_ == -1) {
         track_preview_size_ = m_face_detector_->GetInputSize();
-    } else if (track_preview_size_ < 192) {
-        INSPIRE_LOGW("Track preview size %d is less than the minimum input size %d", track_preview_size_, 192);
-        track_preview_size_ = 192;
+    } else if (track_preview_size_ < 160) {
+        INSPIRE_LOGW("Track preview size %d is less than the minimum input size %d", track_preview_size_, 160);
+        track_preview_size_ = 160;
     }
 }
 

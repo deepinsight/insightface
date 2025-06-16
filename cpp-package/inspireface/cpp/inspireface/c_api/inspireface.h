@@ -513,6 +513,7 @@ typedef struct HFMultipleFaceData {
     HInt32 detectedNum;        ///< Number of faces detected.
     HFaceRect *rects;          ///< Array of bounding rectangles for each face.
     HInt32 *trackIds;          ///< Array of track IDs for each face.
+    HInt32 *trackCounts;       ///< Array of track counts for each face.
     HFloat *detConfidence;     ///< Array of detection confidence for each face.
     HFFaceEulerAngle angles;   ///< Euler angles for each face.
     PHFFaceBasicToken tokens;  ///< Tokens associated with each face.

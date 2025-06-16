@@ -135,7 +135,7 @@ def case_face_tracker_from_video(source, show, out):
                 cv2.circle(frame, (x, y), 0, (255-color[0], 255-color[1], 255-color[2]), 6)
 
             # Draw track ID at the top of the bounding box
-            text = f"ID: {face.track_id}"
+            text = f"ID: {face.track_id}, Count: {face.track_count}"
             text_size, _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
             text_x = min(box[:, 0])
             text_y = min(box[:, 1]) - 10

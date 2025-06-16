@@ -8,7 +8,7 @@
 #include <mutex>
 #include "extract/extract_adapt.h"
 #include "common/face_info/face_object_internal.h"
-#include "face_warpper.h"
+#include "face_wrapper.h"
 #include "middleware/model_archive/inspire_archive.h"
 #include "frame_process.h"
 
