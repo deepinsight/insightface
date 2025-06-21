@@ -85,10 +85,10 @@ for line in open(osp.join(root, '300W_validation.txt'), 'r'):
     outf.write(' ')
     outf.write(' '.join(["%.5f"%x for x in kps.flatten()]))
     outf.write("\n")
-    box = bbox.astype(np.int)
+    box = bbox.astype(np.int32)
     color = (0, 0, 255)
     cv2.rectangle(dimg, (box[0], box[1]), (box[2], box[3]), color, 2)
-    kps = kps.astype(np.int)
+    kps = kps.astype(np.int32)
     #print(landmark.shape)
     for l in range(kps.shape[0]):
         color = (0, 0, 255)
