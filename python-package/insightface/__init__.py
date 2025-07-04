@@ -2,6 +2,8 @@
 # pylint: disable=wrong-import-position
 """InsightFace: A Face Analysis Toolkit."""
 from __future__ import absolute_import
+from loguru import logger
+import os
 
 try:
     #import mxnet as mx
@@ -10,6 +12,10 @@ except ImportError:
     raise ImportError(
         "Unable to import dependency onnxruntime. "
     )
+
+if os.getenv("DEBUG") is None:
+    logger.remove()
+    logger.add(sys.stderr, level="INFO")
 
 __version__ = '0.7.3'
 
