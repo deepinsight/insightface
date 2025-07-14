@@ -13,7 +13,7 @@ InspireFace is a cross-platform face recognition SDK developed in C/C++, support
 
 If you require further information on tracking development branches, CI/CD processes, or downloading pre-compiled libraries, please visit our [development repository](https://github.com/HyperInspire/InspireFace).
 
-Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=InspireFace) for commercial support, including obtaining and integrating higher accuracy models, as well as custom development.
+Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=InspireFace) using your company e-mail for commercial support, including obtaining and integrating higher accuracy models, as well as custom development.
 
 <img src="images/banner.jpg" alt="banner" style="zoom:80%;" />
 
