@@ -19,31 +19,31 @@ You have to install ``onnxruntime-gpu`` manually to enable GPU inference, or ins
 ## Change Log
 
 ### [0.7.1] - 2022-12-14
-  
+
 #### Changed
-  
+
 - Change model downloading provider to cloudfront.
 
 ### [0.7] - 2022-11-28
-  
+
 #### Added
 
 - Add face swapping model and example.
- 
+
 #### Changed
-  
+
 - Set default ORT provider to CUDA and CPU.
- 
+
 ### [0.6] - 2022-01-29
-  
+
 #### Added
 
 - Add pose estimation in face-analysis app.
- 
+
 #### Changed
-  
+
 - Change model automated downloading url, to ucloud.
- 
+
 
 ## Quick Example
 
@@ -150,4 +150,6 @@ handler.prepare(ctx_id=0)
 
 ```
 
+### Enable debugging
 
+To enable the debug logger, export the environment variable DEBUG (set to any value) prior to starting your application.
