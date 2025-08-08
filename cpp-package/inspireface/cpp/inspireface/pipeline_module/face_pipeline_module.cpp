@@ -94,6 +94,7 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
     switch (proc) {
         case PROCESS_MASK: {
             if (m_mask_predict_ == nullptr) {
+                INSPIRE_LOGE("Mask detection disabled");
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
             std::vector<inspirecv::Point2f> pointsFive;
@@ -110,6 +111,7 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
         }
         case PROCESS_RGB_LIVENESS: {
             if (m_rgb_anti_spoofing_ == nullptr) {
+                INSPIRE_LOGE("RGB liveness detection disabled");
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
             // New scheme: padding differences cause errors in inference results
@@ -139,6 +141,10 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
             }
             inspirecv::Rect2i oriRect(face.rect.x, face.rect.y, face.rect.width, face.rect.height);
             auto rect = GetNewBox(originImage.Width(), originImage.Height(), oriRect, 2.7f);
+            if (Launch::GetInstance()->GetImageProcessingBackend() == Launch::IMAGE_PROCESSING_RGA) {
+                // RKRGA must be aligned to 16
+                rect = AlignmentBoxToStrideSquareBox(rect, 16);
+            }
             auto crop = originImage.Crop(rect);
             auto score = (*m_rgb_anti_spoofing_)(crop);
             // crop.Show();
@@ -148,6 +154,7 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
         }
         case PROCESS_INTERACTION: {
             if (m_blink_predict_ == nullptr) {
+                INSPIRE_LOGE("Interaction action detection disabled");
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
             std::vector<std::vector<int>> order_list = {m_landmark_param_->semantic_index.left_eye_region, m_landmark_param_->semantic_index.right_eye_region};
@@ -187,6 +194,7 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
         }
         case PROCESS_ATTRIBUTE: {
             if (m_attribute_predict_ == nullptr) {
+                INSPIRE_LOGE("Face attribute detection disabled");
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
             std::vector<inspirecv::Point2f> pointsFive;
@@ -201,6 +209,7 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
         }
         case PROCESS_FACE_EMOTION: {
             if (m_face_emotion_ == nullptr) {
+                INSPIRE_LOGE("Face emotion detection disabled");
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
             std::vector<inspirecv::Point2f> pointsFive;

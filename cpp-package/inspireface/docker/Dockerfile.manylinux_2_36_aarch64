@@ -1,0 +1,12 @@
+# Use manylinux_2_36_aarch64 as the base image
+FROM quay.io/pypa/manylinux_2_36_aarch64
+
+ARG https_proxy
+ARG http_proxy
+ARG all_proxy
+
+# Set the working directory
+WORKDIR /workspace
+
+# Default to running Bash
+CMD ["/bin/bash"]

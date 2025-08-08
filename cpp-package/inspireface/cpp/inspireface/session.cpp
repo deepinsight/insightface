@@ -14,6 +14,10 @@ public:
         return m_face_session_->Configuration(detect_mode, max_detect_face, param, detect_level_px, track_by_detect_mode_fps);
     }
 
+    void ClearTrackingFace() {
+        m_face_session_->ClearTrackingFace();
+    }
+
     ~Impl() = default;
 
     void SetTrackPreviewSize(int32_t preview_size) {
@@ -38,6 +42,14 @@ public:
 
     void SetTrackModeDetectInterval(int32_t detect_interval) {
         m_face_session_->SetTrackModeDetectInterval(detect_interval);
+    }
+
+    void SetTrackLostRecoveryMode(bool value) {
+        m_face_session_->SetTrackLostRecoveryMode(value);
+    }
+
+    void SetLightTrackConfidenceThreshold(float value) {
+        m_face_session_->SetLightTrackConfidenceThreshold(value);
     }
 
     int32_t FaceDetectAndTrack(inspirecv::FrameProcess& process, std::vector<FaceTrackWrap>& results) {
@@ -198,6 +210,18 @@ Session Session::Create(DetectModuleMode detect_mode, int32_t max_detect_face, c
     Session session;
     session.pImpl->Configure(detect_mode, max_detect_face, param, detect_level_px, track_by_detect_mode_fps);
     return session;
+}
+
+void Session::ClearTrackingFace() {
+    pImpl->ClearTrackingFace();
+}
+
+void Session::SetTrackLostRecoveryMode(bool value) {
+    pImpl->SetTrackLostRecoveryMode(value);
+}
+
+void Session::SetLightTrackConfidenceThreshold(float value) {
+    pImpl->SetLightTrackConfidenceThreshold(value);
 }
 
 void Session::SetTrackPreviewSize(int32_t preview_size) {

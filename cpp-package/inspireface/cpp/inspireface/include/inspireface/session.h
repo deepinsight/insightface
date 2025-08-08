@@ -48,6 +48,23 @@ public:
     }
 
     /**
+     * @brief Clear the tracking face
+     */
+    void ClearTrackingFace();
+
+    /**
+     * @brief Set the track lost recovery mode(only for LightTrack mode, default is false)
+     * @param value The track lost recovery mode value
+     */
+    void SetTrackLostRecoveryMode(bool value);
+
+    /**
+     * @brief Set the light track confidence threshold
+     * @param value Light track confidence threshold
+     */
+    void SetLightTrackConfidenceThreshold(float value);
+
+    /**
      * @brief Set the track preview size.
      * @param preview_size The preview size.
      */

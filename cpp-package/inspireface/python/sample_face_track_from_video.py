@@ -55,6 +55,7 @@ def case_face_tracker_from_video(source, show, out):
     session.set_track_mode_num_smooth_cache_frame(15)
     session.set_filter_minimum_face_pixel_size(0)
     session.set_track_model_detect_interval(0)
+    session.set_track_lost_recovery_mode(True)
     session.set_enable_track_cost_spend(True)
     # Determine if the source is a digital webcam index or a video file path.
     try:

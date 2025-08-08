@@ -153,6 +153,14 @@ public:
     int32_t GetFaceFeature(int32_t id, std::vector<float>& feature);
 
     /**
+     * @brief Retrieves a face feature by its ID.
+     * @param id ID of the feature to retrieve.
+     * @param feature Vector to store the retrieved feature.
+     * @return int32_t Status code of the retrieval operation.
+     */
+    int32_t GetFaceFeature(int32_t id, FaceEmbedding& feature);
+
+    /**
      * @brief Views the database table containing face data.
      * @return int32_t Status code of the operation.
      */

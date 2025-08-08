@@ -188,6 +188,23 @@ public:
      */
     bool IsDetectModeLandmark() const;
 
+    /**
+     * @brief Clear the tracking face
+     */
+    void ClearTrackingFace();
+
+    /**
+     * @brief Set the track lost recovery mode
+     * @param value Track lost recovery mode
+     */
+    void SetTrackLostRecoveryMode(bool value);
+
+    /**
+     * @brief Set the light track confidence threshold
+     * @param value Light track confidence threshold
+     */
+    void SetLightTrackConfidenceThreshold(float value);
+
 public:
     // Accessor methods for various cached data
     /**

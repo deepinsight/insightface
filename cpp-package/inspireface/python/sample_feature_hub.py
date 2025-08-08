@@ -1,5 +1,4 @@
 import os
-import cv2
 import inspireface as isf
 import numpy as np
 import os

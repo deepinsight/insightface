@@ -1,4 +1,5 @@
 #include "image_processor_general.h"
+#include "log.h"
 
 namespace inspire {
 
@@ -52,6 +53,17 @@ int32_t GeneralImageProcessor::MarkDone() {
 
 void GeneralImageProcessor::DumpCacheStatus() const {
     INSPIRECV_LOG(INFO) << "GeneralImageProcessor has no cache to dump";
+}
+
+int32_t GeneralImageProcessor::GetAlignedWidth(int width) const {
+    // Not Supported
+    INSPIRE_LOGE("GeneralImageProcessor::GetAlignedWidth is not supported");
+    return 0;
+}
+
+void GeneralImageProcessor::SetAlignedWidth(int width) {
+    // Not Supported
+    INSPIRE_LOGE("GeneralImageProcessor::SetAlignedWidth is not supported");
 }
 
 }  // namespace nexus

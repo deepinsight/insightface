@@ -8,7 +8,7 @@ namespace inspire {
 
 namespace nexus {
 
-class GeneralImageProcessor : public ImageProcessor {
+class INSPIRE_API_EXPORT GeneralImageProcessor : public ImageProcessor {
 public:
     GeneralImageProcessor() = default;
     ~GeneralImageProcessor() override = default;
@@ -26,6 +26,10 @@ public:
     int32_t MarkDone() override;
 
     void DumpCacheStatus() const override;
+
+    int32_t GetAlignedWidth(int width) const override;
+
+    void SetAlignedWidth(int width) override;
 
 private:
     struct BufferWrapper {

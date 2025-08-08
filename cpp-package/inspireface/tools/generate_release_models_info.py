@@ -32,7 +32,7 @@ def main(model_dir, models):
         if os.path.exists(file_path):
             md5 = get_file_hash_sha256(file_path)
             model_info[file] = {
-                "url": f"https://github.com/HyperInspire/InspireFace/releases/download/v1.x/{file}",
+                "url": f"https://inspireface-1259028827.cos.ap-singapore.myqcloud.com/inspireface_modelzoo/t4/{file}",
                 "filename": file,
                 "md5": md5
             }

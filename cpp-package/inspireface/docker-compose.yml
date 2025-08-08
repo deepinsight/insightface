@@ -100,6 +100,26 @@ services:
     volumes:
       - .:/workspace # Mount the project root directory to the container
     command: bash command/build_wheel_manylinux2014_x86.sh
+  build-manylinux2014-aarch64:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.manylinux2014_aarch64
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace # Mount the project root directory to the container
+    command: bash command/build_wheel_manylinux2014_aarch64.sh
+  build-manylinux_2_36-aarch64:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.manylinux_2_36_aarch64
+    environment:
+      - VERSION=${VERSION}
+    working_dir: /workspace
+    volumes:
+      - .:/workspace # Mount the project root directory to the container
+    command: bash command/build_wheel_manylinux_2_36_aarch64.sh
   build-tensorrt-cuda12-ubuntu22:
     build:
       context: .

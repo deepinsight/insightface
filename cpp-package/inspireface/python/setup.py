@@ -13,6 +13,15 @@ def get_version():
     except FileNotFoundError:
         return "0.0.0"
 
+def get_post_version():
+    """Get post version number"""
+    post_path = os.path.join(os.path.dirname(__file__), 'post')
+    try:
+        with open(post_path, 'r') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return ""
+
 def get_wheel_platform_tag():
     """Get wheel package platform tag"""
     system = platform.system().lower()
@@ -105,7 +114,7 @@ lib_path = os.path.join('modules', 'core', 'libs', system, arch, '*')
 
 setup(
     name='inspireface',
-    version=get_version(),
+    version=get_version() + get_post_version(),
     packages=find_packages(),
     # package_data path should be relative to package directory
     package_data={
@@ -113,7 +122,9 @@ setup(
     },
     install_requires=[
         'numpy',
-        'loguru'
+        'loguru',
+        'filelock',
+        'modelscope'
     ],
     author='Jingyu Yan',
     author_email='tunmxy@163.com',

@@ -94,6 +94,27 @@ struct BoundingBox {
     int right_bottom_y;
 };
 
+inline inspirecv::Rect2i AlignmentBoxToStrideSquareBox(const inspirecv::Rect2i &bbox, int stride) {
+    // 1. Convert xywh to cxcywh (center point coordinates and width/height)
+    int center_x = bbox.GetX() + bbox.GetWidth() / 2;
+    int center_y = bbox.GetY() + bbox.GetHeight() / 2;
+    int width = bbox.GetWidth();
+    int height = bbox.GetHeight();
+    
+    // 2. Get the shortest side of the width and height
+    int min_side = std::min(width, height);
+    
+    // 3. Align the shortest side to the stride
+    int aligned_side = (min_side / stride) * stride;
+    
+    // 4. Create a square box (keep the center point unchanged)
+    int half_side = aligned_side / 2;
+    int new_x = center_x - half_side;
+    int new_y = center_y - half_side;
+    
+    // 5. Convert cxcywh back to xywh
+    return inspirecv::Rect2i(new_x, new_y, aligned_side, aligned_side);
+}
 
 inline inspirecv::Rect2i GetNewBox(int src_w, int src_h, inspirecv::Rect2i bbox, float scale) {
     // Convert cv::Rect to BoundingBox

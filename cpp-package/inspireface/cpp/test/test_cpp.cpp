@@ -52,10 +52,7 @@ int main(int argc, char* argv[]) {
     init_test_evaluation_record();
     TEST_PRINT_OUTPUT(true);
 
-    TEST_PRINT("InspireFace Version: v{}.{}.{}", 
-                INSPIRE_FACE_VERSION_MAJOR_STR, 
-                INSPIRE_FACE_VERSION_MINOR_STR, 
-                INSPIRE_FACE_VERSION_PATCH_STR);
+    TEST_PRINT("InspireFace Version: v{}.{}.{}", INSPIRE_FACE_VERSION_MAJOR_STR, INSPIRE_FACE_VERSION_MINOR_STR, INSPIRE_FACE_VERSION_PATCH_STR);
     TEST_PRINT("Extended Information: {}", INSPIRE_FACE_EXTENDED_INFORMATION);
 
     Catch::Session session;
@@ -89,7 +86,7 @@ int main(int argc, char* argv[]) {
 #if defined(ISF_ENABLE_TENSORRT)
     int32_t cuda_device_count;
     ret = inspire::GetCudaDeviceCount(&cuda_device_count);
-    if (ret != InspireFace::HSUCCEED) {
+    if (ret != HSUCCEED) {
         TEST_ERROR_PRINT("An error occurred while checking CUDA device support: {}", ret);
         return ret;
     }

@@ -187,6 +187,23 @@ public:
      */
     void SetMultiscaleLandmarkLoop(int value);
 
+    /**
+     * @brief Set the track lost recovery mode
+     * @param value Track lost recovery mode
+     */
+    void SetTrackLostRecoveryMode(bool value);
+
+    /**
+     * @brief Set the light track confidence threshold
+     * @param value Light track confidence threshold
+     */
+    void SetLightTrackConfidenceThreshold(float value);
+
+    /**
+     * @brief Clear the tracking face
+     */
+    void ClearTrackingFace();
+
 public:
     std::vector<FaceObjectInternal> trackingFace;  ///< Vector of FaceObjects currently being tracked.
 
@@ -234,7 +251,11 @@ private:
 
     float m_landmark_crop_ratio_ = 1.1f;
 
+    float m_light_track_confidence_threshold_ = 0.1;  ///< Light track confidence threshold
+
     std::vector<float> m_multiscale_landmark_scales_;
+
+    bool m_track_lost_recovery_mode_{false};  ///< Track lost recovery mode(only for LightTrack mode)
 
     std::shared_ptr<LandmarkParam> m_landmark_param_;
 };
