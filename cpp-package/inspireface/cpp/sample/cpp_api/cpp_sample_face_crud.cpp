@@ -19,7 +19,8 @@ int main() {
     db_config.search_mode = inspire::SEARCH_MODE_EXHAUSTIVE;
     db_config.recognition_threshold = 0.48f;
     db_config.primary_key_mode = inspire::AUTO_INCREMENT;
-    INSPIREFACE_FEATURE_HUB->EnableHub(db_config);
+    auto ret = INSPIREFACE_FEATURE_HUB->EnableHub(db_config);
+    INSPIREFACE_CHECK_MSG(ret == HSUCCEED, "EnableHub failed");
 
     // Create a session
     auto param = inspire::CustomPipelineParameter();
@@ -43,6 +44,9 @@ int main() {
     // Insert face feature into the hub, because the id is INSPIRE_INVALID_ID, so input id is ignored
     int64_t result_id;
     INSPIREFACE_FEATURE_HUB->FaceFeatureInsert(feature.embedding, INSPIRE_INVALID_ID, result_id);
+
+    inspire::FaceEmbedding face_feature;
+    INSPIREFACE_FEATURE_HUB->GetFaceFeature(result_id, face_feature);
     
     // Prepare a photo of the same person for the query
     auto query_image = inspirecv::Image::Create("test_res/data/bulk/jntm.jpg");
@@ -65,9 +69,13 @@ int main() {
 
     INSPIREFACE_CHECK_MSG(search_result.id == result_id, "Search face feature result id is not equal to the inserted id");
     
+    // Update the face feature
+    INSPIREFACE_FEATURE_HUB->FaceFeatureUpdate(query_feature.embedding, result_id);
+
     // Remove the face feature
     INSPIREFACE_FEATURE_HUB->FaceFeatureRemove(result_id);
     INSPIREFACE_CHECK_MSG(INSPIREFACE_FEATURE_HUB->GetFaceFeatureCount() == 0, "Face feature is not removed");
+
     
     std::cout << "Remove face feature successfully" << std::endl;
 
@@ -75,6 +83,12 @@ int main() {
     INSPIREFACE_FEATURE_HUB->SearchFaceFeature(query_feature.embedding, search_result, true);
     INSPIREFACE_CHECK_MSG(search_result.id == INSPIRE_INVALID_ID, "Search face feature result id is not equal to the inserted id");
     std::cout << "Query again, search face feature result: " << search_result.id << std::endl;
+
+    
+    // Top-k query
+    std::vector<inspire::FaceSearchResult> top_k_results;
+    INSPIREFACE_FEATURE_HUB->SearchFaceFeatureTopK(query_feature.embedding, top_k_results, 10, true);
+    std::cout << "Top-k query result: " << top_k_results.size() << std::endl;
 
     return 0;
 }

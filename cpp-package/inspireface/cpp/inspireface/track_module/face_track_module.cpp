@@ -61,8 +61,9 @@ float FaceTrackModule::PredictTrackScore(const inspirecv::Image &raw_face_crop) 
 
 bool FaceTrackModule::TrackFace(inspirecv::FrameProcess &image, FaceObjectInternal &face) {
     COST_TIME_SIMPLE(TrackFace);
-    // If the face confidence level is below 0.1, disable tracking
-    if (face.GetConfidence() < 0.1) {
+    // If the track lost recovery mode is enabled,  the lag information of the previous frame will not be used in the current frame
+    if (face.GetConfidence() < m_light_track_confidence_threshold_ && !m_track_lost_recovery_mode_) {
+        // If the face confidence level is below the threshold, disable tracking
         face.DisableTracking();
         return false;
     }
@@ -133,6 +134,13 @@ bool FaceTrackModule::TrackFace(inspirecv::FrameProcess &image, FaceObjectIntern
         auto track_crop = image.ExecuteImageAffineProcessing(affine, m_landmark_param_->input_size, m_landmark_param_->input_size);
         score = PredictTrackScore(track_crop);
         // track_crop.Show("track_crop");
+
+        // If the track lost recovery mode is enabled, 
+        // it will determine whether to discard the invalid face that has been tracked in the current frame
+        if (score < m_light_track_confidence_threshold_ && m_track_lost_recovery_mode_) {
+            face.DisableTracking();
+            return false;
+        }
 
         for (int i = 0; i < m_multiscale_landmark_scales_.size(); i++) {
             inspirecv::Image crop;
@@ -222,6 +230,9 @@ void FaceTrackModule::UpdateStream(inspirecv::FrameProcess &image) {
     detection_index_ += 1;
     if (m_mode_ == DETECT_MODE_ALWAYS_DETECT || m_mode_ == DETECT_MODE_TRACK_BY_DETECT)
         trackingFace.clear();
+
+    // Record whether the detection has been performed in this frame
+    bool detection_executed = false;
     if (trackingFace.empty() || (detection_interval_ > 0 && detection_index_ % detection_interval_ == 0) || m_mode_ == DETECT_MODE_ALWAYS_DETECT ||
         m_mode_ == DETECT_MODE_TRACK_BY_DETECT) {
         image.SetPreviewSize(track_preview_size_);
@@ -241,6 +252,7 @@ void FaceTrackModule::UpdateStream(inspirecv::FrameProcess &image) {
 
         Timer det_cost_time;
         DetectFace(image_detect, image.GetPreviewScale());
+        detection_executed = true;
     }
 
     if (!candidate_faces_.empty()) {
@@ -250,6 +262,9 @@ void FaceTrackModule::UpdateStream(inspirecv::FrameProcess &image) {
         candidate_faces_.clear();
     }
 
+    // Record the number of faces before tracking
+    size_t faces_before_tracking = trackingFace.size();
+
     for (std::vector<FaceObjectInternal>::iterator iter = trackingFace.begin(); iter != trackingFace.end();) {
         if (!TrackFace(image, *iter)) {
             iter = trackingFace.erase(iter);
@@ -257,6 +272,35 @@ void FaceTrackModule::UpdateStream(inspirecv::FrameProcess &image) {
             iter++;
         }
     }
+
+    // In the track lost recovery mode, if all faces are triggered to be lost, detection will be executed immediately 
+    if (m_track_lost_recovery_mode_ && !detection_executed && faces_before_tracking > 0 && trackingFace.empty()) {
+        image.SetPreviewSize(track_preview_size_);
+        inspirecv::Image image_detect = image.ExecutePreviewImageProcessing(true);
+        m_debug_preview_image_size_ = image_detect.Width();
+        DetectFace(image_detect, image.GetPreviewScale());
+
+        // Reset the detection index to 0
+        detection_index_ = 0;
+
+        // Add the detected faces to the tracking face list
+        if (!candidate_faces_.empty()) {
+            for (int i = 0; i < candidate_faces_.size(); i++) {
+                trackingFace.push_back(candidate_faces_[i]);
+            }
+            candidate_faces_.clear();
+        }
+
+        // Track the faces  
+        for (std::vector<FaceObjectInternal>::iterator iter = trackingFace.begin(); iter != trackingFace.end();) {
+            if (!TrackFace(image, *iter)) {
+                iter = trackingFace.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+    }
+
     total.Stop();
     // std::cout << total << std::endl;
 }
@@ -528,6 +572,19 @@ void FaceTrackModule::SetTrackModeDetectInterval(int value) {
 void FaceTrackModule::SetMultiscaleLandmarkLoop(int value) {
     m_multiscale_landmark_loop_num_ = value;
     m_multiscale_landmark_scales_ = GenerateCropScales(m_landmark_crop_ratio_, m_multiscale_landmark_loop_num_);
+}
+
+void FaceTrackModule::SetTrackLostRecoveryMode(bool value) {
+    m_track_lost_recovery_mode_ = value;
+}
+
+void FaceTrackModule::SetLightTrackConfidenceThreshold(float value) {
+    m_light_track_confidence_threshold_ = value;
+}
+
+void FaceTrackModule::ClearTrackingFace() {
+    trackingFace.clear();
+    candidate_faces_.clear();
 }
 
 int32_t FaceTrackModule::GetDebugPreviewImageSize() const {

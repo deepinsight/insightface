@@ -32,10 +32,17 @@ public:
         NN_INFERENCE_TENSORRT_CUDA,
     };
 
+    // Landmark engine enum
     enum LandmarkEngine {
         LANDMARK_HYPLMV2_0_25 = 0,
         LANDMARK_HYPLMV2_0_50,
         LANDMARK_INSIGHTFACE_2D106_TRACK,
+    };
+
+    // Image processing backend engine
+    enum ImageProcessingBackend {
+        IMAGE_PROCESSING_CPU = 0,  // CPU backend(Default)
+        IMAGE_PROCESSING_RGA,      // Rockchip RGA backend(Hardware support is mandatory)
     };
 
     Launch(const Launch&) = delete;             // Delete the copy constructor to prevent copying.
@@ -101,8 +108,20 @@ public:
     // Get the face detect model list
     std::vector<std::string> GetFaceDetectModelList() const;
 
-    // Switch the landmark engine
+    // Switch the landmark engine(It must be used before creating a session)
     void SwitchLandmarkEngine(LandmarkEngine engine);
+
+    // Switch the image processing backend(It must be used before creating a session)
+    void SwitchImageProcessingBackend(ImageProcessingBackend backend);
+
+    // Get the image processing backend
+    ImageProcessingBackend GetImageProcessingBackend() const;
+
+    // Set the ImageProcess Aligned Width(It must be used before creating a session)
+    void SetImageProcessAlignedWidth(int32_t width);
+
+    // Get the ImageProcess Aligned Width
+    int32_t GetImageProcessAlignedWidth() const;
 
 private:
     // Private constructor for the singleton pattern

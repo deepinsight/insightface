@@ -318,6 +318,21 @@ int32_t FeatureHubDB::GetFaceFeature(int32_t id, std::vector<float> &feature) {
     return HSUCCEED;
 }
 
+int32_t FeatureHubDB::GetFaceFeature(int32_t id, FaceEmbedding& feature) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!pImpl->m_enable_) {
+        INSPIRE_LOGW("FeatureHub is disabled, please enable it before it can be served");
+        return HERR_FT_HUB_DISABLE;
+    }
+
+    feature.embedding = EMBEDDING_DB::GetInstance().GetVector(id);
+    if (feature.embedding.empty()) {
+        return HERR_FT_HUB_NOT_FOUND_FEATURE;
+    }
+
+    return HSUCCEED;
+}
+
 int32_t FeatureHubDB::ViewDBTable() {
     if (!pImpl->m_enable_) {
         INSPIRE_LOGE("FeatureHub is disabled, please enable it before it can be served");

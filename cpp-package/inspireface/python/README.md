@@ -100,3 +100,4 @@ python -m unittest discover -s test
 1. Ensure that OpenCV and other necessary dependencies are installed on your system
 2. Make sure the dynamic library is correctly installed before use
 3. Python 3.7 or higher is recommended
+4. The default version is CPU, if you want to use the GPU, CoreML, or NPU backend version, you can refer to the [documentation](https://doc.inspireface.online/guides/python-rockchip-device.html) to replace the so and make a Python installation package

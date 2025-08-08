@@ -6,6 +6,15 @@ from typing import Tuple, List
 from dataclasses import dataclass
 from loguru import logger
 from .utils import ResourceManager
+from .utils.resource import set_use_oss_download
+from . import herror as errcode
+# Exception system
+from .exception import (
+    check_error, validate_image_format, validate_feature_data, 
+    validate_session_initialized, handle_c_api_errors,
+    InspireFaceError, InvalidInputError, SystemNotReadyError, 
+    ProcessingError, ResourceError, HardwareError, FeatureHubError
+)
 
 # If True, the latest model will not be verified
 IGNORE_VERIFICATION_OF_THE_LATEST_MODEL = False
@@ -13,6 +22,14 @@ IGNORE_VERIFICATION_OF_THE_LATEST_MODEL = False
 def ignore_check_latest_model(ignore: bool):
     global IGNORE_VERIFICATION_OF_THE_LATEST_MODEL
     IGNORE_VERIFICATION_OF_THE_LATEST_MODEL = ignore
+
+def use_oss_download(use_oss: bool = True):
+    """Enable OSS download instead of ModelScope (for backward compatibility)
+    
+    Args:
+        use_oss (bool): If True, use OSS download; if False, use ModelScope (default)
+    """
+    set_use_oss_download(use_oss)
 
 class ImageStream(object):
     """
@@ -34,11 +51,10 @@ class ImageStream(object):
             ImageStream: An instance of the ImageStream class initialized with the provided image data.
 
         Raises:
-            Exception: If the image does not have 3 or 4 channels.
+            InvalidInputError: If the image does not have 3 or 4 channels.
         """
+        validate_image_format(image, "Load from CV image")
         h, w, c = image.shape
-        if c != 3 and c != 4:
-            raise Exception("The channel must be 3 or 4.")
         return ImageStream(image, w, h, stream_format, rotation)
 
     @staticmethod
@@ -87,7 +103,7 @@ class ImageStream(object):
             rotation (int): The rotation applied to the image.
 
         Raises:
-            Exception: If there is an error in creating the image stream.
+            ResourceError: If there is an error in creating the image stream.
         """
         self.rotate = rotation
         self.data_format = stream_format
@@ -103,16 +119,14 @@ class ImageStream(object):
         image_struct.rotation = self.rotate
         self._handle = HFImageStream()
         ret = HFCreateImageStream(PHFImageData(image_struct), self._handle)
-        if ret != 0:
-            raise Exception("Error in creating ImageStream")
+        check_error(ret, "Create ImageStream", width=width, height=height, format=stream_format)
 
     def write_to_file(self, file_path: str):
         """
         Write the image stream to a file. Like PATH/image.jpg
         """
         ret = HFDeBugImageStreamDecodeSave(self._handle, file_path)
-        if ret != 0:
-            logger.error(f"Write ImageStream to file error: {ret}")
+        check_error(ret, "Write ImageStream to file", file_path=file_path)
 
     def release(self):
         """
@@ -123,7 +137,7 @@ class ImageStream(object):
         if self._handle is not None:
             ret = HFReleaseImageStream(self._handle)
             if ret != 0:
-                logger.error(f"Release ImageStream error: {ret}")
+                logger.warning(f"Failed to release ImageStream: error code {ret}")
 
     def __del__(self):
         """
@@ -219,8 +233,7 @@ class FaceInformation:
         buffer_size = token_size.value
         self.buffer = create_string_buffer(buffer_size)
         ret = HFCopyFaceBasicToken(_token, self.buffer, token_size)
-        if ret != 0:
-            logger.error("Failed to copy face basic token")
+        check_error(ret, "Copy face basic token", track_id=track_id)
 
         # Store the copied token.
         self._token = HFFaceBasicToken()
@@ -289,22 +302,29 @@ class InspireFaceSession(object):
                  max_detect_num: int = 10, detect_pixel_level=-1, track_by_detect_mode_fps=-1):
         """
         Initializes a new session with the provided configuration parameters.
+        
         Args:
             param (int or SessionCustomParameter): Configuration parameters or flags.
             detect_mode (int): Detection mode to be used (e.g., image-based detection).
             max_detect_num (int): Maximum number of faces to detect.
+            
         Raises:
-            Exception: If session creation fails.
+            SystemNotReadyError: If InspireFace is not launched.
+            ProcessingError: If session creation fails.
         """
+        # Initialize _sess to None first to prevent AttributeError in __del__
+        self._sess = None
+        self.multiple_faces = None
+        self.param = param
+        
         # If InspireFace is not initialized, run launch() use Pikachu model
         if not query_launch_status():
             ret = launch()
             if not ret:
-                raise Exception("Launch InspireFace failure")
+                raise SystemNotReadyError("Failed to launch InspireFace automatically")
 
-        self.multiple_faces = None
         self._sess = HFSession()
-        self.param = param
+        
         if isinstance(self.param, SessionCustomParameter):
             ret = HFCreateInspireFaceSession(self.param._c_struct(), detect_mode, max_detect_num, detect_pixel_level,
                                              track_by_detect_mode_fps, self._sess)
@@ -312,26 +332,33 @@ class InspireFaceSession(object):
             ret = HFCreateInspireFaceSessionOptional(self.param, detect_mode, max_detect_num, detect_pixel_level,
                                                      track_by_detect_mode_fps, self._sess)
         else:
-            raise NotImplemented("")
-        if ret != 0:
-            st = f"Create session error: {ret}"
-            raise Exception(st)
+            raise InvalidInputError("Session parameter must be SessionCustomParameter or int", 
+                                   context={'param_type': type(self.param).__name__})
+        
+        check_error(ret, "Create InspireFace session", 
+                   detect_mode=detect_mode, max_detect_num=max_detect_num)
 
+    @handle_c_api_errors("Face detection")
     def face_detection(self, image) -> List[FaceInformation]:
         """
         Detects faces in the given image and returns a list of FaceInformation objects containing detailed face data.
+        
         Args:
             image (np.ndarray or ImageStream): The image in which to detect faces.
+            
         Returns:
             List[FaceInformation]: A list of detected face information.
+            
+        Raises:
+            ResourceError: If session is not initialized.
+            ProcessingError: If face detection fails.
         """
+        validate_session_initialized(self, "Face detection")
         stream = self._get_image_stream(image)
         self.multiple_faces = HFMultipleFaceData()
         ret = HFExecuteFaceTrack(self._sess, stream.handle,
-                                 PHFMultipleFaceData(self.multiple_faces))
-        if ret != 0:
-            logger.error(f"Face detection error: ", {ret})
-            return []
+                                PHFMultipleFaceData(self.multiple_faces))
+        check_error(ret, "Execute face tracking")
 
         if self.multiple_faces.detectedNum > 0:
             boxes = self._get_faces_boundary_boxes()
@@ -369,11 +396,12 @@ class InspireFaceSession(object):
             return []
         
     def get_face_five_key_points(self, single_face: FaceInformation):
+        """Get five key points for a detected face"""
+        validate_session_initialized(self, "Get face five key points")
         num_landmarks = 5
         landmarks_array = (HPoint2f * num_landmarks)()
         ret = HFGetFaceFiveKeyPointsFromFaceToken(single_face._token, landmarks_array, num_landmarks)
-        if ret != 0:
-            logger.error(f"An error occurred obtaining a dense landmark for a single face: {ret}")
+        check_error(ret, "Get face five key points", track_id=single_face.track_id)
 
         landmark = []
         for point in landmarks_array:
@@ -383,12 +411,13 @@ class InspireFaceSession(object):
         return np.asarray(landmark).reshape(-1, 2)
 
     def get_face_dense_landmark(self, single_face: FaceInformation):
+        """Get dense landmarks for a detected face"""
+        validate_session_initialized(self, "Get face dense landmark")
         num_landmarks = HInt32()
         HFGetNumOfFaceDenseLandmark(byref(num_landmarks))
         landmarks_array = (HPoint2f * num_landmarks.value)()
         ret = HFGetFaceDenseLandmarkFromFaceToken(single_face._token, landmarks_array, num_landmarks)
-        if ret != 0:
-            logger.error(f"An error occurred obtaining a dense landmark for a single face: {ret}")
+        check_error(ret, "Get face dense landmark", track_id=single_face.track_id)
 
         landmark = []
         for point in landmarks_array:
@@ -398,14 +427,16 @@ class InspireFaceSession(object):
         return np.asarray(landmark).reshape(-1, 2)
     
     def print_track_cost_spend(self):
+        """Print tracking cost statistics"""
+        validate_session_initialized(self, "Print track cost spend")
         ret = HFSessionPrintTrackCostSpend(self._sess)
-        if ret != 0:
-            logger.error(f"Print track cost spend error: {ret}")
+        check_error(ret, "Print track cost spend")
 
     def set_enable_track_cost_spend(self, enable: bool):
+        """Enable or disable track cost spend monitoring"""
+        validate_session_initialized(self, "Set enable track cost spend")
         ret = HFSessionSetEnableTrackCostSpend(self._sess, enable)
-        if ret != 0:
-            logger.error(f"Set enable track cost spend error: {ret}")
+        check_error(ret, "Set enable track cost spend", enable=enable)
     
     def set_detection_confidence_threshold(self, threshold: float):
         """
@@ -413,13 +444,10 @@ class InspireFaceSession(object):
 
         Args:
             threshold (float): The confidence threshold for face detection.
-
-        Notes:
-            If setting the detection confidence threshold fails, an error is logged with the returned status code.
         """
+        validate_session_initialized(self, "Set detection confidence threshold")
         ret = HFSessionSetFaceDetectThreshold(self._sess, threshold)
-        if ret != 0:
-            logger.error(f"Set detection confidence threshold error: {ret}")
+        check_error(ret, "Set detection confidence threshold", threshold=threshold)
 
     def set_track_preview_size(self, size=192):
         """
@@ -427,39 +455,48 @@ class InspireFaceSession(object):
 
         Args:
             size (int, optional): The size of the preview area for face tracking. Default is 192.
-
-        Notes:
-            If setting the preview size fails, an error is logged with the returned status code.
         """
+        validate_session_initialized(self, "Set track preview size")
         ret = HFSessionSetTrackPreviewSize(self._sess, size)
-        if ret != 0:
-            logger.error(f"Set track preview size error: {ret}")
+        check_error(ret, "Set track preview size", size=size)
 
     def set_filter_minimum_face_pixel_size(self, min_size=32):
+        """Set minimum face pixel size filter"""
+        validate_session_initialized(self, "Set filter minimum face pixel size")
         ret = HFSessionSetFilterMinimumFacePixelSize(self._sess, min_size)
-        if ret != 0:
-            logger.error(f"Set filter minimum face pixel size error: {ret}")
+        check_error(ret, "Set filter minimum face pixel size", min_size=min_size)
 
     def set_track_mode_smooth_ratio(self, ratio=0.025):
+        """Set track mode smooth ratio"""
+        validate_session_initialized(self, "Set track mode smooth ratio")
         ret = HFSessionSetTrackModeSmoothRatio(self._sess, ratio)
-        if ret != 0:
-            logger.error(f"Set track mode smooth ratio error: {ret}")
+        check_error(ret, "Set track mode smooth ratio", ratio=ratio)
 
     def set_track_mode_num_smooth_cache_frame(self, num=15):
+        """Set track mode number of smooth cache frames"""
+        validate_session_initialized(self, "Set track mode num smooth cache frame")
         ret = HFSessionSetTrackModeNumSmoothCacheFrame(self._sess, num)
-        if ret != 0:
-            logger.error(f"Set track mode num smooth cache frame error: {ret}")
+        check_error(ret, "Set track mode num smooth cache frame", num=num)
 
     def set_track_model_detect_interval(self, num=20):
+        """Set track model detect interval"""
+        validate_session_initialized(self, "Set track model detect interval")
         ret = HFSessionSetTrackModeDetectInterval(self._sess, num)
-        if ret != 0:
-            logger.error(f"Set track model detect interval error: {ret}")
+        check_error(ret, "Set track model detect interval", num=num)
 
     def set_landmark_augmentation_num(self, num=1):
+        """Set landmark augmentation number"""
+        validate_session_initialized(self, "Set landmark augmentation num")
         ret = HFSessionSetLandmarkAugmentationNum(self._sess, num)
-        if ret != 0:
-            logger.error(f"Set landmark augmentation num error: {ret}")
+        check_error(ret, "Set landmark augmentation num", num=num)
 
+    def set_track_lost_recovery_mode(self, value=False):
+        """Set track lost recovery mode"""
+        validate_session_initialized(self, "Set track lost recovery mode")
+        ret = HFSessionSetTrackLostRecoveryMode(self._sess, value)
+        check_error(ret, "Set track lost recovery mode", value=value)
+
+    @handle_c_api_errors("Face pipeline processing")
     def face_pipeline(self, image, faces: List[FaceInformation], exec_param) -> List[FaceExtended]:
         """
         Processes detected faces to extract additional attributes based on the provided execution parameters.
@@ -471,10 +508,8 @@ class InspireFaceSession(object):
 
         Returns:
             List[FaceExtended]: A list of FaceExtended objects with updated attributes like mask confidence, liveness, etc.
-
-        Notes:
-            If the face pipeline processing fails, an error is logged and an empty list is returned.
         """
+        validate_session_initialized(self, "Face pipeline processing")
         stream = self._get_image_stream(image)
         fn, pm, flag = self._get_processing_function_and_param(exec_param)
         tokens = [face._token for face in faces]
@@ -486,9 +521,7 @@ class InspireFaceSession(object):
         multi_faces.tokens = tokens_ptr
         ret = fn(self._sess, stream.handle, PHFMultipleFaceData(multi_faces), pm)
 
-        if ret != 0:
-            logger.error(f"Face pipeline error: {ret}")
-            return []
+        check_error(ret, "Face pipeline processing", num_faces=len(faces))
 
         extends = [FaceExtended(-1.0, -1.0, -1.0, -1.0, -1.0, 0, 0, 0, 0, 0, -1, -1, -1, -1) for _ in range(len(faces))]
         self._update_mask_confidence(exec_param, flag, extends)
@@ -500,6 +533,7 @@ class InspireFaceSession(object):
 
         return extends
 
+    @handle_c_api_errors("Face feature extraction")
     def face_feature_extract(self, image, face_information: FaceInformation):
         """
         Extracts facial features from a specified face within an image for recognition or comparison purposes.
@@ -510,10 +544,8 @@ class InspireFaceSession(object):
 
         Returns:
             np.ndarray: A numpy array containing the extracted facial features, or None if the extraction fails.
-
-        Notes:
-            If the feature extraction process fails, an error is logged and None is returned.
         """
+        validate_session_initialized(self, "Face feature extraction")
         stream = self._get_image_stream(image)
         feature_length = HInt32()
         HFGetFeatureLength(byref(feature_length))
@@ -522,55 +554,59 @@ class InspireFaceSession(object):
         ret = HFFaceFeatureExtractCpy(self._sess, stream.handle, face_information._token,
                                       feature.ctypes.data_as(ctypes.POINTER(HFloat)))
 
-        if ret != 0:
-            logger.error(f"Face feature extract error: {ret}")
-            return None
-
+        check_error(ret, "Face feature extraction", track_id=face_information.track_id)
         return feature
 
     @staticmethod
     def _get_image_stream(image):
+        """Convert image to ImageStream if needed"""
         if isinstance(image, np.ndarray):
             return ImageStream.load_from_cv_image(image)
         elif isinstance(image, ImageStream):
             return image
         else:
-            raise NotImplemented("Place check input type.")
+            raise InvalidInputError("Image must be numpy.ndarray or ImageStream", 
+                                   context={'input_type': type(image).__name__})
 
     @staticmethod
     def _get_processing_function_and_param(exec_param):
+        """Get processing function and parameters"""
         if isinstance(exec_param, SessionCustomParameter):
             return HFMultipleFacePipelineProcess, exec_param._c_struct(), "object"
         elif isinstance(exec_param, int):
             return HFMultipleFacePipelineProcessOptional, exec_param, "bitmask"
         else:
-            raise NotImplemented("Unsupported parameter type")
+            raise InvalidInputError("exec_param must be SessionCustomParameter or int",
+                                   context={'param_type': type(exec_param).__name__})
 
     def _update_mask_confidence(self, exec_param, flag, extends):
+        """Update mask confidence in extends list"""
         if (flag == "object" and exec_param.enable_mask_detect) or (
                 flag == "bitmask" and exec_param & HF_ENABLE_MASK_DETECT):
             mask_results = HFFaceMaskConfidence()
             ret = HFGetFaceMaskConfidence(self._sess, PHFFaceMaskConfidence(mask_results))
-            if ret == 0:
+            if ret == errcode.HSUCCEED:
                 for i in range(mask_results.num):
                     extends[i].mask_confidence = mask_results.confidence[i]
             else:
-                logger.error(f"Get mask result error: {ret}")
+                logger.warning(f"Failed to get mask confidence: error code {ret}")
 
     def _update_face_interact_confidence(self, exec_param, flag, extends):
+        """Update face interaction confidence in extends list"""
         if (flag == "object" and exec_param.enable_interaction_liveness) or (
                 flag == "bitmask" and exec_param & HF_ENABLE_INTERACTION):
             results = HFFaceInteractionState()
             ret = HFGetFaceInteractionStateResult(self._sess, PHFFaceInteractionState(results))
-            if ret == 0:
+            if ret == errcode.HSUCCEED:
                 for i in range(results.num):
                     extends[i].left_eye_status_confidence = results.leftEyeStatusConfidence[i]
                     extends[i].right_eye_status_confidence = results.rightEyeStatusConfidence[i]
             else:
-                logger.error(f"Get face interact result error: {ret}")
+                logger.warning(f"Failed to get face interaction state: error code {ret}")
+                
             actions = HFFaceInteractionsActions()
             ret = HFGetFaceInteractionActionsResult(self._sess, PHFFaceInteractionsActions(actions))
-            if ret == 0:
+            if ret == errcode.HSUCCEED:
                 for i in range(results.num):
                     extends[i].action_normal = actions.normal[i]
                     extends[i].action_shake = actions.shake[i]
@@ -578,89 +614,95 @@ class InspireFaceSession(object):
                     extends[i].action_head_raise = actions.headRaise[i]
                     extends[i].action_blink = actions.blink[i]
             else:
-                logger.error(f"Get face action result error: {ret}")
+                logger.warning(f"Failed to get face interaction actions: error code {ret}")
 
     def _update_face_emotion_confidence(self, exec_param, flag, extends):
+        """Update face emotion confidence in extends list"""
         if (flag == "object" and exec_param.enable_face_emotion) or (
                 flag == "bitmask" and exec_param & HF_ENABLE_FACE_EMOTION):
             emotion_results = HFFaceEmotionResult()
             ret = HFGetFaceEmotionResult(self._sess, PHFFaceEmotionResult(emotion_results))
-            if ret == 0:
+            if ret == errcode.HSUCCEED:
                 for i in range(emotion_results.num):
                     extends[i].emotion = emotion_results.emotion[i]
             else:
-                logger.error(f"Get face emotion result error: {ret}")
+                logger.warning(f"Failed to get face emotion result: error code {ret}")
 
     def _update_rgb_liveness_confidence(self, exec_param, flag, extends: List[FaceExtended]):
+        """Update RGB liveness confidence in extends list"""
         if (flag == "object" and exec_param.enable_liveness) or (
                 flag == "bitmask" and exec_param & HF_ENABLE_LIVENESS):
             liveness_results = HFRGBLivenessConfidence()
             ret = HFGetRGBLivenessConfidence(self._sess, PHFRGBLivenessConfidence(liveness_results))
-            if ret == 0:
+            if ret == errcode.HSUCCEED:
                 for i in range(liveness_results.num):
                     extends[i].rgb_liveness_confidence = liveness_results.confidence[i]
             else:
-                logger.error(f"Get rgb liveness result error: {ret}")
+                logger.warning(f"Failed to get RGB liveness confidence: error code {ret}")
 
     def _update_face_attribute_confidence(self, exec_param, flag, extends: List[FaceExtended]):
+        """Update face attribute confidence in extends list"""
         if (flag == "object" and exec_param.enable_face_attribute) or (
                 flag == "bitmask" and exec_param & HF_ENABLE_FACE_ATTRIBUTE):
             attribute_results = HFFaceAttributeResult()
             ret = HFGetFaceAttributeResult(self._sess, PHFFaceAttributeResult(attribute_results))
-            if ret == 0:
+            if ret == errcode.HSUCCEED:
                 for i in range(attribute_results.num):
                     extends[i].gender = attribute_results.gender[i]
                     extends[i].age_bracket = attribute_results.ageBracket[i]
                     extends[i].race = attribute_results.race[i]
             else:
-                logger.error(f"Get face attribute result error: {ret}")
+                logger.warning(f"Failed to get face attribute result: error code {ret}")
 
     def _update_face_quality_confidence(self, exec_param, flag, extends: List[FaceExtended]):
+        """Update face quality confidence in extends list"""
         if (flag == "object" and exec_param.enable_face_quality) or (
                 flag == "bitmask" and exec_param & HF_ENABLE_QUALITY):
             quality_results = HFFaceQualityConfidence()
             ret = HFGetFaceQualityConfidence(self._sess, PHFFaceQualityConfidence(quality_results))
-            if ret == 0:
+            if ret == errcode.HSUCCEED:
                 for i in range(quality_results.num):
                     extends[i].quality_confidence = quality_results.confidence[i]
             else:
-                logger.error(f"Get quality result error: {ret}")
+                logger.warning(f"Failed to get face quality confidence: error code {ret}")
 
     def _get_faces_boundary_boxes(self) -> List:
+        """Get face boundary boxes from detection results"""
         num_of_faces = self.multiple_faces.detectedNum
         rects_ptr = self.multiple_faces.rects
         rects = [(rects_ptr[i].x, rects_ptr[i].y, rects_ptr[i].width, rects_ptr[i].height) for i in range(num_of_faces)]
-
         return rects
 
     def _get_faces_track_ids(self) -> List:
+        """Get face track IDs from detection results"""
         num_of_faces = self.multiple_faces.detectedNum
         track_ids_ptr = self.multiple_faces.trackIds
         track_ids = [track_ids_ptr[i] for i in range(num_of_faces)]
-
         return track_ids
 
     def _get_faces_euler_angle(self) -> List:
+        """Get face euler angles from detection results"""
         num_of_faces = self.multiple_faces.detectedNum
         euler_angle = self.multiple_faces.angles
         angles = [(euler_angle.roll[i], euler_angle.yaw[i], euler_angle.pitch[i]) for i in range(num_of_faces)]
-
         return angles
      
     def _get_faces_track_counts(self) -> List:
+        """Get face track counts from detection results"""
         num_of_faces = self.multiple_faces.detectedNum
         track_counts_ptr = self.multiple_faces.trackCounts
         track_counts = [track_counts_ptr[i] for i in range(num_of_faces)]
         return track_counts
 
     def _get_faces_tokens(self) -> List[HFFaceBasicToken]:
+        """Get face tokens from detection results"""
         num_of_faces = self.multiple_faces.detectedNum
         tokens_ptr = self.multiple_faces.tokens
         tokens = [tokens_ptr[i] for i in range(num_of_faces)]
-
         return tokens
 
     def release(self):
+        """Release session resources"""
         if self._sess is not None:
             HFReleaseInspireFaceSession(self._sess)
             self._sess = None
@@ -670,6 +712,38 @@ class InspireFaceSession(object):
 
 
 # == Global API ==
+
+def _check_modelscope_availability():
+    """
+    Check if ModelScope is available when needed and provide helpful error message if not.
+    
+    Exits the program if ModelScope is needed but not available and OSS is not enabled.
+    """
+    import sys
+    from .utils.resource import USE_OSS_DOWNLOAD
+    
+    # Dynamic check for ModelScope availability (don't rely on cached MODELSCOPE_AVAILABLE)
+    modelscope_available = True
+    try:
+        from modelscope.hub.snapshot_download import snapshot_download
+        print("ModelScope import successful")
+    except Exception as e:
+        modelscope_available = False
+        print(f"ModelScope import failed: {e}")
+    
+    if not USE_OSS_DOWNLOAD and not modelscope_available:
+        print("ModelScope is not available, cannot download models!")
+        print("\nPlease choose one of the following solutions:")
+        print("1. Reinstall ModelScope with all dependencies:")
+        print("   pip install --upgrade modelscope")
+        print("\n2. Install missing dependencies manually:")
+        print("   pip install filelock")
+        print("\n3. Switch to OSS download mode:")
+        print("   import inspireface as isf")
+        print("   isf.use_oss_download(True)  # Execute before calling launch()")
+        print("\nNote: OSS download requires stable international network connection")
+        sys.exit(1)
+
 def launch(model_name: str = "Pikachu", resource_path: str = None) -> bool:
     """
     Launches the InspireFace system with the specified resource directory.
@@ -681,21 +755,26 @@ def launch(model_name: str = "Pikachu", resource_path: str = None) -> bool:
     Returns:
         bool: True if the system was successfully launched, False otherwise.
 
-    Notes:
-        A specific error is logged if duplicate loading is detected or if there is any other launch failure.
+    Raises:
+        SystemNotReadyError: If launch fails due to resource issues.
     """
     if resource_path is None:
-        sm = ResourceManager()
+        from .utils.resource import USE_OSS_DOWNLOAD
+        
+        # Check if ModelScope is available when needed
+        _check_modelscope_availability()
+        
+        # Use ModelScope by default unless OSS is forced
+        sm = ResourceManager(use_modelscope=not USE_OSS_DOWNLOAD)
         resource_path = sm.get_model(model_name, ignore_verification=IGNORE_VERIFICATION_OF_THE_LATEST_MODEL)
     path_c = String(bytes(resource_path, encoding="utf8"))
     ret = HFLaunchInspireFace(path_c)
     if ret != 0:
-        if ret == 1363:
+        if ret == errcode.HERR_ARCHIVE_REPETITION_LOAD:
             logger.warning("Duplicate loading was found")
             return True
         else:
-            logger.error(f"Launch InspireFace failure: {ret}")
-            return False
+            check_error(ret, "Launch InspireFace", model_name=model_name, resource_path=resource_path)
     return True
 
 def pull_latest_model(model_name: str = "Pikachu") -> str:
@@ -706,8 +785,14 @@ def pull_latest_model(model_name: str = "Pikachu") -> str:
         model_name (str): the name of the model to use.
 
     Returns:
+        str: Path to the downloaded model.
     """
-    sm = ResourceManager()
+    from .utils.resource import USE_OSS_DOWNLOAD
+    
+    # Check if ModelScope is available when needed
+    _check_modelscope_availability()
+    
+    sm = ResourceManager(use_modelscope=not USE_OSS_DOWNLOAD)
     resource_path = sm.get_model(model_name, re_download=True)
     return resource_path
 
@@ -720,18 +805,24 @@ def reload(model_name: str = "Pikachu", resource_path: str = None) -> bool:
         resource_path (str): if None, use the default model path.
 
     Returns:
+        bool: True if reload was successful.
     """
     if resource_path is None:
-        sm = ResourceManager()
+        from .utils.resource import USE_OSS_DOWNLOAD
+        
+        # Check if ModelScope is available when needed
+        _check_modelscope_availability()
+        
+        sm = ResourceManager(use_modelscope=not USE_OSS_DOWNLOAD)
+        resource_path = sm.get_model(model_name, ignore_verification=IGNORE_VERIFICATION_OF_THE_LATEST_MODEL)
     path_c = String(bytes(resource_path, encoding="utf8"))
     ret = HFReloadInspireFace(path_c)
     if ret != 0:
-        if ret == 1363:
+        if ret == errcode.HERR_ARCHIVE_REPETITION_LOAD:
             logger.warning("Duplicate loading was found")
             return True
         else:
-            logger.error(f"Launch InspireFace failure: {ret}")
-            return False
+            check_error(ret, "Reload InspireFace", model_name=model_name, resource_path=resource_path)
     return True
 
 def terminate() -> bool:
@@ -740,13 +831,9 @@ def terminate() -> bool:
 
     Returns:
         bool: True if the system was successfully terminated, False otherwise.
-
-    Notes:
     """
     ret = HFTerminateInspireFace()
-    if ret != 0:
-        logger.error(f"Terminate InspireFace failure: {ret}")
-        return False
+    check_error(ret, "Terminate InspireFace")
     return True
 
 def query_launch_status() -> bool:
@@ -758,16 +845,25 @@ def query_launch_status() -> bool:
     """
     status = HInt32()
     ret = HFQueryInspireFaceLaunchStatus(byref(status))
-    if ret != 0:
-        logger.error(f"Query launch status error: {ret}")
-        return False
+    check_error(ret, "Query launch status")
     return status.value == 1
 
 def switch_landmark_engine(engine: int):
+    """Switch landmark engine"""
     ret = HFSwitchLandmarkEngine(engine)
-    if ret != 0:
-        logger.error(f"Switch landmark engine error: {ret}")
-        return False
+    check_error(ret, "Switch landmark engine", engine=engine)
+    return True
+
+def switch_image_processing_backend(backend: int):
+    """Switch image processing backend"""
+    ret = HFSwitchImageProcessingBackend(backend)
+    check_error(ret, "Switch image processing backend", backend=backend)
+    return True
+
+def set_image_process_aligned_width(width: int):
+    """Set the image process aligned width"""
+    ret = HFSetImageProcessAlignedWidth(width)
+    check_error(ret, "Set image process aligned width", width=width)
     return True
 
 @dataclass
@@ -776,9 +872,9 @@ class FeatureHubConfiguration:
     Configuration settings for managing the feature hub, including database and search settings.
 
     Attributes:
-        feature_block_num (int): Number of features per block in the database.
-        enable_use_db (bool): Flag to indicate if the database should be used.
-        db_path (str): Path to the database file.
+        primary_key_mode (int): Primary key mode for the database.
+        enable_persistence (bool): Flag to indicate if the database should be used.
+        persistence_db_path (str): Path to the database file.
         search_threshold (float): The threshold value for considering a match.
         search_mode (int): The mode of searching in the database.
     """
@@ -813,14 +909,9 @@ def feature_hub_enable(config: FeatureHubConfiguration) -> bool:
 
     Returns:
         bool: True if successfully enabled, False otherwise.
-
-    Notes:
-        Logs an error if enabling the feature hub fails.
     """
     ret = HFFeatureHubDataEnable(config._c_struct())
-    if ret != 0:
-        logger.error(f"FeatureHub enable failure: {ret}")
-        return False
+    check_error(ret, "Enable FeatureHub")
     return True
 
 
@@ -830,14 +921,9 @@ def feature_hub_disable() -> bool:
 
     Returns:
         bool: True if successfully disabled, False otherwise.
-
-    Notes:
-        Logs an error if disabling the feature hub fails.
     """
     ret = HFFeatureHubDataDisable()
-    if ret != 0:
-        logger.error(f"FeatureHub disable failure: {ret}")
-        return False
+    check_error(ret, "Disable FeatureHub")
     return True
 
 
@@ -851,10 +937,9 @@ def feature_comparison(feature1: np.ndarray, feature2: np.ndarray) -> float:
 
     Returns:
         float: A similarity score, where -1.0 indicates an error during comparison.
-
-    Notes:
-        Logs an error if the comparison process fails.
     """
+    validate_feature_data(feature1, "Feature comparison")
+    validate_feature_data(feature2, "Feature comparison")
     faces = [feature1, feature2]
     feats = []
     for face in faces:
@@ -866,10 +951,7 @@ def feature_comparison(feature1: np.ndarray, feature2: np.ndarray) -> float:
 
     comparison_result = HFloat()
     ret = HFFaceComparison(feats[0], feats[1], HPFloat(comparison_result))
-    if ret != 0:
-        logger.error(f"Comparison error: {ret}")
-        return -1.0
-
+    check_error(ret, "Face feature comparison")
     return float(comparison_result.value)
 
 
@@ -879,8 +961,7 @@ class FaceIdentity(object):
 
     Attributes:
         feature (np.ndarray): The facial features as a numpy array.
-        custom_id (int): A custom identifier for the face identity.
-        tag (str): A tag or label associated with the face identity.
+        id (int): A custom identifier for the face identity.
 
     Methods:
         __init__: Initializes a new instance of FaceIdentity.
@@ -894,13 +975,9 @@ class FaceIdentity(object):
 
         Args:
             data (np.ndarray): The facial feature data.
-            custom_id (int): A custom identifier for tracking or referencing the face identity.
-            tag (str): A descriptive tag or label for the face identity.
+            id (int): A custom identifier for tracking or referencing the face identity.
         """
-
-        if data.dtype != np.float32:
-            logger.error("The input data must be in float32 format")
-            raise ValueError("The input data must be in float32 format")
+        validate_feature_data(data, "FaceIdentity initialization")
         self.feature = data
         self.id = id
 
@@ -960,16 +1037,11 @@ def feature_hub_face_insert(face_identity: FaceIdentity) -> Tuple[bool, int]:
         face_identity (FaceIdentity): The face identity to insert.
 
     Returns:
-        bool: True if the face identity was successfully inserted, False otherwise.
-
-    Notes:
-        Logs an error if the insertion process fails.
+        Tuple[bool, int]: (True, allocated_id) if the face identity was successfully inserted.
     """
     alloc_id = HFaceId()
     ret = HFFeatureHubInsertFeature(face_identity._c_struct(), HPFaceId(alloc_id))
-    if ret != 0:
-        logger.error(f"Failed to insert face feature data into FeatureHub: {ret}")
-        return False, -1
+    check_error(ret, "Insert face feature into FeatureHub", identity_id=face_identity.id)
     return True, int(alloc_id.value)
 
 
@@ -997,20 +1069,14 @@ def feature_hub_face_search(data: np.ndarray) -> SearchResult:
 
     Returns:
         SearchResult: The search result containing the confidence and the most similar identity found.
-
-    Notes:
-        If the search operation fails, logs an error and returns a SearchResult with a confidence of -1.
     """
-    if data.dtype != np.float32:
-        logger.error("The input data must be in float32 format")
-        raise ValueError("The input data must be in float32 format")
+    validate_feature_data(data, "FeatureHub face search")
     feature = HFFaceFeature(size=HInt32(data.size), data=data.ctypes.data_as(HPFloat))
     confidence = HFloat()
     most_similar = HFFaceFeatureIdentity()
     ret = HFFeatureHubFaceSearch(feature, HPFloat(confidence), PHFFaceFeatureIdentity(most_similar))
-    if ret != 0:
-        logger.error(f"Failed to search face: {ret}")
-        return SearchResult(confidence=-1, similar_identity=FaceIdentity(np.zeros(0), most_similar.id))
+    check_error(ret, "Search face in FeatureHub")
+    
     if most_similar.id != -1:
         search_identity = FaceIdentity.from_ctypes(most_similar)
         return SearchResult(confidence=confidence.value, similar_identity=search_identity)
@@ -1029,19 +1095,13 @@ def feature_hub_face_search_top_k(data: np.ndarray, top_k: int) -> List[Tuple]:
 
     Returns:
         List[Tuple]: A list of tuples, each containing the confidence and custom ID of the top results.
-
-    Notes:
-        If the search operation fails, an empty list is returned.
     """
-
-    if data.dtype != np.float32:
-        logger.error("The input data must be in float32 format")
-        raise ValueError("The input data must be in float32 format")
+    validate_feature_data(data, "FeatureHub face search top k")
     feature = HFFaceFeature(size=HInt32(data.size), data=data.ctypes.data_as(HPFloat))
     results = HFSearchTopKResults()
     ret = HFFeatureHubFaceSearchTopK(feature, top_k, PHFSearchTopKResults(results))
     outputs = []
-    if ret == 0:
+    if ret == errcode.HSUCCEED:
         for idx in range(results.size):
             confidence = results.confidence[idx]
             id_ = results.ids[idx]
@@ -1104,9 +1164,7 @@ def feature_hub_get_face_identity(custom_id: int):
     """
     identify = HFFaceFeatureIdentity()
     ret = HFFeatureHubGetFaceIdentity(HFaceId(custom_id), PHFFaceFeatureIdentity(identify))
-    if ret != 0:
-        logger.error("Get face identity errors from FeatureHub")
-        return None
+    check_error(ret, "Get face identity from FeatureHub", custom_id=custom_id)
 
     return FaceIdentity.from_ctypes(identify)
 
@@ -1123,8 +1181,7 @@ def feature_hub_get_face_count() -> int:
     """
     count = HInt32()
     ret = HFFeatureHubGetFaceCount(HPInt32(count))
-    if ret != 0:
-        logger.error(f"Failed to get count: {ret}")
+    check_error(ret, "Get face count")
 
     return int(count.value)
 
@@ -1151,8 +1208,7 @@ def view_table_in_terminal():
         Logs an error if the operation to view the table fails.
     """
     ret = HFFeatureHubViewDBTable()
-    if ret != 0:
-        logger.error(f"Failed to view DB: {ret}")
+    check_error(ret, "View DB table")
 
 def get_recommended_cosine_threshold() -> float:
     """
@@ -1249,10 +1305,7 @@ def set_expansive_hardware_rockchip_dma_heap_path(path: str):
     Sets the path to the expansive hardware Rockchip DMA heap.
     """
     ret = HFSetExpansiveHardwareRockchipDmaHeapPath(path)
-    if ret != 0:
-        logger.error(f"Failed to set expansive hardware Rockchip DMA heap path: {ret}")
-        return False
-    return True
+    check_error(ret, "Set expansive hardware Rockchip DMA heap path", path=path)
 
 def query_expansive_hardware_rockchip_dma_heap_path() -> str:
     """
@@ -1260,9 +1313,7 @@ def query_expansive_hardware_rockchip_dma_heap_path() -> str:
     """
     path = HString()
     ret = HFQueryExpansiveHardwareRockchipDmaHeapPath(path)
-    if ret != 0:
-        logger.error(f"Failed to query expansive hardware Rockchip DMA heap path: {ret}")
-        return None
+    check_error(ret, "Query expansive hardware Rockchip DMA heap path")
     return str(path.value)
 
 
@@ -1271,8 +1322,7 @@ def set_cuda_device_id(device_id: int):
     Sets the CUDA device ID.
     """
     ret = HFSetCudaDeviceId(device_id)
-    if ret != 0:
-        logger.error(f"Failed to set CUDA device ID: {ret}")
+    check_error(ret, "Set CUDA device ID", device_id=device_id)
 
 def get_cuda_device_id() -> int:
     """
@@ -1280,8 +1330,7 @@ def get_cuda_device_id() -> int:
     """
     id = HInt32()
     ret = HFGetCudaDeviceId(id)
-    if ret != 0:
-        logger.error(f"Failed to get CUDA device ID: {ret}")
+    check_error(ret, "Get CUDA device ID")
     return int(id.value)
 
 def print_cuda_device_info():
@@ -1296,8 +1345,7 @@ def get_num_cuda_devices() -> int:
     """
     num = HInt32()
     ret = HFGetNumCudaDevices(num)
-    if ret != 0:
-        logger.error(f"Failed to get number of CUDA devices: {ret}")
+    check_error(ret, "Get number of CUDA devices")
     return int(num.value)
 
 def check_cuda_device_support() -> bool:
@@ -1306,6 +1354,5 @@ def check_cuda_device_support() -> bool:
     """
     is_support = HInt32()
     ret = HFCheckCudaDeviceSupport(is_support)
-    if ret != 0:
-        logger.error(f"Failed to check CUDA device support: {ret}")
+    check_error(ret, "Check CUDA device support")
     return bool(is_support.value)

@@ -2,7 +2,6 @@ import os
 import cv2
 import inspireface as isf
 import click
-import numpy as np
 
 race_tags = ["Black", "Asian", "Latino/Hispanic", "Middle Eastern", "White"]
 gender_tags = ["Female", "Male"]
@@ -20,6 +19,7 @@ def case_face_detection_image(image_path, show):
     This is a sample application for face detection and tracking using an image.
     It also includes pipeline extensions such as RGB liveness, mask detection, and face quality evaluation.
     """
+    isf.switch_image_processing_backend(isf.HF_IMAGE_PROCESSING_CPU)
     opt = isf.HF_ENABLE_FACE_RECOGNITION | isf.HF_ENABLE_QUALITY | isf.HF_ENABLE_MASK_DETECT | \
           isf.HF_ENABLE_LIVENESS | isf.HF_ENABLE_INTERACTION | isf.HF_ENABLE_FACE_ATTRIBUTE | isf.HF_ENABLE_FACE_EMOTION
     session = isf.InspireFaceSession(opt, isf.HF_DETECT_MODE_ALWAYS_DETECT)

@@ -6,15 +6,26 @@ namespace inspire {
 
 namespace nexus {
 
-RgaImageProcessor::RgaImageProcessor() {}
+RgaImageProcessor::RgaImageProcessor() {
+    aligned_width_ = 4;
+}
 
 RgaImageProcessor::~RgaImageProcessor() {}
+
+int32_t RgaImageProcessor::GetAlignedWidth(int width) const {
+    return aligned_width_;
+}
+
+void RgaImageProcessor::SetAlignedWidth(int width) {
+    aligned_width_ = width;
+}
 
 int32_t RgaImageProcessor::Resize(const uint8_t* src_data, int src_width, int src_height, int channels, uint8_t** dst_data, int dst_width,
                                   int dst_height) {
     // Calculate width aligned to 4 bytes
-    int aligned_src_width = (src_width + 3) & ~3;  // Round up to nearest multiple of 4
-    int aligned_dst_width = (dst_width + 3) & ~3;
+    int aligned_src_width = (src_width + aligned_width_ - 1) & ~(aligned_width_ - 1);  // Round up to nearest multiple of aligned_width_
+    int aligned_dst_width = (dst_width + aligned_width_ - 1) & ~(aligned_width_ - 1);
+    // std::cout << "aligned_src_width: " << aligned_src_width << ", aligned_dst_width: " << aligned_dst_width << std::endl;
 
     // 1. Get or create source buffer with aligned width
     BufferKey src_key{aligned_src_width, src_height, channels};
@@ -38,14 +49,14 @@ int32_t RgaImageProcessor::Resize(const uint8_t* src_data, int src_width, int sr
     int ret = imcheck(src_buffer.buffer, dst_buffer.buffer, {}, {});
     if (IM_STATUS_NOERROR != ret) {
         INSPIRECV_LOG(ERROR) << "RGA parameter check failed: " << imStrError((IM_STATUS)ret);
-        return false;
+        return -1;
     }
 
     ret = imresize(src_buffer.buffer, dst_buffer.buffer);
 
     if (ret != IM_STATUS_SUCCESS) {
         INSPIRECV_LOG(ERROR) << "RGA resize failed: " << imStrError((IM_STATUS)ret);
-        return false;
+        return -1;
     }
 
     // 5. Return pointer to destination buffer
@@ -71,7 +82,7 @@ int32_t RgaImageProcessor::MarkDone() {
 
 int32_t RgaImageProcessor::SwapColor(const uint8_t* src_data, int src_width, int src_height, int channels, uint8_t** dst_data) {
     // Calculate width aligned to 4 bytes
-    int aligned_src_width = (src_width + 3) & ~3;  // Round up to nearest multiple of 4
+    int aligned_src_width = (src_width + aligned_width_ - 1) & ~(aligned_width_ - 1);  // Round up to nearest multiple of aligned_width_
     // 1. Get or create source buffer
     BufferKey src_key{aligned_src_width, src_height, channels};
     auto& src_buffer = GetOrCreateBuffer(src_key);
@@ -119,8 +130,8 @@ int32_t RgaImageProcessor::Padding(const uint8_t* src_data, int src_width, int s
     dst_height = src_height + top + bottom;
 
     // Calculate width aligned to 4 bytes
-    int aligned_src_width = (src_width + 3) & ~3;
-    int aligned_dst_width = (dst_width + 3) & ~3;
+    int aligned_src_width = (src_width + aligned_width_ - 1) & ~(aligned_width_ - 1);  // Round up to nearest multiple of aligned_width_
+    int aligned_dst_width = (dst_width + aligned_width_ - 1) & ~(aligned_width_ - 1);  // Round up to nearest multiple of aligned_width_
 
     // 1. Get or create source buffer with aligned width
     BufferKey src_key{aligned_src_width, src_height, channels};
@@ -173,8 +184,8 @@ int32_t RgaImageProcessor::Padding(const uint8_t* src_data, int src_width, int s
 int32_t RgaImageProcessor::ResizeAndPadding(const uint8_t* src_data, int src_width, int src_height, int channels, int dst_width, int dst_height,
                                             uint8_t** dst_data, float& scale) {
     // Ensure target dimensions are multiples of 4
-    int aligned_dst_width = (dst_width + 3) & ~3;
-    int aligned_dst_height = (dst_height + 3) & ~3;
+    int aligned_dst_width = (dst_width + aligned_width_ - 1) & ~(aligned_width_ - 1);  // Round up to nearest multiple of aligned_width_
+    int aligned_dst_height = (dst_height + aligned_width_ - 1) & ~(aligned_width_ - 1);  // Round up to nearest multiple of aligned_width_
 
     // Calculate scale (take minimum to fit target box)
     scale = std::min(static_cast<float>(aligned_dst_width) / src_width, static_cast<float>(aligned_dst_height) / src_height);
@@ -184,10 +195,10 @@ int32_t RgaImageProcessor::ResizeAndPadding(const uint8_t* src_data, int src_wid
     int resized_h = static_cast<int>(src_height * scale);
 
     // Ensure scaled dimensions are multiples of 4
-    resized_w = (resized_w + 3) & ~3;
-    resized_h = (resized_h + 3) & ~3;
+    resized_w = (resized_w + aligned_width_ - 1) & ~(aligned_width_ - 1);  // Round up to nearest multiple of aligned_width_
+    resized_h = (resized_h + aligned_width_ - 1) & ~(aligned_width_ - 1);  // Round up to nearest multiple of aligned_width_
 
-    int aligned_src_width = (src_width + 3) & ~3;
+    int aligned_src_width = (src_width + aligned_width_ - 1) & ~(aligned_width_ - 1);  // Round up to nearest multiple of aligned_width_
 
     // 1. Get source buffer
     BufferKey src_key{aligned_src_width, src_height, channels};

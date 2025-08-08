@@ -24,6 +24,10 @@ We welcome your questions💬, they help guide and accelerate its development.
 
 ## Change Logs
 
+**`2025-08-03`** Add a multi-link model download channel for the Python-SDK.
+
+**`2025-06-15`** The [ErrorCode-Table](/doc/Error-Feedback-Codes.md) has been reorganized and streamlined.
+
 **`2025-06-08`** Add facial expression recognition.
 
 **`2025-04-27`** Optimize some issues and provide a stable version.
@@ -69,7 +73,7 @@ The licensing of the open-source models employed by InspireFace adheres to the s
 For Python users on **Linux and MacOS**, InspireFace can be quickly installed via pip:
 
 ```bash
-pip install inspireface
+pip install -U inspireface
 ```
 
 After installation, you can use inspireface like this:
@@ -513,7 +517,7 @@ Please note that the C++ interface has not been fully tested. It is recommended 
 **More detailed cases**:
 
 - [C Sample](cpp/sample/api/)
-- [C/C++ Sample](cpp/sample/cpp_api/)
+- [C++ Sample](cpp/sample/cpp_api/)
 
 ### Python Native Sample
 
@@ -610,7 +614,7 @@ We released InspireFace's Android SDK on JitPack, which you can incorporate into
 
   ```groovy
   dependencies {
-      implementation 'com.github.HyperInspire:inspireface-android-sdk:1.2.0'
+      implementation 'com.github.HyperInspire:inspireface-android-sdk:1.2.3.post4'
   }
   ```
 
@@ -631,7 +635,10 @@ You need to get the resource file from the release  [Release Page](https://githu
 ```
 asset/
 └── inspireface/
-    └── Pikachu
+    │── Pikachu
+    │── Megatron
+    │── Gundam_RK356X
+    └── Gundam_RK3588
 ```
 
 #### How to use the Android/Java API
@@ -753,11 +760,11 @@ For different scenarios, we currently provide several Packs, each containing mul
 
 | Name | Supported Devices | Note | Last Update | Link |
 | --- | --- | --- | --- | --- |
-| Pikachu | CPU | Lightweight edge-side models | Jun 15, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Pikachu) |
+| Pikachu | CPU | Lightweight edge-side models | Jun 22, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Pikachu) |
 | Megatron | CPU, GPU | Mobile and server models | Jun 15, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Megatron) |
 | Megatron_TRT | GPU | CUDA-based server models | Jun 15, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Megatron_TRT) |
 | Gundam-RV1109 | RKNPU | Supports RK1109 and RK1126 | Jun 15, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RV1109) |
-| Gundam-RV1106 | RKNPU | Supports RV1103 and RV1106 | Jun 15, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RV1106) |
+| Gundam-RV1106 | RKNPU | Supports RV1103 and RV1106 | Jul 6, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RV1106) |
 | Gundam-RK356X | RKNPU | Supports RK3566 and RK3568 | Jun 15, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RK356X) |
 | Gundam-RK3588 | RKNPU | Supports RK3588 | Jun 15, 2025 | [Download](https://github.com/HyperInspire/InspireFace/releases/download/v1.x/Gundam_RK3588) |
 
@@ -766,6 +773,7 @@ For different scenarios, we currently provide several Packs, each containing mul
 - [x] Add TensorRT backend support.
 - [x] Add Add C++ style header files.
 - [x] Add the RKNPU backend support for Android .
+- [ ] Python packages that support more platforms.
 - [ ] Example app project for Android and iOS samples.
 - [ ] Add the batch forward feature.
 - [ ] Design a scheme that can be adapted to multiple CUDA devices.

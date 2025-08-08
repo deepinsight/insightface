@@ -56,8 +56,12 @@ def parse_and_calculate_error_codes(header_content):
             # Calculate the actual error code value
             error_code_value = calculate_error_code_value(error_code_str, error_definitions)
 
-            # Store the calculated error code value
+            # Store the calculated error code value for later reference
             error_definitions[error_name] = error_code_value
+
+            # Skip base offset definitions (ending with _BASE)
+            if error_name.endswith('_BASE'):
+                continue
 
             # Append the extracted information to the error_codes list
             error_codes.append((error_name, error_code_value, comment_part))
@@ -79,6 +83,8 @@ def process_header(header_path, output_path):
     md_table = """# Error Feedback Codes
 
 During the use of InspireFace, some error feedback codes may be generated. Here is a table of error feedback codes.
+
+- As of **June 15, 2025**, the error code definitions have been restructured. Some legacy codes from historical versions have been removed, and a more streamlined version has been reorganized and consolidated.
 
 """
 

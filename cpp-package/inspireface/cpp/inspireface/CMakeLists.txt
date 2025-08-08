@@ -7,16 +7,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 option(ISF_BUILD_SHARED_LIBS "Build shared libraries (DLLs)." ON)
 
-string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d")
-set(EXTENDED_INFORMATION "InspireFace[Community Edition]")
-if(INSPIRECV_BACKEND_OPENCV)
-    set(EXTENDED_INFORMATION "${EXTENDED_INFORMATION}@OpenCV Backend")
-else()
-    set(EXTENDED_INFORMATION "${EXTENDED_INFORMATION}@General")
-endif()
-set(EXTENDED_INFORMATION "${EXTENDED_INFORMATION} - Build Time: ${BUILD_TIMESTAMP}")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/information.h.in ${CMAKE_CURRENT_SOURCE_DIR}/include/inspireface/information.h)
-
 file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 set(SOURCE_FILES ${SOURCE_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/c_api/inspireface.cc)        # Add C_API file
 
@@ -262,9 +252,9 @@ endif()
 if (NOT IOS)
     if (NOT ISF_BUILD_SHARED_LIBS)
         if(MNN_BUILD_SHARED_LIBS)
-            install(FILES ${CMAKE_BINARY_DIR}/3rdparty/MNN/libMNN.so DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/lib)
+            install(FILES ${CMAKE_BINARY_DIR}/MNN/libMNN.so DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/lib)
         else()
-            install(FILES ${CMAKE_BINARY_DIR}/3rdparty/MNN/libMNN.a DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/lib)
+            install(FILES ${CMAKE_BINARY_DIR}/MNN/libMNN.a DESTINATION ${CMAKE_INSTALL_PREFIX}/InspireFace/lib)
         endif()
         if(RKNN_USE_STATIC_LIBS)
             # To be added: The compilation of the RK series needs to be added

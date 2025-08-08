@@ -19,6 +19,7 @@
 #if defined(ISF_ENABLE_TENSORRT)
 #include "cuda_toolkit.h"
 #endif
+#include "meta.h"
 
 #define APPLE_EXTENSION_SUFFIX ".bundle"
 
@@ -27,8 +28,15 @@ namespace inspire {
 // Implementation class definition
 class Launch::Impl {
 public:
-    Impl() : m_load_(false), m_archive_(nullptr), m_cuda_device_id_(0), m_global_coreml_inference_mode_(InferenceWrapper::COREML_ANE) {
+    Impl()
+    : m_load_(false),
+      m_archive_(nullptr),
+      m_cuda_device_id_(0),
+      m_global_coreml_inference_mode_(InferenceWrapper::COREML_ANE),
+      m_image_processing_backend_(IMAGE_PROCESSING_CPU) {
 #if defined(ISF_ENABLE_RGA)
+        m_image_processing_backend_ = IMAGE_PROCESSING_RGA;
+        INSPIRE_LOGW("Default image processing backend is RGA.");
 #if defined(ISF_RKNPU_RV1106)
         m_rockchip_dma_heap_path_ = RV1106_CMA_HEAP_PATH;
 #else
@@ -38,6 +46,7 @@ public:
 #endif
         m_face_detect_pixel_list_ = {160, 320, 640};
         m_face_detect_model_list_ = {"face_detect_160", "face_detect_320", "face_detect_640"};
+        INSPIRE_LOGI("%s", GetSDKInfo().GetFullVersionInfo().c_str());
     }
     // Face Detection pixel size
     std::vector<int32_t> m_face_detect_pixel_list_;
@@ -56,6 +65,8 @@ public:
     bool m_load_;
     int32_t m_cuda_device_id_;
     InferenceWrapper::SpecialBackend m_global_coreml_inference_mode_;
+    Launch::ImageProcessingBackend m_image_processing_backend_;
+    int32_t m_image_process_aligned_width_{4};
 };
 
 // Initialize static members
@@ -289,6 +300,35 @@ void Launch::SwitchLandmarkEngine(LandmarkEngine engine) {
         ret = landmark_param->ReLoad("landmark_insightface_2d106");
     }
     INSPIREFACE_CHECK_MSG(ret, "Failed to switch landmark engine");
+}
+
+void Launch::SwitchImageProcessingBackend(ImageProcessingBackend backend) {
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    if (backend == IMAGE_PROCESSING_RGA) {
+#if defined(ISF_ENABLE_RGA)
+        pImpl->m_image_processing_backend_ = backend;
+#else
+        INSPIRE_LOGE("RKRGA is not enabled, please check the build configuration.");
+#endif  // ISF_ENABLE_RGA
+        return;
+    } else {
+        pImpl->m_image_processing_backend_ = backend;
+    }
+}
+
+Launch::ImageProcessingBackend Launch::GetImageProcessingBackend() const {
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    return pImpl->m_image_processing_backend_;
+}
+
+void Launch::SetImageProcessAlignedWidth(int32_t width) {
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    pImpl->m_image_process_aligned_width_ = width;
+}
+
+int32_t Launch::GetImageProcessAlignedWidth() const {
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    return pImpl->m_image_process_aligned_width_;
 }
 
 }  // namespace inspire

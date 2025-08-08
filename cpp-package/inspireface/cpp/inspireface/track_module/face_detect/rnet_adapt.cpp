@@ -11,8 +11,15 @@ float RNetAdapt::operator()(const inspirecv::Image &bgr_affine) {
     // auto resized = bgr_affine.Resize(24, 24);
     uint8_t *resized_data = nullptr;
     float scale;
-    m_processor_->Resize(bgr_affine.Data(), bgr_affine.Width(), bgr_affine.Height(), bgr_affine.Channels(), &resized_data, 24, 24);
-    auto resized = inspirecv::Image::Create(24, 24, bgr_affine.Channels(), resized_data, false);
+    auto ret = m_processor_->Resize(bgr_affine.Data(), bgr_affine.Width(), bgr_affine.Height(), bgr_affine.Channels(), &resized_data, 24, 24);
+    inspirecv::Image resized;
+    if (ret == -1) {
+        // Some RK devices seem unable to resize to 24x24, fallback to CPU processing
+        resized = bgr_affine.Resize(24, 24);
+    } else {
+        // RGA resize success
+        resized = inspirecv::Image::Create(24, 24, bgr_affine.Channels(), resized_data, false);
+    }
 
     AnyTensorOutputs outputs;
     Forward(resized, outputs);

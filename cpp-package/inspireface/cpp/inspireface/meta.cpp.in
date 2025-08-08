@@ -1,0 +1,137 @@
+#include "meta.h"
+#include <sstream>
+#include <iomanip>
+#include <cstdio>
+
+namespace inspire {
+
+// static global SDK info instance
+static const SDKInfo g_sdk_info = {
+    // version
+    @INSPIRE_FACE_VERSION_MAJOR_STR@,                          // version_major
+    @INSPIRE_FACE_VERSION_MINOR_STR@,                          // version_minor
+    @INSPIRE_FACE_VERSION_PATCH_STR@,                          // version_patch
+    
+    // series name
+    "@INSPIRE_FACE_SERIES_NAME@",                              // series
+    
+    // build info
+    __DATE__,                   // build_date
+    __TIME__,                   // build_time
+    
+#ifdef __GNUC__
+    "GCC " __VERSION__,         // compiler
+#elif defined(_MSC_VER)
+    "MSVC " + std::to_string(_MSC_VER),
+#elif defined(__clang__)
+    "Clang " __VERSION__,
+#else
+    "Unknown Compiler",
+#endif
+    
+#ifdef _WIN32
+    "Windows",                  // platform
+#elif defined(__APPLE__)
+    "MacOS",
+#elif defined(__linux__)
+    "Linux",
+#elif defined(__ANDROID__)
+    "Android",
+#else
+    "Unknown Platform",
+#endif
+
+#if defined(__x86_64__) || defined(_M_X64)
+    "x86_64",                   // architecture
+#elif defined(__i386) || defined(_M_IX86)
+    "x86",
+#elif defined(__aarch64__) || defined(_M_ARM64)
+    "arm64",
+#elif defined(__arm__) || defined(_M_ARM)
+    "arm",
+#else
+    "unknown",
+#endif
+
+    // backend info
+#if defined(ISF_ENABLE_TENSORRT)
+    "TensorRT(CUDA)",             // inference_backend
+#elif defined(ISF_ENABLE_APPLE_EXTENSION)
+    "CoreML(ANE)",
+#elif defined(ISF_ENABLE_RKNN)
+    "RKNN(RKNPU)",
+#else
+    "MNN(CPU-Only)",
+#endif
+
+#if defined(INSPIRECV_BACKEND_OPENCV)
+    "InspireCV-OpenCV",                   // inspirecv_backend
+#else
+    "InspireCV",
+#endif
+
+#if defined(ISF_ENABLE_RGA)
+    true,                       // rga_backend_enabled
+#else
+    false,
+#endif
+    
+    "InspireFace SDK - Advanced Face Recognition Library"  // description
+};
+
+std::string SDKInfo::GetFullVersionInfo() const {
+    std::stringstream ss;
+    ss << "InspireFace SDK " << "[" << series << "]" << " v" << version_major << "." << version_minor << "." << version_patch
+       << " (Built: " << build_date << " " << build_time << ")"
+       << " [" << platform << "/" << architecture << "/" << compiler << "]"
+       << " Backend: " << inference_backend << " " << inspirecv_backend << "[CPU" << (rga_backend_enabled ? ", RGA" : "") << "]";
+    return ss.str();
+}
+
+std::string SDKInfo::GetVersionMajorStr() const {
+    return std::to_string(version_major);
+}
+
+std::string SDKInfo::GetVersionMinorStr() const {
+    return std::to_string(version_minor);
+}
+
+std::string SDKInfo::GetVersionPatchStr() const {
+    return std::to_string(version_patch);
+}
+
+std::string SDKInfo::GetVersionString() const {
+    return std::to_string(version_major) + "." + std::to_string(version_minor) + "." + std::to_string(version_patch);
+}
+
+const SDKInfo& GetSDKInfo() {
+    return g_sdk_info;
+}
+
+}   // namespace inspire
+
+extern "C" {
+
+INSPIRE_API_EXPORT const char* GetInspireFaceVersionMajorStr() {
+    static char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%d", inspire::g_sdk_info.version_major);
+    return buffer;
+}
+
+INSPIRE_API_EXPORT const char* GetInspireFaceVersionMinorStr() {
+    static char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%d", inspire::g_sdk_info.version_minor);
+    return buffer;
+}
+
+INSPIRE_API_EXPORT const char* GetInspireFaceVersionPatchStr() {
+    static char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%d", inspire::g_sdk_info.version_patch);
+    return buffer;
+}
+
+INSPIRE_API_EXPORT const char* GetInspireFaceExtendedInformation() {
+    return inspire::g_sdk_info.description.c_str();
+}
+
+}

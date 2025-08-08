@@ -31,7 +31,7 @@ namespace inspire {
 
 namespace nexus {
 
-class RgaImageProcessor : public ImageProcessor {
+class INSPIRE_API_EXPORT RgaImageProcessor : public ImageProcessor {
 public:
     RgaImageProcessor();
     ~RgaImageProcessor() override;
@@ -47,6 +47,10 @@ public:
                              float& scale) override;
 
     int32_t MarkDone() override;
+
+    int32_t GetAlignedWidth(int width) const override;
+
+    void SetAlignedWidth(int width) override;
 
 public:
     struct BufferInfo {
@@ -200,6 +204,7 @@ private:
     std::unordered_map<BufferKey, RGABuffer, BufferKeyHash> buffer_cache_;
     BufferKey last_src_key_{0, 0, 0};
     BufferKey last_dst_key_{0, 0, 0};
+    int32_t aligned_width_{0};
 };
 
 }  // namespace nexus

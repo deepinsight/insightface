@@ -2,63 +2,50 @@
 
 During the use of InspireFace, some error feedback codes may be generated. Here is a table of error feedback codes.
 
+- As of **June 15, 2025**, the error code definitions have been restructured. Some legacy codes from historical versions have been removed, and a more streamlined version has been reorganized and consolidated.
+
  | Index | Name | Code | Comment | 
  | --- | --- | --- | --- | 
  | 1 | HSUCCEED | 0 | Success | 
- | 2 | HERR_BASIC_BASE | 1 | Basic error types | 
- | 3 | HERR_UNKNOWN | 1 | Unknown error | 
- | 4 | HERR_INVALID_PARAM | 2 | Invalid parameter | 
- | 5 | HERR_INVALID_IMAGE_STREAM_HANDLE | 25 | Invalid image stream handle | 
- | 6 | HERR_INVALID_CONTEXT_HANDLE | 26 | Invalid context handle | 
- | 7 | HERR_INVALID_FACE_TOKEN | 31 | Invalid face token | 
- | 8 | HERR_INVALID_FACE_FEATURE | 32 | Invalid face feature | 
- | 9 | HERR_INVALID_FACE_LIST | 33 | Invalid face feature list | 
- | 10 | HERR_INVALID_BUFFER_SIZE | 34 | Invalid copy token | 
- | 11 | HERR_INVALID_IMAGE_STREAM_PARAM | 35 | Invalid image param | 
- | 12 | HERR_INVALID_SERIALIZATION_FAILED | 36 | Invalid face serialization failed | 
- | 13 | HERR_INVALID_DETECTION_INPUT | 37 | Failed to modify detector input size | 
- | 14 | HERR_INVALID_IMAGE_BITMAP_HANDLE | 38 | Invalid image bitmap handle | 
- | 15 | HERR_SESS_BASE | 1280 | Session error types | 
- | 16 | HERR_SESS_FUNCTION_UNUSABLE | 1282 | Function not usable | 
- | 17 | HERR_SESS_TRACKER_FAILURE | 1283 | Tracker module not initialized | 
- | 18 | HERR_SESS_INVALID_RESOURCE | 1290 | Invalid static resource | 
- | 19 | HERR_SESS_NUM_OF_MODELS_NOT_MATCH | 1291 | Number of models does not match | 
- | 20 | HERR_SESS_LANDMARK_NUM_NOT_MATCH | 1300 | The number of input landmark points does not match | 
- | 21 | HERR_SESS_LANDMARK_NOT_ENABLE | 1301 | The number of input landmark points does not match | 
- | 22 | HERR_SESS_KEY_POINT_NUM_NOT_MATCH | 1302 | The number of input key points does not match | 
- | 23 | HERR_SESS_PIPELINE_FAILURE | 1288 | Pipeline module not initialized | 
- | 24 | HERR_SESS_REC_EXTRACT_FAILURE | 1295 | Face feature extraction not registered | 
- | 25 | HERR_SESS_REC_DEL_FAILURE | 1296 | Face feature deletion failed due to out of range index | 
- | 26 | HERR_SESS_REC_UPDATE_FAILURE | 1297 | Face feature update failed due to out of range index | 
- | 27 | HERR_SESS_REC_ADD_FEAT_EMPTY | 1298 | Feature vector for registration cannot be empty | 
- | 28 | HERR_SESS_REC_FEAT_SIZE_ERR | 1299 | Incorrect length of feature vector for registration | 
- | 29 | HERR_SESS_REC_INVALID_INDEX | 1300 | Invalid index number | 
- | 30 | HERR_SESS_REC_CONTRAST_FEAT_ERR | 1303 | Incorrect length of feature vector for comparison | 
- | 31 | HERR_SESS_REC_BLOCK_FULL | 1304 | Feature vector block full | 
- | 32 | HERR_SESS_REC_BLOCK_DEL_FAILURE | 1305 | Deletion failed | 
- | 33 | HERR_SESS_REC_BLOCK_UPDATE_FAILURE | 1306 | Update failed | 
- | 34 | HERR_SESS_REC_ID_ALREADY_EXIST | 1307 | ID already exists | 
- | 35 | HERR_SESS_FACE_DATA_ERROR | 1310 | Face data parsing | 
- | 36 | HERR_SESS_FACE_REC_OPTION_ERROR | 1320 | An optional parameter is incorrect | 
- | 37 | HERR_FT_HUB_DISABLE | 1329 | FeatureHub is disabled | 
- | 38 | HERR_FT_HUB_OPEN_ERROR | 1330 | Database open error | 
- | 39 | HERR_FT_HUB_NOT_OPENED | 1331 | Database not opened | 
- | 40 | HERR_FT_HUB_NO_RECORD_FOUND | 1332 | No record found | 
- | 41 | HERR_FT_HUB_CHECK_TABLE_ERROR | 1333 | Data table check error | 
- | 42 | HERR_FT_HUB_INSERT_FAILURE | 1334 | Data insertion error | 
- | 43 | HERR_FT_HUB_PREPARING_FAILURE | 1335 | Data preparation error | 
- | 44 | HERR_FT_HUB_EXECUTING_FAILURE | 1336 | SQL execution error | 
- | 45 | HERR_FT_HUB_NOT_VALID_FOLDER_PATH | 1337 | Invalid folder path | 
- | 46 | HERR_FT_HUB_ENABLE_REPETITION | 1338 | Enable db function repeatedly | 
- | 47 | HERR_FT_HUB_DISABLE_REPETITION | 1339 | Disable db function repeatedly | 
- | 48 | HERR_FT_HUB_NOT_FOUND_FEATURE | 1340 | Get face feature error | 
- | 49 | HERR_ARCHIVE_LOAD_FAILURE | 1360 | Archive load failure | 
- | 50 | HERR_ARCHIVE_LOAD_MODEL_FAILURE | 1361 | Model load failure | 
- | 51 | HERR_ARCHIVE_FILE_FORMAT_ERROR | 1362 | The archive format is incorrect | 
- | 52 | HERR_ARCHIVE_REPETITION_LOAD | 1363 | Do not reload the model | 
- | 53 | HERR_ARCHIVE_NOT_LOAD | 1364 | Model not loaded | 
- | 54 | HERR_DEVICE_BASE | 2304 | hardware error | 
- | 55 | HERR_DEVICE_CUDA_NOT_SUPPORT | 2305 | CUDA not supported | 
- | 56 | HERR_DEVICE_CUDA_TENSORRT_NOT_SUPPORT | 2306 | CUDA TensorRT not supported | 
- | 57 | HERR_DEVICE_CUDA_UNKNOWN_ERROR | 2324 | CUDA unknown error | 
- | 58 | HERR_DEVICE_CUDA_DISABLE | 2325 | CUDA support is disabled | 
+ | 2 | HERR_UNKNOWN | 1 | Unknown error (1) | 
+ | 3 | HERR_INVALID_PARAM | 2 | Invalid parameter (2) | 
+ | 4 | HERR_INVALID_IMAGE_STREAM_HANDLE | 3 | Invalid image stream handle (3) | 
+ | 5 | HERR_INVALID_CONTEXT_HANDLE | 4 | Invalid context handle (4) | 
+ | 6 | HERR_INVALID_FACE_TOKEN | 5 | Invalid face token (5) | 
+ | 7 | HERR_INVALID_FACE_FEATURE | 6 | Invalid face feature (6) | 
+ | 8 | HERR_INVALID_FACE_LIST | 7 | Invalid face feature list (7) | 
+ | 9 | HERR_INVALID_BUFFER_SIZE | 8 | Invalid copy token (8) | 
+ | 10 | HERR_INVALID_IMAGE_STREAM_PARAM | 9 | Invalid image param (9) | 
+ | 11 | HERR_INVALID_SERIALIZATION_FAILED | 10 | Invalid face serialization failed (10) | 
+ | 12 | HERR_INVALID_DETECTION_INPUT | 11 | Failed to modify detector input size (11) | 
+ | 13 | HERR_INVALID_IMAGE_BITMAP_HANDLE | 12 | Invalid image bitmap handle (12) | 
+ | 14 | HERR_IMAGE_STREAM_DECODE_FAILED | 13 | ImageStream failed to decode the image (13) | 
+ | 15 | HERR_SESS_FUNCTION_UNUSABLE | 101 | Function not usable (101) | 
+ | 16 | HERR_SESS_TRACKER_FAILURE | 102 | Tracker module not initialized (102) | 
+ | 17 | HERR_SESS_PIPELINE_FAILURE | 103 | Pipeline module not initialized (103) | 
+ | 18 | HERR_SESS_INVALID_RESOURCE | 104 | Invalid static resource (104) | 
+ | 19 | HERR_SESS_LANDMARK_NUM_NOT_MATCH | 105 | The number of input landmark points does not match (105) | 
+ | 20 | HERR_SESS_LANDMARK_NOT_ENABLE | 106 | The landmark model is not enabled (106) | 
+ | 21 | HERR_SESS_KEY_POINT_NUM_NOT_MATCH | 107 | The number of input key points does not match (107) | 
+ | 22 | HERR_SESS_REC_EXTRACT_FAILURE | 108 | Face feature extraction not registered (108) | 
+ | 23 | HERR_SESS_REC_CONTRAST_FEAT_ERR | 109 | Incorrect length of feature vector for comparison (109) | 
+ | 24 | HERR_SESS_FACE_DATA_ERROR | 110 | Face data parsing (110) | 
+ | 25 | HERR_SESS_FACE_REC_OPTION_ERROR | 111 | An optional parameter is incorrect (111) | 
+ | 26 | HERR_FT_HUB_DISABLE | 201 | FeatureHub is disabled (201) | 
+ | 27 | HERR_FT_HUB_INSERT_FAILURE | 202 | Data insertion error (202) | 
+ | 28 | HERR_FT_HUB_NOT_FOUND_FEATURE | 203 | Get face feature error (203) | 
+ | 29 | HERR_ARCHIVE_LOAD_FAILURE | 251 | Archive load failure (251) | 
+ | 30 | HERR_ARCHIVE_LOAD_MODEL_FAILURE | 252 | Model load failure (252) | 
+ | 31 | HERR_ARCHIVE_FILE_FORMAT_ERROR | 253 | The archive format is incorrect (253) | 
+ | 32 | HERR_ARCHIVE_REPETITION_LOAD | 254 | Do not reload the model (254) | 
+ | 33 | HERR_ARCHIVE_NOT_LOAD | 255 | Model not loaded (255) | 
+ | 34 | HERR_DEVICE_CUDA_NOT_SUPPORT | 301 | CUDA not supported (301) | 
+ | 35 | HERR_DEVICE_CUDA_TENSORRT_NOT_SUPPORT | 302 | CUDA TensorRT not supported (302) | 
+ | 36 | HERR_DEVICE_CUDA_UNKNOWN_ERROR | 303 | CUDA unknown error (303) | 
+ | 37 | HERR_DEVICE_CUDA_DISABLE | 304 | CUDA support is disabled (304) | 
+ | 38 | HERR_EXTENSION_ERROR | 351 | Extension module error (351) | 
+ | 39 | HERR_EXTENSION_MLMODEL_LOAD_FAILED | 352 | MLModel load failed (352) | 
+ | 40 | HERR_EXTENSION_HETERO_MODEL_TAG_ERROR | 353 | Incorrect heterogeneous model tag (353) | 
+ | 41 | HERR_EXTENSION_HETERO_REC_HEAD_CONFIG_ERROR | 354 | Rec head config error (354) | 
+ | 42 | HERR_EXTENSION_HETERO_MODEL_NOT_MATCH | 355 | Heterogeneous model dimensions do not match (355) | 
+ | 43 | HERR_EXTENSION_HETERO_MODEL_NOT_LOADED | 356 | Heterogeneous model dimensions not loaded (356) | 

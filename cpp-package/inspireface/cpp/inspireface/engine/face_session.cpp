@@ -458,6 +458,18 @@ bool FaceSession::IsDetectModeLandmark() const {
     return m_face_track_->IsDetectModeLandmark();
 }
 
+void FaceSession::ClearTrackingFace() {
+    m_face_track_->ClearTrackingFace();
+}
+
+void FaceSession::SetTrackLostRecoveryMode(bool value) {
+    m_face_track_->SetTrackLostRecoveryMode(value);
+}
+
+void FaceSession::SetLightTrackConfidenceThreshold(float value) {
+    m_face_track_->SetLightTrackConfidenceThreshold(value);
+}
+
 int32_t FaceSession::SetTrackPreviewSize(const int32_t preview_size) {
     m_face_track_->SetTrackPreviewSize(preview_size);
     return HSUCCEED;

@@ -6,4 +6,6 @@ from .inspireface import ImageStream, FaceExtended, FaceInformation, SessionCust
     set_logging_level, disable_logging, show_system_resource_statistics, get_recommended_cosine_threshold, cosine_similarity_convert_to_percentage, \
     get_similarity_converter_config, set_similarity_converter_config, pull_latest_model, switch_landmark_engine, \
     HF_PK_AUTO_INCREMENT, HF_PK_MANUAL_INPUT, HF_SEARCH_MODE_EAGER, HF_SEARCH_MODE_EXHAUSTIVE, \
-    ignore_check_latest_model, set_cuda_device_id, get_cuda_device_id, print_cuda_device_info, get_num_cuda_devices, check_cuda_device_support, terminate
+    ignore_check_latest_model, set_cuda_device_id, get_cuda_device_id, print_cuda_device_info, get_num_cuda_devices, check_cuda_device_support, terminate, \
+    InspireFaceError, InvalidInputError, SystemNotReadyError, ProcessingError, ResourceError, HardwareError, FeatureHubError, \
+    switch_image_processing_backend, HF_IMAGE_PROCESSING_CPU, HF_IMAGE_PROCESSING_RGA, set_image_process_aligned_width, use_oss_download

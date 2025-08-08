@@ -8,72 +8,68 @@
 
 // [Anchor-Begin]
 
-#define HSUCCEED (0)                                              // Success
-#define HERR_BASIC_BASE 0X0001                                    // Basic error types
-#define HERR_UNKNOWN HERR_BASIC_BASE                              // Unknown error
-#define HERR_INVALID_PARAM (HERR_BASIC_BASE + 1)                  // Invalid parameter
-#define HERR_INVALID_IMAGE_STREAM_HANDLE (HERR_BASIC_BASE + 24)   // Invalid image stream handle
-#define HERR_INVALID_CONTEXT_HANDLE (HERR_BASIC_BASE + 25)        // Invalid context handle
-#define HERR_INVALID_FACE_TOKEN (HERR_BASIC_BASE + 30)            // Invalid face token
-#define HERR_INVALID_FACE_FEATURE (HERR_BASIC_BASE + 31)          // Invalid face feature
-#define HERR_INVALID_FACE_LIST (HERR_BASIC_BASE + 32)             // Invalid face feature list
-#define HERR_INVALID_BUFFER_SIZE (HERR_BASIC_BASE + 33)           // Invalid copy token
-#define HERR_INVALID_IMAGE_STREAM_PARAM (HERR_BASIC_BASE + 34)    // Invalid image param
-#define HERR_INVALID_SERIALIZATION_FAILED (HERR_BASIC_BASE + 35)  // Invalid face serialization failed
-#define HERR_INVALID_DETECTION_INPUT (HERR_BASIC_BASE + 36)       // Failed to modify detector input size
-#define HERR_INVALID_IMAGE_BITMAP_HANDLE (HERR_BASIC_BASE + 37)   // Invalid image bitmap handle
+#define HSUCCEED (0)  // Success
 
-#define HERR_SESS_BASE 0X500                                     // Session error types
-#define HERR_SESS_FUNCTION_UNUSABLE (HERR_SESS_BASE + 2)         // Function not usable
-#define HERR_SESS_TRACKER_FAILURE (HERR_SESS_BASE + 3)           // Tracker module not initialized
-#define HERR_SESS_INVALID_RESOURCE (HERR_SESS_BASE + 10)         // Invalid static resource
-#define HERR_SESS_NUM_OF_MODELS_NOT_MATCH (HERR_SESS_BASE + 11)  // Number of models does not match
-#define HERR_SESS_LANDMARK_NUM_NOT_MATCH (HERR_SESS_BASE + 20)   // The number of input landmark points does not match
-#define HERR_SESS_LANDMARK_NOT_ENABLE (HERR_SESS_BASE + 21)      // The number of input landmark points does not match
-#define HERR_SESS_KEY_POINT_NUM_NOT_MATCH (HERR_SESS_BASE + 22)  // The number of input key points does not match
+// Basic error types (1-99)
+#define HERR_BASIC_BASE 0x0001                                   // Basic error types
+#define HERR_UNKNOWN HERR_BASIC_BASE                             // Unknown error (1)
+#define HERR_INVALID_PARAM (HERR_BASIC_BASE + 1)                 // Invalid parameter (2)
+#define HERR_INVALID_IMAGE_STREAM_HANDLE (HERR_BASIC_BASE + 2)   // Invalid image stream handle (3)
+#define HERR_INVALID_CONTEXT_HANDLE (HERR_BASIC_BASE + 3)        // Invalid context handle (4)
+#define HERR_INVALID_FACE_TOKEN (HERR_BASIC_BASE + 4)            // Invalid face token (5)
+#define HERR_INVALID_FACE_FEATURE (HERR_BASIC_BASE + 5)          // Invalid face feature (6)
+#define HERR_INVALID_FACE_LIST (HERR_BASIC_BASE + 6)             // Invalid face feature list (7)
+#define HERR_INVALID_BUFFER_SIZE (HERR_BASIC_BASE + 7)           // Invalid copy token (8)
+#define HERR_INVALID_IMAGE_STREAM_PARAM (HERR_BASIC_BASE + 8)    // Invalid image param (9)
+#define HERR_INVALID_SERIALIZATION_FAILED (HERR_BASIC_BASE + 9)  // Invalid face serialization failed (10)
+#define HERR_INVALID_DETECTION_INPUT (HERR_BASIC_BASE + 10)      // Failed to modify detector input size (11)
+#define HERR_INVALID_IMAGE_BITMAP_HANDLE (HERR_BASIC_BASE + 11)  // Invalid image bitmap handle (12)
+#define HERR_IMAGE_STREAM_DECODE_FAILED (HERR_BASIC_BASE + 12)  // ImageStream failed to decode the image (13)
 
-#define HERR_SESS_PIPELINE_FAILURE (HERR_SESS_BASE + 8)  // Pipeline module not initialized
+// Session error types (100-199)
+#define HERR_SESS_BASE 0x0064                                   // Session error types (100)
+#define HERR_SESS_FUNCTION_UNUSABLE (HERR_SESS_BASE + 1)        // Function not usable (101)
+#define HERR_SESS_TRACKER_FAILURE (HERR_SESS_BASE + 2)          // Tracker module not initialized (102)
+#define HERR_SESS_PIPELINE_FAILURE (HERR_SESS_BASE + 3)         // Pipeline module not initialized (103)
+#define HERR_SESS_INVALID_RESOURCE (HERR_SESS_BASE + 4)         // Invalid static resource (104)
+#define HERR_SESS_LANDMARK_NUM_NOT_MATCH (HERR_SESS_BASE + 5)   // The number of input landmark points does not match (105)
+#define HERR_SESS_LANDMARK_NOT_ENABLE (HERR_SESS_BASE + 6)      // The landmark model is not enabled (106)
+#define HERR_SESS_KEY_POINT_NUM_NOT_MATCH (HERR_SESS_BASE + 7)  // The number of input key points does not match (107)
+#define HERR_SESS_REC_EXTRACT_FAILURE (HERR_SESS_BASE + 8)      // Face feature extraction not registered (108)
+#define HERR_SESS_REC_CONTRAST_FEAT_ERR (HERR_SESS_BASE + 9)    // Incorrect length of feature vector for comparison (109)
+#define HERR_SESS_FACE_DATA_ERROR (HERR_SESS_BASE + 10)         // Face data parsing (110)
+#define HERR_SESS_FACE_REC_OPTION_ERROR (HERR_SESS_BASE + 11)   // An optional parameter is incorrect (111)
 
-#define HERR_SESS_REC_EXTRACT_FAILURE (HERR_SESS_BASE + 15)       // Face feature extraction not registered
-#define HERR_SESS_REC_DEL_FAILURE (HERR_SESS_BASE + 16)           // Face feature deletion failed due to out of range index
-#define HERR_SESS_REC_UPDATE_FAILURE (HERR_SESS_BASE + 17)        // Face feature update failed due to out of range index
-#define HERR_SESS_REC_ADD_FEAT_EMPTY (HERR_SESS_BASE + 18)        // Feature vector for registration cannot be empty
-#define HERR_SESS_REC_FEAT_SIZE_ERR (HERR_SESS_BASE + 19)         // Incorrect length of feature vector for registration
-#define HERR_SESS_REC_INVALID_INDEX (HERR_SESS_BASE + 20)         // Invalid index number
-#define HERR_SESS_REC_CONTRAST_FEAT_ERR (HERR_SESS_BASE + 23)     // Incorrect length of feature vector for comparison
-#define HERR_SESS_REC_BLOCK_FULL (HERR_SESS_BASE + 24)            // Feature vector block full
-#define HERR_SESS_REC_BLOCK_DEL_FAILURE (HERR_SESS_BASE + 25)     // Deletion failed
-#define HERR_SESS_REC_BLOCK_UPDATE_FAILURE (HERR_SESS_BASE + 26)  // Update failed
-#define HERR_SESS_REC_ID_ALREADY_EXIST (HERR_SESS_BASE + 27)      // ID already exists
+// FeatureHub error types (200-249)
+#define HERR_FT_HUB_BASE 0x00C8                               // FeatureHub error types (200)
+#define HERR_FT_HUB_DISABLE (HERR_FT_HUB_BASE + 1)            // FeatureHub is disabled (201)
+#define HERR_FT_HUB_INSERT_FAILURE (HERR_FT_HUB_BASE + 2)     // Data insertion error (202)
+#define HERR_FT_HUB_NOT_FOUND_FEATURE (HERR_FT_HUB_BASE + 3)  // Get face feature error (203)
 
-#define HERR_SESS_FACE_DATA_ERROR (HERR_SESS_BASE + 30)  // Face data parsing
+// Archive error types (250-299)
+#define HERR_ARCHIVE_BASE 0x00FA                                 // Archive error types (250)
+#define HERR_ARCHIVE_LOAD_FAILURE (HERR_ARCHIVE_BASE + 1)        // Archive load failure (251)
+#define HERR_ARCHIVE_LOAD_MODEL_FAILURE (HERR_ARCHIVE_BASE + 2)  // Model load failure (252)
+#define HERR_ARCHIVE_FILE_FORMAT_ERROR (HERR_ARCHIVE_BASE + 3)   // The archive format is incorrect (253)
+#define HERR_ARCHIVE_REPETITION_LOAD (HERR_ARCHIVE_BASE + 4)     // Do not reload the model (254)
+#define HERR_ARCHIVE_NOT_LOAD (HERR_ARCHIVE_BASE + 5)            // Model not loaded (255)
 
-#define HERR_SESS_FACE_REC_OPTION_ERROR (HERR_SESS_BASE + 40)  // An optional parameter is incorrect
+// Device/Hardware error types (300-349)
+#define HERR_DEVICE_BASE 0x012C                                       // Hardware error types (300)
+#define HERR_DEVICE_CUDA_NOT_SUPPORT (HERR_DEVICE_BASE + 1)           // CUDA not supported (301)
+#define HERR_DEVICE_CUDA_TENSORRT_NOT_SUPPORT (HERR_DEVICE_BASE + 2)  // CUDA TensorRT not supported (302)
+#define HERR_DEVICE_CUDA_UNKNOWN_ERROR (HERR_DEVICE_BASE + 3)         // CUDA unknown error (303)
+#define HERR_DEVICE_CUDA_DISABLE (HERR_DEVICE_BASE + 4)               // CUDA support is disabled (304)
 
-#define HERR_FT_HUB_DISABLE (HERR_SESS_BASE + 49)                // FeatureHub is disabled
-#define HERR_FT_HUB_OPEN_ERROR (HERR_SESS_BASE + 50)             // Database open error
-#define HERR_FT_HUB_NOT_OPENED (HERR_SESS_BASE + 51)             // Database not opened
-#define HERR_FT_HUB_NO_RECORD_FOUND (HERR_SESS_BASE + 52)        // No record found
-#define HERR_FT_HUB_CHECK_TABLE_ERROR (HERR_SESS_BASE + 53)      // Data table check error
-#define HERR_FT_HUB_INSERT_FAILURE (HERR_SESS_BASE + 54)         // Data insertion error
-#define HERR_FT_HUB_PREPARING_FAILURE (HERR_SESS_BASE + 55)      // Data preparation error
-#define HERR_FT_HUB_EXECUTING_FAILURE (HERR_SESS_BASE + 56)      // SQL execution error
-#define HERR_FT_HUB_NOT_VALID_FOLDER_PATH (HERR_SESS_BASE + 57)  // Invalid folder path
-#define HERR_FT_HUB_ENABLE_REPETITION (HERR_SESS_BASE + 58)      // Enable db function repeatedly
-#define HERR_FT_HUB_DISABLE_REPETITION (HERR_SESS_BASE + 59)     // Disable db function repeatedly
-#define HERR_FT_HUB_NOT_FOUND_FEATURE (HERR_SESS_BASE + 60)      // Get face feature error
+// Extension module error types (350-549)
+#define HERR_EXTENSION_BASE 0x015E                                             // Extension module error types (350)
+#define HERR_EXTENSION_ERROR (HERR_EXTENSION_BASE + 1)                         // Extension module error (351)
+#define HERR_EXTENSION_MLMODEL_LOAD_FAILED (HERR_EXTENSION_BASE + 2)           // MLModel load failed (352)
+#define HERR_EXTENSION_HETERO_MODEL_TAG_ERROR (HERR_EXTENSION_BASE + 3)        // Incorrect heterogeneous model tag (353)
+#define HERR_EXTENSION_HETERO_REC_HEAD_CONFIG_ERROR (HERR_EXTENSION_BASE + 4)  // Rec head config error (354)
+#define HERR_EXTENSION_HETERO_MODEL_NOT_MATCH (HERR_EXTENSION_BASE + 5)        // Heterogeneous model dimensions do not match (355)
+#define HERR_EXTENSION_HETERO_MODEL_NOT_LOADED (HERR_EXTENSION_BASE + 6)       // Heterogeneous model dimensions not loaded (356)
 
-#define HERR_ARCHIVE_LOAD_FAILURE (HERR_SESS_BASE + 80)        // Archive load failure
-#define HERR_ARCHIVE_LOAD_MODEL_FAILURE (HERR_SESS_BASE + 81)  // Model load failure
-#define HERR_ARCHIVE_FILE_FORMAT_ERROR (HERR_SESS_BASE + 82)   // The archive format is incorrect
-#define HERR_ARCHIVE_REPETITION_LOAD (HERR_SESS_BASE + 83)     // Do not reload the model
-#define HERR_ARCHIVE_NOT_LOAD (HERR_SESS_BASE + 84)            // Model not loaded
-
-#define HERR_DEVICE_BASE 0X900                                        // hardware error
-#define HERR_DEVICE_CUDA_NOT_SUPPORT (HERR_DEVICE_BASE + 1)           // CUDA not supported
-#define HERR_DEVICE_CUDA_TENSORRT_NOT_SUPPORT (HERR_DEVICE_BASE + 2)  // CUDA TensorRT not supported
-#define HERR_DEVICE_CUDA_UNKNOWN_ERROR (HERR_DEVICE_BASE + 20)        // CUDA unknown error
-#define HERR_DEVICE_CUDA_DISABLE (HERR_DEVICE_BASE + 21)              // CUDA support is disabled
 // [Anchor-End]
 
 #endif  // INSPIRE_FACE_HERROR_H

@@ -1,0 +1,56 @@
+@startuml InspireFace SDK Usage Sequence
+!theme plain
+
+title Execution Sequence
+footer : 20250615 create by Jingyu Yan
+header : @InspireFace
+
+participant "Application" as App
+participant "InspireFace SDK" as SDK
+participant "FaceSession" as Session
+
+note over SDK, Session
+  Sessions support multiple and are allocated across multiple threads, 
+	but cache data between sessions cannot be mixed
+end note
+
+== Initialization Phase ==
+App -> SDK: HFLaunchInspireFace
+SDK --> App: Return initialization result
+
+== Session Creation & Configuration ==
+App -> SDK: HFCreateInspireFaceSessionOptional
+SDK -> Session: Create session instance
+SDK --> App: Return session handle
+
+== Image Preparation ==
+App -> SDK: HFCreateImageStream
+SDK --> App: Return image handle
+
+== Face Detection & Processing ==
+App -> Session: HFExecuteFaceTrack
+activate Session
+Session --> App: Return MultipleFaceData
+
+App -> Session: HFMultipleFacePipelineProcessOptional
+Session --> App: Pipeline processing completed
+
+== Result Retrieval Phase ==
+App -> Session: HFGetFaceMaskConfidence
+Session --> App: Mask detection result
+
+App -> Session: HFGetFaceQualityConfidence
+Session --> App: Quality assessment result
+
+App -> Session: Other APIs
+Session --> App: ....
+
+== Resource Release ==
+App -> SDK: HFReleaseImageStream
+
+== Program Termination ==
+
+App -> Session: HFReleaseInspireFaceSession
+App -> SDK: HFTerminateInspireFace
+
+@enduml
