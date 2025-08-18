@@ -19,6 +19,8 @@ Both manual-downloading models from our github repo and auto-downloading models 
 
 ## Top News
 
+**`2025-08-18`** Our [On-device Live Face Swap iOS App](https://www.Picsi.Ai/App) released based on [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) models.
+
 **`2025-03-02`** [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) launched.
 
 **`2024-08-01`** We’ve integrated our most advanced face-swapping models, **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai](https://www.picsi.ai) face-swapping service. These models outperform nearly all commercial alternatives and our previous open-source model (inswapper_128).
@@ -32,6 +34,8 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 **`2021-10-29`**: We achieved 1st place on the [VISA track](https://pages.nist.gov/frvt/plots/11/visa.html) of [NIST-FRVT 1:1](https://pages.nist.gov/frvt/html/frvt11.html) by using Partial FC (Xiang An, Jiankang Deng, Jia Guo).
 
 ## ChangeLogs
+
+**`2025-08-18`** Our [On-device Live Face Swap iOS App](https://www.Picsi.Ai/App) released based on [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) models.
 
 **`2025-03-02`** [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) launched.
 
