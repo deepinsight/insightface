@@ -128,8 +128,8 @@ def sample_rois(rois,
     :return: (labels, rois, bbox_targets, bbox_weights)
     """
     if labels is None:
-        overlaps = bbox_overlaps(rois[:, 1:].astype(np.float),
-                                 gt_boxes[:, :4].astype(np.float))
+        overlaps = bbox_overlaps(rois[:, 1:].astype(np.float32),
+                                 gt_boxes[:, :4].astype(np.float32))
         gt_assignment = overlaps.argmax(axis=1)
         overlaps = overlaps.max(axis=1)
         labels = gt_boxes[gt_assignment, 4]
@@ -345,8 +345,8 @@ def sample_rois(rois,
             overlaps = np.zeros((len(rois), ))
             labels = np.zeros((len(rois), ))
         else:
-            overlaps = bbox_overlaps(rois[:, 1:].astype(np.float),
-                                     gt_boxes[:, :4].astype(np.float))
+            overlaps = bbox_overlaps(rois[:, 1:].astype(np.float32),
+                                     gt_boxes[:, :4].astype(np.float32))
             gt_assignment = overlaps.argmax(axis=1)
             overlaps = overlaps.max(axis=1)
             labels = gt_boxes[gt_assignment, 4]
@@ -465,8 +465,8 @@ def sample_rois_fpn(rois,
             overlaps = np.zeros((len(rois), ))
             labels = np.zeros((len(rois), ))
         else:
-            overlaps = bbox_overlaps(rois[:, 1:].astype(np.float),
-                                     gt_boxes[:, :4].astype(np.float))
+            overlaps = bbox_overlaps(rois[:, 1:].astype(np.float32),
+                                     gt_boxes[:, :4].astype(np.float32))
             gt_assignment = overlaps.argmax(axis=1)
             overlaps = overlaps.max(axis=1)
             labels = gt_boxes[gt_assignment, 4]
@@ -617,8 +617,8 @@ def get_rois(rois,
     if labels is None:
         if len(gt_boxes) == 0:
             gt_boxes = np.array([[1, 1, 1, 1, 0]])
-        overlaps = bbox_overlaps(rois[:, 1:].astype(np.float),
-                                 gt_boxes[:, :4].astype(np.float))
+        overlaps = bbox_overlaps(rois[:, 1:].astype(np.float32),
+                                 gt_boxes[:, :4].astype(np.float32))
         gt_assignment = overlaps.argmax(axis=1)
         overlaps = overlaps.max(axis=1)
         labels = gt_boxes[gt_assignment, 4]

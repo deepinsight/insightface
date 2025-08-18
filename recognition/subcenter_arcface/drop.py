@@ -165,7 +165,7 @@ def main(args):
         x, _, contents = get_embedding(args, imgrec, id_item[1], id_item[2],
                                        image_size, model)
         subcenters = W[wid]
-        K_stat = np.zeros((K, ), dtype=np.int)
+        K_stat = np.zeros((K, ), dtype=np.int32)
         for i in range(x.shape[0]):
             _x = x[i]
             sim = np.dot(subcenters, _x)  # len(sim)==K
