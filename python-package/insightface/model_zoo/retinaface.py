@@ -2,7 +2,7 @@
 # @Organization  : insightface.ai
 # @Author        : Jia Guo
 # @Time          : 2021-09-18
-# @Function      : 
+# @Function      :
 
 from __future__ import division
 import datetime
@@ -13,6 +13,7 @@ import os
 import os.path as osp
 import cv2
 import sys
+from loguru import logger
 
 def softmax(z):
     assert len(z.shape) == 2
@@ -139,7 +140,7 @@ class RetinaFace:
         input_size = kwargs.get('input_size', None)
         if input_size is not None:
             if self.input_size is not None:
-                print('warning: det_size is already set in detection model, ignore')
+                logger.warning('warning: det_size is already set in detection model, ignore')
             else:
                 self.input_size = input_size
 
@@ -207,7 +208,7 @@ class RetinaFace:
     def detect(self, img, input_size = None, max_num=0, metric='default'):
         assert input_size is not None or self.input_size is not None
         input_size = self.input_size if input_size is None else input_size
-            
+
         im_ratio = float(img.shape[0]) / img.shape[1]
         model_ratio = float(input_size[1]) / input_size[0]
         if im_ratio>model_ratio:

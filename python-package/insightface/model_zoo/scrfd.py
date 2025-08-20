@@ -2,7 +2,7 @@
 # @Organization  : insightface.ai
 # @Author        : Jia Guo
 # @Time          : 2021-05-04
-# @Function      : 
+# @Function      :
 
 from __future__ import division
 import datetime
@@ -13,6 +13,7 @@ import os
 import os.path as osp
 import cv2
 import sys
+from loguru import logger
 
 def softmax(z):
     assert len(z.shape) == 2
@@ -142,7 +143,7 @@ class SCRFD:
         input_size = kwargs.get('input_size', None)
         if input_size is not None:
             if self.input_size is not None:
-                print('warning: det_size is already set in scrfd model, ignore')
+                logger.warning('warning: det_size is already set in scrfd model, ignore')
             else:
                 self.input_size = input_size
 
@@ -220,7 +221,7 @@ class SCRFD:
     def detect(self, img, input_size = None, max_num=0, metric='default'):
         assert input_size is not None or self.input_size is not None
         input_size = self.input_size if input_size is None else input_size
-            
+
         im_ratio = float(img.shape[0]) / img.shape[1]
         model_ratio = float(input_size[1]) / input_size[0]
         if im_ratio>model_ratio:
@@ -329,10 +330,10 @@ if __name__ == '__main__':
             #bboxes, kpss = detector.detect(img, 0.5, input_size = (640, 640))
             bboxes, kpss = detector.detect(img, 0.5)
             tb = datetime.datetime.now()
-            print('all cost:', (tb-ta).total_seconds()*1000)
-        print(img_path, bboxes.shape)
+            logger.debug('all cost:', (tb-ta).total_seconds()*1000)
+        logger.debug(img_path, bboxes.shape)
         if kpss is not None:
-            print(kpss.shape)
+            logger.debug(kpss.shape)
         for i in range(bboxes.shape[0]):
             bbox = bboxes[i]
             x1,y1,x2,y2,score = bbox.astype(np.int)
@@ -343,6 +344,6 @@ if __name__ == '__main__':
                     kp = kp.astype(np.int)
                     cv2.circle(img, tuple(kp) , 1, (0,0,255) , 2)
         filename = img_path.split('/')[-1]
-        print('output:', filename)
+        logger.debug('output:', filename)
         cv2.imwrite('./outputs/%s'%filename, img)
 
