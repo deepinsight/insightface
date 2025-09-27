@@ -2,12 +2,13 @@
 # InsightFace: 2D and 3D Face Analysis Project
 
 <div align="left">
-  <img src="https://insightface.ai/assets/img/custom/logo3.jpg" width="240"/>
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/insightface_logo.jpg_320x320.webp?raw=true" width="240"/>
 </div>
 
 [InsightFace](https://insightface.ai) project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) and [Jiankang Deng](https://jiankangdeng.github.io/). 
 
-For all main contributors, please check [contributing](#contributing).
+For more information, please visit our official website at [https://insightface.ai](https://insightface.ai)
+
 
 ## License
 
