@@ -17,8 +17,6 @@ This non-commercial restriction applies to all distribution methods, including m
 
 Any unauthorized commercial use of the data or pre-trained models is strictly prohibited. Commercial usage is permitted only by entities that have secured prior written approval from InsightFace (Jia Guo: [guojia@gmail.com](mailto:guojia@gmail.com) and Jiankang Deng: [jiankangdeng@gmail.com](mailto:jiankangdeng@gmail.com)).
 
-[Here](https://github.com/deepinsight/approved_license.md) is the approval list.
-
 ## Top News
 
 **`2025-08-18`** Our [On-device Live Face Swap iOS App](https://www.Picsi.Ai/App) released based on [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) models.
