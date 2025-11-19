@@ -5,18 +5,19 @@
   <img src="https://github.com/nttstar/insightface-resources/blob/master/images/insightface_logo.jpg_320x320.webp?raw=true" width="240"/>
 </div>
 
-[InsightFace](https://insightface.ai) project is mainly maintained By [Jia Guo](mailto:guojia@gmail.com?subject=[GitHub]%20InsightFace%20Project) and [Jiankang Deng](https://jiankangdeng.github.io/). 
+InsightFace project is mainly maintained by [Jia Guo](https://scholar.google.com/citations?user=H_-hMLUAAAAJ) and [Jiankang Deng](https://jiankangdeng.github.io/). 
 
-For more information, please visit our official website at [https://insightface.ai](https://insightface.ai)
+## InsightFace Licensing Policy
 
+The InsightFace code is released under the MIT License, permitting both academic and unrestricted commercial use.
 
-## License
+However, the training data (e.g., facial landmarks on WiderFace, face identities on WebFace) and all pre-trained models resulting from these data are licensed exclusively for non-commercial research purposes only.
 
-The code of InsightFace is released under the MIT License. There is no limitation for both academic and commercial usage.
+This non-commercial restriction applies to all distribution methods, including manual downloads from our GitHub repository and automatic downloads via our Python library.
 
-The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only.
+Any unauthorized commercial use of the data or pre-trained models is strictly prohibited. Commercial usage is permitted only by entities that have secured prior written approval from InsightFace (Jia Guo: [guojia@gmail.com](mailto:guojia@gmail.com) and Jiankang Deng: [jiankangdeng@gmail.com](mailto:jiankangdeng@gmail.com)).
 
-Both manual-downloading models from our github repo and auto-downloading models with our [python-library](python-package) follow the above license policy(which is for non-commercial research purposes only).
+[Here](https://github.com/deepinsight/approved_license.md) is the approval list.
 
 ## Top News
 
