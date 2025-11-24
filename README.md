@@ -19,13 +19,9 @@ Any unauthorized commercial use of the data or pre-trained models is strictly pr
 
 ## Top News
 
-**`2025-08-18`** Our [On-device Live Face Swap iOS App](https://www.Picsi.Ai/App) released based on [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) models.
+**`2025-11-18`** `[Picsi.ai]` Released Live Face Swap macOS & iOS App and updated [Picsi.ai](https://www.picsi.ai) services with our latest series of swap models (incl. [inswapper-live](https://github.com/deepinsight/inswapper-512-live)/Cyn/Dax).
 
-**`2025-03-02`** [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) launched.
-
-**`2024-08-01`** We’ve integrated our most advanced face-swapping models, **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai](https://www.picsi.ai) face-swapping service. These models outperform nearly all commercial alternatives and our previous open-source model (inswapper_128).
-
-**`2024-05-04`** We have added [InspireFace](cpp-package/inspireface), which is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backends. 
+**`2024-05-04`** `[Picsi.ai]` Released [InspireFace](cpp-package/inspireface), a cross-platform C/C++ face recognition SDK.
 
 **`2022-08-12`**: We achieved Rank-1st of 
 [Perspective Projection Based Monocular 3D Face Reconstruction Challenge](https://tianchi.aliyun.com/competition/entrance/531961/introduction)
@@ -35,13 +31,9 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 
 ## ChangeLogs
 
-**`2025-08-18`** Our [On-device Live Face Swap iOS App](https://www.Picsi.Ai/App) released based on [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) models.
+**`2025-11-18`** `[Picsi.ai]` Released Live Face Swap macOS & iOS App and updated [Picsi.ai](https://www.picsi.ai) services with our latest series of swap models (incl. [inswapper-live](https://github.com/deepinsight/inswapper-512-live)/Cyn/Dax).
 
-**`2025-03-02`** [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live) launched.
-
-**`2024-08-01`** We’ve integrated our most advanced face-swapping models, **inswapper\_cyn** and **inswapper\_dax**, into the [Picsi.Ai](https://www.picsi.ai) face-swapping service. These models outperform nearly all commercial alternatives and our previous open-source model (inswapper_128).
-
-**`2024-05-04`** We have added [InspireFace](cpp-package/inspireface), which is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backends. 
+**`2024-05-04`** `[Picsi.ai]` Released [InspireFace](cpp-package/inspireface), a cross-platform C/C++ face recognition SDK.
 
 **`2024-04-17`**: [Monocular Identity-Conditioned Facial Reflectance Reconstruction](https://arxiv.org/abs/2404.00301) accepted by [CVPR-2024](https://cvpr.thecvf.com/Conferences/2024).
 
