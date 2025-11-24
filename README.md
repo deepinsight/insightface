@@ -5,7 +5,7 @@
   <img src="https://github.com/nttstar/insightface-resources/blob/master/images/insightface_logo.jpg_320x320.webp?raw=true" width="240"/>
 </div>
 
-InsightFace project is mainly maintained by [Jia Guo](mailto:guojia@gmail.com) and [Jiankang Deng](https://jiankangdeng.github.io/). 
+InsightFace project is mainly maintained by [Jia Guo](mailto:guojia@insightface.ai) and [Jiankang Deng](https://jiankangdeng.github.io/). 
 
 For more information, please visit our website at [https://insightface.ai](https://insightface.ai)
 
