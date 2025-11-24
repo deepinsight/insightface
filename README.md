@@ -5,17 +5,24 @@
   <img src="https://github.com/nttstar/insightface-resources/blob/master/images/insightface_logo.jpg_320x320.webp?raw=true" width="240"/>
 </div>
 
-InsightFace project is mainly maintained by [Jia Guo](https://scholar.google.com/citations?user=H_-hMLUAAAAJ) and [Jiankang Deng](https://jiankangdeng.github.io/). 
+InsightFace project is mainly maintained by [Jia Guo](mailto:guojia@gmail.com) and [Jiankang Deng](https://jiankangdeng.github.io/). 
 
-## InsightFace Licensing Policy
+For more information, please visit our website at [https://insightface.ai](https://insightface.ai)
 
-The InsightFace code is released under the MIT License, permitting both academic and unrestricted commercial use.
+## License
 
-However, the training data (e.g., facial landmarks on WiderFace, face identities on WebFace) and all pre-trained models resulting from these data are licensed exclusively for non-commercial research purposes only.
+The code of InsightFace is released under the MIT License. There is no limitation for both academic and commercial usage.
 
-This non-commercial restriction applies to all distribution methods, including manual downloads from our GitHub repository and automatic downloads via our Python library.
+The training data containing the annotation (and the models trained with these data) are available for non-commercial research purposes only.
 
-Any unauthorized commercial use of the data or pre-trained models is strictly prohibited. Commercial usage is permitted only by entities that have secured prior written approval from InsightFace (Jia Guo: [guojia@gmail.com](mailto:guojia@gmail.com) and Jiankang Deng: [jiankangdeng@gmail.com](mailto:jiankangdeng@gmail.com)).
+Both manual-downloading models from our github repo and auto-downloading models with our [python-library](python-package) follow the above license policy(which is for non-commercial research purposes only).
+
+`2025-11-24 Update:`
+
+1. For inswapper series face swap models(e.g., inswapper_128), please contact [contact@picsi.ai](mailto:contact@picsi.ai) for licensing.
+2. For open-sourced face recognition models, such as buffalo_l package, commercial use requires prior written approval. Please contact [Jia Guo](mailto:guojia@insightface.ai) and Jiankang Deng: [jiankangdeng@gmail.com](mailto:jiankangdeng@gmail.com).
+3. For advanced face recognition SDK and models(e.g., InspireFace SDK), please contact [contact@picsi.ai](mailto:contact@picsi.ai).
+
 
 ## Top News
 
