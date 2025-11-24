@@ -26,7 +26,7 @@ Both manual-downloading models from our github repo and auto-downloading models 
 
 ## Top News
 
-**`2025-11-18`** `[Picsi.ai]` Released Live Face Swap macOS & iOS App and updated [Picsi.ai](https://www.picsi.ai) services with our latest series of swap models (incl. [inswapper-live](https://github.com/deepinsight/inswapper-512-live)/Cyn/Dax).
+**`2025-11-18`** `[Picsi.ai]` Released Live Face Swap macOS & iOS App and updated [Picsi.ai](https://www.picsi.ai) services with our latest series of swap models (incl. [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live)/Cyn/Dax).
 
 **`2024-05-04`** `[Picsi.ai]` Released [InspireFace](cpp-package/inspireface), a cross-platform C/C++ face recognition SDK.
 
