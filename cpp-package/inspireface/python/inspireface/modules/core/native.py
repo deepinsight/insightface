@@ -1325,6 +1325,36 @@ if _libs[_LIBRARY_FILENAME].has("HFSetCudaDeviceId", "cdecl"):
     HFSetCudaDeviceId.argtypes = [HInt32]
     HFSetCudaDeviceId.restype = HResult
 
+# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 448
+if _libs[_LIBRARY_FILENAME].has("HFSetRockchipDefaultNpuCoreMask", "cdecl"):
+    HFSetRockchipDefaultNpuCoreMask = _libs[_LIBRARY_FILENAME].get("HFSetRockchipDefaultNpuCoreMask", "cdecl")
+    HFSetRockchipDefaultNpuCoreMask.argtypes = [HInt32]
+    HFSetRockchipDefaultNpuCoreMask.restype = HResult
+
+# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 455
+if _libs[_LIBRARY_FILENAME].has("HFSetRockchipNpuCoreMask", "cdecl"):
+    HFSetRockchipNpuCoreMask = _libs[_LIBRARY_FILENAME].get("HFSetRockchipNpuCoreMask", "cdecl")
+    HFSetRockchipNpuCoreMask.argtypes = [HInt32]
+    HFSetRockchipNpuCoreMask.restype = HResult
+
+# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 462
+if _libs[_LIBRARY_FILENAME].has("HFClearRockchipNpuCoreMask", "cdecl"):
+    HFClearRockchipNpuCoreMask = _libs[_LIBRARY_FILENAME].get("HFClearRockchipNpuCoreMask", "cdecl")
+    HFClearRockchipNpuCoreMask.argtypes = []
+    HFClearRockchipNpuCoreMask.restype = HResult
+
+# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 469
+if _libs[_LIBRARY_FILENAME].has("HFGetRockchipNpuCoreMask", "cdecl"):
+    HFGetRockchipNpuCoreMask = _libs[_LIBRARY_FILENAME].get("HFGetRockchipNpuCoreMask", "cdecl")
+    HFGetRockchipNpuCoreMask.argtypes = [HPInt32]
+    HFGetRockchipNpuCoreMask.restype = HResult
+
+# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 476
+if _libs[_LIBRARY_FILENAME].has("HFGetRockchipDefaultNpuCoreMask", "cdecl"):
+    HFGetRockchipDefaultNpuCoreMask = _libs[_LIBRARY_FILENAME].get("HFGetRockchipDefaultNpuCoreMask", "cdecl")
+    HFGetRockchipDefaultNpuCoreMask.argtypes = [HPInt32]
+    HFGetRockchipDefaultNpuCoreMask.restype = HResult
+
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 436
 if _libs[_LIBRARY_FILENAME].has("HFGetCudaDeviceId", "cdecl"):
     HFGetCudaDeviceId = _libs[_LIBRARY_FILENAME].get("HFGetCudaDeviceId", "cdecl")
@@ -2346,4 +2376,3 @@ HFInspireFaceExtendedInformation = struct_HFInspireFaceExtendedInformation# /Use
 # No inserted files
 
 # No prefix-stripping
-
