@@ -19,9 +19,9 @@ Both manual-downloading models from our github repo and auto-downloading models 
 
 `2025-11-24 Update:`
 
-1. For inswapper series face swap models (e.g., inswapper_128/[inswapper-512-live](https://github.com/deepinsight/inswapper-512-live)), please contact [contact@picsi.ai](mailto:contact@picsi.ai) or [guojia@insightface.ai](mailto:guojia@insightface.ai) for licensing and additional support.
-2. For open-sourced face recognition models (e.g., buffalo_l package), please contact Jia Guo: [guojia@insightface.ai](mailto:guojia@insightface.ai) and Jiankang Deng: [jiankangdeng@gmail.com](mailto:jiankangdeng@gmail.com) for licensing.
-3. For advanced face recognition SDK and models (e.g., InspireFace SDK), please contact [contact@picsi.ai](mailto:contact@picsi.ai) or [guojia@insightface.ai](mailto:guojia@insightface.ai) for licensing and additional support.
+1. For inswapper series face swap models (e.g., inswapper_128.onnx/[inswapper-512-live](https://github.com/deepinsight/inswapper-512-live)), please contact [contact@insightface.ai](mailto:contact@insightface.ai) for licensing and additional support.
+2. For open-sourced face recognition models (e.g., buffalo_l package), please contact [recognition-oss-pack@insightface.ai](mailto:recognition-oss-pack@insightface.ai) for licensing.
+3. For advanced face recognition SDK and models (e.g., InspireFace SDK), please contact [contact@insightface.ai](mailto:contact@insightface.ai) for licensing and additional support.
 
 
 ## Top News
