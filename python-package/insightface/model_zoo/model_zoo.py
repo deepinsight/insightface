@@ -2,12 +2,13 @@
 # @Organization  : insightface.ai
 # @Author        : Jia Guo
 # @Time          : 2021-05-04
-# @Function      : 
+# @Function      :
 
 import os
 import os.path as osp
 import glob
 import onnxruntime
+from loguru import logger
 from .arcface_onnx import *
 from .retinaface import *
 #from .scrfd import *
@@ -19,7 +20,7 @@ from ..utils import download_onnx
 __all__ = ['get_model']
 
 
-class PickableInferenceSession(onnxruntime.InferenceSession): 
+class PickableInferenceSession(onnxruntime.InferenceSession):
     # This is a wrapper to make the current InferenceSession class pickable.
     def __init__(self, model_path, **kwargs):
         super().__init__(model_path, **kwargs)
@@ -38,7 +39,7 @@ class ModelRouter:
 
     def get_model(self, **kwargs):
         session = PickableInferenceSession(self.onnx_file, **kwargs)
-        print(f'Applied providers: {session._providers}, with options: {session._provider_options}')
+        logger.debug(f'Applied providers: {session._providers}, with options: {session._provider_options}')
         inputs = session.get_inputs()
         input_cfg = inputs[0]
         input_shape = input_cfg.shape

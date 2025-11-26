@@ -4,6 +4,7 @@ import os
 import os.path as osp
 import sys
 import mxnet as mx
+from loguru import logger
 
 
 class RecBuilder():
@@ -15,7 +16,7 @@ class RecBuilder():
         self.max_label = -1
         assert not osp.exists(path), '%s exists' % path
         os.makedirs(path)
-        self.writer = mx.recordio.MXIndexedRecordIO(os.path.join(path, 'train.idx'), 
+        self.writer = mx.recordio.MXIndexedRecordIO(os.path.join(path, 'train.idx'),
                                                     os.path.join(path, 'train.rec'),
                                                     'w')
         self.meta = []
@@ -64,7 +65,7 @@ class RecBuilder():
     def close(self):
         with open(osp.join(self.path, 'train.meta'), 'wb') as pfile:
             pickle.dump(self.meta, pfile, protocol=pickle.HIGHEST_PROTOCOL)
-        print('stat:', self.widx, self.wlabel)
+        logger.debug('stat:', self.widx, self.wlabel)
         with open(os.path.join(self.path, 'property'), 'w') as f:
             f.write("%d,%d,%d\n" % (self.max_label+1, self.image_size[0], self.image_size[1]))
             f.write("%d\n" % (self.widx))

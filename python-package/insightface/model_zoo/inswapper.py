@@ -3,6 +3,7 @@ import numpy as np
 import onnxruntime
 import cv2
 import onnx
+from loguru import logger
 from onnx import numpy_helper
 from ..utils import face_align
 
@@ -35,7 +36,7 @@ class INSwapper():
         input_cfg = inputs[0]
         input_shape = input_cfg.shape
         self.input_shape = input_shape
-        print('inswapper-shape:', self.input_shape)
+        logger.debug('inswapper-shape:', self.input_shape)
         self.input_size = tuple(input_shape[2:4][::-1])
 
     def forward(self, img, latent):

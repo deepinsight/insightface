@@ -4,6 +4,7 @@ This code file mainly comes from https://github.com/dmlc/gluon-cv/blob/master/gl
 import os
 import hashlib
 import requests
+from loguru import logger
 from tqdm import tqdm
 
 
@@ -67,7 +68,7 @@ def download_file(url, path=None, overwrite=False, sha1_hash=None):
         if not os.path.exists(dirname):
             os.makedirs(dirname)
 
-        print('Downloading %s from %s...' % (fname, url))
+        logger.debug('Downloading %s from %s...' % (fname, url))
         r = requests.get(url, stream=True)
         if r.status_code != 200:
             raise RuntimeError("Failed downloading url %s" % url)
