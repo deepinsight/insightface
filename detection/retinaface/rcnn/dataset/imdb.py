@@ -133,8 +133,8 @@ class IMDB(object):
                 gt_boxes = gt_roidb[i]['boxes']
                 gt_classes = gt_roidb[i]['gt_classes']
                 # n boxes and k gt_boxes => n * k overlap
-                gt_overlaps = bbox_overlaps(boxes.astype(np.float),
-                                            gt_boxes.astype(np.float))
+                gt_overlaps = bbox_overlaps(boxes.astype(np.float32),
+                                            gt_boxes.astype(np.float32))
                 # for each box in n boxes, select only maximum overlap (must be greater than zero)
                 argmaxes = gt_overlaps.argmax(axis=1)
                 maxes = gt_overlaps.max(axis=1)
@@ -285,8 +285,8 @@ class IMDB(object):
                 if boxes.shape[0] == 0:
                     continue
 
-                overlaps = bbox_overlaps(boxes.astype(np.float),
-                                         gt_boxes.astype(np.float))
+                overlaps = bbox_overlaps(boxes.astype(np.float32),
+                                         gt_boxes.astype(np.float32))
 
                 _gt_overlaps = np.zeros((gt_boxes.shape[0]))
                 # choose whatever is smaller to iterate

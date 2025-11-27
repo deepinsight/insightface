@@ -231,7 +231,7 @@ def get_surface_high_res_mesh(sdf, resolution=100):
     # return mesh_low_res
 
     components = mesh_low_res.split(only_watertight=False)
-    areas = np.array([c.area for c in components], dtype=np.float)
+    areas = np.array([c.area for c in components], dtype=np.float32)
     mesh_low_res = components[areas.argmax()]
 
     recon_pc = trimesh.sample.sample_surface(mesh_low_res, 10000)[0]

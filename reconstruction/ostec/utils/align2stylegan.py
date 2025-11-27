@@ -24,7 +24,7 @@ def create_perspective_transform_matrix(src, dst):
             [0, 0, 0, x, y, 1, -Y * x, -Y * y],
         ])
 
-    A = np.matrix(in_matrix, dtype=np.float)
+    A = np.matrix(in_matrix, dtype=np.float32)
     B = np.array(dst).reshape(8)
     af = np.dot(np.linalg.inv(A.T * A) * A.T, B)
     return np.append(np.array(af).reshape(8), 1).reshape((3, 3))
@@ -80,7 +80,7 @@ def create_perspective_transform(src, dst, round=False, splat_args=False):
         transform_matrix = create_perspective_transform_matrix(src, dst)
         error = None
     except np.linalg.LinAlgError as e:
-        transform_matrix = np.identity(3, dtype=np.float)
+        transform_matrix = np.identity(3, dtype=np.float32)
         error = "invalid input quads (%s and %s): %s" %(src, dst, e)
         error = error.replace("\n", "")
 

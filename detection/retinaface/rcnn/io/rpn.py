@@ -245,8 +245,8 @@ def assign_anchor_fpn(feat_shape,
     if gt_boxes.size > 0:
         # overlap between the anchors and the gt boxes
         # overlaps (ex, gt)
-        overlaps = bbox_overlaps(anchors.astype(np.float),
-                                 gt_boxes.astype(np.float))
+        overlaps = bbox_overlaps(anchors.astype(np.float32),
+                                 gt_boxes.astype(np.float32))
         argmax_overlaps = overlaps.argmax(axis=1)
         #print('AAA', argmax_overlaps.shape)
         max_overlaps = overlaps[np.arange(len(inds_inside)), argmax_overlaps]
@@ -618,8 +618,8 @@ class AA:
         if gt_boxes.size > 0:
             # overlap between the anchors and the gt boxes
             # overlaps (ex, gt)
-            overlaps = bbox_overlaps(anchors.astype(np.float),
-                                     gt_boxes.astype(np.float))
+            overlaps = bbox_overlaps(anchors.astype(np.float32),
+                                     gt_boxes.astype(np.float32))
             argmax_overlaps = overlaps.argmax(axis=1)
             #print('AAA', argmax_overlaps.shape)
             max_overlaps = overlaps[np.arange(len(inds_inside)),

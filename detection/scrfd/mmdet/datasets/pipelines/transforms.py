@@ -907,7 +907,7 @@ class RandomSquareCrop(object):
                     top = random.randint(h - ch, 0)
 
                 patch = np.array(
-                    (int(left), int(top), int(left + cw), int(top + ch)), dtype=np.int)
+                    (int(left), int(top), int(left + cw), int(top + ch)), dtype=np.int32)
 
                 # center of boxes should inside the crop img
                 # only adjust boxes and instance masks when the gt is not empty

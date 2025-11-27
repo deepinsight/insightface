@@ -161,7 +161,7 @@ class Operator:
         if include_mask is not None:
             fill_mask = fill_mask | include_mask.astype(np.bool)
         if face.exclude_mask is not None:
-            tcoord_sampling = np.round(self.tcoords.points[:,::-1] * face.exclude_mask.shape).astype(np.int)
+            tcoord_sampling = np.round(self.tcoords.points[:,::-1] * face.exclude_mask.shape).astype(np.int32)
             fill_mask[self.mask] =  fill_mask[self.mask] & ~face.exclude_mask[face.exclude_mask.shape[0] - tcoord_sampling[:, 0], tcoord_sampling[:, 1]]
 
         mask_mesh = ColouredTriMesh(face.tmesh.points, trilist=face.tmesh.trilist, colours=np.tile(fill_mask, [3, 1]).T)
@@ -362,7 +362,7 @@ class Operator:
         angle_uv_list = [np.clip(angle_uv_src.pixels * face.coef_dict()['src'],-1,1)]
 
         view_angle_src_full = self.camera_tri_angle_src(face.tmesh_rotated)
-        tcoord_sampling = np.round(self.tcoords.points*angle_uv_src.shape).astype(np.int)
+        tcoord_sampling = np.round(self.tcoords.points*angle_uv_src.shape).astype(np.int32)
         view_angle_src_full[self.mask] = angle_uv_src.pixels[0, angle_uv_src.shape[0] - tcoord_sampling[:, 1], tcoord_sampling[:, 0]]
         view_angle_src_full[~self.tight_mask] = -1  # Only take tight crop from the original image
 
@@ -399,7 +399,7 @@ class Operator:
 
         uv_blending = {}
         for i, key in enumerate(key_list):
-            uv_blending[key] = np.zeros(max_ind_one_hot[:,i].shape,np.float)
+            uv_blending[key] = np.zeros(max_ind_one_hot[:,i].shape,np.float32)
             for j in range(i):
                 uv_blending[key] += max_ind_one_hot[:,j]
             uv_blending[key] = np.clip(uv_blending[key],0, 1)

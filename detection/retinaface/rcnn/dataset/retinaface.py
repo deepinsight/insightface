@@ -75,13 +75,13 @@ class retinaface(IMDB):
                 roi = {'image': image_path}
                 roidb.append(roi)
                 continue
-            boxes = np.zeros([len(self._fp_bbox_map[fp]), 4], np.float)
-            landmarks = np.zeros([len(self._fp_bbox_map[fp]), 5, 3], np.float)
-            blur = np.zeros((len(self._fp_bbox_map[fp]), ), np.float)
+            boxes = np.zeros([len(self._fp_bbox_map[fp]), 4], np.float32)
+            landmarks = np.zeros([len(self._fp_bbox_map[fp]), 5, 3], np.float32)
+            blur = np.zeros((len(self._fp_bbox_map[fp]), ), np.float32)
             boxes_mask = []
 
             gt_classes = np.ones([len(self._fp_bbox_map[fp])], np.int32)
-            overlaps = np.zeros([len(self._fp_bbox_map[fp]), 2], np.float)
+            overlaps = np.zeros([len(self._fp_bbox_map[fp]), 2], np.float32)
 
             imsize = cv2.imread(os.path.join(self._imgs_path,
                                              fp)).shape[0:2][::-1]
@@ -106,14 +106,14 @@ class retinaface(IMDB):
                     if (
                             x2 - x1
                     ) < config.BBOX_MASK_THRESH or y2 - y1 < config.BBOX_MASK_THRESH:
-                        boxes_mask.append(np.array([x1, y1, x2, y2], np.float))
+                        boxes_mask.append(np.array([x1, y1, x2, y2], np.float32))
                         continue
                 if (
                         x2 - x1
                 ) < config.TRAIN.MIN_BOX_SIZE or y2 - y1 < config.TRAIN.MIN_BOX_SIZE:
                     continue
 
-                boxes[ix, :] = np.array([x1, y1, x2, y2], np.float)
+                boxes[ix, :] = np.array([x1, y1, x2, y2], np.float32)
                 if self._split == 'train':
                     landmark = np.array(values[4:19],
                                         dtype=np.float32).reshape((5, 3))

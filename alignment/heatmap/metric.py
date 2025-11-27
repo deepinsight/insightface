@@ -51,7 +51,7 @@ class NMEMetric(mx.metric.EvalMetric):
                     ind_gt = np.array(ind_gt)
                 else:
                     ind_gt = label[b][p]
-                    #ind_gt = ind_gt.astype(np.int)
+                    #ind_gt = ind_gt.astype(np.int32)
                     #print(ind_gt)
                 heatmap_pred = pred_label[b][p]
                 heatmap_pred = cv2.resize(
