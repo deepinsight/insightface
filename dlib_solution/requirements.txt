@@ -1,0 +1,43 @@
+# dlib Age & Gender Detection Requirements
+# License: CC0 v1.0 Universal (Public Domain)
+# Commercial Use: ALLOWED
+
+# Core dependencies
+dlib>=19.24.0          # Face detection, landmarks, age/gender models
+opencv-python>=4.8.0   # Image processing and video capture
+numpy>=1.24.0          # Array operations
+
+# Optional (for GPU acceleration with dlib)
+# dlib with CUDA requires building from source
+# See: http://dlib.net/compile.html
+
+# Installation instructions:
+#
+# 1. Basic installation (CPU only):
+#    pip install -r requirements.txt
+#
+# 2. For better performance, build dlib with optimizations:
+#    # Install build dependencies
+#    sudo apt-get install cmake build-essential
+#
+#    # Build dlib from source with optimizations
+#    git clone https://github.com/davisking/dlib.git
+#    cd dlib
+#    mkdir build && cd build
+#    cmake .. -DUSE_AVX_INSTRUCTIONS=ON -DUSE_SSE4_INSTRUCTIONS=ON
+#    cmake --build . --config Release
+#    cd ..
+#    python setup.py install
+#
+# 3. For GPU acceleration (NVIDIA GPU with CUDA):
+#    # Install CUDA toolkit first (10.0+)
+#    # Then build dlib with CUDA support
+#    cmake .. -DDLIB_USE_CUDA=ON -DUSE_AVX_INSTRUCTIONS=ON
+#    cmake --build . --config Release
+#    python setup.py install
+#
+# 4. Download pre-trained models:
+#    bash scripts/download_models.sh
+#
+# 5. Test installation:
+#    python examples/demo_age_gender.py --help
