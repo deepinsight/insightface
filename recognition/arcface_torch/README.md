@@ -1,95 +1,158 @@
-# Distributed Arcface Training in Pytorch
+<div align="center">
 
-The "arcface_torch" repository is the official implementation of the ArcFace algorithm. It supports distributed and sparse training with multiple distributed training examples, including several memory-saving techniques such as mixed precision training and gradient checkpointing. It also supports training for ViT models and datasets including WebFace42M and Glint360K, two of the largest open-source datasets. Additionally, the repository comes with a built-in tool for converting to ONNX format, making it easy to submit to MFR evaluation systems.
+# 🎯 Distributed ArcFace Training in PyTorch
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-ijb-c)](https://paperswithcode.com/sota/face-verification-on-ijb-c?p=killing-two-birds-with-one-stone-efficient)  
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-ijb-b)](https://paperswithcode.com/sota/face-verification-on-ijb-b?p=killing-two-birds-with-one-stone-efficient)  
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-agedb-30)](https://paperswithcode.com/sota/face-verification-on-agedb-30?p=killing-two-birds-with-one-stone-efficient)  
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-ijb-c)](https://paperswithcode.com/sota/face-verification-on-ijb-c?p=killing-two-birds-with-one-stone-efficient)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-ijb-b)](https://paperswithcode.com/sota/face-verification-on-ijb-b?p=killing-two-birds-with-one-stone-efficient)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-agedb-30)](https://paperswithcode.com/sota/face-verification-on-agedb-30?p=killing-two-birds-with-one-stone-efficient)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-cfp-fp)](https://paperswithcode.com/sota/face-verification-on-cfp-fp?p=killing-two-birds-with-one-stone-efficient)
 
-## Requirements
+**The official PyTorch implementation of ArcFace - State-of-the-art Face Recognition**
 
-To avail the latest features of PyTorch, we have upgraded to version 1.12.0.
+[Overview](#-overview) •
+[Installation](#️-installation) •
+[Quick Start](#-quick-start) •
+[Datasets](#-datasets) •
+[Model Zoo](#-model-zoo) •
+[Performance](#-performance)
 
-- Install [PyTorch](https://pytorch.org/get-started/previous-versions/) (torch>=1.12.0).
-- (Optional) Install [DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/), our doc for [install_dali.md](docs/install_dali.md).
-- `pip install -r requirement.txt`.
-  
-## How to Training
+</div>
 
-To train a model, execute the `train_v2.py` script with the path to the configuration files. The sample commands provided below demonstrate the process of conducting distributed training.
+---
 
-### 1. To run on one GPU:
+## 📋 Overview
 
-```shell
+**ArcFace-Torch** is the official implementation of the ArcFace algorithm for face recognition, offering:
+
+- 🚀 **Distributed Training** - Efficient multi-GPU and multi-node training support
+- 💾 **Memory Optimized** - Mixed precision training, gradient checkpointing, and Partial FC
+- 🎓 **State-of-the-art Models** - Support for CNNs (ResNet) and ViTs (Vision Transformers)
+- 📊 **Large-Scale Datasets** - WebFace42M (42.5M images) and Glint360K (17.1M images)
+- 🔄 **ONNX Export** - Built-in conversion tools for easy deployment and evaluation
+
+---
+
+## 🛠️ Installation
+
+### Requirements
+
+- **PyTorch** >= 1.12.0 ([Installation Guide](https://pytorch.org/get-started/previous-versions/))
+- **NVIDIA DALI** (Optional, for faster data loading) - [See our guide](docs/install_dali.md)
+- **Python** >= 3.7
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/deepinsight/insightface.git
+cd insightface/recognition/arcface_torch
+
+# Install dependencies
+pip install -r requirement.txt
+```
+
+> **💡 Tip:** For optimal performance, we recommend using NVIDIA DALI for data loading.
+
+---
+
+## 🚀 Quick Start
+
+### Training Examples
+
+Choose the appropriate command based on your hardware configuration:
+
+#### 🖥️ Single GPU Training
+
+```bash
 python train_v2.py configs/ms1mv3_r50_onegpu
 ```
 
-Note:   
-It is not recommended to use a single GPU for training, as this may result in longer training times and suboptimal performance. For best results, we suggest using multiple GPUs or a GPU cluster.  
+> **⚠️ Note:** Single GPU training is not recommended. For optimal results, use multiple GPUs or a distributed setup.
 
+#### 🔥 Multi-GPU Training (8 GPUs)
 
-### 2. To run on a machine with 8 GPUs:
-
-```shell
+```bash
 torchrun --nproc_per_node=8 train_v2.py configs/ms1mv3_r50
 ```
 
-### 3. To run on 2 machines with 8 GPUs each:
+#### 🌐 Multi-Node Training (2 Nodes × 8 GPUs)
 
-Node 0:
-
-```shell
-torchrun --nproc_per_node=8 --nnodes=2 --node_rank=0 --master_addr="ip1" --master_port=12581 train_v2.py configs/wf42m_pfc02_16gpus_r100
+**Node 0:**
+```bash
+torchrun --nproc_per_node=8 --nnodes=2 --node_rank=0 \
+  --master_addr="ip1" --master_port=12581 \
+  train_v2.py configs/wf42m_pfc02_16gpus_r100
 ```
 
-Node 1:
-  
-```shell
-torchrun --nproc_per_node=8 --nnodes=2 --node_rank=1 --master_addr="ip1" --master_port=12581 train_v2.py configs/wf42m_pfc02_16gpus_r100
+**Node 1:**
+```bash
+torchrun --nproc_per_node=8 --nnodes=2 --node_rank=1 \
+  --master_addr="ip1" --master_port=12581 \
+  train_v2.py configs/wf42m_pfc02_16gpus_r100
 ```
 
-### 4. Run ViT-B on a machine with 24k batchsize:
+#### 🤖 Vision Transformer (ViT-B)
 
-```shell
+```bash
 torchrun --nproc_per_node=8 train_v2.py configs/wf42m_pfc03_40epoch_8gpu_vit_b
 ```
 
+---
 
-## Download Datasets or Prepare Datasets  
-- [MS1MV2](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-arcface-85k-ids58m-images-57) (87k IDs, 5.8M images)
-- [MS1MV3](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-retinaface) (93k IDs, 5.2M images)
-- [Glint360K](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc#4-download) (360k IDs, 17.1M images)
-- [WebFace42M](docs/prepare_webface42m.md) (2M IDs, 42.5M images)
-- [Your Dataset, Click Here!](docs/prepare_custom_dataset.md)
+## 📊 Datasets  
+---
 
-Note: 
-If you want to use DALI for data reading, please use the script 'scripts/shuffle_rec.py' to shuffle the InsightFace style rec before using it.  
-Example:
+## 📊 Datasets
 
-`python scripts/shuffle_rec.py ms1m-retinaface-t1`
+### Available Datasets
 
-You will get the "shuffled_ms1m-retinaface-t1" folder, where the samples in the "train.rec" file are shuffled.
+| Dataset | Identities | Images | Download |
+|---------|-----------|---------|----------|
+| **MS1MV2** | 87K | 5.8M | [Link](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-arcface-85k-ids58m-images-57) |
+| **MS1MV3** | 93K | 5.2M | [Link](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-retinaface) |
+| **Glint360K** | 360K | 17.1M | [Link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc#4-download) |
+| **WebFace42M** | 2M | 42.5M | [Guide](docs/prepare_webface42m.md) |
+| **Custom Dataset** | - | - | [Guide](docs/prepare_custom_dataset.md) |
 
+### Data Preparation
 
-## Model Zoo
+> **📝 Important:** If using DALI for data loading, shuffle the InsightFace-style `.rec` files first:
 
-- The models are available for non-commercial research purposes only.  
-- All models can be found in here.  
-- [Baidu Yun Pan](https://pan.baidu.com/s/1CL-l4zWqsI1oDuEEYVhj-g): e8pw  
-- [OneDrive](https://1drv.ms/u/s!AswpsDO2toNKq0lWY69vN58GR6mw?e=p9Ov5d)
+```bash
+python scripts/shuffle_rec.py ms1m-retinaface-t1
+```
 
-### Performance on IJB-C and [**ICCV2021-MFR**](https://github.com/deepinsight/insightface/blob/master/challenges/mfr/README.md)
+This creates a `shuffled_ms1m-retinaface-t1` folder with shuffled samples in `train.rec`.
 
-ICCV2021-MFR testset consists of non-celebrities so we can ensure that it has very few overlap with public available face 
-recognition training set, such as MS1M and CASIA as they mostly collected from online celebrities. 
-As the result, we can evaluate the FAIR performance for different algorithms.  
+---
 
-For **ICCV2021-MFR-ALL** set, TAR is measured on all-to-all 1:1 protocal, with FAR less than 0.000001(e-6). The 
-globalised multi-racial testset contains 242,143 identities and 1,624,305 images. 
+## 🏆 Model Zoo
 
+---
 
-#### 1. Training on Single-Host GPU
+## 🏆 Model Zoo
+
+### Pre-trained Models
+
+All models are available for **non-commercial research purposes only**.
+
+**Download Links:**
+- 📦 [Baidu Yun Pan](https://pan.baidu.com/s/1CL-l4zWqsI1oDuEEYVhj-g) (Password: `e8pw`)
+- ☁️ [OneDrive](https://1drv.ms/u/s!AswpsDO2toNKq0lWY69vN58GR6mw?e=p9Ov5d)
+
+---
+
+## 📈 Performance
+
+### Benchmark Datasets
+
+Performance is evaluated on:
+- **IJB-C** - A challenging unconstrained face recognition benchmark
+- **ICCV2021-MFR** - Non-celebrity testset ensuring minimal overlap with training data
+
+> **📊 MFR-ALL:** Tests on 242,143 identities and 1,624,305 images with TAR at FAR < 1e-6
+
+### 1️⃣ Single-Host GPU Training
 
 | Datasets       | Backbone            | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | log                                                                                                                                 |
 |:---------------|:--------------------|:------------|:------------|:------------|:------------------------------------------------------------------------------------------------------------------------------------|
@@ -110,7 +173,7 @@ globalised multi-racial testset contains 242,143 identities and 1,624,305 images
 | WF42M-PFC-0.2  | ViT-T-1.5G          | 92.04       | 97.27       | 95.68       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/wf42m_pfc02_40epoch_8gpu_vit_t/training.log) |
 | WF42M-PFC-0.3  | ViT-B-11G           | 97.16       | 97.91       | 97.05       | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/pfc03_wf42m_vit_b_8gpu/training.log)         |
 
-#### 2. Training on Multi-Host GPU
+### 2️⃣ Multi-Host GPU Training
 
 | Datasets         | Backbone(bs*gpus) | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Throughout | log                                                                                                                                        |
 |:-----------------|:------------------|:------------|:------------|:------------|:-----------|:-------------------------------------------------------------------------------------------------------------------------------------------|
@@ -122,11 +185,9 @@ globalised multi-racial testset contains 242,143 identities and 1,624,305 images
 | WF42M-PFC-0.0018 | r100(512*32)      | 93.08       | 97.51       | 95.88       | ~10000     | click me                                                                                                                                   |
 | WF42M-PFC-0.2    | r100(128*32)      | 96.57       | 97.83       | 96.50       | ~9800      | click me                                                                                                                                   |
 
-`r100(128*32)` means backbone is r100, batchsize per gpu is 128, the number of gpus is 32.
+> **Note:** `r100(128*32)` means backbone is R100, batch size per GPU is 128, with 32 GPUs total.
 
-
-
-#### 3. ViT For Face Recognition
+### 3️⃣ Vision Transformer (ViT) Results
 
 | Datasets      | Backbone(bs)  | FLOPs | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | Throughout | log                                                                                                                          |
 |:--------------|:--------------|:------|:------------|:------------|:------------|:-----------|:-----------------------------------------------------------------------------------------------------------------------------|
@@ -139,9 +200,9 @@ globalised multi-racial testset contains 242,143 identities and 1,624,305 images
 | WF42M-PFC-0.3 | VIT-B(384*64) | 11.4  | 97.42       | 97.90       | 97.04       | ~13800     | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/pfc03_wf42m_vit_b_64gpu/training.log) |
 | WF42M-PFC-0.3 | VIT-L(384*64) | 25.3  | 97.85       | 98.00       | 97.23       | ~9406      | [click me](https://raw.githubusercontent.com/anxiangsir/insightface_arcface_log/master/pfc03_wf42m_vit_l_64gpu/training.log) |
 
-`WF42M` means WebFace42M, `PFC-0.3` means negivate class centers sample rate is 0.3.
+> **Note:** `WF42M` = WebFace42M, `PFC-0.3` = Negative class centers sample rate of 0.3
 
-#### 4. Noisy Datasets
+### 4️⃣ Noisy Dataset Results
   
 | Datasets                 | Backbone | **MFR-ALL** | IJB-C(1E-4) | IJB-C(1E-5) | log      |
 |:-------------------------|:---------|:------------|:------------|:------------|:---------|
@@ -150,61 +211,90 @@ globalised multi-racial testset contains 242,143 identities and 1,624,305 images
 | WF12M-Conflict           | r50      | 79.93       | 95.30       | 91.56       | click me |
 | WF12M-Conflict-PFC-0.3*  | r50      | 91.68       | 97.28       | 95.75       | click me |
 
-`WF12M` means WebFace12M, `+PFC-0.1*` denotes additional abnormal inter-class filtering.
+> **Note:** `WF12M` = WebFace12M, `*PFC-0.1*` denotes additional abnormal inter-class filtering
 
+---
 
+## ⚡ Speed Benchmark
+---
 
-## Speed Benchmark
-<div><img src="https://github.com/anxiangsir/insightface_arcface_log/blob/master/pfc_exp.png" width = "90%" /></div>
+## ⚡ Speed Benchmark
 
+<div align="center">
+  <img src="https://github.com/anxiangsir/insightface_arcface_log/blob/master/pfc_exp.png" width="90%" alt="Partial FC Performance"/>
+</div>
 
-**Arcface-Torch** is an efficient tool for training large-scale face recognition training sets. When the number of classes in the training sets exceeds one million, the partial FC sampling strategy maintains the same accuracy while providing several times faster training performance and lower GPU memory utilization. The partial FC is a sparse variant of the model parallel architecture for large-scale face recognition, utilizing a sparse softmax that dynamically samples a subset of class centers for each training batch. During each iteration, only a sparse portion of the parameters are updated, leading to a significant reduction in GPU memory requirements and computational demands. With the partial FC approach, it is possible to train sets with up to 29 million identities, the largest to date. Furthermore, the partial FC method supports multi-machine distributed training and mixed precision training.
+### Why Partial FC?
 
+**ArcFace-Torch** is highly efficient for large-scale face recognition training. When training sets exceed one million classes, **Partial FC** maintains accuracy while providing:
 
+- ⚡ **Several times faster** training speed
+- 💾 **Significantly lower** GPU memory usage
+- 🎯 **Same accuracy** as full softmax
+- 📈 **Scalable** to 29 million identities (largest to date)
 
-More details see 
-[speed_benchmark.md](docs/speed_benchmark.md) in docs.
+**How it works:** Partial FC is a sparse variant of model parallel architecture that dynamically samples a subset of class centers for each training batch. Only sparse parameters are updated per iteration, dramatically reducing computational and memory requirements.
 
-> 1. Training Speed of Various Parallel Techniques (Samples per Second) on a Tesla V100 32GB x 8 System (Higher is Optimal)
+**Features:**
+- ✅ Multi-machine distributed training support
+- ✅ Mixed precision training support
+- ✅ Proven on datasets up to 29M identities
 
-`-` means training failed because of gpu memory limitations.
+📖 **More details:** [speed_benchmark.md](docs/speed_benchmark.md)
 
-| Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
-|:--------------------------------|:--------------|:---------------|:---------------|
-| 125000                          | 4681          | 4824           | 5004           |
-| 1400000                         | **1672**      | 3043           | 4738           |
-| 5500000                         | **-**         | **1389**       | 3975           |
-| 8000000                         | **-**         | **-**          | 3565           |
-| 16000000                        | **-**         | **-**          | 2679           |
-| 29000000                        | **-**         | **-**          | **1855**       |
+### Performance Comparison
 
-> 2. GPU Memory Utilization of Various Parallel Techniques (MB per GPU) on a Tesla V100 32GB x 8 System (Lower is Optimal)
+#### 🚄 Training Speed (Samples/Second on V100 32GB × 8)
 
-| Number of Identities in Dataset | Data Parallel | Model Parallel | Partial FC 0.1 |
-|:--------------------------------|:--------------|:---------------|:---------------|
-| 125000                          | 7358          | 5306           | 4868           |
-| 1400000                         | 32252         | 11178          | 6056           |
-| 5500000                         | **-**         | 32188          | 9854           |
-| 8000000                         | **-**         | **-**          | 12310          |
-| 16000000                        | **-**         | **-**          | 19950          |
-| 29000000                        | **-**         | **-**          | 32324          |
+> Higher is better. `-` indicates training failed due to GPU memory limitations.
 
+| Identities | Data Parallel | Model Parallel | Partial FC 0.1 |
+|:-----------|:--------------|:---------------|:---------------|
+| 125K       | 4,681         | 4,824          | **5,004** ✨    |
+| 1.4M       | **1,672**     | 3,043          | **4,738** ✨    |
+| 5.5M       | **-**         | **1,389**      | **3,975** ✨    |
+| 8M         | **-**         | **-**          | **3,565** ✨    |
+| 16M        | **-**         | **-**          | **2,679** ✨    |
+| 29M        | **-**         | **-**          | **1,855** ✨    |
 
-## Citations
+#### 💾 GPU Memory Usage (MB per GPU on V100 32GB × 8)
 
-```
+> Lower is better
+
+| Identities | Data Parallel | Model Parallel | Partial FC 0.1 |
+|:-----------|:--------------|:---------------|:---------------|
+| 125K       | 7,358         | 5,306          | **4,868** ✨    |
+| 1.4M       | 32,252        | 11,178         | **6,056** ✨    |
+| 5.5M       | **-**         | 32,188         | **9,854** ✨    |
+| 8M         | **-**         | **-**          | **12,310** ✨   |
+| 16M        | **-**         | **-**          | **19,950** ✨   |
+| 29M        | **-**         | **-**          | **32,324** ✨   |
+
+---
+
+## 📚 Citations
+
+---
+
+## 📚 Citations
+
+If you find this work useful, please cite:
+
+```bibtex
 @inproceedings{deng2019arcface,
   title={Arcface: Additive angular margin loss for deep face recognition},
   author={Deng, Jiankang and Guo, Jia and Xue, Niannan and Zafeiriou, Stefanos},
   booktitle={CVPR},
   year={2019}
 }
+
 @inproceedings{an2022partialfc,
-    author={An, Xiang and Deng, Jiankang and Guo, Jia and Feng, Ziyong and Zhu, XuHan and Yang, Jing and Liu, Tongliang},
-    title={Killing Two Birds With One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
-    booktitle={CVPR},
-    year={2022},
+  author={An, Xiang and Deng, Jiankang and Guo, Jia and Feng, Ziyong and Zhu, XuHan and Yang, Jing and Liu, Tongliang},
+  title={Killing Two Birds With One Stone: Efficient and Robust Training of Face Recognition CNNs by Partial FC},
+  booktitle={CVPR},
+  year={2022}
 }
+
 @inproceedings{zhu2021webface260m,
   title={Webface260m: A benchmark unveiling the power of million-scale deep face recognition},
   author={Zhu, Zheng and Huang, Guan and Deng, Jiankang and Ye, Yun and Huang, Junjie and Chen, Xinze and Zhu, Jiagang and Yang, Tian and Lu, Jiwen and Du, Dalong and Zhou, Jie},
@@ -213,6 +303,18 @@ More details see
 }
 ```
 
+---
 
-## Welcome!  
-<a href='https://mapmyvisitors.com/web/1bw5e'  title='Visit tracker'><img src='https://mapmyvisitors.com/map.png?cl=ffffff&w=1024&t=n&d=0mqj5JJrL2-BR6EVSskbTRFBlGgSbqZK9ZJg6g_vh74&co=2d78ad&ct=ffffff'/></a>
+<div align="center">
+
+## 🌟 Star History
+
+[![Stargazers over time](https://starchart.cc/deepinsight/insightface.svg)](https://starchart.cc/deepinsight/insightface)
+
+**Welcome!**
+
+<a href='https://mapmyvisitors.com/web/1bw5e' title='Visit tracker'>
+  <img src='https://mapmyvisitors.com/map.png?cl=ffffff&w=1024&t=n&d=0mqj5JJrL2-BR6EVSskbTRFBlGgSbqZK9ZJg6g_vh74&co=2d78ad&ct=ffffff' alt='Visitor Map'/>
+</a>
+
+</div>
