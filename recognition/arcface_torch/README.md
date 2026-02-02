@@ -99,9 +99,6 @@ torchrun --nproc_per_node=8 train_v2.py configs/wf42m_pfc03_40epoch_8gpu_vit_b
 
 ---
 
-## 📊 Datasets  
----
-
 ## 📊 Datasets
 
 ### Available Datasets
@@ -123,10 +120,6 @@ python scripts/shuffle_rec.py ms1m-retinaface-t1
 ```
 
 This creates a `shuffled_ms1m-retinaface-t1` folder with shuffled samples in `train.rec`.
-
----
-
-## 🏆 Model Zoo
 
 ---
 
@@ -216,9 +209,6 @@ Performance is evaluated on:
 ---
 
 ## ⚡ Speed Benchmark
----
-
-## ⚡ Speed Benchmark
 
 <div align="center">
   <img src="https://github.com/anxiangsir/insightface_arcface_log/blob/master/pfc_exp.png" width="90%" alt="Partial FC Performance"/>
@@ -251,11 +241,11 @@ Performance is evaluated on:
 | Identities | Data Parallel | Model Parallel | Partial FC 0.1 |
 |:-----------|:--------------|:---------------|:---------------|
 | 125K       | 4,681         | 4,824          | **5,004** ✨    |
-| 1.4M       | **1,672**     | 3,043          | **4,738** ✨    |
-| 5.5M       | **-**         | **1,389**      | **3,975** ✨    |
-| 8M         | **-**         | **-**          | **3,565** ✨    |
-| 16M        | **-**         | **-**          | **2,679** ✨    |
-| 29M        | **-**         | **-**          | **1,855** ✨    |
+| 1.4M       | 1,672         | 3,043          | **4,738** ✨    |
+| 5.5M       | -             | 1,389          | **3,975** ✨    |
+| 8M         | -             | -              | **3,565** ✨    |
+| 16M        | -             | -              | **2,679** ✨    |
+| 29M        | -             | -              | **1,855** ✨    |
 
 #### 💾 GPU Memory Usage (MB per GPU on V100 32GB × 8)
 
@@ -265,14 +255,10 @@ Performance is evaluated on:
 |:-----------|:--------------|:---------------|:---------------|
 | 125K       | 7,358         | 5,306          | **4,868** ✨    |
 | 1.4M       | 32,252        | 11,178         | **6,056** ✨    |
-| 5.5M       | **-**         | 32,188         | **9,854** ✨    |
-| 8M         | **-**         | **-**          | **12,310** ✨   |
-| 16M        | **-**         | **-**          | **19,950** ✨   |
-| 29M        | **-**         | **-**          | **32,324** ✨   |
-
----
-
-## 📚 Citations
+| 5.5M       | -             | 32,188         | **9,854** ✨    |
+| 8M         | -             | -              | **12,310** ✨   |
+| 16M        | -             | -              | **19,950** ✨   |
+| 29M        | -             | -              | **32,324** ✨   |
 
 ---
 
