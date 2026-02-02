@@ -178,7 +178,7 @@ Performance is evaluated on:
 | WF42M-PFC-0.0018 | r100(512*32)      | 93.08       | 97.51       | 95.88       | ~10000     | click me                                                                                                                                   |
 | WF42M-PFC-0.2    | r100(128*32)      | 96.57       | 97.83       | 96.50       | ~9800      | click me                                                                                                                                   |
 
-> **Note:** `r100(128*32)` means backbone is R100, batch size per GPU is 128, with 32 GPUs total.
+> **Note:** `r100(128*32)` means backbone is r100, batch size per GPU is 128, with 32 GPUs total.
 
 ### 3️⃣ Vision Transformer (ViT) Results
 
@@ -204,7 +204,7 @@ Performance is evaluated on:
 | WF12M-Conflict           | r50      | 79.93       | 95.30       | 91.56       | click me |
 | WF12M-Conflict-PFC-0.3*  | r50      | 91.68       | 97.28       | 95.75       | click me |
 
-> **Note:** `WF12M` = WebFace12M, `*PFC-0.1*` denotes additional abnormal inter-class filtering
+> **Note:** `WF12M` = WebFace12M, `PFC-0.1*` or `PFC-0.3*` denotes additional abnormal inter-class filtering
 
 ---
 
