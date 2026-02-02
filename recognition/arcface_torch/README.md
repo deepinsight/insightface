@@ -1,5 +1,3 @@
-<div align="center">
-
 <img src="https://github.com/nttstar/insightface-resources/blob/master/images/insightface_logo.jpg_320x320.webp?raw=true" width="120px" alt="InsightFace Logo"/>
 
 # ArcFace-Torch
@@ -17,17 +15,7 @@
 
 **Official PyTorch implementation of the ArcFace paper - Efficient distributed training for large-scale face recognition**
 
-<p align="center">
-  <a href="#-key-features">Features</a> •
-  <a href="#-getting-started">Getting Started</a> •
-  <a href="#-training">Training</a> •
-  <a href="#-datasets">Datasets</a> •
-  <a href="#-model-zoo">Model Zoo</a> •
-  <a href="#-benchmarks">Benchmarks</a> •
-  <a href="#-citation">Citation</a>
-</p>
-
-</div>
+**Navigation:** [Features](#-key-features) • [Getting Started](#-getting-started) • [Training](#-training) • [Datasets](#-datasets) • [Model Zoo](#-model-zoo) • [Benchmarks](#-benchmarks) • [Citation](#-citation)
 
 <br/>
 
@@ -189,16 +177,12 @@ torchrun --nproc_per_node=8 train_v2.py configs/wf42m_pfc03_40epoch_8gpu_vit_b
 
 ### Available Training Datasets
 
-<div align="center">
-
 | Dataset | Identities | Images | Download Link |
 |:-------:|:----------:|:------:|:-------------:|
 | **MS1MV2** | 87K | 5.8M | [Link](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-arcface-85k-ids58m-images-57) |
 | **MS1MV3** | 93K | 5.2M | [Link](https://github.com/deepinsight/insightface/tree/master/recognition/_datasets_#ms1m-retinaface) |
 | **Glint360K** | 360K | 17.1M | [Link](https://github.com/deepinsight/insightface/tree/master/recognition/partial_fc#4-download) |
 | **WebFace42M** | 2M | 42.5M | [Guide](docs/prepare_webface42m.md) |
-
-</div>
 
 ### Custom Dataset Preparation
 
@@ -221,8 +205,6 @@ python scripts/shuffle_rec.py ms1m-retinaface-t1
 
 ## 🏆 Model Zoo
 
-<div align="center">
-
 ### Pre-trained Models
 
 All models are available for **non-commercial research purposes only**.
@@ -232,8 +214,6 @@ All models are available for **non-commercial research purposes only**.
 [![Baidu](https://img.shields.io/badge/Baidu_Yun-Download-blue?logo=baidu)](https://pan.baidu.com/s/1CL-l4zWqsI1oDuEEYVhj-g) (Password: `e8pw`)  
 [![OneDrive](https://img.shields.io/badge/OneDrive-Download-blue?logo=microsoft)](https://1drv.ms/u/s!AswpsDO2toNKq0lWY69vN58GR6mw?e=p9Ov5d)
 
-</div>
-
 <br/>
 
 ---
@@ -242,16 +222,12 @@ All models are available for **non-commercial research purposes only**.
 
 ### Evaluation Datasets
 
-<div align="center">
-
 | Benchmark | Description |
 |:---------:|:------------|
 | **IJB-C** | Challenging unconstrained face recognition benchmark |
 | **ICCV2021-MFR** | Non-celebrity testset with minimal training overlap |
 
 **MFR-ALL**: 242,143 identities • 1,624,305 images • TAR @ FAR < 1e-6
-
-</div>
 
 ### 🏅 Single-Host GPU Training Results
 
@@ -340,10 +316,9 @@ All models are available for **non-commercial research purposes only**.
 
 ## ⚡ Speed & Memory Efficiency
 
-<div align="center">
-  <img src="https://github.com/anxiangsir/insightface_arcface_log/blob/master/pfc_exp.png" width="80%" alt="Partial FC Performance Visualization"/>
-  <p><i>Partial FC enables training on datasets with up to 29M identities</i></p>
-</div>
+<img src="https://github.com/anxiangsir/insightface_arcface_log/blob/master/pfc_exp.png" width="80%" alt="Partial FC Performance Visualization"/>
+
+*Partial FC enables training on datasets with up to 29M identities*
 
 ### 🎯 Why Partial FC?
 
@@ -386,8 +361,6 @@ Dynamically samples a sparse subset of class centers for each training batch. On
 <details open>
 <summary><b>Training Speed (Samples/Second on V100 32GB × 8)</b></summary>
 
-<div align="center">
-
 | # Identities | Data Parallel | Model Parallel | Partial FC 0.1 | Speedup |
 |:------------:|:-------------:|:--------------:|:--------------:|:-------:|
 | 125K | 4,681 | 4,824 | **5,004** ⚡ | 1.07× |
@@ -399,14 +372,10 @@ Dynamically samples a sparse subset of class centers for each training batch. On
 
 *Higher is better • OOM = Out of Memory*
 
-</div>
-
 </details>
 
 <details open>
 <summary><b>GPU Memory Usage (MB per GPU on V100 32GB × 8)</b></summary>
-
-<div align="center">
 
 | # Identities | Data Parallel | Model Parallel | Partial FC 0.1 | Savings |
 |:------------:|:-------------:|:--------------:|:--------------:|:-------:|
@@ -418,8 +387,6 @@ Dynamically samples a sparse subset of class centers for each training batch. On
 | 29M | ❌ OOM | ❌ OOM | **32,324** 💾 | - |
 
 *Lower is better • Savings vs. Model Parallel*
-
-</div>
 
 </details>
 
@@ -463,8 +430,6 @@ If you find our work helpful, please consider citing:
 
 ---
 
-<div align="center">
-
 ## 🤝 Acknowledgments
 
 This project is part of the [InsightFace](https://github.com/deepinsight/insightface) project.
@@ -484,5 +449,3 @@ This project is part of the [InsightFace](https://github.com/deepinsight/insight
 <br/><br/>
 
 **Made with ❤️ by the InsightFace Team**
-
-</div>
