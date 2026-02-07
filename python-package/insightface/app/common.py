@@ -1,49 +1,54 @@
 import numpy as np
 from numpy.linalg import norm as l2norm
-#from easydict import EasyDict
+
 
 class Face(dict):
+    __slots__ = ("__dict__",)
 
     def __init__(self, d=None, **kwargs):
-        if d is None:
-            d = {}
+        super().__init__()
+        if d:
+            self.update(d)
         if kwargs:
-            d.update(**kwargs)
-        for k, v in d.items():
-            setattr(self, k, v)
-        # Class attributes
-        #for k in self.__class__.__dict__.keys():
-        #    if not (k.startswith('__') and k.endswith('__')) and not k in ('update', 'pop'):
-        #        setattr(self, k, getattr(self, k))
+            self.update(kwargs)
 
-    def __setattr__(self, name, value):
-        if isinstance(value, (list, tuple)):
-            value = [self.__class__(x)
-                    if isinstance(x, dict) else x for x in value]
-        elif isinstance(value, dict) and not isinstance(value, self.__class__):
-            value = self.__class__(value)
-        super(Face, self).__setattr__(name, value)
-        super(Face, self).__setitem__(name, value)
+    def __setattr__(self, key, value):
+        if isinstance(value, dict) and not isinstance(value, Face):
+            value = Face(value)
+        elif isinstance(value, (list, tuple)):
+            value = [
+                Face(v) if isinstance(v, dict) else v
+                for v in value
+            ]
+        super().__setattr__(key, value)
+        super().__setitem__(key, value)
 
     __setitem__ = __setattr__
 
-    def __getattr__(self, name):
-        return None
+    def __getattr__(self, key):
+        # avoid AttributeError cost
+        return self.get(key, None)
 
     @property
     def embedding_norm(self):
-        if self.embedding is None:
+        emb = self.get("embedding")
+        if emb is None:
             return None
-        return l2norm(self.embedding)
+        return l2norm(emb)
 
-    @property 
+    @property
     def normed_embedding(self):
-        if self.embedding is None:
+        emb = self.get("embedding")
+        if emb is None:
             return None
-        return self.embedding / self.embedding_norm
+        n = l2norm(emb)
+        if n == 0:
+            return emb
+        return emb / n
 
-    @property 
+    @property
     def sex(self):
-        if self.gender is None:
+        g = self.get("gender")
+        if g is None:
             return None
-        return 'M' if self.gender==1 else 'F'
+        return "M" if g == 1 else "F"
