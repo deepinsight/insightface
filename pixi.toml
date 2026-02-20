@@ -1,0 +1,14 @@
+[workspace]
+authors = ["Hameer Abbasi <2190658+hameerabbasi@users.noreply.github.com>"]
+channels = ["conda-forge"]
+name = "insightface"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = "<3.14"
+
+[pypi-dependencies]
+insightface = { path = "./python-package", editable = true}

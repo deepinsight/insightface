@@ -1,3 +1,41 @@
 [build-system]
-requires = ["setuptools", "numpy", "cython"]
+requires = ["setuptools>=80", "numpy>=2.3", "cython>=3.2", "setuptools_scm>=9"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "insightface"
+dynamic = ["version"]
+dependencies = [
+    "numpy",
+    "onnx",
+    "tqdm",
+    "requests",
+    "matplotlib",
+    "Pillow",
+    "scipy",
+    "scikit-learn",
+    "scikit-image",
+    "easydict",
+    "cython",
+    "albumentations",
+    "prettytable",
+]
+authors = [
+  {name = "InsightFace Contributors", email = "contact@insightface.ai"},
+  {name = "Hameer Abbasi", email = "hameerabbasi@yahoo.com"},
+]
+description = "InsightFace Python Library"
+readme = "README.md"
+license = "MIT"
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["*.docs.*", "*.tests.*", "*.scripts.*"]
+
+[project.entry-points."console_scripts"]
+insightface-cli = "insightface.commands.insightface_cli:main"
+
+[project.urls]
+Homepage = "https://github.com/deepinsight/insightface"
+Repository = "https://github.com/deepinsight/insightface.git"
+Issues = "https://github.com/deepinsight/insightface/issues"
