@@ -1,0 +1,11 @@
+# Images
+include insightface/data/images/*.jpg
+include insightface/data/images/*.png
+
+# Mesh
+include insightface/thirdparty/face3d/mesh/cython/*.h
+include insightface/thirdparty/face3d/mesh/cython/*.c
+include insightface/thirdparty/face3d/mesh/cython/*.py*
+
+# Objects
+include insightface/data/objects/*.pkl

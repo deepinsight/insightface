@@ -164,7 +164,7 @@ class MaskRenderer:
         p4 = params[232:235]
         p4 = np.array(p4, dtype=np.float32).reshape( (-1, 1))
         return p0, p1, p2, p3, p4
-    
+
 class MaskAugmentation(ImageOnlyTransform):
 
     def __init__(
@@ -228,5 +228,3 @@ if __name__ == "__main__":
     mask_out = tool.render_mask(image, 'mask_blue', params)# use single thread to test the time cost
 
     cv2.imwrite('output_mask.jpg', mask_out)
-
-
