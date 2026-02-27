@@ -97,7 +97,7 @@ def main(args):
 
     backbone = torch.nn.parallel.DistributedDataParallel(
         module=backbone, broadcast_buffers=False, device_ids=[local_rank], bucket_cap_mb=16,
-        find_unused_parameters=True)
+        find_unused_parameters=False)
     backbone.register_comm_hook(None, fp16_compress_hook)
 
     backbone.train()
@@ -171,7 +171,7 @@ def main(args):
     )
 
     loss_am = AverageMeter()
-    amp = torch.cuda.amp.grad_scaler.GradScaler(growth_interval=100)
+    amp = torch.amp.GradScaler('cuda', growth_interval=100)
 
     for epoch in range(start_epoch, cfg.num_epoch):
 

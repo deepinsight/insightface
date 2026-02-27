@@ -24,6 +24,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+# /home/svision/experiments/recognition/insightface/recognition/arcface_torch/wandb
+recognition/arcface_torch/wandb/
+recognition/volumes/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

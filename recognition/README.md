@@ -1,5 +1,7 @@
 ## Face Recognition
 
+This is the forked version of original Insightface repo which I modified and used to train face reco models.
+Many links and descriptions remains similar to original repo, I've just added some utility scripts and files needed to create training / testing environment.
 
 <div align="left">
   <img src="https://insightface.ai/assets/img/custom/logo3.jpg" width="240"/>
