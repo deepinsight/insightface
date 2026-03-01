@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import warnings
 from datetime import datetime
 
 import numpy as np
@@ -142,6 +143,11 @@ def main(args):
         warmup_iters=cfg.warmup_step,
         total_iters=cfg.total_step)
 
+    # GradScaler can skip opt.step() on inf gradients, desyncing the
+    # scheduler/optimizer step counters. The warning is a false positive
+    # since our call order is correct; suppress it.
+    warnings.filterwarnings('ignore', message='.*lr_scheduler.step.*optimizer.step.*')
+
     start_epoch = 0
     global_step = 0
     if cfg.resume:
@@ -160,7 +166,8 @@ def main(args):
 
     callback_verification = CallBackVerification(
         val_targets=cfg.val_targets, rec_prefix=cfg.rec, 
-        summary_writer=summary_writer, wandb_logger = wandb_logger
+        summary_writer=summary_writer, wandb_logger = wandb_logger,
+        output_dir=cfg.output
     )
     callback_logging = CallBackLogging(
         frequent=cfg.frequent,
@@ -190,17 +197,17 @@ def main(args):
                     amp.step(opt)
                     amp.update()
                     opt.zero_grad()
+                    lr_scheduler.step()
             else:
                 loss.backward()
                 if global_step % cfg.gradient_acc == 0:
                     torch.nn.utils.clip_grad_norm_(backbone.parameters(), 5)
                     opt.step()
                     opt.zero_grad()
-            lr_scheduler.step()
+                    lr_scheduler.step()
 
             with torch.no_grad():
                 loss_am.update(loss.item(), 1)
-                callback_logging(global_step, loss_am, epoch, cfg.fp16, lr_scheduler.get_last_lr()[0], amp)
 
                 if wandb_logger:
                     wandb_logger.log({
@@ -209,6 +216,8 @@ def main(args):
                         'Process/Step': global_step,
                         'Process/Epoch': epoch
                     })
+
+                callback_logging(global_step, loss_am, epoch, cfg.fp16, lr_scheduler.get_last_lr()[0], amp)
 
                 if global_step % cfg.verbose == 0 and global_step > 0:
                     callback_verification(global_step, backbone)
@@ -227,6 +236,13 @@ def main(args):
         if rank == 0:
             path_module = os.path.join(cfg.output, "model.pt")
             torch.save(backbone.module.state_dict(), path_module)
+
+            # Save a snapshot every N epochs
+            save_every = getattr(cfg, 'save_every_epoch', 0)
+            if save_every and (epoch + 1) % save_every == 0:
+                epoch_path = os.path.join(cfg.output, f"model_epoch_{epoch}.pt")
+                torch.save(backbone.module.state_dict(), epoch_path)
+                logging.info(f"Saved epoch snapshot: {epoch_path}")
 
             if wandb_logger and cfg.save_artifacts:
                 artifact_name = f"{run_name}_E{epoch}"

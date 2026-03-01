@@ -13,7 +13,8 @@ from torch import distributed
 
 class CallBackVerification(object):
     
-    def __init__(self, val_targets, rec_prefix, summary_writer=None, image_size=(112, 112), wandb_logger=None):
+    def __init__(self, val_targets, rec_prefix, summary_writer=None, image_size=(112, 112), wandb_logger=None,
+                 output_dir=None):
         self.rank: int = distributed.get_rank()
         self.highest_acc: float = 0.0
         self.highest_acc_list: List[float] = [0.0] * len(val_targets)
@@ -24,6 +25,7 @@ class CallBackVerification(object):
 
         self.summary_writer = summary_writer
         self.wandb_logger = wandb_logger
+        self.output_dir = output_dir
 
     def ver_test(self, backbone: torch.nn.Module, global_step: int):
         results = []
@@ -49,6 +51,25 @@ class CallBackVerification(object):
             logging.info(
                 '[%s][%d]Accuracy-Highest: %1.5f' % (self.ver_name_list[i], global_step, self.highest_acc_list[i]))
             results.append(acc2)
+
+        # Save best model based on mean accuracy across all val targets
+        if results:
+            mean_acc = sum(results) / len(results)
+            if mean_acc > self.highest_acc:
+                self.highest_acc = mean_acc
+                if self.output_dir:
+                    best_path = os.path.join(self.output_dir, "best_model.pt")
+                    torch.save(backbone.state_dict(), best_path)
+                    logging.info('[Best Model][%d] Mean-Acc: %1.5f  Saved to %s' % (
+                        global_step, mean_acc, best_path))
+                    if self.wandb_logger:
+                        self.wandb_logger.log({
+                            'Acc/best_mean_acc': mean_acc,
+                            'Process/best_step': global_step,
+                        })
+            else:
+                logging.info('[Best Model][%d] Mean-Acc: %1.5f  (best: %1.5f, not saving)' % (
+                    global_step, mean_acc, self.highest_acc))
 
     def init_dataset(self, val_targets, data_dir, image_size):
         for name in val_targets:
