@@ -12,6 +12,9 @@ services:
       - WANDB_API_KEY=${WANDB_API_KEY}
       - WANDB_ENTITY=${WANDB_ENTITY}
       - WANDB_PROJECT=${WANDB_PROJECT}
+    ports:
+      - "6006:6006" # TensorBoard
+      - "12345:12345" # For distributed training
     deploy:
       resources:
         reservations:

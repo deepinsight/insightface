@@ -12,11 +12,11 @@ config.sample_rate = 0.2
 config.fp16 = True
 config.momentum = 0.9
 config.weight_decay = 1e-4
-config.batch_size = 288
+config.batch_size = 320
 config.lr = 0.1
-config.verbose = 1000
+config.verbose = 4000
 config.dali = False
-config.num_workers = 3  # 4 × 3 GPUs = 12 workers; RecordIO is lightweight per worker
+config.num_workers = 3  # Reduced to fit alongside other process (~66GB)
 
 config.rec = "/datasets/merged_ms1m_glint_rec"
 config.num_classes = 453663
@@ -33,6 +33,6 @@ config.wandb_entity = os.getenv("WANDB_ENTITY")
 config.wandb_project = os.getenv("WANDB_PROJECT")
 config.wandb_log_all = True
 config.wandb_resume = False
-config.suffix_run_name = "merged_ms1m_glint_r100_2nd_try"
+config.suffix_run_name = "merged_ms1m_glint_r100_3rd_try"
 config.notes = "Training r100 on merged MS1MV3 + Glint360K dataset"
 

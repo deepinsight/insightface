@@ -32,6 +32,7 @@ RUN python3 -m pip install \
     easydict \
     mxnet \
     onnx \
+    onnxruntime-gpu \
     scikit-learn \
     tqdm \
     wandb \

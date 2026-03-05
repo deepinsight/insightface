@@ -216,3 +216,23 @@ More details see
 
 ## Welcome!  
 <a href='https://mapmyvisitors.com/web/1bw5e'  title='Visit tracker'><img src='https://mapmyvisitors.com/map.png?cl=ffffff&w=1024&t=n&d=0mqj5JJrL2-BR6EVSskbTRFBlGgSbqZK9ZJg6g_vh74&co=2d78ad&ct=ffffff'/></a>
+
+
+### Evaluating the SOTA ArcFace and Your trained model
+
+#### You model
+
+```
+python3 /workspace/arcface_torch/eval_model.py \
+    --model /output/merged_ms1m_glint_r100_2nd_try/best_model.pt \
+    --network r100 \
+    --bin-dir /datasets/merged_ms1m_glint_rec
+```
+
+#### ArcFace SOTA (antelope_v2)
+
+```
+python3 /workspace/arcface_torch/eval_model.py \
+    --model /output/ms1mv3_r100/model.onnx \
+    --bin-dir /datasets/merged_ms1m_glint_rec
+```

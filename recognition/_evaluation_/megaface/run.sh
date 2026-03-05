@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DEVKIT="/raid5data/dplearn/megaface/devkit/experiments"
+DEVKIT="/datasets/megaface/devkit/experiments"
 ALGO="r100ii" #ms1mv2
 ROOT=$(dirname `which $0`)
 echo $ROOT
