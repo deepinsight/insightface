@@ -285,4 +285,5 @@ Main contributors:
 - [Xiang An](https://github.com/anxiangsir) ``anxiangsir[at]gmail.com``
 - [Jack Yu](https://github.com/szad670401) ``jackyu961127[at]gmail.com``
 - [Baris Gecer](https://barisgecer.github.io/) ``barisgecer[at]msn.com``
-- [Stefanos Zafeiriou](https://wp.doc.ic.ac.uk/szafeiri/)  ``s.zafeiriou[at]imperial.ac.uk``
+- [Stefanos Zafeiriou](https://wp.doc.ic.ac.uk/szafeiri/)  ``drzafeiriou[at]gmail.com
+ ``
