@@ -860,6 +860,43 @@ def switch_image_processing_backend(backend: int):
     check_error(ret, "Switch image processing backend", backend=backend)
     return True
 
+
+def set_default_rknn_core_mask(core_mask: int) -> bool:
+    """Set default Rockchip NPU core mask used when no thread override is provided."""
+    ret = HFSetRockchipDefaultNpuCoreMask(core_mask)
+    check_error(ret, "Set default Rockchip core mask", core_mask=core_mask)
+    return True
+
+
+def set_rknn_core_mask(core_mask: int) -> bool:
+    """Bind the current thread to the specified Rockchip NPU core mask."""
+    ret = HFSetRockchipNpuCoreMask(core_mask)
+    check_error(ret, "Set Rockchip core mask", core_mask=core_mask)
+    return True
+
+
+def clear_rknn_core_mask() -> bool:
+    """Clear the Rockchip NPU core mask override for the current thread."""
+    ret = HFClearRockchipNpuCoreMask()
+    check_error(ret, "Clear Rockchip core mask override")
+    return True
+
+
+def get_rknn_core_mask() -> int:
+    """Get the Rockchip NPU core mask that will be used by the current thread."""
+    mask = HInt32()
+    ret = HFGetRockchipNpuCoreMask(byref(mask))
+    check_error(ret, "Get Rockchip core mask")
+    return mask.value
+
+
+def get_default_rknn_core_mask() -> int:
+    """Get the default Rockchip NPU core mask value."""
+    mask = HInt32()
+    ret = HFGetRockchipDefaultNpuCoreMask(byref(mask))
+    check_error(ret, "Get default Rockchip core mask")
+    return mask.value
+
 def set_image_process_aligned_width(width: int):
     """Set the image process aligned width"""
     ret = HFSetImageProcessAlignedWidth(width)

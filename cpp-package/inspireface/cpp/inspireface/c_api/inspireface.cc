@@ -591,6 +591,62 @@ HResult HFGetCudaDeviceId(HPInt32 device_id) {
     return HSUCCEED;
 }
 
+HResult HFSetRockchipDefaultNpuCoreMask(HInt32 core_mask) {
+#if defined(ISF_ENABLE_RKNN) || defined(ISF_ENABLE_RKNN2)
+    INSPIREFACE_CONTEXT->SetRockchipDefaultNpuCoreMask(core_mask);
+    return HSUCCEED;
+#else
+    INSPIRE_LOGW("RKNN runtime is not enabled during compilation; default core mask configuration skipped.");
+    return HERR_EXTENSION_ERROR;
+#endif
+}
+
+HResult HFSetRockchipNpuCoreMask(HInt32 core_mask) {
+#if defined(ISF_ENABLE_RKNN) || defined(ISF_ENABLE_RKNN2)
+    if (core_mask < 0) {
+        INSPIREFACE_CONTEXT->ClearRockchipThreadNpuCoreMask();
+    } else {
+        INSPIREFACE_CONTEXT->SetRockchipThreadNpuCoreMask(core_mask);
+    }
+    return HSUCCEED;
+#else
+    INSPIRE_LOGW("RKNN runtime is not enabled during compilation; thread core mask configuration skipped.");
+    return HERR_EXTENSION_ERROR;
+#endif
+}
+
+HResult HFClearRockchipNpuCoreMask(void) {
+#if defined(ISF_ENABLE_RKNN) || defined(ISF_ENABLE_RKNN2)
+    INSPIREFACE_CONTEXT->ClearRockchipThreadNpuCoreMask();
+    return HSUCCEED;
+#else
+    INSPIRE_LOGW("RKNN runtime is not enabled during compilation; clear core mask skipped.");
+    return HERR_EXTENSION_ERROR;
+#endif
+}
+
+HResult HFGetRockchipNpuCoreMask(HPInt32 core_mask) {
+#if defined(ISF_ENABLE_RKNN) || defined(ISF_ENABLE_RKNN2)
+    *core_mask = INSPIREFACE_CONTEXT->GetRockchipNpuCoreMask();
+    return HSUCCEED;
+#else
+    INSPIRE_LOGW("RKNN runtime is not enabled during compilation; returning default auto core mask.");
+    *core_mask = 0;
+    return HERR_EXTENSION_ERROR;
+#endif
+}
+
+HResult HFGetRockchipDefaultNpuCoreMask(HPInt32 core_mask) {
+#if defined(ISF_ENABLE_RKNN) || defined(ISF_ENABLE_RKNN2)
+    *core_mask = INSPIREFACE_CONTEXT->GetRockchipDefaultNpuCoreMask();
+    return HSUCCEED;
+#else
+    INSPIRE_LOGW("RKNN runtime is not enabled during compilation; returning default auto core mask.");
+    *core_mask = 0;
+    return HERR_EXTENSION_ERROR;
+#endif
+}
+
 HResult HFPrintCudaDeviceInfo() {
 #if defined(ISF_ENABLE_TENSORRT)
     return inspire::PrintCudaDeviceInfo();
