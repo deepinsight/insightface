@@ -75,6 +75,21 @@ public:
     // Get the rockchip dma heap path
     std::string GetRockchipDmaHeapPath() const;
 
+    // Configure default Rockchip NPU core mask
+    void SetRockchipDefaultNpuCoreMask(int32_t core_mask);
+
+    // Configure the Rockchip NPU core mask for the current thread
+    void SetRockchipThreadNpuCoreMask(int32_t core_mask);
+
+    // Clear the Rockchip NPU core mask override for the current thread
+    void ClearRockchipThreadNpuCoreMask();
+
+    // Query the Rockchip NPU core mask for the current thread (fallback to default)
+    int32_t GetRockchipNpuCoreMask() const;
+
+    // Query the default Rockchip NPU core mask
+    int32_t GetRockchipDefaultNpuCoreMask() const;
+
     // Set the extension path
     void ConfigurationExtensionPath(const std::string& path);
 

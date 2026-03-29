@@ -436,6 +436,40 @@ HYPER_CAPI_EXPORT extern HResult HFSetCudaDeviceId(HInt32 device_id);
 HYPER_CAPI_EXPORT extern HResult HFGetCudaDeviceId(HPInt32 device_id);
 
 /**
+ * @brief Set the default Rockchip NPU core mask. This value is used when the current thread does not override the mask.
+ * @param core_mask The default core mask to be set.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFSetRockchipDefaultNpuCoreMask(HInt32 core_mask);
+
+/**
+ * @brief Set the Rockchip NPU core mask for the current thread. Call with -1 to fall back to the default mask.
+ * @param core_mask The core mask to be applied to the current thread.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFSetRockchipNpuCoreMask(HInt32 core_mask);
+
+/**
+ * @brief Clear the Rockchip NPU core mask override for the current thread.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFClearRockchipNpuCoreMask(void);
+
+/**
+ * @brief Get the Rockchip NPU core mask that will be used for the current thread.
+ * @param core_mask Pointer to the core mask to be returned.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFGetRockchipNpuCoreMask(HPInt32 core_mask);
+
+/**
+ * @brief Get the default Rockchip NPU core mask value.
+ * @param core_mask Pointer to the default core mask to be returned.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFGetRockchipDefaultNpuCoreMask(HPInt32 core_mask);
+
+/**
  * @brief Print the CUDA device information.
  * @return HResult indicating the success or failure of the operation.
  * */

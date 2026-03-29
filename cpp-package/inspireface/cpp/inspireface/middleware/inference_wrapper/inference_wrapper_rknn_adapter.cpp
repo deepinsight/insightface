@@ -36,6 +36,19 @@ int32_t InferenceWrapperRKNNAdapter::SetNumThreads(const int32_t num_threads) {
     return WrapperOk;
 }
 
+int32_t InferenceWrapperRKNNAdapter::SetDevice(int32_t device_id) {
+    core_mask_ = device_id;
+    core_mask_overridden_ = true;
+    if (net_) {
+        auto ret = net_->SetCoreMask(core_mask_);
+        if (ret != 0) {
+            INSPIRE_LOGE("Failed to apply RKNN core mask(%d), ret=%d", core_mask_, ret);
+            return WrapperError;
+        }
+    }
+    return WrapperOk;
+}
+
 int32_t InferenceWrapperRKNNAdapter::ParameterInitialization(std::vector<InputTensorInfo> &input_tensor_info_list,
                                                              std::vector<OutputTensorInfo> &output_tensor_info_list) {
     return WrapperOk;
@@ -115,6 +128,13 @@ int32_t InferenceWrapperRKNNAdapter::Initialize(char *model_buffer, int model_si
     if (ret != 0) {
         INSPIRE_LOGE("Rknn init error.");
         return WrapperError;
+    }
+    if (core_mask_overridden_) {
+        auto mask_ret = net_->SetCoreMask(core_mask_);
+        if (mask_ret != 0) {
+            INSPIRE_LOGE("Failed to apply RKNN core mask(%d), ret=%d", core_mask_, mask_ret);
+            return WrapperError;
+        }
     }
     return ParameterInitialization(input_tensor_info_list, output_tensor_info_list);
 }

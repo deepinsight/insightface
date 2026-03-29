@@ -82,6 +82,10 @@ public:
 
         if (m_infer_type_ == InferenceWrapper::INFER_TENSORRT) {
             m_nn_inference_->SetDevice(INSPIREFACE_CONTEXT->GetCudaDeviceId());
+        } else if (m_infer_type_ == InferenceWrapper::INFER_RKNN) {
+#if defined(ISF_ENABLE_RKNN) || defined(ISF_ENABLE_RKNN2)
+            m_nn_inference_->SetDevice(INSPIREFACE_CONTEXT->GetRockchipNpuCoreMask());
+#endif
         }
 
 #if defined(ISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA) && !defined(ISF_ENABLE_RKNN)

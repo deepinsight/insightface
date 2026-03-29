@@ -8,4 +8,5 @@ from .inspireface import ImageStream, FaceExtended, FaceInformation, SessionCust
     HF_PK_AUTO_INCREMENT, HF_PK_MANUAL_INPUT, HF_SEARCH_MODE_EAGER, HF_SEARCH_MODE_EXHAUSTIVE, \
     ignore_check_latest_model, set_cuda_device_id, get_cuda_device_id, print_cuda_device_info, get_num_cuda_devices, check_cuda_device_support, terminate, \
     InspireFaceError, InvalidInputError, SystemNotReadyError, ProcessingError, ResourceError, HardwareError, FeatureHubError, \
-    switch_image_processing_backend, HF_IMAGE_PROCESSING_CPU, HF_IMAGE_PROCESSING_RGA, set_image_process_aligned_width, use_oss_download
+    switch_image_processing_backend, HF_IMAGE_PROCESSING_CPU, HF_IMAGE_PROCESSING_RGA, set_image_process_aligned_width, use_oss_download, \
+    set_default_rknn_core_mask, set_rknn_core_mask, clear_rknn_core_mask, get_rknn_core_mask, get_default_rknn_core_mask

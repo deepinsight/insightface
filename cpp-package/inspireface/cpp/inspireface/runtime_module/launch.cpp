@@ -14,6 +14,8 @@
 #include "image_process/nexus_processor/rga/dma_alloc.h"
 #endif
 #include <mutex>
+#include <thread>
+#include <unordered_map>
 #include "middleware/inference_wrapper/inference_wrapper.h"
 #include "middleware/system.h"
 #if defined(ISF_ENABLE_TENSORRT)
@@ -59,6 +61,7 @@ public:
     static std::shared_ptr<Launch> instance_;
 
     // Data members
+    mutable std::mutex state_mutex_;
     std::string m_rockchip_dma_heap_path_;
     std::string m_extension_path_;
     std::unique_ptr<InspireArchive> m_archive_;
@@ -67,6 +70,9 @@ public:
     InferenceWrapper::SpecialBackend m_global_coreml_inference_mode_;
     Launch::ImageProcessingBackend m_image_processing_backend_;
     int32_t m_image_process_aligned_width_{4};
+    int32_t m_default_rknn_core_mask_{0};
+    std::unordered_map<std::thread::id, int32_t> m_thread_rknn_core_masks_;
+    mutable std::mutex m_core_mask_mutex_;
 };
 
 // Initialize static members
@@ -88,7 +94,7 @@ std::shared_ptr<Launch> Launch::GetInstance() {
 }
 
 InspireArchive& Launch::getMArchive() {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     if (!pImpl->m_archive_) {
         throw std::runtime_error("Archive not initialized");
     }
@@ -96,7 +102,7 @@ InspireArchive& Launch::getMArchive() {
 }
 
 int32_t Launch::Load(const std::string& path) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
 #if defined(ISF_ENABLE_TENSORRT)
     int32_t support_cuda;
     auto ret = CheckCudaUsability(&support_cuda);
@@ -143,7 +149,7 @@ int32_t Launch::Load(const std::string& path) {
 }
 
 int32_t Launch::Reload(const std::string& path) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     INSPIREFACE_CHECK_MSG(os::IsExists(path), "The package path does not exist because the launch failed.");
 #if defined(ISF_ENABLE_APPLE_EXTENSION)
     BuildAppleExtensionPath(path);
@@ -180,7 +186,7 @@ bool Launch::isMLoad() const {
 }
 
 void Launch::Unload() {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     if (pImpl->m_load_) {
         pImpl->m_archive_.reset();
         pImpl->m_load_ = false;
@@ -191,13 +197,46 @@ void Launch::Unload() {
 }
 
 void Launch::SetRockchipDmaHeapPath(const std::string& path) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     pImpl->m_rockchip_dma_heap_path_ = path;
 }
 
 std::string Launch::GetRockchipDmaHeapPath() const {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     return pImpl->m_rockchip_dma_heap_path_;
+}
+
+void Launch::SetRockchipDefaultNpuCoreMask(int32_t core_mask) {
+    std::lock_guard<std::mutex> lock(pImpl->m_core_mask_mutex_);
+    pImpl->m_default_rknn_core_mask_ = core_mask;
+}
+
+void Launch::SetRockchipThreadNpuCoreMask(int32_t core_mask) {
+    std::lock_guard<std::mutex> lock(pImpl->m_core_mask_mutex_);
+    if (core_mask < 0) {
+        pImpl->m_thread_rknn_core_masks_.erase(std::this_thread::get_id());
+    } else {
+        pImpl->m_thread_rknn_core_masks_[std::this_thread::get_id()] = core_mask;
+    }
+}
+
+void Launch::ClearRockchipThreadNpuCoreMask() {
+    std::lock_guard<std::mutex> lock(pImpl->m_core_mask_mutex_);
+    pImpl->m_thread_rknn_core_masks_.erase(std::this_thread::get_id());
+}
+
+int32_t Launch::GetRockchipNpuCoreMask() const {
+    std::lock_guard<std::mutex> lock(pImpl->m_core_mask_mutex_);
+    auto it = pImpl->m_thread_rknn_core_masks_.find(std::this_thread::get_id());
+    if (it != pImpl->m_thread_rknn_core_masks_.end()) {
+        return it->second;
+    }
+    return pImpl->m_default_rknn_core_mask_;
+}
+
+int32_t Launch::GetRockchipDefaultNpuCoreMask() const {
+    std::lock_guard<std::mutex> lock(pImpl->m_core_mask_mutex_);
+    return pImpl->m_default_rknn_core_mask_;
 }
 
 void Launch::ConfigurationExtensionPath(const std::string& path) {
@@ -209,12 +248,12 @@ void Launch::ConfigurationExtensionPath(const std::string& path) {
 }
 
 std::string Launch::GetExtensionPath() const {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     return pImpl->m_extension_path_;
 }
 
 void Launch::SetGlobalCoreMLInferenceMode(NNInferenceBackend mode) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     if (mode == NN_INFERENCE_CPU) {
         pImpl->m_global_coreml_inference_mode_ = InferenceWrapper::COREML_CPU;
     } else if (mode == NN_INFERENCE_COREML_GPU) {
@@ -234,7 +273,7 @@ void Launch::SetGlobalCoreMLInferenceMode(NNInferenceBackend mode) {
 }
 
 Launch::NNInferenceBackend Launch::GetGlobalCoreMLInferenceMode() const {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     if (pImpl->m_global_coreml_inference_mode_ == InferenceWrapper::COREML_CPU) {
         return NN_INFERENCE_CPU;
     } else if (pImpl->m_global_coreml_inference_mode_ == InferenceWrapper::COREML_GPU) {
@@ -255,37 +294,37 @@ void Launch::BuildAppleExtensionPath(const std::string& resource_path) {
 }
 
 void Launch::SetCudaDeviceId(int32_t device_id) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     pImpl->m_cuda_device_id_ = device_id;
 }
 
 int32_t Launch::GetCudaDeviceId() const {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     return pImpl->m_cuda_device_id_;
 }
 
 void Launch::SetFaceDetectPixelList(const std::vector<int32_t>& pixel_list) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     pImpl->m_face_detect_pixel_list_ = pixel_list;
 }
 
 std::vector<int32_t> Launch::GetFaceDetectPixelList() const {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     return pImpl->m_face_detect_pixel_list_;
 }
 
 void Launch::SetFaceDetectModelList(const std::vector<std::string>& model_list) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     pImpl->m_face_detect_model_list_ = model_list;
 }
 
 std::vector<std::string> Launch::GetFaceDetectModelList() const {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     return pImpl->m_face_detect_model_list_;
 }
 
 void Launch::SwitchLandmarkEngine(LandmarkEngine engine) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     if (pImpl->m_archive_->QueryStatus() != SARC_SUCCESS) {
         INSPIRE_LOGE("The InspireFace is not initialized, please call launch first.");
         return;
@@ -303,7 +342,7 @@ void Launch::SwitchLandmarkEngine(LandmarkEngine engine) {
 }
 
 void Launch::SwitchImageProcessingBackend(ImageProcessingBackend backend) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     if (backend == IMAGE_PROCESSING_RGA) {
 #if defined(ISF_ENABLE_RGA)
         pImpl->m_image_processing_backend_ = backend;
@@ -317,17 +356,17 @@ void Launch::SwitchImageProcessingBackend(ImageProcessingBackend backend) {
 }
 
 Launch::ImageProcessingBackend Launch::GetImageProcessingBackend() const {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     return pImpl->m_image_processing_backend_;
 }
 
 void Launch::SetImageProcessAlignedWidth(int32_t width) {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     pImpl->m_image_process_aligned_width_ = width;
 }
 
 int32_t Launch::GetImageProcessAlignedWidth() const {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    std::lock_guard<std::mutex> lock(pImpl->state_mutex_);
     return pImpl->m_image_process_aligned_width_;
 }
 

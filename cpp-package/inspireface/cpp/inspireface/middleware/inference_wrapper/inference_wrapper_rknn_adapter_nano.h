@@ -22,6 +22,7 @@ public:
     InferenceWrapperRKNNAdapter();
     ~InferenceWrapperRKNNAdapter() override;
     int32_t SetNumThreads(const int32_t num_threads) override;
+    int32_t SetDevice(int32_t device_id) override;
     int32_t Initialize(const std::string& model_filename, std::vector<InputTensorInfo>& input_tensor_info_list,
                        std::vector<OutputTensorInfo>& output_tensor_info_list) override;
     int32_t Initialize(char* model_buffer, int model_size, std::vector<InputTensorInfo>& input_tensor_info_list,
@@ -38,6 +39,8 @@ public:
 private:
     std::shared_ptr<RKNNAdapterNano> net_;
     int32_t num_threads_;
+    int32_t core_mask_{0};
+    bool core_mask_overridden_{false};
 };
 
 #endif  // INFERENCE_WRAPPER_ENABLE_RKNN2
