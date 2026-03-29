@@ -2,7 +2,7 @@
 
 
 <div align="left">
-  <img src="https://insightface.ai/assets/img/custom/logo3.jpg" width="240"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/logo3.jpg" width="240"/>
 </div>
 
 
@@ -12,7 +12,7 @@ These are the face alignment methods of [InsightFace](https://insightface.ai)
 
 
 <div align="left">
-  <img src="https://insightface.ai/assets/img/custom/thumb_sdunet.png" width="600"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/thumb_sdunet.png" width="600"/>
 </div>
 
 
