@@ -2,7 +2,7 @@
 
 
 <div align="left">
-  <img src="https://insightface.ai/assets/img/custom/logo3.jpg" width="240"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/logo3.jpg" width="240"/>
 </div>
 
 
@@ -12,7 +12,7 @@ These are the face detection methods of [InsightFace](https://insightface.ai)
 
 
 <div align="left">
-  <img src="https://insightface.ai/assets/img/github/11513D05.jpg" width="800"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/11513D05.jpg" width="800"/>
 </div>
 
 
