@@ -2,7 +2,7 @@
 # InsightFace: 2D and 3D Face Analysis Project
 
 <div align="left">
-  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/insightface_logo.jpg_320x320.webp?raw=true" width="240"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/insightface_logo.jpg_320x320.webp" width="240"/>
 </div>
 
 InsightFace project is mainly maintained by [Jia Guo](mailto:guojia@insightface.ai) and [Jiankang Deng](https://jiankangdeng.github.io/). 
@@ -163,7 +163,7 @@ We provide standard IJB and Megaface evaluation pipelines in [evaluation](recogn
 ### Introduction
 
 <div align="left">
-  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/11513D05.jpg?raw=true" width="640"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/11513D05.jpg" width="640"/>
 </div>
 
 In this module, we provide training data with annotation, network settings and loss designs for face detection training, evaluation and inference.
@@ -184,7 +184,7 @@ The supported methods are as follows:
 ### Introduction
 
 <div align="left">
-  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/thumb_sdunet.png?raw=true" width="600"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/thumb_sdunet.png" width="600"/>
 </div>
 
 In this module, we provide datasets and training/inference pipelines for face alignment.
