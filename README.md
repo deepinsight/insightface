@@ -92,7 +92,7 @@ Please start with our [python-package](python-package/), for testing detection, 
 ### ArcFace Video Demo
 
 
-[<img src=https://insightface.ai/assets/img/github/facerecognitionfromvideo.PNG width="760" />](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
+[<img src=https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/facerecognitionfromvideo.PNG width="760" />](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
 
 
 Please click the image to watch the Youtube video. For Bilibili users, click [here](https://www.bilibili.com/video/av38041494?from=search&seid=11501833604850032313).
@@ -163,7 +163,7 @@ We provide standard IJB and Megaface evaluation pipelines in [evaluation](recogn
 ### Introduction
 
 <div align="left">
-  <img src="https://insightface.ai/assets/img/github/11513D05.jpg" width="640"/>
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/11513D05.jpg?raw=true" width="640"/>
 </div>
 
 In this module, we provide training data with annotation, network settings and loss designs for face detection training, evaluation and inference.
@@ -184,7 +184,7 @@ The supported methods are as follows:
 ### Introduction
 
 <div align="left">
-  <img src="https://insightface.ai/assets/img/custom/thumb_sdunet.png" width="600"/>
+  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/thumb_sdunet.png?raw=true" width="600"/>
 </div>
 
 In this module, we provide datasets and training/inference pipelines for face alignment.
