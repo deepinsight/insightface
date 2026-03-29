@@ -131,7 +131,7 @@ Clone the `3rdparty` repository from the remote repository into the root directo
 
 ```Bash
 # Must enter this directory
-cd InspireFace
+cd inspireface
 # Clone the repository and pull submodules
 git clone --recurse-submodules https://github.com/tunmx/inspireface-3rdparty.git 3rdparty
 ```
@@ -140,7 +140,7 @@ If you need to update the `3rdparty` repository to ensure it is current, or if y
 
 ```bash
 # Must enter this directory
-cd InspireFace
+cd inspireface
 # If you're not using recursive pull
 git clone https://github.com/tunmx/inspireface-3rdparty.git 3rdparty
 
@@ -208,7 +208,7 @@ CMake option are used to control the various details of the compilation phase. P
 ### Local Compilation
 If you are using macOS or Linux, you can quickly compile using the shell scripts provided in the `command` folder at the project root:
 ```bash
-cd InspireFace/
+cd inspireface/
 # Execute the local compilation script
 bash command/build.sh
 ```
