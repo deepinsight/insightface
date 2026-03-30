@@ -54,7 +54,7 @@ requirements = [
     'scikit-image',
     'easydict',
     'cython',
-    'albumentations',
+    'albumentationsx',
     'prettytable',
 ]
 
