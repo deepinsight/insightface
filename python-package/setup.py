@@ -56,10 +56,11 @@ requirements = [
     'cython',
     'albumentations',
     'prettytable',
+    'loguru',
 ]
 
 extensions = [
-        Extension("insightface.thirdparty.face3d.mesh.cython.mesh_core_cython", 
+        Extension("insightface.thirdparty.face3d.mesh.cython.mesh_core_cython",
             ["insightface/thirdparty/face3d/mesh/cython/mesh_core_cython.pyx", "insightface/thirdparty/face3d/mesh/cython/mesh_core.cpp"], language='c++'),
         ]
 data_images = list(glob.glob('insightface/data/images/*.jpg'))
@@ -91,7 +92,7 @@ if platform.system() == "Darwin":
         logging.warning("   Install Homebrew: https://brew.sh/")
         logging.warning("   Then, run: brew install llvm libomp")
         logging.info("Proceeding without setting the compiler.")
-    
+
     else:
         # Check if LLVM is installed
         llvm_check = subprocess.run(["brew", "--prefix", "llvm"], capture_output=True, text=True)
