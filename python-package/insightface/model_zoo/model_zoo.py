@@ -68,7 +68,7 @@ def find_onnx_file(dir_path):
     return paths[-1]
 
 def get_default_providers():
-    return ['CUDAExecutionProvider', 'CPUExecutionProvider']
+    return ['CUDAExecutionProvider', 'CANNExecutionProvider', 'CPUExecutionProvider']
 
 def get_default_provider_options():
     return None
