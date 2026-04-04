@@ -24,7 +24,7 @@ def compute_bbox_regression_targets(rois, overlaps, labels):
     :return: targets[i][class, dx, dy, dw, dh] k * 5
     """
     # Ensure ROIs are floats
-    rois = rois.astype(np.float, copy=False)
+    rois = rois.astype(np.float32, copy=False)
 
     # Sanity check
     if len(rois) != len(overlaps):
@@ -190,7 +190,7 @@ def compute_bbox_mask_targets_and_label(rois, overlaps, labels, seg, flipped):
     :return: targets[i][class, dx, dy, dw, dh] k * 5
     """
     # Ensure ROIs are floats
-    rois = rois.astype(np.float, copy=False)
+    rois = rois.astype(np.float32, copy=False)
 
     # Sanity check
     if len(rois) != len(overlaps):

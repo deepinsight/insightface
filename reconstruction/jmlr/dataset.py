@@ -681,7 +681,7 @@ def test_dataset1(cfg):
         #img_local = (img_local+1.0) * 128.0
         #draw = img_local.astype(np.uint8).transpose( (1,2,0) )[:,:,::-1].copy()
         #for i in range(points2d.shape[0]):
-        #    pt = points2d[i].astype(np.int)
+        #    pt = points2d[i].astype(np.int32)
         #    cv2.circle(draw, pt, 2, (255,0,0), 2)
         ##output_path = "outputs/%d_%.3f_%.3f_%.3f.jpg"%(idx, label_6dof[0], label_6dof[1], label_6dof[2])
         #output_path = "outputs/%06d.jpg"%(idx)
@@ -787,10 +787,10 @@ def test_dataset2(cfg):
         img_local = (img_local+1.0) * 128.0
         draw = img_local.astype(np.uint8).transpose( (1,2,0) )[:,:,::-1].copy()
         for i in range(points2d.shape[0]):
-            pt = points2d[i].astype(np.int)
+            pt = points2d[i].astype(np.int32)
             cv2.circle(draw, pt, 2, (255,0,0), 2)
         for i in range(eye_points.shape[0]):
-            pt = eye_points[i].astype(np.int)
+            pt = eye_points[i].astype(np.int32)
             cv2.circle(draw, pt, 2, (0,255,0), 2)
         ##output_path = "outputs/%d_%.3f_%.3f_%.3f.jpg"%(idx, label_6dof[0], label_6dof[1], label_6dof[2])
         output_path = "outputs/%06d.jpg"%(idx)
