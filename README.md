@@ -44,6 +44,8 @@ Both manual-downloading models from our github repo and auto-downloading models 
 
 ## Top News
 
+**`2026-07-27`** [InsightFace Server](server/) Added a simple AWS Rekognition alternative with accuracy-preserving INT8 embedding quantization and 50M+ image search on one RTX 5090 GPU.
+
 **`2026-05-23`** `InsightFace 1.0` Added a cross-platform desktop GUI Demo for face recognition, enterprise evaluation, reports, and face swap trials, with a lighter default Python install that removes C++ build requirements.
 
 **`2025-11-18`** `[Picsi.ai]` Released Live Face Swap macOS & iOS App and updated [Picsi.ai](https://www.picsi.ai) services with our latest series of swap models (incl. [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live)/Cyn/Dax).
@@ -57,6 +59,8 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 **`2021-10-29`**: We achieved 1st place on the [VISA track](https://pages.nist.gov/frvt/plots/11/visa.html) of [NIST-FRVT 1:1](https://pages.nist.gov/frvt/html/frvt11.html) by using Partial FC (Xiang An, Jiankang Deng, Jia Guo).
 
 ## ChangeLogs
+
+**`2026-07-27`** [InsightFace Server](server/) Added a simple AWS Rekognition alternative with accuracy-preserving INT8 embedding quantization and 50M+ image search on one RTX 5090 GPU.
 
 **`2025-11-18`** `[Picsi.ai]` Released Live Face Swap macOS & iOS App and updated [Picsi.ai](https://www.picsi.ai) services with our latest series of swap models (incl. [inswapper-live](https://github.com/deepinsight/inswapper-512-live)/Cyn/Dax).
 
