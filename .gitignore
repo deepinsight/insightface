@@ -100,4 +100,15 @@ ENV/
 # mypy
 .mypy_cache/
 
+# InsightFace Server local state and private biometric/model assets
+.private/
+evaluation_data/
+.pytest_cache/
+.ruff_cache/
+server/.data/
+server/.models/*
+!server/.models/.gitkeep
+server/test-results/
+*.onnx
+
 .DS_Store

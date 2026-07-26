@@ -1,0 +1,14 @@
+-r requirements.cpu.lock
+coverage==7.15.1
+httpcore==1.0.9
+httpcore2==2.9.1
+httpx==0.28.1
+httpx2==2.9.1
+iniconfig==2.3.0
+mypy==1.14.1
+mypy-extensions==1.1.0
+pluggy==1.6.0
+pytest==9.0.3
+pytest-cov==6.0.0
+ruff==0.9.3
+truststore==0.10.4

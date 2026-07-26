@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools==80.9.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "insightface-server"
+version = "0.2.0"
+description = "Simple self-hosted InsightFace REST API and management UI"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+license-files = ["LICENSING.md"]
+authors = [{name = "InsightFace Contributors"}]
+dynamic = ["dependencies"]
+
+[tool.setuptools]
+package-dir = {"" = "backend"}
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.setuptools.package-data]
+"insightface_server.licensing" = [
+  "trusted_keys/*.pem",
+  "defaults/*/MODEL.LICENSE",
+]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.common.lock"]}
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+markers = [
+  "cpu: requires local real ONNX models",
+  "cuda: requires an NVIDIA GPU and CUDA image",
+  "consistency: compares CPU and CUDA inference outputs",
+  "docker: requires Docker Engine",
+  "e2e: exercises the browser UI",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/insightface_server/app.py" = ["B008"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+check_untyped_defs = true
+warn_unused_ignores = true

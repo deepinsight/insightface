@@ -1,0 +1,90 @@
+name: insightface-simple-cpu
+
+x-models-path: &models-path ../.models
+
+services:
+  server:
+    image: ghcr.io/deepinsight/insightface-server:0.2.0-cpu
+    platform: linux/amd64
+    init: true
+    read_only: true
+    user: "10001:10001"
+    restart: unless-stopped
+    stop_grace_period: 30s
+    ports:
+      - "18097:8080"
+    environment:
+      INSIGHTFACE_AUTH_ENABLED: "${INSIGHTFACE_AUTH_ENABLED:-false}"
+      INSIGHTFACE_CONFIG_FILE: /etc/insightface/server.toml
+      INSIGHTFACE_API_KEY: "${INSIGHTFACE_API_KEY:-}"
+      INSIGHTFACE_CORS_ORIGINS: "${INSIGHTFACE_CORS_ORIGINS:-}"
+      INSIGHTFACE_LOG_LEVEL: "${INSIGHTFACE_LOG_LEVEL:-INFO}"
+      INSIGHTFACE_SAVE_FACE_CROPS: "${INSIGHTFACE_SAVE_FACE_CROPS:-false}"
+      INSIGHTFACE_DEFAULT_THRESHOLD: "${INSIGHTFACE_DEFAULT_THRESHOLD:-0.4}"
+      INSIGHTFACE_COLLECTION_DEFAULT_SEARCH_PROFILE: "${INSIGHTFACE_COLLECTION_DEFAULT_SEARCH_PROFILE:-fp32_v1}"
+      INSIGHTFACE_COLLECTION_DEFAULT_CAPACITY_ROWS: "${INSIGHTFACE_COLLECTION_DEFAULT_CAPACITY_ROWS:-100000}"
+      INSIGHTFACE_COLLECTION_MAX_CAPACITY_ROWS: "${INSIGHTFACE_COLLECTION_MAX_CAPACITY_ROWS:-10000000}"
+      INSIGHTFACE_COLLECTION_DEFAULT_MAX_FACES_PER_PERSON: "${INSIGHTFACE_COLLECTION_DEFAULT_MAX_FACES_PER_PERSON:-20}"
+      INSIGHTFACE_COLLECTION_DEFAULT_LOAD_POLICY: "${INSIGHTFACE_COLLECTION_DEFAULT_LOAD_POLICY:-lazy}"
+      INSIGHTFACE_SEARCH_DEVICE_ID: "${INSIGHTFACE_SEARCH_DEVICE_ID:-0}"
+      INSIGHTFACE_SEARCH_TOPK_MODE: "${INSIGHTFACE_SEARCH_TOPK_MODE:-auto}"
+      INSIGHTFACE_SEARCH_BUILD_BATCH_ROWS: "${INSIGHTFACE_SEARCH_BUILD_BATCH_ROWS:-4096}"
+      INSIGHTFACE_INFERENCE_MODE: onnx
+      INSIGHTFACE_EXECUTION_PROVIDER: CPUExecutionProvider
+    volumes:
+      - type: bind
+        source: ../config/server.toml
+        target: /etc/insightface/server.toml
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: volume
+        source: data
+        target: /data
+      - type: bind
+        source: *models-path
+        target: /models
+        read_only: true
+        bind:
+          create_host_path: false
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=128m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 512
+    shm_size: 256m
+
+  models:
+    profiles: [tools]
+    image: ghcr.io/deepinsight/insightface-server:0.2.0-cpu
+    platform: linux/amd64
+    init: true
+    read_only: true
+    user: "${INSIGHTFACE_MODELS_UID:-1000}:${INSIGHTFACE_MODELS_GID:-1000}"
+    group_add: ["10001"]
+    entrypoint: ["python", "-m", "insightface_server.models_cli"]
+    environment:
+      INSIGHTFACE_MODELS_DIR: /models
+      HTTP_PROXY: "${HTTP_PROXY:-}"
+      HTTPS_PROXY: "${HTTPS_PROXY:-}"
+      NO_PROXY: "${NO_PROXY:-}"
+      http_proxy: "${http_proxy:-}"
+      https_proxy: "${https_proxy:-}"
+      no_proxy: "${no_proxy:-}"
+    volumes:
+      - type: bind
+        source: *models-path
+        target: /models
+        bind:
+          create_host_path: false
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    healthcheck:
+      disable: true
+
+volumes:
+  data:
+    name: insightface-simple-cpu-data

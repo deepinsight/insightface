@@ -1,0 +1,4 @@
+-r requirements.common.lock
+# ONNX Runtime 1.27's PyPI GPU wheel targets CUDA 13. This fixed CUDA 12
+# wheel is published by Microsoft and protected by its SHA-256 fragment.
+onnxruntime-gpu @ https://aiinfra.pkgs.visualstudio.com/2692857e-05ef-43b4-ba9c-ccf1c22c437c/_packaging/9387c3aa-d9ad-4513-968c-383f6f7f53b8/pypi/download/onnxruntime-gpu/1.27/onnxruntime_gpu-1.27.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl#sha256=00238cee89f8f4f5c65dae0de9178f1ca903e34068029c2ccfee358a028f84ba

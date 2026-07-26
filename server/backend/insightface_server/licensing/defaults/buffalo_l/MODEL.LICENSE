@@ -1,0 +1,9 @@
+{
+  "license_version": 1,
+  "license_id": "buffalo_l-public-v1",
+  "issuer": "InsightFace",
+  "model_id": "buffalo_l",
+  "grant": "non-commercial",
+  "valid_from": "2021-09-22T00:00:00Z",
+  "signature": "mkF_zjs_gw5lzWlN6DXlBWPY6ZK7diTGoSORdp33ISLegqxSrL930a--bHEGOOiUO4n-W9kX5qQc6kbEkGnUBQ"
+}

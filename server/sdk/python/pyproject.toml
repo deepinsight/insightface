@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools==80.9.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "insightface-server-client"
+version = "0.2.0"
+description = "Typed Python client for InsightFace Server"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "InsightFace contributors" }]
+dependencies = ["httpx==0.28.1"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Typing :: Typed",
+]
+
+[project.optional-dependencies]
+test = ["pytest==9.0.3"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+insightface_server = ["py.typed"]

@@ -1,0 +1,128 @@
+# syntax=docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
+
+FROM nvidia/cuda:12.9.1-devel-ubuntu22.04@sha256:bd4e2680a261c212f1e2fea241606f71497dc67a417f73175d794ec8212b5ba8 AS native-search-builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get -o Acquire::Retries=5 update \
+    && apt-get -o Acquire::Retries=5 install --yes --no-install-recommends cmake g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY server/native/search /src/native-search
+RUN cmake -S /src/native-search -B /build/native-search \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DIFS_SEARCH_BUILD_CPU=OFF \
+      -DIFS_SEARCH_BUILD_CUDA=ON \
+      -DIFS_SEARCH_BUILD_TESTS=ON \
+    && cmake --build /build/native-search --parallel \
+    && ctest --test-dir /build/native-search --output-on-failure
+
+FROM nvcr.io/nvidia/cuda:12.9.1-runtime-ubuntu22.04@sha256:6553b9635f35d992cf0473f55d1e998935a2dd1e2e604d3cbfb2bf295a8faa79
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+LABEL org.opencontainers.image.title="InsightFace Server CUDA 12" \
+      org.opencontainers.image.description="Simple InsightFace Server for linux/amd64 NVIDIA GPU inference" \
+      org.opencontainers.image.source="https://github.com/deepinsight/insightface"
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PATH=/opt/venv/bin:$PATH \
+    PYTHONPATH=/opt/insightface/server/backend:/opt/insightface/python-package \
+    INSIGHTFACE_DATA_DIR=/data \
+    INSIGHTFACE_MODELS_DIR=/models \
+    INSIGHTFACE_CONFIG_FILE=/etc/insightface/server.toml \
+    INSIGHTFACE_INFERENCE_MODE=onnx \
+    INSIGHTFACE_EXECUTION_PROVIDER=CUDAExecutionProvider \
+    INSIGHTFACE_STRICT_CUDA=1 \
+    INSIGHTFACE_SEARCH_BACKEND=native_cuda \
+    INSIGHTFACE_SEARCH_LIBRARY=/opt/insightface/server/native/lib/libifs_search_cuda.so \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+    CUDA_MODULE_LOADING=LAZY
+
+# Ubuntu 22.04 does not include Python 3.11. The deadsnakes repository is used
+# inside the image only; this never changes the customer's host packages.
+RUN set -eux; \
+    for attempt in 1 2 3 4 5; do \
+      if apt-get -o Acquire::Retries=5 update \
+        && apt-get -o Acquire::Retries=5 install --yes --no-install-recommends \
+          ca-certificates libgomp1 software-properties-common; then \
+        break; \
+      fi; \
+      test "$attempt" -lt 5; \
+      sleep 2; \
+    done; \
+    for attempt in 1 2 3 4 5; do \
+      if add-apt-repository --yes ppa:deadsnakes/ppa; then \
+        break; \
+      fi; \
+      test "$attempt" -lt 5; \
+      sleep 2; \
+    done; \
+    for attempt in 1 2 3 4 5; do \
+      if apt-get -o Acquire::Retries=5 update \
+        && apt-get -o Acquire::Retries=5 install --fix-missing --yes \
+          --no-install-recommends python3.11 python3.11-venv \
+          libcudnn9-cuda-12=9.24.0.43-1; then \
+        break; \
+      fi; \
+      test "$attempt" -lt 5; \
+      sleep 2; \
+    done; \
+    python3.11 -m venv /opt/venv; \
+    rm -rf /var/lib/apt/lists/*
+
+COPY server/requirements.common.lock server/requirements.cuda12.lock /tmp/requirements/
+RUN python -m pip install --no-cache-dir -r /tmp/requirements/requirements.cuda12.lock
+
+COPY server/scripts/verify_runtime.py /opt/insightface/server/scripts/verify_runtime.py
+RUN python /opt/insightface/server/scripts/verify_runtime.py \
+      --mode build --provider CUDAExecutionProvider
+
+COPY python-package/insightface/__init__.py /opt/insightface/python-package/insightface/__init__.py
+COPY python-package/insightface/app /opt/insightface/python-package/insightface/app
+COPY python-package/insightface/model_zoo /opt/insightface/python-package/insightface/model_zoo
+COPY python-package/insightface/utils /opt/insightface/python-package/insightface/utils
+COPY python-package/insightface/data/__init__.py \
+     python-package/insightface/data/image.py \
+     python-package/insightface/data/pickle_object.py \
+     /opt/insightface/python-package/insightface/data/
+COPY python-package/insightface/thirdparty/__init__.py /opt/insightface/python-package/insightface/thirdparty/__init__.py
+
+COPY server/backend /opt/insightface/server/backend
+COPY server/frontend /opt/insightface/server/frontend
+COPY server/migrations /opt/insightface/server/migrations
+COPY server/config/server.toml /etc/insightface/server.toml
+COPY server/LICENSING.md /opt/insightface/server/LICENSING.md
+COPY server/docs/api*.md /opt/insightface/server/docs/
+COPY server/docs/user-guide*.md /opt/insightface/server/docs/
+COPY server/docs/maintainer-guide.md /opt/insightface/server/docs/maintainer-guide.md
+COPY server/docs/images /opt/insightface/server/docs/images
+COPY --from=native-search-builder \
+     /build/native-search/cuda/libifs_search_cuda.so.2.0.0 \
+     /opt/insightface/server/native/lib/libifs_search_cuda.so
+
+RUN groupadd --gid 10001 insightface \
+    && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent \
+       --shell /usr/sbin/nologin insightface \
+    && install -d -o insightface -g insightface -m 0750 /data \
+    && install -d -o root -g insightface -m 0550 /models \
+    && chown -R root:insightface /opt/insightface \
+    && chmod -R u=rwX,g=rX,o= /opt/insightface
+
+ARG INSIGHTFACE_SERVER_VERSION=0.2.0
+LABEL org.opencontainers.image.version="${INSIGHTFACE_SERVER_VERSION}"
+
+WORKDIR /opt/insightface/server
+USER 10001:10001
+
+VOLUME ["/data"]
+EXPOSE 8080
+STOPSIGNAL SIGTERM
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3 \
+  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/v1/health', timeout=3).read()"]
+
+ENTRYPOINT ["python", "/opt/insightface/server/scripts/verify_runtime.py", "--mode", "startup", "--provider", "CUDAExecutionProvider", "--"]
+CMD ["python", "-m", "uvicorn", "insightface_server.app:app", "--host", "0.0.0.0", "--port", "8080", "--no-access-log"]

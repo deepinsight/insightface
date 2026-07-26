@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#09090b">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'"
+    >
+    <meta name="description" content="Self-hosted InsightFace detection, comparison, enrollment, and search.">
+    <title>InsightFace Server</title>
+    <link rel="icon" href="/assets/insightface-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/assets/styles.css?v=0.2.0-r13">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <button class="brand" type="button" data-route="dashboard" aria-label="InsightFace Server dashboard">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M5.5 21a7.5 7.5 0 0 1 13 0"></path>
+            </svg>
+          </span>
+          <div>
+            <strong>InsightFace</strong>
+            <small>Server console</small>
+          </div>
+        </button>
+
+        <div class="server-chip" id="sidebar-health">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>Connecting</span>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item active" type="button" data-route="dashboard" aria-current="page">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"></path><path d="M5 10v10h14V10"></path><path d="M9 20v-6h6v6"></path></svg></span>Dashboard
+          </button>
+          <button class="nav-item" type="button" data-route="collections">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"></ellipse><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5"></path><path d="M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"></path></svg></span>Collections
+          </button>
+          <button class="nav-item" type="button" data-route="people">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>People
+          </button>
+          <button class="nav-item" type="button" data-route="detect">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 9V5a2 2 0 0 1 2-2h4"></path><path d="M15 3h4a2 2 0 0 1 2 2v4"></path><path d="M21 15v4a2 2 0 0 1-2 2h-4"></path><path d="M9 21H5a2 2 0 0 1-2-2v-4"></path><circle cx="12" cy="10" r="3"></circle><path d="M7 18a5 5 0 0 1 10 0"></path></svg></span>Detect
+          </button>
+          <button class="nav-item" type="button" data-route="compare">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></span>Compare
+          </button>
+          <button class="nav-item" type="button" data-route="search">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg></span>Search
+          </button>
+          <button class="nav-item" type="button" data-route="video">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m16 13 5 3V8l-5 3"></path><rect x="3" y="6" width="13" height="12" rx="2"></rect></svg></span>Camera monitoring
+          </button>
+          <button class="nav-item" type="button" data-route="system">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"></path></svg></span>System
+          </button>
+          <button class="nav-item" type="button" data-route="help">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9.7 9a2.5 2.5 0 1 1 3.8 2.1c-.9.6-1.5 1.1-1.5 2.4"></path><path d="M12 17h.01"></path></svg></span>Help
+          </button>
+        </nav>
+
+        <div class="sidebar-footer" data-auth-ui hidden>
+          <button class="button secondary full-width" id="open-api-key" type="button">Configure API key</button>
+          <p class="muted tiny">The key stays in this tab's memory and is never saved by the UI.</p>
+        </div>
+      </aside>
+
+      <main id="main-content" class="main-content" tabindex="-1">
+        <header class="topbar">
+          <button class="menu-button" id="menu-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+          <div>
+            <p class="eyebrow">INSIGHTFACE SERVER</p>
+            <h1 id="page-title">Dashboard</h1>
+          </div>
+          <div class="topbar-actions">
+            <label class="language-control" title="Language">
+              <span class="sr-only">Language</span>
+              <select id="language-select" aria-label="Language">
+                <option value="en">English</option>
+                <option value="zh">中文</option>
+                <option value="ja">日本語</option>
+                <option value="de">Deutsch</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="ru">Русский</option>
+                <option value="pt">Português</option>
+                <option value="ko">한국어</option>
+              </select>
+            </label>
+            <span class="auth-state" id="auth-state" data-auth-ui hidden><span aria-hidden="true">○</span> No API key</span>
+            <button class="icon-button" id="refresh-page" type="button" aria-label="Refresh current page" title="Refresh">↻</button>
+          </div>
+        </header>
+
+        <div class="page-stack">
+          <section class="page" data-page="dashboard" aria-labelledby="dashboard-heading">
+            <div class="hero-panel">
+              <div>
+                <p class="eyebrow">LOCAL FACE INTELLIGENCE</p>
+                <h2 id="dashboard-heading">Your face recognition service, <span class="gradient-text">at a glance.</span></h2>
+                <p>Detect, compare, enroll, and search without sending images outside your server.</p>
+              </div>
+              <div class="hero-provider">
+                <span>Execution provider</span>
+                <strong id="dashboard-provider">Checking…</strong>
+              </div>
+            </div>
+
+            <div class="metric-grid" aria-label="Database totals">
+              <article class="metric-card"><span>Collections</span><strong id="metric-collections">—</strong><small>separate identity spaces</small></article>
+              <article class="metric-card"><span>People</span><strong id="metric-people">—</strong><small>enrolled identities</small></article>
+              <article class="metric-card"><span>Face samples</span><strong id="metric-faces">—</strong><small>stored embeddings</small></article>
+              <article class="metric-card"><span>Model</span><strong class="metric-text" id="metric-model">—</strong><small id="metric-model-version">not loaded</small></article>
+            </div>
+
+            <div class="two-column">
+              <article class="panel">
+                <div class="panel-heading"><div><p class="eyebrow">SERVICE</p><h3>Runtime status</h3></div><button class="text-button" type="button" data-route="system">View diagnostics →</button></div>
+                <dl class="status-list" id="dashboard-status"></dl>
+              </article>
+              <article class="panel">
+                <div class="panel-heading"><div><p class="eyebrow">THIS TAB</p><h3>Recent errors</h3></div><button class="text-button" id="clear-errors" type="button">Clear</button></div>
+                <div id="recent-errors" class="empty-state compact"><strong>No recent errors</strong><span>API failures from this browser tab will appear here.</span></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="page" data-page="collections" aria-labelledby="collections-heading" hidden>
+            <div class="section-heading">
+              <div><p class="eyebrow">IDENTITY SPACES</p><h2 id="collections-heading">Collections</h2><p>Each collection is pinned to the model and preprocessing version active when it is created.</p></div>
+              <button class="button primary" id="show-create-collection" type="button">＋ New collection</button>
+            </div>
+
+            <form class="panel form-panel collapsible" id="collection-create-form" hidden>
+              <div class="panel-heading"><div><p class="eyebrow">CREATE</p><h3>New collection</h3></div><button class="icon-button close-form" type="button" aria-label="Close">×</button></div>
+              <div class="form-grid three">
+                <label><span class="field-caption">Collection ID</span><input name="id" required pattern="(_default|[A-Za-z0-9][A-Za-z0-9._-]{0,63})" maxlength="64" placeholder="employees" autocomplete="off"><small>Letters, numbers, dot, dash, underscore; max 64. `_default` is reserved for the default collection.</small></label>
+                <label><span class="field-caption">Name</span><input name="name" required maxlength="128" placeholder="Company Employees"></label>
+                <label><span class="field-caption">Default cosine threshold</span><input name="threshold" type="number" min="0" max="1" step="0.01" value="0.4" required></label>
+                <label><span class="field-caption">Search profile</span><select name="search_profile" required><option value="fp32_v1">FP32</option><option value="fp16_v1">FP16</option><option value="bf16_v1">BF16</option><option value="int8_x736_v1">INT8 ×736</option><option value="int8_x1000_v1">INT8 ×1000</option></select></label>
+                <label><span class="field-caption">Capacity (faces)</span><input name="capacity_rows" type="number" min="1" step="1" value="100000" required></label>
+                <label><span class="field-caption">Maximum faces per person</span><input name="max_faces_per_person" type="number" min="1" max="1000000" step="1" value="20" required></label>
+                <label><span class="field-caption">Load policy</span><select name="load_policy"><option value="">Server default</option><option value="lazy">Lazy</option><option value="eager">Eager</option></select></label>
+                <label><span class="field-caption">Detector input sizes</span><input name="detector_input_sizes" value="96x96, 512x512" required><small>Comma-separated width×height pairs; each side must be a multiple of 32.</small></label>
+                <label><span class="field-caption">Detection threshold</span><input name="detector_threshold" type="number" min="0" max="1" step="0.01" value="0.5" required></label>
+                <label><span class="field-caption">NMS threshold</span><input name="detector_nms_threshold" type="number" min="0" max="1" step="0.01" value="0.4" required></label>
+                <label><span class="field-caption">Single-face selection</span><select name="single_face_selection" required><option value="largest">Largest face</option><option value="center_largest">Center-weighted largest</option></select></label>
+              </div>
+              <label class="checkbox-field"><input name="save_face_crops" type="checkbox"><span>Save 112×112 face crops in SQLite</span><small>Off by default. This never stores the original upload and may substantially increase database size.</small></label>
+              <label>Description<textarea name="description" rows="2" maxlength="1000" placeholder="What belongs in this collection?"></textarea></label>
+              <label>Metadata (JSON)<textarea name="metadata" rows="3" spellcheck="false">{}</textarea></label>
+              <div class="form-actions"><button class="button primary" type="submit">Create collection</button><span class="form-status" role="status"></span></div>
+            </form>
+
+            <article class="panel">
+              <div class="table-toolbar">
+                <label class="search-field"><span class="sr-only">Filter collections</span><input id="collection-filter" type="search" placeholder="Filter collections…"></label>
+                <span class="muted" id="collection-count">0 collections</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Collection</th><th>Threshold</th><th>Profile</th><th>Crops</th><th>Model</th><th>People</th><th>Faces</th><th><span class="sr-only">Actions</span></th></tr></thead>
+                  <tbody id="collection-table"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="collection-empty"><strong>No collections yet</strong><span>Create one to start enrolling people.</span></div>
+            </article>
+          </section>
+
+          <section class="page" data-page="people" aria-labelledby="people-heading" hidden>
+            <div class="section-heading">
+              <div><p class="eyebrow">ENROLLMENT</p><h2 id="people-heading">People &amp; face samples</h2><p>Register several clear photos for each real person to improve search robustness.</p></div>
+              <button class="button primary" id="show-create-person" type="button">＋ Register person</button>
+            </div>
+
+            <div class="toolbar panel slim">
+              <label>Collection<select id="people-collection"><option value="">Select a collection</option></select></label>
+              <label class="grow">Search people<input id="people-filter" type="search" placeholder="Name, ID, or external ID"></label>
+            </div>
+
+            <form class="panel form-panel collapsible" id="person-create-form" hidden>
+              <div class="panel-heading"><div><p class="eyebrow">REGISTER</p><h3>New person</h3></div><button class="icon-button close-form" type="button" aria-label="Close">×</button></div>
+              <div class="form-grid three">
+                <label><span class="field-caption">Person ID <span class="optional">optional</span></span><input name="id" maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,63}" placeholder="employee-001"></label>
+                <label><span class="field-caption">Name</span><input name="name" maxlength="200" placeholder="Alice"></label>
+                <label><span class="field-caption">External ID</span><input name="external_id" maxlength="200" placeholder="HR-1001"></label>
+                <label><span class="field-caption">Enrollment review</span><select name="review_mode"><option value="off" selected>Off · collection selection</option><option value="standard">Standard quality</option><option value="strict">Strict identity</option></select></label>
+                <label><span class="field-caption">Embedding source</span><select name="embedding_mode"><option value="server" selected>Extract from image</option><option value="external_trusted">Trusted external feature</option></select></label>
+              </div>
+              <p class="hint embedding-contract-summary">Collection embedding contract: <code class="embedding-contract">Select a Collection</code></p>
+              <div class="external-embedding-fields" hidden>
+                <p class="hint">Images are still required for detection and quality review; the server will not extract or verify these features.</p>
+                <label>External embeddings (JSON, one vector per image)<textarea name="external_embeddings" rows="6" spellcheck="false" placeholder="[[0.0123, -0.0456, ...]]"></textarea></label>
+              </div>
+              <label>Metadata (JSON)<textarea name="metadata" rows="3" spellcheck="false">{}</textarea></label>
+              <label class="drop-zone" id="person-drop-zone">
+                <input name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
+                <span class="drop-icon" aria-hidden="true">＋</span>
+                <strong>Drop registration photos here</strong>
+                <span>or choose one or more JPEG, PNG, or WebP images</span>
+                <small class="file-summary">No files selected</small>
+              </label>
+              <p class="hint">Off uses the Collection single-face selection strategy. Standard and strict require exactly one clear, usable face.</p>
+              <div class="form-actions"><button class="button primary" type="submit">Register person</button><span class="form-status" role="status"></span></div>
+              <div class="rejection-list" id="person-rejections" hidden></div>
+            </form>
+
+            <div class="people-layout">
+              <article class="panel people-list-panel">
+                <div class="panel-heading"><div><p class="eyebrow">DIRECTORY</p><h3 id="people-list-title">People</h3></div><span class="muted" id="people-count">0 people</span></div>
+                <div class="person-list" id="person-list"></div>
+                <div class="empty-state" id="people-empty"><strong>Select a collection</strong><span>Its enrolled people will appear here.</span></div>
+              </article>
+              <article class="panel detail-panel" id="person-detail">
+                <div class="empty-state"><strong>No person selected</strong><span>Choose a person to view details and face samples.</span></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="page" data-page="detect" aria-labelledby="detect-heading" hidden>
+            <div class="section-heading"><div><p class="eyebrow">STATELESS</p><h2 id="detect-heading">Detect faces</h2><p>Find faces, five-point landmarks, confidence, and quality in one image.</p></div></div>
+            <div class="tool-layout">
+              <form class="panel tool-controls" id="detect-form">
+                <label class="drop-zone compact-drop" id="detect-drop-zone">
+                  <input name="image" type="file" accept="image/jpeg,image/png,image/webp" required>
+                  <span class="drop-icon" aria-hidden="true">⌗</span><strong>Drop an image</strong><span>JPEG, PNG, or WebP</span><small class="file-summary">No file selected</small>
+                </label>
+                <div class="form-grid two">
+                  <label><span class="field-caption">Maximum faces</span><input name="max_faces" type="number" min="1" max="100" placeholder="All"></label>
+                  <label><span class="field-caption">Detection profile</span><select name="collection" id="detect-collection"><option value="">System default</option></select></label>
+                </div>
+                <button class="button primary full-width" type="submit">Detect faces</button>
+                <div class="result-summary" id="detect-summary" aria-live="polite">Choose an image to begin.</div>
+              </form>
+              <article class="panel media-panel">
+                <div class="canvas-stage empty" id="detect-stage"><canvas id="detect-canvas" aria-label="Uploaded image with detected face overlays"></canvas><span class="canvas-placeholder">Image preview</span></div>
+                <div class="face-result-list" id="detect-results"></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="page" data-page="compare" aria-labelledby="compare-heading" hidden>
+            <div class="section-heading"><div><p class="eyebrow">ONE-TO-ONE</p><h2 id="compare-heading">Compare two faces</h2><p>The selected detection profile chooses one face from each image for cosine comparison.</p></div></div>
+            <form id="compare-form">
+              <div class="compare-grid">
+                <article class="panel media-panel">
+                  <div class="panel-heading"><h3>Source image</h3></div>
+                  <label class="drop-zone compact-drop" id="compare-source-drop"><input name="source" type="file" accept="image/jpeg,image/png,image/webp" required><strong>Choose source</strong><span>JPEG, PNG, or WebP</span><span class="file-summary">No file selected</span></label>
+                  <div class="canvas-stage empty"><canvas id="compare-source-canvas" aria-label="Source image face overlay"></canvas><span class="canvas-placeholder">Source preview</span></div>
+                </article>
+                <article class="panel media-panel">
+                  <div class="panel-heading"><h3>Target image</h3></div>
+                  <label class="drop-zone compact-drop" id="compare-target-drop"><input name="target" type="file" accept="image/jpeg,image/png,image/webp" required><strong>Choose target</strong><span>JPEG, PNG, or WebP</span><span class="file-summary">No file selected</span></label>
+                  <div class="canvas-stage empty"><canvas id="compare-target-canvas" aria-label="Target image face overlay"></canvas><span class="canvas-placeholder">Target preview</span></div>
+                </article>
+              </div>
+              <div class="panel compare-action-bar">
+                <label><span class="field-caption">Detection profile</span><select name="collection" id="compare-collection"><option value="">System default</option></select></label>
+                <label><span class="field-caption">Match threshold <output id="compare-threshold-output">0.40</output></span><input name="threshold" id="compare-threshold" type="range" min="0" max="1" step="0.01" value="0.4"></label>
+                <button class="button primary" type="submit">Compare faces</button>
+                <div class="compare-verdict" id="compare-verdict" aria-live="polite"><span class="verdict-mark">—</span><div><strong>Waiting for images</strong><small>Similarity is not a probability.</small></div></div>
+              </div>
+            </form>
+          </section>
+
+          <section class="page" data-page="search" aria-labelledby="search-heading" hidden>
+            <div class="section-heading"><div><p class="eyebrow">ONE-TO-MANY</p><h2 id="search-heading">Search a collection</h2><p>Find the closest enrolled people using the Collection single-face selection strategy.</p></div></div>
+            <div class="tool-layout">
+              <form class="panel tool-controls" id="search-form">
+                <label>Collection<select name="collection" id="search-collection" required><option value="">Select a collection</option></select></label>
+                <label class="drop-zone compact-drop" id="search-drop-zone"><input name="image" type="file" accept="image/jpeg,image/png,image/webp" required><span class="drop-icon" aria-hidden="true">⌕</span><strong>Drop a query image</strong><span>JPEG, PNG, or WebP</span><small class="file-summary">No file selected</small></label>
+                <div class="form-grid two search-parameters">
+                  <label><span class="field-caption">Top results</span><input name="limit" type="number" min="1" max="100" value="5" required></label>
+                  <label><span class="field-caption">Threshold <span class="optional">blank = collection default</span></span><input name="threshold" type="number" min="0" max="1" step="0.01" placeholder="Default"></label>
+                </div>
+                <button class="button primary full-width" type="submit">Search people</button>
+                <div class="result-summary" id="search-summary" aria-live="polite">Choose a collection and image.</div>
+              </form>
+              <article class="panel media-panel">
+                <div class="canvas-stage empty" id="search-stage"><canvas id="search-canvas" aria-label="Search image face overlay"></canvas><span class="canvas-placeholder">Query preview</span></div>
+                <div class="match-list" id="search-results"></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="page" data-page="video" aria-labelledby="video-heading" hidden>
+            <div class="section-heading"><div><p class="eyebrow">RTSP MONITORS</p><h2 id="video-heading">Camera monitoring</h2><p>Create persistent server-side Monitors, inspect their current state, and pull recent in-memory events. Video frames and events are not saved.</p></div><button class="button primary" id="show-create-monitor" type="button">New Monitor</button></div>
+            <div class="two-column monitor-admin">
+              <article class="panel">
+                <div class="panel-heading"><div><p class="eyebrow">CONFIGURATION</p><h3>Monitors</h3></div><button class="text-button" id="refresh-monitors" type="button">Refresh</button></div>
+                <div class="monitor-list" id="monitor-list"></div>
+                <div class="empty-state compact" id="monitor-empty"><strong>No Monitors</strong><span>Create a Monitor to connect an RTSP camera.</span></div>
+              </article>
+              <form class="panel form-panel" id="monitor-create-form" hidden>
+                <div class="panel-heading"><div><p class="eyebrow" id="monitor-form-eyebrow">NEW MONITOR</p><h3 id="monitor-form-title">Create Monitor</h3></div><button class="icon-button close-form" type="button" aria-label="Close">×</button></div>
+                <div class="form-grid two">
+                  <label><span class="field-caption">Monitor ID</span><input name="id" maxlength="64" pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,63}" placeholder="front-gate" required></label>
+                  <label><span class="field-caption">Name</span><input name="name" maxlength="200" placeholder="Company front gate" required></label>
+                </div>
+                <label><span class="field-caption">Description</span><input name="description" maxlength="2000" placeholder="Optional location or purpose"></label>
+                <label><span class="field-caption">RTSP URL</span><input name="url" id="rtsp-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="rtsp://camera.example:8554/stream" required><small>The credential is encrypted in /data and is never returned by the API.</small></label>
+                <label><span class="field-caption">Collection</span><select name="collection_id" id="video-collection" required><option value="">Select a collection</option></select></label>
+                <div class="form-grid two">
+                  <label><span class="field-caption">Inference rate</span><input name="inference_fps" type="number" min="0.1" max="30" step="0.1" value="2" required><small>Executions per second</small></label>
+                  <label><span class="field-caption">Match threshold <span class="optional">blank = collection default</span></span><input name="match_threshold" type="number" min="0" max="1" step="0.01" placeholder="Default"></label>
+                </div>
+                <div class="form-grid two">
+                  <label><span class="field-caption">Recent event capacity</span><input name="event_buffer_size" type="number" min="10" max="10000" value="1000" required></label>
+                  <label><span class="field-caption">Confirmation frames</span><input name="confirm_frames" type="number" min="1" max="100" value="3" required></label>
+                </div>
+                <div class="form-grid two">
+                  <label><span class="field-caption">Absence timeout</span><input name="absence_timeout_seconds" type="number" min="0.1" max="300" step="0.1" value="3" required><small>Seconds before an exit event</small></label>
+                  <label><span class="field-caption">Event cooldown</span><input name="cooldown_seconds" type="number" min="0" max="3600" step="0.1" value="10" required><small>Seconds between repeated events</small></label>
+                </div>
+                <label class="checkbox-line"><input name="enabled" type="checkbox" checked><span><strong id="monitor-enabled-label">Start after creation</strong><small id="monitor-enabled-help">Run independently of this browser.</small></span></label>
+                <label class="checkbox-line"><input name="emit_unknown" type="checkbox" checked><span><strong>Emit unknown-person events</strong><small>Include confirmed faces that are not enrolled.</small></span></label>
+                <label class="checkbox-line"><input name="preview_enabled" type="checkbox"><span><strong>Enable Web video preview</strong><small>Off by default. Recognition and events work without preview.</small></span></label>
+                <button class="button primary full-width" id="monitor-form-submit" type="submit">Create Monitor</button>
+              </form>
+            </div>
+            <div class="tool-layout video-layout">
+              <article class="panel video-view">
+                <div class="video-stage">
+                  <img id="rtsp-preview" alt="RTSP camera preview" hidden>
+                  <canvas id="rtsp-overlay" aria-label="Recognition overlay" hidden></canvas>
+                  <div class="video-idle" id="video-idle"><span class="video-symbol" aria-hidden="true">●</span><strong id="video-idle-title">No Monitor selected</strong><span id="video-idle-message">Select a Monitor to inspect its live recognition state.</span></div>
+                </div>
+                <div class="stream-legend" aria-label="Recognition color legend">
+                  <span><i class="legend-swatch recognized" aria-hidden="true"></i>Recognized person</span>
+                  <span><i class="legend-swatch not-enrolled" aria-hidden="true"></i>Detected, not enrolled</span>
+                </div>
+              </article>
+              <article class="panel tool-controls" id="monitor-runtime">
+                <div class="panel-heading"><div><p class="eyebrow">CURRENT STATE</p><h3 id="selected-monitor-name">Select a Monitor</h3></div><span class="badge" id="selected-monitor-id">—</span></div>
+                <div class="monitor-actions">
+                  <button class="button secondary small" id="monitor-toggle" type="button" disabled>Start</button>
+                  <button class="button secondary small" id="monitor-preview-toggle" type="button" disabled>Enable preview</button>
+                  <button class="button secondary small" id="monitor-edit" type="button" disabled>Edit</button>
+                  <button class="button danger small" id="monitor-delete" type="button" disabled>Delete</button>
+                </div>
+                <dl class="stream-metrics" id="monitor-config" hidden>
+                  <div><dt>Source</dt><dd id="monitor-source">—</dd></div>
+                  <div><dt>Collection</dt><dd id="monitor-collection">—</dd></div>
+                  <div><dt>Match threshold</dt><dd id="monitor-threshold">—</dd></div>
+                  <div><dt>Recent event capacity</dt><dd id="monitor-event-capacity">—</dd></div>
+                </dl>
+                <div class="result-summary" id="video-status" aria-live="polite">Select a Monitor to inspect it.</div>
+                <dl class="stream-metrics" id="video-metrics" hidden>
+                  <div><dt>Connection</dt><dd id="video-connection">—</dd></div>
+                  <div><dt>Effective rate</dt><dd id="video-effective-fps">—</dd></div>
+                  <div><dt>Inference time</dt><dd id="video-latency">—</dd></div>
+                  <div><dt>Skipped frames</dt><dd id="video-skipped">—</dd></div>
+                </dl>
+                <div class="video-matches" id="video-matches"></div>
+                <div class="panel-heading monitor-events-heading"><div><p class="eyebrow">IN-MEMORY BUFFER</p><h3>Recent events</h3></div><span class="badge" id="monitor-event-count">0</span></div>
+                <div class="monitor-events" id="monitor-events"></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="page" data-page="system" aria-labelledby="system-heading" hidden>
+            <div class="section-heading"><div><p class="eyebrow">ADMINISTRATION</p><h2 id="system-heading">System</h2><p>Runtime diagnostics and safe system configuration. Secrets and embeddings are never displayed.</p></div><button class="button secondary" id="system-refresh" type="button">Refresh system</button></div>
+            <div class="metric-grid system-metrics">
+              <article class="metric-card"><span>Server</span><strong class="metric-text" id="system-server">—</strong><small id="system-platform">—</small></article>
+              <article class="metric-card"><span>Provider</span><strong class="metric-text" id="system-provider">—</strong><small id="system-ort">—</small></article>
+              <article class="metric-card"><span>Accelerator</span><strong class="metric-text" id="system-gpu">—</strong><small id="system-driver">—</small></article>
+              <article class="metric-card" data-auth-ui hidden><span>API key in UI</span><strong class="metric-text" id="system-auth">Not configured</strong><small>tab memory only</small></article>
+            </div>
+            <div class="two-column">
+              <article class="panel"><div class="panel-heading"><div><p class="eyebrow">RUNTIME</p><h3>Hardware &amp; software</h3></div></div><dl class="diagnostic-list" id="system-runtime"></dl></article>
+              <article class="panel"><div class="panel-heading"><div><p class="eyebrow">STORAGE</p><h3>Database &amp; mounts</h3></div></div><dl class="diagnostic-list" id="system-storage"></dl></article>
+            </div>
+            <article class="panel">
+              <div class="panel-heading"><div><p class="eyebrow">MODELS</p><h3>Loaded models</h3></div></div>
+              <aside class="model-license-notice" aria-label="Open-source model license">
+                <strong>Open-source model license</strong>
+                <p>InsightFace-provided open-source pretrained models, including buffalo_l, are for non-commercial research use only.</p>
+                <p>Commercial use requires a separate license. <a href="https://www.insightface.ai" target="_blank" rel="noopener noreferrer">Commercial licensing</a></p>
+              </aside>
+              <div class="model-grid" id="system-models"></div>
+            </article>
+            <article class="panel developer-tools-panel">
+              <div>
+                <p class="eyebrow">DEVELOPER TOOLS</p>
+                <h3>OpenAPI Schema</h3>
+                <p>Inspect the exact paths, parameters, and response schemas exposed by this running server.</p>
+              </div>
+              <div class="developer-tools-actions">
+                <a class="button secondary" href="/docs" target="_blank" rel="noopener">Open schema explorer</a>
+                <a class="text-link" href="/openapi.json" target="_blank" rel="noopener">OpenAPI JSON</a>
+              </div>
+            </article>
+          </section>
+
+          <section class="page" data-page="help" aria-labelledby="help-heading" hidden>
+            <div class="section-heading">
+              <div><p class="eyebrow">DOCUMENTATION</p><h2 id="help-heading">Help</h2><p>Beginner guidance and complete API documentation are bundled with this server and work without internet access.</p></div>
+            </div>
+            <div class="documentation-switcher" id="documentation-switcher" role="group" aria-label="Documentation"></div>
+            <div class="documentation-layout">
+              <aside class="panel documentation-nav" aria-label="Documentation">
+                <strong>On this page</strong>
+                <label class="documentation-filter"><span>Find a topic</span><input id="documentation-filter" type="search" placeholder="Search help topics…"></label>
+                <nav class="documentation-toc" id="documentation-toc" aria-label="Help topics"></nav>
+                <p class="muted tiny">The displayed language follows the console language selector.</p>
+              </aside>
+              <article class="panel markdown-document" id="markdown-document" aria-live="polite">
+                <div class="loading-document"><span></span><strong>Loading documentation…</strong></div>
+              </article>
+            </div>
+            <aside class="panel documentation-developer-note">
+              <div><strong>Developer schema</strong><p>Use the OpenAPI schema when generating clients or checking exact runtime types.</p></div>
+              <a class="button secondary" href="/docs" target="_blank" rel="noopener">Open schema explorer</a>
+            </aside>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <dialog id="api-key-dialog" data-auth-ui hidden>
+      <form method="dialog" id="api-key-form">
+        <div class="dialog-heading"><div><p class="eyebrow">AUTHENTICATION</p><h2>API key</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div>
+        <p>Requests from this tab will send the key as a Bearer token. It is not written to cookies, local storage, logs, or the URL.</p>
+        <label>API key<input name="api_key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste API key"></label>
+        <div class="dialog-actions"><button class="button secondary" id="clear-api-key" type="button">Clear key</button><button class="button primary" value="default" type="submit">Use for this tab</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="collection-edit-dialog">
+      <form method="dialog" id="collection-edit-form">
+        <div class="dialog-heading"><div><p class="eyebrow">COLLECTION</p><h2>Edit collection</h2></div><button class="icon-button" value="cancel" aria-label="Close">×</button></div>
+        <input name="id" type="hidden">
+        <label>Name<input name="name" required maxlength="128"></label>
+        <label>Description<textarea name="description" rows="3" maxlength="1000"></textarea></label>
+        <label>Default cosine threshold<input name="threshold" required type="number" min="0" max="1" step="0.01"></label>
+        <label>Search profile<input name="search_profile" readonly></label>
+        <label>Capacity (faces)<input name="capacity_rows" required type="number" min="1" step="1"></label>
+        <label>Maximum faces per person<input name="max_faces_per_person" required type="number" min="1" max="1000000" step="1"></label>
+        <label>Load policy<select name="load_policy"><option value="lazy">Lazy</option><option value="eager">Eager</option></select></label>
+        <label>Detector input sizes<input name="detector_input_sizes" required><small>Comma-separated width×height pairs.</small></label>
+        <label>Detection threshold<input name="detector_threshold" required type="number" min="0" max="1" step="0.01"></label>
+        <label>NMS threshold<input name="detector_nms_threshold" required type="number" min="0" max="1" step="0.01"></label>
+        <label>Single-face selection<select name="single_face_selection"><option value="largest">Largest face</option><option value="center_largest">Center-weighted largest</option></select></label>
+        <label class="checkbox-field"><input name="save_face_crops" type="checkbox"><span>Save 112×112 face crops in SQLite</span><small>Applies to later registrations; an already-running request may use the previous setting.</small></label>
+        <label>Metadata (JSON)<textarea name="metadata" rows="4" spellcheck="false"></textarea></label>
+        <div class="dialog-actions"><button class="button secondary" value="cancel">Cancel</button><button class="button primary" value="default" type="submit">Save changes</button></div>
+      </form>
+    </dialog>
+
+    <div class="toast-region" id="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
+    <script type="module" src="/assets/app.mjs?v=0.2.0-r13"></script>
+  </body>
+</html>

@@ -17,6 +17,16 @@ InsightFace 1.0 focuses on easier local evaluation and desktop usage:
 - Added **InsightFace Evaluation Studio**, a cross-platform GUI Demo for Windows, macOS, and Linux.
 - The GUI supports local face recognition, enterprise model evaluation/reporting, and basic face swap trials.
 
+## InsightFace Server
+
+The new [InsightFace Server](server/) provides a simple self-hosted Web UI,
+snake_case `/v1` REST API, and Python client for detection, comparison,
+registration, and Person search. A single Linux x86_64 CPU or NVIDIA GPU
+container runs local ONNX Runtime inference and SQLite with operator-supplied,
+manifest-verified models. Models are not included; review their separate
+licensing terms before deployment. The code/model boundary is defined in the
+[InsightFace Server licensing guide](server/LICENSING.md).
+
 ## License
 
 The code of InsightFace is released under the MIT License. There is no limitation for both academic and commercial usage.

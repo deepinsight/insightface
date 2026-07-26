@@ -1,0 +1,6783 @@
+{
+  "components": {
+    "schemas": {
+      "Body_add_faces_v1_collections__collection_id__persons__person_id__faces_post": {
+        "properties": {
+          "embedding_contract_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Contract Id"
+          },
+          "embedding_mode": {
+            "default": "server",
+            "enum": [
+              "server",
+              "external_trusted"
+            ],
+            "title": "Embedding Mode",
+            "type": "string"
+          },
+          "external_embeddings": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Embeddings"
+          },
+          "images": {
+            "items": {
+              "contentMediaType": "application/octet-stream",
+              "type": "string"
+            },
+            "title": "Images",
+            "type": "array"
+          },
+          "review_mode": {
+            "default": "off",
+            "enum": [
+              "off",
+              "standard",
+              "strict"
+            ],
+            "title": "Review Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "images"
+        ],
+        "title": "Body_add_faces_v1_collections__collection_id__persons__person_id__faces_post",
+        "type": "object"
+      },
+      "Body_compare_v1_compare_post": {
+        "properties": {
+          "collection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collection Id"
+          },
+          "source": {
+            "contentMediaType": "application/octet-stream",
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "contentMediaType": "application/octet-stream",
+            "title": "Target",
+            "type": "string"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          }
+        },
+        "required": [
+          "source",
+          "target"
+        ],
+        "title": "Body_compare_v1_compare_post",
+        "type": "object"
+      },
+      "Body_create_person_v1_collections__collection_id__persons_post": {
+        "properties": {
+          "embedding_contract_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Contract Id"
+          },
+          "embedding_mode": {
+            "default": "server",
+            "enum": [
+              "server",
+              "external_trusted"
+            ],
+            "title": "Embedding Mode",
+            "type": "string"
+          },
+          "external_embeddings": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Embeddings"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "images": {
+            "items": {
+              "contentMediaType": "application/octet-stream",
+              "type": "string"
+            },
+            "title": "Images",
+            "type": "array"
+          },
+          "metadata": {
+            "default": "{}",
+            "title": "Metadata",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "review_mode": {
+            "default": "off",
+            "enum": [
+              "off",
+              "standard",
+              "strict"
+            ],
+            "title": "Review Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "images"
+        ],
+        "title": "Body_create_person_v1_collections__collection_id__persons_post",
+        "type": "object"
+      },
+      "Body_detect_v1_detect_post": {
+        "properties": {
+          "collection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collection Id"
+          },
+          "image": {
+            "contentMediaType": "application/octet-stream",
+            "title": "Image",
+            "type": "string"
+          },
+          "max_faces": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Faces"
+          },
+          "min_score": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "deprecated": true,
+            "title": "Min Score"
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "title": "Body_detect_v1_detect_post",
+        "type": "object"
+      },
+      "Body_embeddings_v1_embeddings_post": {
+        "properties": {
+          "collection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collection Id"
+          },
+          "face_selection": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "deprecated": true,
+            "title": "Face Selection"
+          },
+          "image": {
+            "contentMediaType": "application/octet-stream",
+            "title": "Image",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "title": "Body_embeddings_v1_embeddings_post",
+        "type": "object"
+      },
+      "Body_search_v1_collections__collection_id__search_post": {
+        "properties": {
+          "face_selection": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "deprecated": true,
+            "title": "Face Selection"
+          },
+          "image": {
+            "contentMediaType": "application/octet-stream",
+            "title": "Image",
+            "type": "string"
+          },
+          "limit": {
+            "default": 5,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "title": "Body_search_v1_collections__collection_id__search_post",
+        "type": "object"
+      },
+      "BoundingBox": {
+        "additionalProperties": true,
+        "properties": {
+          "normalized": {
+            "$ref": "#/components/schemas/NormalizedBox"
+          },
+          "pixels": {
+            "$ref": "#/components/schemas/PixelBox"
+          }
+        },
+        "required": [
+          "pixels",
+          "normalized"
+        ],
+        "title": "BoundingBox",
+        "type": "object"
+      },
+      "Collection": {
+        "additionalProperties": true,
+        "properties": {
+          "capacity_rows": {
+            "title": "Capacity Rows",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "default_threshold": {
+            "title": "Default Threshold",
+            "type": "number"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "detection": {
+            "$ref": "#/components/schemas/DetectionProfile"
+          },
+          "detection_revision": {
+            "title": "Detection Revision",
+            "type": "integer"
+          },
+          "embedding_contract_id": {
+            "title": "Embedding Contract Id",
+            "type": "string"
+          },
+          "embedding_dimension": {
+            "title": "Embedding Dimension",
+            "type": "integer"
+          },
+          "face_count": {
+            "title": "Face Count",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "load_policy": {
+            "enum": [
+              "eager",
+              "lazy"
+            ],
+            "title": "Load Policy",
+            "type": "string"
+          },
+          "max_faces_per_person": {
+            "title": "Max Faces Per Person",
+            "type": "integer"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "model_digest": {
+            "title": "Model Digest",
+            "type": "string"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "person_count": {
+            "title": "Person Count",
+            "type": "integer"
+          },
+          "preprocessing_version": {
+            "title": "Preprocessing Version",
+            "type": "string"
+          },
+          "save_face_crops": {
+            "title": "Save Face Crops",
+            "type": "boolean"
+          },
+          "search_profile": {
+            "title": "Search Profile",
+            "type": "string"
+          },
+          "search_revision": {
+            "title": "Search Revision",
+            "type": "integer"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "default_threshold",
+          "model_id",
+          "model_version",
+          "model_digest",
+          "embedding_dimension",
+          "preprocessing_version",
+          "embedding_contract_id",
+          "search_profile",
+          "capacity_rows",
+          "max_faces_per_person",
+          "load_policy",
+          "search_revision",
+          "save_face_crops",
+          "metadata",
+          "person_count",
+          "face_count",
+          "created_at",
+          "updated_at",
+          "detection",
+          "detection_revision"
+        ],
+        "title": "Collection",
+        "type": "object"
+      },
+      "CollectionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "detection": {
+            "$ref": "#/components/schemas/CollectionDetectionCreate"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "save_face_crops": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Save Face Crops"
+          },
+          "search": {
+            "$ref": "#/components/schemas/CollectionSearchCreate"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "CollectionCreate",
+        "type": "object"
+      },
+      "CollectionDetectionCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "input_sizes": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "prefixItems": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ],
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Sizes"
+          },
+          "nms_threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nms Threshold"
+          },
+          "single_face_selection": {
+            "anyOf": [
+              {
+                "enum": [
+                  "largest",
+                  "center_largest"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Single Face Selection"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          }
+        },
+        "title": "CollectionDetectionCreate",
+        "type": "object"
+      },
+      "CollectionDetectionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "input_sizes": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "prefixItems": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "integer"
+                    }
+                  ],
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Sizes"
+          },
+          "nms_threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nms Threshold"
+          },
+          "single_face_selection": {
+            "anyOf": [
+              {
+                "enum": [
+                  "largest",
+                  "center_largest"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Single Face Selection"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          }
+        },
+        "title": "CollectionDetectionPatch",
+        "type": "object"
+      },
+      "CollectionPageResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "collections": {
+            "items": {
+              "$ref": "#/components/schemas/Collection"
+            },
+            "title": "Collections",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "collections",
+          "next_cursor"
+        ],
+        "title": "CollectionPageResponse",
+        "type": "object"
+      },
+      "CollectionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "detection": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CollectionDetectionPatch"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "save_face_crops": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Save Face Crops"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CollectionSearchPatch"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          }
+        },
+        "title": "CollectionPatch",
+        "type": "object"
+      },
+      "CollectionResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "collection": {
+            "$ref": "#/components/schemas/Collection"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "collection"
+        ],
+        "title": "CollectionResponse",
+        "type": "object"
+      },
+      "CollectionSearchCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "capacity_rows": {
+            "anyOf": [
+              {
+                "maximum": 9.223372036854776e+18,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity Rows"
+          },
+          "load_policy": {
+            "anyOf": [
+              {
+                "enum": [
+                  "eager",
+                  "lazy"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Load Policy"
+          },
+          "max_faces_per_person": {
+            "anyOf": [
+              {
+                "maximum": 1000000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Faces Per Person"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "enum": [
+                  "fp32_v1",
+                  "fp16_v1",
+                  "bf16_v1",
+                  "int8_x736_v1",
+                  "int8_x1000_v1"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile"
+          }
+        },
+        "title": "CollectionSearchCreate",
+        "type": "object"
+      },
+      "CollectionSearchPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "capacity_rows": {
+            "anyOf": [
+              {
+                "maximum": 9.223372036854776e+18,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity Rows"
+          },
+          "load_policy": {
+            "anyOf": [
+              {
+                "enum": [
+                  "eager",
+                  "lazy"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Load Policy"
+          },
+          "max_faces_per_person": {
+            "anyOf": [
+              {
+                "maximum": 1000000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Faces Per Person"
+          }
+        },
+        "title": "CollectionSearchPatch",
+        "type": "object"
+      },
+      "CompareResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "matched": {
+            "title": "Matched",
+            "type": "boolean"
+          },
+          "processing_ms": {
+            "title": "Processing Ms",
+            "type": "number"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "similarity": {
+            "title": "Similarity",
+            "type": "number"
+          },
+          "source_face": {
+            "$ref": "#/components/schemas/FaceObservation"
+          },
+          "target_face": {
+            "$ref": "#/components/schemas/FaceObservation"
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "request_id",
+          "matched",
+          "similarity",
+          "threshold",
+          "source_face",
+          "target_face",
+          "processing_ms"
+        ],
+        "title": "CompareResponse",
+        "type": "object"
+      },
+      "DetectResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "faces": {
+            "items": {
+              "$ref": "#/components/schemas/FaceObservation"
+            },
+            "title": "Faces",
+            "type": "array"
+          },
+          "processing_ms": {
+            "title": "Processing Ms",
+            "type": "number"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "faces",
+          "processing_ms"
+        ],
+        "title": "DetectResponse",
+        "type": "object"
+      },
+      "DetectionProfile": {
+        "additionalProperties": true,
+        "properties": {
+          "input_sizes": {
+            "items": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "title": "Input Sizes",
+            "type": "array"
+          },
+          "nms_threshold": {
+            "title": "Nms Threshold",
+            "type": "number"
+          },
+          "single_face_selection": {
+            "enum": [
+              "largest",
+              "center_largest"
+            ],
+            "title": "Single Face Selection",
+            "type": "string"
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "input_sizes",
+          "threshold",
+          "nms_threshold",
+          "single_face_selection"
+        ],
+        "title": "DetectionProfile",
+        "type": "object"
+      },
+      "EmbeddingsResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "faces": {
+            "items": {
+              "$ref": "#/components/schemas/FaceObservation"
+            },
+            "title": "Faces",
+            "type": "array"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelSummary"
+          },
+          "processing_ms": {
+            "title": "Processing Ms",
+            "type": "number"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "faces",
+          "model",
+          "processing_ms"
+        ],
+        "title": "EmbeddingsResponse",
+        "type": "object"
+      },
+      "ErrorBody": {
+        "additionalProperties": true,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
+        "title": "ErrorBody",
+        "type": "object"
+      },
+      "ErrorEnvelope": {
+        "properties": {
+          "error": {
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "details": {
+                "type": "object"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "details"
+            ],
+            "type": "object"
+          },
+          "request_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error",
+          "request_id"
+        ],
+        "type": "object"
+      },
+      "FaceObservation": {
+        "additionalProperties": true,
+        "properties": {
+          "bbox": {
+            "$ref": "#/components/schemas/BoundingBox"
+          },
+          "detection_score": {
+            "title": "Detection Score",
+            "type": "number"
+          },
+          "embedding": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding"
+          },
+          "landmarks": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "title": "Landmarks",
+            "type": "array"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/FaceQuality"
+          }
+        },
+        "required": [
+          "bbox",
+          "landmarks",
+          "detection_score",
+          "quality"
+        ],
+        "title": "FaceObservation",
+        "type": "object"
+      },
+      "FacePageResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "faces": {
+            "items": {
+              "$ref": "#/components/schemas/FaceSample"
+            },
+            "title": "Faces",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "faces",
+          "next_cursor"
+        ],
+        "title": "FacePageResponse",
+        "type": "object"
+      },
+      "FaceQuality": {
+        "additionalProperties": true,
+        "properties": {
+          "brightness": {
+            "title": "Brightness",
+            "type": "number"
+          },
+          "pose": {
+            "title": "Pose",
+            "type": "number"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "sharpness": {
+            "title": "Sharpness",
+            "type": "number"
+          }
+        },
+        "required": [
+          "score",
+          "sharpness",
+          "brightness",
+          "pose"
+        ],
+        "title": "FaceQuality",
+        "type": "object"
+      },
+      "FaceRegistrationResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "faces": {
+            "items": {
+              "$ref": "#/components/schemas/FaceSample"
+            },
+            "title": "Faces",
+            "type": "array"
+          },
+          "rejected_images": {
+            "items": {
+              "$ref": "#/components/schemas/RejectedImage"
+            },
+            "title": "Rejected Images",
+            "type": "array"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "faces",
+          "rejected_images"
+        ],
+        "title": "FaceRegistrationResponse",
+        "type": "object"
+      },
+      "FaceSample": {
+        "additionalProperties": true,
+        "properties": {
+          "bounding_box": {
+            "$ref": "#/components/schemas/BoundingBox"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "detection_score": {
+            "title": "Detection Score",
+            "type": "number"
+          },
+          "embedding_contract_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Contract Id"
+          },
+          "embedding_source": {
+            "enum": [
+              "server",
+              "external_trusted"
+            ],
+            "title": "Embedding Source",
+            "type": "string"
+          },
+          "has_crop": {
+            "title": "Has Crop",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "landmarks": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Landmarks"
+          },
+          "model_digest": {
+            "title": "Model Digest",
+            "type": "string"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "person_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Person Id"
+          },
+          "preprocessing_version": {
+            "title": "Preprocessing Version",
+            "type": "string"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/FaceQuality"
+          }
+        },
+        "required": [
+          "id",
+          "bounding_box",
+          "landmarks",
+          "detection_score",
+          "quality",
+          "model_id",
+          "model_version",
+          "model_digest",
+          "preprocessing_version",
+          "embedding_source",
+          "embedding_contract_id",
+          "has_crop",
+          "created_at"
+        ],
+        "title": "FaceSample",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "auth_enabled": {
+            "title": "Auth Enabled",
+            "type": "boolean"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ready",
+              "not_ready"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "status",
+          "version",
+          "auth_enabled"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "Match": {
+        "additionalProperties": true,
+        "properties": {
+          "matched_face_id": {
+            "title": "Matched Face Id",
+            "type": "string"
+          },
+          "person": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "similarity": {
+            "title": "Similarity",
+            "type": "number"
+          }
+        },
+        "required": [
+          "person",
+          "similarity",
+          "matched_face_id"
+        ],
+        "title": "Match",
+        "type": "object"
+      },
+      "ModelComponent": {
+        "additionalProperties": true,
+        "properties": {
+          "embedding_dimension": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Embedding Dimension"
+          },
+          "file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File"
+          },
+          "input_size": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Size"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "preprocessing_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preprocessing Version"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "task": {
+            "title": "Task",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_id",
+          "model_version",
+          "task",
+          "sha256"
+        ],
+        "title": "ModelComponent",
+        "type": "object"
+      },
+      "ModelSummary": {
+        "additionalProperties": true,
+        "properties": {
+          "embedding_dimension": {
+            "title": "Embedding Dimension",
+            "type": "integer"
+          },
+          "license": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License"
+          },
+          "model_digest": {
+            "title": "Model Digest",
+            "type": "string"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/ModelComponent"
+            },
+            "title": "Models",
+            "type": "array"
+          },
+          "preprocessing_version": {
+            "title": "Preprocessing Version",
+            "type": "string"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "model_id",
+          "model_version",
+          "model_digest",
+          "embedding_dimension",
+          "preprocessing_version",
+          "provider",
+          "models",
+          "license"
+        ],
+        "title": "ModelSummary",
+        "type": "object"
+      },
+      "ModelsResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "execution_provider": {
+            "title": "Execution Provider",
+            "type": "string"
+          },
+          "license": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "License"
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/ModelComponent"
+            },
+            "title": "Models",
+            "type": "array"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "models",
+          "execution_provider",
+          "license"
+        ],
+        "title": "ModelsResponse",
+        "type": "object"
+      },
+      "Monitor": {
+        "additionalProperties": true,
+        "properties": {
+          "collection_id": {
+            "title": "Collection Id",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "event_buffer_size": {
+            "title": "Event Buffer Size",
+            "type": "integer"
+          },
+          "event_policy": {
+            "$ref": "#/components/schemas/MonitorEventPolicy-Output"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "inference_fps": {
+            "title": "Inference Fps",
+            "type": "number"
+          },
+          "match_threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Threshold"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "preview_enabled": {
+            "title": "Preview Enabled",
+            "type": "boolean"
+          },
+          "runtime": {
+            "$ref": "#/components/schemas/MonitorRuntime"
+          },
+          "source": {
+            "$ref": "#/components/schemas/MonitorSource-Output"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "enabled",
+          "source",
+          "collection_id",
+          "inference_fps",
+          "match_threshold",
+          "event_buffer_size",
+          "event_policy",
+          "preview_enabled",
+          "runtime",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Monitor",
+        "type": "object"
+      },
+      "MonitorCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "collection_id": {
+            "title": "Collection Id",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "event_buffer_size": {
+            "default": 1000,
+            "maximum": 10000.0,
+            "minimum": 10.0,
+            "title": "Event Buffer Size",
+            "type": "integer"
+          },
+          "event_policy": {
+            "$ref": "#/components/schemas/MonitorEventPolicy-Input"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "inference_fps": {
+            "default": 2.0,
+            "maximum": 30.0,
+            "minimum": 0.1,
+            "title": "Inference Fps",
+            "type": "number"
+          },
+          "match_threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Threshold"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "preview_enabled": {
+            "default": false,
+            "title": "Preview Enabled",
+            "type": "boolean"
+          },
+          "source": {
+            "$ref": "#/components/schemas/MonitorSource-Input"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "source",
+          "collection_id"
+        ],
+        "title": "MonitorCreate",
+        "type": "object"
+      },
+      "MonitorEvent": {
+        "additionalProperties": true,
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "face": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Face"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "matched_face_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Face Id"
+          },
+          "monitor_id": {
+            "title": "Monitor Id",
+            "type": "string"
+          },
+          "occurred_at": {
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "person": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Person"
+          },
+          "sequence": {
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "similarity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similarity"
+          },
+          "stream_epoch": {
+            "title": "Stream Epoch",
+            "type": "string"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          },
+          "track_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Track Id"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "sequence",
+          "type",
+          "monitor_id",
+          "stream_epoch",
+          "occurred_at"
+        ],
+        "title": "MonitorEvent",
+        "type": "object"
+      },
+      "MonitorEventPageResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/MonitorEvent"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "latest_sequence": {
+            "title": "Latest Sequence",
+            "type": "integer"
+          },
+          "monitor_id": {
+            "title": "Monitor Id",
+            "type": "string"
+          },
+          "next_cursor": {
+            "title": "Next Cursor",
+            "type": "string"
+          },
+          "oldest_sequence": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldest Sequence"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "stream_epoch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stream Epoch"
+          },
+          "stream_reset": {
+            "title": "Stream Reset",
+            "type": "boolean"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "request_id",
+          "monitor_id",
+          "stream_epoch",
+          "events",
+          "oldest_sequence",
+          "latest_sequence",
+          "has_more",
+          "truncated",
+          "stream_reset",
+          "next_cursor"
+        ],
+        "title": "MonitorEventPageResponse",
+        "type": "object"
+      },
+      "MonitorEventPolicy-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "absence_timeout_seconds": {
+            "default": 3.0,
+            "maximum": 300.0,
+            "minimum": 0.1,
+            "title": "Absence Timeout Seconds",
+            "type": "number"
+          },
+          "confirm_frames": {
+            "default": 3,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Confirm Frames",
+            "type": "integer"
+          },
+          "cooldown_seconds": {
+            "default": 10.0,
+            "maximum": 3600.0,
+            "minimum": 0.0,
+            "title": "Cooldown Seconds",
+            "type": "number"
+          },
+          "emit_unknown": {
+            "default": true,
+            "title": "Emit Unknown",
+            "type": "boolean"
+          }
+        },
+        "title": "MonitorEventPolicy",
+        "type": "object"
+      },
+      "MonitorEventPolicy-Output": {
+        "additionalProperties": true,
+        "properties": {
+          "absence_timeout_seconds": {
+            "title": "Absence Timeout Seconds",
+            "type": "number"
+          },
+          "confirm_frames": {
+            "title": "Confirm Frames",
+            "type": "integer"
+          },
+          "cooldown_seconds": {
+            "title": "Cooldown Seconds",
+            "type": "number"
+          },
+          "emit_unknown": {
+            "title": "Emit Unknown",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "confirm_frames",
+          "absence_timeout_seconds",
+          "cooldown_seconds",
+          "emit_unknown"
+        ],
+        "title": "MonitorEventPolicy",
+        "type": "object"
+      },
+      "MonitorEventPolicyPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "absence_timeout_seconds": {
+            "anyOf": [
+              {
+                "maximum": 300.0,
+                "minimum": 0.1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Absence Timeout Seconds"
+          },
+          "confirm_frames": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirm Frames"
+          },
+          "cooldown_seconds": {
+            "anyOf": [
+              {
+                "maximum": 3600.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cooldown Seconds"
+          },
+          "emit_unknown": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emit Unknown"
+          }
+        },
+        "title": "MonitorEventPolicyPatch",
+        "type": "object"
+      },
+      "MonitorInferenceState": {
+        "additionalProperties": true,
+        "properties": {
+          "actual_fps": {
+            "title": "Actual Fps",
+            "type": "number"
+          },
+          "capacity_limited": {
+            "title": "Capacity Limited",
+            "type": "boolean"
+          },
+          "configured_fps": {
+            "title": "Configured Fps",
+            "type": "number"
+          },
+          "decoded_frames": {
+            "title": "Decoded Frames",
+            "type": "integer"
+          },
+          "dropped_frames": {
+            "title": "Dropped Frames",
+            "type": "integer"
+          },
+          "frame_sequence": {
+            "title": "Frame Sequence",
+            "type": "integer"
+          },
+          "last_frame_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Frame At"
+          },
+          "last_inference_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Inference At"
+          },
+          "processed_frames": {
+            "title": "Processed Frames",
+            "type": "integer"
+          },
+          "processing_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processing Ms"
+          }
+        },
+        "required": [
+          "configured_fps",
+          "actual_fps",
+          "processing_ms",
+          "last_frame_at",
+          "last_inference_at",
+          "frame_sequence",
+          "decoded_frames",
+          "processed_frames",
+          "dropped_frames",
+          "capacity_limited"
+        ],
+        "title": "MonitorInferenceState",
+        "type": "object"
+      },
+      "MonitorPageResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "monitors": {
+            "items": {
+              "$ref": "#/components/schemas/Monitor"
+            },
+            "title": "Monitors",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "monitors",
+          "next_cursor"
+        ],
+        "title": "MonitorPageResponse",
+        "type": "object"
+      },
+      "MonitorPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "collection_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collection Id"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          },
+          "event_buffer_size": {
+            "anyOf": [
+              {
+                "maximum": 10000.0,
+                "minimum": 10.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Buffer Size"
+          },
+          "event_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MonitorEventPolicyPatch"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inference_fps": {
+            "anyOf": [
+              {
+                "maximum": 30.0,
+                "minimum": 0.1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inference Fps"
+          },
+          "match_threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Threshold"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "preview_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preview Enabled"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MonitorSource-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "MonitorPatch",
+        "type": "object"
+      },
+      "MonitorPreviewState": {
+        "additionalProperties": true,
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "frames": {
+            "title": "Frames",
+            "type": "integer"
+          },
+          "viewers": {
+            "title": "Viewers",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "enabled",
+          "active",
+          "viewers",
+          "frames"
+        ],
+        "title": "MonitorPreviewState",
+        "type": "object"
+      },
+      "MonitorResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "monitor": {
+            "$ref": "#/components/schemas/Monitor"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "monitor"
+        ],
+        "title": "MonitorResponse",
+        "type": "object"
+      },
+      "MonitorRuntime": {
+        "additionalProperties": true,
+        "properties": {
+          "connected": {
+            "title": "Connected",
+            "type": "boolean"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "last_frame_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Frame At"
+          },
+          "preview_active": {
+            "title": "Preview Active",
+            "type": "boolean"
+          },
+          "preview_viewers": {
+            "title": "Preview Viewers",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "stream_epoch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stream Epoch"
+          }
+        },
+        "required": [
+          "status",
+          "connected",
+          "stream_epoch",
+          "last_frame_at",
+          "last_error",
+          "preview_active",
+          "preview_viewers"
+        ],
+        "title": "MonitorRuntime",
+        "type": "object"
+      },
+      "MonitorSource-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "const": "rtsp",
+            "default": "rtsp",
+            "title": "Type",
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 2048,
+            "minLength": 8,
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "MonitorSource",
+        "type": "object"
+      },
+      "MonitorSource-Output": {
+        "additionalProperties": true,
+        "properties": {
+          "type": {
+            "const": "rtsp",
+            "title": "Type",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "url"
+        ],
+        "title": "MonitorSource",
+        "type": "object"
+      },
+      "MonitorState": {
+        "additionalProperties": true,
+        "properties": {
+          "connected": {
+            "title": "Connected",
+            "type": "boolean"
+          },
+          "faces": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Faces",
+            "type": "array"
+          },
+          "inference": {
+            "$ref": "#/components/schemas/MonitorInferenceState"
+          },
+          "inference_errors": {
+            "title": "Inference Errors",
+            "type": "integer"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          },
+          "matched_faces": {
+            "title": "Matched Faces",
+            "type": "integer"
+          },
+          "monitor_id": {
+            "title": "Monitor Id",
+            "type": "string"
+          },
+          "preview": {
+            "$ref": "#/components/schemas/MonitorPreviewState"
+          },
+          "reconnects": {
+            "title": "Reconnects",
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/MonitorStateSource"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "stream_epoch": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stream Epoch"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          },
+          "unknown_faces": {
+            "title": "Unknown Faces",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "monitor_id",
+          "stream_epoch",
+          "status",
+          "connected",
+          "source",
+          "inference",
+          "threshold",
+          "faces",
+          "matched_faces",
+          "unknown_faces",
+          "preview",
+          "reconnects",
+          "inference_errors",
+          "last_error",
+          "started_at"
+        ],
+        "title": "MonitorState",
+        "type": "object"
+      },
+      "MonitorStateResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/MonitorState"
+          }
+        },
+        "required": [
+          "request_id",
+          "state"
+        ],
+        "title": "MonitorStateResponse",
+        "type": "object"
+      },
+      "MonitorStateSource": {
+        "additionalProperties": true,
+        "properties": {
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "source_fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Fps"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width"
+          }
+        },
+        "required": [
+          "width",
+          "height",
+          "source_fps"
+        ],
+        "title": "MonitorStateSource",
+        "type": "object"
+      },
+      "NormalizedBox": {
+        "additionalProperties": true,
+        "properties": {
+          "height": {
+            "title": "Height",
+            "type": "number"
+          },
+          "left": {
+            "title": "Left",
+            "type": "number"
+          },
+          "top": {
+            "title": "Top",
+            "type": "number"
+          },
+          "width": {
+            "title": "Width",
+            "type": "number"
+          }
+        },
+        "required": [
+          "left",
+          "top",
+          "width",
+          "height"
+        ],
+        "title": "NormalizedBox",
+        "type": "object"
+      },
+      "Person": {
+        "additionalProperties": true,
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "face_count": {
+            "title": "Face Count",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "external_id",
+          "metadata",
+          "face_count",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Person",
+        "type": "object"
+      },
+      "PersonPageResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          },
+          "persons": {
+            "items": {
+              "$ref": "#/components/schemas/Person"
+            },
+            "title": "Persons",
+            "type": "array"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "persons",
+          "next_cursor"
+        ],
+        "title": "PersonPageResponse",
+        "type": "object"
+      },
+      "PersonPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "external_id": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Id"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "title": "PersonPatch",
+        "type": "object"
+      },
+      "PersonRegistrationResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "faces": {
+            "items": {
+              "$ref": "#/components/schemas/FaceSample"
+            },
+            "title": "Faces",
+            "type": "array"
+          },
+          "person": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "rejected_images": {
+            "items": {
+              "$ref": "#/components/schemas/RejectedImage"
+            },
+            "title": "Rejected Images",
+            "type": "array"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "person",
+          "faces",
+          "rejected_images"
+        ],
+        "title": "PersonRegistrationResponse",
+        "type": "object"
+      },
+      "PersonResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "person": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "person"
+        ],
+        "title": "PersonResponse",
+        "type": "object"
+      },
+      "PixelBox": {
+        "additionalProperties": true,
+        "properties": {
+          "height": {
+            "title": "Height",
+            "type": "integer"
+          },
+          "width": {
+            "title": "Width",
+            "type": "integer"
+          },
+          "x": {
+            "title": "X",
+            "type": "integer"
+          },
+          "y": {
+            "title": "Y",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "title": "PixelBox",
+        "type": "object"
+      },
+      "RejectedImage": {
+        "additionalProperties": true,
+        "properties": {
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "filename",
+          "reason"
+        ],
+        "title": "RejectedImage",
+        "type": "object"
+      },
+      "SearchResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/Match"
+            },
+            "title": "Matches",
+            "type": "array"
+          },
+          "processing_ms": {
+            "title": "Processing Ms",
+            "type": "number"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "searched_face": {
+            "$ref": "#/components/schemas/FaceObservation"
+          },
+          "threshold": {
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "request_id",
+          "searched_face",
+          "matches",
+          "threshold",
+          "processing_ms"
+        ],
+        "title": "SearchResponse",
+        "type": "object"
+      },
+      "SystemResponse": {
+        "additionalProperties": true,
+        "properties": {
+          "api_key": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Api Key",
+            "type": "object"
+          },
+          "architecture": {
+            "title": "Architecture",
+            "type": "string"
+          },
+          "cpu": {
+            "additionalProperties": true,
+            "title": "Cpu",
+            "type": "object"
+          },
+          "data": {
+            "additionalProperties": true,
+            "title": "Data",
+            "type": "object"
+          },
+          "database": {
+            "additionalProperties": true,
+            "title": "Database",
+            "type": "object"
+          },
+          "execution_provider": {
+            "title": "Execution Provider",
+            "type": "string"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelSummary"
+          },
+          "models": {
+            "additionalProperties": true,
+            "title": "Models",
+            "type": "object"
+          },
+          "os": {
+            "title": "Os",
+            "type": "string"
+          },
+          "recent_errors": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Recent Errors",
+            "type": "array"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          },
+          "runtime": {
+            "additionalProperties": true,
+            "title": "Runtime",
+            "type": "object"
+          },
+          "safe_config": {
+            "additionalProperties": true,
+            "title": "Safe Config",
+            "type": "object"
+          },
+          "search": {
+            "additionalProperties": true,
+            "title": "Search",
+            "type": "object"
+          },
+          "server_version": {
+            "title": "Server Version",
+            "type": "string"
+          },
+          "stats": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Stats",
+            "type": "object"
+          }
+        },
+        "required": [
+          "request_id",
+          "server_version",
+          "os",
+          "architecture",
+          "cpu",
+          "runtime",
+          "execution_provider",
+          "model",
+          "database",
+          "data",
+          "models",
+          "stats",
+          "search",
+          "api_key",
+          "safe_config",
+          "recent_errors"
+        ],
+        "title": "SystemResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Simple self-hosted face detection, comparison, registration, and search.",
+    "title": "InsightFace Server",
+    "version": "0.2.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/collections": {
+      "get": {
+        "operationId": "list_collections_v1_collections_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionPageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List Collections",
+        "tags": [
+          "collections"
+        ]
+      },
+      "post": {
+        "operationId": "create_collection_v1_collections_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollectionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create Collection",
+        "tags": [
+          "collections"
+        ]
+      }
+    },
+    "/v1/collections/{collection_id}": {
+      "delete": {
+        "operationId": "delete_collection_v1_collections__collection_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "force",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Force",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete Collection",
+        "tags": [
+          "collections"
+        ]
+      },
+      "get": {
+        "operationId": "get_collection_v1_collections__collection_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get Collection",
+        "tags": [
+          "collections"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_collection_v1_collections__collection_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollectionPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Patch Collection",
+        "tags": [
+          "collections"
+        ]
+      }
+    },
+    "/v1/collections/{collection_id}/persons": {
+      "get": {
+        "operationId": "list_persons_v1_collections__collection_id__persons_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonPageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List Persons",
+        "tags": [
+          "persons"
+        ]
+      },
+      "post": {
+        "operationId": "create_person_v1_collections__collection_id__persons_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_create_person_v1_collections__collection_id__persons_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonRegistrationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create Person",
+        "tags": [
+          "persons"
+        ]
+      }
+    },
+    "/v1/collections/{collection_id}/persons/{person_id}": {
+      "delete": {
+        "operationId": "delete_person_v1_collections__collection_id__persons__person_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "title": "Person Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete Person",
+        "tags": [
+          "persons"
+        ]
+      },
+      "get": {
+        "operationId": "get_person_v1_collections__collection_id__persons__person_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "title": "Person Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get Person",
+        "tags": [
+          "persons"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_person_v1_collections__collection_id__persons__person_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "title": "Person Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Patch Person",
+        "tags": [
+          "persons"
+        ]
+      }
+    },
+    "/v1/collections/{collection_id}/persons/{person_id}/faces": {
+      "get": {
+        "operationId": "list_faces_v1_collections__collection_id__persons__person_id__faces_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "title": "Person Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FacePageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List Faces",
+        "tags": [
+          "persons"
+        ]
+      },
+      "post": {
+        "operationId": "add_faces_v1_collections__collection_id__persons__person_id__faces_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "title": "Person Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_add_faces_v1_collections__collection_id__persons__person_id__faces_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FaceRegistrationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Add Faces",
+        "tags": [
+          "persons"
+        ]
+      }
+    },
+    "/v1/collections/{collection_id}/persons/{person_id}/faces/{face_id}": {
+      "delete": {
+        "operationId": "delete_face_v1_collections__collection_id__persons__person_id__faces__face_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "title": "Person Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "face_id",
+            "required": true,
+            "schema": {
+              "title": "Face Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete Face",
+        "tags": [
+          "persons"
+        ]
+      }
+    },
+    "/v1/collections/{collection_id}/persons/{person_id}/faces/{face_id}/image": {
+      "get": {
+        "operationId": "get_face_image_v1_collections__collection_id__persons__person_id__faces__face_id__image_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "title": "Person Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "face_id",
+            "required": true,
+            "schema": {
+              "title": "Face Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Saved 112 x 112 face crop"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get Face Image",
+        "tags": [
+          "persons"
+        ]
+      }
+    },
+    "/v1/collections/{collection_id}/search": {
+      "post": {
+        "operationId": "search_v1_collections__collection_id__search_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collection_id",
+            "required": true,
+            "schema": {
+              "title": "Collection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_search_v1_collections__collection_id__search_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Search",
+        "tags": [
+          "search"
+        ]
+      }
+    },
+    "/v1/compare": {
+      "post": {
+        "operationId": "compare_v1_compare_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_compare_v1_compare_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Compare",
+        "tags": [
+          "faces"
+        ]
+      }
+    },
+    "/v1/detect": {
+      "post": {
+        "operationId": "detect_v1_detect_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_detect_v1_detect_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetectResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Detect",
+        "tags": [
+          "faces"
+        ]
+      }
+    },
+    "/v1/embeddings": {
+      "post": {
+        "operationId": "embeddings_v1_embeddings_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_embeddings_v1_embeddings_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmbeddingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Embeddings",
+        "tags": [
+          "faces"
+        ]
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "operationId": "health_v1_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "The process is running but is not ready."
+          }
+        },
+        "summary": "Health",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/v1/models": {
+      "get": {
+        "operationId": "models_v1_models_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Models",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/v1/monitors": {
+      "get": {
+        "operationId": "list_monitors_v1_monitors_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorPageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List Monitors",
+        "tags": [
+          "monitors"
+        ]
+      },
+      "post": {
+        "operationId": "create_monitor_v1_monitors_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The enabled Monitor capacity is exhausted."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create Monitor",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/monitors/{monitor_id}": {
+      "delete": {
+        "operationId": "delete_monitor_v1_monitors__monitor_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete Monitor",
+        "tags": [
+          "monitors"
+        ]
+      },
+      "get": {
+        "operationId": "get_monitor_v1_monitors__monitor_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get Monitor",
+        "tags": [
+          "monitors"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_monitor_v1_monitors__monitor_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MonitorPatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "The enabled Monitor capacity is exhausted."
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Patch Monitor",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/monitors/{monitor_id}/events": {
+      "get": {
+        "operationId": "monitor_events_v1_monitors__monitor_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorEventPageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Monitor Events",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/monitors/{monitor_id}/preview.mjpeg": {
+      "get": {
+        "operationId": "monitor_preview_v1_monitors__monitor_id__preview_mjpeg_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "multipart/x-mixed-replace": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Live Motion JPEG preview stream."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Monitor Preview",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/monitors/{monitor_id}/state": {
+      "get": {
+        "operationId": "monitor_state_v1_monitors__monitor_id__state_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "monitor_id",
+            "required": true,
+            "schema": {
+              "title": "Monitor Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonitorStateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Monitor State",
+        "tags": [
+          "monitors"
+        ]
+      }
+    },
+    "/v1/system": {
+      "get": {
+        "operationId": "system_v1_system_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "413": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "System",
+        "tags": [
+          "system"
+        ]
+      }
+    }
+  }
+}

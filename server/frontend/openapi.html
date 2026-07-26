@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#09090b">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <meta name="description" content="Live InsightFace Server OpenAPI schema explorer.">
+    <title>OpenAPI Schema · InsightFace Server</title>
+    <link rel="icon" href="/assets/insightface-mark.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/assets/openapi.css">
+  </head>
+  <body>
+    <header class="docs-header">
+      <a class="brand-link" href="/">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4"></circle><path d="M5.5 21a7.5 7.5 0 0 1 13 0"></path></svg></span>
+        <span><strong>InsightFace Server</strong><small>OpenAPI Schema</small></span>
+      </a>
+      <div class="header-links">
+        <label class="docs-language" title="Language"><span class="sr-only">Language</span><select id="language-select" aria-label="Language"><option value="en">English</option><option value="zh">中文</option><option value="ja">日本語</option><option value="de">Deutsch</option><option value="es">Español</option><option value="fr">Français</option><option value="ru">Русский</option><option value="pt">Português</option><option value="ko">한국어</option></select></label>
+        <a href="/#help">Help</a>
+        <a href="/">Open console</a><a href="/openapi.json" target="_blank" rel="noopener">OpenAPI JSON</a>
+      </div>
+    </header>
+    <main>
+      <section class="docs-intro">
+        <p class="eyebrow">DEVELOPER TOOL · OPENAPI 3</p>
+        <h1>Live API schema.</h1>
+        <p id="api-description">Loading the server's OpenAPI document…</p>
+        <p class="guide-callout">New to the server? Follow the <a href="/#help">step-by-step user guide</a> before using this live schema reference.</p>
+        <div class="base-url"><span>Base path</span><code id="base-url">/v1</code></div>
+      </section>
+
+      <div class="docs-layout">
+        <aside class="docs-sidebar" aria-label="API operations">
+          <label><span>Filter operations</span><input id="operation-filter" type="search" placeholder="detect, collections…"></label>
+          <nav id="operation-nav"></nav>
+        </aside>
+        <section class="operations" id="operations" aria-live="polite">
+          <div class="loading"><span></span><strong>Loading API schema</strong></div>
+        </section>
+      </div>
+
+      <section class="schema-section">
+        <div class="section-heading"><div><p class="eyebrow">COMPONENTS</p><h2>Data schemas</h2></div><span id="schema-count"></span></div>
+        <div class="schema-grid" id="schema-grid"></div>
+      </section>
+    </main>
+    <footer>Generated locally from <code>/openapi.json</code>. No external scripts, fonts, or services are used.</footer>
+    <script type="module" src="/assets/openapi.js?v=0.2.0-r13"></script>
+  </body>
+</html>

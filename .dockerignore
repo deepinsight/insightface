@@ -1,0 +1,43 @@
+# The server images intentionally receive only the Server tree and the selected
+# InsightFace inference package; unrelated repository data never enters the
+# Docker build context.
+**
+!server/
+!server/**
+!python-package/
+!python-package/insightface/
+!python-package/insightface/__init__.py
+!python-package/insightface/app/
+!python-package/insightface/app/**
+!python-package/insightface/model_zoo/
+!python-package/insightface/model_zoo/**
+!python-package/insightface/utils/
+!python-package/insightface/utils/**
+!python-package/insightface/data/
+!python-package/insightface/data/__init__.py
+!python-package/insightface/data/image.py
+!python-package/insightface/data/pickle_object.py
+!python-package/insightface/thirdparty/
+!python-package/insightface/thirdparty/__init__.py
+
+# Re-exclude local state and secrets below the whitelisted source trees.
+.private/
+server/.venv/
+server/.data/
+server/.models/
+server/.mypy_cache/
+server/.pytest_cache/
+server/.ruff_cache/
+server/build/
+server/test-results/
+**/__pycache__/
+**/*.py[cod]
+**/._*
+**/.DS_Store
+server/**/dist/
+**/*.onnx
+**/.env
+**/.env.*
+**/*.key
+**/*.pem
+!server/backend/insightface_server/licensing/trusted_keys/*.pem

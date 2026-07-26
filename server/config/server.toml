@@ -1,0 +1,34 @@
+# InsightFace Server settings loaded once during process startup.
+# Restart the container after changing this file.
+
+[inference]
+# "auto" resolves to 4 concurrent model pipelines on CPU and 8 on CUDA.
+# A positive integer overrides the provider-specific default. API calls,
+# enrollment and RTSP frames share this one process-wide budget.
+max_concurrency = "auto"
+
+[detection]
+# Each entry is [width, height]. Dynamic SCRFD models run every configured
+# resolution, map all candidates to source-image coordinates, then apply one
+# global NMS pass to the merged candidate set.
+input_sizes = [[96, 96], [512, 512]]
+
+# Minimum detector confidence. It is applied while SCRFD candidates are
+# generated, before the merged NMS pass.
+threshold = 0.50
+
+# IoU threshold used by the single global NMS pass.
+nms_threshold = 0.40
+
+# Used by operations that require one face. Supported values:
+# "largest" and "center_largest". The latter maximizes the pixel-space score
+# area - 2.0 * squared_distance(face_box_center, image_center).
+single_face_selection = "largest"
+
+# Deployment-wide safety limit. A request may ask for fewer results, never more.
+max_detected_faces = 100
+
+[web]
+# false (default): serve the Web UI, interactive API reference and guides.
+# true: API-only mode; keep /v1 and /openapi.json, but do not register UI routes.
+disabled = false
