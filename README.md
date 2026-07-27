@@ -16,17 +16,15 @@ InsightFace 1.0 focuses on easier local evaluation and desktop usage:
 - The default Python package no longer builds the optional C++/Cython `face3d` extension, reducing local compiler requirements.
 - Added **InsightFace Evaluation Studio**, a cross-platform GUI Demo for Windows, macOS, and Linux.
 - The GUI supports local face recognition, enterprise model evaluation/reporting, and basic face swap trials.
-- Added [InsightFace Server](server/), a self-hosted Web UI and REST API for face detection, recognition, and search.
 
 ## InsightFace Server
 
 The new [InsightFace Server](server/) provides a simple self-hosted Web UI,
-snake_case `/v1` REST API, and Python client for detection, comparison,
+snake_case REST API, and Python client for detection, comparison,
 registration, and Person search. A single Linux x86_64 CPU or NVIDIA GPU
 container runs local ONNX Runtime inference and SQLite with operator-supplied,
-manifest-verified models. Models are not included; review their separate
-licensing terms before deployment. The code/model boundary is defined in the
-[InsightFace Server licensing guide](server/LICENSING.md).
+manifest-verified models. It is a simple AWS Rekognition alternative with 
+accuracy-preserving INT8 embedding quantization and 50M+ image search on one RTX 5090 GPU.
 
 ## License
 
