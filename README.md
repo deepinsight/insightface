@@ -16,6 +16,7 @@ InsightFace 1.0 focuses on easier local evaluation and desktop usage:
 - The default Python package no longer builds the optional C++/Cython `face3d` extension, reducing local compiler requirements.
 - Added **InsightFace Evaluation Studio**, a cross-platform GUI Demo for Windows, macOS, and Linux.
 - The GUI supports local face recognition, enterprise model evaluation/reporting, and basic face swap trials.
+- Added [InsightFace Server](server/), a self-hosted Web UI and REST API for face detection, recognition, and search.
 
 ## InsightFace Server
 
