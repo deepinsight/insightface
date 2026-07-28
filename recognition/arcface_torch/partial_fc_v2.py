@@ -154,7 +154,7 @@ class PartialFC_V2(torch.nn.Module):
         else:
             weight = self.weight
 
-        with torch.cuda.amp.autocast(self.fp16):
+        with torch.amp.autocast('cuda', enabled=self.fp16):
             norm_embeddings = normalize(embeddings)
             norm_weight_activated = normalize(weight)
             logits = linear(norm_embeddings, norm_weight_activated)

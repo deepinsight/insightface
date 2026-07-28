@@ -23,7 +23,7 @@ def get_dataloader(
     dali = False,
     dali_aug = False,
     seed = 2048,
-    num_workers = 2,
+    num_workers = 4,
     ) -> Iterable:
 
     rec = os.path.join(root_dir, 'train.rec')
