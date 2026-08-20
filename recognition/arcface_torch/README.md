@@ -11,11 +11,21 @@ This repository is the official implementation of **ArcFace** with distributed a
 
 ## Requirements
 
-- PyTorch >= 1.12.0 — see [installation guide](https://pytorch.org/get-started/previous-versions/)
-- (Optional) [DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/) for fast data loading — see [install_dali.md](docs/install_dali.md)
-- `pip install -r requirement.txt`
+Managed with [uv](https://docs.astral.sh/uv/) (`pyproject.toml` + `uv.lock` in this directory):
 
----
+```shell
+cd recognition/arcface_torch
+uv sync                      # core: torch, torchvision, mxnet (RecordIO), timm, easydict, tensorboard, opencv, pillow
+uv sync --extra dali         # + NVIDIA DALI GPU decoding (config.dali = True)
+uv sync --extra eval --extra dev   # + IJB-C / ONNX tooling, pytest
+uv run python launch.py      # or: uv run torchrun --nproc_per_node=8 train_v2.py configs/ms1mv3_r50
+uv run pytest                # unit tests (CPU)
+```
+
+torch comes from PyPI (CUDA 12.x wheels); for another CUDA build point uv at the matching PyTorch index (see the
+comment in `pyproject.toml`). The optional `mamba-ssm` kernel for MambaVision must be built separately
+(`uv pip install --no-build-isolation mamba-ssm`); without it MambaVision uses its pure-PyTorch selective scan.
+A plain `pip install -r requirement.txt` still works for the core dependencies.
 
 ## Backbones
 

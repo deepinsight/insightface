@@ -1,0 +1,57 @@
+[project]
+name = "arcface-torch"
+version = "1.0.0"
+description = "Distributed face recognition training in PyTorch (ArcFace / AdaFace / TransFace / TransFace++ / MambaVision)"
+readme = "README.md"
+requires-python = ">=3.8,<3.12"   # numpy<1.24 (mxnet) has no 3.12 wheels
+license = { text = "MIT" }
+dependencies = [
+    "torch>=2.4",
+    "torchvision>=0.19",
+    "numpy>=1.23,<1.24",       # mxnet 1.9.1 still uses np.bool (removed in numpy 1.24)
+    "mxnet>=1.9.1",            # RecordIO reader (train.rec / train.idx)
+    "timm>=0.9",               # ViT / MambaVision / TransFace++ layers
+    "easydict>=1.10",
+    "tensorboard>=2.12",
+    "scikit-learn>=1.1",
+    "opencv-python>=4.8",
+    "pillow>=10.0",            # TIFF/PNG byte layouts for TransFace++ (probed once with PIL)
+]
+
+[project.optional-dependencies]
+# IJB-C evaluation, ONNX export, FLOPs counting
+eval = [
+    "onnx>=1.14",
+    "onnxruntime>=1.16",
+    "prettytable>=3.0",
+    "scikit-image>=0.19",
+    "matplotlib>=3.7",
+    "pandas>=1.5",
+    "scipy>=1.10",
+    "menpo>=0.11",
+    "ptflops>=0.7",
+]
+# GPU JPEG decoding (config.dali = True); served from the NVIDIA index, see [tool.uv.index]
+dali = ["nvidia-dali-cuda120>=1.40"]
+# MambaVision's optional fused selective-scan kernel (mamba-ssm) needs torch + nvcc at build
+# time and cannot be locked; install it manually after `uv sync` if wanted:
+#   uv pip install --no-build-isolation mamba-ssm
+dev = ["pytest>=7.4"]
+
+[tool.uv]
+package = false                # application, not a distributable package: `uv sync` installs deps only
+# torch wheels come from PyPI (CUDA 12.x). For another CUDA, add a torch index, e.g.:
+#   [[tool.uv.index]]  name = "pytorch-cu118"  url = "https://download.pytorch.org/whl/cu118"
+#   [tool.uv.sources]  torch = { index = "pytorch-cu118" }  torchvision = { index = "pytorch-cu118" }
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com"
+explicit = true
+
+[tool.uv.sources]
+nvidia-dali-cuda120 = { index = "nvidia" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
