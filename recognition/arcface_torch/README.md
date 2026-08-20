@@ -1,6 +1,6 @@
 # Distributed ArcFace Training in PyTorch
 
-This repository is the official implementation of **ArcFace** with distributed and sparse training support. It has been extended with four new methods: **AdaFace** (quality-adaptive margin), **TransFace** (FFT amplitude augmentation), **MambaVision** (hybrid CNN+SSM backbone), and **UIFace** (diffusion-based synthetic face generation).
+This repository is the official implementation of **ArcFace** with distributed and sparse training support. It has been extended with five new methods: **AdaFace** (quality-adaptive margin), **TransFace** (DPAP + EHSM for ViTs), **TransFace++** (face recognition directly from image bytes), **MambaVision** (hybrid Mamba-Transformer backbone), and **UIFace** (diffusion-based synthetic face generation).
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-ijb-c)](https://paperswithcode.com/sota/face-verification-on-ijb-c?p=killing-two-birds-with-one-stone-efficient)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/killing-two-birds-with-one-stone-efficient/face-verification-on-ijb-b)](https://paperswithcode.com/sota/face-verification-on-ijb-b?p=killing-two-birds-with-one-stone-efficient)
@@ -46,29 +46,53 @@ All backbones are registered in `backbones/__init__.py` and accessed via `get_mo
 
 ### TransFaceViT *(new)*
 
-Drop-in ViT replacement that emits per-patch attention entropy during training for FFT-guided augmentation. At eval time it returns a plain embedding identical to the base ViT.
+ViT + SE patch re-weighting from [TransFace](https://arxiv.org/abs/2308.10133) (ICCV 2023). In training it returns `(embedding, patch_weight, patch_entropy)`: the softmaxed SE gates mark the *dominant* 9×9 patches that DPAP perturbs, and the per-patch feature std feeds EHSM. At eval time it returns a plain embedding.
 
 | Name | Embed dim | Depth |
 |------|-----------|-------|
 | `transface_vit_b` | 512 | 24 |
 | `transface_vit_l` | 768 | 24 |
 
+### TransFace++ byte ViT *(new)*
+
+[TransFace++](https://arxiv.org/abs/2308.10133) (TPAMI 2025) recognises faces **directly from the image bytes** — no JPEG/PNG decoding in the serving path. `backbones/transface_pp.py`:
+
+```
+image bytes (TIFF file bytes by default; also PNG / raw fHWC / fCHW)
+  → bytes projector: 256-entry byte embedding + 2 strided Conv1d  → 144 tokens × 512
+  → topology feature: Conv1d → 20 points → 0-dim persistent homology (MST) → MLP, cross-attended as K/V in the last block
+  → TIBC: topological byte compression of the byte signal added to the tokens (p = 0.3, training only)
+  → ViT blocks → SE patch gates → 512-d embedding   (+ patch entropy for EHSM)
+```
+
+Everything — byte conversion (`image_to_bytes`), the TIFF/PNG writers (byte-identical to PIL, `backbones/byte_codecs.py`), both persistence computations and TIBC — runs batched on the GPU; `mamba_ssm`-style external topology libraries are not needed.
+
+| Name | Embed dim | Depth | mask ratio |
+|------|-----------|-------|-----------|
+| `transface_pp_vit_s` | 512 | 12 | 0 |
+| `transface_pp_vit_b` | 512 | 24 | 0.05 |
+
 ### MambaVision *(new)*
 
-Hybrid CNN + Mamba (S6 selective state space) backbone for 112×112 face recognition. CNN stages reduce spatial resolution to 28×28 patch tokens; Mamba blocks then do long-range sequence modelling. Pure-PyTorch selective scan — no `mamba_ssm` CUDA package required (install it for 10–100× faster training on GPU).
+Port of NVIDIA's [MambaVision](https://github.com/NVlabs/MambaVision) hybrid Mamba-Transformer backbone (`backbones/mamba_vision.py`), adapted to 112×112 faces. Four-level pyramid: two convolutional stages, then two stages whose first half are MambaVision mixer blocks (SSM on half the channels, conv+SiLU on the other half) and second half are self-attention blocks, each followed by an MLP. Window sizes are `[7, 7, 7, 4]` so the 7×7 / 4×4 grids at 112×112 are processed without padding. The selective scan uses `mamba_ssm`'s fused CUDA kernel when installed and a pure-PyTorch fallback otherwise (the SSM only runs on 49 / 16 tokens, so the fallback is fast).
 
 ```
-112×112 → Stage1 CNN (3→C, /2) → 56×56
-        → Stage2 CNN (C→2C, /2) → 28×28 = 784 tokens
-        → N × MambaBlock(2C)
-        → Global avg pool → Linear→BN→Linear→BN → 512-d embedding
+112×112 → PatchEmbed (/4)        → 28×28, dim
+        → level 0: ConvBlock×d0   → /8   14×14, 2·dim
+        → level 1: ConvBlock×d1   → /16   7×7, 4·dim   (49 tokens)
+        → level 2: Mixer… + Attn… → /32   4×4, 8·dim   (16 tokens)
+        → level 3: Mixer… + Attn…
+        → BN → GAP → Linear → BN → 512-d embedding
 ```
 
-| Name | CNN dims | SSM dim | Mamba blocks | ~Params |
-|------|----------|---------|-------------|---------|
-| `mamba_s` | 128→256 | 256 | 12 | 7M |
-| `mamba_b` | 256→512 | 512 | 24 | 90M |
-| `mamba_l` | 384→768 | 768 | 24 | 190M |
+| Name | dim | depths | heads | Params |
+|------|-----|--------|-------|--------|
+| `mambavision_t` | 80 | [1, 3, 8, 4] | [2, 4, 8, 16] | 31.5M |
+| `mambavision_s` | 96 | [3, 3, 7, 5] | [2, 4, 8, 16] | 49.8M |
+| `mambavision_b` | 128 | [3, 3, 10, 5] | [2, 4, 8, 16] | 97.2M |
+| `mambavision_l` | 196 | [3, 3, 10, 5] | [4, 8, 16, 32] | 227.2M |
+
+Training memory at batch 128/GPU (fp16) is a few GB — the previous flat `MambaVit` stack, which ran 784 tokens through a pure-PyTorch scan, needed >80 GB and was removed.
 
 ---
 
@@ -89,6 +113,17 @@ Key hyperparameters: `adaface_m` (margin, default 0.4), `adaface_h` (scaler clip
 ---
 
 ## Training
+
+### One-command launcher (`launch.py`)
+
+```shell
+python launch.py                                   # interactive: dataset dir, backbone, loss, init weights / resume, output
+python launch.py --rec /data/webface42m --network r100 --loss arcface --output work_dirs/r100 --yes   # no prompts
+python launch.py ... --pretrained path/to/model.pt  # fine-tune from a backbone state_dict
+python launch.py ... --resume --resume-epoch 7      # continue from a checkpoint
+```
+
+It reads `num_image` / `num_classes` from the RecordIO, recommends per-GPU batch size, PartialFC `sample_rate`, optimizer and learning rate for the detected GPUs (official-config recipes, lr scaled linearly with the total batch), optionally copies the dataset into `/dev/shm`, writes `configs/launch_<name>.py` plus `<output>/launch_cmd.sh`, and starts `torchrun`. Every flag can also be given on the command line (`python launch.py -h`).
 
 ### Standard ArcFace / ViT / MambaVision
 
@@ -118,8 +153,8 @@ Available configs for the new backbones:
 | `configs/ms1mv3_vit_b` | `vit_b_dp005_mask_005` | AdamW |
 | `configs/ms1mv3_vit_l` | `vit_l_dp005_mask_005` | AdamW |
 | `configs/ms1mv3_vit_h` | `vit_h` | AdamW |
-| `configs/ms1mv3_mamba_b` | `mamba_b` | AdamW |
-| `configs/ms1mv3_mamba_l` | `mamba_l` | AdamW |
+| `configs/ms1mv3_mambavision_b` | `mambavision_b` | AdamW |
+| `configs/ms1mv3_mambavision_l` | `mambavision_l` | AdamW |
 
 ### AdaFace
 
@@ -128,16 +163,37 @@ torchrun --nproc_per_node=8 train_adaface.py configs/ms1mv3_adaface_r50
 torchrun --nproc_per_node=8 train_adaface.py configs/ms1mv3_adaface_r100
 ```
 
-### TransFace
+### TransFace (DPAP + EHSM)
 
-Entropy-guided FFT augmentation. Each step: run backbone to get per-patch attention entropy → apply FFT amplitude mixing to below-median-entropy images (probability `fft_prob`) → re-run backbone on augmented batch → standard ArcFace loss.
+Paper recipe, on by default in `configs/ms1mv3_transface_vit_{b,l}`: AdamW lr 1e-3, wd 0.1, 35 epochs, warm-up 3; each step a no-grad forward gives the SE patch weights → **DPAP** perturbs the amplitude spectrum of the top-`dpap_topk`=7 patches of `dpap_prob`=20 % of the images (λ ~ U(0, `dpap_alpha`=1), phase kept; GPU-batched) → forward → ArcFace/AdaFace loss re-weighted by **EHSM** (`1 + exp(-ehsm_gamma · mean patch entropy)`).
 
 ```shell
-torchrun --nproc_per_node=8 train_transface.py configs/ms1mv3_transface_vit_b
-torchrun --nproc_per_node=8 train_transface.py configs/ms1mv3_transface_vit_l
+torchrun --nproc_per_node=8 train_transface.py configs/ms1mv3_transface_vit_b     # cfg.loss = "arcface" | "adaface"
 ```
 
-Key config parameters: `fft_prob` (default 0.2), `fft_ratio` (spectrum blend fraction, default 0.1).
+### TransFace++ (bytes)
+
+Paper recipe, on by default in `configs/ms1mv3_transface_pp_vit_{s,b}`: TIFF bytes (best format in the paper), TIBC p=0.3, topology cross-attention, EHSM, AdamW lr 1e-3, wd 0.1, 20 epochs, warm-up 2. `cfg.byte_format` also accepts `png`, `fhwc`, `fchw`.
+
+```shell
+torchrun --nproc_per_node=8 train_transface_pp.py configs/ms1mv3_transface_pp_vit_s
+```
+
+### Resuming from a checkpoint
+
+All `train_*.py` scripts share `utils/utils_checkpoint.py`. With `config.save_all_states = True` every epoch writes `{output}/checkpoint_gpu_{rank}.pt` (backbone, PartialFC shard, optimizer, LR scheduler, AMP scaler); `config.keep_epoch_checkpoints = True` additionally keeps `checkpoint_epoch{N}_gpu_{rank}.pt`.
+
+```python
+config.resume = True                 # latest checkpoint in config.output
+config.resume_epoch = 7              # ... or the one written after epoch 7
+config.resume_from = "work_dirs/x"   # ... or from another run dir / a "{rank}"-pattern path
+```
+
+The number of GPUs must match the run that wrote the checkpoint (PartialFC shards are per rank).
+
+### Data loading
+
+`config.dali = True` decodes JPEGs on the GPU with NVIDIA DALI from the same `train.rec`/`train.idx` (install `nvidia-dali-cuda1xx`); the CPU path (`MXFaceDataset`) delivers ≈600 img/s per `num_workers` process. Put the RecordIO on NVMe: training reads it with random access and it is not loaded into RAM.
 
 ### UIFace — Synthetic Data Generation
 
