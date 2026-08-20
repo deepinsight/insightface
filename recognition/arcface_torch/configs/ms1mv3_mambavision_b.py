@@ -1,7 +1,7 @@
 from easydict import EasyDict as edict
 
 config = edict()
-config.network = "mamba_l"
+config.network = "mambavision_b"
 config.resume = False
 config.output = None
 
