@@ -7,14 +7,15 @@ import numpy as np
 import torch
 from backbones import get_model
 from dataset import get_dataloader
-from losses import CombinedMarginLoss
+from losses import AdaFaceLoss, CombinedMarginLoss, ehsm_sample_weight
 from lr_scheduler import PolynomialLRWarmup
-from partial_fc_v2 import PartialFC_V2
+from partial_fc_v2 import PartialFC_V2, PartialFC_V2_AdaFace
 from torch import distributed
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from augmentation.fft_mix import amplitude_spectrum_mix
+from augmentation.fft_mix import dpap_perturb
 from utils.utils_callbacks import CallBackLogging, CallBackVerification
+from utils.utils_checkpoint import load_checkpoint, load_pretrained_backbone, save_checkpoint
 from utils.utils_config import get_config
 from utils.utils_distributed_sampler import setup_seed
 from utils.utils_logging import AverageMeter, init_logging
@@ -89,9 +90,19 @@ def main(args):
         cfg.num_workers,
     )
 
+    # loss = "arcface" (CombinedMarginLoss, default) or "adaface" (AdaFaceLoss;
+    # the backbone then also returns feature norms via norm_output=True).
+    loss_type = cfg.get("loss", "arcface")
+    assert loss_type in ("arcface", "adaface"), loss_type
+    use_adaface = loss_type == "adaface"
+
     backbone = get_model(
         cfg.network, dropout=0.0, fp16=cfg.fp16,
-        num_features=cfg.embedding_size).cuda()
+        num_features=cfg.embedding_size,
+        norm_output=use_adaface).cuda()
+
+    if cfg.get("pretrained"):
+        load_pretrained_backbone(backbone, cfg.pretrained)
 
     backbone = torch.nn.parallel.DistributedDataParallel(
         module=backbone, broadcast_buffers=False, device_ids=[local_rank],
@@ -101,16 +112,26 @@ def main(args):
     backbone.train()
     backbone._set_static_graph()
 
-    margin_loss = CombinedMarginLoss(
-        64,
-        cfg.margin_list[0],
-        cfg.margin_list[1],
-        cfg.margin_list[2],
-        cfg.interclass_filtering_threshold,
-    )
+    if use_adaface:
+        margin_loss = AdaFaceLoss(
+            m=cfg.adaface_m,
+            h=cfg.adaface_h,
+            s=cfg.adaface_s,
+            t_alpha=cfg.adaface_t_alpha,
+        )
+        pfc_cls = PartialFC_V2_AdaFace
+    else:
+        margin_loss = CombinedMarginLoss(
+            64,
+            cfg.margin_list[0],
+            cfg.margin_list[1],
+            cfg.margin_list[2],
+            cfg.interclass_filtering_threshold,
+        )
+        pfc_cls = PartialFC_V2
 
     if cfg.optimizer == "sgd":
-        module_partial_fc = PartialFC_V2(
+        module_partial_fc = pfc_cls(
             margin_loss, cfg.embedding_size, cfg.num_classes,
             cfg.sample_rate, False)
         module_partial_fc.train().cuda()
@@ -120,7 +141,7 @@ def main(args):
             lr=cfg.lr, momentum=0.9, weight_decay=cfg.weight_decay)
 
     elif cfg.optimizer == "adamw":
-        module_partial_fc = PartialFC_V2(
+        module_partial_fc = pfc_cls(
             margin_loss, cfg.embedding_size, cfg.num_classes,
             cfg.sample_rate, False)
         module_partial_fc.train().cuda()
@@ -140,18 +161,9 @@ def main(args):
         warmup_iters=cfg.warmup_step,
         total_iters=cfg.total_step)
 
-    start_epoch = 0
-    global_step = 0
-    if cfg.resume:
-        dict_checkpoint = torch.load(
-            os.path.join(cfg.output, f"checkpoint_gpu_{rank}.pt"))
-        start_epoch = dict_checkpoint["epoch"]
-        global_step = dict_checkpoint["global_step"]
-        backbone.module.load_state_dict(dict_checkpoint["state_dict_backbone"])
-        module_partial_fc.load_state_dict(dict_checkpoint["state_dict_softmax_fc"])
-        opt.load_state_dict(dict_checkpoint["state_optimizer"])
-        lr_scheduler.load_state_dict(dict_checkpoint["state_lr_scheduler"])
-        del dict_checkpoint
+    amp = torch.cuda.amp.grad_scaler.GradScaler(growth_interval=100)
+    start_epoch, global_step = load_checkpoint(
+        cfg, rank, backbone, module_partial_fc, opt, lr_scheduler, amp)
 
     for key, value in cfg.items():
         num_space = 25 - len(key)
@@ -170,7 +182,6 @@ def main(args):
     )
 
     loss_am = AverageMeter()
-    amp = torch.cuda.amp.grad_scaler.GradScaler(growth_interval=100)
 
     for epoch in range(start_epoch, cfg.num_epoch):
         if isinstance(train_loader, DataLoader):
@@ -179,25 +190,22 @@ def main(args):
         for _, (img, local_labels) in enumerate(train_loader):
             global_step += 1
 
-            # --- TransFace: entropy-guided FFT augmentation ---
-            local_embeddings, patch_entropy = backbone(img)
-            patch_entropy = patch_entropy.detach()
+            # --- TransFace (ICCV 2023): DPAP guided by the SE patch weights, EHSM on patch entropy ---
+            if cfg.dpap_prob > 0:
+                with torch.no_grad():
+                    patch_weight = backbone(img)[-2]
+                img = dpap_perturb(img, patch_weight, top_k=cfg.dpap_topk,
+                                   prob=cfg.dpap_prob, alpha=cfg.dpap_alpha)
+            outputs = backbone(img)                       # (emb, [norm,] patch_weight, patch_entropy)
+            local_embeddings, patch_entropy = outputs[0], outputs[-1]
+            local_norms = outputs[1] if use_adaface else None
+            sample_weight = ehsm_sample_weight(patch_entropy, cfg.ehsm_gamma) if cfg.ehsm else None
+            # ------------------------------------------------------------------------------------
 
-            if torch.rand(1).item() < cfg.fft_prob:
-                median_ent = patch_entropy.median()
-                low_disc = patch_entropy < median_ent
-                if low_disc.any():
-                    ref_idx = torch.randperm(img.size(0), device=img.device)
-                    img_aug = img.clone()
-                    img_aug[low_disc] = amplitude_spectrum_mix(
-                        img[low_disc],
-                        img[ref_idx][low_disc],
-                        ratio=cfg.fft_ratio,
-                    )
-                    local_embeddings, _ = backbone(img_aug)
-            # -------------------------------------------------
-
-            loss: torch.Tensor = module_partial_fc(local_embeddings, local_labels)
+            if use_adaface:
+                loss: torch.Tensor = module_partial_fc(local_embeddings, local_norms, local_labels, sample_weight)
+            else:
+                loss: torch.Tensor = module_partial_fc(local_embeddings, local_labels, sample_weight)
 
             if cfg.fp16:
                 amp.scale(loss).backward()
@@ -232,16 +240,8 @@ def main(args):
                     callback_verification(global_step, backbone)
 
         if cfg.save_all_states:
-            checkpoint = {
-                "epoch": epoch + 1,
-                "global_step": global_step,
-                "state_dict_backbone": backbone.module.state_dict(),
-                "state_dict_softmax_fc": module_partial_fc.state_dict(),
-                "state_optimizer": opt.state_dict(),
-                "state_lr_scheduler": lr_scheduler.state_dict(),
-            }
-            torch.save(checkpoint,
-                       os.path.join(cfg.output, f"checkpoint_gpu_{rank}.pt"))
+            save_checkpoint(cfg, rank, epoch, global_step, backbone, module_partial_fc,
+                            opt, lr_scheduler, amp)
 
         if rank == 0:
             path_module = os.path.join(cfg.output, "model.pt")

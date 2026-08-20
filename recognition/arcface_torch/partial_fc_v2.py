@@ -107,6 +107,7 @@ class PartialFC_V2(torch.nn.Module):
         self,
         local_embeddings: torch.Tensor,
         local_labels: torch.Tensor,
+        sample_weight: torch.Tensor = None,
     ):
         """
         Parameters:
@@ -115,6 +116,8 @@ class PartialFC_V2(torch.nn.Module):
             feature embeddings on each GPU(Rank).
         local_labels: torch.Tensor
             labels on each GPU(Rank).
+        sample_weight: torch.Tensor, optional
+            (batch, 1) per-sample loss weights on each GPU(Rank), e.g. EHSM.
         Returns:
         -------
         loss: torch.Tensor
@@ -163,8 +166,18 @@ class PartialFC_V2(torch.nn.Module):
         logits = logits.clamp(-1, 1)
 
         logits = self.margin_softmax(logits, labels)
-        loss = self.dist_cross_entropy(logits, labels)
+        loss = self.dist_cross_entropy(logits, labels, _gather_sample_weight(sample_weight, batch_size))
         return loss
+
+
+def _gather_sample_weight(sample_weight, batch_size):
+    """All-gather per-rank (batch, 1) sample weights to match the gathered embeddings."""
+    if sample_weight is None:
+        return None
+    sample_weight = sample_weight.detach().float().view(batch_size, 1).cuda()
+    gathered = [torch.zeros((batch_size, 1)).cuda() for _ in range(distributed.get_world_size())]
+    distributed.all_gather(gathered, sample_weight)
+    return torch.cat(gathered)
 
 
 class DistCrossEntropyFunc(torch.autograd.Function):
@@ -174,8 +187,8 @@ class DistCrossEntropyFunc(torch.autograd.Function):
     """
 
     @staticmethod
-    def forward(ctx, logits: torch.Tensor, label: torch.Tensor):
-        """ """
+    def forward(ctx, logits: torch.Tensor, label: torch.Tensor, sample_weight: torch.Tensor = None):
+        """sample_weight: optional (batch, 1) per-sample loss weights (e.g. EHSM)."""
         batch_size = logits.size(0)
         # for numerical stability
         max_logits, _ = torch.max(logits, dim=1, keepdim=True)
@@ -192,8 +205,11 @@ class DistCrossEntropyFunc(torch.autograd.Function):
         loss = torch.zeros(batch_size, 1, device=logits.device)
         loss[index] = logits[index].gather(1, label[index])
         distributed.all_reduce(loss, distributed.ReduceOp.SUM)
-        ctx.save_for_backward(index, logits, label)
-        return loss.clamp_min_(1e-30).log_().mean() * (-1)
+        if sample_weight is None:
+            sample_weight = torch.ones_like(loss)
+        sample_weight = sample_weight.view(batch_size, 1).to(loss)
+        ctx.save_for_backward(index, logits, label, sample_weight)
+        return (loss.clamp_min_(1e-30).log_() * sample_weight).mean() * (-1)
 
     @staticmethod
     def backward(ctx, loss_gradient):
@@ -208,6 +224,7 @@ class DistCrossEntropyFunc(torch.autograd.Function):
             index,
             logits,
             label,
+            sample_weight,
         ) = ctx.saved_tensors
         batch_size = logits.size(0)
         one_hot = torch.zeros(
@@ -216,15 +233,16 @@ class DistCrossEntropyFunc(torch.autograd.Function):
         one_hot.scatter_(1, label[index], 1)
         logits[index] -= one_hot
         logits.div_(batch_size)
-        return logits * loss_gradient.item(), None
+        logits.mul_(sample_weight)
+        return logits * loss_gradient.item(), None, None
 
 
 class DistCrossEntropy(torch.nn.Module):
     def __init__(self):
         super(DistCrossEntropy, self).__init__()
 
-    def forward(self, logit_part, label_part):
-        return DistCrossEntropyFunc.apply(logit_part, label_part)
+    def forward(self, logit_part, label_part, sample_weight=None):
+        return DistCrossEntropyFunc.apply(logit_part, label_part, sample_weight)
 
 
 class AllGatherFunc(torch.autograd.Function):
@@ -325,6 +343,7 @@ class PartialFC_V2_AdaFace(torch.nn.Module):
         local_embeddings: torch.Tensor,
         local_norms: torch.Tensor,
         local_labels: torch.Tensor,
+        sample_weight: torch.Tensor = None,
     ):
         local_labels.squeeze_()
         local_labels = local_labels.long()
@@ -379,5 +398,5 @@ class PartialFC_V2_AdaFace(torch.nn.Module):
         logits = logits.clamp(-1, 1)
 
         logits = self.margin_softmax(logits, norms, labels)
-        loss   = self.dist_cross_entropy(logits, labels)
+        loss   = self.dist_cross_entropy(logits, labels, _gather_sample_weight(sample_weight, batch_size))
         return loss

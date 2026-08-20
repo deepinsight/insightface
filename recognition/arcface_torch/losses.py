@@ -157,3 +157,16 @@ class AdaFaceLoss(torch.nn.Module):
         logits = logits - m_cos
 
         return logits * self.s
+
+
+def ehsm_sample_weight(patch_entropy: torch.Tensor, gamma: float = 1.0, topk: int = None) -> torch.Tensor:
+    """Entropy-guided Hard Sample Mining (TransFace / TransFace++) sample weights.
+
+    eta(x) = 1 + exp(-gamma * mean_topk(E(x_i))) : samples whose patch features carry
+    little information (low entropy / std) are hard and get weights close to 2,
+    easy ones close to 1.  patch_entropy: (B, P) -> (B, 1).
+    """
+    if topk is not None and topk < patch_entropy.shape[1]:
+        patch_entropy = torch.topk(patch_entropy, k=topk, dim=1).values
+    entropy = gamma * patch_entropy.mean(dim=1, keepdim=True)
+    return (1 + torch.exp(-entropy)).detach()
