@@ -154,9 +154,11 @@ class VisionTransformer(nn.Module):
                  norm_layer: str = "ln",
                  mask_ratio = 0.1,
                  using_checkpoint = False,
+                 norm_output: bool = False,
                  ):
         super().__init__()
         self.num_classes = num_classes
+        self.norm_output = norm_output
         # num_features for consistency with other models
         self.num_features = self.embed_dim = embed_dim
 
@@ -277,4 +279,8 @@ class VisionTransformer(nn.Module):
     def forward(self, x):
         x = self.forward_features(x)
         x = self.feature(x)
+        if self.norm_output:
+            norm = torch.norm(x, 2, 1, True)
+            x = torch.div(x, norm)
+            return x, norm
         return x

@@ -66,8 +66,10 @@ class IResNet(nn.Module):
 
     def __init__(self,
                  block, layers, dropout=0, num_features=512, zero_init_residual=False,
-                 groups=1, width_per_group=64, replace_stride_with_dilation=None, fp16=False):
+                 groups=1, width_per_group=64, replace_stride_with_dilation=None, fp16=False,
+                 norm_output=False):
         super(IResNet, self).__init__()
+        self.norm_output = norm_output
         self.fp16 = fp16
         self.inplanes = 64
         self.dilation = 1
@@ -162,6 +164,10 @@ class IResNet(nn.Module):
             x = self.dropout(x)
         x = self.fc(x.float() if self.fp16 else x)
         x = self.features(x)
+        if self.norm_output:
+            norm = torch.norm(x, 2, 1, True)
+            x = torch.div(x, norm)
+            return x, norm
         return x
 
 

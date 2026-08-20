@@ -14,6 +14,7 @@ from torch import distributed
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from utils.utils_callbacks import CallBackLogging, CallBackVerification
+from utils.utils_checkpoint import load_checkpoint, load_pretrained_backbone, save_checkpoint
 from utils.utils_config import get_config
 from utils.utils_distributed_sampler import setup_seed
 from utils.utils_logging import AverageMeter, init_logging
@@ -94,6 +95,9 @@ def main(args):
         num_features=cfg.embedding_size,
         norm_output=True).cuda()
 
+    if cfg.get("pretrained"):
+        load_pretrained_backbone(backbone, cfg.pretrained)
+
     backbone = torch.nn.parallel.DistributedDataParallel(
         module=backbone, broadcast_buffers=False, device_ids=[local_rank], bucket_cap_mb=16,
         find_unused_parameters=True)
@@ -138,17 +142,9 @@ def main(args):
         warmup_iters=cfg.warmup_step,
         total_iters=cfg.total_step)
 
-    start_epoch = 0
-    global_step = 0
-    if cfg.resume:
-        dict_checkpoint = torch.load(os.path.join(cfg.output, f"checkpoint_gpu_{rank}.pt"))
-        start_epoch = dict_checkpoint["epoch"]
-        global_step = dict_checkpoint["global_step"]
-        backbone.module.load_state_dict(dict_checkpoint["state_dict_backbone"])
-        module_partial_fc.load_state_dict(dict_checkpoint["state_dict_softmax_fc"])
-        opt.load_state_dict(dict_checkpoint["state_optimizer"])
-        lr_scheduler.load_state_dict(dict_checkpoint["state_lr_scheduler"])
-        del dict_checkpoint
+    amp = torch.cuda.amp.grad_scaler.GradScaler(growth_interval=100)
+    start_epoch, global_step = load_checkpoint(
+        cfg, rank, backbone, module_partial_fc, opt, lr_scheduler, amp)
 
     for key, value in cfg.items():
         num_space = 25 - len(key)
@@ -167,7 +163,6 @@ def main(args):
     )
 
     loss_am = AverageMeter()
-    amp = torch.cuda.amp.grad_scaler.GradScaler(growth_interval=100)
 
     for epoch in range(start_epoch, cfg.num_epoch):
 
@@ -175,7 +170,8 @@ def main(args):
             train_loader.sampler.set_epoch(epoch)
         for _, (img, local_labels) in enumerate(train_loader):
             global_step += 1
-            local_embeddings, local_norms = backbone(img)
+            outputs = backbone(img)
+            local_embeddings, local_norms = outputs[0], outputs[1]
             loss: torch.Tensor = module_partial_fc(local_embeddings, local_norms, local_labels)
 
             if cfg.fp16:
@@ -210,15 +206,8 @@ def main(args):
                     callback_verification(global_step, backbone)
 
         if cfg.save_all_states:
-            checkpoint = {
-                "epoch": epoch + 1,
-                "global_step": global_step,
-                "state_dict_backbone": backbone.module.state_dict(),
-                "state_dict_softmax_fc": module_partial_fc.state_dict(),
-                "state_optimizer": opt.state_dict(),
-                "state_lr_scheduler": lr_scheduler.state_dict()
-            }
-            torch.save(checkpoint, os.path.join(cfg.output, f"checkpoint_gpu_{rank}.pt"))
+            save_checkpoint(cfg, rank, epoch, global_step, backbone, module_partial_fc,
+                            opt, lr_scheduler, amp)
 
         if rank == 0:
             path_module = os.path.join(cfg.output, "model.pt")

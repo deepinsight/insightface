@@ -86,10 +86,11 @@ class GDC(Module):
 
 
 class MobileFaceNet(Module):
-    def __init__(self, fp16=False, num_features=512, blocks=(1, 4, 6, 2), scale=2):
+    def __init__(self, fp16=False, num_features=512, blocks=(1, 4, 6, 2), scale=2, norm_output=False):
         super(MobileFaceNet, self).__init__()
         self.scale = scale
         self.fp16 = fp16
+        self.norm_output = norm_output
         self.layers = nn.ModuleList()
         self.layers.append(
             ConvBlock(3, 64 * self.scale, kernel=(3, 3), stride=(2, 2), padding=(1, 1))
@@ -137,11 +138,15 @@ class MobileFaceNet(Module):
                 x = func(x)
         x = self.conv_sep(x.float() if self.fp16 else x)
         x = self.features(x)
+        if self.norm_output:
+            norm = torch.norm(x, 2, 1, True)
+            x = torch.div(x, norm)
+            return x, norm
         return x
 
 
-def get_mbf(fp16, num_features, blocks=(1, 4, 6, 2), scale=2):
-    return MobileFaceNet(fp16, num_features, blocks, scale=scale)
+def get_mbf(fp16, num_features, blocks=(1, 4, 6, 2), scale=2, norm_output=False):
+    return MobileFaceNet(fp16, num_features, blocks, scale=scale, norm_output=norm_output)
 
-def get_mbf_large(fp16, num_features, blocks=(2, 8, 12, 4), scale=4):
-    return MobileFaceNet(fp16, num_features, blocks, scale=scale)
+def get_mbf_large(fp16, num_features, blocks=(2, 8, 12, 4), scale=4, norm_output=False):
+    return MobileFaceNet(fp16, num_features, blocks, scale=scale, norm_output=norm_output)
