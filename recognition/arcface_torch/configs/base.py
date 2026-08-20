@@ -9,8 +9,12 @@ config = edict()
 # Margin Base Softmax
 config.margin_list = (1.0, 0.5, 0.0)
 config.network = "r50"
-config.resume = False
-config.save_all_states = False
+config.pretrained = None         # path to a model.pt to initialise the backbone from (fine-tuning)
+config.resume = False            # resume from {output}/checkpoint_gpu_{rank}.pt (see utils/utils_checkpoint.py)
+config.resume_from = None        # directory or file pattern (may contain {rank} / {epoch}) to resume from
+config.resume_epoch = None       # resume from checkpoint_epoch{N}_gpu_{rank}.pt instead of the latest
+config.save_all_states = False   # write resumable checkpoints every epoch
+config.keep_epoch_checkpoints = False  # also keep checkpoint_epoch{N}_gpu_{rank}.pt for every epoch
 config.output = "ms1mv3_arcface_r50"
 
 config.embedding_size = 512
