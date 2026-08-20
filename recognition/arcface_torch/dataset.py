@@ -76,6 +76,13 @@ def get_dataloader(
 
     return train_loader
 
+class _PrefetchError:
+    """Sentinel carrying an exception raised inside the prefetch thread."""
+
+    def __init__(self, exc):
+        self.exc = exc
+
+
 class BackgroundGenerator(threading.Thread):
     def __init__(self, generator, local_rank, max_prefetch=6):
         super(BackgroundGenerator, self).__init__()
@@ -86,15 +93,23 @@ class BackgroundGenerator(threading.Thread):
         self.start()
 
     def run(self):
-        torch.cuda.set_device(self.local_rank)
-        for item in self.generator:
-            self.queue.put(item)
-        self.queue.put(None)
+        try:
+            if self.local_rank is not None:
+                torch.cuda.set_device(self.local_rank)
+            for item in self.generator:
+                self.queue.put(item)
+            self.queue.put(None)
+        except BaseException as exc:  # noqa: BLE001 - re-raised in the consumer thread
+            # Without this the consumer blocks on queue.get() forever and, under DDP,
+            # every other rank dies with a NCCL timeout instead of a readable error.
+            self.queue.put(_PrefetchError(exc))
 
     def next(self):
         next_item = self.queue.get()
         if next_item is None:
             raise StopIteration
+        if isinstance(next_item, _PrefetchError):
+            raise RuntimeError(f"DataLoaderX prefetch thread failed: {next_item.exc!r}") from next_item.exc
         return next_item
 
     def __next__(self):
@@ -190,6 +205,44 @@ class SyntheticDataset(Dataset):
         return 1000000
 
 
+def dali_index_file(rec_file: str, idx_file: str) -> str:
+    """Return an index file usable by DALI's mxnet reader.
+
+    insightface RecordIO files carry a header record with key 0 (flag=2, no
+    image payload) that MXFaceDataset skips but ``fn.readers.mxnet`` does not:
+    it tries to JPEG-decode it and aborts the epoch. Write a copy of the index
+    without that entry (next to the .rec, or in the temp dir if read-only).
+    Only rank 0 writes; all ranks wait on a barrier.
+    """
+    import tempfile
+    with open(idx_file) as f:
+        lines = f.readlines()
+    kept = [l for l in lines if l.split("\t", 1)[0].strip() != "0"]
+    if len(kept) == len(lines):
+        return idx_file
+    candidates = [idx_file + ".dali", os.path.join(
+        tempfile.gettempdir(), f"{os.path.basename(os.path.dirname(os.path.abspath(rec_file)))}_train.idx.dali")]
+    rank, world_size = get_dist_info()
+    out = None
+    for cand in candidates:
+        try:
+            if rank == 0:
+                with open(cand + ".tmp", "w") as f:
+                    f.writelines(kept)
+                os.replace(cand + ".tmp", cand)
+            elif not os.path.isdir(os.path.dirname(cand)) or not os.access(os.path.dirname(cand), os.W_OK):
+                continue
+            out = cand
+            break
+        except OSError:
+            continue
+    if world_size > 1:
+        distributed.barrier()
+    if out is None or not os.path.exists(out):
+        raise RuntimeError(f"could not write a DALI index file for {idx_file}")
+    return out
+
+
 def dali_data_iter(
     batch_size: int, rec_file: str, idx_file: str, num_threads: int,
     initial_fill=32768, random_shuffle=True,
@@ -207,6 +260,7 @@ def dali_data_iter(
     """
     rank: int = distributed.get_rank()
     world_size: int = distributed.get_world_size()
+    idx_file = dali_index_file(rec_file, idx_file)
     import nvidia.dali.fn as fn
     import nvidia.dali.types as types
     from nvidia.dali.pipeline import Pipeline
