@@ -1,0 +1,13 @@
+{
+  "name": "cheetah_s",
+  "root": "~/.insightface",
+  "providers": ["CPUExecutionProvider"],
+  "config": {
+    "body_det_size": 0,
+    "face_det_size": 0,
+    "face_similarity_threshold": 0.45,
+    "reid_similarity_threshold": 0.85,
+    "max_body_samples": 4,
+    "reference_capacity": 256
+  }
+}

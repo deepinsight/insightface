@@ -2,7 +2,7 @@
 
 [Back to the Python library](../README.md)
 
-InsightFace loads ONNX models for face analysis and direct detection or
+InsightFace loads ONNX models for face and person analysis and direct detection or
 recognition use. See the [runtime guide](runtime.md) for installation and
 execution provider selection.
 
@@ -21,15 +21,87 @@ manually downloaded models.** To use your own licensed models, see
 InsightFace 2.0 supports `raccoon_s` and `raccoon_l` through task-aware V2
 manifests that declare the model files and preprocessing. Use them with
 `FaceAnalysis(name="raccoon_s")` or `FaceAnalysis(name="raccoon_l")`.
-PrivateFrame requires one of these packages; its default and the default for
-new GUI configurations is `raccoon_s`. Ordinary `FaceAnalysis()` continues to
-use `buffalo_l` by default.
+PrivateFrame requires one of these packages; its default is `raccoon_s`.
+Ordinary `FaceAnalysis()` continues to use `buffalo_l` by default.
 
 Model packages are stored under `<root>/models/<name>/` (default root:
 `~/.insightface`). PrivateFrame can download a missing selected package on
 first use; see its [model setup guide](../insightface/app/privateframe/README.md).
 Liveness is a separate optional addon and must be enabled explicitly; see the
 [liveness guide](liveness.md) for installation and usage.
+
+## Cheetah person-analysis packages
+
+Use Cheetah with `PersonAnalysis` or the GUI's **Person Analysis** workflow.
+It contains body detection, body ReID, face detection, and face recognition:
+
+| Package | Default body detector input | Use |
+| --- | --- | --- |
+| `cheetah_s` | 320 × 320 | Smaller package; default for new GUI configurations |
+| `cheetah_l` | 640 × 640 | Larger package; default for the PersonAnalysis Python API |
+
+Their display names are **Cheetah S** and **Cheetah L**; Python uses the package
+names `cheetah_s` and `cheetah_l`.
+
+The face detection and recognition ONNX files are identical to those in
+`buffalo_s` for `cheetah_s`, and `buffalo_l` for `cheetah_l`. They are included
+in the Cheetah packages; a separate Buffalo installation is not required.
+
+Both use 640 × 640 full-frame face detection by default and support CPU/CUDA.
+
+`PersonConfig(body_det_size=0, face_det_size=0)` uses the package's body input
+size and the SDK's 640×640 face input. The face detection size is not read from
+the manifest.
+When creating the instance, you can independently override the square body
+input with a positive multiple of 64 and the square face input with a positive
+multiple of 32. The GUI exposes both settings in **Advanced parameters** for
+the next run. The overrides leave the manifest and feature extraction models
+unchanged; see the [configuration guide](person_analysis.md#11-configuration-and-defaults).
+
+Python package installation does not include model files. `PersonAnalysis`
+downloads a missing `cheetah_s` or `cheetah_l` package on first preparation from
+the official
+[model-zoo release](https://github.com/deepinsight/insightface/releases/tag/model-zoo).
+The GUI also downloads a missing selected Cheetah package. Both reuse complete
+local packages. You can instead download the archive manually or use
+**Models > Downloads** in the GUI.
+
+For manual installation, place the complete package at `<root>/models/cheetah_s/`
+or `<root>/models/cheetah_l/`, including its manifest, `MODEL.LICENSE`, and declared model files.
+The default root is `~/.insightface`. Keep each package's files together so its
+manifest and hashes match. `manifest.json` must be directly inside the package
+folder, without an extra nested directory. Existing incomplete or invalid
+packages are not overwritten automatically. If a release asset is unavailable
+or you work offline, install the package supplied to you. Custom package names
+must be installed locally.
+
+Cheetah uses the same V2 manifest structure as the other task-aware packages.
+Its compact manifest identifies the four model files, their SHA-256 hashes,
+normalization settings, and body/ReID/recognition input sizes. Face detection
+uses 640×640 from the SDK unless overridden at initialization.
+Task names select the processing pipeline; an `adapter` field is not needed.
+The loader follows existing V2 rules: hashes are optional and verified when
+present, unknown package/task metadata are ignored, and extra tasks are allowed.
+The four PersonAnalysis tasks remain required. Face preprocessing and recognition
+metadata use the existing V2 defaults when omitted; supplied preprocessing
+objects are still validated. Missing body/ReID input sizes default to 640×640
+and 256×128 respectively.
+Model-specific mean/std values are explicit, as in Raccoon. For body preprocessing,
+only neutral values (`mean=0`, `std=1`, `scale=1`) may be omitted. All supplied
+Cheetah tasks use raw 0–255 pixel values as the basis for mean/std; both body
+tasks omit scale and use `1`. The small
+package declares 320×320 body input; the large package declares 640×640. See the
+[package rules](person_analysis.md#model-package-rules) for details.
+Models with built-in normalization can declare `"preprocessing": "embedded"`,
+using the same meaning as Raccoon. The current Cheetah models use explicit
+numeric normalization. Each Cheetah recognition entry matches its corresponding
+Raccoon entry, including the weights, preprocessing version, input size and
+embedding dimension.
+Keep the signed `MODEL.LICENSE` included with the package; public packages carry
+a non-commercial grant.
+
+See the [PersonAnalysis guide](person_analysis.md) for installation and API usage,
+or the [GUI guide](gui.md) for the visual workflow.
 
 ## Legacy model packs
 

@@ -49,6 +49,108 @@ def test_core_business_translations_have_professional_terms():
     assert tr("License Center", "ru") == "Центр лицензий"
 
 
+def test_person_analysis_chinese_copy_preserves_format_fields():
+    from insightface.gui.core.i18n import _PERSON_ANALYSIS_ZH_TRANSLATIONS
+    required = {"Person Analysis", "Start analysis", "Get commercial license", "Unmatched",
+                "Automatically add body references", "Invalid person configuration",
+                "Could not load person settings:\n{error}",
+                "Advanced parameters", "Analyze at most (times/second)",
+                "Could not save person settings:\n{error}",
+                "Changes apply the next time you start analysis.",
+                "Analyzed frames: {frame} · Time: {time} · Detected: {count} · Matched: {known}"}
+    assert required.issubset(_PERSON_ANALYSIS_ZH_TRANSLATIONS)
+    assert tr("Unmatched", "zh") == "未匹配"
+    for source, translated in _PERSON_ANALYSIS_ZH_TRANSLATIONS.items():
+        assert translated and translated != source
+        assert tr(source, "zh") == translated
+        fields = lambda text: {(name, spec, conversion) for _part, name, spec, conversion in Formatter().parse(text) if name}
+        assert fields(source) == fields(translated), source
+
+
+def test_person_analysis_page_can_switch_chinese_and_english(tmp_path):
+    pytest.importorskip("PySide6")
+    from types import SimpleNamespace
+    from PySide6.QtWidgets import QApplication
+    from insightface.gui.app import configure_qt_plugin_paths
+    from insightface.gui.core.config import AppConfig
+    from insightface.gui.core.i18n import apply_translations
+    from insightface.gui.pages.person_analysis_page import PersonAnalysisPage
+
+    configure_qt_plugin_paths()
+    app = QApplication.instance() or QApplication([])
+    cfg = AppConfig(workspace_path=str(tmp_path), model_root=str(tmp_path / "models"), ui_language="zh")
+    page = PersonAnalysisPage(SimpleNamespace(config=cfg))
+    apply_translations(page, "zh")
+    assert page.start_button.text() == "开始分析"
+    assert page.commercial_button.text() == "获取商业授权"
+    assert page.auto_update.text() == "自动补充人体参考样本"
+    assert page.advanced_button.text() == "高级参数"
+    assert page.analysis_max_fps.specialValueText() == "自动"
+    assert "适用于视频和摄像头" in page.analysis_rate_hint.text()
+    assert page.input_kind.itemText(0) == "本地视频"
+    assert "按顺序" in page.input_hint.text()
+    assert "按视频时间采样" in page.input_hint.text()
+    assert "快于或慢于" in page.input_hint.text()
+    page.input_kind.setCurrentIndex(page.input_kind.findData("rtsp"))
+    assert "最新帧" in page.input_hint.text() and "跳过" in page.input_hint.text()
+    cfg.ui_language = "en"
+    apply_translations(page, "en")
+    assert page.start_button.text() == "Start analysis"
+    assert page.commercial_button.text() == "Get commercial license"
+    assert page.auto_update.text() == "Automatically add body references"
+    assert page.advanced_button.text() == "Advanced parameters"
+    assert page.analysis_max_fps.specialValueText() == "Auto"
+    assert page.input_kind.itemText(0) == "Local video"
+    assert "latest frame" in page.input_hint.text() and "skips older" in page.input_hint.text()
+    assert "Applies to videos and cameras" in page.analysis_rate_hint.text()
+    page.input_kind.setCurrentIndex(page.input_kind.findData("video"))
+    assert "every video frame" in page.input_hint.text()
+    assert "samples by video time" in page.input_hint.text()
+    assert "faster or slower than playback" in page.input_hint.text()
+    app.processEvents()
+    page.close()
+
+
+def test_all_person_parameter_labels_and_help_switch_languages(tmp_path):
+    pytest.importorskip("PySide6")
+    from PySide6.QtCore import QCoreApplication, QEvent
+    from PySide6.QtWidgets import QApplication
+    from insightface.gui.app import configure_qt_plugin_paths
+    from insightface.gui.core.i18n import apply_translations, _PERSON_ANALYSIS_ZH_TRANSLATIONS
+    from insightface.gui.pages.person_analysis_page import PERSON_PARAMETER_COPY, PersonParametersDialog
+
+    configure_qt_plugin_paths()
+    app = QApplication.instance() or QApplication([])
+    saved = []
+    dialog = PersonParametersDialog({}, "zh", saved.append)
+    assert dialog.windowTitle() == "高级参数"
+    assert dialog.restore_button.text() == "恢复默认"
+    assert dialog.save_button.text() == "保存" and dialog.cancel_button.text() == "取消"
+    for name in ("face_det_size", "body_det_size"):
+        assert dialog.controls[name].value() == 0
+        assert dialog.controls[name].specialValueText() == ("默认（640）" if name == "face_det_size" else "模型默认")
+    for name, (label, help_text) in PERSON_PARAMETER_COPY.items():
+        assert label in _PERSON_ANALYSIS_ZH_TRANSLATIONS
+        assert help_text in _PERSON_ANALYSIS_ZH_TRANSLATIONS
+        assert dialog.field_labels[name].text() == tr(label, "zh") != label
+        assert dialog.help_labels[name].text() == tr(help_text, "zh") != help_text
+        assert dialog.controls[name].toolTip() == tr(help_text, "zh")
+    apply_translations(dialog, "en")
+    assert dialog.windowTitle() == "Advanced parameters"
+    assert dialog.restore_button.text() == "Restore defaults"
+    for name in ("face_det_size", "body_det_size"):
+        assert dialog.controls[name].specialValueText() == ("Default (640)" if name == "face_det_size" else "Model default")
+    for name, (label, help_text) in PERSON_PARAMETER_COPY.items():
+        assert dialog.field_labels[name].text() == label
+        assert dialog.help_labels[name].text() == help_text
+        assert dialog.controls[name].toolTip() == help_text
+    dialog.reject()
+    assert not saved
+    dialog.deleteLater()
+    QCoreApplication.sendPostedEvents(None, QEvent.DeferredDelete)
+    app.processEvents()
+
+
 def test_privateframe_translation_catalog_is_complete_and_format_safe():
     from insightface.gui.core.i18n import _PRIVATEFRAME_UI_TRANSLATIONS
 

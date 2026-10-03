@@ -94,7 +94,7 @@ def test_privateframe_page_does_not_default_to_hidden_workspace_exports(
         "_default_privateframe_output_directory",
         lambda: videos,
     )
-    config = AppConfig(workspace_path=str(tmp_path / ".insightface"))
+    config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path / ".insightface"))
 
     class Context:
         pass
@@ -204,7 +204,7 @@ def test_privateframe_page_displays_video_preview_metadata_and_clears_it(
 
     configure_qt_plugin_paths()
     _app = QApplication.instance() or QApplication([])
-    config = AppConfig(workspace_path=str(tmp_path), auto_load_model=False)
+    config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False)
 
     class Context:
         pass
@@ -279,7 +279,7 @@ def test_privateframe_video_preview_ignores_stale_and_cleared_results(
 
     configure_qt_plugin_paths()
     _app = QApplication.instance() or QApplication([])
-    config = AppConfig(workspace_path=str(tmp_path), auto_load_model=False)
+    config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False)
 
     class Context:
         pass
@@ -388,7 +388,7 @@ def test_privateframe_primary_options_reflow_without_losing_values(tmp_path):
 
     configure_qt_plugin_paths()
     _app = QApplication.instance() or QApplication([])
-    config = AppConfig(workspace_path=str(tmp_path), auto_load_model=False)
+    config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False)
 
     class Context:
         pass
@@ -851,7 +851,7 @@ def test_privateframe_page_has_non_blocking_controls(tmp_path):
 
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
-    config = AppConfig(workspace_path=str(tmp_path), auto_load_model=False)
+    config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False)
 
     class Context:
         pass
@@ -1081,6 +1081,7 @@ def test_privateframe_core_controls_are_localized_in_every_gui_language(
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
     config = AppConfig(
+        model_name="raccoon_s",
         workspace_path=str(tmp_path / language),
         model_root=str(tmp_path / language / "model-root"),
         auto_load_model=False,
@@ -1135,6 +1136,7 @@ def test_privateframe_dynamic_content_retranslates_without_losing_values(tmp_pat
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
     config = AppConfig(
+        model_name="raccoon_s",
         workspace_path=str(tmp_path / "workspace"),
         model_root=str(tmp_path / "model-root"),
         auto_load_model=False,
@@ -1220,6 +1222,7 @@ def test_privateframe_dynamic_error_and_provider_tooltip_retranslate(tmp_path):
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
     config = AppConfig(
+        model_name="raccoon_s",
         workspace_path=str(tmp_path / "workspace"),
         auto_load_model=False,
         provider="CPU",
@@ -1285,7 +1288,7 @@ def test_privateframe_json_only_controls_preview_and_progress(tmp_path):
 
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
-    config = AppConfig(workspace_path=str(tmp_path), auto_load_model=False)
+    config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False)
 
     class Context:
         pass
@@ -1356,7 +1359,7 @@ def test_privateframe_flat_reference_scan_and_job_validation(tmp_path):
 
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
-    config = AppConfig(workspace_path=str(tmp_path), auto_load_model=False)
+    config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False)
 
     class Context:
         pass
@@ -1419,7 +1422,7 @@ def test_existing_json_is_included_in_replace_confirmation(tmp_path, monkeypatch
 
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
-    config = AppConfig(workspace_path=str(tmp_path), auto_load_model=False)
+    config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False)
 
     class Context:
         pass
@@ -1474,6 +1477,7 @@ def test_privateframe_refresh_recomputes_resolved_provider(tmp_path, monkeypatch
         lambda: list(available),
     )
     config = AppConfig(
+        model_name="raccoon_s",
         workspace_path=str(tmp_path),
         auto_load_model=False,
         provider="Auto",
@@ -1518,6 +1522,7 @@ def test_privateframe_page_runs_python_api_on_background_worker(
     configure_qt_plugin_paths()
     app = QApplication.instance() or QApplication([])
     config = AppConfig(
+        model_name="raccoon_s",
         workspace_path=str(tmp_path / "workspace"),
         model_root=str(tmp_path / "models"),
         auto_load_model=False,
@@ -1533,6 +1538,7 @@ def test_privateframe_page_runs_python_api_on_background_worker(
             str(tmp_path / "app.log"),
         )
     )
+    window.open_page("private_frame")
     page = window.page_registry.get("private_frame")
     source = tmp_path / "input.mp4"
     source.write_bytes(b"video")
@@ -1600,7 +1606,7 @@ def reference_page(tmp_path):
 
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
-    page = PrivateFramePage(SimpleNamespace(config=AppConfig(workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")))
+    page = PrivateFramePage(SimpleNamespace(config=AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")))
     yield page
     page.more_options_dialog.close()
     page.processing_details_dialog.close()
@@ -1810,7 +1816,7 @@ def test_gui_initial_values_and_restore_read_one_packaged_base_snapshot(tmp_path
     defaults, config_path = _configured_gui_base(tmp_path, monkeypatch, analysis_fps=analysis_fps)
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
-    page = privateframe_page.PrivateFramePage(SimpleNamespace(config=AppConfig(workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")))
+    page = privateframe_page.PrivateFramePage(SimpleNamespace(config=AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")))
     assert page.analysis_mode.currentData() == analysis_fps
     assert page.analysis_mode.itemText(0) == "Fast (target 15 analysis FPS)"
     assert page.analysis_mode.itemText(1) == (
@@ -1905,7 +1911,7 @@ def test_non_crf_base_is_preserved_until_user_selects_quality(tmp_path, monkeypa
     _configured_gui_base(tmp_path, monkeypatch, rate_control=rate)
     configure_qt_plugin_paths()
     QApplication.instance() or QApplication([])
-    page = privateframe_page.PrivateFramePage(SimpleNamespace(config=AppConfig(workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")))
+    page = privateframe_page.PrivateFramePage(SimpleNamespace(config=AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")))
     source = tmp_path / "video.mp4"
     source.write_bytes(b"video")
     page.video_input.set_path(str(source))
@@ -1966,7 +1972,7 @@ def test_empty_or_null_base_preset_inherits_encoder_default(tmp_path, monkeypatc
     defaults["render"]["video_output"]["preset"] = preset
     path.write_text(yaml.safe_dump(defaults), encoding="utf-8")
     QApplication.instance() or QApplication([])
-    page = privateframe_page.PrivateFramePage(SimpleNamespace(config=AppConfig(workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")))
+    page = privateframe_page.PrivateFramePage(SimpleNamespace(config=AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")))
     assert page.video_preset.currentData() == preset
     assert page.video_preset.currentText() == "Automatic"
     job = privateframe_page.build_privateframe_job(input_path=tmp_path / "video.mp4", output_dir=tmp_path / "out", model_package="raccoon_s", runtime_provider="auto")
@@ -2024,6 +2030,7 @@ def test_primary_options_reflow_when_control_size_hints_change(tmp_path):
     app = QApplication.instance() or QApplication([])
     host = QWidget()
     page = PrivateFramePage(SimpleNamespace(config=AppConfig(
+        model_name="raccoon_s",
         workspace_path=str(tmp_path), auto_load_model=False, ui_language="en",
     )), parent=host)
     try:
@@ -2208,7 +2215,7 @@ def test_privateframe_fits_default_application_page_viewport(tmp_path, monkeypat
     app = QApplication.instance() or QApplication([])
     old_style = app.styleSheet()
     monkeypatch.setattr(privateframe_page.PrivateFramePage, "_global_model_status", _stub_ready_privateframe_model)
-    config = AppConfig(workspace_path=str(tmp_path), auto_load_model=False, ui_language="zh")
+    config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False, ui_language="zh")
     app.setStyleSheet(application_stylesheet(config.ui_theme))
     page = privateframe_page.PrivateFramePage(SimpleNamespace(config=config))
     try:
@@ -2263,7 +2270,7 @@ def test_path_fields_expand_when_native_forms_default_to_size_hints(tmp_path, mo
         # Use Fusion drawing with the restrictive native-form hint so the
         # regression runs consistently without a macOS window server.
         app.setStyle(SizeHintFormStyle(QStyleFactory.create("Fusion")))
-        config = AppConfig(workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")
+        config = AppConfig(model_name="raccoon_s", workspace_path=str(tmp_path), auto_load_model=False, ui_language="en")
         app.setStyleSheet(application_stylesheet(config.ui_theme))
         probe = QWidget()
         assert QFormLayout(probe).fieldGrowthPolicy() == QFormLayout.FieldsStayAtSizeHint

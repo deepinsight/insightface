@@ -46,6 +46,8 @@ def test_fallback_model_assets_have_github_release_urls(tmp_path):
         "antelopev2.zip",
         "raccoon_l.zip",
         "raccoon_s.zip",
+        "cheetah_s.zip",
+        "cheetah_l.zip",
         "GFPGANv1.4.onnx",
     }.issubset(names)
     for asset in assets:
@@ -277,7 +279,8 @@ def test_refresh_uses_model_zoo_tag_api_and_canonical_download_urls(
     assert requested == [(GITHUB_MODEL_ZOO_RELEASE_API, 7)]
     assert "Refreshed" in message
     official = [asset for asset in assets if asset.source == "InsightFace"]
-    assert {"raccoon_s.zip", "raccoon_l.zip"}.issubset(
+    # Keep the new choices even before the release publishes their assets.
+    assert {"raccoon_s.zip", "raccoon_l.zip", "cheetah_s.zip", "cheetah_l.zip"}.issubset(
         {asset.name for asset in official}
     )
     assert all(asset.tag_name == "model-zoo" for asset in official)

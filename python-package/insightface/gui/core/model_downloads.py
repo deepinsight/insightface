@@ -1,8 +1,4 @@
-"""Manual model download catalog and helpers.
-
-The GUI never downloads models automatically. Users must open Model Downloads,
-refresh URLs, and explicitly start a download.
-"""
+"""Model catalog and downloads, including local-first Person Analysis startup."""
 
 from __future__ import annotations
 
@@ -49,6 +45,8 @@ INSIGHTFACE_MODEL_ASSET_NAMES = (
     "buffalo_m.zip",
     "buffalo_s.zip",
     "buffalo_sc.zip",
+    "cheetah_l.zip",
+    "cheetah_s.zip",
     "inswapper_128.onnx",
     "raccoon_l.zip",
     "raccoon_s.zip",
@@ -299,6 +297,11 @@ def installed_model_asset_path(
     root = Path(model_root).expanduser()
     if asset.name.endswith(".zip"):
         target = root / "models" / asset.stem
+        from .model_packages import PERSON_MODEL_PACKAGES, inspect_person_model
+
+        if asset.stem in PERSON_MODEL_PACKAGES:
+            status = inspect_person_model(asset.stem, root)
+            return status.package_path if status.installed else None
         if target.exists() and any(target.glob("*.onnx")):
             return target
         return None
@@ -321,6 +324,12 @@ def is_model_asset_installed(
 
 
 def local_model_status(asset: ModelAsset, model_root: str | os.PathLike[str]) -> str:
+    from .model_packages import PERSON_MODEL_PACKAGES, inspect_person_model
+
+    if asset.stem in PERSON_MODEL_PACKAGES:
+        status = inspect_person_model(asset.stem, model_root)
+        if status.state == "invalid":
+            return status.message
     installed_path = installed_model_asset_path(asset, model_root)
     if installed_path is not None:
         return f"installed: {installed_path}"
@@ -332,6 +341,10 @@ def local_model_status(asset: ModelAsset, model_root: str | os.PathLike[str]) ->
 
 
 def is_model_package_installed(model_name: str, model_root: str | os.PathLike[str]) -> bool:
+    from .model_packages import PERSON_MODEL_PACKAGES, inspect_person_model
+
+    if model_name in PERSON_MODEL_PACKAGES:
+        return inspect_person_model(model_name, model_root).installed
     target = Path(model_root).expanduser() / "models" / model_name
     return target.exists() and any(target.glob("*.onnx"))
 
@@ -418,6 +431,11 @@ def _download_with_retries(
             partial.replace(destination)
             return
         except (urllib.error.URLError, TimeoutError, ConnectionResetError, OSError) as exc:
+            if isinstance(exc, urllib.error.HTTPError) and exc.code in (404, 410):
+                raise RuntimeError(
+                    f"{asset_name} is not available at {url} (HTTP {exc.code}). "
+                    "The release asset may not have been published yet."
+                ) from exc
             if isinstance(exc, urllib.error.HTTPError) and exc.code == 416 and partial.exists():
                 partial.replace(destination)
                 return
@@ -438,7 +456,14 @@ def download_model_asset(
     model_root: str | os.PathLike[str],
     gui_cache_dir: str | os.PathLike[str],
     progress: Callable[[int, int, str], None] | None = None,
+    is_cancelled: Callable[[], bool] | None = None,
 ) -> Path:
+    from .model_packages import PERSON_MODEL_PACKAGES
+
+    if asset.name.endswith(".zip") and asset.stem in PERSON_MODEL_PACKAGES:
+        return _download_person_model_asset(
+            asset, model_root, gui_cache_dir, progress, is_cancelled,
+        )
     cache_dir = Path(gui_cache_dir).expanduser() / "models"
     cache_dir.mkdir(parents=True, exist_ok=True)
     model_root_path = Path(model_root).expanduser() / "models"
@@ -512,3 +537,66 @@ def download_model_asset(
     if progress:
         progress(1, 1, f"Saved to {target_file}")
     return target_file
+
+
+def _download_person_model_asset(asset, model_root, gui_cache_dir, progress, is_cancelled):
+    """Validate Cheetah in staging, preserving every existing local package."""
+    from .model_packages import inspect_person_model
+    from ...model_zoo.person_package import load_person_package
+
+    def check_cancelled():
+        if is_cancelled is not None and is_cancelled():
+            raise RuntimeError("Person model preparation cancelled.")
+
+    def report(current, total, message):
+        check_cancelled()
+        if progress is not None:
+            progress(current, total, message)
+
+    check_cancelled()
+    status = inspect_person_model(asset.stem, model_root)
+    if status.installed:
+        return status.package_path
+    if not status.can_start:
+        raise RuntimeError(status.message)
+    cache = Path(gui_cache_dir).expanduser() / "models"
+    cache.mkdir(parents=True, exist_ok=True)
+    status.package_path.parent.mkdir(parents=True, exist_ok=True)
+    archive = cache / asset.name
+    url = model_zoo_download_url(asset.name)
+    try:
+        _download_with_retries(url, archive, asset.name, expected_size=asset.size, progress=report)
+        check_cancelled()
+        with tempfile.TemporaryDirectory(
+            prefix=f".{asset.stem}-install-", dir=status.package_path.parent,
+        ) as temporary:
+            staging_root = Path(temporary)
+            staging_package = staging_root / "models" / asset.stem
+            staging_package.mkdir(parents=True)
+            with zipfile.ZipFile(archive) as bundle:
+                bundle.extractall(staging_package)
+            # Accept both a package-content zip and a zip with one named folder.
+            wrapped_package = staging_package / asset.stem
+            if not (staging_package / "manifest.json").exists() and (wrapped_package / "manifest.json").is_file():
+                unpacked = staging_root / "unpacked"
+                wrapped_package.replace(unpacked)
+                shutil.rmtree(staging_package)
+                unpacked.replace(staging_package)
+            check_cancelled()
+            load_person_package(asset.stem, staging_root)
+            check_cancelled()
+            # A concurrent installer or user may have created a local package
+            # during the download. Never replace it with our staged result.
+            if status.package_path.exists() or status.package_path.is_symlink():
+                current = inspect_person_model(asset.stem, status.model_root)
+                if current.installed:
+                    return current.package_path
+                raise RuntimeError(f"Local package appeared during download: {status.package_path}. It was not replaced.")
+            staging_package.replace(status.package_path)
+        report(1, 1, f"Installed and validated {asset.name} at {status.package_path}")
+        return status.package_path
+    except Exception as exc:
+        raise RuntimeError(
+            f"Could not prepare {asset.stem}: {exc} "
+            f"Install the complete package (manifest.json and its four models) at {status.package_path}."
+        ) from exc

@@ -20,6 +20,7 @@ from .pages.mode_dashboards import (
 )
 from .pages.multiface_photo_page import MultiFacePhotoPage
 from .pages.people_library_page import PeopleLibraryPage
+from .pages.person_analysis_page import PersonAnalysisPage
 from .pages.placeholder_page import CommercialNextStepsPage, PlaceholderPage
 from .pages.privateframe_page import PrivateFramePage
 from .pages.reports_page import ReportsPage
@@ -43,6 +44,7 @@ class PageRegistry:
 
     def _create_page(self, page_key: str) -> QWidget:
         factories = {
+            "person_analysis": PersonAnalysisPage,
             "private_frame": PrivateFramePage,
             "verification": VerificationPage,
             "face_dashboard": FaceDashboardPage,

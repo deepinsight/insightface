@@ -8,10 +8,14 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QBrush
 from PySide6.QtWidgets import QCheckBox, QComboBox, QFormLayout, QLabel, QLineEdit, QTextEdit
 
+from ..app import begin_context_activity, context_activity_count, end_context_activity
 from ..core.config import save_config
 from ..core.face_engine import FaceEngine, is_cuda_provider_available, providers_from_choice
 from ..core.model_downloads import is_model_package_installed, list_installed_gfpgan_models, list_installed_swap_models
-from ..core.model_packages import CUSTOM_MODEL_CHOICE, GUI_MODEL_PACKAGES
+from ..core.model_packages import (
+    CUSTOM_MODEL_CHOICE, GUI_MODEL_PACKAGES, PERSON_MODEL_PACKAGES,
+    ensure_person_model, inspect_person_model, person_model_providers, person_provider_runtime_display,
+)
 from .base import BasePage
 
 
@@ -43,6 +47,7 @@ class ModelSettingsPage(BasePage):
         self.det_combo = QComboBox()
         self.det_combo.addItems(["Auto", "128x128", "320x320", "640x640", "1024x1024"])
         self.det_combo.setCurrentText(context.config.det_size_label)
+        self.model_combo.currentIndexChanged.connect(self._update_person_controls)
         self.swap_model_combo = QComboBox()
         self._update_swap_model_choices()
         self.gfpgan_enabled = QCheckBox("Enable GFPGAN restore after face swap")
@@ -73,6 +78,7 @@ class ModelSettingsPage(BasePage):
         )
         self.refresh()
         self._update_custom_dir_visibility()
+        self._update_person_controls()
 
     def _apply_to_config(self) -> None:
         cfg = self.context.config
@@ -129,6 +135,12 @@ class ModelSettingsPage(BasePage):
         self.refresh()
 
     def test_load(self) -> None:
+        if any(context_activity_count(self.context, key) for key in (
+            "person_analysis_jobs_in_progress", "privateframe_jobs_in_progress",
+            "model_downloads_in_progress",
+        )):
+            self.show_error("Wait for active model or analysis work to finish before testing models.")
+            return
         try:
             model_name, model_root, custom_model_dir = self._selected_model_values()
         except ValueError as exc:
@@ -136,6 +148,9 @@ class ModelSettingsPage(BasePage):
             return
 
         provider = self.provider_combo.currentText()
+        if model_name in PERSON_MODEL_PACKAGES:
+            self._test_person_load(model_name, model_root, provider)
+            return
         provider = (
             "Auto"
             if provider == "CUDA" and not is_cuda_provider_available()
@@ -166,7 +181,42 @@ class ModelSettingsPage(BasePage):
 
         self.run_task("Loading model", task, done)
 
+    def _test_person_load(self, model_name, model_root, provider) -> None:
+        cache_dir = self.context.config.cache_dir
+
+        def task(progress=None, is_cancelled=None):
+            from ...app.person_analysis import PersonAnalysis
+
+            providers = person_model_providers(provider)
+            ensure_person_model(model_name, model_root, cache_dir, progress, is_cancelled)
+            if is_cancelled is not None and is_cancelled():
+                raise RuntimeError("Person model preparation cancelled.")
+            app = PersonAnalysis(name=model_name, root=model_root, providers=providers)
+            try:
+                app.prepare()
+                return {"model": model_name, "providers": providers}
+            finally:
+                app.close()
+
+        def done(info):
+            self.runtime.setPlainText("\n".join(f"{key}: {value}" for key, value in info.items()))
+            self.set_status("Person Analysis models loaded, warmed up, and closed successfully.")
+
+        begin_context_activity(self.context, "person_analysis_jobs_in_progress")
+
+        def finished():
+            end_context_activity(self.context, "person_analysis_jobs_in_progress")
+
+        try:
+            self.run_task("Loading Person Analysis models", task, done, on_finished=finished)
+        except Exception:
+            finished()
+            raise
+
     def warmup(self) -> None:
+        if self.model_combo.currentData() in PERSON_MODEL_PACKAGES:
+            self.test_load()
+            return
         if not self.context.engine.is_loaded():
             self.show_error("Model is not loaded. Please open Models.")
             return
@@ -177,7 +227,12 @@ class ModelSettingsPage(BasePage):
         self._update_provider_availability()
         self._update_swap_model_choices()
         self._update_gfpgan_model_choices()
-        info = self.context.engine.get_runtime_info()
+        if self.context.config.model_name in PERSON_MODEL_PACKAGES:
+            provider, detail = person_provider_runtime_display(self.context.config.provider)
+            info = {"model": self.context.config.model_name, "provider": provider,
+                    "provider_policy": detail, "status": "Prepared when Person Analysis starts."}
+        else:
+            info = self.context.engine.get_runtime_info()
         self.runtime.setPlainText("\n".join(f"{key}: {value}" for key, value in info.items()))
 
     def _update_provider_availability(self) -> None:
@@ -198,11 +253,24 @@ class ModelSettingsPage(BasePage):
                 "CUDA is unavailable on this machine, so Auto will choose "
                 "the best available provider."
             )
+        elif self.model_combo.currentData() in PERSON_MODEL_PACKAGES:
+            self.provider_combo.setToolTip(
+                "Person Analysis Auto chooses CUDA when available, otherwise CPU."
+            )
         else:
             self.provider_combo.setToolTip(
                 "Auto chooses the best available ONNX Runtime provider in "
                 "this order: CoreML, CUDA, CPU."
             )
+
+    def _update_person_controls(self) -> None:
+        is_person = self.model_combo.currentData() in PERSON_MODEL_PACKAGES
+        self.det_combo.setEnabled(not is_person)
+        self.det_combo.setToolTip(
+            "Person Analysis uses the package input sizes: face 640; body 320 for cheetah_s or 640 for cheetah_l."
+            if is_person else ""
+        )
+        self._update_provider_availability()
 
     def _update_model_availability(self, *, sync_selection: bool = False) -> None:
         model = self.model_combo.model()
@@ -212,6 +280,7 @@ class ModelSettingsPage(BasePage):
             if item is None:
                 continue
             installed = is_model_package_installed(package, root)
+            person_status = inspect_person_model(package, root) if package in PERSON_MODEL_PACKAGES else None
             # Missing packages remain selectable: the general GUI reports that
             # a manual download is required, while PrivateFrame may download a
             # selected Raccoon package on first use.
@@ -227,6 +296,10 @@ class ModelSettingsPage(BasePage):
                 if installed
                 else f"{package} is not downloaded. Open Models > Downloads to install it."
             )
+            if person_status is not None:
+                item.setToolTip(person_status.message)
+                if person_status.state == "invalid":
+                    item.setText(f"{package} (invalid package)")
         custom_item = model.item(len(self.model_packages))
         if custom_item is not None:
             custom_item.setEnabled(True)

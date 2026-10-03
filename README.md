@@ -20,6 +20,12 @@ also supports `raccoon_s` / `raccoon_l` model packages, automatic CoreML/CUDA/CP
 provider selection, and reusable CoreML compilation caches. PrivateFrame defaults
 to **Fast mode (target 15 analysis FPS)**.
 
+[PersonAnalysis](python-package/docs/person_analysis.md) adds person detection,
+face recognition, and body ReID for matching people against registered references.
+Use its Python API or try local videos, webcams, and RTSP streams in the desktop GUI.
+
+For installation and use, start with the [Python SDK and GUI documentation](python-package/README.md).
+
 ## InsightFace Server
 
 The new [InsightFace Server](server/) provides a simple self-hosted Web UI,
@@ -44,6 +50,8 @@ Both manual-downloading models from our github repo and auto-downloading models 
 3. For advanced face recognition SDK and models (e.g., InspireFace SDK), please contact [contact@insightface.ai](mailto:contact@insightface.ai) for licensing and additional support.
 
 ## ChangeLogs
+
+**`2026-10-03`** `InsightFace 2.1` **PersonAnalysis update:** Add person detection, face recognition and body ReID with separate `get()`, `match()` and optional `update()` calls. Support `cheetah_s` / `cheetah_l` on CPU or CUDA with automatic model downloads, plus a GUI workflow for local videos, webcams and RTSP with analysis-rate controls and advanced settings. See the [Python package](python-package/README.md) and [full change log](python-package/CHANGELOG.md).
 
 **`2026-09-09`** `InsightFace 2.0` **Liveness update:** Add the optional RGB liveness addon, `normal`/`observe` modes, per-face scores and input-rejection reasons, plus Server Web model installation and activation. See [Python usage](python-package/README.md#optional-liveness-addon) and [Server usage](server/docs/user-guide.md#optional-liveness-addon).
 

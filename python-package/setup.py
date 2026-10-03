@@ -121,7 +121,7 @@ if build_face3d:
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
 # Check if running on macOS (Darwin)
-if platform.system() == "Darwin":
+if build_face3d and platform.system() == "Darwin":
     logging.info("Detected macOS. Checking if Homebrew, LLVM, and OpenMP are installed...")
 
     # Check if Homebrew is installed

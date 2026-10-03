@@ -25,6 +25,16 @@ from zipfile import ZipFile
 
 
 REQUIRED_FILES = (
+    "insightface/app/person_analysis.py",
+    "insightface/app/person/__init__.py",
+    "insightface/app/person/config.py",
+    "insightface/app/person/matrix.py",
+    "insightface/app/person/types.py",
+    "insightface/model_zoo/person_package.py",
+    "insightface/model_zoo/person_detection.py",
+    "insightface/model_zoo/person_reid.py",
+    "insightface/gui/core/person_analysis.py",
+    "insightface/gui/pages/person_analysis_page.py",
     "insightface/data/images/t1.jpg",
     "insightface/data/objects/meanshape_68.pkl",
     "insightface/gui/assets/app_icon.png",
@@ -49,9 +59,14 @@ def _check_public_key(data: bytes) -> None:
     assert len(der) == 44, "Expected an Ed25519 public key"
 
 
-def _check_resources(names: set[str], read) -> None:
+def _check_resources(names: set[str], read, *, archive: bool = False) -> None:
     missing = set(REQUIRED_FILES) - names
     assert not missing, f"Missing package resources: {sorted(missing)}"
+    if archive:
+        for name in names:
+            parts = Path(name).parts
+            assert not {".private", "__pycache__", ".pytest_cache"}.intersection(parts), name
+            assert not name.endswith((".onnx", ".mp4", ".sqlite", ".db")), name
     for name in names:
         if name.startswith("insightface/model_zoo/trusted_keys/") and name.endswith(".pem"):
             _check_public_key(read(name))
@@ -92,7 +107,7 @@ def inspect_archives(wheel: Path, sdist: Path, *, allow_native: bool = False) ->
             assert "Tag: py3-none-any" in wheel_metadata
             assert not any(name.endswith(NATIVE_SUFFIXES) for name in names)
         assert not any(".data/data/insightface/data/" in name for name in names)
-        _check_resources(names, archive.read)
+        _check_resources(names, archive.read, archive=True)
         entry_points = archive.read(f"{dist_info}/entry_points.txt").decode("utf-8")
         assert "insightface-privateframe = insightface_privateframe_bootstrap:main" in entry_points
 
@@ -107,7 +122,7 @@ def inspect_archives(wheel: Path, sdist: Path, *, allow_native: bool = False) ->
 
         sdist_package = _check_metadata(read("PKG-INFO"))
         assert sdist_package["Version"] == package["Version"]
-        _check_resources(names, read)
+        _check_resources(names, read, archive=True)
     print(f"Release archive checks passed: {wheel}, {sdist}")
 
 
@@ -121,7 +136,8 @@ def _probe(profile: str) -> None:
     sys.addaudithook(_offline_audit)
     import insightface
     import insightface_privateframe_bootstrap
-    from insightface.app import FaceAnalysis
+    from insightface.app import FaceAnalysis, PersonAnalysis
+    from insightface.app.person import PersonConfig
     from insightface import model_zoo
 
     distribution = metadata.distribution("insightface")
@@ -131,6 +147,15 @@ def _probe(profile: str) -> None:
         distribution.locate_file("insightface/__init__.py")
     ).resolve(), "Smoke checks must import the installed distribution"
     assert callable(FaceAnalysis) and callable(model_zoo.get_model)
+    person = PersonAnalysis(config=PersonConfig())
+    try:
+        assert person.name == "cheetah_l"
+        assert person.providers == ["CPUExecutionProvider"]
+        for name in ("prepare", "register", "get", "get_reid", "match", "update",
+                     "remove_person", "clear_references"):
+            assert callable(getattr(person, name)), name
+    finally:
+        person.close()
     assert callable(insightface_privateframe_bootstrap.main)
     root = Path(distribution.locate_file(""))
     _check_resources({str(path).replace("\\", "/") for path in distribution.files}, lambda name: (root / name).read_bytes())

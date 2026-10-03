@@ -1,4 +1,9 @@
-InsightFace Example
----
+# InsightFace Examples
 
-Before running the examples, please install insightface package via `pip install -U insightface`
+Install or upgrade InsightFace before running the examples:
+
+```bash
+python -m pip install -U insightface
+```
+
+See the [Python package README](../python-package/README.md) for documentation.

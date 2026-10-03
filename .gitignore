@@ -119,3 +119,4 @@ server/test-results/
 **/README_INTERNAL*.md
 
 .DS_Store
+._*

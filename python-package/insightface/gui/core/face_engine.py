@@ -21,6 +21,7 @@ from .constants import AUTO_DET_SIZES, DEFAULT_DET_SIZE, DEFAULT_MODEL_NAME, DEF
 from .i18n import tr
 from .logging import get_logger
 from .models import CompareResult, FaceRecord
+from .model_packages import PERSON_MODEL_PACKAGES
 from .quality import score_face
 from .recognition import compare_embeddings, cosine_similarity, normalize_embedding
 from .utils import crop_bbox
@@ -85,6 +86,13 @@ class FaceEngine:
             self.active_providers = []
             self.ctx_id = -1
             self._prepared_det_size = None
+            if self.model_name in PERSON_MODEL_PACKAGES and not self._custom_model_directory_selected():
+                self.last_error = (
+                    "Cheetah packages require PersonAnalysis. Use Person Analysis "
+                    "or select a face model in Models."
+                )
+                LOGGER.warning(self.last_error)
+                return
             start = time.perf_counter()
             model_dir = self.resolve_model_dir()
             if not model_dir.is_dir():

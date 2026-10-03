@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QFrame,
     QLabel,
+    QSizePolicy,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -33,7 +34,11 @@ from ..core.model_downloads import (
     local_model_status,
     refresh_model_assets,
 )
-from ..core.model_packages import is_gui_model_package_asset
+from ..core.model_packages import (
+    PERSON_MODEL_PACKAGES,
+    inspect_person_model,
+    is_gui_model_package_asset,
+)
 from ..widgets.table_utils import configure_table_columns, refresh_table_columns
 from .base import BasePage
 
@@ -50,7 +55,8 @@ class ModelDownloadPage(BasePage):
         self._download_in_progress = False
         self.content.addWidget(
             self.notice(
-                "Downloads are manual only. The GUI does not auto-download models. "
+                "Downloads here start only when requested. Person Analysis also tries "
+                "to download a missing Cheetah package when you start processing. "
                 "Model files may have different licenses from code; review usage before deployment."
             )
         )
@@ -91,11 +97,13 @@ class ModelDownloadPage(BasePage):
         )
         configure_table_columns(self.table, [210, 100, 150, 90, 170, 150, 360])
         self.table.itemSelectionChanged.connect(self._update_selection_actions)
-        self.table.setMinimumHeight(400)
+        # The surrounding tab can be shorter than the page's size hint. Let
+        # the scrollable table shrink instead of overlapping the footer.
         self.content.addWidget(self.table, 1)
         self.content.addSpacing(8)
         self.source_footer = QFrame()
         self.source_footer.setObjectName("downloadSourceFooter")
+        self.source_footer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         footer_layout = QVBoxLayout(self.source_footer)
         footer_layout.setContentsMargins(10, 8, 10, 8)
         self.url_label = QLabel()
@@ -152,9 +160,11 @@ class ModelDownloadPage(BasePage):
     def download_selected(self) -> None:
         if context_activity_count(
             self.context, "privateframe_jobs_in_progress"
+        ) or context_activity_count(
+            self.context, "person_analysis_jobs_in_progress"
         ):
             self.show_error(
-                "Wait for PrivateFrame processing to finish before downloading "
+                "Wait for analysis processing to finish before downloading "
                 "a model package."
             )
             return
@@ -233,9 +243,11 @@ class ModelDownloadPage(BasePage):
             self.context, "model_downloads_in_progress"
         ) or context_activity_count(
             self.context, "privateframe_jobs_in_progress"
+        ) or context_activity_count(
+            self.context, "person_analysis_jobs_in_progress"
         ):
             self.show_error(
-                "Wait for active model or PrivateFrame work to finish before "
+                "Wait for active model or analysis work to finish before "
                 "changing the global model."
             )
             return
@@ -259,9 +271,12 @@ class ModelDownloadPage(BasePage):
                 manager.notify_model_configuration_changed()
             if hasattr(manager, "refresh_model_pages"):
                 manager.refresh_model_pages()
-            self.set_status(
-                f"Model set to {asset.stem}. Open Models and test model load."
-            )
+            if asset.stem in PERSON_MODEL_PACKAGES:
+                self.set_status(f"Model set to {asset.stem}. Open Person Analysis to use it.")
+            else:
+                self.set_status(
+                    f"Model set to {asset.stem}. Open Models and test model load."
+                )
         else:
             path = installed_model_asset_path(
                 asset,
@@ -308,17 +323,27 @@ class ModelDownloadPage(BasePage):
         privateframe_running = context_activity_count(
             self.context, "privateframe_jobs_in_progress"
         )
+        person_running = context_activity_count(
+            self.context, "person_analysis_jobs_in_progress"
+        )
         busy = bool(
             self._download_in_progress
             or model_download_running
             or privateframe_running
+            or person_running
         )
         can_use = bool(use_kind and installed and not busy)
         can_download = bool(asset is not None and not installed and not busy)
+        person_status = (
+            inspect_person_model(asset.stem, self.context.config.model_root)
+            if asset is not None and asset.stem in PERSON_MODEL_PACKAGES else None
+        )
+        if person_status is not None and person_status.state == "invalid":
+            can_download = False
         self.use_selected_button.setEnabled(can_use)
         if busy:
             use_tooltip = (
-                "Wait for active model or PrivateFrame work to finish before "
+                "Wait for active model or analysis work to finish before "
                 "changing the global model."
             )
         elif asset is None:
@@ -340,15 +365,17 @@ class ModelDownloadPage(BasePage):
         self.download_selected_button.setEnabled(
             can_download
         )
-        if privateframe_running:
+        if privateframe_running or person_running:
             download_tooltip = (
-                "Wait for PrivateFrame processing to finish before downloading "
+                "Wait for analysis processing to finish before downloading "
                 "models."
             )
         elif model_download_running:
             download_tooltip = "A model download is already in progress."
         elif installed:
             download_tooltip = "This model asset is already downloaded."
+        elif person_status is not None and person_status.state == "invalid":
+            download_tooltip = person_status.message
         elif asset is None:
             download_tooltip = "Select a model asset to download."
         else:

@@ -2,7 +2,7 @@
 
 [Back to the Python library](../README.md)
 
-InsightFace 2.0 uses ONNX Runtime for FaceAnalysis, ModelZoo, PrivateFrame, and
+InsightFace 2.1 uses ONNX Runtime for FaceAnalysis, ModelZoo, PersonAnalysis, PrivateFrame, and
 the desktop Evaluation Studio. This guide covers installation, execution
 provider selection, telemetry settings, and CoreML compilation caches. See
 the [model guide](model_zoo.md) for model packages and direct model loading.
@@ -13,9 +13,9 @@ Python 3.10 or newer is required for the base package and all optional extras.
 
 | Use case | Command |
 | --- | --- |
-| FaceAnalysis and ModelZoo | `pip install insightface` |
-| Video face blur/mosaic with the PrivateFrame API and CLI | `pip install "insightface[privateframe]"` |
-| Evaluation Studio GUI, including PrivateFrame | `pip install "insightface[gui]"` |
+| FaceAnalysis, PersonAnalysis and ModelZoo | `python -m pip install -U insightface` |
+| Video face blur/mosaic with the PrivateFrame API and CLI | `python -m pip install -U "insightface[privateframe]"` |
+| Evaluation Studio GUI, including PrivateFrame | `python -m pip install -U "insightface[gui]"` |
 
 The base package installs `onnxruntime`. The `privateframe` extra additionally
 installs PyAV and PyYAML; the `gui` extra includes those dependencies plus the
@@ -26,6 +26,9 @@ Qt desktop application.
 Run these commands from the repository root:
 
 ```bash
+# Base SDK, including PersonAnalysis:
+python -m pip install -e ./python-package
+# Or include the optional PrivateFrame workflow:
 python -m pip install -e "./python-package[privateframe]"
 # Or install the desktop application, which includes PrivateFrame:
 python -m pip install -e "./python-package[gui]"
@@ -46,10 +49,22 @@ See the [Evaluation Studio guide](gui.md) and
 [PrivateFrame guide](../insightface/app/privateframe/README.md) for their
 workflows and configuration.
 
+### Optional face3d installation
+
+Ordinary inference and GUI use do not require the optional Cython/C++ `face3d`
+extension. If your application uses it, install its dependencies and compile it
+from a source checkout with a suitable C++ compiler:
+
+```bash
+cd python-package
+python -m pip install -e ".[face3d]" --no-build-isolation --config-settings editable_mode=compat
+python setup.py build_ext --inplace --with-face3d
+```
+
 ## Automatic provider selection
 
-When callers do not pass an explicit provider list, InsightFace inspects the
-providers reported by the installed ONNX Runtime and selects the first
+When callers do not pass an explicit provider list, FaceAnalysis and ModelZoo inspect the
+providers reported by the installed ONNX Runtime and select the first
 available entry in this order:
 
 ```text
@@ -61,6 +76,12 @@ when available. For example, a runtime that reports both CoreML and CUDA uses
 CoreML + CPU, not CoreML + CUDA + CPU. Explicit `providers=[...]` arguments and
 PrivateFrame's explicit `runtime.provider` setting take precedence over this
 automatic policy.
+
+PersonAnalysis supports CPU and CUDA. Its Python API defaults to
+`CPUExecutionProvider`; pass `providers=["CUDAExecutionProvider"]` to request
+CUDA. In the GUI's Person Analysis workflow, **Auto** chooses CUDA when available,
+otherwise CPU. Cheetah does not use CoreML. See the
+[PersonAnalysis guide](person_analysis.md) for model setup and examples.
 
 Check what the current Python environment can actually use:
 
@@ -93,7 +114,7 @@ The Python package intentionally has no `gpu` extra. Install InsightFace, then
 replace the default runtime with the GPU distribution:
 
 ```bash
-pip install insightface              # or insightface[privateframe] / [gui]
+python -m pip install -U insightface  # or insightface[privateframe] / [gui]
 python -m pip uninstall -y onnxruntime
 python -m pip install onnxruntime-gpu
 ```

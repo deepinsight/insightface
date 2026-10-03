@@ -1,11 +1,20 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import re
 import sys
 from pathlib import Path
 
 block_cipher = None
 
 project_root = Path.cwd()
+version_match = re.search(
+    r"^__version__\s*=\s*['\"]([^'\"]+)['\"]",
+    (project_root / "insightface" / "__init__.py").read_text(encoding="utf-8"),
+    re.M,
+)
+if version_match is None:
+    raise RuntimeError("Unable to find the InsightFace version")
+app_version = version_match.group(1)
 icon_dir = project_root / "insightface" / "gui" / "assets"
 runtime_icon_datas = [
     (str(icon_dir / name), "insightface/gui/assets")
@@ -137,8 +146,8 @@ app = BUNDLE(
         "CFBundleName": "InsightFace Evaluation Studio",
         "CFBundleDisplayName": "InsightFace Evaluation Studio",
         "CFBundleIdentifier": "ai.insightface.evaluationstudio",
-        "CFBundleShortVersionString": "2.0",
-        "CFBundleVersion": "2.0",
+        "CFBundleShortVersionString": app_version,
+        "CFBundleVersion": app_version,
         "NSHighResolutionCapable": True,
     },
 )

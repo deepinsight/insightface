@@ -24,15 +24,14 @@ Music: [Tears in Rain](https://www.scottbuckley.com.au/library/tears-in-rain/) b
 
 ## Installation
 
-To use the features in this branch, run one of these commands from the
-repository root:
+Install or upgrade InsightFace with the extra for your workflow:
 
 ```bash
 # PrivateFrame CLI and Python API
-python -m pip install "./python-package[privateframe]"
+python -m pip install -U "insightface[privateframe]"
 
 # Desktop GUI, including PrivateFrame
-python -m pip install "./python-package[gui]"
+python -m pip install -U "insightface[gui]"
 ```
 
 The `privateframe` extra installs PyAV and PyYAML alongside the base InsightFace

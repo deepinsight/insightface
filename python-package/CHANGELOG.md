@@ -3,6 +3,20 @@
 Release history for the InsightFace Python Library. See the
 [package README](README.md) for installation and quick starts.
 
+## [2.1] - 2026-10-03
+
+### PersonAnalysis
+
+- Add person detection, face recognition and body ReID through `PersonAnalysis`,
+  with separate `get()`, `match()` and optional `update()` calls.
+- Support `cheetah_s` and `cheetah_l` on CPU and NVIDIA CUDA, with first-use model
+  downloads and configurable face and body detection input sizes.
+- Add a desktop workflow for local video, webcams and RTSP, with reference-photo
+  registration, analysis-rate controls and advanced settings.
+
+See the [PersonAnalysis guide](docs/person_analysis.md) for usage, configuration
+and examples, or the [GUI guide](docs/gui.md) for desktop use.
+
 ## [2.0] - 2026-09-10
 
 ### Liveness update

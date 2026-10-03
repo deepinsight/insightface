@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import builtins
+import re
 import runpy
 import sys
 from pathlib import Path
@@ -29,6 +30,10 @@ def test_desktop_bundle_preserves_privateframe_config_and_reference_paths(
             datas=[],
         )
 
+    def bundle(*args, **kwargs):
+        captured["bundle_kwargs"] = kwargs
+        return object()
+
     monkeypatch.chdir(package_root)
     runpy.run_path(
         str(package_root / "packaging" / "desktop" / "pyinstaller.spec"),
@@ -37,7 +42,7 @@ def test_desktop_bundle_preserves_privateframe_config_and_reference_paths(
             "PYZ": lambda *args, **kwargs: object(),
             "EXE": lambda *args, **kwargs: object(),
             "COLLECT": lambda *args, **kwargs: object(),
-            "BUNDLE": lambda *args, **kwargs: object(),
+            "BUNDLE": bundle,
         },
         run_name="desktop_packaging_test",
     )
@@ -74,10 +79,18 @@ def test_desktop_bundle_preserves_privateframe_config_and_reference_paths(
     assert bundled_docs == expected_docs
     assert expected_keys
     assert bundled_keys == expected_keys
+    version = re.search(
+        r"^__version__\s*=\s*['\"]([^'\"]+)['\"]",
+        (package_root / "insightface" / "__init__.py").read_text(),
+        re.M,
+    ).group(1)
+    assert captured["bundle_kwargs"]["info_plist"]["CFBundleShortVersionString"] == version
+    assert captured["bundle_kwargs"]["info_plist"]["CFBundleVersion"] == version
 
 
+@pytest.mark.parametrize("platform_name", ["Linux", "Darwin"])
 def test_privateframe_extra_config_and_offline_reference_are_packaged(
-    monkeypatch,
+    monkeypatch, platform_name,
 ) -> None:
     package_root = Path(__file__).resolve().parents[2]
     captured: dict[str, Any] = {}
@@ -90,7 +103,9 @@ def test_privateframe_extra_config_and_offline_reference_are_packaged(
         "setup",
         lambda **kwargs: captured.update(kwargs),
     )
-    monkeypatch.setattr("platform.system", lambda: "Linux")
+    monkeypatch.setattr("platform.system", lambda: platform_name)
+    monkeypatch.setattr("subprocess.run", lambda *a, **k: pytest.fail("Default install must not probe compilers"))
+    monkeypatch.setattr("subprocess.getoutput", lambda *a, **k: pytest.fail("Default install must not probe compilers"))
 
     runpy.run_path(str(package_root / "setup.py"), run_name="packaging_test")
 

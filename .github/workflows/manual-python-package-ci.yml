@@ -237,22 +237,25 @@ jobs:
         run: |
           python packaging/pypi/artifact_smoke.py installed --profile gui
 
-      - name: Copy GUI tests outside source tree
+      - name: Copy PersonAnalysis and GUI tests outside source tree
         run: |
           python - <<'PY'
           import os
           import shutil
           from pathlib import Path
 
-          source = Path("tests/gui")
-          target = Path(os.environ["RUNNER_TEMP"]) / "insightface-gui-tests"
+          source = Path("tests")
+          target = Path(os.environ["RUNNER_TEMP"]) / "insightface-installed-tests"
           if target.exists():
               shutil.rmtree(target)
-          shutil.copytree(source, target)
-          print(f"Copied GUI tests to {target}")
+          target.mkdir()
+          shutil.copy2(source / "conftest.py", target / "conftest.py")
+          for name in ("person", "gui"):
+              shutil.copytree(source / name, target / name)
+          print(f"Copied PersonAnalysis and GUI tests to {target}")
           PY
 
-      - name: Run GUI tests against installed wheel
+      - name: Run PersonAnalysis and GUI tests against installed wheel
         run: |
           python - <<'PY'
           import os
@@ -260,7 +263,7 @@ jobs:
           import sys
           from pathlib import Path
 
-          test_dir = Path(os.environ["RUNNER_TEMP"]) / "insightface-gui-tests"
+          test_dir = Path(os.environ["RUNNER_TEMP"]) / "insightface-installed-tests"
           subprocess.check_call([
               sys.executable, "-m", "pytest", str(test_dir), "-q", "--import-mode=importlib",
           ], cwd=str(test_dir.parent))

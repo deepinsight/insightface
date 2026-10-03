@@ -1,381 +1,356 @@
-# InsightFace Evaluation Studio GUI
+# InsightFace Evaluation Studio: User Guide
 
-InsightFace Evaluation Studio is a local desktop GUI for InsightFace 2.0. It is
-designed for local video face privacy with PrivateFrame, no-code face recognition
-testing, local People Library management, album organization, enterprise model
-evaluation, report export, and basic face swap trials. See the
-[PrivateFrame guide](../insightface/app/privateframe/README.md) for its full
-workflow and video demo.
+InsightFace Evaluation Studio is a desktop application for person detection and matching,
+face recognition, video privacy, photo organization, and model evaluation.
+Processing and results stay on your computer; the application does not
+upload images, videos, embeddings, or reports automatically.
 
-## Install
+## Open the application
+
+Launch **InsightFace Evaluation Studio** from your installed desktop package.
+If you use a Python distribution that includes the GUI, install its GUI
+components and launch it with:
 
 ```bash
-cd python-package
-pip install -e ".[gui]"
+python -m pip install -U "insightface[gui]"
 insightface-gui
 ```
 
-PyPI users can install:
+The Python application requires Python 3.10 or newer. Use the application or
+package release supplied for your deployment; available features and model
+downloads depend on that release.
 
-```bash
-pip install "insightface[gui]"
-insightface-gui
+On first launch, choose a workspace and device setting. New workspaces open
+**Person Analysis** with `cheetah_s` selected. Existing workspaces keep their
+saved model and last workflow. Use **Workflows** on the left to switch tasks.
+
+The top bar provides three shared controls:
+
+- **Models**: select a model package, model folder, and processing device.
+- **Settings**: change the interface language and theme.
+- **License**: review model license information and contact options.
+
+## Choose and install models
+
+Open **Models > Runtime**, choose the package for your task, and save the
+selection. The chosen package and device appear at the top of the application.
+
+| Workflow | Model selection |
+| --- | --- |
+| Person Analysis | `cheetah_s` or `cheetah_l` |
+| PrivateFrame | `raccoon_s` or `raccoon_l` |
+| Face Recognition, Album Management, Enterprise Evaluation | A compatible face package, such as `buffalo_l`, `buffalo_s`, or a Raccoon package |
+| Face Swap | A compatible face package and a downloaded face-swap model selected in Runtime |
+
+`cheetah_s` is the smaller person-analysis package; `cheetah_l` uses larger
+models. Start with a short representative video to choose the package that
+suits your images and computer.
+
+If a non-Cheetah package is selected, the Person Analysis input and result
+area is greyed out. **Choose model** above that area remains available: use it
+to select `cheetah_s` or `cheetah_l`. A missing or invalid model is described
+in the status message below the model name.
+
+### Model folders
+
+The default model root is `~/.insightface`. A model root is the parent of the
+`models` folder, not the package folder itself. With the default root, complete
+packages belong at:
+
+```text
+~/.insightface/models/cheetah_s/
+~/.insightface/models/cheetah_l/
+~/.insightface/models/raccoon_s/
+~/.insightface/models/buffalo_l/
 ```
 
-These commands install `onnxruntime` by default for CPU and supported macOS
-CoreML systems. The `gui` extra also installs PrivateFrame, PyAV, and PyYAML.
-PrivateFrame can instead be installed without the GUI with
-`pip install "insightface[privateframe]"`. For NVIDIA CUDA, replace the default
-runtime after installing the GUI:
+To install a supplied package manually, place its complete contents in the
+matching folder, preserving its model files and manifest. Select the same
+package name in **Models**. For Person Analysis, use the standard Cheetah
+package folders rather than the custom face-model directory option.
+
+### Downloads
+
+In **Models > Downloads**, click **Refresh Download URLs**, select an available
+package, then click **Download Selected**. After download, use **Use Selected
+Model** to make it the current package.
+
+Person Analysis and PrivateFrame can also attempt a download when you start
+processing with a supported package whose folder is absent. Download entries
+are resolved from the [InsightFace model-zoo release](https://github.com/deepinsight/insightface/releases/tag/model-zoo); an entry does not mean
+that every package has already been published. If the requested asset is
+unavailable, install the complete package supplied to you in the local folder
+shown on the page. An invalid existing Cheetah package is reported instead of
+being overwritten automatically.
+
+Stop the current analysis or video task before changing models or devices.
+Model downloads and processing must finish before another conflicting model
+operation can start.
+
+### Processing device
+
+For **Person Analysis**, **Auto** chooses CUDA when available, otherwise CPU.
+Choose **CPU** to use the processor, or **CUDA** to request a compatible NVIDIA
+GPU. Person Analysis does not use CoreML. Other face workflows may use CoreML
+when Auto is selected on a supported macOS installation.
+
+Person Analysis defaults to 640 for face detection. Body detection defaults to
+320 for `cheetah_s` or 640 for `cheetah_l`. **Advanced parameters** provides
+separate **Body detection input size** and **Face detection input size**
+settings to override those defaults for the next run. Its shared detection-size
+control is disabled in Models. In face-only workflows, **Auto** detection size
+combines 128 and 640 inputs; other sizes can be selected in Runtime.
+
+## Person Analysis
+
+The first workflow demonstrates the same `get()` → `match()` → `update()` API
+available in Python. Choose `cheetah_s` or `cheetah_l` in Models. Until a compatible
+model package is selected, the operation panel is disabled and the model picker
+remains available. CPU and CUDA are supported; Auto uses CUDA when available.
+
+### Choose input and reference photos
+
+Select a local video, a local camera index, or an RTSP URL. Camera addresses are
+used only for the current run and are not saved in settings or reports. Reference
+photos are optional. Drag photos into the people area or click Add photos, then
+edit the names. Use one clear face per photo; photos with the same name belong to
+one person. Face references have no per-person count limit, so three or more
+valid, distinct photos can be registered for the same person. Quality and
+duplicate checks still apply.
+
+Enable **Automatically add body references** to allow reliable same-frame face
+matches to supply body references for later frames. Only a clear face with an
+unambiguous body association can add one. A body-only match does not add another
+reference. Face references are added only through the reference photos you supply.
+Body references default to four per person, counting manual and automatic samples
+together. At that limit, only the oldest automatic body sample can be replaced;
+manual samples are protected. References are cleared when a run ends; there is no
+anonymous-ID memory.
+
+### Choose how often to analyze
+
+**Analyze at most (times/second)** is a shared control in the input section,
+above **Advanced parameters** and **Start analysis**. It stays available for
+local videos, local cameras and RTSP streams. The default is **0 (Auto)**;
+enter a positive value to choose a sampling limit.
+
+| Input | 0 (Auto) | Positive value |
+| --- | --- | --- |
+| Local video | Analyze every frame in sequence | Sample frames by their timestamps in the video |
+| Local camera or RTSP | Analyze the newest pending frame as quickly as possible | Limit analysis starts by elapsed time, using the newest pending frame |
+
+For a 30 FPS video, a value of 5 analyzes approximately every sixth frame,
+or five frames per second of video time. There is no delay to match playback
+speed: the run can finish faster or slower than the video's duration, depending
+on processing speed. Frames between samples are skipped for analysis.
+
+Sampling uses each frame's video timestamp when available. If timestamps are
+missing or stop advancing, it falls back to the source video's frame rate. If
+neither provides usable timing, a positive limit stops with a message to use
+**Auto**. Auto still processes every frame, although its time may be unavailable.
+
+For a camera or RTSP stream, analysis waits when no fresh frame is available.
+If processing is slower than the limit, it takes the newest pending frame when
+ready and skips older unprocessed frames without building a queue. Time spent
+processing counts toward the interval; the GUI does not add a full interval
+after each analysis finishes.
+
+The setting never repeats frames to reach a requested rate. Setting a limit
+above the source frame rate does not create additional frames.
+
+### Advanced parameters
+
+Open **Advanced parameters** to adjust all 16 `PersonConfig` fields, including
+body and face detection input sizes, matching thresholds, face and body quality requirements, body-reference limits,
+initial reference capacity and CPU threads. The defaults come from
+`PersonConfig()`; see the complete [field and default table](person_analysis.md#11-configuration-and-defaults).
+Face references have no per-person count limit.
+
+**Body detection input size** defaults to `0`, meaning the model package's
+default: 320×320 for `cheetah_s` or 640×640 for `cheetah_l`. To override it, enter
+a positive multiple of 64, such as `640` for a 640×640 input. The setting applies
+when starting the next analysis and leaves the model package unchanged. It does
+not change the separately configured face detection size or feature extraction
+sizes.
+
+**Face detection input size** also defaults to `0`, displayed as **Default
+(640)**. This uses the SDK's 640×640 input rather than a value from the model
+manifest. Enter a positive multiple of 32, such as `320`, to override it
+for the next run. The same input size is used to detect faces in your reference
+photos and video or camera frames. This changes the detector input, not the
+minimum face-box sizes for recognition (20 original-image pixels) or reference
+registration (32 original-image pixels by default). Face recognition still uses
+a 112×112 aligned crop, and the package files stay unchanged. Smaller detection
+inputs may miss smaller faces; larger inputs do not guarantee better accuracy.
+Compare speed and results on your own inputs before changing either size.
+
+**Restore defaults** fills the dialog with the default values. **Save** saves
+the changes for the next run; **Cancel** closes the dialog without applying its
+edits. Model packages and CPU/CUDA selection remain in **Models**.
+
+### Start and review
+
+Click Start analysis. Green boxes show current matches; amber boxes show unmatched
+observations. Labels include the registered name, face/body matching method and
+similarity. Associated faces may have an additional face box. Unicode names are
+rendered by Qt. No match is inherited from previous frames, so labels may change
+when a face or body becomes difficult to recognize.
+
+Local videos process every frame in sequence with Auto, or sample by video
+timestamps with a positive limit, and end at EOF. For local cameras and RTSP
+streams, a separate reader continuously captures frames while analysis
+runs. Only one captured frame can be pending: a newer frame replaces an older
+unprocessed frame. Analysis completes `get()` → `match()` → optional `update()`
+for the current frame, then takes the latest available frame when the analysis
+rate limit permits, or waits for a new one. Camera timestamps record UTC when
+OpenCV successfully reads each frame and stay with that frame throughout
+analysis. They are not the camera's own capture timestamps. The interface also
+keeps only one pending preview result.
+
+Stop ends the input and releases resources after the current native read or
+inference finishes. Camera, network and decoder buffers can still add latency;
+buffering and read-timeout support depend on the OpenCV backend. This
+single-input demonstration does not automatically reconnect a camera, manage
+multiple cameras, or save tracks, appearance durations, event logs or a history
+database.
+
+### Saved settings
+
+The GUI saves the shared input sampling limit as the top-level setting
+`person_analysis_max_fps`, which defaults to `0`. Advanced algorithm overrides
+belong to the separate `person_config` dictionary. For example, this GUI
+configuration requests up to 15 analyses per second of video time for a file,
+or per elapsed second for a camera/RTSP stream:
+
+```json
+{
+  "person_analysis_max_fps": 15,
+  "person_config": {
+    "face_similarity_threshold": 0.45,
+    "reid_similarity_threshold": 0.85,
+    "max_body_samples": 4,
+    "reference_capacity": 256
+  }
+}
+```
+
+The dictionary uses the same field names as the SDK; omitted fields use
+`PersonConfig()` defaults. `person_analysis_max_fps` controls GUI input sampling.
+It is not a `PersonConfig` field or an argument to the SDK's `get()` method, and
+does not change the command-line examples. Saved changes take effect when you
+start the next run.
+Defaults are initial settings, not calibrated accuracy guarantees. See the
+[PersonAnalysis guide](person_analysis.md) and [runnable examples](../../examples/person_analysis/README.md).
+
+## Other workflows
+
+### PrivateFrame: blur or mosaic faces in a video
+
+Select `raccoon_s` or `raccoon_l` in Models, then open **PrivateFrame** and add
+a video. Choose a privacy policy and **Gaussian** or **Mosaic**. **Fast**
+targets 15 analysis FPS and **Normal** targets 30 analysis FPS; these settings
+control sampling density, not output-video FPS or guaranteed processing speed.
+
+Choose an output folder and either **JSON only** or **JSON + redacted video**.
+The outputs are `<video>_privateframe.json` and, when requested,
+`<video>_privateframe.mp4`.
+
+Photo-based privacy options use a reference-photo folder and the largest face
+in each photo. **Blur only** blurs matched people; **Exempt** keeps matched
+people visible and blurs everyone else. Review the result before sharing it.
+The [PrivateFrame guide](../insightface/app/privateframe/README.md) explains
+privacy policies, reference photos, and output options in detail.
+
+### Face Recognition: compare a query with a gallery
+
+Select a face model and open **Face Recognition**. Add one image to **Query**
+and an image, several images, or a folder to **Gallery**. Click **Run
+Recognition**. One gallery image runs a one-to-one comparison; several images
+run a ranked gallery search. Review the similarity, threshold, decision, and
+face-detection information in the results.
+
+### Album Management: group local photos
+
+Open **Album Management** and add album directories. **Import / Refresh** scans
+the images and groups similar faces. Select a group to see its photos, then
+double-click a thumbnail to open the original image. Groups are suggestions
+for review, not confirmed registered identities.
+
+The similarity threshold defaults to `0.48`; higher values make grouping
+stricter. Selected directories and results are saved locally. **Clear** clears
+the directory selection while leaving the results visible. **Rebuild All**
+asks for confirmation before replacing the saved grouping results.
+
+### Face Swap: choose a source and a target
+
+In **Models > Runtime**, choose a downloaded face-swap model. Open **Face
+Swap**, add a source image, and choose an image or video as the target. Click
+**Run Face Swap** and review the result. Video output is saved as MP4 in the
+exports folder.
+
+Optional GFPGAN restoration is configured under Models and requires its
+separately downloaded model. Face-swap and restoration models may have their
+own license conditions.
+
+### Enterprise Evaluation: evaluate a labeled dataset
+
+Choose **1:1 Verification** or **1:N Identification**, select the dataset, and
+set the multi-face policy. **Auto Split** can divide identity-folder images
+into gallery and probe sets; the page describes the required layout. Without
+Auto Split, one-to-many evaluation accepts `gallery/<identity>`,
+`probe/<identity>`, and optional `unknown/` folders.
+
+Click **Validate Dataset** and resolve any reported problems before **Run
+Evaluation**. Results include recognition accuracy, false-accept operating
+points, and corresponding thresholds. Export the report for review;
+Markdown, HTML, and PDF reports are supported by the GUI installation.
+
+## Workspace, language, and licenses
+
+The default workspace is `~/.insightface/gui`. It contains the local database,
+exports, reports, caches, and application logs. To use another workspace when
+launching the Python application:
+
+```bash
+insightface-gui --workspace /path/to/workspace
+```
+
+Use **Settings** to select a language and theme. The default language follows
+the operating system when supported, otherwise English. Person Analysis
+provides English and Chinese labels; untranslated text in other languages
+falls back to English.
+
+Open **License** to inspect the current model's license information. Code and
+model files may have different licenses. **Get commercial license** on the
+Person Analysis page opens the InsightFace contact page for model
+authorization and integration support. Obtain the permissions required for
+your model and intended use before commercial deployment.
+
+## Troubleshooting
+
+| Problem | What to check |
+| --- | --- |
+| Person Analysis is greyed out | Click **Choose model** and select `cheetah_s` or `cheetah_l`. |
+| Start is disabled | Select a supported model and input. Read the model status message; repair an invalid package before starting. |
+| A model download is unavailable | Use **Refresh Download URLs** or install the complete package supplied for your release in the displayed model folder. |
+| A reference photo is rejected | Choose a readable photo with exactly one clear face and fill in its name. |
+| A camera cannot open | Check its device number or RTSP address, network access, operating-system permissions, and whether another application is using it. |
+| A person remains unmatched | Check the reference name, photo and face visibility. A body match needs a body reference: in the GUI, enable automatic body-reference updates so a clear face match can add one; the Python API also supports manual body registration. Face and body matches each need enough similarity and separation from other registered people. |
+| Processing is slow | Try `cheetah_s` or an available CUDA device. Compare processing time and recognition results on a representative input. |
+
+For Python installations, CUDA requires a compatible NVIDIA driver and
+`onnxruntime-gpu`. If replacing the CPU runtime, use the same environment as
+the GUI and keep only one ONNX Runtime distribution installed:
 
 ```bash
 python -m pip uninstall -y onnxruntime
 python -m pip install onnxruntime-gpu
 ```
 
-Do not keep `onnxruntime` and `onnxruntime-gpu` in the same environment.
-Installing or upgrading `insightface[gui]` may install the default runtime
-again, so repeat this replacement afterward on NVIDIA systems.
-
-Aliases:
-
-```bash
-insightface-eval-studio
-insightface-desktop
-python -m insightface.gui
-```
-
-## Workspace
-
-By default, user data is stored in:
-
-```text
-~/.insightface/gui
-```
-
-The workspace contains the SQLite database, crops, exports, reports, and logs.
-The GUI does not upload images, videos, embeddings, or reports automatically.
-
-You can override the workspace:
-
-```bash
-insightface-gui --workspace /path/to/workspace
-```
-
-## File, Folder, and Video Inputs
-
-Image and video pages use the preview frame as the upload target. Click the
-empty preview frame labeled `Click to upload or drag a file here`, or drag a
-local file onto it. The preview changes color on hover to indicate it is
-clickable, and changes again while a valid file is dragged over it. After a file
-is loaded, the small `×` button removes it, and dragging another file onto the
-preview replaces it.
-
-Multi-file imports, folder imports, CSV files, and local model inputs use
-clickable drag-and-drop selectors with hover and drag-over color feedback.
-
-## Mode-based navigation
-
-InsightFace Evaluation Studio uses five workflow modes. The mode selector is a
-persistent **Workflows** rail on the left side of the window so the current
-workspace is always visible. Face Recognition, Album Management, and Face Swap
-use a single full-width workspace; modes with several workflows show a compact
-secondary sidebar next to the workflow rail:
-
-The Workflows rail also keeps the local-processing notice visible in every
-mode: **All processing is local. No images, embeddings, or reports are uploaded
-automatically.**
-
-1. **PrivateFrame**: upload or drop a video and use the global model, model root,
-   and provider selected under **Models**. PrivateFrame enables processing only
-   for `raccoon_s` or `raccoon_l`; a missing Raccoon package can be downloaded
-   to the displayed global model root on first use, while an invalid installed
-   V2 package is reported before processing starts. Keep **Fast (default, target
-   15 analysis FPS)** or choose **Normal (target 30 analysis FPS)** for denser
-   sampling, then select a privacy policy and Gaussian / Mosaic. These are
-   regular detection sampling targets, not output FPS or processing speed.
-   Processing runs through the PrivateFrame Python API on a background worker.
-   The output directory initially uses the
-   operating system's Videos directory (Movies on macOS), and remains editable.
-   The page always writes
-   `<video>_privateframe.json` to the selected output directory. Choose
-   **JSON only** to stop after analysis for later editing, or **JSON + redacted
-   video** to also write the paired `<video>_privateframe.mp4`. **More Options**
-   contains between-scan control, face coverage, encoding preset (Medium by
-   default), CRF quality, supported audio, and person-matching settings. Photo
-   modes use one reference-photo folder with no per-person subfolders; only
-   the largest face in each photo is used. **Blur only** blurs matched people
-   and leaves unmatched or uncertain people visible; **Exempt** keeps matched
-   people visible and blurs everyone else. Review the output before sharing it.
-2. **Face Recognition**: one Query & Gallery workspace. One gallery image runs
-   1:1 compare; multiple gallery images or a folder run 1:N gallery search.
-3. **Album Management**: one **Album** workspace for local folder import,
-   refresh, DBSCAN face clustering, and photo review.
-4. **Face Swap**: one Source + Target = Result workspace. Target can be an
-   image or video.
-5. **Enterprise Evaluation**: a single local 1:1 / 1:N evaluation workspace
-   with identity-folder import, Auto Split, metrics, and report export.
-
-Global utilities are always available from the top app bar:
-
-- **Settings** opens the application settings dialog for the UI theme and
-  language. Language defaults to the operating system when supported, otherwise
-  English. Supported GUI languages are English, Chinese, Japanese, Korean,
-  Spanish, French, German, Portuguese, and Russian. The included themes are
-  System, Precision Light, Studio Dark, Graphite Pro, Azure Lab, Emerald Focus,
-  and Crimson Audit. Workspace paths are chosen on first launch and are not
-  changed from this dialog.
-- **Models** opens runtime settings, model downloads, and custom model directory
-  tools.
-- **License** opens the License Center dialog.
-
-Settings, Model Settings, Model Downloads, and License Center are intentionally
-not shown in the left sidebar.
-
-## Models
-
-Open **Models** from the top app bar or **Tools > Models** to choose:
-
-- global model pack: `raccoon_s`, `raccoon_l`, `buffalo_l`, `buffalo_m`,
-  `buffalo_s`, `buffalo_sc`, `antelopev2`, or a custom model folder
-- global InsightFace model root (the parent of `models/<model_name>`)
-- provider: Auto, CPU, CUDA when `CUDAExecutionProvider` is available
-- detection size: Auto, 128x128, 320x320, 640x640, 1024x1024
-- face swap model
-- GFPGAN post-processing model, if `GFPGANv1.4.onnx` has been downloaded
-
-**Auto** detection size is the default. It runs joint 128x128 and 640x640
-detection and merges duplicate boxes.
-
-The Runtime tab also lets you choose a face swap model. Only downloaded local
-swap models are listed. Download `inswapper_128.onnx` or another compatible
-swap model from **Models > Downloads** first.
-
-The Runtime tab can also enable GFPGAN post-processing for face swap. GFPGAN is
-listed in **Models > Downloads** as a third-party restore model and is not
-downloaded automatically. When enabled, face swap output is passed through the
-configured GFPGAN ONNX model using a 512x512 restore pass.
-
-New GUI installations default to `raccoon_s`, so the initially selected
-PrivateFrame workflow can run without a separate model selection. Existing
-`config.json` files keep their saved model selection.
-
-The GUI opens even when a model is missing. In that case, pages show
-`Model is not loaded. Please open Models.`
-
-The general face-recognition and face-swap GUI does not download models
-automatically. Open **Models > Downloads** and click **Refresh Download URLs**
-to fetch the dedicated `model-zoo` release assets from:
-
-```text
-https://github.com/deepinsight/insightface/releases/tag/model-zoo
-```
-
-InsightFace assets resolve under
-`https://github.com/deepinsight/insightface/releases/download/model-zoo/`.
-Cached official URLs from the former `v0.7` release are migrated when loaded.
-
-The refreshed URLs are cached in:
-
-```text
-~/.insightface/gui/cache/model_download_urls.json
-```
-
-The GFPGANv1.4 third-party entry is added by the GUI alongside refreshed
-InsightFace release assets. Its separate third-party release URL is unchanged,
-and the file is saved under the same local model root after manual download.
-
-Downloaded archives are cached in:
-
-```text
-~/.insightface/gui/cache/models
-```
-
-PrivateFrame is the exception: when the global model is `raccoon_s` or
-`raccoon_l`, it may be downloaded under the configured global model root on
-first use. PrivateFrame never silently falls back to `~/.insightface` or to a
-different Raccoon package.
-
-Zip model packages are extracted below the configured model root. With the
-default root, that is:
-
-```text
-~/.insightface/models/<model_name>/
-```
-
-For example:
-
-```text
-~/.insightface/models/buffalo_l/
-~/.insightface/models/antelopev2/
-```
-
-Users can also manually place model directories under the configured
-`<model_root>/models/` directory or choose **custom model directory** from
-**Models > Runtime** to reveal the custom directory field. Choosing a catalog
-package clears the custom-directory override; choosing a custom directory saves
-that non-empty path as both the model identity and explicit model directory.
-
-Changing the global model settings invalidates the ordinary GUI FaceAnalysis
-engine and refreshes PrivateFrame. A PrivateFrame job already in progress keeps
-the model name, model root, and provider snapshot captured when it started; the
-new global selection applies to the next job. Runtime Sessions are not shared
-between the ordinary GUI and PrivateFrame. Within one GUI process, model
-downloads and PrivateFrame processing are mutually exclusive: a download keeps
-PrivateFrame disabled even if the Models dialog is closed, and Models cannot be
-opened until a running PrivateFrame job finishes.
-
-## Face Recognition
-
-Open **Face Recognition** and use the full-width **Query & Gallery** workspace.
-The Query preview accepts one image by click or drag. The Gallery panel accepts
-one image, multiple images, or a folder by click or drag. There is no separate
-Choose button in Gallery; click the Gallery panel or drag files/folders onto it.
-
-If Gallery contains one image, **Run Recognition** automatically runs 1:1
-compare and reports similarity, threshold, decision, and detection score. If
-Gallery contains multiple images or a folder, the same button runs 1:N gallery
-search and ranks the gallery images by similarity.
-
-## Multi-face Photo Recognition
-
-Open **Multi-face Photo Recognition** to detect all faces in a group photo,
-identify them against People Library, save results to the local database, and
-export annotated images or CSV/JSON.
-
-## Batch Processing
-
-Open **Batch Folder Processing**, select an image folder, and choose recursive
-scan, crop saving, and identification options. Batch results can be exported to
-CSV and JSON.
-
-## Album People Clustering
-
-Open **Album Management > Album** to add one or more album directories. Click
-**Import / Refresh** to scan new image files, detect faces, save local crops,
-and cluster all indexed faces from the selected directories. The page exposes a
-cosine similarity threshold with a default value of `0.48`; higher values make
-clusters stricter. DBSCAN internally receives cosine distance as
-`1 - cosine threshold`. The GUI extra installs scikit-learn for DBSCAN
-clustering.
-
-Album cluster IDs avoid duplicating existing People Library IDs. When a cluster
-matches an existing person within the configured duplicate distance threshold
-(`0.28` by default), the existing person ID is reused; otherwise the page assigns
-the next available album person ID. The cluster thumbnail is chosen from the
-face nearest the cluster centroid. Selecting a cluster shows all original photo
-thumbnails for that cluster, and double-clicking a thumbnail opens the original
-image.
-
-Album directories and clustering results are saved in the local SQLite
-database so the page can restore them on the next launch. **Clear** only clears
-the selected album directories and leaves the current clustering results
-visible. **Rebuild All** asks for confirmation, then reprocesses all selected
-album directories from scratch and replaces the saved clustering results. If no
-album directories are selected, **Rebuild All** clears the saved clustering
-results.
-
-## Enterprise Evaluation
-
-Open **Enterprise Evaluation** to run no-code local evaluations:
-
-- **1:1 Verification** from identity folders. Each subfolder is one identity.
-  With **Auto Split**, the file containing `gallery` or the first sorted image
-  becomes that identity's gallery image; other images are probes. Matching is
-  probe-vs-gallery across identities. Without Auto Split, all images are probes
-  and the page runs full pairwise probe-vs-probe comparisons.
-- **1:N Identification** from identity folders. With **Auto Split**, select a
-  dataset containing `identities/<identity folders>` or identity folders
-  directly; gallery images are selected with the same rule as 1:1. Without Auto
-  Split, use `gallery/<identity>`, `probe/<identity>`, and optional `unknown/`
-  folders.
-
-Choose a **Multi-face handling** policy before validation:
-
-- **Require exactly one face**: default. Validation fails if any evaluation
-  image contains more than one detected face.
-- **Use largest face**: validation warns on multi-face images and evaluation
-  uses the largest detected face.
-- **Use largest centered face**: validation warns on multi-face images and
-  evaluation uses the face with the best area-minus-center-distance score.
-- **Mark as skip**: multi-face images are skipped. If a required gallery image
-  would be skipped, validation fails because that identity no longer has a
-  usable gallery sample.
-
-Click **Validate Dataset** before running. Validation checks the folder layout,
-Auto Split rules, gallery/probe availability, generated positive and negative
-pairs for 1:1, required gallery coverage for 1:N, and the selected multi-face
-policy. **Run Evaluation** is enabled only after validation passes.
-
-1:1 reports include best cosine threshold accuracy, the threshold at that
-operating point, and TAR@FAR for `1e-6`, `1e-5`, `1e-4`, and `1e-3`. 1:N
-reports include Top1 plus TAR@FAR for `1e-5`, `1e-4`, `1e-3`, and `1e-2`,
-including the corresponding thresholds.
-
-## Report Export
-
-Reports are written to:
-
-```text
-~/.insightface/gui/reports
-```
-
-Markdown, HTML, and PDF are supported when the GUI extra is installed.
-
-## Face Swap
-
-Open **Face Swap** to use the full-width Source + Target = Result workspace.
-Choose the swap model in **Models > Runtime**; the page itself does not expose a
-model picker. The swap model is loaded only when you click **Run Face Swap**.
-If GFPGAN post-processing is enabled in **Models > Runtime**, the swapped image
-or swapped video frames are restored with GFPGAN before being saved.
-
-Source is always an image. Target can be an image or a video, and the workflow
-automatically chooses image swap or video swap from the target file type. Video
-swap writes an `.mp4` result to the exports folder and shows a preview frame
-when one is available.
-
-If the model is missing, it shows:
-
-```text
-Face swap model not found. Please download and choose a swap model in Models.
-```
-
-Face swap may require separate commercial authorization depending on usage and
-model license. Use only with appropriate rights and consent.
-
-## License Notice
-
-Code and model files may have different licenses. Research or publicly
-distributed pretrained models may be restricted to non-commercial or research
-usage. Commercial deployment requires appropriate model authorization.
-
-This tool does not provide legal advice. Users are responsible for consent,
-privacy, retention, and compliance with applicable biometric regulations.
-
-## Troubleshooting
-
-Run without automatic model loading:
-
-```bash
-insightface-gui --safe-mode
-```
-
-Safe mode is only applied to the current launch. It is intended for
-troubleshooting model/provider issues and is not saved to `config.json`.
-
-Force CPU:
-
-```bash
-insightface-gui --provider cpu
-```
-
-`CUDA` is selectable only when ONNX Runtime reports `CUDAExecutionProvider`.
-If CUDA is requested on a machine without a usable CUDA provider, the GUI
-falls back to Auto/CPU instead of exposing a broken GPU option.
-
-Logs are stored in:
-
-```text
-~/.insightface/gui/logs/app.log
-```
+Installing or upgrading `insightface[gui]` can reinstall the CPU runtime, so
+check the selected device afterward. You can explicitly start on CPU with
+`insightface-gui --provider cpu`. Use `insightface-gui --safe-mode` to open
+without automatic model loading when investigating startup problems.
+
+Application logs are at `~/.insightface/gui/logs/app.log`, or the logs folder
+of your custom workspace.

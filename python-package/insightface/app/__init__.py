@@ -8,3 +8,10 @@ except ImportError:
     # The mask renderer depends on optional compiled face3d extensions. Keep the
     # main InsightFace API importable in source-tree and GUI-safe environments.
     pass
+
+
+def __getattr__(name):
+    if name == "PersonAnalysis":
+        from .person_analysis import PersonAnalysis
+        return PersonAnalysis
+    raise AttributeError(name)

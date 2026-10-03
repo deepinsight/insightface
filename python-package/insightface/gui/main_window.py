@@ -44,7 +44,10 @@ from .core.navigation import (
     last_page_attr,
     mode_from_value,
 )
-from .core.model_packages import CUSTOM_MODEL_CHOICE, GUI_MODEL_PACKAGES
+from .core.model_packages import (
+    CUSTOM_MODEL_CHOICE, GUI_MODEL_PACKAGES, PERSON_MODEL_PACKAGES,
+    person_provider_runtime_display,
+)
 from .core.theme import application_stylesheet
 from .core.tooltips import apply_button_tooltips, set_button_tooltip
 from .dialogs.license_dialog import LicenseDialog
@@ -179,7 +182,7 @@ class FirstLaunchWizard(QDialog):
         self.config.ui_last_mode = (
             AppMode.ENTERPRISE_EVALUATION.value
             if self.config.mode == "Enterprise Evaluation"
-            else AppMode.PRIVATE_FRAME.value
+            else AppMode.PERSON_ANALYSIS.value
         )
         selected_model = self.model.currentData()
         if selected_model == CUSTOM_MODEL_CHOICE:
@@ -227,6 +230,7 @@ class FirstLaunchWizard(QDialog):
 
 class MainWindow(QMainWindow):
     LEGACY_PAGE_MAP = {
+        "Person Analysis": "person_analysis",
         "PrivateFrame": "private_frame",
         "PrivateFrame Video Privacy": "private_frame",
         "Dashboard": "face_dashboard",
@@ -389,6 +393,7 @@ class MainWindow(QMainWindow):
 
     def _mode_subtitle(self, mode: AppMode) -> str:
         subtitles = {
+            AppMode.PERSON_ANALYSIS: "Detect and match people",
             AppMode.PRIVATE_FRAME: "Local video face redaction",
             AppMode.FACE_VERIFICATION: "Query and gallery recognition",
             AppMode.ALBUM_MANAGEMENT: "Photo clustering and review",
@@ -554,7 +559,8 @@ class MainWindow(QMainWindow):
     def _auto_load_model_if_needed(self) -> None:
         if (
             self._closing_after_workers
-            or self.current_mode == AppMode.PRIVATE_FRAME
+            or self.current_mode in {AppMode.PRIVATE_FRAME, AppMode.PERSON_ANALYSIS}
+            or self.context.config.model_name in PERSON_MODEL_PACKAGES
             or not self.context.config.auto_load_model
             or self.context.runtime_safe_mode
             or self.context.engine.is_loaded()
@@ -567,7 +573,12 @@ class MainWindow(QMainWindow):
         self.auto_load_model()
 
     def auto_load_model(self) -> None:
-        if self._model_autoload_running or self.context.engine.is_loaded():
+        if (
+            self.current_mode in {AppMode.PRIVATE_FRAME, AppMode.PERSON_ANALYSIS}
+            or self.context.config.model_name in PERSON_MODEL_PACKAGES
+            or self._model_autoload_running
+            or self.context.engine.is_loaded()
+        ):
             return
         self._model_autoload_running = True
         engine = self.context.engine
@@ -634,12 +645,12 @@ class MainWindow(QMainWindow):
     def open_model_manager(self, initial: str | None = None) -> None:
         from .app import context_activity_count
 
-        if context_activity_count(
-            self.context, "privateframe_jobs_in_progress"
-        ):
-            message = (
-                "Wait for PrivateFrame processing to finish before opening Models."
-            )
+        message = None
+        if context_activity_count(self.context, "person_analysis_jobs_in_progress"):
+            message = "Stop Person Analysis before opening Models."
+        elif context_activity_count(self.context, "privateframe_jobs_in_progress"):
+            message = "Wait for PrivateFrame processing to finish before opening Models."
+        if message:
             self.set_status(message)
             QMessageBox.warning(
                 self,
@@ -665,7 +676,11 @@ class MainWindow(QMainWindow):
 
         engine_changed = reconfigure_context_engine(self.context)
         self._model_files_changed()
-        if engine_changed and self.current_mode != AppMode.PRIVATE_FRAME:
+        if (
+            engine_changed
+            and self.current_mode not in {AppMode.PRIVATE_FRAME, AppMode.PERSON_ANALYSIS}
+            and self.context.config.model_name not in PERSON_MODEL_PACKAGES
+        ):
             if self._model_autoload_running:
                 self._model_autoload_pending = True
             else:
@@ -696,7 +711,11 @@ class MainWindow(QMainWindow):
 
     def refresh_statusbar(self) -> None:
         cfg = self.context.config
-        provider_name, provider_tooltip = provider_runtime_display(cfg.provider)
+        provider_name, provider_tooltip = (
+            person_provider_runtime_display(cfg.provider, cfg.ui_language)
+            if cfg.model_name in PERSON_MODEL_PACKAGES
+            else provider_runtime_display(cfg.provider)
+        )
         license_display = current_model_license_display(self.context)
         license_status = tr(license_display.status_text, cfg.ui_language)
         license_tooltip = license_display.tooltip(cfg.ui_language)

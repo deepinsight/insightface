@@ -52,11 +52,11 @@ def _write_v2_package(
     return package
 
 
-def test_new_gui_config_defaults_to_raccoon_without_migrating_existing_json(
+def test_new_gui_config_defaults_to_cheetah_without_migrating_existing_json(
     tmp_path,
 ):
     fresh = AppConfig(workspace_path=str(tmp_path / "fresh"))
-    assert fresh.model_name == "raccoon_s"
+    assert fresh.model_name == "cheetah_s"
 
     existing_path = tmp_path / "existing" / "config.json"
     existing_path.parent.mkdir()
@@ -79,7 +79,8 @@ def test_new_gui_config_defaults_to_raccoon_without_migrating_existing_json(
 
 
 def test_shared_gui_catalog_contains_privateframe_and_legacy_packages():
-    assert tuple(GUI_MODEL_PACKAGES[:2]) == ("raccoon_s", "raccoon_l")
+    assert tuple(GUI_MODEL_PACKAGES[:2]) == ("cheetah_s", "cheetah_l")
+    assert tuple(GUI_MODEL_PACKAGES[2:4]) == ("raccoon_s", "raccoon_l")
     assert PRIVATEFRAME_MODEL_PACKAGES == {"raccoon_s", "raccoon_l"}
     assert {"buffalo_l", "buffalo_m", "buffalo_s", "buffalo_sc", "antelopev2"}.issubset(
         GUI_MODEL_PACKAGES
@@ -299,6 +300,7 @@ def test_model_manager_separates_configuration_from_status_and_file_events(
     QApplication.instance() or QApplication([])
     config = AppConfig(
         workspace_path=str(tmp_path / "workspace"),
+        model_name="raccoon_s",
         model_root=str(tmp_path / "model-root"),
         auto_load_model=False,
         provider="CPU",
@@ -609,7 +611,7 @@ def test_model_download_activity_survives_dialog_close_and_blocks_privateframe(
     monkeypatch.setattr(downloads, "show_error", download_errors.append)
     downloads.download_selected()
     assert download_errors == [
-        "Wait for PrivateFrame processing to finish before downloading a model "
+        "Wait for analysis processing to finish before downloading a model "
         "package."
     ]
     assert len(host.requests) == 1

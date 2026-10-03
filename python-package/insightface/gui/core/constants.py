@@ -38,7 +38,7 @@ COMMERCIAL_NOTICE = (
     "evaluation, SDK/API access, SLA, or custom training."
 )
 
-DEFAULT_MODEL_NAME = "raccoon_s"
+DEFAULT_MODEL_NAME = "cheetah_s"
 DEFAULT_PROVIDER = "Auto"
 DEFAULT_DET_SIZE = (0, 0)
 AUTO_DET_SIZES = ((128, 128), (640, 640))

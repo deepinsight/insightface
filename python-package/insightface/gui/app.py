@@ -9,7 +9,7 @@ from typing import Iterable
 
 from pathlib import Path
 
-from .core.config import AppConfig, load_config, save_config
+from .core.config import AppConfig, PersonConfigError, load_config, save_config
 from .core.face_engine import FaceEngine, is_cuda_provider_available, providers_from_choice
 from .core.logging import setup_logging
 from .core.model_packages import GUI_MODEL_PACKAGES
@@ -26,6 +26,7 @@ class StudioContext:
     runtime_safe_mode: bool = False
     model_downloads_in_progress: int = 0
     privateframe_jobs_in_progress: int = 0
+    person_analysis_jobs_in_progress: int = 0
 
 
 def context_activity_count(context, name: str) -> int:
@@ -228,7 +229,15 @@ def run_app(args=None) -> int:
 
     app = QApplication.instance() or QApplication(sys.argv[:1])
     configure_application_metadata(app)
-    context = create_context(args)
+    try:
+        context = create_context(args)
+    except PersonConfigError as error:
+        from PySide6.QtWidgets import QMessageBox
+        from .core.i18n import tr
+
+        QMessageBox.critical(None, tr('Invalid person configuration', 'system'),
+            tr('Could not load person settings:\n{error}', 'system').format(error=str(error)))
+        return 2
     window = MainWindow(context)
     window.resize(1320, 860)
     window.show()

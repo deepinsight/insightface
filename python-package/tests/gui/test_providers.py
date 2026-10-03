@@ -183,6 +183,7 @@ def test_main_window_and_dashboard_show_resolved_provider(
     )
     config = AppConfig(
         workspace_path=str(tmp_path),
+        model_name="raccoon_s",
         auto_load_model=False,
         safe_mode=True,
         provider="Auto",
@@ -211,5 +212,16 @@ def test_main_window_and_dashboard_show_resolved_provider(
 
     assert "CUDAExecutionProvider" in window.provider_chip.text()
     assert dashboard.cards["provider"].value_label.text() == "CUDAExecutionProvider"
+
+    # Cheetah uses PersonAnalysis, whose Auto policy supports CUDA/CPU only.
+    # It must not inherit the ordinary face workflow's CoreML display.
+    import onnxruntime
+    monkeypatch.setattr(onnxruntime, "get_available_providers", lambda: ["CoreMLExecutionProvider", "CPUExecutionProvider"])
+    for model_name in ("cheetah_s", "cheetah_l"):
+        config.model_name = model_name
+        window.refresh_statusbar()
+        assert "CPUExecutionProvider" in window.provider_chip.text()
+        assert "CoreMLExecutionProvider" not in window.provider_chip.text()
+        assert "CoreMLExecutionProvider" not in window.provider_chip.toolTip()
     dashboard.close()
     window.close()

@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass
+import math
+import tempfile
+from copy import deepcopy
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -16,6 +19,36 @@ from .constants import (
     DEFAULT_TOP_K,
 )
 from .paths import default_config_path, default_workspace, ensure_workspace, expand_path
+
+
+class PersonConfigError(ValueError):
+    """Invalid person options must not silently replace the user's GUI settings."""
+
+
+def validate_person_config(value: dict) -> dict:
+    """Return an independent runtime override dictionary, without loading models."""
+    from ...app.person.config import PersonConfig
+
+    if not isinstance(value, dict):
+        raise PersonConfigError('person_config must be a JSON object')
+    try:
+        PersonConfig(**value)
+    except (TypeError, ValueError, OverflowError) as error:
+        raise PersonConfigError('Invalid person_config: ' + str(error)) from error
+    return deepcopy(value)
+
+
+def validate_person_analysis_max_fps(value: float) -> float:
+    """Zero is automatic; a positive value limits analysis for every input source."""
+    try:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError
+        rate = float(value)
+        if not math.isfinite(rate) or rate < 0:
+            raise ValueError
+    except (ValueError, OverflowError):
+        raise PersonConfigError('person_analysis_max_fps must be a finite number >= 0 (0 = Auto)') from None
+    return rate
 
 
 @dataclass
@@ -45,8 +78,9 @@ class AppConfig:
     camera_frame_skip: int = 3
     ui_theme: str = "azure_lab"
     ui_language: str = "system"
-    ui_default_mode: str = "private_frame"
-    ui_last_mode: str = "private_frame"
+    ui_default_mode: str = "person_analysis"
+    ui_last_mode: str = "person_analysis"
+    ui_last_page_person_analysis: str = "person_analysis"
     ui_last_page_private_frame: str = "private_frame"
     ui_last_page_face_verification: str = "verification"
     ui_last_page_album_management: str = "album"
@@ -64,8 +98,12 @@ class AppConfig:
     swap_model_path: str = ""
     enable_gfpgan: bool = False
     gfpgan_model_path: str = ""
+    person_config: dict = field(default_factory=dict)
+    person_analysis_max_fps: float = 0.0
 
     def __post_init__(self) -> None:
+        self.person_config = validate_person_config(self.person_config)
+        self.person_analysis_max_fps = validate_person_analysis_max_fps(self.person_analysis_max_fps)
         if self.det_size is None:
             self.det_size = [DEFAULT_DET_SIZE[0], DEFAULT_DET_SIZE[1]]
         self.apply_workspace_defaults()
@@ -110,15 +148,27 @@ def load_config(path: Optional[str | Path] = None) -> tuple[AppConfig, bool]:
     try:
         data = json.loads(config_path.read_text(encoding="utf-8"))
         return AppConfig.from_dict(data), True
+    except PersonConfigError as error:
+        raise PersonConfigError(f'Invalid GUI settings in {config_path}: {error}') from error
     except Exception:
         return AppConfig(), False
 
 
 def save_config(config: AppConfig, path: Optional[str | Path] = None) -> Path:
+    config.person_config = validate_person_config(config.person_config)
+    config.person_analysis_max_fps = validate_person_analysis_max_fps(config.person_analysis_max_fps)
     config.apply_workspace_defaults()
     config_path = expand_path(path) if path else Path(config.workspace_path) / "config.json"
     config_path.parent.mkdir(parents=True, exist_ok=True)
-    config_path.write_text(
-        json.dumps(config.to_dict(), indent=2, sort_keys=True), encoding="utf-8"
-    )
+    payload = json.dumps(config.to_dict(), indent=2, sort_keys=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=config_path.parent,
+                                         prefix=config_path.name + '.', suffix='.tmp', delete=False) as handle:
+            temporary = Path(handle.name)
+            handle.write(payload)
+        temporary.replace(config_path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
     return config_path

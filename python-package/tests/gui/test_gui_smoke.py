@@ -27,7 +27,7 @@ def test_main_window_smoke(tmp_path):
     assert app.applicationName() == "InsightFace Evaluation Studio"
     assert app.organizationName() == "InsightFace"
     assert app.organizationDomain() == "insightface.ai"
-    assert app.applicationVersion() == "2.0"
+    assert app.applicationVersion() == "2.1"
     assert APP_ID == "ai.insightface.evaluationstudio"
     assert APP_PROCESS_NAME == "InsightFace Evaluation Studio"
     assert app_icon_path().exists()
@@ -47,7 +47,18 @@ def test_main_window_smoke(tmp_path):
     assert window.mode_rail.isVisible()
     assert window.mode_rail.width() >= 220
     assert window.mode_list.count() == len(AppMode)
-    assert window.mode_list.currentItem().data(Qt.UserRole) == AppMode.PRIVATE_FRAME.value
+    assert window.mode_list.currentItem().data(Qt.UserRole) == AppMode.PERSON_ANALYSIS.value
+    person_page = window.page_registry.get("person_analysis")
+    assert window.stack.currentWidget() is person_page
+    assert person_page.objectName() == "personAnalysisPage"
+    assert window.page_registry.get("person_analysis") is person_page
+    assert not person_page.stop_button.isEnabled()
+    assert hasattr(person_page, "references_table")
+    assert hasattr(person_page, "preview")
+    assert not hasattr(person_page, "database_button")
+    assert not hasattr(person_page, "event_table")
+    assert not hasattr(person_page, "export_button")
+    assert person_page.auto_update.isChecked()
     enterprise_help_button = window.findChild(QPushButton, "enterpriseHelpButton")
     assert enterprise_help_button is not None
     assert enterprise_help_button.text() == "Enterprise Help"
@@ -57,9 +68,13 @@ def test_main_window_smoke(tmp_path):
     assert "All processing is local" in local_notice.text()
     assert "No images, embeddings, or reports are uploaded automatically" in local_notice.text()
     privateframe_page = window.page_registry.get("private_frame")
+    window.change_mode(AppMode.PRIVATE_FRAME)
     assert window.stack.currentWidget() is privateframe_page
     assert privateframe_page.objectName() == "privateFramePage"
     assert privateframe_page.progress_bar.value() == 0
+    assert not privateframe_page.start_button.isEnabled()
+    cfg.model_name = "raccoon_s"
+    window._model_configuration_changed()
     assert privateframe_page.start_button.isEnabled()
     assert not privateframe_page.cancel_button.isEnabled()
     window.change_mode(AppMode.FACE_VERIFICATION)
@@ -223,7 +238,12 @@ def test_main_window_smoke(tmp_path):
     assert not hasattr(settings_dialog, "default_mode")
     model_dialog = ModelManagerDialog(window.context, window)
     assert model_dialog.minimumWidth() >= 1120
-    assert model_dialog.downloads_page.table.minimumHeight() >= 400
+    model_dialog.open_page("Model Downloads")
+    model_dialog.resize(1120, 700)
+    model_dialog.show()
+    app.processEvents()
+    downloads = model_dialog.downloads_page
+    assert downloads.table.geometry().bottom() < downloads.source_footer.geometry().top()
     assert hasattr(model_dialog, "run_task")
     assert model_dialog.downloads_page.table.selectionBehavior() == QAbstractItemView.SelectRows
     assert model_dialog.downloads_page.table.selectionMode() == QAbstractItemView.SingleSelection
@@ -252,6 +272,60 @@ def test_main_window_smoke(tmp_path):
     for dialog in dialogs:
         dialog.close()
     assert window.windowTitle().startswith("InsightFace Evaluation Studio")
+    window.close()
+
+
+@pytest.mark.parametrize(
+    "mode,model", [("person_analysis", "buffalo_l"), ("face_verification", "cheetah_s"), ("face_verification", "cheetah_l")],
+)
+def test_person_workflow_and_packages_do_not_autoload_face_engine(tmp_path, monkeypatch, mode, model):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    pytest.importorskip("PySide6")
+    from PySide6.QtWidgets import QApplication
+    from insightface.gui.app import StudioContext, configure_qt_plugin_paths, create_face_engine
+    from insightface.gui.core.config import AppConfig
+    from insightface.gui.core.storage import Storage
+    from insightface.gui.main_window import MainWindow
+
+    configure_qt_plugin_paths()
+    app = QApplication.instance() or QApplication([])
+    cfg = AppConfig(workspace_path=str(tmp_path), model_root=str(tmp_path / "models"),
+                    model_name=model, ui_last_mode=mode, auto_load_model=True)
+    engine = create_face_engine(cfg)
+    monkeypatch.setattr(engine, "load", lambda: pytest.fail("FaceEngine must stay unloaded"))
+    window = MainWindow(StudioContext(cfg, True, Storage(cfg.database_path), engine, str(tmp_path / "app.log")))
+    window._auto_load_model_if_needed()
+    window.auto_load_model()
+    app.processEvents()
+    assert not window.active_workers
+    assert not engine.is_loaded()
+    window.close()
+
+
+def test_person_analysis_blocks_model_manager_while_running(tmp_path, monkeypatch):
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    pytest.importorskip("PySide6")
+    from PySide6.QtWidgets import QApplication, QMessageBox
+    from insightface.gui import main_window
+    from insightface.gui.app import StudioContext, configure_qt_plugin_paths, create_face_engine
+    from insightface.gui.core.config import AppConfig
+    from insightface.gui.core.storage import Storage
+
+    configure_qt_plugin_paths()
+    app = QApplication.instance() or QApplication([])
+    cfg = AppConfig(workspace_path=str(tmp_path), model_root=str(tmp_path / "models"),
+                    auto_load_model=False, ui_language="en")
+    context = StudioContext(cfg, True, Storage(cfg.database_path), create_face_engine(cfg), str(tmp_path / "app.log"))
+    window = main_window.MainWindow(context)
+    context.person_analysis_jobs_in_progress = 1
+    warnings = []
+    monkeypatch.setattr(QMessageBox, "warning", lambda *args: warnings.append(args))
+    monkeypatch.setattr(main_window, "ModelManagerDialog", lambda *_args, **_kwargs: pytest.fail("Models must stay closed"))
+    window.open_model_manager()
+    assert len(warnings) == 1
+    assert warnings[0][2] == "Stop Person Analysis before opening Models."
+    context.person_analysis_jobs_in_progress = 0
+    app.processEvents()
     window.close()
 
 
