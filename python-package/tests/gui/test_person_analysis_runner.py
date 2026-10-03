@@ -90,6 +90,8 @@ def runtime(monkeypatch):
             assert not self.reading
             self.released = True
             state['calls'].append('release')
+            if state.get('after_release'):
+                state['after_release']()
     class SDK:
         def __init__(self, **options):
             assert set(options) == {'name', 'root', 'providers', 'config'}
@@ -288,10 +290,14 @@ def test_live_source_uses_same_pipeline_and_stops_between_frames(tmp_path, runti
 
 
 @pytest.mark.parametrize('kind,source', [('camera', 0), ('rtsp', 'rtsp://host.test/live')])
-def test_live_capture_replaces_pending_frames_during_slow_inference(tmp_path, runtime, monkeypatch, kind, source):
+@pytest.mark.parametrize('wait_for_capture_release', [False, True],
+                         ids=['natural_order', 'release_during_inference'])
+def test_live_capture_replaces_pending_frames_during_slow_inference(
+        tmp_path, runtime, monkeypatch, kind, source, wait_for_capture_release):
     first_inference = threading.Event()
     pending_frames_read = threading.Event()
     release_last_read = threading.Event()
+    capture_released = threading.Event()
     runtime['frames'] = 4
     clock = {'ns': 1_750_000_000_000_000_000}
     captured_at = [clock['ns'] + index * 10_000_000 for index in range(4)]
@@ -318,12 +324,16 @@ def test_live_capture_replaces_pending_frames_during_slow_inference(tmp_path, ru
                 clock['ns'] = captured_at[-1] + 9_000_000_000
             finally:
                 release_last_read.set()
+            if wait_for_capture_release:
+                # EOF may release capture while this copied frame is still being analyzed.
+                assert capture_released.wait(3), 'capture did not release after EOF'
 
     def after_match():
         if len(runtime['frames_seen']) == 2:
             runner.request_stop()
 
-    runtime.update(before_read=before_read, on_get=on_get, after_match=after_match)
+    runtime.update(before_read=before_read, on_get=on_get, after_match=after_match,
+                   after_release=capture_released.set)
     result = runner.run()
     assert result['status'] == 'stopped' and result['frames_processed'] == 2
     assert runtime['frames_seen'] == [0, 3]
@@ -332,7 +342,8 @@ def test_live_capture_replaces_pending_frames_during_slow_inference(tmp_path, ru
     assert np.all(image == 3)
     assert preview.frame_index == 2 and preview.time_basis == 'utc'
     assert preview.timestamp == captured_at[3] // 1_000_000
-    assert runtime['calls'][-2:] == ['release', 'close']
+    assert [call for call in runtime['calls'] if call in ('release', 'close')] == ['release', 'close']
+    assert runtime['calls'][-1] == 'close'
 
 
 @pytest.mark.parametrize('kind,source', [('camera', 0), ('rtsp', 'rtsp://host.test/live')])
@@ -605,7 +616,8 @@ def test_stop_during_inference_waits_for_native_read_before_closing_sdk(tmp_path
     result = finish_runner(outcome)
     assert result['status'] == 'stopped'
     assert runtime['frames_seen'] == [0]
-    assert runtime['calls'][-2:] == ['release', 'close']
+    assert [call for call in runtime['calls'] if call in ('release', 'close')] == ['release', 'close']
+    assert runtime['calls'][-1] == 'close'
 
 
 @pytest.mark.parametrize('kind,source', [('camera', 0), ('rtsp', 'rtsp://host.test/live')])
