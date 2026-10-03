@@ -6,6 +6,7 @@ import stat
 import urllib.error
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -159,12 +160,19 @@ def test_local_package_created_during_download_is_preserved(tmp_path, monkeypatc
     assert not list(target.parent.glob(".*-download-*"))
 
 
-@pytest.mark.parametrize("entry", ["../outside", "/outside", "nested/../../outside", "nested\\outside", "C:/outside"])
-def test_archive_paths_are_checked_before_any_extraction(tmp_path, entry):
+@pytest.mark.parametrize("separator", ["/", "\\"], ids=["posix", "windows"])
+@pytest.mark.parametrize("entry", ["../outside", "/outside", "nested/../../outside", "nested\\outside", "C:/outside", "nested\x00outside"])
+def test_archive_paths_are_checked_before_any_extraction(tmp_path, monkeypatch, entry, separator):
+    # Exercise ZipInfo's platform-dependent normalization on every CI runner.
+    monkeypatch.setattr(zipfile, "os", SimpleNamespace(**{**vars(zipfile.os), "sep": separator}))
     archive = tmp_path / "unsafe.zip"
     with zipfile.ZipFile(archive, "w") as bundle:
         bundle.writestr("safe.txt", "must not be written")
-        bundle.writestr(entry, "unsafe")
+        info = zipfile.ZipInfo(entry)
+        info.filename = entry  # Keep the malformed name in the actual ZIP bytes.
+        bundle.writestr(info, "unsafe")
+    with zipfile.ZipFile(archive) as bundle:
+        assert bundle.infolist()[1].orig_filename == entry
     destination = tmp_path / "unpacked"
     with pytest.raises(ValueError, match="unsafe model archive entry"):
         person_package._extract_person_archive(archive, destination)

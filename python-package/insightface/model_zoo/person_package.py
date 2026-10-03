@@ -192,11 +192,13 @@ def _extract_person_archive(archive, destination):
     with zipfile.ZipFile(archive) as bundle:
         seen = set()
         for member in bundle.infolist():
-            path = PurePosixPath(member.filename)
+            # ZipInfo.filename normalizes Windows separators and truncates NULs.
+            filename = member.orig_filename
+            path = PurePosixPath(filename)
             if (not path.parts or path.is_absolute() or ".." in path.parts or
-                    "\\" in member.filename or ":" in member.filename or "\x00" in member.filename or
+                    "\\" in filename or ":" in filename or "\x00" in filename or
                     stat.S_ISLNK(member.external_attr >> 16) or path in seen):
-                raise ValueError(f"unsafe model archive entry: {member.filename!r}")
+                raise ValueError(f"unsafe model archive entry: {filename!r}")
             seen.add(path)
         bundle.extractall(destination)
 
