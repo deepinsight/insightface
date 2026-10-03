@@ -5,23 +5,19 @@ from pathlib import Path
 import pickle
 
 def get_object(name):
+    base_dirs = []
     if getattr(sys, 'frozen', False):
-        base_dir = sys._MEIPASS
-    else:
-        base_dir = Path(__file__).parent.absolute()
-
-    objects_dir = osp.join(base_dir, 'objects')
+        base_dirs.append(sys._MEIPASS)
+    base_dirs.append(Path(__file__).parent.absolute())
 
     if not name.endswith('.pkl'):
         name = name + ".pkl"
 
-    filepath = osp.join(objects_dir, name)
-    
-    if not osp.exists(filepath):
-        print(f"[Error] File not found: {filepath}")
-        return None
+    for base_dir in base_dirs:
+        filepath = osp.join(base_dir, 'objects', name)
+        if osp.exists(filepath):
+            with open(filepath, 'rb') as f:
+                return pickle.load(f)
 
-    with open(filepath, 'rb') as f:
-        obj = pickle.load(f)
-
-    return obj
+    print(f"[Error] File not found: {filepath}")
+    return None
