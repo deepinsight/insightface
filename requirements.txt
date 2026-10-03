@@ -1,3 +1,5 @@
 Cython>=0.29.28
 cmake>=3.22.3    
 numpy>=1.22.3
+onnx>=1.4.0
+onnxruntime>=1.6.0
