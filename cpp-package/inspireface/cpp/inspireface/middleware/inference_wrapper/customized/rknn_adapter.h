@@ -11,6 +11,10 @@
 #include "data_type.h"
 #include "log.h"
 
+#if defined(RKNN_NPU_CORE_UNDEFINED)
+#define INSPIREFACE_HAS_RKNN_CORE_MASK 1
+#endif
+
 /**
  * @brief Function to get RKNN data type string.
  * @param type Data type
@@ -167,7 +171,14 @@ public:
         }
         run_ = true;
 
-        return init_();
+        ret = init_();
+        if (ret != RKNN_SUCC) {
+            return ret;
+        }
+        if (core_mask_overridden_) {
+            ret = apply_core_mask_();
+        }
+        return ret;
     }
 
     /**
@@ -188,7 +199,14 @@ public:
         }
         run_ = true;
 
-        return init_();
+        ret = init_();
+        if (ret != RKNN_SUCC) {
+            return ret;
+        }
+        if (core_mask_overridden_) {
+            ret = apply_core_mask_();
+        }
+        return ret;
     }
 
     /**
@@ -385,6 +403,33 @@ public:
         outputs_want_float_ = outputsWantFloat;
     }
 
+    /**
+     * @brief Configure the target NPU core mask.
+     * @param core_mask Rockchip NPU core mask value.
+     * @return 0 on success, negative on failure.
+     */
+    int SetCoreMask(int32_t core_mask) {
+        core_mask_ = core_mask;
+        core_mask_overridden_ = true;
+        if (run_) {
+            return apply_core_mask_();
+        }
+        return 0;
+    }
+
+    /**
+     * @brief Reset NPU core mask to auto scheduling.
+     * @return 0 on success, negative on failure.
+     */
+    int ResetCoreMask() {
+        core_mask_ = 0;
+        core_mask_overridden_ = false;
+        if (run_) {
+            return apply_core_mask_();
+        }
+        return 0;
+    }
+
 private:
     /**
      * initial
@@ -474,6 +519,23 @@ private:
         return ret;
     }
 
+    int apply_core_mask_() {
+        if (!run_) {
+            return 0;
+        }
+#if defined(INSPIREFACE_HAS_RKNN_CORE_MASK)
+        // rknn_set_core_mask 需要 rknn_core_mask 类型，这里做显式转换
+        int ret = rknn_set_core_mask(rk_ctx_, static_cast<rknn_core_mask>(core_mask_));
+        if (ret != RKNN_SUCC) {
+            INSPIRE_LOGE("rknn_set_core_mask fail! ret=%d", ret);
+        }
+        return ret;
+#else
+        INSPIRE_LOGW("Current RKNN runtime does not support core mask configuration, skip.");
+        return RKNN_SUCC;
+#endif
+    }
+
 private:
     rknn_context rk_ctx_;              ///< The context manager for RKNN.
     rknn_input_output_num rk_io_num_;  ///< The number of input and output streams in RKNN.
@@ -493,6 +555,8 @@ private:
     unsigned char *model_data;  ///< Pointer to the model's data stream.
     bool load_;
     bool run_;
+    int32_t core_mask_{0};
+    bool core_mask_overridden_{false};
 };
 
 #endif  // INSPIREFACE_RKNN_ADAPTER_RKNPU1_H

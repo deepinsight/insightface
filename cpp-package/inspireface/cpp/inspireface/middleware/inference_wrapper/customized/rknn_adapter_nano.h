@@ -19,6 +19,9 @@
 #include <vector>
 #include "log.h"
 
+#if defined(RKNN_NPU_CORE_UNDEFINED)
+#define INSPIREFACE_HAS_RKNN_CORE_MASK 1
+#endif
 inline std::vector<float> softmax(const std::vector<float> &input) {
     std::vector<float> output;
     output.reserve(input.size());
@@ -79,6 +82,24 @@ public:
     RKNNAdapterNano(const RKNNAdapterNano &) = delete;
     RKNNAdapterNano &operator=(const RKNNAdapterNano &) = delete;
     RKNNAdapterNano() = default;
+
+    int32_t SetCoreMask(int32_t core_mask) {
+        core_mask_ = core_mask;
+        core_mask_overridden_ = true;
+        if (run_) {
+            return apply_core_mask_();
+        }
+        return 0;
+    }
+
+    int32_t ResetCoreMask() {
+        core_mask_ = 0;
+        core_mask_overridden_ = false;
+        if (run_) {
+            return apply_core_mask_();
+        }
+        return 0;
+    }
 
     int32_t Initialize(void *model_data, unsigned int model_size) {
         int ret = rknn_init(&m_rk_ctx_, model_data, model_size, 0, NULL);
@@ -168,6 +189,12 @@ public:
         }
 
         run_ = true;
+        if (core_mask_overridden_) {
+            ret = apply_core_mask_();
+            if (ret != RKNN_SUCC) {
+                return ret;
+            }
+        }
         return 0;
     }
 
@@ -254,6 +281,23 @@ public:
         return 0;
     }
 
+    int apply_core_mask_() {
+        if (!run_) {
+            return 0;
+        }
+#if defined(INSPIREFACE_HAS_RKNN_CORE_MASK)
+        // rknn_set_core_mask 期望的是枚举类型 rknn_core_mask，这里做显式转换
+        int ret = rknn_set_core_mask(m_rk_ctx_, static_cast<rknn_core_mask>(core_mask_));
+        if (ret != RKNN_SUCC) {
+            INSPIRE_LOGE("rknn_set_core_mask fail! ret=%d", ret);
+        }
+        return ret;
+#else
+        INSPIRE_LOGW("Current RKNN runtime does not support core mask configuration, skip.");
+        return RKNN_SUCC;
+#endif
+    }
+
     std::vector<float> &GetOutputData(size_t index) {
         return m_output_nchw_[index];
     }
@@ -307,6 +351,8 @@ private:
 
     std::vector<std::vector<float>> m_output_nchw_;
     bool run_;
+    int32_t core_mask_{0};
+    bool core_mask_overridden_{false};
 };
 
 #endif  // SLEEPMONITORING_RKNN_ADAPTER_NANO_H
