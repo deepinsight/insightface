@@ -8,6 +8,23 @@ arcface_dst = np.array(
      [41.5493, 92.3655], [70.7299, 92.2041]],
     dtype=np.float32)
 
+
+def _estimate_similarity(src, dst):
+    """Fit a similarity transform mapping src to dst.
+
+    scikit-image 0.26 deprecated ``SimilarityTransform.estimate`` in favour of
+    the ``from_estimate`` constructor, which returns a falsy object on failure.
+    """
+    if hasattr(trans.SimilarityTransform, 'from_estimate'):
+        tform = trans.SimilarityTransform.from_estimate(src, dst)
+        if not tform:
+            raise RuntimeError(f'Similarity transform estimation failed: {tform}')
+        return tform
+    tform = trans.SimilarityTransform()
+    tform.estimate(src, dst)
+    return tform
+
+
 def estimate_norm(lmk, image_size=112,mode='arcface'):
     assert lmk.shape == (5, 2)
     assert image_size%112==0 or image_size%128==0
@@ -19,8 +36,7 @@ def estimate_norm(lmk, image_size=112,mode='arcface'):
         diff_x = 8.0*ratio
     dst = arcface_dst * ratio
     dst[:,0] += diff_x
-    tform = trans.SimilarityTransform()
-    tform.estimate(lmk, dst)
+    tform = _estimate_similarity(lmk, dst)
     M = tform.params[0:2, :]
     return M
 
