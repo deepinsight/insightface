@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EEG Vault — Research Demo</title>
+<style>
+:root{color-scheme:dark;--bg:#0a0d14;--panel:#111827;--line:#263244;--text:#eef3ff;--muted:#9ba9bd;--accent:#8b9cff;--green:#50d8a0;--red:#ff7e87;--amber:#ffc86b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#18203c 0%,var(--bg) 48%);font:15px/1.5 system-ui,Segoe UI,sans-serif;color:var(--text)}
+main{max-width:1120px;margin:auto;padding:34px 20px 60px}.eyebrow{color:var(--accent);font-weight:700;letter-spacing:.14em;font-size:12px;text-transform:uppercase}
+h1{font-size:clamp(32px,5vw,54px);line-height:1.05;margin:10px 0}h2{font-size:20px;margin:0 0 14px}.sub{color:var(--muted);max-width:760px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}.card{background:rgba(17,24,39,.94);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 18px 60px #0002}
+.wide{grid-column:1/-1}.fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}label{color:var(--muted);font-size:12px;font-weight:650}
+select,input{width:100%;background:#0b1220;color:var(--text);border:1px solid #35435a;border-radius:10px;padding:11px;font:inherit}
+button{background:var(--accent);border:0;border-radius:10px;padding:12px 16px;font-weight:800;color:#0b1020;cursor:pointer;margin-top:14px}button.secondary{background:#202b40;color:var(--text);border:1px solid #38465d}button:disabled{opacity:.45;cursor:wait}
+.status{border-radius:12px;border:1px solid var(--line);padding:12px;margin-top:12px;color:var(--muted);word-break:break-word}.ok{border-color:#24684f;color:var(--green)}.bad{border-color:#71333c;color:var(--red)}.warn{border-color:#68522b;color:var(--amber)}
+.metricgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.metric{background:#0b1220;border:1px solid var(--line);padding:14px;border-radius:12px}.metric small{color:var(--muted);display:block}.metric strong{font-size:22px;display:block;margin-top:4px}
+.meter{height:8px;background:#263244;border-radius:9px;overflow:hidden;margin-top:12px}.meter div{height:100%;width:0;background:var(--accent);transition:width .2s}
+.secret{font:12px/1.6 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:#cbd6ea}
+.steps{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.pill{border:1px solid var(--line);border-radius:99px;padding:6px 10px;color:var(--muted);font-size:12px}
+footer{color:var(--muted);font-size:12px;margin-top:18px}code{color:#dce3ff}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.wide{grid-column:auto}.fieldgrid{grid-template-columns:1fr}.metricgrid{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+<div class="eyebrow">EEG ArcFace · local research prototype</div>
+<h1>EEG Vault</h1>
+<p class="sub">Enroll an EEG session, create an encrypted demo wallet payload, then try to unlock it using another session. The local model compares normalized 32-dimensional embeddings and reports the score and threshold decision.</p>
+<div class="steps"><span class="pill">01 · Select subject</span><span class="pill">02 · Create vault</span><span class="pill">03 · Verify another session</span><span class="pill">04 · Inspect scores</span></div>
+
+<div class="layout">
+<section class="card">
+<h2>01 — Enrollment / wallet creation</h2>
+<p class="sub">Choose the identity and the enrollment session that will represent the wallet owner.</p>
+<div class="fieldgrid">
+<div class="field"><label for="enrollSubject">ENROLLMENT SUBJECT</label><select id="enrollSubject"></select></div>
+<div class="field"><label for="enrollSession">ENROLLMENT SESSION</label><select id="enrollSession"></select></div>
+<div class="field"><label for="enrollFreq">SSVEP FREQUENCY</label><select id="enrollFreq"></select></div>
+</div>
+<button id="createWallet">Generate & encrypt demo wallet</button>
+<div id="walletStatus" class="status">No wallet created yet.</div>
+<div id="walletDetails" hidden>
+<div class="metricgrid">
+<div class="metric"><small>Wallet ID</small><strong id="walletId">—</strong></div>
+<div class="metric"><small>Encryption</small><strong>AES-GCM</strong></div>
+<div class="metric"><small>Key export</small><strong>Disabled</strong></div>
+</div>
+<div class="status"><div class="secret" id="walletCipher"></div></div>
+</div>
+</section>
+
+<section class="card">
+<h2>02 — Unlock / session verification</h2>
+<p class="sub">Select a candidate identity and a different session. Only a passing score triggers the browser-side decrypt operation.</p>
+<div class="fieldgrid">
+<div class="field"><label for="probeSubject">CANDIDATE SUBJECT</label><select id="probeSubject"></select></div>
+<div class="field"><label for="probeSession">UNLOCK SESSION</label><select id="probeSession"></select></div>
+<div class="field"><label for="probeFreq">SSVEP FREQUENCY</label><select id="probeFreq"></select></div>
+<div class="field"><label for="threshold">SIMILARITY THRESHOLD</label><select id="threshold"><option value="0.617122">0.617122 · calibrated nominal 1% FAR</option><option value="0.751461">0.751461 · calibrated nominal 0.1% FAR</option><option value="0.559022">0.559022 · calibrated EER</option></select></div>
+</div>
+<button id="verify" disabled>Verify session & attempt decrypt</button>
+<div id="verifyStatus" class="status">Create a demo wallet first.</div>
+<div class="metricgrid">
+<div class="metric"><small>Cosine similarity</small><strong id="score">—</strong></div>
+<div class="metric"><small>Threshold</small><strong id="scoreThreshold">—</strong></div>
+<div class="metric"><small>Decision</small><strong id="decision">—</strong></div>
+</div>
+<div class="meter"><div id="meterFill"></div></div>
+</section>
+
+<section class="card wide">
+<h2>03 — Decrypted wallet payload</h2>
+<div id="decryptOutput" class="status">Locked. A successful verification is required to decrypt the payload in this demo.</div>
+<div class="fieldgrid" style="margin-top:12px">
+<div class="field"><label>MODEL</label><div class="status" id="modelInfo">Connecting to local model…</div></div>
+<div class="field"><label>SELECTED CHANNELS</label><div class="status">POZ, PO3, PO4, PO7, PO8, OZ, O1, O2</div></div>
+</div>
+</section>
+</div>
+<footer>
+Research prototype only. The wallet payload is a random demo secret, not a funded blockchain wallet. The non-extractable WebCrypto key is stored by this browser; the EEG score is a UI gate, not a cryptographic biometric key or a production security boundary. A production design needs a threat model, secure hardware/key custody, replay protection, liveness checks, and independent security review. Use sessions 3→4 and the 0.617122 threshold for the closest match to the reported held-out protocol.
+</footer>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let config = null, aesKey = null, iv = null, ciphertext = null, walletPayload = null, walletId = null;
+const enc = new TextEncoder(), dec = new TextDecoder();
+function fill(id, vals, fmt=x=>String(x), selected=null){
+  const el=$(id); el.innerHTML='';
+  for(const v of vals){const o=document.createElement('option');o.value=String(v);o.textContent=fmt(v);if(selected!==null&&String(v)===String(selected))o.selected=true;el.appendChild(o);}
+}
+async function init(){
+  try{
+    const r=await fetch('/api/config'); if(!r.ok) throw new Error(await r.text());
+    config=await r.json();
+    fill('enrollSubject',config.subjects, v=>`Subject ${v}`);
+    fill('probeSubject',config.subjects, v=>`Subject ${v}`);
+    fill('enrollSession',config.sessions,v=>`Session ${v}`,3);
+    fill('probeSession',config.sessions,v=>`Session ${v}`,4);
+    fill('enrollFreq',config.frequencies,v=>`${v.toFixed(1)} Hz`,10.0);
+    fill('probeFreq',config.frequencies,v=>`${v.toFixed(1)} Hz`,10.0);
+    $('modelInfo').textContent=`${config.device} · ${config.embedding_dim}-D normalized embedding · checkpoint epoch ${config.checkpoint_epoch ?? 'unknown'}`;
+    $('verify').disabled=false;
+    // Choose an unseen identity as the default demo subject when available.
+    const defaultSubject=(config.unseen_subjects||[])[0] ?? config.subjects[0];
+    $('enrollSubject').value=String(defaultSubject); $('probeSubject').value=String(defaultSubject);
+  }catch(e){$('modelInfo').textContent='Could not load local model: '+e.message;}
+}
+$('createWallet').addEventListener('click', async ()=>{
+  try{
+    $('createWallet').disabled=true;
+    // The key is non-extractable; wallet payload and ciphertext stay in this browser tab.
+    aesKey=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+    iv=crypto.getRandomValues(new Uint8Array(12));
+    const secret=crypto.getRandomValues(new Uint8Array(32));
+    const digest=await crypto.subtle.digest('SHA-256',secret);
+    walletId='EEG-'+Array.from(new Uint8Array(digest).slice(0,6)).map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+    walletPayload={walletId, demoSecretHex:Array.from(secret).map(b=>b.toString(16).padStart(2,'0')).join(''), createdAt:new Date().toISOString(), note:'Demo-only random secret; not a real blockchain private key.'};
+    ciphertext=await crypto.subtle.encrypt({name:'AES-GCM',iv},aesKey,enc.encode(JSON.stringify(walletPayload)));
+    $('walletId').textContent=walletId;
+    $('walletCipher').textContent='AES-GCM ciphertext (base64): '+btoa(String.fromCharCode(...new Uint8Array(ciphertext)))+'\nIV (base64): '+btoa(String.fromCharCode(...iv))+'\nKey extractable: '+aesKey.extractable;
+    $('walletDetails').hidden=false;
+    $('walletStatus').className='status ok'; $('walletStatus').textContent='Encrypted demo wallet created. The browser reports the AES key as non-extractable.';
+    $('decryptOutput').className='status warn'; $('decryptOutput').textContent='Locked. Run a session verification to attempt decryption.';
+  }catch(e){$('walletStatus').className='status bad';$('walletStatus').textContent='Wallet creation failed: '+e.message;}
+  finally{$('createWallet').disabled=false;}
+});
+$('verify').addEventListener('click', async ()=>{
+  if(!aesKey||!ciphertext){$('verifyStatus').className='status warn';$('verifyStatus').textContent='Create the encrypted demo wallet first.';return;}
+  try{
+    $('verify').disabled=true; $('verify').textContent='Scoring EEG…';
+    const body={
+      enroll_subject:Number($('enrollSubject').value),
+      enroll_session:Number($('enrollSession').value),
+      probe_subject:Number($('probeSubject').value),
+      probe_session:Number($('probeSession').value),
+      frequency:Number($('probeFreq').value),
+      threshold:Number($('threshold').value)
+    };
+    if(Number($('enrollFreq').value)!==body.frequency) throw new Error('Enrollment and unlock frequencies must match. Set both frequency selectors to the same value.');
+    const r=await fetch('/api/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const result=await r.json(); if(!r.ok) throw new Error(result.detail||'Verification failed');
+    $('score').textContent=result.score.toFixed(6);
+    $('scoreThreshold').textContent=result.threshold.toFixed(6);
+    $('decision').textContent=result.passed?'PASS':'FAIL';
+    $('meterFill').style.width=Math.max(0,Math.min(100,result.score*100))+'%';
+    if(result.passed){
+      const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv},aesKey,ciphertext);
+      const decoded=JSON.parse(dec.decode(plain));
+      $('verifyStatus').className='status ok';$('verifyStatus').textContent=`${result.decision} · cosine ${result.score.toFixed(6)} ≥ threshold ${result.threshold.toFixed(6)}. Browser decryption succeeded.`;
+      $('decryptOutput').className='status ok';$('decryptOutput').innerHTML='';
+      const title=document.createElement('strong');title.textContent='Decryption successful';
+      const pre=document.createElement('div');pre.className='secret';pre.textContent=JSON.stringify({walletId:decoded.walletId, demoSecretHex:decoded.demoSecretHex, createdAt:decoded.createdAt, note:decoded.note},null,2);
+      $('decryptOutput').append(title,pre);
+    }else{
+      $('verifyStatus').className='status bad';$('verifyStatus').textContent=`${result.decision} · cosine ${result.score.toFixed(6)} < threshold ${result.threshold.toFixed(6)}.`;
+      $('decryptOutput').className='status bad';$('decryptOutput').textContent='Decryption blocked by the demo UI because the similarity threshold was not met.';
+    }
+  }catch(e){$('verifyStatus').className='status bad';$('verifyStatus').textContent=e.message;}
+  finally{$('verify').disabled=false;$('verify').textContent='Verify session & attempt decrypt';}
+});
+$('enrollFreq').addEventListener('change',()=>{$('probeFreq').value=$('enrollFreq').value;});
+$('probeFreq').addEventListener('change',()=>{$('enrollFreq').value=$('probeFreq').value;});
+init();
+</script>
+</body></html>
