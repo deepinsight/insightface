@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- RTSP Monitors now pull RTP over TCP by default. With the pinned OpenCV 4.11,
+  the previous default negotiated UDP first, which loses or reorders packets on
+  high-bitrate streams (`RTP: missed N packets`, HEVC reference errors). Set
+  `INSIGHTFACE_RTSP_TRANSPORT=udp` to restore UDP-first negotiation. The
+  setting is process-wide; an explicit `OPENCV_FFMPEG_CAPTURE_OPTIONS` is
+  respected unchanged.
+- Monitor logs now record the transport, stream size and FPS on connect, the
+  failing stage (`open`, `read`, `read_timeout`), consecutive failures, and
+  outage duration on recovery. Sources stay redacted (no credentials or query).
+- Reconnect backoff is reset only after a frame decodes, so a source that
+  accepts connections but never delivers frames backs off up to 30 s instead
+  of retrying every `INSIGHTFACE_RTSP_RECONNECT_DELAY_SECONDS`.
+
 ## 0.3.1
 
 - Simplify CPU and CUDA Docker deployment: Server and model installer run as

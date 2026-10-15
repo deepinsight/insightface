@@ -147,6 +147,7 @@ def test_compose_uses_one_writable_model_mount_and_persists_data() -> None:
             "INSIGHTFACE_SEARCH_DEVICE_ID",
             "INSIGHTFACE_SEARCH_TOPK_MODE",
             "INSIGHTFACE_SEARCH_BUILD_BATCH_ROWS",
+            "INSIGHTFACE_RTSP_TRANSPORT",
         ):
             assert variable in compose
 

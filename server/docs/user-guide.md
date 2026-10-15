@@ -315,6 +315,81 @@ restrict Monitor administration to trusted operators.
 
 With liveness enabled in `normal`, blocked faces show `status: liveness_blocked` and their separate liveness result. They increment `liveness_blocked_faces`, not `unknown_faces`, and do not trigger person/unknown entry events. `observe` continues recognition. Input rejection is displayed separately from a fake result.
 
+### RTSP transport, timeouts, and reconnects
+
+These Server environment variables apply to every Monitor. Restart the Server
+after changing them.
+
+| Variable | Default | Effect |
+| --- | --- | --- |
+| `INSIGHTFACE_RTSP_TRANSPORT` | `tcp` | How RTP media is carried: `tcp` (interleaved on the RTSP connection) or `udp`. |
+| `INSIGHTFACE_RTSP_OPEN_TIMEOUT_SECONDS` | `5` | Connection timeout: the longest wait for the RTSP handshake and the first stream data while opening (0.5–60). |
+| `INSIGHTFACE_RTSP_READ_TIMEOUT_SECONDS` | `5` | Read timeout: if no frame arrives for this long, the Monitor reconnects (0.5–60). |
+| `INSIGHTFACE_RTSP_RECONNECT_DELAY_SECONDS` | `1` | First retry delay. It doubles after each failed attempt, up to 30 s, and resets once a frame decodes (0.1–30). |
+
+**Use TCP unless the camera cannot.** Over UDP, every RTP packet the network or
+the receiving socket drops is lost for good. This is common when a large camera
+sends a multi-hundred-kilobyte keyframe in one burst. FFmpeg then logs
+`RTP: missed N packets`, and H.265 decoding shows reference errors such as
+`Could not find ref with POC` until the next keyframe. TCP retransmits lost
+segments, so the decoder receives a complete stream. The cost is that sustained
+loss appears as extra latency or a read timeout and reconnect instead of
+corrupted frames. Transport does not change the camera's resolution, frame
+rate, or codec.
+
+The transport is set with OpenCV's process-wide
+`OPENCV_FFMPEG_CAPTURE_OPTIONS` variable, so it cannot differ between cameras
+on one Server. If you set `OPENCV_FFMPEG_CAPTURE_OPTIONS` yourself, the Server
+leaves it unchanged and logs `rtsp_transport_override`. The bundled OpenCV 4.11
+cannot make either transport strict. With `tcp`, FFmpeg falls back to UDP only
+if the camera rejects TCP. With `udp`, it falls back to TCP if the camera
+rejects UDP. The startup log line `rtsp_transport_configured` shows the result,
+for example `effective=tcp_preferred`.
+
+Socket buffer size and packet-reordering delay are separate UDP-only
+mechanisms. A larger UDP receive buffer can absorb keyframe bursts, and a
+longer reordering delay (`max_delay`, `reorder_queue_size`) waits longer for
+out-of-order packets. Neither recovers packets that never arrive, and the
+reordering delay adds latency. OpenCV 4.11 cannot apply them, so they are not
+Server settings; prefer TCP. Frames are never queued: the decoder keeps only
+the newest frame.
+
+Monitor logs never include credentials or URL query values. Useful lines:
+
+- `monitor_source_connected`: transport, width, height, source FPS, and the
+  failed attempts and outage length before this connection;
+- `monitor_source_unavailable`: the failing `stage` (`open`, `read`, or
+  `read_timeout`), frames received on the lost connection,
+  `consecutive_failures`, and the next `retry_seconds`.
+
+The Server cannot count lost RTP packets, because OpenCV does not expose
+FFmpeg's RTP statistics. To measure loss, test the camera with FFmpeg from the
+Server host, using the same URL:
+
+```bash
+# Compare transports. FFplay uses UDP unless told otherwise.
+ffplay -rtsp_transport udp "rtsp://USER:PASS@CAMERA/path"
+ffplay -rtsp_transport tcp "rtsp://USER:PASS@CAMERA/path"
+
+# Decode for 60 s without display and count loss/decoder errors per transport.
+ffmpeg -hide_banner -rtsp_transport udp -i "rtsp://USER:PASS@CAMERA/path" \
+  -t 60 -f null - 2>&1 | grep -cE "missed|Could not find ref|error"
+ffmpeg -hide_banner -rtsp_transport tcp -i "rtsp://USER:PASS@CAMERA/path" \
+  -t 60 -f null - 2>&1 | grep -cE "missed|Could not find ref|error"
+
+# Confirm resolution, codec, and frame rate.
+ffprobe -hide_banner -rtsp_transport tcp -show_streams -select_streams v \
+  "rtsp://USER:PASS@CAMERA/path"
+
+# On Linux, rising UDP "receive buffer errors" indicate socket-buffer overflow.
+netstat -su | grep -i "receive buffer errors"
+```
+
+If TCP still shows stalls or timeouts, the loss is on the network path or in
+the camera's encoder or uplink. Check the camera's bitrate setting, switch
+ports, and NIC drop counters (`ip -s link`). Remember that shell history and
+process lists can reveal credentials typed on the command line.
+
 ## 7. Update and delete data
 
 Collections and Persons can be edited from their lists. Deleting a FaceSample removes its embedding and optional crop. Deleting a non-empty Collection requires explicit force confirmation. Back up `/data` before bulk or destructive maintenance.
