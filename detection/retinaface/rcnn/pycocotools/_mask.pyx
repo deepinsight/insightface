@@ -130,6 +130,11 @@ def _frString(rleObjs):
             raise Exception('Python version must be 2 or 3')
         c_string = py_string
         rleFrString( <RLE*> &Rs._R[i], <char*> c_string, obj['size'][0], obj['size'][1] )
+        # rleFrString produces an empty RLE when the counts string is
+        # malformed (run lengths not summing to h*w) - surface that as a
+        # Python error instead of decoding out of bounds (issue #2889)
+        if Rs._R[i].h != obj['size'][0] or Rs._R[i].w != obj['size'][1]:
+            raise ValueError('invalid RLE: run lengths do not match the mask size')
     return Rs
 
 # encode mask to RLEs objects
@@ -144,7 +149,13 @@ def encode(np.ndarray[np.uint8_t, ndim=3, mode='fortran'] mask):
 # decode mask from compressed list of RLE string or RLEs object
 def decode(rleObjs):
     cdef RLEs Rs = _frString(rleObjs)
+    cdef siz i
     h, w, n = Rs._R[0].h, Rs._R[0].w, Rs._n
+    for i in range(n):
+        # all masks must share the declared size, or rleDecode writes
+        # past the buffer of the first one
+        if Rs._R[i].h != h or Rs._R[i].w != w:
+            raise ValueError('all RLEs must have the same mask size')
     masks = Masks(h, w, n)
     rleDecode(<RLE*>Rs._R, masks._mask, n);
     return np.array(masks)

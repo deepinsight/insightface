@@ -215,8 +215,9 @@ char* rleToString( const RLE *R ) {
 }
 
 void rleFrString( RLE *R, char *s, siz h, siz w ) {
-  siz m=0, p=0, k; long x; int more; uint *cnts;
-  while( s[m] ) m++; cnts=malloc(sizeof(uint)*m); m=0;
+  siz m=0, p=0, k, len; long x; int more; uint *cnts;
+  while( s[m] ) m++; len=m; cnts=malloc(sizeof(uint)*len); m=0;
+  if( !cnts && len>0 ) { rleInit(R,0,0,0,0); return; }
   while( s[p] ) {
     x=0; k=0; more=1;
     while( more ) {
@@ -225,6 +226,17 @@ void rleFrString( RLE *R, char *s, siz h, siz w ) {
       if(!more && (c & 0x10)) x |= -1 << 5*k;
     }
     if(m>2) x+=(long) cnts[m-2]; cnts[m++]=(uint) x;
+  }
+  /* Guard against malformed counts strings: the decoded run lengths must
+   * total exactly h*w, otherwise rleDecode() writes past the end of the
+   * mask buffer (native heap overflow, issue #2889). A delta value that
+   * wraps into a huge uint count also fails this check. Reject the string
+   * by producing an empty RLE; the Python layer turns that into a
+   * ValueError. */
+  {
+    siz total=0, j;
+    for( j=0; j<m; j++ ) total += cnts[j];
+    if( total != h*w ) { free(cnts); rleInit(R,0,0,0,0); return; }
   }
   rleInit(R,h,w,m,cnts); free(cnts);
 }
