@@ -27,7 +27,11 @@ from .onnxruntime_utils import (
     get_default_providers,
     preload_cuda_libraries,
 )
-from .coreml_cache import copy_session_options, create_coreml_session
+from .coreml_cache import (
+    _COPYABLE_SESSION_OPTION_ATTRIBUTES,
+    copy_session_options,
+    create_coreml_session,
+)
 from .package_manifest import (
     DETECTION_TASK,
     EMBEDDED_PREPROCESSING,
@@ -72,6 +76,15 @@ class PickableInferenceSession(onnxruntime.InferenceSession):
         dimension_overrides = getattr(self, "coreml_dimension_overrides", None)
         if dimension_overrides:
             values["coreml_dimension_overrides"] = dict(dimension_overrides)
+        # Preserve the session options the caller supplied. Without this, a
+        # pickled session comes back with the default thread pool sizing,
+        # which oversubscribes the CPU in quota-limited containers (#2899).
+        session_options = self.get_session_options()
+        values["session_options"] = {
+            name: getattr(session_options, name)
+            for name in _COPYABLE_SESSION_OPTION_ATTRIBUTES
+            if hasattr(session_options, name)
+        }
         return values
 
     def __setstate__(self, values):
@@ -85,6 +98,15 @@ class PickableInferenceSession(onnxruntime.InferenceSession):
             kwargs["sess_options"] = copy_session_options(
                 dimension_overrides=dimension_overrides,
             )
+        session_options = values.get("session_options")
+        if session_options:
+            if kwargs.get("sess_options") is None:
+                kwargs["sess_options"] = copy_session_options()
+            for name, value in session_options.items():
+                try:
+                    setattr(kwargs["sess_options"], name, value)
+                except (AttributeError, TypeError, ValueError):
+                    continue
         self.__init__(model_path, **kwargs)
         if dimension_overrides:
             self.coreml_dimension_overrides = dict(dimension_overrides)
