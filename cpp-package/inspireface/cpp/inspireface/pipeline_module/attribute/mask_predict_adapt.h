@@ -31,6 +31,9 @@ public:
      */
     float operator()(const inspirecv::Image& bgr_affine);
 
+    /** @brief Runs mask prediction and reports preprocessing failures explicitly. */
+    int32_t Predict(const inspirecv::Image& bgr_affine, float& score);
+
 private:
     const int m_input_size_ = 96;  ///< The input size for the model.
 };

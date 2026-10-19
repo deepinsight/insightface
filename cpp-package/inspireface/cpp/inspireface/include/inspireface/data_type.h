@@ -20,7 +20,11 @@
 
 #if defined(_WIN32)
 #ifdef ISF_BUILD_SHARED_LIBS
+#ifdef ISF_EXPORTS
 #define INSPIRE_API_EXPORT __declspec(dllexport)
+#else
+#define INSPIRE_API_EXPORT __declspec(dllimport)
+#endif
 #else
 #define INSPIRE_API_EXPORT
 #endif

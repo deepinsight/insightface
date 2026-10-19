@@ -21,6 +21,11 @@ namespace nexus {
  * - Hardware accelerated implementation like Rockchip RGA (enabled with ISF_ENABLE_RGA) 
  *
  * The backend implementation is selected at runtime based on the backend parameter.
+ *
+ * Processing calls are synchronous from the caller's perspective. On success, the output pointer
+ * is non-null and CPU-readable until the next processing call on the same instance. On failure,
+ * implementations clear the output pointer and leave scalar output parameters in an invalid state.
+ * Call MarkDone after the consumer has finished reading a successful output.
  */
 class INSPIRE_API_EXPORT ImageProcessor {
 public:
@@ -45,7 +50,7 @@ public:
     virtual int32_t ResizeAndPadding(const uint8_t* src_data, int src_width, int src_height, int channels, int dst_width, int dst_height,
                                      uint8_t** dst_data, float& scale) = 0;
 
-    // Mark processing as complete
+    // Finish CPU access to the most recent output and propagate backend synchronization failures
     virtual int32_t MarkDone() = 0;
 
     // Display cache status information

@@ -1,15 +1,10 @@
 #include "STrack.h"
 
-STrack::STrack(vector<float> tlwh_, float score) {
-    _tlwh.resize(4);
-    _tlwh.assign(tlwh_.begin(), tlwh_.end());
+STrack::STrack(const TrackBox &tlwh_, float score) : _tlwh(tlwh_), tlwh{}, tlbr{} {
 
     is_activated = false;
     track_id = 0;
     state = TrackState::New;
-
-    tlwh.resize(4);
-    tlbr.resize(4);
 
     static_tlwh();
     static_tlbr();
@@ -19,18 +14,11 @@ STrack::STrack(vector<float> tlwh_, float score) {
     start_frame = 0;
 }
 
-STrack::~STrack() {}
-
-void STrack::activate(byte_kalman::KalmanFilter &kalman_filter, int frame_id) {
+void STrack::activate(byte_kalman::KalmanFilter &kalman_filter, int frame_id, int track_id) {
     this->kalman_filter = kalman_filter;
-    this->track_id = this->next_id();
+    this->track_id = track_id;
 
-    vector<float> _tlwh_tmp(4);
-    _tlwh_tmp[0] = this->_tlwh[0];
-    _tlwh_tmp[1] = this->_tlwh[1];
-    _tlwh_tmp[2] = this->_tlwh[2];
-    _tlwh_tmp[3] = this->_tlwh[3];
-    vector<float> xyah = tlwh_to_xyah(_tlwh_tmp);
+    TrackBox xyah = tlwh_to_xyah(this->_tlwh);
     DETECTBOX xyah_box;
     xyah_box[0] = xyah[0];
     xyah_box[1] = xyah[1];
@@ -53,8 +41,8 @@ void STrack::activate(byte_kalman::KalmanFilter &kalman_filter, int frame_id) {
     this->start_frame = frame_id;
 }
 
-void STrack::re_activate(STrack &new_track, int frame_id, bool new_id) {
-    vector<float> xyah = tlwh_to_xyah(new_track.tlwh);
+void STrack::re_activate(STrack &new_track, int frame_id, int new_track_id) {
+    TrackBox xyah = tlwh_to_xyah(new_track.tlwh);
     DETECTBOX xyah_box;
     xyah_box[0] = xyah[0];
     xyah_box[1] = xyah[1];
@@ -72,15 +60,15 @@ void STrack::re_activate(STrack &new_track, int frame_id, bool new_id) {
     this->is_activated = true;
     this->frame_id = frame_id;
     this->score = new_track.score;
-    if (new_id)
-        this->track_id = next_id();
+    if (new_track_id > 0)
+        this->track_id = new_track_id;
 }
 
 void STrack::update(STrack &new_track, int frame_id) {
     this->frame_id = frame_id;
     this->tracklet_len++;
 
-    vector<float> xyah = tlwh_to_xyah(new_track.tlwh);
+    TrackBox xyah = tlwh_to_xyah(new_track.tlwh);
     DETECTBOX xyah_box;
     xyah_box[0] = xyah[0];
     xyah_box[1] = xyah[1];
@@ -120,25 +108,24 @@ void STrack::static_tlwh() {
 }
 
 void STrack::static_tlbr() {
-    tlbr.clear();
-    tlbr.assign(tlwh.begin(), tlwh.end());
+    tlbr = tlwh;
     tlbr[2] += tlbr[0];
     tlbr[3] += tlbr[1];
 }
 
-vector<float> STrack::tlwh_to_xyah(vector<float> tlwh_tmp) {
-    vector<float> tlwh_output = tlwh_tmp;
+TrackBox STrack::tlwh_to_xyah(TrackBox tlwh_tmp) {
+    TrackBox tlwh_output = tlwh_tmp;
     tlwh_output[0] += tlwh_output[2] / 2;
     tlwh_output[1] += tlwh_output[3] / 2;
     tlwh_output[2] /= tlwh_output[3];
     return tlwh_output;
 }
 
-vector<float> STrack::to_xyah() {
+TrackBox STrack::to_xyah() {
     return tlwh_to_xyah(tlwh);
 }
 
-vector<float> STrack::tlbr_to_tlwh(vector<float> &tlbr) {
+TrackBox STrack::tlbr_to_tlwh(TrackBox tlbr) {
     tlbr[2] -= tlbr[0];
     tlbr[3] -= tlbr[1];
     return tlbr;
@@ -150,12 +137,6 @@ void STrack::mark_lost() {
 
 void STrack::mark_removed() {
     state = TrackState::Removed;
-}
-
-int STrack::next_id() {
-    static int _count = 0;
-    _count++;
-    return _count;
 }
 
 int STrack::end_frame() {

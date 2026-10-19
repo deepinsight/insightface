@@ -1,87 +1,40 @@
 #!/bin/bash
+set -eo pipefail
 
 reorganize_structure() {
     local base_path=$1
-
-    # Define the new main directories
-    local main_dirs=("lib" "sample" "test")
-
-    # Check if the base path exists
-    if [[ ! -d "$base_path" ]]; then
-        echo "Error: The path '$base_path' does not exist."
-        return 1
-    fi
-
-    # Create new main directories at the base path
-    for dir in "${main_dirs[@]}"; do
-        mkdir -p "$base_path/$dir"
-    done
-
-    # Find all architecture directories (e.g., arm64-v8a, armeabi-v7a)
-    local arch_dirs=()
-    for d in "$base_path"/*; do
-        [[ -d "$d" ]] || continue
-        name=$(basename "$d")
-        if [[ "$name" != "lib" && "$name" != "sample" && "$name" != "test" && "$name" != "." && "$name" != ".." ]]; then
-            arch_dirs+=("$d")
-        fi
-    done
-
-    for arch_dir in "${arch_dirs[@]}"; do
-        # Get the architecture name (e.g., arm64-v8a)
-        local arch=$(basename "$arch_dir")
-
-        # Operate on each main directory
-        for main_dir in "${main_dirs[@]}"; do
-            # Create a specific directory for each architecture under the main directory
+    local arch arch_dir main_dir
+    local copied_common=false
+    # Iterate only known ABIs: include/java from an earlier build are not ABIs.
+    for arch in arm64-v8a armeabi-v7a x86_64; do
+        arch_dir="$base_path/$arch"
+        for main_dir in lib sample test; do
             mkdir -p "$base_path/$main_dir/$arch"
-
-            # Selectively copy content based on the directory type
-            case "$main_dir" in
-                lib)
-                    # Copy the lib directory
-                    if [ -d "$arch_dir/InspireFace/lib" ]; then
-                        cp -r "$arch_dir/InspireFace/lib/"* "$base_path/$main_dir/$arch/"
-                    fi
-                    ;;
-                sample)
-                    # Copy the sample directory
-                    if [ -d "$arch_dir/InspireFace/sample" ]; then
-                        cp -r "$arch_dir/InspireFace/sample/"* "$base_path/$main_dir/$arch/"
-                    fi
-                    ;;
-                test)
-                    # Copy the test directory
-                    if [ -d "$arch_dir/InspireFace/test" ]; then
-                        cp -r "$arch_dir/InspireFace/test/"* "$base_path/$main_dir/$arch/"
-                    fi
-                    ;;
-            esac
+            if [[ -d "$arch_dir/InspireFace/$main_dir" ]]; then
+                cp -R "$arch_dir/InspireFace/$main_dir/." "$base_path/$main_dir/$arch/"
+            fi
         done
-
-        # Copy version.txt file to the base path, ignoring duplicates
-        if [ -f "$arch_dir/version.txt" ]; then
-            cp -f "$arch_dir/version.txt" "$base_path/version.txt"
+        # Remove the obsolete adapter when rebuilding into a former two-library SDK.
+        rm -f "$base_path/lib/$arch/libInspireFaceJNI.so"
+        if [[ "$copied_common" == false ]]; then
+            mkdir -p "$base_path/include" "$base_path/java"
+            cp -R "$arch_dir/InspireFace/include/." "$base_path/include/"
+            cp "$arch_dir/version.txt" "$base_path/version.txt"
+            # Keep the supplementary legacy Android classes alongside the full JNI JAR.
+            cp -R "$arch_dir/InspireFace/java/." "$base_path/java/"
+            if [[ -f "$arch_dir/Java/inspireface.jar" ]]; then
+                cp "$arch_dir/Java/inspireface.jar" "$arch_dir/Java/api-manifest.json" "$base_path/java/"
+                cp -R "$arch_dir/Java/sources" "$arch_dir/Java/examples" "$base_path/java/"
+                cp "$SCRIPT_DIR/java/consumer-rules.pro" "$base_path/java/"
+            fi
+            copied_common=true
         fi
     done
-
-        # Copy include once from a valid arch
-    for arch_dir in "${arch_dirs[@]}"; do
-        if [ -d "$arch_dir/InspireFace/include" ]; then
-            mkdir -p "$base_path/include"
-            cp -r "$arch_dir/InspireFace/include/"* "$base_path/include/"
-            echo "Copied include from $arch_dir"
-            break
-        fi
+    # Remove intermediate ABI installs only after all artifacts have been copied.
+    for arch in arm64-v8a armeabi-v7a x86_64; do
+        rm -rf "$base_path/$arch"
     done
-
-    # Delete the original architecture directories
-    for arch_dir in "${arch_dirs[@]}"; do
-        rm -rf "$arch_dir"
-    done
-
-
-    echo "Reorganization complete."
+    echo "Reorganization complete (C/C++ SDK, legacy Android sources, and portable JNI/JAR)."
 }
 
 
@@ -109,8 +62,13 @@ move_install_files() {
 }
 
 build() {
-    arch=$1
-    NDK_API_LEVEL=$2
+    local arch=$1
+    local NDK_API_LEVEL=$2
+    local android_neon_args=()
+    # Let the NDK toolchain select valid ARMv7 NEON flags for this ABI only.
+    if [[ "${arch}" == "armeabi-v7a" ]]; then
+        android_neon_args+=("-DANDROID_ARM_NEON=TRUE")
+    fi
     mkdir -p ${BUILD_FOLDER_PATH}/${arch}
     pushd ${BUILD_FOLDER_PATH}/${arch}
     cmake ${SCRIPT_DIR} \
@@ -122,9 +80,12 @@ build() {
         -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
         -DANDROID_TOOLCHAIN=clang \
         -DANDROID_ABI=${arch} \
+        "${android_neon_args[@]}" \
         -DANDROID_NATIVE_API_LEVEL=${NDK_API_LEVEL} \
         -DANDROID_STL=c++_static \
         -DMNN_BUILD_FOR_ANDROID_COMMAND=true \
+        -DISF_BUILD_JAVA=ON \
+        -DISF_BUILD_JAVA_TESTS=OFF \
         -DISF_BUILD_WITH_SAMPLE=OFF \
         -DISF_BUILD_WITH_TEST=OFF \
         -DISF_ENABLE_BENCHMARK=OFF \
@@ -152,4 +113,3 @@ build armeabi-v7a 21
 build x86_64 21
 
 reorganize_structure "${BUILD_FOLDER_PATH}"
-

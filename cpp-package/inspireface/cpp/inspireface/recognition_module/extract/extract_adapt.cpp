@@ -116,14 +116,19 @@ namespace inspire {
 
 Embedded ExtractAdapt::GetFaceFeature(const inspirecv::Image &bgr_affine) {
     AnyTensorOutputs outputs;
-    Forward(bgr_affine, outputs);
+    if (Forward(bgr_affine, outputs) != InferenceWrapper::WrapperOk || outputs.empty()) {
+        return {};
+    }
 
     return outputs[0].second;
 }
 
 Embedded ExtractAdapt::operator()(const inspirecv::Image &bgr_affine, float &norm, bool normalize) {
     AnyTensorOutputs outputs;
-    Forward(bgr_affine, outputs);
+    if (Forward(bgr_affine, outputs) != InferenceWrapper::WrapperOk || outputs.empty()) {
+        norm = 0.0f;
+        return {};
+    }
 
     auto &embedded = outputs[0].second;
     float mse = 0.0f;
@@ -137,7 +142,7 @@ Embedded ExtractAdapt::operator()(const inspirecv::Image &bgr_affine, float &nor
         DumpRawFeature(outputs, embedded, norm);
     }
 
-    if (normalize) {
+    if (normalize && mse > 0.0f) {
         for (float &one : embedded) {
             one /= mse;
         }

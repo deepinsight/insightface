@@ -1,0 +1,31 @@
+@PACKAGE_INIT@
+
+if(NOT TARGET InspireFace::InspireFace)
+    set_and_check(_isf_include_dir "${PACKAGE_PREFIX_DIR}/InspireFace/include")
+    set_and_check(_isf_library "${PACKAGE_PREFIX_DIR}/InspireFace/lib/$<TARGET_FILE_NAME:InspireFace>")
+    add_library(InspireFace::InspireFace @ISF_PACKAGE_LIBRARY_TYPE@ IMPORTED)
+    set_target_properties(InspireFace::InspireFace PROPERTIES
+            IMPORTED_LOCATION "${_isf_library}"
+            INTERFACE_INCLUDE_DIRECTORIES "${_isf_include_dir}"
+            INTERFACE_COMPILE_FEATURES cxx_std_14)
+    if(@ISF_BUILD_SHARED_LIBS@)
+        set_and_check(_isf_import_library "${PACKAGE_PREFIX_DIR}/InspireFace/lib/$<TARGET_LINKER_FILE_NAME:InspireFace>")
+        set_target_properties(InspireFace::InspireFace PROPERTIES
+                IMPORTED_IMPLIB "${_isf_import_library}"
+                INTERFACE_COMPILE_DEFINITIONS "ISF_BUILD_SHARED_LIBS;INSPIRECV_API=__declspec(dllimport)")
+    else()
+        set_and_check(_isf_mnn_library "${PACKAGE_PREFIX_DIR}/InspireFace/lib/MNN.lib")
+        set_property(TARGET InspireFace::InspireFace PROPERTY INTERFACE_LINK_LIBRARIES "${_isf_mnn_library}")
+    endif()
+    if(@ISF_ENABLE_OPENCV@)
+        include(CMakeFindDependencyMacro)
+        find_dependency(OpenCV)
+        set_property(TARGET InspireFace::InspireFace APPEND PROPERTY INTERFACE_LINK_LIBRARIES "${OpenCV_LIBS}")
+    endif()
+    unset(_isf_include_dir)
+    unset(_isf_library)
+    unset(_isf_import_library)
+    unset(_isf_mnn_library)
+endif()
+
+check_required_components(InspireFace)

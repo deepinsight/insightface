@@ -16,6 +16,7 @@
 #include <memory>
 #include "inference_wrapper.h"
 #include "customized/rknn_adapter.h"
+#include "deferred_output_release.h"
 
 class InferenceWrapperRKNNAdapter : public InferenceWrapper {
 public:
@@ -38,6 +39,7 @@ public:
 private:
     std::shared_ptr<RKNNAdapter> net_;
     int32_t num_threads_;
+    inference_wrapper_detail::DeferredOutputRelease output_release_;
 };
 
 #endif  // INFERENCE_WRAPPER_ENABLE_RKNN

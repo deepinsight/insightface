@@ -1,5 +1,11 @@
+import ctypes
+from functools import wraps
+from typing import Callable, Optional, TypeVar, cast
+
 from . import herror as errcode
-from typing import Optional, Dict, Any
+
+
+_CallableT = TypeVar("_CallableT", bound=Callable)
 
 
 class InspireFaceError(Exception):
@@ -13,12 +19,9 @@ class InspireFaceError(Exception):
     
     def _get_error_name(self, error_code: int) -> str:
         """Get error name corresponding to error code"""
-        for name, value in errcode.__dict__.items():
-            if isinstance(value, int) and value == error_code:
-                return name
-        return f"UNKNOWN_ERROR"
+        return _ERROR_NAMES.get(error_code, "UNKNOWN_ERROR")
     
-    def __str__(self):
+    def __str__(self) -> str:
         base_msg = super().__str__()
         if self.error_code is not None:
             return f"[{self._error_name}({self.error_code})] {base_msg}"
@@ -60,14 +63,26 @@ class FeatureHubError(InspireFaceError):
     pass
 
 
+class UnsupportedError(InspireFaceError, NotImplementedError):
+    """Requested feature or operation is unavailable in this SDK build."""
+    pass
+
+
 # === Error code mapping table ===
 ERROR_CODE_MAPPING = {
+    # Recognized operations that this SDK does not implement
+    'unsupported': [
+        errcode.HERR_UNSUPPORTED,
+    ],
+
     # Input parameter errors
     'invalid_input': [
         errcode.HERR_INVALID_PARAM,
         errcode.HERR_INVALID_IMAGE_STREAM_PARAM,
         errcode.HERR_INVALID_BUFFER_SIZE,
         errcode.HERR_INVALID_DETECTION_INPUT,
+        errcode.HERR_CAPTURE_INVALID_CONFIG,
+        errcode.HERR_CAPTURE_FRAME_OUT_OF_ORDER,
     ],
     
     # System not ready
@@ -85,6 +100,7 @@ ERROR_CODE_MAPPING = {
         errcode.HERR_SESS_REC_EXTRACT_FAILURE,
         errcode.HERR_SESS_LANDMARK_NOT_ENABLE,
         errcode.HERR_IMAGE_STREAM_DECODE_FAILED,
+        errcode.HERR_CAPTURE_REQUIRED_FEATURE_OFF,
     ],
     
     # Resource errors
@@ -95,6 +111,7 @@ ERROR_CODE_MAPPING = {
         errcode.HERR_INVALID_FACE_FEATURE,
         errcode.HERR_INVALID_FACE_LIST,
         errcode.HERR_INVALID_IMAGE_BITMAP_HANDLE,
+        errcode.HERR_CAPTURE_INVALID_HANDLE,
     ],
     
     # Hardware errors
@@ -108,11 +125,35 @@ ERROR_CODE_MAPPING = {
         errcode.HERR_FT_HUB_DISABLE,
         errcode.HERR_FT_HUB_INSERT_FAILURE,
         errcode.HERR_FT_HUB_NOT_FOUND_FEATURE,
+        errcode.HERR_FT_HUB_INVALID_FEATURE,
+        errcode.HERR_FT_HUB_DATABASE_FAILURE,
     ],
 }
 
+_ERROR_NAMES = {}
+for _name, _value in vars(errcode).items():
+    if isinstance(_value, int):
+        _ERROR_NAMES.setdefault(_value, _name)
+del _name, _value
 
-def check_error(error_code: int, operation: str = "", **context):
+_EXCEPTION_TYPES = {
+    'unsupported': UnsupportedError,
+    'invalid_input': InvalidInputError,
+    'system_not_ready': SystemNotReadyError,
+    'processing': ProcessingError,
+    'resource': ResourceError,
+    'hardware': HardwareError,
+    'feature_hub': FeatureHubError,
+}
+
+_EXCEPTION_BY_CODE = {}
+for _category, _codes in ERROR_CODE_MAPPING.items():
+    for _code in _codes:
+        _EXCEPTION_BY_CODE.setdefault(_code, _EXCEPTION_TYPES[_category])
+del _category, _code, _codes
+
+
+def check_error(error_code: int, operation: str = "", **context) -> None:
     """
     Check error code and raise corresponding exception
     
@@ -128,11 +169,7 @@ def check_error(error_code: int, operation: str = "", **context):
         return
     
     # Get error name
-    error_name = None
-    for name, value in errcode.__dict__.items():
-        if isinstance(value, int) and value == error_code:
-            error_name = name
-            break
+    error_name = _ERROR_NAMES.get(error_code)
     
     # Build basic error message
     if operation:
@@ -143,23 +180,7 @@ def check_error(error_code: int, operation: str = "", **context):
         message = error_name or f"Unknown error (code: {error_code})"
     
     # Select exception type based on error code
-    exception_class = InspireFaceError  # Default exception type
-    
-    for category, codes in ERROR_CODE_MAPPING.items():
-        if error_code in codes:
-            if category == 'invalid_input':
-                exception_class = InvalidInputError
-            elif category == 'system_not_ready':
-                exception_class = SystemNotReadyError
-            elif category == 'processing':
-                exception_class = ProcessingError
-            elif category == 'resource':
-                exception_class = ResourceError
-            elif category == 'hardware':
-                exception_class = HardwareError
-            elif category == 'feature_hub':
-                exception_class = FeatureHubError
-            break
+    exception_class = _EXCEPTION_BY_CODE.get(error_code, InspireFaceError)
     
     # Raise corresponding exception
     raise exception_class(message, error_code, **context)
@@ -167,7 +188,7 @@ def check_error(error_code: int, operation: str = "", **context):
 
 # === Convenient validation functions ===
 
-def validate_image_format(image, operation: str = "Image validation"):
+def validate_image_format(image, operation: str = "Image validation") -> None:
     """Validate image format"""
     import numpy as np
     
@@ -186,6 +207,13 @@ def validate_image_format(image, operation: str = "Image validation"):
         )
     
     h, w, c = image.shape
+    if h <= 0 or w <= 0:
+        raise InvalidInputError(
+            f"{operation}: Image width and height must be positive",
+            errcode.HERR_INVALID_IMAGE_STREAM_PARAM,
+            actual_shape=image.shape
+        )
+
     if c not in [3, 4]:
         raise InvalidInputError(
             f"{operation}: Image must have 3 or 4 channels",
@@ -193,8 +221,15 @@ def validate_image_format(image, operation: str = "Image validation"):
             actual_channels=c
         )
 
+    if image.dtype != np.uint8:
+        raise InvalidInputError(
+            f"{operation}: Image data must be uint8",
+            errcode.HERR_INVALID_IMAGE_STREAM_PARAM,
+            actual_dtype=str(image.dtype)
+        )
 
-def validate_feature_data(data, operation: str = "Feature validation"):
+
+def validate_feature_data(data, operation: str = "Feature validation", allow_empty: bool = False) -> None:
     """Validate feature data format"""
     import numpy as np
     
@@ -212,8 +247,34 @@ def validate_feature_data(data, operation: str = "Feature validation"):
             actual_dtype=str(data.dtype)
         )
 
+    if data.ndim != 1:
+        raise InvalidInputError(
+            f"{operation}: Feature data must be one-dimensional",
+            errcode.HERR_INVALID_FACE_FEATURE,
+            actual_shape=data.shape
+        )
 
-def validate_session_initialized(session, operation: str = "Session operation"):
+    if data.size == 0 and not allow_empty:
+        raise InvalidInputError(
+            f"{operation}: Feature data must not be empty",
+            errcode.HERR_INVALID_FACE_FEATURE
+        )
+
+    if not data.flags.c_contiguous:
+        raise InvalidInputError(
+            f"{operation}: Feature data must be C-contiguous",
+            errcode.HERR_INVALID_FACE_FEATURE,
+            actual_strides=data.strides
+        )
+
+    if not np.isfinite(data).all():
+        raise InvalidInputError(
+            f"{operation}: Feature data must contain only finite values",
+            errcode.HERR_INVALID_FACE_FEATURE
+        )
+
+
+def validate_session_initialized(session, operation: str = "Session operation") -> None:
     """Validate if session is initialized"""
     if session is None or session._sess is None:
         raise ResourceError(
@@ -224,19 +285,19 @@ def validate_session_initialized(session, operation: str = "Session operation"):
 
 # === Exception handling decorators for special scenarios ===
 
-def handle_c_api_errors(operation_name: str):
-    """Decorator for wrapping C API calls"""
-    def decorator(func):
+def handle_c_api_errors(operation_name: str) -> Callable[[_CallableT], _CallableT]:
+    """Translate ctypes boundary failures without hiding Python programming errors."""
+    def decorator(func: _CallableT) -> _CallableT:
+        @wraps(func)
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except Exception as e:
-                if not isinstance(e, InspireFaceError):
-                    # Wrap non-InspireFace exceptions as ProcessingError
-                    raise ProcessingError(
-                        f"{operation_name}: {str(e)}",
-                        context={'original_exception': type(e).__name__}
-                    ) from e
+            except InspireFaceError:
                 raise
-        return wrapper
+            except (ctypes.ArgumentError, OSError) as error:
+                raise ProcessingError(
+                    f"{operation_name}: {str(error)}",
+                    original_exception=type(error).__name__,
+                ) from error
+        return cast(_CallableT, wrapper)
     return decorator

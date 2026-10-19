@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <limits>
 #include <memory>
 
 class TensorInfo {
@@ -21,11 +22,21 @@ public:
 
 public:
     TensorInfo() : name(""), id(-1), tensor_type(TensorTypeNone), is_nchw(true) {}
-    ~TensorInfo() {}
+    TensorInfo(const TensorInfo&) = default;
+    TensorInfo(TensorInfo&&) noexcept = default;
+    TensorInfo& operator=(const TensorInfo&) = default;
+    TensorInfo& operator=(TensorInfo&&) noexcept = default;
+    ~TensorInfo() = default;
 
     int32_t GetElementNum() const {
+        if (tensor_dims.empty()) {
+            return -1;
+        }
         int32_t element_num = 1;
         for (const auto& dim : tensor_dims) {
+            if (dim <= 0 || element_num > std::numeric_limits<int32_t>::max() / dim) {
+                return -1;
+            }
             element_num *= dim;
         }
         return element_num;
@@ -128,7 +139,7 @@ public:
 
 class OutputTensorInfo : public TensorInfo {
 public:
-    OutputTensorInfo() : data(nullptr), quant({1.0f, 0}), data_fp32_(nullptr) {}
+    OutputTensorInfo() : data(nullptr), quant({1.0f, 0}) {}
 
     OutputTensorInfo(std::string name_, int32_t tensor_type_, bool is_nchw_ = true) : OutputTensorInfo() {
         name = name_;
@@ -136,33 +147,35 @@ public:
         is_nchw = is_nchw_;
     }
 
-    ~OutputTensorInfo() {
-        if (data_fp32_ != nullptr) {
-            delete[] data_fp32_;
-        }
-    }
+    OutputTensorInfo(const OutputTensorInfo&) = default;
+    OutputTensorInfo(OutputTensorInfo&&) noexcept = default;
+    OutputTensorInfo& operator=(const OutputTensorInfo&) = default;
+    OutputTensorInfo& operator=(OutputTensorInfo&&) noexcept = default;
+    ~OutputTensorInfo() = default;
 
     float* GetDataAsFloat() {
+        const int32_t element_num = GetElementNum();
+        if (data == nullptr || element_num <= 0) {
+            return nullptr;
+        }
         if (tensor_type == TensorTypeUint8 || tensor_type == TensorTypeInt8) {
-            if (data_fp32_ == nullptr) {
-                data_fp32_ = new float[GetElementNum()];
-            }
+            data_fp32_.resize(static_cast<size_t>(element_num));
             if (tensor_type == TensorTypeUint8) {
-#pragma omp parallel
-                for (int32_t i = 0; i < GetElementNum(); i++) {
-                    const uint8_t* val_uint8 = static_cast<const uint8_t*>(data);
-                    float val_float = (val_uint8[i] - quant.zero_point) * quant.scale;
-                    data_fp32_[i] = val_float;
+                const auto* values = static_cast<const uint8_t*>(data);
+#pragma omp parallel for
+                for (int32_t i = 0; i < element_num; i++) {
+                    data_fp32_[static_cast<size_t>(i)] =
+                      (static_cast<int32_t>(values[i]) - quant.zero_point) * quant.scale;
                 }
             } else {
-#pragma omp parallel
-                for (int32_t i = 0; i < GetElementNum(); i++) {
-                    const int8_t* val_int8 = static_cast<const int8_t*>(data);
-                    float val_float = (val_int8[i] - quant.zero_point) * quant.scale;
-                    data_fp32_[i] = val_float;
+                const auto* values = static_cast<const int8_t*>(data);
+#pragma omp parallel for
+                for (int32_t i = 0; i < element_num; i++) {
+                    data_fp32_[static_cast<size_t>(i)] =
+                      (static_cast<int32_t>(values[i]) - quant.zero_point) * quant.scale;
                 }
             }
-            return data_fp32_;
+            return data_fp32_.data();
         } else if (tensor_type == TensorTypeFp32) {
             return static_cast<float*>(data);
         } else {
@@ -178,7 +191,13 @@ public:
     } quant;
 
 private:
-    float* data_fp32_;
+    std::vector<float> data_fp32_;
+};
+
+struct InferenceCacheStatistics {
+    uint64_t image_process_creations = 0;
+    uint64_t blob_host_tensor_creations = 0;
+    uint64_t output_host_tensor_creations = 0;
 };
 
 namespace cv {
@@ -243,6 +262,16 @@ public:
     virtual int32_t ResizeInput(const std::vector<InputTensorInfo>& input_tensor_info_list) = 0;
 
     virtual std::vector<std::string> GetInputNames() = 0;
+
+    virtual InferenceCacheStatistics GetCacheStatistics() const {
+        return {};
+    }
+
+    virtual void ResetCacheStatistics() {}
+
+#ifdef ISF_ENABLE_MNN_CACHE_GUARD
+    virtual void SetCacheEnabledForTesting(bool) {}
+#endif
 
 protected:
     void ConvertNormalizeParameters(InputTensorInfo& tensor_info);

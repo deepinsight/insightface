@@ -54,6 +54,12 @@ public:
                                 bool enableInteractionLiveness, bool enableFaceEmotion);
 
     /**
+     * @brief Query whether every requested pipeline model was initialized.
+     * @return Initialization status code.
+     */
+    int32_t QueryStatus() const;
+
+    /**
      * @brief Processes a face using the specified FaceProcessFunction.
      *
      * @param image CameraStream instance containing the image.
@@ -70,7 +76,8 @@ public:
      * @param proc The FaceProcessFunction to apply to the face.
      * @return int32_t Status code indicating success (0) or failure.
      */
-    int32_t Process(inspirecv::FrameProcess &processor, const FaceTrackWrap &face, FaceProcessFunctionOption proc);
+    int32_t Process(inspirecv::FrameProcess &processor, const FaceTrackWrap &face, FaceProcessFunctionOption proc,
+                    const inspirecv::Image *aligned_crop = nullptr, const inspirecv::Image *origin_image = nullptr);
 
     /**
      * @brief Get Rgb AntiSpoofing module
@@ -133,6 +140,7 @@ private:
     const bool m_enable_attribute_ = false;             ///< Whether face attribute is enabled.
     const bool m_enable_interaction_liveness_ = false;  ///< Whether interaction liveness detection is enabled.
     const bool m_enable_face_emotion_ = false;          ///< Whether face emotion is enabled.
+    int32_t m_status_code_ = 0;                         ///< Pipeline initialization status.
     
     std::shared_ptr<FaceAttributePredictAdapt> m_attribute_predict_;  ///< Pointer to AgePredict instance.
     std::shared_ptr<MaskPredictAdapt> m_mask_predict_;                ///< Pointer to MaskPredict instance.

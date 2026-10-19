@@ -6,11 +6,16 @@
 #ifdef ANDROID
 
 #include <jni.h>
+#include <cstdint>
+#include <memory>
 #include <string>
+#include <vector>
 #include <android/log.h>
 #include <stdlib.h>
 #include <android/bitmap.h>
 #include "../common/common.h"
+#include "../common/jni_data_utils.h"
+#include "../portable/support.h"
 #include "c_api/inspireface.h"
 #include "log.h"
 #include "herror.h"
@@ -19,6 +24,67 @@
  * Java Native Interface (JNI) macro for generating JNI function names.
  */
 #define INSPIRE_FACE_JNI(sig) Java_com_insightface_sdk_inspireface_##sig
+
+namespace {
+
+inspire::jni::OwnedImageBufferRegistry &GetOwnedImageBuffers() {
+    static inspire::jni::OwnedImageBufferRegistry buffers;
+    return buffers;
+}
+
+bool CreateOwnedImageStream(const std::shared_ptr<std::vector<uint8_t>> &buffer, int32_t width, int32_t height, HFImageFormat format,
+                            HFRotation rotation, HFImageStream *stream) {
+    if (!buffer || buffer->empty() || !stream) {
+        return false;
+    }
+    *stream = nullptr;
+    HFImageData imageData{};
+    imageData.data = buffer->data();
+    imageData.width = width;
+    imageData.height = height;
+    imageData.format = format;
+    imageData.rotation = rotation;
+    if (HFCreateImageStream(&imageData, stream) != HSUCCEED) {
+        return false;
+    }
+    if (!GetOwnedImageBuffers().Store(*stream, buffer)) {
+        HFReleaseImageStream(*stream);
+        *stream = nullptr;
+        return false;
+    }
+    return true;
+}
+
+bool ReleaseOwnedImageStream(HFImageStream stream) {
+    if (!stream) {
+        return false;
+    }
+    HResult result = HFReleaseImageStream(stream);
+    if (result == HSUCCEED) {
+        GetOwnedImageBuffers().Erase(stream);
+        return true;
+    } else {
+        INSPIRE_LOGE("Failed to release image stream, error code: %d", result);
+        return false;
+    }
+}
+
+jobject CreateJavaImageStream(JNIEnv *env, HFImageStream stream) {
+    jclass streamClass = env->FindClass("com/insightface/sdk/inspireface/base/ImageStream");
+    if (!streamClass) {
+        return nullptr;
+    }
+    jmethodID constructor = env->GetMethodID(streamClass, "<init>", "()V");
+    jfieldID streamHandleField = env->GetFieldID(streamClass, "handle", "J");
+    jobject imageStream = constructor && streamHandleField ? env->NewObject(streamClass, constructor) : nullptr;
+    if (imageStream) {
+        env->SetLongField(imageStream, streamHandleField, reinterpret_cast<jlong>(stream));
+    }
+    env->DeleteLocalRef(streamClass);
+    return imageStream;
+}
+
+}  // namespace
 
 extern "C" {
 
@@ -38,6 +104,21 @@ JNIEXPORT jboolean INSPIRE_FACE_JNI(InspireFace_GlobalLaunch)(JNIEnv *env, jobje
         return false;
     }
     return true;
+}
+
+JNIEXPORT jboolean INSPIRE_FACE_JNI(InspireFace_GlobalReload)(JNIEnv *env, jobject thiz, jstring resourcePath) {
+    try {
+        isf_jni::Context context;
+        const char *path = context.string(env, resourcePath);
+        isf_jni::Require(env, path != nullptr, "Resource path must not be null");
+        auto result = HFReloadInspireFace(path);
+        if (result != HSUCCEED) {
+            INSPIRE_LOGE("Failed to reload InspireFace, error code: %d", result);
+            return JNI_FALSE;
+        }
+        return JNI_TRUE;
+    } catch (...) { isf_jni::TranslateException(env); }
+    return JNI_FALSE;
 }
 
 /**
@@ -160,50 +241,60 @@ JNIEXPORT void INSPIRE_FACE_JNI(InspireFace_ReleaseSession)(JNIEnv *env, jobject
  * @return The InspireFace image stream object.
  */
 JNIEXPORT jobject INSPIRE_FACE_JNI(InspireFace_CreateImageStreamFromBitmap)(JNIEnv *env, jobject thiz, jobject bitmap, jint rotation) {
-    AndroidBitmapInfo info;
+    if (!env || !bitmap) {
+        return nullptr;
+    }
+    AndroidBitmapInfo info{};
     void *pixels = nullptr;
-    HFImageFormat format = HF_STREAM_RGB;
     if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) {
         INSPIRE_LOGE("Failed to get bitmap info");
         return nullptr;
     }
     if (AndroidBitmap_lockPixels(env, bitmap, &pixels) < 0) {
-        AndroidBitmap_unlockPixels(env, bitmap);
         INSPIRE_LOGE("Failed to lock pixels");
         return nullptr;
     }
-    if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
-        format = HF_STREAM_RGBA;
-    } else if (info.format == ANDROID_BITMAP_FORMAT_RGB_565) {
-        format = HF_STREAM_RGB;
-    } else {
+
+    std::shared_ptr<std::vector<uint8_t>> ownedBuffer;
+    HFImageFormat format = HF_STREAM_RGB;
+    bool copied = false;
+    const bool supportedFormat = info.format == ANDROID_BITMAP_FORMAT_RGBA_8888 || info.format == ANDROID_BITMAP_FORMAT_RGB_565;
+    if (!supportedFormat) {
         AndroidBitmap_unlockPixels(env, bitmap);
         INSPIRE_LOGE("Unsupported bitmap format: %d", info.format);
         return nullptr;
     }
-
-    HFImageData imageData;
-    imageData.data = (uint8_t *)pixels;
-    imageData.width = info.width;
-    imageData.height = info.height;
-    imageData.format = (HFImageFormat)format;
-    imageData.rotation = (HFRotation)rotation;
-
-    HFImageStream streamHandle;
-    auto result = HFCreateImageStream(&imageData, &streamHandle);
-    if (result != HSUCCEED) {
-        INSPIRE_LOGE("Failed to create image stream, error code: %d", result);
-        return nullptr;
+    try {
+        ownedBuffer = std::make_shared<std::vector<uint8_t>>();
+        if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
+            format = HF_STREAM_RGBA;
+            copied = inspire::jni::CopyPackedRows(static_cast<const uint8_t *>(pixels), info.stride,
+                                                   static_cast<size_t>(info.width) * 4, info.height, ownedBuffer.get());
+        } else if (info.format == ANDROID_BITMAP_FORMAT_RGB_565) {
+            format = HF_STREAM_RGB;
+            copied = inspire::jni::ConvertRgb565RowsToRgb(static_cast<const uint8_t *>(pixels), info.stride, info.width, info.height,
+                                                          ownedBuffer.get());
+        }
+    } catch (const std::bad_alloc &) {
+        copied = false;
     }
     AndroidBitmap_unlockPixels(env, bitmap);
 
-    jclass streamClass = env->FindClass("com/insightface/sdk/inspireface/base/ImageStream");
-    jmethodID constructor = env->GetMethodID(streamClass, "<init>", "()V");
-    jfieldID streamHandleField = env->GetFieldID(streamClass, "handle", "J");
-    jobject imageStreamObj = env->NewObject(streamClass, constructor);
-    env->SetLongField(imageStreamObj, streamHandleField, (jlong)streamHandle);
+    if (!copied) {
+        INSPIRE_LOGE("Failed to copy bitmap pixels");
+        return nullptr;
+    }
 
-    return imageStreamObj;
+    HFImageStream stream = nullptr;
+    if (!CreateOwnedImageStream(ownedBuffer, info.width, info.height, format, static_cast<HFRotation>(rotation), &stream)) {
+        INSPIRE_LOGE("Failed to create image stream from copied bitmap pixels");
+        return nullptr;
+    }
+    jobject imageStream = CreateJavaImageStream(env, stream);
+    if (!imageStream) {
+        ReleaseOwnedImageStream(stream);
+    }
+    return imageStream;
 }
 
 /**
@@ -220,30 +311,37 @@ JNIEXPORT jobject INSPIRE_FACE_JNI(InspireFace_CreateImageStreamFromBitmap)(JNIE
  */
 JNIEXPORT jobject INSPIRE_FACE_JNI(InspireFace_CreateImageStreamFromByteBuffer)(JNIEnv *env, jobject thiz, jbyteArray data, jint width, jint height,
                                                                                 jint format, jint rotation) {
-    // Convert jbyteArray to byte*
-    uint8_t *buf = (uint8_t *)env->GetByteArrayElements(data, 0);
-    HFImageData imageData;
-    imageData.data = buf;
-    imageData.width = width;
-    imageData.height = height;
-    imageData.format = (HFImageFormat)format;
-    imageData.rotation = (HFRotation)rotation;
-
-    HFImageStream streamHandle;
-    auto result = HFCreateImageStream(&imageData, &streamHandle);
-    if (result != HSUCCEED) {
-        INSPIRE_LOGE("Failed to create image stream, error code: %d", result);
+    if (!env || !data) {
+        return nullptr;
+    }
+    size_t bufferSize = 0;
+    if (!inspire::jni::CheckedImageByteSize(format, width, height, &bufferSize) ||
+        bufferSize > static_cast<size_t>(env->GetArrayLength(data))) {
+        INSPIRE_LOGE("Invalid image buffer dimensions, format, or length");
         return nullptr;
     }
 
-    jclass streamClass = env->FindClass("com/insightface/sdk/inspireface/base/ImageStream");
-    jmethodID constructor = env->GetMethodID(streamClass, "<init>", "()V");
-    jfieldID streamHandleField = env->GetFieldID(streamClass, "handle", "J");
-    jobject imageStreamObj = env->NewObject(streamClass, constructor);
-    env->SetLongField(imageStreamObj, streamHandleField, (jlong)streamHandle);
-    env->ReleaseByteArrayElements(data, (jbyte *)buf, JNI_ABORT);
+    std::shared_ptr<std::vector<uint8_t>> ownedBuffer;
+    try {
+        ownedBuffer = std::make_shared<std::vector<uint8_t>>(bufferSize);
+    } catch (const std::bad_alloc &) {
+        return nullptr;
+    }
+    env->GetByteArrayRegion(data, 0, static_cast<jsize>(bufferSize), reinterpret_cast<jbyte *>(ownedBuffer->data()));
+    if (env->ExceptionCheck()) {
+        return nullptr;
+    }
 
-    return imageStreamObj;
+    HFImageStream stream = nullptr;
+    if (!CreateOwnedImageStream(ownedBuffer, width, height, static_cast<HFImageFormat>(format), static_cast<HFRotation>(rotation), &stream)) {
+        INSPIRE_LOGE("Failed to create image stream from copied byte array");
+        return nullptr;
+    }
+    jobject imageStream = CreateJavaImageStream(env, stream);
+    if (!imageStream) {
+        ReleaseOwnedImageStream(stream);
+    }
+    return imageStream;
 }
 
 /**
@@ -271,13 +369,16 @@ JNIEXPORT void INSPIRE_FACE_JNI(InspireFace_WriteImageStreamToFile)(JNIEnv *env,
  * @param imageStream The InspireFace image stream object.
  */
 JNIEXPORT void INSPIRE_FACE_JNI(InspireFace_ReleaseImageStream)(JNIEnv *env, jobject thiz, jobject imageStream) {
+    if (!env || !imageStream) {
+        return;
+    }
     jclass streamClass = env->GetObjectClass(imageStream);
     jfieldID streamHandleField = env->GetFieldID(streamClass, "handle", "J");
     HFImageStream streamHandle = (HFImageStream)env->GetLongField(imageStream, streamHandleField);
-    auto result = HFReleaseImageStream(streamHandle);
-    if (result != HSUCCEED) {
-        INSPIRE_LOGE("Failed to release image stream, error code: %d", result);
+    if (ReleaseOwnedImageStream(streamHandle)) {
+        env->SetLongField(imageStream, streamHandleField, 0);
     }
+    env->DeleteLocalRef(streamClass);
 }
 
 /**
@@ -365,9 +466,15 @@ JNIEXPORT jobject INSPIRE_FACE_JNI(InspireFace_ExecuteFaceTrack)(JNIEnv *env, jo
 
             // Set angle
             jobject angle = env->NewObject(angleClass, angleConstructor);
-            env->SetFloatField(angle, rollField, *results.angles.roll);
-            env->SetFloatField(angle, yawField, *results.angles.yaw);
-            env->SetFloatField(angle, pitchField, *results.angles.pitch);
+            float roll = 0.0f;
+            float yaw = 0.0f;
+            float pitch = 0.0f;
+            if (!inspire::jni::ReadEulerAngle(results.angles, i, &roll, &yaw, &pitch)) {
+                INSPIRE_LOGE("Invalid Euler angle data for face %d", i);
+            }
+            env->SetFloatField(angle, rollField, roll);
+            env->SetFloatField(angle, yawField, yaw);
+            env->SetFloatField(angle, pitchField, pitch);
             env->SetObjectArrayElement(angleArray, i, angle);
 
             // Create token object
@@ -760,6 +867,9 @@ JNIEXPORT void INSPIRE_FACE_JNI(InspireFace_SetTrackModeDetectInterval)(JNIEnv *
  * @param configuration The configuration object.
  */
 JNIEXPORT jboolean INSPIRE_FACE_JNI(InspireFace_FeatureHubDataEnable)(JNIEnv *env, jobject thiz, jobject configuration) {
+    if (!env || !configuration) {
+        return false;
+    }
     jclass configClass = env->GetObjectClass(configuration);
 
     jfieldID primaryKeyModeField = env->GetFieldID(configClass, "primaryKeyMode", "I");
@@ -767,27 +877,24 @@ JNIEXPORT jboolean INSPIRE_FACE_JNI(InspireFace_FeatureHubDataEnable)(JNIEnv *en
     jfieldID persistenceDbPathField = env->GetFieldID(configClass, "persistenceDbPath", "Ljava/lang/String;");
     jfieldID searchThresholdField = env->GetFieldID(configClass, "searchThreshold", "F");
     jfieldID searchModeField = env->GetFieldID(configClass, "searchMode", "I");
-    HFFeatureHubConfiguration config;
+    HFFeatureHubConfiguration config{};
     config.primaryKeyMode = (HFPKMode)env->GetIntField(configuration, primaryKeyModeField);
     config.enablePersistence = env->GetIntField(configuration, enablePersistenceField);
 
-    // Add null check for dbPath
+    std::string nativeDbPath;
     jstring dbPath = (jstring)env->GetObjectField(configuration, persistenceDbPathField);
     if (dbPath != nullptr) {
-        const char *nativeDbPath = env->GetStringUTFChars(dbPath, nullptr);
-        if (nativeDbPath != nullptr) {
-            config.persistenceDbPath = const_cast<char *>(nativeDbPath);
-        } else {
-            config.persistenceDbPath[0] = '\0';
+        nativeDbPath = jstring2str(env, dbPath);
+        env->DeleteLocalRef(dbPath);
+        if (env->ExceptionCheck()) {
+            return false;
         }
-    } else {
-        config.persistenceDbPath[0] = '\0';
     }
+    config.persistenceDbPath = const_cast<char *>(nativeDbPath.c_str());
 
     config.searchThreshold = env->GetFloatField(configuration, searchThresholdField);
     config.searchMode = (HFSearchMode)env->GetIntField(configuration, searchModeField);
 
-    // Remove debug logs that might interfere with error handling
     auto result = HFFeatureHubDataEnable(config);
     if (result != HSUCCEED) {
         INSPIRE_LOGE("Failed to enable feature hub data, error code: %d", result);
@@ -883,10 +990,9 @@ JNIEXPORT jboolean INSPIRE_FACE_JNI(InspireFace_FeatureHubInsertFeature)(JNIEnv 
  * @param env The JNI environment.
  * @param thiz The Java object.
  * @param searchFeature The search feature object.
- * @param confidence The confidence.
  * @return The search result object.
  */
-JNIEXPORT jobject INSPIRE_FACE_JNI(InspireFace_FeatureHubFaceSearch)(JNIEnv *env, jobject thiz, jobject searchFeature, jfloat confidence) {
+JNIEXPORT jobject INSPIRE_FACE_JNI(InspireFace_FeatureHubFaceSearch)(JNIEnv *env, jobject thiz, jobject searchFeature) {
     // Get FaceFeature class and fields
     jclass featureClass = env->GetObjectClass(searchFeature);
     jfieldID dataField = env->GetFieldID(featureClass, "data", "[F");

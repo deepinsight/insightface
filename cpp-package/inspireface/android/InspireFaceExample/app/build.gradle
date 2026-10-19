@@ -64,6 +64,9 @@ android {
             path file('src/main/cpp/Android.mk')
         }
     }
+    sourceSets {
+        main.java.srcDir file('../../../cpp/inspireface/platform/jni/java')
+    }
 }
 
 dependencies {

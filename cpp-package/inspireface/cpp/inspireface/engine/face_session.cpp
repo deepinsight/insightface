@@ -4,6 +4,7 @@
  */
 
 #include "face_session.h"
+#include <cmath>
 #include <launch.h>
 #include <utility>
 #include "log.h"
@@ -17,27 +18,47 @@ FaceSession::FaceSession() = default;
 
 int32_t FaceSession::Configuration(DetectModuleMode detect_mode, int32_t max_detect_face, CustomPipelineParameter param, int32_t detect_level_px,
                                    int32_t track_by_detect_mode_fps) {
-    m_detect_mode_ = detect_mode;
-    m_max_detect_face_ = max_detect_face;
-    m_parameter_ = param;
-    if (!INSPIREFACE_CONTEXT->isMLoad()) {
+    if (detect_mode < DETECT_MODE_ALWAYS_DETECT || detect_mode > DETECT_MODE_TRACK_BY_DETECT || max_detect_face <= 0 ||
+        (detect_mode == DETECT_MODE_TRACK_BY_DETECT && track_by_detect_mode_fps == 0)) {
+        return HERR_INVALID_PARAM;
+    }
+    if (param.enable_ir_liveness) {
+        return HERR_UNSUPPORTED;
+    }
+    auto archive = INSPIREFACE_CONTEXT->AcquireArchive();
+    if (!archive) {
         return HERR_ARCHIVE_NOT_LOAD;
     }
-    if (INSPIREFACE_CONTEXT->getMArchive().QueryStatus() != SARC_SUCCESS) {
+    if (archive->QueryStatus() != SARC_SUCCESS) {
         return HERR_ARCHIVE_LOAD_FAILURE;
     }
 
-    m_face_track_ = std::make_shared<FaceTrackModule>(m_detect_mode_, m_max_detect_face_, 20, 192, detect_level_px, track_by_detect_mode_fps, true);
-    m_face_track_->Configuration(INSPIREFACE_CONTEXT->getMArchive(), "", m_parameter_.enable_face_pose || m_parameter_.enable_face_quality);
-    // SetDetectMode(m_detect_mode_);
-
-    m_face_recognition_ = std::make_shared<FeatureExtractionModule>(INSPIREFACE_CONTEXT->getMArchive(), m_parameter_.enable_recognition);
-    if (m_face_recognition_->QueryStatus() != HSUCCEED) {
-        return m_face_recognition_->QueryStatus();
+    auto face_track = std::make_shared<FaceTrackModule>(detect_mode, max_detect_face, 20, 192, detect_level_px, track_by_detect_mode_fps, true);
+    auto status = face_track->Configuration(*archive, "", param.enable_face_pose || param.enable_face_quality);
+    if (status != HSUCCEED) {
+        return status;
     }
 
-    m_face_pipeline_ = std::make_shared<FacePipelineModule>(INSPIREFACE_CONTEXT->getMArchive(), param.enable_liveness, param.enable_mask_detect,
-                                                            param.enable_face_attribute, param.enable_interaction_liveness, param.enable_face_emotion);
+    auto face_recognition = std::make_shared<FeatureExtractionModule>(*archive, param.enable_recognition);
+    status = face_recognition->QueryStatus();
+    if (status != HSUCCEED) {
+        return status;
+    }
+
+    auto face_pipeline = std::make_shared<FacePipelineModule>(*archive, param.enable_liveness, param.enable_mask_detect, param.enable_face_attribute,
+                                                              param.enable_interaction_liveness, param.enable_face_emotion);
+    status = face_pipeline->QueryStatus();
+    if (status != HSUCCEED) {
+        return status;
+    }
+
+    m_detect_mode_ = detect_mode;
+    m_max_detect_face_ = max_detect_face;
+    m_parameter_ = param;
+    m_face_track_ = std::move(face_track);
+    m_face_recognition_ = std::move(face_recognition);
+    m_face_pipeline_ = std::move(face_pipeline);
+    m_archive_ = std::move(archive);
     m_face_track_cost_ = std::make_shared<inspire::SpendTimer>("FaceTrack");
 
     return HSUCCEED;
@@ -57,6 +78,8 @@ int32_t FaceSession::FaceDetectAndTrack(inspirecv::FrameProcess& process) {
     m_roll_results_cache_.clear();
     m_yaw_results_cache_.clear();
     m_pitch_results_cache_.clear();
+    m_mask_results_cache_.clear();
+    m_rgb_liveness_results_cache_.clear();
     m_quality_score_results_cache_.clear();
     m_react_left_eye_results_cache_.clear();
     m_react_right_eye_results_cache_.clear();
@@ -68,14 +91,17 @@ int32_t FaceSession::FaceDetectAndTrack(inspirecv::FrameProcess& process) {
     m_action_jaw_open_results_cache_.clear();
     m_action_raise_head_results_cache_.clear();
 
-    m_quality_score_results_cache_.clear();
     m_attribute_race_results_cache_.clear();
     m_attribute_gender_results_cache_.clear();
+    m_attribute_age_results_cache_.clear();
     m_det_confidence_cache_.clear();
     if (m_face_track_ == nullptr) {
         return HERR_SESS_TRACKER_FAILURE;
     }
-    m_face_track_->UpdateStream(process);
+    const int32_t track_status = m_face_track_->UpdateStreamWithStatus(process);
+    if (track_status != HSUCCEED) {
+        return track_status;
+    }
     for (int i = 0; i < m_face_track_->trackingFace.size(); ++i) {
         auto& face = m_face_track_->trackingFace[i];
         FaceTrackWrap data = FaceObjectInternalToHyperFaceData(face, i);
@@ -117,11 +143,17 @@ int32_t FaceSession::FaceDetectAndTrack(inspirecv::FrameProcess& process) {
 }
 
 int32_t FaceSession::SetLandmarkLoop(int32_t value) {
-    // TODO: implement this function
+    if (m_face_track_ == nullptr || value <= 0) {
+        return HERR_INVALID_PARAM;
+    }
+    m_face_track_->SetMultiscaleLandmarkLoop(value);
     return HSUCCEED;
 }
 
 int32_t FaceSession::SetFaceDetectThreshold(float value) {
+    if (m_face_track_ == nullptr || !std::isfinite(value) || value < 0.0f || value > 1.0f) {
+        return HERR_INVALID_PARAM;
+    }
     m_face_track_->SetDetectThreshold(value);
     return HSUCCEED;
 }
@@ -143,25 +175,46 @@ const int32_t FaceSession::GetNumberOfFacesCurrentlyDetected() const {
 }
 
 int32_t FaceSession::FacesProcess(inspirecv::FrameProcess& process, const std::vector<FaceTrackWrap>& faces, const CustomPipelineParameter& param) {
+    if (param.enable_ir_liveness) {
+        return HERR_UNSUPPORTED;
+    }
     std::lock_guard<std::mutex> lock(m_mtx_);
-    m_mask_results_cache_.resize(faces.size(), -1.0f);
-    m_rgb_liveness_results_cache_.resize(faces.size(), -1.0f);
-    m_react_left_eye_results_cache_.resize(faces.size(), -1.0f);
-    m_react_right_eye_results_cache_.resize(faces.size(), -1.0f);
-    m_attribute_race_results_cache_.resize(faces.size(), -1);
-    m_attribute_gender_results_cache_.resize(faces.size(), -1);
-    m_attribute_age_results_cache_.resize(faces.size(), -1);
-    m_action_normal_results_cache_.resize(faces.size(), -1);
-    m_action_jaw_open_results_cache_.resize(faces.size(), -1);
-    m_action_blink_results_cache_.resize(faces.size(), -1);
-    m_action_raise_head_results_cache_.resize(faces.size(), -1);
-    m_action_shake_results_cache_.resize(faces.size(), -1);
-    m_face_emotion_results_cache_.resize(faces.size(), -1);
+    m_mask_results_cache_.assign(faces.size(), -1.0f);
+    m_rgb_liveness_results_cache_.assign(faces.size(), -1.0f);
+    m_react_left_eye_results_cache_.assign(faces.size(), -1.0f);
+    m_react_right_eye_results_cache_.assign(faces.size(), -1.0f);
+    m_attribute_race_results_cache_.assign(faces.size(), -1);
+    m_attribute_gender_results_cache_.assign(faces.size(), -1);
+    m_attribute_age_results_cache_.assign(faces.size(), -1);
+    m_action_normal_results_cache_.assign(faces.size(), -1);
+    m_action_jaw_open_results_cache_.assign(faces.size(), -1);
+    m_action_blink_results_cache_.assign(faces.size(), -1);
+    m_action_raise_head_results_cache_.assign(faces.size(), -1);
+    m_action_shake_results_cache_.assign(faces.size(), -1);
+    m_face_emotion_results_cache_.assign(faces.size(), -1);
+    inspirecv::Image origin_image;
+    const bool need_origin_image = param.enable_liveness && !faces.empty();
+    if (need_origin_image) {
+        origin_image = process.ExecuteImageScaleProcessing(1.0f, true);
+    }
+    const bool need_aligned_crop = param.enable_mask_detect || param.enable_face_attribute || param.enable_face_emotion;
     for (int i = 0; i < faces.size(); ++i) {
         const auto& face = faces[i];
+        inspirecv::Image aligned_crop;
+        if (need_aligned_crop) {
+            std::vector<inspirecv::Point2f> points_five;
+            points_five.reserve(5);
+            for (const auto& point : face.keyPoints) {
+                points_five.emplace_back(point.x, point.y);
+            }
+            auto transform = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, points_five);
+            aligned_crop = process.ExecuteImageAffineProcessing(transform, FACE_CROP_SIZE, FACE_CROP_SIZE);
+        }
+        const inspirecv::Image* aligned_crop_ptr = need_aligned_crop ? &aligned_crop : nullptr;
+        const inspirecv::Image* origin_image_ptr = need_origin_image ? &origin_image : nullptr;
         // RGB Liveness Detect
         if (param.enable_liveness) {
-            auto ret = m_face_pipeline_->Process(process, face, PROCESS_RGB_LIVENESS);
+            auto ret = m_face_pipeline_->Process(process, face, PROCESS_RGB_LIVENESS, aligned_crop_ptr, origin_image_ptr);
             if (ret != HSUCCEED) {
                 return ret;
             }
@@ -169,7 +222,7 @@ int32_t FaceSession::FacesProcess(inspirecv::FrameProcess& process, const std::v
         }
         // Mask detection
         if (param.enable_mask_detect) {
-            auto ret = m_face_pipeline_->Process(process, face, PROCESS_MASK);
+            auto ret = m_face_pipeline_->Process(process, face, PROCESS_MASK, aligned_crop_ptr, origin_image_ptr);
             if (ret != HSUCCEED) {
                 return ret;
             }
@@ -177,7 +230,7 @@ int32_t FaceSession::FacesProcess(inspirecv::FrameProcess& process, const std::v
         }
         // Face attribute prediction
         if (param.enable_face_attribute) {
-            auto ret = m_face_pipeline_->Process(process, face, PROCESS_ATTRIBUTE);
+            auto ret = m_face_pipeline_->Process(process, face, PROCESS_ATTRIBUTE, aligned_crop_ptr, origin_image_ptr);
             if (ret != HSUCCEED) {
                 return ret;
             }
@@ -188,7 +241,7 @@ int32_t FaceSession::FacesProcess(inspirecv::FrameProcess& process, const std::v
 
         // Face interaction
         if (param.enable_interaction_liveness) {
-            auto ret = m_face_pipeline_->Process(process, face, PROCESS_INTERACTION);
+            auto ret = m_face_pipeline_->Process(process, face, PROCESS_INTERACTION, aligned_crop_ptr, origin_image_ptr);
             if (ret != HSUCCEED) {
                 return ret;
             }
@@ -208,7 +261,7 @@ int32_t FaceSession::FacesProcess(inspirecv::FrameProcess& process, const std::v
                             m_react_left_eye_results_cache_[i] = new_eye_left;
                             m_react_right_eye_results_cache_[i] = new_eye_right;
                         }
-                        const auto actions = target.UpdateFaceAction(INSPIREFACE_CONTEXT->getMArchive().GetLandmarkParam()->semantic_index);
+                        const auto actions = target.UpdateFaceAction(m_archive_->GetLandmarkParam()->semantic_index);
                         m_action_normal_results_cache_[i] = actions.normal;
                         m_action_jaw_open_results_cache_[i] = actions.jawOpen;
                         m_action_blink_results_cache_[i] = actions.blink;
@@ -228,7 +281,7 @@ int32_t FaceSession::FacesProcess(inspirecv::FrameProcess& process, const std::v
         }
         // Face emotion recognition
         if (param.enable_face_emotion) {
-            auto ret = m_face_pipeline_->Process(process, face, PROCESS_FACE_EMOTION);
+            auto ret = m_face_pipeline_->Process(process, face, PROCESS_FACE_EMOTION, aligned_crop_ptr, origin_image_ptr);
             if (ret != HSUCCEED) {
                 return ret;
             }
@@ -471,6 +524,9 @@ void FaceSession::SetLightTrackConfidenceThreshold(float value) {
 }
 
 int32_t FaceSession::SetTrackPreviewSize(const int32_t preview_size) {
+    if (m_face_track_ == nullptr || preview_size == 0 || preview_size < -1) {
+        return HERR_INVALID_PARAM;
+    }
     m_face_track_->SetTrackPreviewSize(preview_size);
     return HSUCCEED;
 }
@@ -480,21 +536,33 @@ int32_t FaceSession::GetTrackPreviewSize() const {
 }
 
 int32_t FaceSession::SetTrackFaceMinimumSize(int32_t minSize) {
+    if (m_face_track_ == nullptr || minSize < 0) {
+        return HERR_INVALID_PARAM;
+    }
     m_face_track_->SetMinimumFacePxSize(minSize);
     return HSUCCEED;
 }
 
 int32_t FaceSession::SetTrackModeSmoothRatio(float value) {
+    if (m_face_track_ == nullptr || !std::isfinite(value) || value < 0.0f || value > 1.0f) {
+        return HERR_INVALID_PARAM;
+    }
     m_face_track_->SetTrackModeSmoothRatio(value);
     return HSUCCEED;
 }
 
 int32_t FaceSession::SetTrackModeNumSmoothCacheFrame(int value) {
+    if (m_face_track_ == nullptr || value <= 0) {
+        return HERR_INVALID_PARAM;
+    }
     m_face_track_->SetTrackModeNumSmoothCacheFrame(value);
     return HSUCCEED;
 }
 
 int32_t FaceSession::SetTrackModeDetectInterval(int value) {
+    if (m_face_track_ == nullptr || value <= 0) {
+        return HERR_INVALID_PARAM;
+    }
     m_face_track_->SetTrackModeDetectInterval(value);
     return HSUCCEED;
 }

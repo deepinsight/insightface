@@ -59,7 +59,12 @@ TEST_CASE("test_Landmark", "[track_module") {
     FaceLandmarkAdapt face_landmark(112);
     face_landmark.LoadData(model, model.modelType);
 
-    inspirecv::Image img = inspirecv::Image::Create(GET_DATA("data/crop/crop.png"));
+    inspirecv::Image source = inspirecv::Image::Create(GET_DATA("data/crop/crop.png"));
+    REQUIRE(!source.Empty());
+    inspirecv::Image img = source.Resize(face_landmark.getInputSize(), face_landmark.getInputSize());
+    REQUIRE(!img.Empty());
+    REQUIRE(img.Width() == 112);
+    REQUIRE(img.Height() == 112);
     auto result = face_landmark(img);
     REQUIRE(result.size() == 106 * 2);
 }

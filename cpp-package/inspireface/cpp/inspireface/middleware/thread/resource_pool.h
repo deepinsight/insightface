@@ -2,6 +2,8 @@
 #define INSPIRE_RESOURCE_POOL_H
 
 #include <iostream>
+#include <chrono>
+#include <deque>
 #include <mutex>
 #include <queue>
 #include <condition_variable>
@@ -53,8 +55,8 @@ public:
         bool m_valid;
     };
 
-    explicit ResourcePool(size_t size, ResourceDeleter deleter = nullptr) : m_deleter(deleter) {
-        m_resources.reserve(size);
+    explicit ResourcePool(size_t size, ResourceDeleter deleter = nullptr) : m_deleter(std::move(deleter)) {
+        (void)size;
     }
 
     ~ResourcePool() {
@@ -135,7 +137,9 @@ private:
 private:
     mutable std::mutex m_mutex;
     std::condition_variable m_cv;
-    std::vector<Resource> m_resources;            // Store actual resources
+    // deque keeps references and pointers stable when AddResource grows the pool
+    // while another resource is checked out.
+    std::deque<Resource> m_resources;             // Store actual resources
     std::queue<Resource*> m_available_resources;  // Queue of available resources
     ResourceDeleter m_deleter;                    // Resource cleanup callback
 

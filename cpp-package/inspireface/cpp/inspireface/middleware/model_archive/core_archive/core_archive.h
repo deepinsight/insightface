@@ -45,6 +45,7 @@ public:
     CoreArchive& operator=(CoreArchive&& other) noexcept;
 
     int32_t Reset(const std::string& archiveFile);
+    std::shared_ptr<const std::vector<char>> GetFileContentShared(const std::string& filename) const;
     std::vector<char>& GetFileContent(const std::string& filename);
     int32_t QueryLoadStatus() const;
     const std::vector<std::string>& GetSubfilesNames() const;

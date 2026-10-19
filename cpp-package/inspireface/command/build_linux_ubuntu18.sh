@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 # Reusable function to handle 'install' directory operations
 move_install_files() {

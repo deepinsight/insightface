@@ -88,6 +88,10 @@ std::string getBenchmarkRecordFile();
 std::string getEvaluationRecordFile();
 
 /** Logger level */
+#if defined(_WIN32)
+#pragma push_macro("ERROR")
+#undef ERROR
+#endif
 enum LOG_LEVEL {
     TRACE = 0,  ///< trace
     DEBUG = 1,  ///< debug
@@ -97,6 +101,9 @@ enum LOG_LEVEL {
     FATAL = 5,  ///< fatal
     OFF = 6,    ///< off
 };
+#if defined(_WIN32)
+#pragma pop_macro("ERROR")
+#endif
 
 class TestMessageBroadcast {
 public:

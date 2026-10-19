@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 # Reusable function to handle 'install' directory operations
 move_install_files() {
@@ -58,10 +59,10 @@ DYLIB_DEST_PATH="${SCRIPT_DIR}/python/inspireface/modules/core/libs/darwin/arm64
 mkdir -p ${DYLIB_DEST_PATH}
 cp -r ${BUILD_DYLIB_PATH} ${DYLIB_DEST_PATH}
 
-pip3 install setuptools wheel twine
-
 PYTHON_PRJ_PATH=${SCRIPT_DIR}/python
 cd ${PYTHON_PRJ_PATH}/
-python3 setup.py bdist_wheel
+# ctypes has no CPython ABI dependency; build one py3-none wheel per platform.
+wheel_python="${ISF_WHEEL_PYTHON:-python3}"
+"${wheel_python}" -m pip wheel --no-deps --wheel-dir dist .
 
 echo "Build wheel for MacOS Arm64, Well Done!"

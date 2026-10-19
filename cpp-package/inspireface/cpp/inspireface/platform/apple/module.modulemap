@@ -1,0 +1,8 @@
+framework module InspireFace {
+    umbrella header "InspireFaceApple.h"
+    link "c++"
+    link framework "Foundation"
+    link framework "CoreVideo"
+    export *
+    module * { export * }
+}

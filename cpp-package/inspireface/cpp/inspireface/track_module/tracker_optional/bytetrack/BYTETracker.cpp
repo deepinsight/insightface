@@ -8,6 +8,7 @@ BYTETracker::BYTETracker(int frame_rate, int track_buffer) {
     match_thresh = 0.8;
 
     frame_id = 0;
+    next_track_id = 0;
     max_time_lost = int(frame_rate / 30.0 * track_buffer);
     std::cout << "Init ByteTrack!" << std::endl;
 }
@@ -34,10 +35,15 @@ vector<STrack> BYTETracker::update(const vector<Object> &objects) {
     vector<STrack *> strack_pool;
     vector<STrack *> r_tracked_stracks;
 
+    activated_stracks.reserve(objects.size());
+    refind_stracks.reserve(this->lost_stracks.size());
+    detections.reserve(objects.size());
+    detections_low.reserve(objects.size());
+    output_stracks.reserve(this->tracked_stracks.size() + objects.size());
+
     if (objects.size() > 0) {
         for (int i = 0; i < objects.size(); i++) {
-            vector<float> tlbr_;
-            tlbr_.resize(4);
+            TrackBox tlbr_{};
             tlbr_[0] = objects[i].rect.GetX();
             tlbr_[1] = objects[i].rect.GetY();
             tlbr_[2] = objects[i].rect.GetX() + objects[i].rect.GetWidth();
@@ -47,9 +53,9 @@ vector<STrack> BYTETracker::update(const vector<Object> &objects) {
 
             STrack strack(STrack::tlbr_to_tlwh(tlbr_), score);
             if (score >= track_thresh) {
-                detections.push_back(strack);
+                detections.push_back(std::move(strack));
             } else {
-                detections_low.push_back(strack);
+                detections_low.push_back(std::move(strack));
             }
         }
     }
@@ -70,7 +76,7 @@ vector<STrack> BYTETracker::update(const vector<Object> &objects) {
     int dist_size = 0, dist_size_size = 0;
     dists = iou_distance(strack_pool, detections, dist_size, dist_size_size);
 
-    vector<vector<int> > matches;
+    vector<TrackMatch> matches;
     vector<int> u_track, u_detection;
     linear_assignment(dists, dist_size, dist_size_size, match_thresh, matches, u_track, u_detection);
 
@@ -81,7 +87,7 @@ vector<STrack> BYTETracker::update(const vector<Object> &objects) {
             track->update(*det, this->frame_id);
             activated_stracks.push_back(*track);
         } else {
-            track->re_activate(*det, this->frame_id, false);
+            track->re_activate(*det, this->frame_id);
             refind_stracks.push_back(*track);
         }
     }
@@ -114,7 +120,7 @@ vector<STrack> BYTETracker::update(const vector<Object> &objects) {
             track->update(*det, this->frame_id);
             activated_stracks.push_back(*track);
         } else {
-            track->re_activate(*det, this->frame_id, false);
+            track->re_activate(*det, this->frame_id);
             refind_stracks.push_back(*track);
         }
     }
@@ -155,7 +161,7 @@ vector<STrack> BYTETracker::update(const vector<Object> &objects) {
         STrack *track = &detections[u_detection[i]];
         if (track->score < this->high_thresh)
             continue;
-        track->activate(this->kalman_filter, this->frame_id);
+        track->activate(this->kalman_filter, this->frame_id, ++this->next_track_id);
         activated_stracks.push_back(*track);
     }
 
@@ -186,9 +192,7 @@ vector<STrack> BYTETracker::update(const vector<Object> &objects) {
     }
 
     this->lost_stracks = sub_stracks(this->lost_stracks, this->removed_stracks);
-    for (int i = 0; i < removed_stracks.size(); i++) {
-        this->removed_stracks.push_back(removed_stracks[i]);
-    }
+    this->removed_stracks = std::move(removed_stracks);
 
     remove_duplicate_stracks(resa, resb, this->tracked_stracks, this->lost_stracks);
 

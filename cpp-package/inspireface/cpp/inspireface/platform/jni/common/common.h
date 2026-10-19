@@ -16,22 +16,16 @@
  * @return std::string
  */
 inline std::string jstring2str(JNIEnv *env, jstring jstr) {
-    char *rtn = NULL;
-    jclass clsstring = env->FindClass("java/lang/String");
-    jstring strencode = env->NewStringUTF("GB2312");
-    jmethodID mid = env->GetMethodID(clsstring, "getBytes", "(Ljava/lang/String;)[B");
-    jbyteArray barr = (jbyteArray)env->CallObjectMethod(jstr, mid, strencode);
-    jsize alen = env->GetArrayLength(barr);
-    jbyte *ba = env->GetByteArrayElements(barr, JNI_FALSE);
-    if (alen > 0) {
-        rtn = (char *)malloc(alen + 1);
-        memcpy(rtn, ba, alen);
-        rtn[alen] = 0;
+    if (!env || !jstr) {
+        return {};
     }
-    env->ReleaseByteArrayElements(barr, ba, 0);
-    std::string stemp(rtn);
-    free(rtn);
-    return stemp;
+    const char *characters = env->GetStringUTFChars(jstr, nullptr);
+    if (!characters) {
+        return {};
+    }
+    std::string result(characters);
+    env->ReleaseStringUTFChars(jstr, characters);
+    return result;
 }
 
 #endif  // INSPIRE_FACE_JNI_COMMON_H

@@ -1,10 +1,12 @@
 #ifndef SIMILARITY_CONVERTER_H
 #define SIMILARITY_CONVERTER_H
 
-#include <iostream>
 #include <cmath>
 #include <mutex>
+
 #include "data_type.h"
+
+#define ISF_SIMILARITY_CONVERTER_COHERENT_STATE 1
 
 #define SIMILARITY_CONVERTER_UPDATE_CONFIG(config) inspire::SimilarityConverter::getInstance().updateConfig(config)
 #define SIMILARITY_CONVERTER_RUN(cosine) inspire::SimilarityConverter::getInstance().convert(cosine)
@@ -16,35 +18,51 @@
 namespace inspire {
 
 struct SimilarityConverterConfig {
-    double threshold = 0.48;   // Similarity threshold (e.g. 0.48 or 0.32)
-    double middleScore = 0.6;  // Target score at threshold (e.g. 0.6)
-    double steepness = 8.0;    // Steepness of the curve
-    double outputMin = 0.01;   // Minimum value of output range
-    double outputMax = 1.0;    // Maximum value of output range
+    double threshold = 0.48;
+    double middleScore = 0.6;
+    double steepness = 8.0;
+    double outputMin = 0.01;
+    double outputMax = 1.0;
+};
+
+struct SimilarityConverterState {
+    SimilarityConverterConfig config;
+    double outputScale = 0.99;
+    double bias = 0.0;
+    float recommendedCosineThreshold = 0.48f;
 };
 
 class INSPIRE_API_EXPORT SimilarityConverter {
 private:
+    // Keep the original field order: SimilarityConverter is an exported C++
+    // type, and changing this layout would break existing binary consumers.
     SimilarityConverterConfig config;
-    double outputScale;              // Scale of output range
-    double bias;                     // Sigmoid bias
-    mutable std::mutex configMutex;  // Mutex for protecting config updates
+    double outputScale;
+    double bias;
+    mutable std::mutex configMutex;
+    float recommendedCosineThreshold = 0.48f;
 
-    // Recommended cosine threshold
-    float recommendedCosineThreshold = 0.48;
-
-    static SimilarityConverter* instance;
+    // Retained for binary compatibility with clients built against the
+    // previous inline singleton implementation.
+    static SimilarityConverter *instance;
     static std::mutex instanceMutex;
 
-    // Update internal calculation parameters
     void updateParameters() {
         outputScale = config.outputMax - config.outputMin;
         bias = -std::log((config.outputMax - config.middleScore) / (config.middleScore - config.outputMin));
     }
 
+    static bool CalculateParameters(const SimilarityConverterConfig &candidate, double &output_scale, double &candidate_bias) {
+        if (!IsConfigValid(candidate)) {
+            return false;
+        }
+        output_scale = candidate.outputMax - candidate.outputMin;
+        candidate_bias = -std::log((candidate.outputMax - candidate.middleScore) / (candidate.middleScore - candidate.outputMin));
+        return std::isfinite(output_scale) && std::isfinite(candidate_bias);
+    }
+
 public:
-    // Get global singleton instance
-    static SimilarityConverter& getInstance() {
+    static SimilarityConverter &getInstance() {
         std::lock_guard<std::mutex> lock(instanceMutex);
         if (instance == nullptr) {
             instance = new SimilarityConverter();
@@ -52,41 +70,69 @@ public:
         return *instance;
     }
 
-    // Allow external creation of new instances
-    explicit SimilarityConverter(const SimilarityConverterConfig& config = SimilarityConverterConfig()) : config(config) {
+    explicit SimilarityConverter(const SimilarityConverterConfig &initial_config = SimilarityConverterConfig())
+    : config(IsConfigValid(initial_config) ? initial_config : SimilarityConverterConfig()) {
         updateParameters();
     }
 
-    // Prevent copying
-    SimilarityConverter(const SimilarityConverter&) = delete;
-    SimilarityConverter& operator=(const SimilarityConverter&) = delete;
+    SimilarityConverter(const SimilarityConverter &) = delete;
+    SimilarityConverter &operator=(const SimilarityConverter &) = delete;
 
-    // Update configuration (thread-safe)
-    void updateConfig(const SimilarityConverterConfig& newConfig) {
+    static bool IsConfigValid(const SimilarityConverterConfig &candidate) {
+        return std::isfinite(candidate.threshold) && std::isfinite(candidate.middleScore) && std::isfinite(candidate.steepness) &&
+               std::isfinite(candidate.outputMin) && std::isfinite(candidate.outputMax) && candidate.steepness > 0.0 &&
+               candidate.outputMin < candidate.middleScore && candidate.middleScore < candidate.outputMax;
+    }
+
+    bool updateConfig(const SimilarityConverterConfig &new_config) {
+        double new_output_scale = 0.0;
+        double new_bias = 0.0;
+        if (!CalculateParameters(new_config, new_output_scale, new_bias)) {
+            return false;
+        }
         std::lock_guard<std::mutex> lock(configMutex);
-        config = newConfig;
-        updateParameters();
+        config = new_config;
+        outputScale = new_output_scale;
+        bias = new_bias;
+        return true;
     }
 
-    // Get current configuration (thread-safe)
+    bool updateConfigAndRecommendedThreshold(const SimilarityConverterConfig &new_config, float recommended_threshold) {
+        double new_output_scale = 0.0;
+        double new_bias = 0.0;
+        if (!std::isfinite(recommended_threshold) || !CalculateParameters(new_config, new_output_scale, new_bias)) {
+            return false;
+        }
+        std::lock_guard<std::mutex> lock(configMutex);
+        config = new_config;
+        outputScale = new_output_scale;
+        bias = new_bias;
+        recommendedCosineThreshold = recommended_threshold;
+        return true;
+    }
+
+    SimilarityConverterState getState() const {
+        std::lock_guard<std::mutex> lock(configMutex);
+        SimilarityConverterState state;
+        state.config = config;
+        state.outputScale = outputScale;
+        state.bias = bias;
+        state.recommendedCosineThreshold = recommendedCosineThreshold;
+        return state;
+    }
+
     SimilarityConverterConfig getConfig() const {
-        std::lock_guard<std::mutex> lock(configMutex);
-        return config;
+        return getState().config;
     }
 
-    // Convert similarity (thread-safe)
     template <typename T>
-    double convert(T cosine) {
-        std::lock_guard<std::mutex> lock(configMutex);
-        // Calculate shifted input
-        double shiftedInput = config.steepness * (static_cast<double>(cosine) - config.threshold);
-        // Apply sigmoid function
-        double sigmoid = 1.0 / (1.0 + std::exp(-shiftedInput - bias));
-        // Map to output range
-        return sigmoid * outputScale + config.outputMin;
+    double convert(T cosine) const {
+        const SimilarityConverterState state = getState();
+        const double shifted_input = state.config.steepness * (static_cast<double>(cosine) - state.config.threshold);
+        const double sigmoid = 1.0 / (1.0 + std::exp(-shifted_input - state.bias));
+        return sigmoid * state.outputScale + state.config.outputMin;
     }
 
-    // Clean up singleton instance
     static void destroyInstance() {
         std::lock_guard<std::mutex> lock(instanceMutex);
         if (instance != nullptr) {
@@ -95,18 +141,21 @@ public:
         }
     }
 
-    // Get recommended cosine threshold
     float getRecommendedCosineThreshold() const {
-        return recommendedCosineThreshold;
+        return getState().recommendedCosineThreshold;
     }
 
-    // Set recommended cosine threshold
-    void setRecommendedCosineThreshold(float threshold) {
+    bool setRecommendedCosineThreshold(float threshold) {
+        if (!std::isfinite(threshold)) {
+            return false;
+        }
+        std::lock_guard<std::mutex> lock(configMutex);
         recommendedCosineThreshold = threshold;
+        return true;
     }
 
     ~SimilarityConverter() = default;
-};  // class SimilarityConverter
+};
 
 }  // namespace inspire
 

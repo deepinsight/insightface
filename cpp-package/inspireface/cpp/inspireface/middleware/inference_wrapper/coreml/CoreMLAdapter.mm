@@ -8,6 +8,7 @@
 @property (nonatomic, strong) id<MLFeatureProvider> inputFeatures;
 @property (nonatomic, strong) id<MLFeatureProvider> outputFeatures;
 @property (nonatomic, strong) NSURL *modelURL;
+@property (nonatomic) BOOL legacyCPUOnly;
 @end
 
 @implementation CoreMLAdapterImpl
@@ -147,9 +148,15 @@ int32_t CoreMLAdapter::forward() {
             return COREML_FORWARD_FAILED;
         }
         NSError *error = nil;
+        MLPredictionOptions *options = [[MLPredictionOptions alloc] init];
+        if (@available(iOS 12.0, macOS 10.14, *)) {
+            // Compute units are configured on the model on these systems.
+        } else {
+            options.usesCPUOnly = pImpl->impl.legacyCPUOnly;
+        }
         pImpl->impl.outputFeatures = [pImpl->impl.model predictionFromFeatures:pImpl->impl.inputFeatures
-                                                                    options:[[MLPredictionOptions alloc] init]
-                                                                        error:&error];
+                                                                    options:options
+                                                                      error:&error];
         if (error) {
             NSLog(@"Error in forward pass: %@", error);
             return COREML_FORWARD_FAILED;
@@ -193,28 +200,34 @@ const char* CoreMLAdapter::getOutput(const char* nodeName) {
 
 
 void CoreMLAdapter::setInferenceMode(InferenceMode mode) {
-    MLComputeUnits computeUnits;
-    switch (mode) {
-        case InferenceMode::CPU:
-            computeUnits = MLComputeUnitsCPUOnly;
-            break;
-        case InferenceMode::GPU:
-            computeUnits = MLComputeUnitsCPUAndGPU;
-            break;
-        case InferenceMode::ANE:
-            computeUnits = MLComputeUnitsAll;
-            break;
-    }
-    
-    MLModelConfiguration *config = [[MLModelConfiguration alloc] init];
-    config.computeUnits = computeUnits;
-    
-    NSError *error = nil;
-    pImpl->impl.model = [MLModel modelWithContentsOfURL:pImpl->impl.modelURL
-                                          configuration:config
-                                                  error:&error];
-    if (error) {
-        NSLog(@"Error setting inference mode: %@", error);
+    if (@available(iOS 12.0, macOS 10.14, *)) {
+        MLComputeUnits computeUnits;
+        switch (mode) {
+            case InferenceMode::CPU:
+                computeUnits = MLComputeUnitsCPUOnly;
+                break;
+            case InferenceMode::GPU:
+                computeUnits = MLComputeUnitsCPUAndGPU;
+                break;
+            case InferenceMode::ANE:
+                computeUnits = MLComputeUnitsAll;
+                break;
+        }
+
+        MLModelConfiguration *config = [[MLModelConfiguration alloc] init];
+        config.computeUnits = computeUnits;
+
+        NSError *error = nil;
+        pImpl->impl.model = [MLModel modelWithContentsOfURL:pImpl->impl.modelURL
+                                              configuration:config
+                                                      error:&error];
+        if (error) {
+            NSLog(@"Error setting inference mode: %@", error);
+        }
+    } else {
+        // iOS 11 supports CoreML but predates per-model compute-unit configuration.
+        // CPU remains explicit; GPU/ANE requests use the system's available accelerators.
+        pImpl->impl.legacyCPUOnly = mode == InferenceMode::CPU;
     }
 }
 
@@ -241,7 +254,9 @@ void CoreMLAdapter::printModelInfo() const {
                 NSLog(@"  Dictionary Key Type: %@", @(desc.dictionaryConstraint.keyType));
                 break;
             case MLFeatureTypeSequence:
-                NSLog(@"  Sequence Constraint: %@", desc.sequenceConstraint);
+                if (@available(iOS 12.0, macOS 10.14, *)) {
+                    NSLog(@"  Sequence Constraint: %@", desc.sequenceConstraint);
+                }
                 break;
             default:
                 NSLog(@"  Unknown type details");
@@ -268,7 +283,9 @@ void CoreMLAdapter::printModelInfo() const {
                 NSLog(@"  Dictionary Key Type: %@", @(desc.dictionaryConstraint.keyType));
                 break;
             case MLFeatureTypeSequence:
-                NSLog(@"  Sequence Constraint: %@", desc.sequenceConstraint);
+                if (@available(iOS 12.0, macOS 10.14, *)) {
+                    NSLog(@"  Sequence Constraint: %@", desc.sequenceConstraint);
+                }
                 break;
             default:
                 NSLog(@"  Unknown type details");

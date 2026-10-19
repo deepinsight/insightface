@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "inspireface",
+    "type": "har",
+    "deviceTypes": [
+      "phone",
+      "tablet"
+    ]
+  }
+}
