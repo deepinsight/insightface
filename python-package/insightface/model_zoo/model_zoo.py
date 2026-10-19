@@ -10,6 +10,7 @@ import glob
 import hashlib
 import logging
 import platform
+import types
 import warnings
 from collections.abc import Mapping
 import numpy as np
@@ -27,7 +28,11 @@ from .onnxruntime_utils import (
     get_default_providers,
     preload_cuda_libraries,
 )
-from .coreml_cache import copy_session_options, create_coreml_session
+from .coreml_cache import (
+    _COPYABLE_SESSION_OPTION_ATTRIBUTES,
+    copy_session_options,
+    create_coreml_session,
+)
 from .package_manifest import (
     DETECTION_TASK,
     EMBEDDED_PREPROCESSING,
@@ -69,6 +74,11 @@ class PickableInferenceSession(onnxruntime.InferenceSession):
                 dict(provider_options.get(provider, {})) for provider in providers
             ],
         }
+        session_options = self.get_session_options()
+        values["session_options"] = {
+            name: getattr(session_options, name)
+            for name in _COPYABLE_SESSION_OPTION_ATTRIBUTES
+        }
         dimension_overrides = getattr(self, "coreml_dimension_overrides", None)
         if dimension_overrides:
             values["coreml_dimension_overrides"] = dict(dimension_overrides)
@@ -80,9 +90,11 @@ class PickableInferenceSession(onnxruntime.InferenceSession):
             "providers": values.get("providers"),
             "provider_options": values.get("provider_options"),
         }
+        session_options = values.get("session_options")
         dimension_overrides = values.get("coreml_dimension_overrides")
-        if dimension_overrides:
+        if session_options or dimension_overrides:
             kwargs["sess_options"] = copy_session_options(
+                source=types.SimpleNamespace(**(session_options or {})),
                 dimension_overrides=dimension_overrides,
             )
         self.__init__(model_path, **kwargs)
