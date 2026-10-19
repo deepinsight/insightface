@@ -446,6 +446,27 @@ preview client. JPEG encoding begins lazily only while preview is enabled and
 at least one viewer is connected. `/preview.mjpeg` carries raw frames; clients
 draw labels from `/state`. Closing every browser must not stop the Monitor.
 
+RTSP transport is process-wide (`INSIGHTFACE_RTSP_TRANSPORT`, default `tcp`).
+`cv2.VideoCapture` parameters accept only numeric properties, so the transport
+goes through `OPENCV_FFMPEG_CAPTURE_OPTIONS`, which the FFmpeg backend reads
+with `getenv()` on every open. `configure_rtsp_transport()` writes it once at
+the start of the app lifespan, before engine or capture threads exist, and
+leaves an operator-supplied value alone. Do not mutate it per camera at runtime.
+
+OpenCV 4.11.x inverts this variable's check (fixed in 4.12). A non-empty value
+is ignored and replaced by `rtsp_flags=prefer_tcp`. An absent value applies no
+RTSP option, so FFmpeg negotiates UDP first. On 4.11, `tcp` therefore writes a
+non-empty value and `udp` removes the variable. Neither can be strict, and
+UDP-only options such as `buffer_size` cannot be applied.
+`opencv_inverts_capture_options()` gates this. After upgrading OpenCV (4.12
+wheels need NumPy 2), the same setting maps to strict `rtsp_transport`
+values. Re-check the effective transport with a SETUP-capturing RTSP stub or a
+packet capture.
+
+The reader resets reconnect backoff only after a decoded frame. Each failed
+open or read releases the capture and waits on the stop event, so shutdown
+stays responsive and a session never has more than one reader thread.
+
 Lifecycle updates:
 
 - source, Collection, cadence, threshold, or event-policy changes restart the

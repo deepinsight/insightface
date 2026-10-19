@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import math
+import os
 import sqlite3
 import threading
 import time
@@ -17,6 +18,7 @@ from urllib.parse import urlsplit
 import cv2
 import numpy as np
 
+from ..config import SUPPORTED_RTSP_TRANSPORTS as RTSP_TRANSPORTS
 from ..errors import ApiError
 from ..request_context import without_request_deadline
 from ..storage import CursorCodec, Repository, SecretCodec
@@ -97,6 +99,97 @@ def redacted_rtsp_source(url: str) -> str:
     port = f":{parsed.port}" if parsed.port is not None else ""
     path = parsed.path or "/"
     return f"{parsed.scheme.lower()}://{host}{port}{path}"
+
+
+FFMPEG_CAPTURE_OPTIONS_ENV = "OPENCV_FFMPEG_CAPTURE_OPTIONS"
+# The value this module last wrote, so a later configure call can tell its own
+# earlier write apart from an operator-supplied override.
+_installed_capture_options: str | None = None
+
+
+def opencv_inverts_capture_options(version: str | None = None) -> bool:
+    """Return whether OpenCV has the 4.11 FFmpeg capture-options regression.
+
+    OpenCV 4.11.x reads OPENCV_FFMPEG_CAPTURE_OPTIONS with an inverted check: a
+    non-empty value is ignored and replaced by ``rtsp_flags=prefer_tcp``, while an
+    absent value applies no RTSP option, so FFmpeg's UDP-first default is used.
+    4.10 and 4.12+ apply ``prefer_tcp`` when absent and parse the value when set.
+    """
+
+    parts = (version or cv2.__version__).split(".")
+    return parts[:2] == ["4", "11"]
+
+
+def rtsp_capture_options(transport: str, *, opencv_version: str | None = None) -> str | None:
+    """Return the OPENCV_FFMPEG_CAPTURE_OPTIONS value for a transport.
+
+    ``None`` means the variable must be absent.
+    """
+
+    if transport not in RTSP_TRANSPORTS:
+        raise ValueError(f"RTSP transport must be one of: {', '.join(RTSP_TRANSPORTS)}")
+    if transport == "udp" and opencv_inverts_capture_options(opencv_version):
+        return None
+    return f"rtsp_transport;{transport}"
+
+
+def effective_rtsp_transport(transport: str, *, opencv_version: str | None = None) -> str:
+    """Describe what FFmpeg will actually negotiate for a requested transport."""
+
+    if transport not in RTSP_TRANSPORTS:
+        raise ValueError(f"RTSP transport must be one of: {', '.join(RTSP_TRANSPORTS)}")
+    if opencv_inverts_capture_options(opencv_version):
+        # FFmpeg falls back to the other transport only if the camera rejects
+        # the first SETUP; it cannot be made strict on this OpenCV release.
+        return f"{transport}_preferred"
+    return transport
+
+
+def configure_rtsp_transport(
+    transport: str,
+    *,
+    environ: Any = None,
+    opencv_version: str | None = None,
+) -> str:
+    """Select the process-wide RTSP transport for every Monitor capture.
+
+    OpenCV's VideoCapture parameters accept only numeric properties, so the
+    transport can be set only through the process-global environment variable
+    that the FFmpeg backend reads on each open. Call this once at startup,
+    before capture threads exist; it is not safe to change per camera at runtime.
+    An operator-supplied value is respected and left untouched.
+
+    Returns the effective transport label used in logs.
+    """
+
+    global _installed_capture_options
+    env = os.environ if environ is None else environ
+    desired = rtsp_capture_options(transport, opencv_version=opencv_version)
+    current = env.get(FFMPEG_CAPTURE_OPTIONS_ENV)
+    if current and current != _installed_capture_options:
+        effective = (
+            "tcp_preferred" if opencv_inverts_capture_options(opencv_version) else "custom"
+        )
+        LOGGER.warning(
+            "rtsp_transport_override variable=%s requested=%s effective=%s",
+            FFMPEG_CAPTURE_OPTIONS_ENV,
+            transport,
+            effective,
+        )
+        return effective
+    if desired is None:
+        env.pop(FFMPEG_CAPTURE_OPTIONS_ENV, None)
+    else:
+        env[FFMPEG_CAPTURE_OPTIONS_ENV] = desired
+    _installed_capture_options = desired
+    effective = effective_rtsp_transport(transport, opencv_version=opencv_version)
+    LOGGER.info(
+        "rtsp_transport_configured requested=%s effective=%s opencv=%s",
+        transport,
+        effective,
+        opencv_version or cv2.__version__,
+    )
+    return effective
 
 
 def _utc_now() -> str:
@@ -200,6 +293,7 @@ class MonitorSession:
         read_timeout_seconds: float,
         reconnect_delay_seconds: float,
         capture_factory: Callable[[str, int, int], Any] = _open_capture,
+        transport: str = "unconfigured",
     ) -> None:
         self.service = service
         self.options = options
@@ -210,6 +304,11 @@ class MonitorSession:
         self.read_timeout_ms = int(read_timeout_seconds * 1000)
         self.reconnect_delay_seconds = reconnect_delay_seconds
         self.capture_factory = capture_factory
+        self.transport = transport
+        try:
+            self._log_source = redacted_rtsp_source(options.url)
+        except ValueError:
+            self._log_source = "invalid"
         self.stream_epoch = str(uuid.uuid4())
         self.started_at = _utc_now()
 
@@ -554,6 +653,8 @@ class MonitorSession:
     def _reader_loop(self) -> None:
         retry_delay = self.reconnect_delay_seconds
         next_preview = time.monotonic()
+        consecutive_failures = 0
+        outage_started: float | None = None
         while not self._stop_event.is_set():
             with self._condition:
                 self._state = (
@@ -561,6 +662,8 @@ class MonitorSession:
                 )
                 self._connected = False
             capture = None
+            stage = "open"
+            connection_frames = 0
             try:
                 capture = self.capture_factory(
                     self.options.url,
@@ -576,11 +679,43 @@ class MonitorSession:
                         if math.isfinite(source_fps) and source_fps > 0
                         else None
                     )
-                retry_delay = self.reconnect_delay_seconds
+                stage = "read"
                 while not self._stop_event.is_set():
+                    read_started = time.monotonic()
                     ok, frame = capture.read()
                     if not ok or frame is None or frame.ndim != 3:
+                        # OpenCV reports a timeout, EOF, and exhausted decode
+                        # attempts identically; elapsed time separates a stall.
+                        if (
+                            time.monotonic() - read_started
+                            >= self.read_timeout_ms / 1000.0
+                        ):
+                            stage = "read_timeout"
                         raise RuntimeError("capture_read_failed")
+                    if connection_frames == 0:
+                        # Reset backoff only once a frame decodes, so a source
+                        # that opens but never delivers frames still backs off.
+                        LOGGER.info(
+                            "monitor_source_connected monitor_id=%s source=%s "
+                            "transport=%s width=%s height=%s source_fps=%s "
+                            "failed_attempts=%s outage_seconds=%s",
+                            self.options.id,
+                            self._log_source,
+                            self.transport,
+                            frame.shape[1],
+                            frame.shape[0],
+                            self._source_fps,
+                            consecutive_failures,
+                            (
+                                round(time.monotonic() - outage_started, 1)
+                                if outage_started is not None
+                                else 0
+                            ),
+                        )
+                        retry_delay = self.reconnect_delay_seconds
+                        consecutive_failures = 0
+                        outage_started = None
+                    connection_frames += 1
                     now = time.monotonic()
                     with self._condition:
                         self._decoded_frames += 1
@@ -604,10 +739,21 @@ class MonitorSession:
                         )
             except Exception as exc:
                 if not self._stop_event.is_set():
+                    consecutive_failures += 1
+                    if outage_started is None:
+                        outage_started = time.monotonic()
                     LOGGER.warning(
-                        "monitor_source_unavailable monitor_id=%s error_type=%s",
+                        "monitor_source_unavailable monitor_id=%s source=%s "
+                        "transport=%s stage=%s error_type=%s frames=%s "
+                        "consecutive_failures=%s retry_seconds=%.1f",
                         self.options.id,
+                        self._log_source,
+                        self.transport,
+                        stage,
                         type(exc).__name__,
+                        connection_frames,
+                        consecutive_failures,
+                        retry_delay,
                     )
                     message = "The RTSP source is unavailable; reconnecting."
                     with self._condition:
@@ -840,6 +986,7 @@ class MonitorManager:
         reconnect_delay_seconds: float = 1.0,
         capture_factory: Callable[[str, int, int], Any] = _open_capture,
         session_factory: Callable[..., MonitorSession] = MonitorSession,
+        transport: str = "unconfigured",
     ) -> None:
         self.service = service
         self.repository = repository
@@ -854,6 +1001,7 @@ class MonitorManager:
         self.reconnect_delay_seconds = reconnect_delay_seconds
         self.capture_factory = capture_factory
         self.session_factory = session_factory
+        self.transport = transport
         # Lifecycle mutations are deliberately serialized.  Capacity checks,
         # durable configuration changes, and session publication must be one
         # operation; protecting only individual _sessions reads allows two
@@ -1202,6 +1350,7 @@ class MonitorManager:
             read_timeout_seconds=self.read_timeout_seconds,
             reconnect_delay_seconds=self.reconnect_delay_seconds,
             capture_factory=self.capture_factory,
+            transport=self.transport,
         )
         try:
             session.start()

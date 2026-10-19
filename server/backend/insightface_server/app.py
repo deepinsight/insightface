@@ -74,6 +74,7 @@ from .services import (
     MonitorUnavailableError,
 )
 from .services.presentation import face_result
+from .services.rtsp import configure_rtsp_transport
 from .storage import (
     CursorCodec,
     Database,
@@ -222,6 +223,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             level=getattr(logging, configured.log_level, logging.INFO),
             format="%(asctime)s %(levelname)s %(name)s %(message)s",
         )
+        # Process-global FFmpeg option: set before any engine or capture thread.
+        rtsp_transport = configure_rtsp_transport(configured.rtsp_transport)
         database = Database(
             configured.data_dir / "insightface-server.db", SERVER_DIR / "migrations"
         )
@@ -267,6 +270,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 open_timeout_seconds=configured.rtsp_open_timeout_seconds,
                 read_timeout_seconds=configured.rtsp_read_timeout_seconds,
                 reconnect_delay_seconds=configured.rtsp_reconnect_delay_seconds,
+                transport=rtsp_transport,
             )
             monitors.startup()
             app.state.settings = configured

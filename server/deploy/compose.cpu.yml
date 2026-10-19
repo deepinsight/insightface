@@ -4,7 +4,7 @@ x-models-path: &models-path ../.models
 
 services:
   server:
-    image: ghcr.io/deepinsight/insightface-server:0.3.1-cpu
+    image: insightface-server:rtsp-tcp
     platform: linux/amd64
     init: true
     read_only: true
@@ -29,6 +29,7 @@ services:
       INSIGHTFACE_SEARCH_DEVICE_ID: "${INSIGHTFACE_SEARCH_DEVICE_ID:-0}"
       INSIGHTFACE_SEARCH_TOPK_MODE: "${INSIGHTFACE_SEARCH_TOPK_MODE:-auto}"
       INSIGHTFACE_SEARCH_BUILD_BATCH_ROWS: "${INSIGHTFACE_SEARCH_BUILD_BATCH_ROWS:-4096}"
+      INSIGHTFACE_RTSP_TRANSPORT: "${INSIGHTFACE_RTSP_TRANSPORT:-tcp}"
       HTTP_PROXY: "${HTTP_PROXY:-}"
       HTTPS_PROXY: "${HTTPS_PROXY:-}"
       NO_PROXY: "${NO_PROXY:-}"
@@ -59,7 +60,7 @@ services:
 
   models:
     profiles: [tools]
-    image: ghcr.io/deepinsight/insightface-server:0.3.1-cpu
+    image: insightface-server:rtsp-tcp
     platform: linux/amd64
     init: true
     read_only: true

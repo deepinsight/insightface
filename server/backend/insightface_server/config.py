@@ -20,6 +20,7 @@ SUPPORTED_SEARCH_PROFILES = (
 SUPPORTED_SEARCH_LOAD_POLICIES = ("eager", "lazy")
 SUPPORTED_SEARCH_BACKENDS = ("auto", "reference", "native_cpu", "native_cuda")
 SUPPORTED_SEARCH_TOPK_MODES = ("auto", "host", "device")
+SUPPORTED_RTSP_TRANSPORTS = ("tcp", "udp")
 DEFAULT_DETECTOR_INPUT_SIZES = ((96, 96), (512, 512))
 DEFAULT_DETECTOR_THRESHOLD = 0.50
 DEFAULT_DETECTOR_NMS_THRESHOLD = 0.40
@@ -390,6 +391,7 @@ class Settings:
     rtsp_open_timeout_seconds: float = 5.0
     rtsp_read_timeout_seconds: float = 5.0
     rtsp_reconnect_delay_seconds: float = 1.0
+    rtsp_transport: str = "tcp"
     addons: tuple[str, ...] = ()
     auto_download_addons: tuple[str, ...] = ()
     liveness_mode: str = "normal"
@@ -568,5 +570,8 @@ class Settings:
                 1.0,
                 minimum=0.1,
                 maximum=30.0,
+            ),
+            rtsp_transport=_choice(
+                "INSIGHTFACE_RTSP_TRANSPORT", "tcp", SUPPORTED_RTSP_TRANSPORTS
             ),
         )
