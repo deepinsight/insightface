@@ -1,6 +1,8 @@
 #ifndef INSPIRSE_FACE_FACE_ACTION_DATA_H
 #define INSPIRSE_FACE_FACE_ACTION_DATA_H
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <inspirecv/inspirecv.h>
 #include "middleware/utils.h"
@@ -22,10 +24,10 @@ typedef struct FaceActionList {
 class INSPIRE_API FaceActionPredictor {
 public:
     FaceActionPredictor(int record_list_length) {
-        record_list.resize(record_list_length);
-        record_list_euler.resize(record_list_length);
-        record_list_eyes.resize(record_list_length);
-        record_size = record_list_length;
+        record_size = std::max(record_list_length, 1);
+        record_list.resize(record_size);
+        record_list_euler.resize(record_size);
+        record_list_eyes.resize(record_size);
         index = 0;
     }
 
@@ -35,57 +37,51 @@ public:
         record_list[0] = landmark;
         record_list_euler[0] = euler_angle;
         record_list_eyes[0] = eyes_status;
-        index += 1;
+        if (index < record_size) {
+            index += 1;
+        }
     }
 
     void Reset() {
-        record_list.clear();
-        record_list.resize(record_size);
-        record_list_euler.clear();
-        record_list_euler.resize(record_size);
-        record_list_eyes.clear();
-        record_list_eyes.resize(record_size);
         index = 0;
     }
 
     FaceActionList AnalysisFaceAction(const SemanticIndex& semantic_index) {
         FaceActionList actionRecord;
         actions.clear();
-        eye_state_list.clear();
         if (index < record_list.size()) {
             actions.push_back(ACT_NORMAL);
             actionRecord.normal = 1;
         } else {
-            for (int i = 0; i < record_list_eyes.size(); i++) {
-                const auto &eye = record_list_eyes[i];
-                std::pair<float, float> eye_state(eye[0], eye[1]);
-                eye_state_list.push_back(eye_state);
-            }
-
             // count mouth aspect ratio
 
-            float mouth_widthwise_d = record_list[0][semantic_index.mouth_left_corner].Distance(record_list[0][semantic_index.mouth_right_corner]);
-            float mouth_heightwise_d = record_list[0][semantic_index.mouth_upper].Distance(record_list[0][semantic_index.mouth_lower]);
-            float mouth_aspect_ratio = mouth_heightwise_d / mouth_widthwise_d;
-            if (mouth_aspect_ratio > 0.3) {
-                actions.push_back(ACT_JAW_OPEN);
-                actionRecord.jawOpen = 1;
+            const float mouth_widthwise_d =
+              record_list[0][semantic_index.mouth_left_corner].Distance(record_list[0][semantic_index.mouth_right_corner]);
+            const float mouth_heightwise_d =
+              record_list[0][semantic_index.mouth_upper].Distance(record_list[0][semantic_index.mouth_lower]);
+            if (mouth_widthwise_d > 0.0f) {
+                const float mouth_aspect_ratio = mouth_heightwise_d / mouth_widthwise_d;
+                if (std::isfinite(mouth_aspect_ratio) && mouth_aspect_ratio > 0.3) {
+                    actions.push_back(ACT_JAW_OPEN);
+                    actionRecord.jawOpen = 1;
+                }
             }
 
             int counter_eye_open = 0;
             int counter_eye_close = 0;
-            for (auto &e : eye_state_list) {
-                if (e.first < 0.5 || e.second < 0.5) {
+            for (const auto &eye : record_list_eyes) {
+                if (eye[0] < 0.5 || eye[1] < 0.5) {
                     counter_eye_close += 1;
                 }
-                if (e.first > 0.5 || e.second > 0.5) {
+                if (eye[0] > 0.5 || eye[1] > 0.5) {
                     counter_eye_open += 1;
                 }
             }
-            if (counter_eye_close > 0 && counter_eye_open > 2 && record_list_euler[0][1] > -6 && record_list_euler[0][0] < 6) {
+            const bool blink_detected =
+              counter_eye_close > 0 && counter_eye_open > 2 && record_list_euler[0][1] > -6 && record_list_euler[0][0] < 6;
+            if (blink_detected) {
                 actions.push_back(ACT_BLINK);
                 actionRecord.blink = 1;
-                Reset();
             }
 
             bool counter_head_shake_left = false;
@@ -107,6 +103,10 @@ public:
                 actions.push_back(ACT_RAISE_HEAD);
                 actionRecord.raiseHead = 1;
             }
+
+            if (blink_detected) {
+                Reset();
+            }
         }
         return actionRecord;
     }
@@ -117,11 +117,8 @@ public:
 
 private:
     void MoveRecordList() {
-        // for(int i = 0 ; i < record_list.size() - 1 ; i++){
-        //    record_list[i+1] = record_list[i];
-        //    record_list_euler[i+1] = record_list_euler[i];
-        //}
-        for (int i = record_list.size() - 1; i > 0; i--) {
+        const int last_valid_index = std::min(index, record_size - 1);
+        for (int i = last_valid_index; i > 0; i--) {
             record_list[i] = record_list[i - 1];
             record_list_euler[i] = record_list_euler[i - 1];
             record_list_eyes[i] = record_list_eyes[i - 1];

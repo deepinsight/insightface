@@ -1,0 +1,9 @@
+{
+  "name": "@hyperinspire/inspireface",
+  "version": "1.2.4",
+  "description": "InspireFace face SDK for HarmonyOS ArkTS",
+  "main": "Index.ets",
+  "author": "HyperInspire",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}

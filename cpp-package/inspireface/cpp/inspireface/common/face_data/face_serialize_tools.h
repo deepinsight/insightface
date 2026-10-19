@@ -12,6 +12,8 @@
 #include "data_type.h"
 #include "track_module/landmark/all.h"
 #include <log.h>
+#include <algorithm>
+#include <cstring>
 
 // Define the namespace "inspire" for encapsulation
 namespace inspire {
@@ -50,6 +52,7 @@ inline void INSPIRE_API PrintHyperFaceDataDetail(const FaceTrackWrap& data) {
  */
 inline FaceTrackWrap INSPIRE_API FaceObjectInternalToHyperFaceData(const FaceObjectInternal& obj, int group_index = -1) {
     FaceTrackWrap data;
+    std::memset(&data, 0, sizeof(data));
     // Face rect
     data.rect.x = obj.bbox_.GetX();
     data.rect.y = obj.bbox_.GetY();
@@ -64,16 +67,20 @@ inline FaceTrackWrap INSPIRE_API FaceObjectInternalToHyperFaceData(const FaceObj
     data.trans.ty = obj.getTransMatrix().Get(1, 2);
     // KetPoints five
     if (!obj.high_result.lmk.empty()) {
-        for (int i = 0; i < obj.high_result.lmk.size(); ++i) {
+        const size_t point_count = std::min<size_t>(5, obj.high_result.lmk.size());
+        for (size_t i = 0; i < point_count; ++i) {
             data.keyPoints[i].x = obj.high_result.lmk[i].GetX();
             data.keyPoints[i].y = obj.high_result.lmk[i].GetY();
         }
-        for (int i = 0; i < 5; ++i) {
+        const size_t quality_count = std::min<size_t>(5, obj.high_result.lmk_quality.size());
+        std::fill(std::begin(data.quality), std::end(data.quality), -1.0f);
+        for (size_t i = 0; i < quality_count; ++i) {
             data.quality[i] = obj.high_result.lmk_quality[i];
         }
         //        LOGD("HIGHT");
     } else {
-        for (int i = 0; i < obj.keyPointFive.size(); ++i) {
+        const size_t point_count = std::min<size_t>(5, obj.keyPointFive.size());
+        for (size_t i = 0; i < point_count; ++i) {
             data.keyPoints[i].x = obj.keyPointFive[i].GetX();
             data.keyPoints[i].y = obj.keyPointFive[i].GetY();
         }
@@ -91,7 +98,8 @@ inline FaceTrackWrap INSPIRE_API FaceObjectInternalToHyperFaceData(const FaceObj
     data.face3DAngle.roll = obj.high_result.roll;
     data.face3DAngle.yaw = obj.high_result.yaw;
     // Density Landmark
-    if (!obj.landmark_smooth_aux_.empty()) {
+    if (!obj.landmark_smooth_aux_.empty() &&
+        obj.landmark_smooth_aux_.back().size() >= static_cast<size_t>(FaceLandmarkAdapt::NUM_OF_LANDMARK)) {
         data.densityLandmarkEnable = 1;
         const auto& lmk = obj.landmark_smooth_aux_.back();
         for (size_t i = 0; i < FaceLandmarkAdapt::NUM_OF_LANDMARK; i++) {
@@ -140,11 +148,8 @@ inline inspirecv::Point2f INSPIRE_API HPointToInternalPoint2f(const Point2F& poi
  * @return The result code.
  */
 inline int32_t INSPIRE_API RunSerializeHyperFaceData(const FaceTrackWrap& data, ByteArray& byteArray) {
-    byteArray.reserve(sizeof(data));
-
-    // Serialize the FaceTrackWrap structure itself
-    const char* dataBytes = reinterpret_cast<const char*>(&data);
-    byteArray.insert(byteArray.end(), dataBytes, dataBytes + sizeof(data));
+    byteArray.resize(sizeof(data));
+    std::memcpy(byteArray.data(), &data, sizeof(data));
 
     return HSUCCEED;
 }
@@ -177,7 +182,7 @@ inline int32_t INSPIRE_API RunDeserializeHyperFaceData(const ByteArray& byteArra
  */
 inline int32_t INSPIRE_API RunDeserializeHyperFaceData(const char* byteArray, size_t byteCount, FaceTrackWrap& data) {
     // Check if the byte stream size is sufficient
-    if (byteCount >= sizeof(data)) {
+    if (byteArray != nullptr && byteCount >= sizeof(data)) {
         // Copy data from the byte stream to the FaceTrackWrap structure
         std::memcpy(&data, byteArray, sizeof(data));
     } else {

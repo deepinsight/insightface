@@ -19,6 +19,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <memory>
+#include <limits>
 #include <unordered_map>
 #include "im2d.hpp"
 #include "im2d_single.h"
@@ -106,12 +107,18 @@ private:
         size_t buffer_size{0};
         rga_buffer_handle_t handle{0};
         rga_buffer_t buffer{};
+        bool cpu_access_active{false};
 
         bool Allocate(int w, int h, int c) {
+            if (w <= 0 || h <= 0 || c <= 0 ||
+                static_cast<size_t>(w) > std::numeric_limits<size_t>::max() / static_cast<size_t>(h) ||
+                static_cast<size_t>(w) * static_cast<size_t>(h) > std::numeric_limits<size_t>::max() / static_cast<size_t>(c)) {
+                return false;
+            }
             width = w;
             height = h;
             channels = c;
-            buffer_size = width * height * channels;
+            buffer_size = static_cast<size_t>(width) * static_cast<size_t>(height) * static_cast<size_t>(channels);
 
             int ret = dma_buf_alloc(INSPIREFACE_CONTEXT->GetRockchipDmaHeapPath().c_str(), buffer_size, &dma_fd, &virtual_addr);
             if (ret < 0) {
@@ -132,6 +139,10 @@ private:
         }
 
         void Release() {
+            if (cpu_access_active && dma_fd >= 0) {
+                dma_sync_cpu_to_device(dma_fd);
+                cpu_access_active = false;
+            }
             if (handle) {
                 releasebuffer_handle(handle);
                 handle = 0;
@@ -152,15 +163,17 @@ private:
         int width;
         int height;
         int channels;
+        bool is_src;
 
         bool operator==(const BufferKey& other) const {
-            return width == other.width && height == other.height && channels == other.channels;
+            return width == other.width && height == other.height && channels == other.channels && is_src == other.is_src;
         }
     };
 
     struct BufferKeyHash {
         std::size_t operator()(const BufferKey& key) const {
-            return std::hash<int>()(key.width) ^ (std::hash<int>()(key.height) << 1) ^ (std::hash<int>()(key.channels) << 2);
+            return std::hash<int>()(key.width) ^ (std::hash<int>()(key.height) << 1) ^ (std::hash<int>()(key.channels) << 2) ^
+                   (std::hash<bool>()(key.is_src) << 3);
         }
     };
 
@@ -188,6 +201,7 @@ private:
         auto& buffer = buffer_cache_[key];
         if (!buffer.Allocate(key.width, key.height, key.channels)) {
             INSPIRECV_LOG(ERROR) << "Failed to allocate RGA buffer";
+            buffer_cache_.erase(key);
             throw std::runtime_error("RGA buffer allocation failed");
         }
 
@@ -200,10 +214,14 @@ private:
         return buffer;
     }
 
+    bool BeginCpuAccess(RGABuffer& buffer);
+
+    bool EndCpuAccess(RGABuffer& buffer);
+
 private:
     std::unordered_map<BufferKey, RGABuffer, BufferKeyHash> buffer_cache_;
-    BufferKey last_src_key_{0, 0, 0};
-    BufferKey last_dst_key_{0, 0, 0};
+    BufferKey last_src_key_{0, 0, 0, true};
+    BufferKey last_dst_key_{0, 0, 0, false};
     int32_t aligned_width_{0};
 };
 

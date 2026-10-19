@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
 project(InspireFace)
 
+include(CTest)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+if(NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+endif()
 
 set(INSPIRE_FACE_SERIES_NAME "Community Edition" CACHE STRING "Series name")
 
@@ -26,7 +30,7 @@ endif()
 # Current version
 set(INSPIRE_FACE_VERSION_MAJOR 1)
 set(INSPIRE_FACE_VERSION_MINOR 2)
-set(INSPIRE_FACE_VERSION_PATCH 3)
+set(INSPIRE_FACE_VERSION_PATCH 4)
 
 # Converts the version number to a string
 string(CONCAT INSPIRE_FACE_VERSION_MAJOR_STR ${INSPIRE_FACE_VERSION_MAJOR})
@@ -58,6 +62,27 @@ endif()
 
 # Install cpp api header file
 option(ISF_INSTALL_CPP_HEADER "Install cpp api header file." ON)
+
+option(ISF_BUILD_APPLE_FRAMEWORK "Build the Apple framework and language adapters alongside the original SDK." OFF)
+option(ISF_BUILD_APPLE_TESTS "Build Apple language contract tests." OFF)
+option(ISF_BUILD_JAVA "Build the portable JNI library and Java 8-compatible JAR." OFF)
+option(ISF_BUILD_JAVA_TESTS "Build and run JVM JNI contract tests on the host." OFF)
+if(ISF_BUILD_JAVA_TESTS AND NOT ISF_BUILD_JAVA)
+    message(FATAL_ERROR "ISF_BUILD_JAVA_TESTS requires ISF_BUILD_JAVA")
+endif()
+if(ISF_BUILD_JAVA AND (IOS OR CMAKE_SYSTEM_NAME STREQUAL "iOS" OR OHOS))
+    message(FATAL_ERROR "The portable JNI adapter requires a JVM platform")
+endif()
+if(ISF_BUILD_JAVA)
+    # JNI can also link a static core and its dependencies into a shared adapter.
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+if(ISF_BUILD_APPLE_FRAMEWORK AND NOT APPLE)
+    message(FATAL_ERROR "The Apple framework target requires an Apple platform")
+endif()
+if(ISF_BUILD_APPLE_TESTS AND NOT ISF_BUILD_APPLE_FRAMEWORK)
+    message(FATAL_ERROR "ISF_BUILD_APPLE_TESTS requires ISF_BUILD_APPLE_FRAMEWORK")
+endif()
 
 # Set the ISF_THIRD_PARTY_DIR variable to allow it to be set externally from the command line, or use the default path if it is not set
 set(ISF_THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty" CACHE PATH "Path to the third-party libraries directory")
@@ -176,6 +201,18 @@ option(ISF_BUILD_WITH_TEST "Open Build Unit-Test." ON)
 # If you want to build the sample, you need to set this to ON
 option(ISF_BUILD_WITH_SAMPLE "Open Build Sample Exec." ON)
 
+# Build the ArkTS Node-API adapter as a separate target. The core SDK remains
+# platform-neutral and the adapter calls only the public C API.
+option(ISF_BUILD_OHOS_NAPI "Build the HarmonyOS ArkTS Node-API adapter." OFF)
+if(ISF_BUILD_OHOS_NAPI AND NOT OHOS)
+    message(FATAL_ERROR "ISF_BUILD_OHOS_NAPI requires the OpenHarmony toolchain")
+endif()
+
+# Use Task preprocessing by default; OFF retains the MNN ImageProcess fallback.
+option(ISF_ENABLE_INSPIRECV_TASK_PREPROCESS "Use InspireCV Task API for image preprocessing." ON)
+# InspireCV selects NEON kernels only when the target architecture supports them.
+option(INSPIRECV_TASK_ENABLE_ARM_NEON "Enable ARM NEON imageprocess kernels" ON)
+
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cpp/)
 
 option(ISF_NEVER_USE_OPENCV "Never use opencv." ON)
@@ -196,20 +233,22 @@ endif()
 
 include_directories(${ISF_THIRD_PARTY_DIR}/InspireCV/3rdparty/Eigen-3.4.0-Headers)
 
-if(APPLE)
+if(WIN32)
+    message("Use Windows device")
+    set(PLAT windows)
+elseif(OHOS)
+    message("Use OpenHarmony device")
+    set(PLAT ohos)
+elseif(APPLE)
     if(IOS)
-        add_definitions(-DTARGET_OS_IOS)
-        message(IOS_3RDPARTY=${IOS_3RDPARTY})
+        add_definitions(-DTARGET_OS_IOS=1)
         set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
         set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE NO)
-            add_definitions(-DTARGET_OS_IOS)
-        message(IOS_3RDPARTY=${IOS_3RDPARTY})
-        set(CMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH NO)
-        set(CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE NO)
-
-        set(MNN_FRAMEWORK_PATH "${IOS_3RDPARTY}/MNN.framework")
-        include_directories("${MNN_FRAMEWORK_PATH}/")
-        link_directories(${IOS_3RDPARTY})
+        if(NOT DEFINED MNN_STATIC_PATH)
+            set(MNN_FRAMEWORK_PATH "${IOS_3RDPARTY}/MNN.framework")
+            include_directories("${MNN_FRAMEWORK_PATH}/")
+            link_directories(${IOS_3RDPARTY})
+        endif()
     else()
         message("Use apple device")
         set(PLAT darwin)
@@ -259,7 +298,7 @@ if(ISF_ENABLE_OPENCV)
                     set(OpenCV_STATIC_INCLUDE_DIR ${OPENCV_PRECOMPILED_DIR}/opencv/3.4.5/opencv-linux-aarch64/include/)
                 endif()
             endif()
-        else ()
+        elseif(NOT WIN32)
             set(PLAT linux)
         endif ()
         find_package(OpenCV REQUIRED)
@@ -268,8 +307,12 @@ endif ()
 
 # InspireCV dependency configuration
 set(INSPIRECV_BUILD_OBJECT_LIBS ON CACHE BOOL "Build InspireCV as object library")
-add_subdirectory(${ISF_THIRD_PARTY_DIR}/InspireCV EXCLUDE_FROM_ALL)
-set(INSPIRECV_INCLUDE_PATH "${ISF_THIRD_PARTY_DIR}/InspireCV/include")
+set(ISF_INSPIRECV_SOURCE_DIR "${ISF_THIRD_PARTY_DIR}/InspireCV" CACHE PATH "InspireCV source directory")
+if(NOT EXISTS "${ISF_INSPIRECV_SOURCE_DIR}/CMakeLists.txt")
+    message(FATAL_ERROR "Invalid ISF_INSPIRECV_SOURCE_DIR: ${ISF_INSPIRECV_SOURCE_DIR}")
+endif()
+add_subdirectory(${ISF_INSPIRECV_SOURCE_DIR} ${CMAKE_BINARY_DIR}/InspireCV EXCLUDE_FROM_ALL)
+set(INSPIRECV_INCLUDE_PATH "${ISF_INSPIRECV_SOURCE_DIR}/include")
 set(INSPIRECV_LIBS InspireCV)
 
 # If you need using CUDA-enabled MNN, you need to manually configure the pre-compiled CUDA-enabled MNN library path
@@ -295,7 +338,11 @@ if (ISF_GLOBAL_INFERENCE_BACKEND_USE_MNN_CUDA)
 elseif(DEFINED MNN_STATIC_PATH)
     message("Using static MNN from specified path: ${MNN_STATIC_PATH}")
     set(MNN_INCLUDE_DIRS "${MNN_STATIC_PATH}/include")
-    set(MNN_LIBS "${MNN_STATIC_PATH}/lib/libMNN.a")
+    if(WIN32)
+        set(MNN_LIBS "${MNN_STATIC_PATH}/lib/MNN.lib")
+    else()
+        set(MNN_LIBS "${MNN_STATIC_PATH}/lib/libMNN.a")
+    endif()
 elseif(IOS)
     message(Build iOS)
 
@@ -322,11 +369,30 @@ endif ()
 
 
 # Set the installation directory to the build directory
-set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
+if(WIN32)
+    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "SDK installation prefix" FORCE)
+    endif()
+else()
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install")
+endif()
+set(ISF_INSTALL_ROOT "${CMAKE_INSTALL_PREFIX}")
+if(WIN32)
+    # Relative destinations let --install --prefix relocate the complete SDK.
+    set(ISF_INSTALL_ROOT ".")
+endif()
 
 # Add a child project: InspireFace Source
 add_subdirectory(cpp/inspireface)
 get_property(InspireFace TARGET InspireFace PROPERTY InspireFace)
+
+if(ISF_BUILD_OHOS_NAPI)
+    add_subdirectory(cpp/inspireface/platform/ohos/napi)
+endif()
+
+if(ISF_BUILD_JAVA)
+    add_subdirectory(cpp/inspireface/platform/jni/portable)
+endif()
 
 # Add a child project: Samples
 if (ISF_BUILD_WITH_SAMPLE)
@@ -359,6 +425,8 @@ message(STATUS "\t ISF_BUILD_LINUX_ARM7: ${ISF_BUILD_LINUX_ARM7}")
 message(STATUS "\t ISF_BUILD_LINUX_AARCH64: ${ISF_BUILD_LINUX_AARCH64}")
 message(STATUS "\t ISF_BUILD_WITH_TEST: ${ISF_BUILD_WITH_TEST}")
 message(STATUS "\t ISF_BUILD_WITH_SAMPLE: ${ISF_BUILD_WITH_SAMPLE}")
+message(STATUS "\t ISF_ENABLE_INSPIRECV_TASK_PREPROCESS: ${ISF_ENABLE_INSPIRECV_TASK_PREPROCESS}")
+message(STATUS "\t INSPIRECV_TASK_ENABLE_ARM_NEON: ${INSPIRECV_TASK_ENABLE_ARM_NEON}")
 message(STATUS "\t OpenCV_DIR: ${OpenCV_DIR}")
 if(ISF_ENABLE_OPENCV)
     message(STATUS "\t OpenCV: Enabled")

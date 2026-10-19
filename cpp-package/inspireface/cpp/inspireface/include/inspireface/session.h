@@ -89,6 +89,12 @@ public:
     void SetTrackModeSmoothRatio(int32_t smooth_ratio);
 
     /**
+     * @brief Set the track mode smooth ratio without truncating fractional values.
+     * @param smooth_ratio Smoothing ratio in the inclusive range [0, 1].
+     */
+    void SetTrackModeSmoothRatio(float smooth_ratio);
+
+    /**
      * @brief Set the track mode num smooth cache frame.
      * @param num_smooth_cache_frame The track mode num smooth cache frame.
      */

@@ -409,6 +409,9 @@ private:
     DetectModuleMode m_detect_mode_;       ///< Current detection mode (image or video)
     bool m_always_detect_{};               ///< Flag to determine if detection should always occur
 
+    // Pins the exact model archive used to configure this session. Global
+    // Reload/Unload can safely publish or release a different archive.
+    std::shared_ptr<InspireArchive> m_archive_;
     std::shared_ptr<FaceTrackModule> m_face_track_;                ///< Shared pointer to the FaceTrack object
     std::shared_ptr<FeatureExtractionModule> m_face_recognition_;  ///< Shared pointer to the FaceRecognition object
     std::shared_ptr<FacePipelineModule> m_face_pipeline_;          ///< Shared pointer to the FacePipeline object

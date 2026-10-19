@@ -9,7 +9,7 @@
 #include "inspireface/middleware/thread/resource_pool.h"
 #include <thread>
 
-TEST_CASE("test_SessionParallel", "[Session][Parallel]") {
+TEST_CASE("test_SessionParallel", "[Session][Parallel][stress]") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
@@ -127,7 +127,7 @@ TEST_CASE("test_SessionParallel", "[Session][Parallel]") {
     }
 }
 
-TEST_CASE("test_SessionParallel_Memory", "[Session][Parallel][Memory]") {
+TEST_CASE("test_SessionParallel_Memory", "[Session][Parallel][Memory][stress]") {
     size_t memoryUsage = getCurrentMemoryUsage();
     TEST_PRINT("Current memory usage: {}MB", memoryUsage);
     int loop = 4;

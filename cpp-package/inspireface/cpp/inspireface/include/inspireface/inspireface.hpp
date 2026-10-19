@@ -11,4 +11,6 @@
 #include "similarity_converter.h"
 #include "spend_timer.h"
 #include "information.h"
+#include "component_version.h"
 #include "face_wrapper.h"
+#include "capture.h"

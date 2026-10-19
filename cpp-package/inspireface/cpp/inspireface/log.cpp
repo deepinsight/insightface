@@ -3,6 +3,7 @@
  * @date 2024-10-01
  */
 #include "log.h"
+#include <atomic>
 #include <mutex>
 #include <cstdarg>
 #include <cstring>
@@ -19,7 +20,7 @@ class LogManager::Impl {
 public:
     Impl() : currentLevel(LogLevel::ISF_LOG_INFO) {}
 
-    LogLevel currentLevel;
+    std::atomic<LogLevel> currentLevel;
     static std::mutex mutex;
 };
 
@@ -44,18 +45,19 @@ LogManager* LogManager::getInstance() {
 
 // Set log level
 void LogManager::setLogLevel(LogLevel level) {
-    pImpl->currentLevel = level;
+    pImpl->currentLevel.store(level, std::memory_order_relaxed);
 }
 
 // Get log level
 LogLevel LogManager::getLogLevel() const {
-    return pImpl->currentLevel;
+    return pImpl->currentLevel.load(std::memory_order_relaxed);
 }
 
 #ifdef ANDROID
 // Android logging implementation
 void LogManager::logAndroid(LogLevel level, const char* tag, const char* format, ...) const {
-    if (pImpl->currentLevel == LogLevel::ISF_LOG_NONE || level < pImpl->currentLevel)
+    const LogLevel current_level = pImpl->currentLevel.load(std::memory_order_relaxed);
+    if (current_level == LogLevel::ISF_LOG_NONE || level < current_level)
         return;
 
     int androidLevel;
@@ -94,7 +96,8 @@ void LogManager::logAndroid(LogLevel level, const char* tag, const char* format,
 // Standard logging implementation
 void LogManager::logStandard(LogLevel level, const char* filename, const char* function, int line, const char* format, ...) const {
     // Check whether the current level is LOG NONE or the log level is not enough to log
-    if (pImpl->currentLevel == LogLevel::ISF_LOG_NONE || level < pImpl->currentLevel)
+    const LogLevel current_level = pImpl->currentLevel.load(std::memory_order_relaxed);
+    if (current_level == LogLevel::ISF_LOG_NONE || level < current_level)
         return;
 
     // Build log prefix dynamically based on available data

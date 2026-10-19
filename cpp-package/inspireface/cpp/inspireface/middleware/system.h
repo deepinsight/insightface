@@ -7,7 +7,9 @@
 #include <memory>
 #include <string>
 #include <initializer_list>
+#include <limits>
 #if defined(_WIN32)
+#include <io.h>
 #include <windows.h>
 #else
 #include <dirent.h>
@@ -97,9 +99,19 @@ inline std::string Basename(const std::string& path) {
 
 #if defined(_WIN32)
 inline std::wstring Utf8ToWideChar(const std::string& utf8str) {
-    int size_required = MultiByteToWideChar(CP_UTF8, 0, utf8str.c_str(), utf8str.size(), NULL, 0);
-    std::wstring ws_translated_str(size_required, 0);
-    MultiByteToWideChar(CP_UTF8, 0, utf8str.c_str(), utf8str.size(), &ws_translated_str[0], size_required);
+    if (utf8str.empty() || utf8str.size() > static_cast<size_t>((std::numeric_limits<int>::max)())) {
+        return {};
+    }
+    const int byte_count = static_cast<int>(utf8str.size());
+    const int size_required = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8str.data(), byte_count, nullptr, 0);
+    if (size_required <= 0) {
+        return {};
+    }
+    std::wstring ws_translated_str(size_required, L'\0');
+    if (MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, utf8str.data(), byte_count,
+                            &ws_translated_str[0], size_required) != size_required) {
+        return {};
+    }
     return ws_translated_str;
 }
 #endif
@@ -115,7 +127,9 @@ inline bool IsExists(const std::string& path) {
 
 inline bool IsDir(const std::string& path) {
 #if defined(_WIN32)
-    return GetFileAttributesA(path.c_str()) == FILE_ATTRIBUTE_DIRECTORY;
+    const std::wstring wide_path = Utf8ToWideChar(path);
+    const DWORD attributes = GetFileAttributesW(wide_path.c_str());
+    return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 #else
     struct stat s;
     if (stat(path.c_str(), &s) != 0)
@@ -126,7 +140,9 @@ inline bool IsDir(const std::string& path) {
 
 inline bool IsFile(const std::string& path) {
 #if defined(_WIN32)
-    return GetFileAttributesA(path.c_str()) == FILE_ATTRIBUTE_ARCHIVE;
+    const std::wstring wide_path = Utf8ToWideChar(path);
+    const DWORD attributes = GetFileAttributesW(wide_path.c_str());
+    return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
 #else
     struct stat s;
     if (stat(path.c_str(), &s) != 0)

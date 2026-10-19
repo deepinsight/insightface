@@ -2,18 +2,27 @@
 #define INSPIREFACE_OMNI_INFERENACE__
 #include <cstdint>
 #include <cmath>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <array>
 #include <memory>
+#include <stdexcept>
 
 class XOutputData {
 public:
     XOutputData() : size(0), data(nullptr) {}
 
-    std::vector<float> CopyToFloatArray() {
+    std::vector<float> CopyToFloatArray() const {
         if (!buffer.empty()) {
             return buffer;
+        }
+
+        if (size == 0) {
+            return {};
+        }
+        if (data == nullptr) {
+            throw std::invalid_argument("XOutputData has a non-zero size and a null data pointer");
         }
 
         std::vector<float> floatArray;
@@ -73,14 +82,14 @@ public:
     typedef enum { xDefaultCPU, xMNNCuda, xCoreML } SpecialBackend;
 
 public:
-    virtual ~InferenceAdapter() {};
+    virtual ~InferenceAdapter() = default;
     virtual int32_t SetNumThreads(const int32_t num_threads) = 0;
     virtual int32_t Initialize(const std::string& model_filename, const XTransform& transform, const std::string& input_name,
                                const std::vector<std::string>& outputs_name) = 0;
     virtual int32_t Initialize(char* model_buffer, int model_size, const std::string& input_name, const XTransform& transform,
                                const std::vector<std::string>& outputs_name) = 0;
     virtual int32_t Finalize(void) = 0;
-    virtual int32_t SetInputsData(const std::vector<XInputData>& batch, ) = 0;
+    virtual int32_t SetInputsData(const std::vector<XInputData>& batch) = 0;
     virtual int32_t Forward(std::vector<XOutputDataList>& batch_outputs) = 0;
 
     virtual int32_t ResizeInputs() = 0;
@@ -91,7 +100,7 @@ public:
     };
 
 protected:
-    EngineType engine_type_;
+    EngineType engine_type_ = xEngineMNN;
     SpecialBackend special_backend_ = xDefaultCPU;
 };
 

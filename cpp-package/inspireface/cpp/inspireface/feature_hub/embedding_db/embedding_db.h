@@ -41,8 +41,10 @@ class EmbeddingDB {
 public:
     ~EmbeddingDB();
 
+    static std::shared_ptr<EmbeddingDB> AcquireInstance();
     static EmbeddingDB &GetInstance();
-    static void Init(const std::string &dbPath = ":memory:", size_t vectorDim = 512, IdMode idMode = IdMode::AUTO_INCREMENT);
+    static bool Init(const std::string &dbPath = ":memory:", size_t vectorDim = 512, IdMode idMode = IdMode::AUTO_INCREMENT);
+    static void Deinit();
 
     // Delete copy and move operations
     EmbeddingDB(const EmbeddingDB &) = delete;
@@ -59,13 +61,15 @@ public:
     std::vector<int64_t> BatchInsertVectors(const std::vector<std::vector<float>> &vectors);  // For auto-increment mode
 
     // Update vector
-    void UpdateVector(int64_t id, const std::vector<float> &newVector);
+    bool UpdateVector(int64_t id, const std::vector<float> &newVector);
 
     // Delete vector
-    void DeleteVector(int64_t id);
+    bool DeleteVector(int64_t id);
 
     std::vector<FaceSearchResult> SearchSimilarVectors(const std::vector<float> &queryVector, size_t top_k = 3, float keep_similar_threshold = 0.5f,
                                                        bool return_feature = false);
+    bool SearchSimilarVectors(const std::vector<float> &queryVector, std::vector<FaceSearchResult> &results, size_t top_k = 3,
+                              float keep_similar_threshold = 0.5f, bool return_feature = false);
 
     // Get vector count
     int64_t GetVectorCount() const;
@@ -79,19 +83,13 @@ public:
         return initialized_;
     }
 
-    // De-initialize database
-    static void Deinit() {
-        std::lock_guard<std::mutex> lock(instanceMutex_);
-        if (instance_) {
-            instance_.reset();
-        }
-    }
-
     std::vector<float> GetVector(int64_t id) const;
+    bool GetVector(int64_t id, std::vector<float> &vector) const;
 
-    void ShowTable();
+    bool ShowTable();
 
     std::vector<int64_t> GetAllIds();
+    bool GetAllIds(std::vector<int64_t> &ids);
 
 private:
     // Constructor: add ID mode parameter
@@ -99,21 +97,21 @@ private:
                          IdMode idMode = IdMode::AUTO_INCREMENT);
 
 private:
-    sqlite3 *db_;
+    sqlite3 *db_ = nullptr;
     size_t vectorDim_;
     std::string tableName_;
     IdMode idMode_;
     bool initialized_ = false;
 
     // Helper functions
-    void CheckVectorDimension(const std::vector<float> &vector) const;
-    void ExecuteSQL(const std::string &sql);
-    static void CheckSQLiteError(int rc, sqlite3 *db);
-    int64_t GetLastInsertRowId() const;
+    bool IsValidVector(const std::vector<float> &vector) const;
+    bool InsertVectorUnlocked(int64_t id, const std::vector<float> &vector, int64_t &allocId);
+    bool ExecuteSQLUnlocked(const std::string &sql);
+    bool ValidateSchemaUnlocked() const;
 
 private:
     // Singleton related
-    static std::unique_ptr<EmbeddingDB> instance_;
+    static std::shared_ptr<EmbeddingDB> instance_;
     static std::mutex instanceMutex_;
 
     // Database operation mutex

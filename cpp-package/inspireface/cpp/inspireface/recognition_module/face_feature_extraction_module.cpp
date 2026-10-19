@@ -16,11 +16,14 @@ FeatureExtractionModule::FeatureExtractionModule(InspireArchive &archive, bool e
         InspireModel model;
         m_status_code_ = archive.LoadModel("feature", model);
         if (m_status_code_ != SARC_SUCCESS) {
-            INSPIRE_LOGE("Load rec model error.");
+            INSPIRE_LOGE("Load rec model error: %d", m_status_code_);
+            m_status_code_ = HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+            return;
         }
         m_status_code_ = InitExtractInteraction(model);
-        if (m_status_code_ != 0) {
-            INSPIRE_LOGE("FaceRecognition error.");
+        if (m_status_code_ != HSUCCEED) {
+            INSPIRE_LOGE("FaceRecognition error: %d", m_status_code_);
+            return;
         }
     }
     m_landmark_param_ = archive.GetLandmarkParam();
@@ -28,7 +31,6 @@ FeatureExtractionModule::FeatureExtractionModule(InspireArchive &archive, bool e
 
 int32_t FeatureExtractionModule::InitExtractInteraction(InspireModel &model) {
     try {
-        auto input_size = model.Config().get<std::vector<int>>("input_size");
         m_extract_ = std::make_shared<ExtractAdapt>();
         auto ret = m_extract_->LoadData(model, model.modelType);
         if (ret != InferenceWrapper::WrapperOk) {
@@ -61,8 +63,7 @@ int32_t FeatureExtractionModule::FaceExtract(inspirecv::FrameProcess &processor,
     //    cv::imshow("w", crop);
     //    cv::waitKey(0);
     embedded = (*m_extract_)(crop, norm, normalize);
-
-    return 0;
+    return embedded.empty() ? HERR_SESS_REC_EXTRACT_FAILURE : HSUCCEED;
 }
 
 int32_t FeatureExtractionModule::FaceExtractWithAlignmentImage(inspirecv::FrameProcess &processor, Embedded &embedded, float &norm,
@@ -72,8 +73,7 @@ int32_t FeatureExtractionModule::FaceExtractWithAlignmentImage(inspirecv::FrameP
     }
     auto crop = processor.ExecuteImageScaleProcessing(1.0f, false);
     embedded = (*m_extract_)(crop, norm, normalize);
-
-    return 0;
+    return embedded.empty() ? HERR_SESS_REC_EXTRACT_FAILURE : HSUCCEED;
 }
 
 int32_t FeatureExtractionModule::FaceExtractWithAlignmentImage(const inspirecv::Image& wrapped, Embedded &embedded, float &norm,
@@ -82,8 +82,7 @@ int32_t FeatureExtractionModule::FaceExtractWithAlignmentImage(const inspirecv::
         return HERR_SESS_REC_EXTRACT_FAILURE;
     }
     embedded = (*m_extract_)(wrapped, norm, normalize);
-
-    return 0;
+    return embedded.empty() ? HERR_SESS_REC_EXTRACT_FAILURE : HSUCCEED;
 }
 
 int32_t FeatureExtractionModule::FaceExtract(inspirecv::FrameProcess &processor, const FaceObjectInternal &face, Embedded &embedded, float &norm,
@@ -101,8 +100,7 @@ int32_t FeatureExtractionModule::FaceExtract(inspirecv::FrameProcess &processor,
     auto crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
 
     embedded = (*m_extract_)(crop, norm, normalize);
-
-    return 0;
+    return embedded.empty() ? HERR_SESS_REC_EXTRACT_FAILURE : HSUCCEED;
 }
 
 const std::shared_ptr<ExtractAdapt> &FeatureExtractionModule::getMExtract() const {

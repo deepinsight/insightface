@@ -9,6 +9,7 @@
 #include <chrono>
 #include <memory>
 #include <cstring>
+#include <limits>
 #include <cuda_fp16.h>
 #include <NvInfer.h>
 #include <cuda_runtime_api.h>
@@ -35,16 +36,6 @@ struct TRTContextDeleter {
     void operator()(nvinfer1::IExecutionContext *context) const {
         if (context)
             delete context;
-    }
-};
-
-// custom deleter for CUDA stream
-struct CUDAStreamDeleter {
-    void operator()(cudaStream_t *stream) const {
-        if (stream) {
-            cudaStreamDestroy(*stream);
-            delete stream;
-        }
     }
 };
 
@@ -78,20 +69,10 @@ static std::vector<char> readModelFile(const std::string &filename) {
     return buffer;
 }
 
-// CUDA error check macro
-#define CHECK_CUDA(call)                                                \
-    do {                                                                \
-        cudaError_t error = call;                                       \
-        if (error != cudaSuccess) {                                     \
-            INSPIRE_LOGE("[CUDA error] %s", cudaGetErrorString(error)); \
-            return TENSORRT_HFAIL;                                      \
-        }                                                               \
-    } while (0)
-
 // TensorRT adapter implementation class
 class TensorRTAdapter::Impl {
 public:
-    Impl() : m_ownStream(false), m_inferenceMode(TensorRTAdapter::InferenceMode::FP32), m_deviceId(0) {
+    Impl() : m_inferenceMode(TensorRTAdapter::InferenceMode::FP32), m_deviceId(0), m_inferenceTime(0.0) {
         // create Logger with smart pointer
         m_logger = std::make_unique<TRTLogger>();
     }
@@ -110,15 +91,8 @@ public:
     }
 
     ~Impl() {
-        // release resources - device memory needs to be released manually
-        for (auto &pair : m_deviceBuffers) {
-            if (pair.second) {
-                cudaFree(pair.second);
-            }
-        }
-        m_deviceBuffers.clear();
-
-        // smart pointers will handle the release of other resources
+        resetNetwork();
+        releaseOwnedStream();
     }
 
     int32_t readFromFile(const std::string &enginePath) {
@@ -153,8 +127,10 @@ public:
 
     // create and deserialize engine
     int32_t deserializeEngine(const std::vector<char> &modelData) {
-        // init device
-        initDevice();
+        resetNetwork();
+        if (initDevice() != TENSORRT_HSUCCEED) {
+            return TENSORRT_HFAIL;
+        }
         // create runtime
         m_runtime.reset(nvinfer1::createInferRuntime(*m_logger));
         if (!m_runtime) {
@@ -189,15 +165,23 @@ public:
         }
 
         // initialize CUDA stream
-        if (!m_stream) {
-            cudaStream_t *stream = new cudaStream_t;
-            CHECK_CUDA(cudaStreamCreate(stream));
-            m_stream.reset(stream);
+        if (!m_streamConfigured) {
+            cudaStream_t stream = nullptr;
+            if (!checkCuda(cudaStreamCreate(&stream), "failed to create CUDA stream")) {
+                resetNetwork();
+                return TENSORRT_HFAIL;
+            }
+            m_stream = stream;
             m_ownStream = true;
+            m_streamConfigured = true;
         }
 
         // pre-allocate device memory
-        return allocateDeviceMemory();
+        if (allocateDeviceMemory() != TENSORRT_HSUCCEED) {
+            resetNetwork();
+            return TENSORRT_HFAIL;
+        }
+        return TENSORRT_HSUCCEED;
     }
 
     // allocate device memory
@@ -208,9 +192,14 @@ public:
             nvinfer1::DataType dtype = m_engine->getTensorDataType(name.c_str());
             size_t size = getMemorySize(dims, dtype);
 
-            void *buffer = nullptr;
-            CHECK_CUDA(cudaMalloc(&buffer, size));
-            m_deviceBuffers[name] = buffer;
+            if (size == 0 && hasDynamicDimension(dims)) {
+                m_inputShapes[name] = dimsToVector(dims);
+                continue;
+            }
+            if (size == 0 || ensureDeviceBuffer(name, size) != TENSORRT_HSUCCEED) {
+                INSPIRE_LOGE("[TensorRT error] invalid or unresolved input shape for %s", name.c_str());
+                return TENSORRT_HFAIL;
+            }
 
             // store shape information
             m_inputShapes[name] = dimsToVector(dims);
@@ -221,9 +210,14 @@ public:
             nvinfer1::DataType dtype = m_engine->getTensorDataType(name.c_str());
             size_t size = getMemorySize(dims, dtype);
 
-            void *buffer = nullptr;
-            CHECK_CUDA(cudaMalloc(&buffer, size));
-            m_deviceBuffers[name] = buffer;
+            if (size == 0 && hasDynamicDimension(dims)) {
+                m_outputShapes[name] = dimsToVector(dims);
+                continue;
+            }
+            if (size == 0 || ensureDeviceBuffer(name, size) != TENSORRT_HSUCCEED) {
+                INSPIRE_LOGE("[TensorRT error] invalid or unresolved output shape for %s", name.c_str());
+                return TENSORRT_HFAIL;
+            }
 
             // Save shape information
             m_outputShapes[name] = dimsToVector(dims);
@@ -233,22 +227,36 @@ public:
     }
 
     // set input data
-    void setInput(const char *inputName, const void *data) {
-        auto it = m_deviceBuffers.find(inputName);
-        if (it != m_deviceBuffers.end()) {
-            nvinfer1::Dims dims = m_engine->getTensorShape(inputName);
-            nvinfer1::DataType dtype = m_engine->getTensorDataType(inputName);
-            size_t size = getMemorySize(dims, dtype);
-
-            // copy data from host to device
-            cudaMemcpyAsync(it->second, data, size, cudaMemcpyHostToDevice, *m_stream.get());
-            cudaStreamSynchronize(*m_stream.get());  // add synchronization to ensure data is fully copied
+    int32_t setInput(const char *inputName, const void *data) {
+        if (!inputName || !data || !m_engine || !m_streamConfigured) {
+            INSPIRE_LOGE("[TensorRT error] invalid input or uninitialized adapter");
+            return TENSORRT_HFAIL;
         }
+        auto it = m_deviceBuffers.find(inputName);
+        if (it == m_deviceBuffers.end()) {
+            INSPIRE_LOGE("[TensorRT error] invalid input name: %s", inputName);
+            return TENSORRT_HFAIL;
+        }
+
+        nvinfer1::Dims dims = m_context ? m_context->getTensorShape(inputName) : m_engine->getTensorShape(inputName);
+        nvinfer1::DataType dtype = m_engine->getTensorDataType(inputName);
+        size_t size = getMemorySize(dims, dtype);
+        if (size == 0 || size > m_deviceBufferSizes[inputName]) {
+            INSPIRE_LOGE("[TensorRT error] invalid input buffer size for %s", inputName);
+            return TENSORRT_HFAIL;
+        }
+
+        // Copies and inference use the same stream, so enqueue ordering guarantees
+        // correctness without a synchronization point for every input tensor.
+        return checkCuda(cudaMemcpyAsync(it->second, data, size, cudaMemcpyHostToDevice, m_stream),
+                         "failed to copy input to device")
+                 ? TENSORRT_HSUCCEED
+                 : TENSORRT_HFAIL;
     }
 
     // set batch size (only for models with dynamic shapes)
     int32_t setBatchSize(int batchSize) {
-        if (m_inputNames.empty())
+        if (batchSize <= 0 || m_inputNames.empty() || !m_context || !m_engine)
             return TENSORRT_HFAIL;
 
         for (const auto &name : m_inputNames) {
@@ -264,7 +272,24 @@ public:
 
                 // update shape information
                 m_inputShapes[name] = dimsToVector(newDims);
+
+                nvinfer1::Dims resolvedDims = m_context->getTensorShape(name.c_str());
+                size_t size = getMemorySize(resolvedDims, m_engine->getTensorDataType(name.c_str()));
+                if (size == 0 || ensureDeviceBuffer(name, size) != TENSORRT_HSUCCEED) {
+                    INSPIRE_LOGE("[TensorRT error] failed to resize input buffer for %s", name.c_str());
+                    return TENSORRT_HFAIL;
+                }
             }
+        }
+
+        for (const auto &name : m_outputNames) {
+            nvinfer1::Dims resolvedDims = m_context->getTensorShape(name.c_str());
+            size_t size = getMemorySize(resolvedDims, m_engine->getTensorDataType(name.c_str()));
+            if (size == 0 || ensureDeviceBuffer(name, size) != TENSORRT_HSUCCEED) {
+                INSPIRE_LOGE("[TensorRT error] failed to resize output buffer for %s", name.c_str());
+                return TENSORRT_HFAIL;
+            }
+            m_outputShapes[name] = dimsToVector(resolvedDims);
         }
 
         return TENSORRT_HSUCCEED;
@@ -272,20 +297,22 @@ public:
 
     // forward inference
     int32_t forward() {
-        if (!m_context || !m_engine) {
+        if (!m_context || !m_engine || !m_streamConfigured) {
             return TENSORRT_HFAIL;
         }
 
         // check if all tensors are bound to addresses
         for (const auto &name : m_inputNames) {
-            if (!m_context->setTensorAddress(name.c_str(), m_deviceBuffers[name])) {
+            auto buffer = m_deviceBuffers.find(name);
+            if (buffer == m_deviceBuffers.end() || !buffer->second || !m_context->setTensorAddress(name.c_str(), buffer->second)) {
                 INSPIRE_LOGE("[TensorRT error] failed to set input tensor %s address", name.c_str());
                 return TENSORRT_FORWARD_FAILED;
             }
         }
 
         for (const auto &name : m_outputNames) {
-            if (!m_context->setTensorAddress(name.c_str(), m_deviceBuffers[name])) {
+            auto buffer = m_deviceBuffers.find(name);
+            if (buffer == m_deviceBuffers.end() || !buffer->second || !m_context->setTensorAddress(name.c_str(), buffer->second)) {
                 INSPIRE_LOGE("[TensorRT error] failed to set output tensor %s address", name.c_str());
                 return TENSORRT_FORWARD_FAILED;
             }
@@ -295,10 +322,15 @@ public:
         auto start = std::chrono::high_resolution_clock::now();
 
         // forward inference
-        bool status = m_context->enqueueV3(*m_stream.get());
+        bool status = m_context->enqueueV3(m_stream);
+        if (!status) {
+            return TENSORRT_FORWARD_FAILED;
+        }
 
         // synchronize CUDA stream
-        cudaStreamSynchronize(*m_stream.get());
+        if (!checkCuda(cudaStreamSynchronize(m_stream), "failed to synchronize inference stream")) {
+            return TENSORRT_FORWARD_FAILED;
+        }
 
         // record end time
         auto end = std::chrono::high_resolution_clock::now();
@@ -307,24 +339,34 @@ public:
         auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
         m_inferenceTime = duration_us.count() / 1000.0;
 
-        return status ? TENSORRT_HSUCCEED : TENSORRT_FORWARD_FAILED;
+        return TENSORRT_HSUCCEED;
     }
 
     // get output data
     const void *getOutput(const char *nodeName) {
+        if (!nodeName || !m_context || !m_engine || !m_streamConfigured) {
+            return nullptr;
+        }
         auto it = m_deviceBuffers.find(nodeName);
         if (it != m_deviceBuffers.end()) {
             nvinfer1::Dims dims = m_context->getTensorShape(nodeName);
             nvinfer1::DataType dtype = m_engine->getTensorDataType(nodeName);
             size_t size = getMemorySize(dims, dtype);
-
-            // copy output data from device to host
-            if (m_hostOutputBuffers.find(nodeName) == m_hostOutputBuffers.end()) {
-                m_hostOutputBuffers[nodeName].resize(size);
+            if (size == 0 || size > m_deviceBufferSizes[nodeName]) {
+                INSPIRE_LOGE("[TensorRT error] invalid output buffer size for %s", nodeName);
+                return nullptr;
             }
 
-            cudaMemcpyAsync(m_hostOutputBuffers[nodeName].data(), it->second, size, cudaMemcpyDeviceToHost, *m_stream.get());
-            cudaStreamSynchronize(*m_stream.get());
+            // copy output data from device to host
+            m_hostOutputBuffers[nodeName].resize(size);
+
+            if (!checkCuda(cudaMemcpyAsync(m_hostOutputBuffers[nodeName].data(), it->second, size, cudaMemcpyDeviceToHost, m_stream),
+                           "failed to copy output to host") ||
+                !checkCuda(cudaStreamSynchronize(m_stream), "failed to synchronize output copy")) {
+                return nullptr;
+            }
+
+            m_outputShapes[nodeName] = dimsToVector(dims);
 
             return m_hostOutputBuffers[nodeName].data();
         }
@@ -334,16 +376,13 @@ public:
     // get output data and convert to float type vector
     std::vector<float> getOutputAsFloat(const char *nodeName) {
         std::vector<float> result;
+        if (!nodeName || !m_context || !m_engine || !m_streamConfigured) {
+            return result;
+        }
         auto it = m_deviceBuffers.find(nodeName);
         if (it != m_deviceBuffers.end()) {
             nvinfer1::Dims dims = m_context->getTensorShape(nodeName);
             nvinfer1::DataType dtype = m_engine->getTensorDataType(nodeName);
-
-            // calculate total number of elements
-            size_t numElements = 1;
-            for (int i = 0; i < dims.nbDims; ++i) {
-                numElements *= dims.d[i];
-            }
 
             // allocate buffer of appropriate size based on data type
             size_t elementSize = 0;
@@ -364,12 +403,23 @@ public:
                     return result;
             }
 
+            size_t byteSize = getMemorySize(dims, dtype);
+            if (byteSize == 0 || byteSize > m_deviceBufferSizes[nodeName]) {
+                return result;
+            }
+            size_t numElements = byteSize / elementSize;
+
             // allocate temporary buffer
-            std::vector<unsigned char> buffer(numElements * elementSize);
+            std::vector<unsigned char> buffer(byteSize);
 
             // copy data from device memory to host memory
-            cudaMemcpyAsync(buffer.data(), it->second, buffer.size(), cudaMemcpyDeviceToHost, *m_stream.get());
-            cudaStreamSynchronize(*m_stream.get());
+            if (!checkCuda(cudaMemcpyAsync(buffer.data(), it->second, buffer.size(), cudaMemcpyDeviceToHost, m_stream),
+                           "failed to copy output to host") ||
+                !checkCuda(cudaStreamSynchronize(m_stream), "failed to synchronize output copy")) {
+                return {};
+            }
+
+            m_outputShapes[nodeName] = dimsToVector(dims);
 
             // convert to float based on data type
             result.resize(numElements);
@@ -398,6 +448,8 @@ public:
                     }
                     break;
                 }
+                default:
+                    return {};
             }
         }
         return result;
@@ -410,19 +462,20 @@ public:
     }
 
     // set CUDA stream
-    void setCudaStream(void *streamPtr) {
-        if (m_ownStream) {
-            m_stream.reset();
-            m_ownStream = false;
+    int32_t setCudaStream(void *streamPtr) {
+        if (m_streamConfigured && !checkCuda(cudaStreamSynchronize(m_stream), "failed to synchronize previous CUDA stream")) {
+            return TENSORRT_HFAIL;
+        }
+        if (releaseOwnedStream() != TENSORRT_HSUCCEED) {
+            return TENSORRT_HFAIL;
         }
 
-        // create a new smart pointer instead of using reset + lambda
-        cudaStream_t *streamPointer = static_cast<cudaStream_t *>(streamPtr);
-        // use empty deleter, because this stream is managed by external code
-        m_stream =
-          std::unique_ptr<cudaStream_t, CUDAStreamDeleter>(streamPointer,
-                                                           CUDAStreamDeleter()  // use default deleter, but not actually delete the external stream
-          );
+        // Copy the handle value. Never retain or destroy the caller's handle
+        // storage, and never destroy the borrowed CUDA stream itself.
+        m_stream = streamPtr ? *static_cast<cudaStream_t *>(streamPtr) : nullptr;
+        m_ownStream = false;
+        m_streamConfigured = true;
+        return TENSORRT_HSUCCEED;
     }
 
     // print model info
@@ -496,6 +549,72 @@ public:
     }
 
 private:
+    bool checkCuda(cudaError_t error, const char *operation) const {
+        if (error == cudaSuccess) {
+            return true;
+        }
+        INSPIRE_LOGE("[CUDA error] %s: %s", operation, cudaGetErrorString(error));
+        return false;
+    }
+
+    int32_t ensureDeviceBuffer(const std::string &name, size_t size) {
+        auto sizeIt = m_deviceBufferSizes.find(name);
+        if (sizeIt != m_deviceBufferSizes.end() && sizeIt->second >= size) {
+            return TENSORRT_HSUCCEED;
+        }
+
+        void *newBuffer = nullptr;
+        if (!checkCuda(cudaMalloc(&newBuffer, size), "failed to allocate device buffer")) {
+            return TENSORRT_HFAIL;
+        }
+
+        auto bufferIt = m_deviceBuffers.find(name);
+        if (bufferIt != m_deviceBuffers.end() && bufferIt->second) {
+            if (!checkCuda(cudaFree(bufferIt->second), "failed to release old device buffer")) {
+                cudaFree(newBuffer);
+                return TENSORRT_HFAIL;
+            }
+        }
+        m_deviceBuffers[name] = newBuffer;
+        m_deviceBufferSizes[name] = size;
+        return TENSORRT_HSUCCEED;
+    }
+
+    void resetNetwork() {
+        if (m_streamConfigured) {
+            checkCuda(cudaStreamSynchronize(m_stream), "failed to synchronize stream during cleanup");
+        }
+
+        m_context.reset();
+        for (auto &pair : m_deviceBuffers) {
+            if (pair.second) {
+                checkCuda(cudaFree(pair.second), "failed to release device buffer");
+            }
+        }
+        m_deviceBuffers.clear();
+        m_deviceBufferSizes.clear();
+        m_hostOutputBuffers.clear();
+        m_engine.reset();
+        m_runtime.reset();
+        m_inputNames.clear();
+        m_outputNames.clear();
+        m_inputShapes.clear();
+        m_outputShapes.clear();
+        m_inferenceTime = 0.0;
+    }
+
+    int32_t releaseOwnedStream() {
+        if (!m_ownStream) {
+            return TENSORRT_HSUCCEED;
+        }
+
+        cudaStream_t stream = m_stream;
+        m_stream = nullptr;
+        m_ownStream = false;
+        m_streamConfigured = false;
+        return checkCuda(cudaStreamDestroy(stream), "failed to destroy owned CUDA stream") ? TENSORRT_HSUCCEED : TENSORRT_HFAIL;
+    }
+
     // helper function: convert TensorRT's Dims to standard vector
     std::vector<int> dimsToVector(const nvinfer1::Dims &dims) const {
         std::vector<int> shape;
@@ -507,25 +626,47 @@ private:
 
     // helper function: calculate memory size
     size_t getMemorySize(const nvinfer1::Dims &dims, nvinfer1::DataType dtype) const {
-        size_t size = 1;
-        for (int i = 0; i < dims.nbDims; ++i) {
-            size *= dims.d[i];
-        }
-
+        size_t elementSize = 0;
         switch (dtype) {
             case nvinfer1::DataType::kFLOAT:
-                return size * 4;
+                elementSize = 4;
+                break;
             case nvinfer1::DataType::kHALF:
-                return size * 2;
+                elementSize = 2;
+                break;
             case nvinfer1::DataType::kINT8:
-                return size;
+                elementSize = 1;
+                break;
             case nvinfer1::DataType::kINT32:
-                return size * 4;
+                elementSize = 4;
+                break;
             case nvinfer1::DataType::kBOOL:
-                return size;
+                elementSize = 1;
+                break;
             default:
-                return size;
+                return 0;
         }
+
+        size_t elements = 1;
+        for (int i = 0; i < dims.nbDims; ++i) {
+            if (dims.d[i] <= 0 || elements > std::numeric_limits<size_t>::max() / static_cast<size_t>(dims.d[i])) {
+                return 0;
+            }
+            elements *= static_cast<size_t>(dims.d[i]);
+        }
+        if (elements > std::numeric_limits<size_t>::max() / elementSize) {
+            return 0;
+        }
+        return elements * elementSize;
+    }
+
+    bool hasDynamicDimension(const nvinfer1::Dims &dims) const {
+        for (int i = 0; i < dims.nbDims; ++i) {
+            if (dims.d[i] < 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // helper function: get data type string representation
@@ -552,14 +693,16 @@ private:
     std::unique_ptr<nvinfer1::ICudaEngine, TRTEngineDeleter> m_engine;
     std::unique_ptr<nvinfer1::IExecutionContext, TRTContextDeleter> m_context;
 
-    bool m_ownStream;
-    std::unique_ptr<cudaStream_t, CUDAStreamDeleter> m_stream;
+    cudaStream_t m_stream{nullptr};
+    bool m_ownStream{false};
+    bool m_streamConfigured{false};
 
     int32_t m_deviceId{0};
 
     std::vector<std::string> m_inputNames;
     std::vector<std::string> m_outputNames;
     std::map<std::string, void *> m_deviceBuffers;
+    std::map<std::string, size_t> m_deviceBufferSizes;
     std::map<std::string, std::vector<unsigned char>> m_hostOutputBuffers;
 
     std::map<std::string, std::vector<int>> m_inputShapes;
@@ -571,6 +714,19 @@ private:
 
 // implement TensorRTAdapter methods
 TensorRTAdapter::TensorRTAdapter() : pImpl(new Impl()) {}
+
+TensorRTAdapter::TensorRTAdapter(TensorRTAdapter &&other) noexcept : pImpl(other.pImpl) {
+    other.pImpl = nullptr;
+}
+
+TensorRTAdapter &TensorRTAdapter::operator=(TensorRTAdapter &&other) noexcept {
+    if (this != &other) {
+        delete pImpl;
+        pImpl = other.pImpl;
+        other.pImpl = nullptr;
+    }
+    return *this;
+}
 
 TensorRTAdapter::~TensorRTAdapter() {
     if (pImpl) {
@@ -615,8 +771,8 @@ std::vector<int> TensorRTAdapter::getOutputShapeByName(const std::string &name) 
     return pImpl->getOutputShapeByName(name);
 }
 
-void TensorRTAdapter::setInput(const char *inputName, const void *data) {
-    pImpl->setInput(inputName, data);
+int32_t TensorRTAdapter::setInput(const char *inputName, const void *data) {
+    return pImpl ? pImpl->setInput(inputName, data) : TENSORRT_HFAIL;
 }
 
 int32_t TensorRTAdapter::setBatchSize(int batchSize) {
@@ -643,8 +799,8 @@ void TensorRTAdapter::setInferenceMode(InferenceMode mode) {
     pImpl->setInferenceMode(mode);
 }
 
-void TensorRTAdapter::setCudaStream(void *streamPtr) {
-    pImpl->setCudaStream(streamPtr);
+int32_t TensorRTAdapter::setCudaStream(void *streamPtr) {
+    return pImpl ? pImpl->setCudaStream(streamPtr) : TENSORRT_HFAIL;
 }
 
 void TensorRTAdapter::printModelInfo() const {

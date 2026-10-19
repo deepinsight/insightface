@@ -4,6 +4,7 @@
  */
 
 #include "face_pose_quality_adapt.h"
+#include "herror.h"
 #include "middleware/utils.h"
 
 namespace inspire {
@@ -11,15 +12,28 @@ namespace inspire {
 FacePoseQualityAdapt::FacePoseQualityAdapt() : AnyNetAdapter("FacePoseQuality") {}
 
 FacePoseQualityAdaptResult FacePoseQualityAdapt::operator()(const inspirecv::Image &img) {
-    FacePoseQualityAdaptResult res;
+    FacePoseQualityAdaptResult result;
+    Predict(img, result);
+    return result;
+}
+
+int32_t FacePoseQualityAdapt::Predict(const inspirecv::Image &img, FacePoseQualityAdaptResult &res) {
+    res = {};
     AnyTensorOutputs outputs;
-    if (img.Width() != INPUT_WIDTH || img.Height() != INPUT_HEIGHT) {
-        uint8_t* resized_data = nullptr;
-        m_processor_->Resize(img.Data(), img.Width(), img.Height(), img.Channels(), &resized_data, INPUT_WIDTH, INPUT_HEIGHT);
-        auto resized = inspirecv::Image::Create(INPUT_WIDTH, INPUT_HEIGHT, img.Channels(), resized_data, false);
-        Forward(resized, outputs);
-    } else {
-        Forward(img, outputs);
+    inspirecv::Image resized;
+    if (ResizeImageForInference(img, INPUT_WIDTH, INPUT_HEIGHT, resized) != InferenceWrapper::WrapperOk) {
+        m_processor_->MarkDone();
+        return HERR_DEVICE_IMAGE_PROCESS_FAILURE;
+    }
+    if (Forward(resized, outputs) != InferenceWrapper::WrapperOk) {
+        m_processor_->MarkDone();
+        return HERR_SESS_TRACKER_FAILURE;
+    }
+    if (m_processor_->MarkDone() != 0) {
+        return HERR_DEVICE_IMAGE_PROCESS_FAILURE;
+    }
+    if (outputs.empty() || outputs[0].second.size() < 18) {
+        return HERR_SESS_TRACKER_FAILURE;
     }
     const auto &output = outputs[0].second;
     res.pitch = output[0] * 90;
@@ -34,7 +48,7 @@ FacePoseQualityAdaptResult FacePoseQualityAdapt::operator()(const inspirecv::Ima
         res.lmk[i].SetY((face_pts5[i * 2 + 1] + 1) * (INPUT_HEIGHT / 2));
     }
 
-    return res;
+    return HSUCCEED;
 }
 
 inspirecv::TransformMatrix FacePoseQualityAdapt::ComputeCropMatrix(const inspirecv::Rect2i &rect) {

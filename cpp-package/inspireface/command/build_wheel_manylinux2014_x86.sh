@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 # Reusable function to handle 'install' directory operations
 move_install_files() {
@@ -61,12 +62,9 @@ cp -r ${BUILD_DYLIB_PATH} ${DYLIB_DEST_PATH}
 
 PYTHON_PRJ_PATH=${SCRIPT_DIR}/python
 cd ${PYTHON_PRJ_PATH}/
-# Build wheels for Python 3.7-3.12
-for PYTHON_VERSION in python3.7 python3.8 python3.9 python3.10 python3.11 python3.12; do
-    if [[ "${PYTHON_VERSION}" == "python3.12" ]]; then
-        ${PYTHON_VERSION} -m pip install setuptools wheel twine
-    fi
-    ${PYTHON_VERSION} setup.py bdist_wheel
-done
+# The ctypes wrapper produces one py3-none wheel for all supported Python
+# versions. PEP 517 installs build dependencies from pyproject.toml in isolation.
+wheel_python="${ISF_WHEEL_PYTHON:-python3.12}"
+"${wheel_python}" -m pip wheel --no-deps --wheel-dir dist .
 
 echo "Build wheel for Linux x86_64, Well Done!"

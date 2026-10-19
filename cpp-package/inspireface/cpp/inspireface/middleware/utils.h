@@ -7,7 +7,7 @@
 #include <string>
 
 #ifdef _WIN32
-#include <windows.h>
+#include "system.h"
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -21,8 +21,7 @@ namespace inspire {
 
 inline bool IsDirectory(const std::string& path) {
 #ifdef _WIN32
-    DWORD dwAttrib = GetFileAttributes(path.c_str());
-    return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+    return os::IsDir(path);
 #else
     struct stat st;
     if (stat(path.c_str(), &st) == 0) {
@@ -64,6 +63,10 @@ inline std::vector<inspirecv::Point2f>
 FixPointsMeanshape(std::vector<inspirecv::Point2f> &points,
                    const std::vector<inspirecv::Point2f> &mean_shape) {
 
+    if (points.empty() || mean_shape.empty()) {
+        return {};
+    }
+
     inspirecv::Rect2f bbox = inspirecv::MinBoundingRect(points);
     int R = std::max(bbox.GetHeight(), bbox.GetWidth());
     int cx = bbox.GetX() + bbox.GetWidth() / 2;
@@ -95,6 +98,9 @@ struct BoundingBox {
 };
 
 inline inspirecv::Rect2i AlignmentBoxToStrideSquareBox(const inspirecv::Rect2i &bbox, int stride) {
+    if (stride <= 0 || bbox.GetWidth() <= 0 || bbox.GetHeight() <= 0) {
+        return inspirecv::Rect2i(0, 0, 0, 0);
+    }
     // 1. Convert xywh to cxcywh (center point coordinates and width/height)
     int center_x = bbox.GetX() + bbox.GetWidth() / 2;
     int center_y = bbox.GetY() + bbox.GetHeight() / 2;
@@ -106,6 +112,9 @@ inline inspirecv::Rect2i AlignmentBoxToStrideSquareBox(const inspirecv::Rect2i &
     
     // 3. Align the shortest side to the stride
     int aligned_side = (min_side / stride) * stride;
+    if (aligned_side <= 0) {
+        return inspirecv::Rect2i(0, 0, 0, 0);
+    }
     
     // 4. Create a square box (keep the center point unchanged)
     int half_side = aligned_side / 2;
@@ -117,12 +126,9 @@ inline inspirecv::Rect2i AlignmentBoxToStrideSquareBox(const inspirecv::Rect2i &
 }
 
 inline inspirecv::Rect2i GetNewBox(int src_w, int src_h, inspirecv::Rect2i bbox, float scale) {
-    // Convert cv::Rect to BoundingBox
-    BoundingBox box;
-    box.left_top_x = bbox.GetX();
-    box.left_top_y = bbox.GetY();
-    box.right_bottom_x = bbox.GetX() + bbox.GetWidth();
-    box.right_bottom_y = bbox.GetY() + bbox.GetHeight();
+    if (src_w <= 0 || src_h <= 0 || bbox.GetWidth() <= 0 || bbox.GetHeight() <= 0 || !std::isfinite(scale) || scale <= 0.0f) {
+        return inspirecv::Rect2i(0, 0, 0, 0);
+    }
 
     // Compute new bounding box
     scale = std::min({static_cast<float>(src_h - 1) / bbox.GetHeight(), static_cast<float>(src_w - 1) / bbox.GetWidth(), scale});
@@ -166,6 +172,9 @@ inline inspirecv::Rect2i GetNewBox(int src_w, int src_h, inspirecv::Rect2i bbox,
 
 template<typename T>
 inline bool isShortestSideGreaterThan(const inspirecv::Rect<T>& rect, T value, float scale) {
+    if (!std::isfinite(scale) || scale <= 0.0f || rect.GetWidth() <= 0 || rect.GetHeight() <= 0) {
+        return false;
+    }
     // Find the shortest edge
     T shortestSide = std::min(static_cast<float>(rect.GetWidth()) / scale, static_cast<float>(rect.GetHeight()) / scale);
     // Determines whether the shortest edge is greater than the given value
@@ -174,6 +183,10 @@ inline bool isShortestSideGreaterThan(const inspirecv::Rect<T>& rect, T value, f
 
 // Exponential Moving Average (EMA) filter function
 inline float EmaFilter(float currentProb, std::vector<float> &history, int max, float alpha = 0.2f) {
+    if (max <= 0 || !std::isfinite(alpha) || alpha < 0.0f || alpha > 1.0f) {
+        history.clear();
+        return currentProb;
+    }
     // Add current probability to history
     history.push_back(currentProb);
 
@@ -197,6 +210,15 @@ inline std::vector<float> VectorEmaFilter(const std::vector<float>& currentProbs
                                          std::vector<std::vector<float>>& history, 
                                          int max, 
                                          float alpha = 0.2f) {
+    if (max <= 0 || currentProbs.empty() || !std::isfinite(alpha) || alpha < 0.0f || alpha > 1.0f) {
+        history.clear();
+        return currentProbs;
+    }
+    if (!std::all_of(history.begin(), history.end(), [&currentProbs](const std::vector<float>& item) {
+            return item.size() == currentProbs.size();
+        })) {
+        history.clear();
+    }
     // Add current probability vector to history
     history.push_back(currentProbs);
     

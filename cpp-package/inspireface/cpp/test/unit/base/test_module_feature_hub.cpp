@@ -144,7 +144,7 @@ TEST_CASE("test_PerformancePersistentMode", "[feature_hub") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
-    std::string db_path = ".test_db";
+    std::string db_path = GET_SAVE_DATA(".test_internal_feature_hub");
     std::remove(db_path.c_str());
 
     DatabaseConfiguration config;

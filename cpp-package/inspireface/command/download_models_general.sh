@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Target download folder
 DOWNLOAD_DIR="test_res/pack"
 
@@ -20,18 +22,23 @@ NC='\033[0m' # No Color
 mkdir -p "$DOWNLOAD_DIR"
 
 # Function to download file
-download_file() {
+download_file() (
     local url=$1
+    local filename="${url##*/}"
+    local temp_file
+    temp_file="$(mktemp "$DOWNLOAD_DIR/.${filename}.XXXXXX")"
+    trap 'rm -f "$temp_file"' EXIT
     if command -v wget > /dev/null 2>&1; then
         echo "Using wget for download..."
-        wget --no-check-certificate -L -P "$DOWNLOAD_DIR" "$url"
+        wget --tries=3 --timeout=60 -O "$temp_file" "$url"
     else
         echo "wget not found, using curl instead..."
-        cd "$DOWNLOAD_DIR"
-        curl -L -O "$url"
-        cd - > /dev/null
+        curl --fail --location --retry 3 --connect-timeout 60 \
+            --output "$temp_file" "$url"
     fi
-}
+    test -s "$temp_file"
+    mv -f "$temp_file" "$DOWNLOAD_DIR/$filename"
+)
 
 # Function to print file path
 print_file_path() {

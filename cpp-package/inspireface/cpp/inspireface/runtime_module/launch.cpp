@@ -24,6 +24,17 @@
 #define APPLE_EXTENSION_SUFFIX ".bundle"
 
 namespace inspire {
+namespace {
+
+std::string ResolveAppleExtensionPath(const std::string& resource_path) {
+    const std::string basename = os::Basename(resource_path);
+    const std::string extension_path = os::PathJoin(os::Dirname(resource_path), basename + APPLE_EXTENSION_SUFFIX);
+    INSPIREFACE_CHECK_MSG(os::IsExists(extension_path), "The apple extension path is not exists, please check.");
+    INSPIREFACE_CHECK_MSG(os::IsDir(extension_path), "The apple extension path is not a directory, please check.");
+    return extension_path;
+}
+
+}  // namespace
 
 // Implementation class definition
 class Launch::Impl {
@@ -61,10 +72,11 @@ public:
     // Data members
     std::string m_rockchip_dma_heap_path_;
     std::string m_extension_path_;
-    std::unique_ptr<InspireArchive> m_archive_;
+    std::shared_ptr<InspireArchive> m_archive_;
     bool m_load_;
     int32_t m_cuda_device_id_;
     InferenceWrapper::SpecialBackend m_global_coreml_inference_mode_;
+    Launch::CPUEnginePowerMode m_global_cpu_engine_power_mode_{CPU_ENGINE_POWER_NORMAL};
     Launch::ImageProcessingBackend m_image_processing_backend_;
     int32_t m_image_process_aligned_width_{4};
 };
@@ -88,11 +100,20 @@ std::shared_ptr<Launch> Launch::GetInstance() {
 }
 
 InspireArchive& Launch::getMArchive() {
-    std::lock_guard<std::mutex> lock(pImpl->mutex_);
-    if (!pImpl->m_archive_) {
+    // Preserve the legacy reference-returning API while pinning the selected
+    // archive for the calling thread. Internal code uses AcquireArchive()
+    // directly so its ownership duration is explicit.
+    thread_local std::shared_ptr<InspireArchive> archive_snapshot;
+    archive_snapshot = AcquireArchive();
+    if (!archive_snapshot) {
         throw std::runtime_error("Archive not initialized");
     }
-    return *(pImpl->m_archive_);
+    return *archive_snapshot;
+}
+
+std::shared_ptr<InspireArchive> Launch::AcquireArchive() const {
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    return pImpl->m_archive_;
 }
 
 int32_t Launch::Load(const std::string& path) {
@@ -109,30 +130,40 @@ int32_t Launch::Load(const std::string& path) {
         return HERR_DEVICE_CUDA_NOT_SUPPORT;
     }
 #endif
-    INSPIREFACE_CHECK_MSG(os::IsExists(path), "The package path does not exist because the launch failed.");
+    if (!os::IsExists(path)) {
+        INSPIRE_LOGE("The package path does not exist: %s", path.c_str());
+        return HERR_ARCHIVE_LOAD_FAILURE;
+    }
 #if defined(ISF_ENABLE_APPLE_EXTENSION)
-    BuildAppleExtensionPath(path);
+    std::string extension_path = ResolveAppleExtensionPath(path);
 #endif
     if (!pImpl->m_load_) {
         try {
-            pImpl->m_archive_ = std::make_unique<InspireArchive>();
-            pImpl->m_archive_->ReLoad(path);
-
-            // Update face detect pixel list and model list
-            pImpl->m_face_detect_pixel_list_ = pImpl->m_archive_->GetFaceDetectPixelList();
-            pImpl->m_face_detect_model_list_ = pImpl->m_archive_->GetFaceDetectModelList();
-
-            if (pImpl->m_archive_->QueryStatus() == SARC_SUCCESS) {
-                pImpl->m_load_ = true;
-                INSPIRE_LOGI("Successfully loaded resources");
-                return HSUCCEED;
-            } else {
-                pImpl->m_archive_.reset();
+            auto archive = std::make_shared<InspireArchive>();
+            archive->ReLoad(path);
+            if (archive->QueryStatus() != SARC_SUCCESS) {
                 INSPIRE_LOGE("Failed to load resources");
                 return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
             }
+
+            std::vector<int> face_detect_pixel_list = archive->GetFaceDetectPixelList();
+            std::vector<std::string> face_detect_model_list = archive->GetFaceDetectModelList();
+            const SimilarityConverterConfig converter_config = archive->GetSimilarityConverterConfig();
+            if (!SimilarityConverter::getInstance().updateConfigAndRecommendedThreshold(
+                  converter_config, static_cast<float>(converter_config.threshold))) {
+                INSPIRE_LOGE("Failed to publish similarity converter config");
+                return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+            }
+            pImpl->m_face_detect_pixel_list_.swap(face_detect_pixel_list);
+            pImpl->m_face_detect_model_list_.swap(face_detect_model_list);
+            pImpl->m_archive_.swap(archive);
+#if defined(ISF_ENABLE_APPLE_EXTENSION)
+            pImpl->m_extension_path_.swap(extension_path);
+#endif
+            pImpl->m_load_ = true;
+            INSPIRE_LOGI("Successfully loaded resources");
+            return HSUCCEED;
         } catch (const std::exception& e) {
-            pImpl->m_archive_.reset();
             INSPIRE_LOGE("Exception during resource loading: %s", e.what());
             return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
         }
@@ -144,38 +175,48 @@ int32_t Launch::Load(const std::string& path) {
 
 int32_t Launch::Reload(const std::string& path) {
     std::lock_guard<std::mutex> lock(pImpl->mutex_);
-    INSPIREFACE_CHECK_MSG(os::IsExists(path), "The package path does not exist because the launch failed.");
+    if (!os::IsExists(path)) {
+        INSPIRE_LOGE("The package path does not exist: %s", path.c_str());
+        return HERR_ARCHIVE_LOAD_FAILURE;
+    }
 #if defined(ISF_ENABLE_APPLE_EXTENSION)
-    BuildAppleExtensionPath(path);
+    std::string extension_path = ResolveAppleExtensionPath(path);
 #endif
     try {
-        // Clean up existing archive if it exists
-        if (pImpl->m_archive_) {
-            pImpl->m_archive_.reset();
-            pImpl->m_load_ = false;
-        }
-
-        // Create and load new archive
-        pImpl->m_archive_ = std::make_unique<InspireArchive>();
-        pImpl->m_archive_->ReLoad(path);
-
-        if (pImpl->m_archive_->QueryStatus() == SARC_SUCCESS) {
-            pImpl->m_load_ = true;
-            INSPIRE_LOGI("Successfully reloaded resources");
-            return HSUCCEED;
-        } else {
-            pImpl->m_archive_.reset();
+        // Build and validate the replacement before publishing it. A failed
+        // reload leaves the current archive and its metadata untouched.
+        auto archive = std::make_shared<InspireArchive>();
+        archive->ReLoad(path);
+        if (archive->QueryStatus() != SARC_SUCCESS) {
             INSPIRE_LOGE("Failed to reload resources");
             return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
         }
+
+        std::vector<int> face_detect_pixel_list = archive->GetFaceDetectPixelList();
+        std::vector<std::string> face_detect_model_list = archive->GetFaceDetectModelList();
+        const SimilarityConverterConfig converter_config = archive->GetSimilarityConverterConfig();
+        if (!SimilarityConverter::getInstance().updateConfigAndRecommendedThreshold(
+              converter_config, static_cast<float>(converter_config.threshold))) {
+            INSPIRE_LOGE("Failed to publish similarity converter config");
+            return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+        }
+        pImpl->m_face_detect_pixel_list_.swap(face_detect_pixel_list);
+        pImpl->m_face_detect_model_list_.swap(face_detect_model_list);
+        pImpl->m_archive_.swap(archive);
+#if defined(ISF_ENABLE_APPLE_EXTENSION)
+        pImpl->m_extension_path_.swap(extension_path);
+#endif
+        pImpl->m_load_ = true;
+        INSPIRE_LOGI("Successfully reloaded resources");
+        return HSUCCEED;
     } catch (const std::exception& e) {
-        pImpl->m_archive_.reset();
         INSPIRE_LOGE("Exception during resource reloading: %s", e.what());
         return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
     }
 }
 
 bool Launch::isMLoad() const {
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
     return pImpl->m_load_;
 }
 
@@ -205,6 +246,7 @@ void Launch::ConfigurationExtensionPath(const std::string& path) {
     INSPIREFACE_CHECK_MSG(os::IsDir(path), "The apple extension path is not a directory, please check.");
 #endif
     INSPIREFACE_CHECK_MSG(os::IsExists(path), "The extension path is not exists, please check.");
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
     pImpl->m_extension_path_ = path;
 }
 
@@ -247,11 +289,24 @@ Launch::NNInferenceBackend Launch::GetGlobalCoreMLInferenceMode() const {
     }
 }
 
+int32_t Launch::SetGlobalCPUEnginePowerMode(CPUEnginePowerMode mode) {
+    if (mode != CPU_ENGINE_POWER_NORMAL && mode != CPU_ENGINE_POWER_HIGH && mode != CPU_ENGINE_POWER_LOW) {
+        return HERR_INVALID_PARAM;
+    }
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    pImpl->m_global_cpu_engine_power_mode_ = mode;
+    return HSUCCEED;
+}
+
+Launch::CPUEnginePowerMode Launch::GetGlobalCPUEnginePowerMode() const {
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    return pImpl->m_global_cpu_engine_power_mode_;
+}
+
 void Launch::BuildAppleExtensionPath(const std::string& resource_path) {
-    std::string basename = os::Basename(resource_path);
-    pImpl->m_extension_path_ = os::PathJoin(os::Dirname(resource_path), basename + APPLE_EXTENSION_SUFFIX);
-    INSPIREFACE_CHECK_MSG(os::IsExists(pImpl->m_extension_path_), "The apple extension path is not exists, please check.");
-    INSPIREFACE_CHECK_MSG(os::IsDir(pImpl->m_extension_path_), "The apple extension path is not a directory, please check.");
+    const std::string extension_path = ResolveAppleExtensionPath(resource_path);
+    std::lock_guard<std::mutex> lock(pImpl->mutex_);
+    pImpl->m_extension_path_ = extension_path;
 }
 
 void Launch::SetCudaDeviceId(int32_t device_id) {
@@ -284,22 +339,38 @@ std::vector<std::string> Launch::GetFaceDetectModelList() const {
     return pImpl->m_face_detect_model_list_;
 }
 
-void Launch::SwitchLandmarkEngine(LandmarkEngine engine) {
+int32_t Launch::SwitchLandmarkEngine(LandmarkEngine engine) {
     std::lock_guard<std::mutex> lock(pImpl->mutex_);
-    if (pImpl->m_archive_->QueryStatus() != SARC_SUCCESS) {
+    if (!pImpl->m_archive_ || pImpl->m_archive_->QueryStatus() != SARC_SUCCESS) {
         INSPIRE_LOGE("The InspireFace is not initialized, please call launch first.");
-        return;
+        return HERR_ARCHIVE_NOT_LOAD;
     }
-    auto landmark_param = pImpl->m_archive_->GetLandmarkParam();
-    bool ret = false;
+
+    const char* engine_name = nullptr;
     if (engine == LANDMARK_HYPLMV2_0_25) {
-        ret = landmark_param->ReLoad("landmark");
+        engine_name = "landmark";
     } else if (engine == LANDMARK_HYPLMV2_0_50) {
-        ret = landmark_param->ReLoad("landmark_0_50");
+        engine_name = "landmark_0_50";
     } else if (engine == LANDMARK_INSIGHTFACE_2D106_TRACK) {
-        ret = landmark_param->ReLoad("landmark_insightface_2d106");
+        engine_name = "landmark_insightface_2d106";
+    } else {
+        return HERR_INVALID_PARAM;
     }
-    INSPIREFACE_CHECK_MSG(ret, "Failed to switch landmark engine");
+
+    // Publish a new archive snapshot. Sessions already created keep their old
+    // archive, model, and landmark parameters as one consistent generation.
+    try {
+        auto replacement = std::make_shared<InspireArchive>(*pImpl->m_archive_);
+        if (!replacement->SwitchLandmarkEngine(engine_name)) {
+            INSPIRE_LOGE("Failed to switch landmark engine to %s", engine_name);
+            return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+        }
+        pImpl->m_archive_.swap(replacement);
+        return HSUCCEED;
+    } catch (const std::exception& error) {
+        INSPIRE_LOGE("Failed to switch landmark engine to %s: %s", engine_name, error.what());
+        return HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+    }
 }
 
 void Launch::SwitchImageProcessingBackend(ImageProcessingBackend backend) {

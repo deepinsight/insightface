@@ -10,15 +10,22 @@ std::vector<float> FaceEmotionAdapt::operator()(const inspirecv::Image& bgr_affi
     AnyTensorOutputs outputs;
     if (bgr_affine.Width() != INPUT_WIDTH || bgr_affine.Height() != INPUT_HEIGHT) {
         auto resized = bgr_affine.Resize(INPUT_WIDTH, INPUT_HEIGHT);
-        Forward(resized, outputs);
+        if (Forward(resized, outputs) != InferenceWrapper::WrapperOk) {
+            return {};
+        }
     } else {
-        Forward(bgr_affine, outputs);
+        if (Forward(bgr_affine, outputs) != InferenceWrapper::WrapperOk) {
+            return {};
+        }
+    }
+
+    if (outputs.empty() || outputs[0].second.size() != static_cast<size_t>(OUTPUT_SIZE)) {
+        return {};
     }
 
     std::vector<float> &emotionOut = outputs[0].second;
     auto sm = Softmax(emotionOut);
-
-    return sm;
+    return sm.size() == static_cast<size_t>(OUTPUT_SIZE) ? sm : std::vector<float>{};
 }
 
 }   // namespace inspire

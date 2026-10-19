@@ -38,6 +38,11 @@ public:
      */
     TensorRTAdapter();
 
+    TensorRTAdapter(const TensorRTAdapter &) = delete;
+    TensorRTAdapter &operator=(const TensorRTAdapter &) = delete;
+    TensorRTAdapter(TensorRTAdapter &&other) noexcept;
+    TensorRTAdapter &operator=(TensorRTAdapter &&other) noexcept;
+
     /**
      * @brief destructor
      */
@@ -102,8 +107,9 @@ public:
      * @brief set input data
      * @param inputName input tensor name
      * @param data input data
+     * @return 0 means success, -1 means failure
      */
-    void setInput(const char *inputName, const void *data);
+    int32_t setInput(const char *inputName, const void *data);
 
     /**
      * @brief set dynamic batch size
@@ -145,10 +151,14 @@ public:
     void setInferenceMode(InferenceMode mode);
 
     /**
-     * @brief set CUDA stream
-     * @param stream CUDA stream
+     * @brief set a caller-owned CUDA stream
+     * @param streamPtr pointer to a CUDA stream handle; nullptr selects the
+     *                  CUDA default stream
+     * @return 0 means success, -1 means failure
+     *
+     * The adapter borrows the supplied stream and never destroys it.
      */
-    void setCudaStream(void *streamPtr);
+    int32_t setCudaStream(void *streamPtr);
 
     /**
      * @brief print model info

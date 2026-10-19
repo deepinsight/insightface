@@ -14,9 +14,17 @@ std::vector<int> FaceAttributePredictAdapt::operator()(const inspirecv::Image &b
     AnyTensorOutputs outputs;
     if (bgr_affine.Width() != INPUT_WIDTH || bgr_affine.Height() != INPUT_HEIGHT) {
         auto resized = bgr_affine.Resize(INPUT_WIDTH, INPUT_HEIGHT);
-        Forward(resized, outputs);
+        if (Forward(resized, outputs) != InferenceWrapper::WrapperOk) {
+            return {};
+        }
     } else {
-        Forward(bgr_affine, outputs);
+        if (Forward(bgr_affine, outputs) != InferenceWrapper::WrapperOk) {
+            return {};
+        }
+    }
+
+    if (outputs.size() < 3 || outputs[0].second.empty() || outputs[1].second.empty() || outputs[2].second.empty()) {
+        return {};
     }
 
     // cv::imshow("w", bgr_affine);

@@ -14,6 +14,10 @@ typedef void*               HFSession;                        ///< Handle for co
 typedef void**              PHFSession;                       ///< Pointer to Handle for context.
 typedef void*               HFImageBitmap;                    ///< Handle for image bitmap.
 typedef void**              PHFImageBitmap;                   ///< Pointer to Handle for image bitmap.
+typedef void*               HFFaceResultSnapshot;             ///< Handle for an owned face detection result snapshot.
+typedef void**              PHFFaceResultSnapshot;            ///< Pointer to an owned face detection result snapshot handle.
+typedef void*               HFFaceCaptureSession;             ///< Handle for a stateful face capture session.
+typedef void**              PHFFaceCaptureSession;            ///< Pointer to a face capture session handle.
 typedef void*               HPVoid;                           ///< Pointer to Void.
 typedef long                HLong;                            ///< Long integer.
 typedef float               HFloat;                           ///< Single-precision floating point.
@@ -24,6 +28,9 @@ typedef unsigned char*      HPUInt8;                          ///< Pointer to un
 typedef signed int			HInt32;                           ///< Signed 32-bit integer.
 typedef signed int			HOption;                          ///< Signed 32-bit integer option.
 typedef signed int*			HPInt32;                          ///< Pointer to signed 32-bit integer.
+typedef int32_t             HFStatus;                         ///< Fixed-width result code for C API level 2 and later.
+typedef uint32_t            HFUInt32;                         ///< Fixed-width unsigned 32-bit integer.
+typedef uint64_t            HFUInt64;                         ///< Fixed-width unsigned 64-bit integer.
 typedef int64_t             HFaceId;                          ///< Face ID type for non-Windows platforms
 typedef int64_t*            HPFaceId;                         ///< Pointer to Face ID type for non-Windows platforms
 typedef long                HResult;                          ///< Result code.

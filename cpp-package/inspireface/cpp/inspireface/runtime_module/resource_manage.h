@@ -5,13 +5,16 @@
 #pragma once
 #ifndef INSPIREFACE_RESOURCE_MANAGE_H
 #define INSPIREFACE_RESOURCE_MANAGE_H
-#include <iostream>
+
+#include <algorithm>
+#include <cstdint>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
-#include <memory>
-#include <iomanip>  // For std::setw and std::left
 #include <vector>
+
 #include "log.h"
+
 #ifndef INSPIRE_API
 #define INSPIRE_API
 #endif
@@ -20,214 +23,334 @@
 
 namespace inspire {
 
+using ResourceHandle = uintptr_t;
+static_assert(sizeof(ResourceHandle) >= sizeof(void *), "ResourceHandle must preserve every pointer bit");
+
+struct ResourceCounts {
+    uint64_t total_created = 0;
+    uint64_t total_released = 0;
+    uint64_t live = 0;
+};
+
+struct ResourceStatistics {
+    ResourceCounts sessions;
+    ResourceCounts streams;
+    ResourceCounts image_bitmaps;
+    ResourceCounts face_features;
+    ResourceCounts face_result_snapshots;
+    ResourceCounts face_capture_sessions;
+};
+
 /**
- * @brief ResourceManager is a singleton class that manages the creation and release of sessions and image streams.
- * It uses hash tables to store session and image stream handles, and provides methods to create, release, and query these resources.
- * The ResourceManager class is designed to be used in a multi-threaded environment, and it uses a mutex to synchronize access to its data structures.
+ * @brief Tracks the live C API handles and cumulative lifecycle counters.
+ *
+ * Only live handles are retained, so memory use is bounded by peak concurrent
+ * resources rather than the number of resources ever created.
  */
 class INSPIRE_API ResourceManager {
-private:
-    // Private static instance pointer
-    static std::unique_ptr<ResourceManager> instance;
-    static std::mutex mutex;
-
-    // Use hash tables to store session and image stream handles
-    std::unordered_map<long, bool> sessionMap;
-    std::unordered_map<long, bool> streamMap;
-    std::unordered_map<long, bool> imageBitmapMap;
-    std::unordered_map<long, bool> faceFeatureMap;
-
-    // The private constructor guarantees singletons
-    ResourceManager() {}
-
 public:
-    // Remove copy constructors and assignment operators
-    ResourceManager(const ResourceManager&) = delete;
-    ResourceManager& operator=(const ResourceManager&) = delete;
+    /**
+     * Pins the object backing a validated opaque handle for the duration of a
+     * C API call. Releasing the public handle removes it from the registry
+     * immediately, while destruction is deferred until the final lease ends.
+     */
+    class ResourceLease {
+    public:
+        ResourceLease() = default;
 
-    // Method of obtaining singleton instance
-    static ResourceManager* getInstance() {
-        std::lock_guard<std::mutex> lock(mutex);
-        if (!instance) {
-            instance.reset(new ResourceManager());
+        explicit operator bool() const {
+            return acquired_;
         }
-        return instance.get();
+
+    private:
+        friend class ResourceManager;
+
+        ResourceLease(bool acquired, std::shared_ptr<void> owner) : acquired_(acquired), owner_(std::move(owner)) {}
+
+        bool acquired_{false};
+        std::shared_ptr<void> owner_;
+    };
+
+    ResourceManager(const ResourceManager &) = delete;
+    ResourceManager &operator=(const ResourceManager &) = delete;
+
+    static ResourceManager *getInstance() {
+        static ResourceManager instance;
+        return &instance;
     }
 
-    // Method of obtaining singleton instance
-    void createSession(long handle) {
-        std::lock_guard<std::mutex> lock(mutex);
-        sessionMap[handle] = false;  // false indicates that it is not released
+    bool createSession(ResourceHandle handle, std::shared_ptr<void> owner = {}) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Register(session_registry_, handle, std::move(owner));
     }
 
-    // Release session
-    bool releaseSession(long handle) {
-        std::lock_guard<std::mutex> lock(mutex);
-        auto it = sessionMap.find(handle);
-        if (it != sessionMap.end() && !it->second) {
-            it->second = true;  // Mark as released
-            return true;
+    bool releaseSession(ResourceHandle handle) {
+        std::shared_ptr<void> released_owner;
+        bool released = false;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            released = Release(session_registry_, handle, released_owner);
         }
-        return false;  // Release failed, possibly because the handle could not be found or was
-                       // released
+        return released;
     }
 
-    // Create and record image streams
-    void createStream(long handle) {
-        std::lock_guard<std::mutex> lock(mutex);
-        streamMap[handle] = false;  // false indicates that it is not released
+    bool createStream(ResourceHandle handle, std::shared_ptr<void> owner = {}) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Register(stream_registry_, handle, std::move(owner));
     }
 
-    // Release image stream
-    bool releaseStream(long handle) {
-        std::lock_guard<std::mutex> lock(mutex);
-        auto it = streamMap.find(handle);
-        if (it != streamMap.end() && !it->second) {
-            it->second = true;  // Mark as released
-            return true;
+    bool releaseStream(ResourceHandle handle) {
+        std::shared_ptr<void> released_owner;
+        bool released = false;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            released = Release(stream_registry_, handle, released_owner);
         }
-        return false;  // Release failed, possibly because the handle could not be found or was
-                       // released
+        return released;
     }
 
-    // Create and record image bitmaps
-    void createImageBitmap(long handle) {
-        std::lock_guard<std::mutex> lock(mutex);
-        imageBitmapMap[handle] = false;  // false indicates that it is not released
+    bool createImageBitmap(ResourceHandle handle, std::shared_ptr<void> owner = {}) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Register(image_bitmap_registry_, handle, std::move(owner));
     }
 
-    // Release image bitmap
-    bool releaseImageBitmap(long handle) {
-        std::lock_guard<std::mutex> lock(mutex);
-        auto it = imageBitmapMap.find(handle);
-        if (it != imageBitmapMap.end() && !it->second) {
-            it->second = true;  // Mark as released
-            return true;
+    bool releaseImageBitmap(ResourceHandle handle) {
+        std::shared_ptr<void> released_owner;
+        bool released = false;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            released = Release(image_bitmap_registry_, handle, released_owner);
         }
-        return false;  // Release failed, possibly because the handle could not be found or was released
+        return released;
     }
 
-    // Create and record face features
-    void createFaceFeature(long handle) {
-        std::lock_guard<std::mutex> lock(mutex);
-        faceFeatureMap[handle] = false;  // false indicates that it is not released
+    bool createFaceFeature(ResourceHandle handle, std::shared_ptr<void> owner = {}) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Register(face_feature_registry_, handle, std::move(owner));
     }
 
-    // Release face feature
-    bool releaseFaceFeature(long handle) {
-        std::lock_guard<std::mutex> lock(mutex);
-        auto it = faceFeatureMap.find(handle);
-        if (it != faceFeatureMap.end() && !it->second) {
-            it->second = true;  // Mark as released
-            return true;
+    bool releaseFaceFeature(ResourceHandle handle) {
+        std::shared_ptr<void> released_owner;
+        bool released = false;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            released = Release(face_feature_registry_, handle, released_owner);
         }
-        return false;  // Release failed, possibly because the handle could not be found or was released
+        return released;
     }
 
-    // Gets a list of unreleased session handles
-    std::vector<long> getUnreleasedSessions() {
-        std::lock_guard<std::mutex> lock(mutex);
-        std::vector<long> unreleasedSessions;
-        for (const auto& entry : sessionMap) {
-            if (!entry.second) {
-                unreleasedSessions.push_back(entry.first);
-            }
+    bool createFaceResultSnapshot(ResourceHandle handle, std::shared_ptr<void> owner = {}) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Register(face_result_snapshot_registry_, handle, std::move(owner));
+    }
+
+    bool releaseFaceResultSnapshot(ResourceHandle handle) {
+        std::shared_ptr<void> released_owner;
+        bool released = false;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            released = Release(face_result_snapshot_registry_, handle, released_owner);
         }
-        return unreleasedSessions;
+        return released;
     }
 
-    // Gets a list of unreleased image stream handles
-    std::vector<long> getUnreleasedStreams() {
-        std::lock_guard<std::mutex> lock(mutex);
-        std::vector<long> unreleasedStreams;
-        for (const auto& entry : streamMap) {
-            if (!entry.second) {
-                unreleasedStreams.push_back(entry.first);
-            }
+    bool createFaceCaptureSession(ResourceHandle handle, std::shared_ptr<void> owner = {}) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Register(face_capture_session_registry_, handle, std::move(owner));
+    }
+
+    bool releaseFaceCaptureSession(ResourceHandle handle) {
+        std::shared_ptr<void> released_owner;
+        bool released = false;
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            released = Release(face_capture_session_registry_, handle, released_owner);
         }
-        return unreleasedStreams;
+        return released;
     }
 
-    // Gets a list of unreleased image bitmap handles
-    std::vector<long> getUnreleasedImageBitmaps() {
-        std::lock_guard<std::mutex> lock(mutex);
-        std::vector<long> unreleasedImageBitmaps;
-        for (const auto& entry : imageBitmapMap) {
-            if (!entry.second) {
-                unreleasedImageBitmaps.push_back(entry.first);
-            }
-        }
-        return unreleasedImageBitmaps;
+    ResourceLease acquireSession(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Acquire(session_registry_, handle);
     }
 
-    // Gets a list of unreleased face feature handles
-    std::vector<long> getUnreleasedFaceFeatures() {
-        std::lock_guard<std::mutex> lock(mutex);
-        std::vector<long> unreleasedFaceFeatures;
-        for (const auto& entry : faceFeatureMap) {
-            if (!entry.second) {
-                unreleasedFaceFeatures.push_back(entry.first);
-            }
-        }
-        return unreleasedFaceFeatures;
+    ResourceLease acquireStream(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Acquire(stream_registry_, handle);
     }
 
-    // Method to print resource management statistics
-    void printResourceStatistics() {
-        std::lock_guard<std::mutex> lock(mutex);
+    ResourceLease acquireImageBitmap(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Acquire(image_bitmap_registry_, handle);
+    }
+
+    ResourceLease acquireFaceResultSnapshot(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Acquire(face_result_snapshot_registry_, handle);
+    }
+
+    ResourceLease acquireFaceCaptureSession(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Acquire(face_capture_session_registry_, handle);
+    }
+
+    bool isSessionLive(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Contains(session_registry_, handle);
+    }
+
+    bool isStreamLive(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Contains(stream_registry_, handle);
+    }
+
+    bool isImageBitmapLive(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Contains(image_bitmap_registry_, handle);
+    }
+
+    bool isFaceFeatureLive(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Contains(face_feature_registry_, handle);
+    }
+
+    bool isFaceResultSnapshotLive(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Contains(face_result_snapshot_registry_, handle);
+    }
+
+    bool isFaceCaptureSessionLive(ResourceHandle handle) const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Contains(face_capture_session_registry_, handle);
+    }
+
+    std::vector<ResourceHandle> getUnreleasedSessions() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Snapshot(session_registry_);
+    }
+
+    std::vector<ResourceHandle> getUnreleasedStreams() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Snapshot(stream_registry_);
+    }
+
+    std::vector<ResourceHandle> getUnreleasedImageBitmaps() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Snapshot(image_bitmap_registry_);
+    }
+
+    std::vector<ResourceHandle> getUnreleasedFaceFeatures() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Snapshot(face_feature_registry_);
+    }
+
+    std::vector<ResourceHandle> getUnreleasedFaceResultSnapshots() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        return Snapshot(face_result_snapshot_registry_);
+    }
+
+    ResourceStatistics getResourceStatistics() const {
+        std::lock_guard<std::mutex> lock(mutex_);
+        ResourceStatistics statistics;
+        statistics.sessions = Counts(session_registry_);
+        statistics.streams = Counts(stream_registry_);
+        statistics.image_bitmaps = Counts(image_bitmap_registry_);
+        statistics.face_features = Counts(face_feature_registry_);
+        statistics.face_result_snapshots = Counts(face_result_snapshot_registry_);
+        statistics.face_capture_sessions = Counts(face_capture_session_registry_);
+        return statistics;
+    }
+
+    void printResourceStatistics() const {
+        const ResourceStatistics statistics = getResourceStatistics();
         INSPIRE_LOGI("================================================================");
         INSPIRE_LOGI("%-15s%-15s%-15s%-15s", "Resource Name", "Total Created", "Total Released", "Not Released");
         INSPIRE_LOGI("----------------------------------------------------------------");
-
-        // Print session statistics
-        int totalSessionsCreated = sessionMap.size();
-        int totalSessionsReleased = 0;
-        int sessionsNotReleased = 0;
-        for (const auto& entry : sessionMap) {
-            if (entry.second)
-                ++totalSessionsReleased;
-            if (!entry.second)
-                ++sessionsNotReleased;
-        }
-        INSPIRE_LOGI("%-15s%-15d%-15d%-15d", "Session", totalSessionsCreated, totalSessionsReleased, sessionsNotReleased);
-
-        // Print stream statistics
-        int totalStreamsCreated = streamMap.size();
-        int totalStreamsReleased = 0;
-        int streamsNotReleased = 0;
-        for (const auto& entry : streamMap) {
-            if (entry.second)
-                ++totalStreamsReleased;
-            if (!entry.second)
-                ++streamsNotReleased;
-        }
-        INSPIRE_LOGI("%-15s%-15d%-15d%-15d", "Stream", totalStreamsCreated, totalStreamsReleased, streamsNotReleased);
-
-        // Print bitmap statistics
-        int totalBitmapsCreated = imageBitmapMap.size();
-        int totalBitmapsReleased = 0;
-        int bitmapsNotReleased = 0;
-        for (const auto& entry : imageBitmapMap) {
-            if (entry.second)
-                ++totalBitmapsReleased;
-            if (!entry.second)
-                ++bitmapsNotReleased;
-        }
-        INSPIRE_LOGI("%-15s%-15d%-15d%-15d", "Bitmap", totalBitmapsCreated, totalBitmapsReleased, bitmapsNotReleased);
-
-        // Print face feature statistics
-        int totalFeaturesCreated = faceFeatureMap.size();
-        int totalFeaturesReleased = 0;
-        int featuresNotReleased = 0;
-        for (const auto& entry : faceFeatureMap) {
-            if (entry.second)
-                ++totalFeaturesReleased;
-            if (!entry.second)
-                ++featuresNotReleased;
-        }
-        INSPIRE_LOGI("%-15s%-15d%-15d%-15d", "FaceFeature", totalFeaturesCreated, totalFeaturesReleased, featuresNotReleased);
+        PrintCounts("Session", statistics.sessions);
+        PrintCounts("Stream", statistics.streams);
+        PrintCounts("Bitmap", statistics.image_bitmaps);
+        PrintCounts("FaceFeature", statistics.face_features);
+        PrintCounts("FaceSnapshot", statistics.face_result_snapshots);
+        PrintCounts("FaceCapture", statistics.face_capture_sessions);
         INSPIRE_LOGI("================================================================");
     }
+
+private:
+    struct Registry {
+        std::unordered_map<ResourceHandle, std::shared_ptr<void>> live_handles;
+        uint64_t total_created = 0;
+        uint64_t total_released = 0;
+    };
+
+    ResourceManager() = default;
+
+    static bool Register(Registry &registry, ResourceHandle handle, std::shared_ptr<void> owner) {
+        if (handle == 0) {
+            return false;
+        }
+        const bool inserted = registry.live_handles.emplace(handle, std::move(owner)).second;
+        if (inserted) {
+            ++registry.total_created;
+        }
+        return inserted;
+    }
+
+    static bool Release(Registry &registry, ResourceHandle handle, std::shared_ptr<void>& released_owner) {
+        const auto position = registry.live_handles.find(handle);
+        if (handle == 0 || position == registry.live_handles.end()) {
+            return false;
+        }
+        released_owner = std::move(position->second);
+        registry.live_handles.erase(position);
+        ++registry.total_released;
+        return true;
+    }
+
+    static ResourceLease Acquire(const Registry &registry, ResourceHandle handle) {
+        if (handle == 0) {
+            return {};
+        }
+        const auto position = registry.live_handles.find(handle);
+        if (position == registry.live_handles.end()) {
+            return {};
+        }
+        return ResourceLease(true, position->second);
+    }
+
+    static bool Contains(const Registry &registry, ResourceHandle handle) {
+        return handle != 0 && registry.live_handles.find(handle) != registry.live_handles.end();
+    }
+
+    static std::vector<ResourceHandle> Snapshot(const Registry &registry) {
+        std::vector<ResourceHandle> handles;
+        handles.reserve(registry.live_handles.size());
+        for (const auto& entry : registry.live_handles) {
+            handles.push_back(entry.first);
+        }
+        std::sort(handles.begin(), handles.end());
+        return handles;
+    }
+
+    static ResourceCounts Counts(const Registry &registry) {
+        ResourceCounts counts;
+        counts.total_created = registry.total_created;
+        counts.total_released = registry.total_released;
+        counts.live = registry.live_handles.size();
+        return counts;
+    }
+
+    static void PrintCounts(const char *name, const ResourceCounts &counts) {
+        INSPIRE_LOGI("%-15s%-15llu%-15llu%-15llu", name, static_cast<unsigned long long>(counts.total_created),
+                     static_cast<unsigned long long>(counts.total_released), static_cast<unsigned long long>(counts.live));
+    }
+
+    mutable std::mutex mutex_;
+    Registry session_registry_;
+    Registry stream_registry_;
+    Registry image_bitmap_registry_;
+    Registry face_feature_registry_;
+    Registry face_result_snapshot_registry_;
+    Registry face_capture_session_registry_;
 };
 
 }  // namespace inspire

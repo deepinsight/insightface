@@ -160,7 +160,10 @@ int32_t InferenceWrapperTensorRT::PreProcess(const std::vector<InputTensorInfo>&
             return WrapperError;
         }
         auto p = input_tensor_->host<float>();
-        net_->setInput(input_tensor_info.name.c_str(), reinterpret_cast<const char*>(p));
+        if (net_->setInput(input_tensor_info.name.c_str(), reinterpret_cast<const char*>(p)) != TENSORRT_HSUCCEED) {
+            PRINT_E("Failed to set input (%s)\n", input_tensor_info.name.c_str());
+            return WrapperError;
+        }
     }
     return WrapperOk;
 }
@@ -202,7 +205,7 @@ std::vector<std::string> InferenceWrapperTensorRT::GetInputNames() {
 
 int32_t InferenceWrapperTensorRT::ResizeInput(const std::vector<InputTensorInfo>& input_tensor_info_list) {
     PRINT_E("Currently, TensorRT does not support input resizing\n");
-    return 0;
+    return WrapperError;
 }
 
 #endif  // INFERENCE_WRAPPER_ENABLE_TENSORRT

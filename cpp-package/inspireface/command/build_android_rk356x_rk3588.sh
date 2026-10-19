@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 reorganize_structure() {
     local base_path=$1
@@ -92,8 +93,13 @@ move_install_files() {
 
 
 build() {
-    arch=$1
-    NDK_API_LEVEL=$2
+    local arch=$1
+    local NDK_API_LEVEL=$2
+    local android_neon_args=()
+    # Let the NDK toolchain select valid ARMv7 NEON flags for this ABI only.
+    if [[ "${arch}" == "armeabi-v7a" ]]; then
+        android_neon_args+=("-DANDROID_ARM_NEON=TRUE")
+    fi
     mkdir -p ${BUILD_FOLDER_PATH}/${arch}
     pushd ${BUILD_FOLDER_PATH}/${arch}
     cmake ${SCRIPT_DIR} \
@@ -105,6 +111,7 @@ build() {
         -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake \
         -DANDROID_TOOLCHAIN=clang \
         -DANDROID_ABI=${arch} \
+        "${android_neon_args[@]}" \
         -DANDROID_NATIVE_API_LEVEL=${NDK_API_LEVEL} \
         -DANDROID_STL=c++_static \
         -DMNN_BUILD_FOR_ANDROID_COMMAND=true \
@@ -139,4 +146,3 @@ build arm64-v8a 24
 build armeabi-v7a 24
 
 reorganize_structure "${BUILD_FOLDER_PATH}"
-

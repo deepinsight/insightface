@@ -6,11 +6,13 @@
 #ifndef INSPIRE_FEATURE_HUB_DB_H
 #define INSPIRE_FEATURE_HUB_DB_H
 
+#include <cstdint>
 #include <memory>
-#include <vector>
 #include <string>
-#include "data_type.h"
 #include <mutex>
+#include <vector>
+
+#include "data_type.h"
 
 #define INSPIREFACE_FEATURE_HUB inspire::FeatureHubDB::GetInstance()
 #define INSPIRE_INVALID_ID -1
@@ -87,6 +89,13 @@ public:
     int32_t GetAllIds();
 
     /**
+     * @brief Copies all IDs into caller-owned storage.
+     * @param ids Destination for the database IDs.
+     * @return int32_t Status code of the operation.
+     */
+    int32_t GetAllIds(std::vector<int64_t>& ids);
+
+    /**
      * @brief Searches for a face feature within stored data.
      * @param queryFeature Embedded feature to search for.
      * @param searchResult SearchResult object to store search results.
@@ -94,6 +103,16 @@ public:
      * @return int32_t Status code of the search operation.
      */
     int32_t SearchFaceFeature(const Embedded& queryFeature, FaceSearchResult& searchResult, bool returnFeature = true);
+
+    /**
+     * @brief Searches for a face feature and reports matches independently of the face ID value.
+     * @param queryFeature Embedded feature to search for.
+     * @param searchResult SearchResult object to store search results.
+     * @param found Set to true when a result passed the configured threshold.
+     * @param returnFeature Whether to return the feature data.
+     * @return int32_t Status code of the search operation.
+     */
+    int32_t SearchFaceFeatureV2(const Embedded& queryFeature, FaceSearchResult& searchResult, bool& found, bool returnFeature = true);
 
     /**
      * @brief Search the stored data for the top k facial features that are most similar.
@@ -123,11 +142,21 @@ public:
     int32_t FaceFeatureInsert(const std::vector<float>& feature, int32_t id, int64_t& result_id);
 
     /**
+     * @brief Inserts a face feature with a 64-bit custom ID.
+     */
+    int32_t FaceFeatureInsert(const std::vector<float>& feature, int64_t id, int64_t& result_id);
+
+    /**
      * @brief Removes a face feature by its ID.
      * @param id ID of the feature to remove.
      * @return int32_t Status code of the removal operation.
      */
     int32_t FaceFeatureRemove(int32_t id);
+
+    /**
+     * @brief Removes a face feature by its 64-bit ID.
+     */
+    int32_t FaceFeatureRemove(int64_t id);
 
     /**
      * @brief Updates a face feature by its ID.
@@ -138,11 +167,21 @@ public:
     int32_t FaceFeatureUpdate(const std::vector<float>& feature, int32_t customId);
 
     /**
+     * @brief Updates a face feature by its 64-bit ID.
+     */
+    int32_t FaceFeatureUpdate(const std::vector<float>& feature, int64_t customId);
+
+    /**
      * @brief Retrieves a face feature by its ID.
      * @param id ID of the feature to retrieve.
      * @return int32_t Status code of the retrieval operation.
      */
     int32_t GetFaceFeature(int32_t id);
+
+    /**
+     * @brief Retrieves a face feature by its 64-bit ID into the compatibility cache.
+     */
+    int32_t GetFaceFeature(int64_t id);
 
     /**
      * @brief Retrieves a face feature by its ID.
@@ -153,12 +192,22 @@ public:
     int32_t GetFaceFeature(int32_t id, std::vector<float>& feature);
 
     /**
+     * @brief Retrieves a face feature by its 64-bit ID.
+     */
+    int32_t GetFaceFeature(int64_t id, std::vector<float>& feature);
+
+    /**
      * @brief Retrieves a face feature by its ID.
      * @param id ID of the feature to retrieve.
      * @param feature Vector to store the retrieved feature.
      * @return int32_t Status code of the retrieval operation.
      */
     int32_t GetFaceFeature(int32_t id, FaceEmbedding& feature);
+
+    /**
+     * @brief Retrieves a face feature by its 64-bit ID.
+     */
+    int32_t GetFaceFeature(int64_t id, FaceEmbedding& feature);
 
     /**
      * @brief Views the database table containing face data.
@@ -218,6 +267,13 @@ public:
      * @return int32_t Total number of facial features.
      */
     int32_t GetFaceFeatureCount();
+
+    /**
+     * @brief Retrieves the total number of facial features with explicit status.
+     * @param count Destination for the count. Reset to zero on failure.
+     * @return int32_t Status code of the operation.
+     */
+    int32_t GetFaceFeatureCount(int32_t& count);
 
     /**
      * @brief Retrieves the confidence scores for the top k facial features.
