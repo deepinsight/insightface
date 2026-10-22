@@ -5,93 +5,10 @@ __docformat__ = "restructuredtext"
 import ctypes
 import sys
 from ctypes import *  # noqa: F401, F403
-import platform
-from pathlib import Path
-import subprocess
-import os
 
-def get_lib_path():
-    """
-    Get the appropriate library path based on the current platform and architecture.
-    
-    Returns:
-        str: The path to the platform-specific library
-        
-    Raises:
-        RuntimeError: If the platform/architecture is unsupported or library not found
-    """
-    package_dir = Path(__file__).parent
-    
-    # Get basic platform information
-    system = platform.system().lower()
-    machine = platform.machine().lower()
-    
-    # Initialize variables
-    platform_dir = None
-    lib_name = None
-    arch = None
-    
-    if system == 'windows':
-        platform_dir = 'windows'
-        lib_name = 'libInspireFace.dll'
-        # Windows architecture detection
-        arch = 'x64' if machine == 'amd64' or machine == 'x86_64' else 'arm64'
-        
-    elif system == 'linux':
-        platform_dir = 'linux'
-        lib_name = 'libInspireFace.so'
-        # Linux architecture detection
-        if machine == 'x86_64':
-            arch = 'x64'
-        elif machine in ['aarch64', 'arm64']:
-            arch = 'arm64'
-        elif machine.startswith('arm'):
-            arch = 'arm64'  # Might need more specific ARM version distinction
-            
-    elif system == 'darwin':  # macOS
-        platform_dir = 'darwin'
-        lib_name = 'libInspireFace.dylib'
-        
-        # macOS architecture detection
-        if machine == 'x86_64':
-            # Check if running under Rosetta 2
-            try:
-                # Use sysctl to detect Rosetta 2
-                is_rosetta = bool(int(subprocess.check_output(
-                    ['sysctl', '-n', 'sysctl.proc_translated']).decode().strip()))
-                # If running under Rosetta, it's actually an ARM machine
-                if is_rosetta:
-                    arch = 'arm64'
-                else:
-                    arch = 'x64'
-            except:
-                # If detection fails, assume native x64
-                arch = 'x64'
-        elif machine == 'arm64':
-            arch = 'arm64'
-            
-    # Validate that all necessary parameters were set
-    if not all([platform_dir, lib_name, arch]):
-        raise RuntimeError(
-            f"Unsupported platform: system={system}, machine={machine}")
-    
-    # Construct the full library path
-    dir_path = package_dir / 'libs' / platform_dir / arch
-    os.makedirs(dir_path, exist_ok=True)
-    lib_path = dir_path / lib_name
-    
-    # Verify that the library file exists
-    if not lib_path.exists():
-        raise RuntimeError(
-            f"Library not found at {lib_path}. "
-            f"System: {system}, Architecture: {arch}")
-    
-    return str(lib_path)
+from ._library_path import get_lib_path
 
-try:    
-    _LIBRARY_FILENAME = get_lib_path()
-except Exception as e:
-    print(e)
+_LIBRARY_FILENAME = get_lib_path()
 
 _int_types = (ctypes.c_int16, ctypes.c_int32)
 if hasattr(ctypes, "c_int64"):
@@ -521,420 +438,14 @@ def ord_if_char(value):
 _libs = {}
 _libdirs = []
 
-# Begin loader
-
-"""
-Load libraries - appropriately for all our supported platforms
-"""
-# ----------------------------------------------------------------------------
-# Copyright (c) 2008 David James
-# Copyright (c) 2006-2008 Alex Holkner
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-#  * Neither the name of pyglet nor the names of its
-#    contributors may be used to endorse or promote products
-#    derived from this software without specific prior written
-#    permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
-# ----------------------------------------------------------------------------
-
-import ctypes
-import ctypes.util
-import glob
-import os.path
-import platform
-import re
-import sys
-
-
-def _environ_path(name):
-    """Split an environment variable into a path-like list elements"""
-    if name in os.environ:
-        return os.environ[name].split(":")
-    return []
-
-
-class LibraryLoader:
-    """
-    A base class For loading of libraries ;-)
-    Subclasses load libraries for specific platforms.
-    """
-
-    # library names formatted specifically for platforms
-    name_formats = ["%s"]
-
-    class Lookup:
-        """Looking up calling conventions for a platform"""
-
-        mode = ctypes.DEFAULT_MODE
-
-        def __init__(self, path):
-            super(LibraryLoader.Lookup, self).__init__()
-            self.access = dict(cdecl=ctypes.CDLL(path, self.mode))
-
-        def get(self, name, calling_convention="cdecl"):
-            """Return the given name according to the selected calling convention"""
-            if calling_convention not in self.access:
-                raise LookupError(
-                    "Unknown calling convention '{}' for function '{}'".format(
-                        calling_convention, name
-                    )
-                )
-            return getattr(self.access[calling_convention], name)
-
-        def has(self, name, calling_convention="cdecl"):
-            """Return True if this given calling convention finds the given 'name'"""
-            if calling_convention not in self.access:
-                return False
-            return hasattr(self.access[calling_convention], name)
-
-        def __getattr__(self, name):
-            return getattr(self.access["cdecl"], name)
-
-    def __init__(self):
-        self.other_dirs = []
-
-    def __call__(self, libname):
-        """Given the name of a library, load it."""
-        paths = self.getpaths(libname)
-
-        for path in paths:
-            # noinspection PyBroadException
-            try:
-                return self.Lookup(path)
-            except Exception as err:  # pylint: disable=broad-except
-                print(err)
-
-        raise ImportError("Could not load %s." % libname)
-
-    def getpaths(self, libname):
-        """Return a list of paths where the library might be found."""
-        if os.path.isabs(libname):
-            yield libname
-        else:
-            # search through a prioritized series of locations for the library
-
-            # we first search any specific directories identified by user
-            for dir_i in self.other_dirs:
-                for fmt in self.name_formats:
-                    # dir_i should be absolute already
-                    yield os.path.join(dir_i, fmt % libname)
-
-            # check if this code is even stored in a physical file
-            try:
-                this_file = __file__
-            except NameError:
-                this_file = None
-
-            # then we search the directory where the generated python interface is stored
-            if this_file is not None:
-                for fmt in self.name_formats:
-                    yield os.path.abspath(os.path.join(os.path.dirname(__file__), fmt % libname))
-
-            # now, use the ctypes tools to try to find the library
-            for fmt in self.name_formats:
-                path = ctypes.util.find_library(fmt % libname)
-                if path:
-                    yield path
-
-            # then we search all paths identified as platform-specific lib paths
-            for path in self.getplatformpaths(libname):
-                yield path
-
-            # Finally, we'll try the users current working directory
-            for fmt in self.name_formats:
-                yield os.path.abspath(os.path.join(os.path.curdir, fmt % libname))
-
-    def getplatformpaths(self, _libname):  # pylint: disable=no-self-use
-        """Return all the library paths available in this platform"""
-        return []
-
-
-# Darwin (Mac OS X)
-
-
-class DarwinLibraryLoader(LibraryLoader):
-    """Library loader for MacOS"""
-
-    name_formats = [
-        "lib%s.dylib",
-        "lib%s.so",
-        "lib%s.bundle",
-        "%s.dylib",
-        "%s.so",
-        "%s.bundle",
-        "%s",
-    ]
-
-    class Lookup(LibraryLoader.Lookup):
-        """
-        Looking up library files for this platform (Darwin aka MacOS)
-        """
-
-        # Darwin requires dlopen to be called with mode RTLD_GLOBAL instead
-        # of the default RTLD_LOCAL.  Without this, you end up with
-        # libraries not being loadable, resulting in "Symbol not found"
-        # errors
-        mode = ctypes.RTLD_GLOBAL
-
-    def getplatformpaths(self, libname):
-        if os.path.pathsep in libname:
-            names = [libname]
-        else:
-            names = [fmt % libname for fmt in self.name_formats]
-
-        for directory in self.getdirs(libname):
-            for name in names:
-                yield os.path.join(directory, name)
-
-    @staticmethod
-    def getdirs(libname):
-        """Implements the dylib search as specified in Apple documentation:
-
-        http://developer.apple.com/documentation/DeveloperTools/Conceptual/
-            DynamicLibraries/Articles/DynamicLibraryUsageGuidelines.html
-
-        Before commencing the standard search, the method first checks
-        the bundle's ``Frameworks`` directory if the application is running
-        within a bundle (OS X .app).
-        """
-
-        dyld_fallback_library_path = _environ_path("DYLD_FALLBACK_LIBRARY_PATH")
-        if not dyld_fallback_library_path:
-            dyld_fallback_library_path = [
-                os.path.expanduser("~/lib"),
-                "/usr/local/lib",
-                "/usr/lib",
-            ]
-
-        dirs = []
-
-        if "/" in libname:
-            dirs.extend(_environ_path("DYLD_LIBRARY_PATH"))
-        else:
-            dirs.extend(_environ_path("LD_LIBRARY_PATH"))
-            dirs.extend(_environ_path("DYLD_LIBRARY_PATH"))
-            dirs.extend(_environ_path("LD_RUN_PATH"))
-
-        if hasattr(sys, "frozen") and getattr(sys, "frozen") == "macosx_app":
-            dirs.append(os.path.join(os.environ["RESOURCEPATH"], "../../..", "Frameworks"))
-
-        dirs.extend(dyld_fallback_library_path)
-
-        return dirs
-
-
-# Posix
-
-
-class PosixLibraryLoader(LibraryLoader):
-    """Library loader for POSIX-like systems (including Linux)"""
-
-    _ld_so_cache = None
-
-    _include = re.compile(r"^\s*include\s+(?P<pattern>.*)")
-
-    name_formats = ["lib%s.so", "%s.so", "%s"]
-
-    class _Directories(dict):
-        """Deal with directories"""
-
-        def __init__(self):
-            dict.__init__(self)
-            self.order = 0
-
-        def add(self, directory):
-            """Add a directory to our current set of directories"""
-            if len(directory) > 1:
-                directory = directory.rstrip(os.path.sep)
-            # only adds and updates order if exists and not already in set
-            if not os.path.exists(directory):
-                return
-            order = self.setdefault(directory, self.order)
-            if order == self.order:
-                self.order += 1
-
-        def extend(self, directories):
-            """Add a list of directories to our set"""
-            for a_dir in directories:
-                self.add(a_dir)
-
-        def ordered(self):
-            """Sort the list of directories"""
-            return (i[0] for i in sorted(self.items(), key=lambda d: d[1]))
-
-    def _get_ld_so_conf_dirs(self, conf, dirs):
-        """
-        Recursive function to help parse all ld.so.conf files, including proper
-        handling of the `include` directive.
-        """
-
-        try:
-            with open(conf) as fileobj:
-                for dirname in fileobj:
-                    dirname = dirname.strip()
-                    if not dirname:
-                        continue
-
-                    match = self._include.match(dirname)
-                    if not match:
-                        dirs.add(dirname)
-                    else:
-                        for dir2 in glob.glob(match.group("pattern")):
-                            self._get_ld_so_conf_dirs(dir2, dirs)
-        except IOError:
-            pass
-
-    def _create_ld_so_cache(self):
-        # Recreate search path followed by ld.so.  This is going to be
-        # slow to build, and incorrect (ld.so uses ld.so.cache, which may
-        # not be up-to-date).  Used only as fallback for distros without
-        # /sbin/ldconfig.
-        #
-        # We assume the DT_RPATH and DT_RUNPATH binary sections are omitted.
-
-        directories = self._Directories()
-        for name in (
-            "LD_LIBRARY_PATH",
-            "SHLIB_PATH",  # HP-UX
-            "LIBPATH",  # OS/2, AIX
-            "LIBRARY_PATH",  # BE/OS
-        ):
-            if name in os.environ:
-                directories.extend(os.environ[name].split(os.pathsep))
-
-        self._get_ld_so_conf_dirs("/etc/ld.so.conf", directories)
-
-        bitage = platform.architecture()[0]
-
-        unix_lib_dirs_list = []
-        if bitage.startswith("64"):
-            # prefer 64 bit if that is our arch
-            unix_lib_dirs_list += ["/lib64", "/usr/lib64"]
-
-        # must include standard libs, since those paths are also used by 64 bit
-        # installs
-        unix_lib_dirs_list += ["/lib", "/usr/lib"]
-        if sys.platform.startswith("linux"):
-            # Try and support multiarch work in Ubuntu
-            # https://wiki.ubuntu.com/MultiarchSpec
-            if bitage.startswith("32"):
-                # Assume Intel/AMD x86 compat
-                unix_lib_dirs_list += ["/lib/i386-linux-gnu", "/usr/lib/i386-linux-gnu"]
-            elif bitage.startswith("64"):
-                # Assume Intel/AMD x86 compatible
-                unix_lib_dirs_list += [
-                    "/lib/x86_64-linux-gnu",
-                    "/usr/lib/x86_64-linux-gnu",
-                ]
-            else:
-                # guess...
-                unix_lib_dirs_list += glob.glob("/lib/*linux-gnu")
-        directories.extend(unix_lib_dirs_list)
-
-        cache = {}
-        lib_re = re.compile(r"lib(.*)\.s[ol]")
-        # ext_re = re.compile(r"\.s[ol]$")
-        for our_dir in directories.ordered():
-            try:
-                for path in glob.glob("%s/*.s[ol]*" % our_dir):
-                    file = os.path.basename(path)
-
-                    # Index by filename
-                    cache_i = cache.setdefault(file, set())
-                    cache_i.add(path)
-
-                    # Index by library name
-                    match = lib_re.match(file)
-                    if match:
-                        library = match.group(1)
-                        cache_i = cache.setdefault(library, set())
-                        cache_i.add(path)
-            except OSError:
-                pass
-
-        self._ld_so_cache = cache
-
-    def getplatformpaths(self, libname):
-        if self._ld_so_cache is None:
-            self._create_ld_so_cache()
-
-        result = self._ld_so_cache.get(libname, set())
-        for i in result:
-            # we iterate through all found paths for library, since we may have
-            # actually found multiple architectures or other library types that
-            # may not load
-            yield i
-
-
-# Windows
-
-
-class WindowsLibraryLoader(LibraryLoader):
-    """Library loader for Microsoft Windows"""
-
-    name_formats = ["%s.dll", "lib%s.dll", "%slib.dll", "%s"]
-
-    class Lookup(LibraryLoader.Lookup):
-        """Lookup class for Windows libraries..."""
-
-        def __init__(self, path):
-            super(WindowsLibraryLoader.Lookup, self).__init__(path)
-            self.access["stdcall"] = ctypes.windll.LoadLibrary(path)
-
-
-# Platform switching
-
-# If your value of sys.platform does not appear in this dict, please contact
-# the Ctypesgen maintainers.
-
-loaderclass = {
-    "darwin": DarwinLibraryLoader,
-    "cygwin": WindowsLibraryLoader,
-    "win32": WindowsLibraryLoader,
-    "msys": WindowsLibraryLoader,
-}
-
-load_library = loaderclass.get(sys.platform, PosixLibraryLoader)()
-
-
-def add_library_search_dirs(other_dirs):
-    """
-    Add libraries to search paths.
-    If library paths are relative, convert them to absolute with respect to this
-    file's directory
-    """
-    for path in other_dirs:
-        if not os.path.isabs(path):
-            path = os.path.abspath(path)
-        load_library.other_dirs.append(path)
-
-
-del loaderclass
-
-# End loader
+from ._native_loader import (
+    DarwinLibraryLoader,
+    LibraryLoader,
+    PosixLibraryLoader,
+    WindowsLibraryLoader,
+    add_library_search_dirs,
+    load_library,
+)
 
 add_library_search_dirs([])
 
@@ -957,6 +468,14 @@ HFImageBitmap = POINTER(None)# /Users/tunm/work/InspireFace/cpp/inspireface/c_ap
 
 PHFImageBitmap = POINTER(POINTER(None))# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/intypedef.h: 16
 
+HFFaceResultSnapshot = POINTER(None)
+
+PHFFaceResultSnapshot = POINTER(POINTER(None))
+
+HFFaceCaptureSession = POINTER(None)
+
+PHFFaceCaptureSession = POINTER(POINTER(None))
+
 HPVoid = POINTER(None)# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/intypedef.h: 17
 
 HFloat = c_float# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/intypedef.h: 19
@@ -970,6 +489,12 @@ HInt32 = c_int# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/intypedef.h: 
 HOption = c_int# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/intypedef.h: 25
 
 HPInt32 = POINTER(c_int)# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/intypedef.h: 26
+
+HFStatus = c_int32
+
+HFUInt32 = c_uint32
+
+HFUInt64 = c_uint64
 
 HFaceId = c_int64# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/intypedef.h: 27
 
@@ -1242,6 +767,40 @@ if _libs[_LIBRARY_FILENAME].has("HFImageBitmapShow", "cdecl"):
     HFImageBitmapShow.restype = HResult
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 327
+class struct_HFResourcePackInfo(Structure):
+    pass
+
+struct_HFResourcePackInfo.__slots__ = [
+    'structSize',
+    'structVersion',
+    'archiveFileCount',
+    'modelCount',
+    'tag',
+    'version',
+    'major',
+    'releaseDate',
+    'reserved',
+]
+struct_HFResourcePackInfo._fields_ = [
+    ('structSize', HFUInt32),
+    ('structVersion', HFUInt32),
+    ('archiveFileCount', HFUInt32),
+    ('modelCount', HFUInt32),
+    ('tag', HChar * int(64)),
+    ('version', HChar * int(64)),
+    ('major', HChar * int(64)),
+    ('releaseDate', HChar * int(64)),
+    ('reserved', HFUInt64 * int(8)),
+]
+
+HFResourcePackInfo = struct_HFResourcePackInfo
+PHFResourcePackInfo = POINTER(struct_HFResourcePackInfo)
+
+if _libs[_LIBRARY_FILENAME].has("HFValidateResourcePack", "cdecl"):
+    HFValidateResourcePack = _libs[_LIBRARY_FILENAME].get("HFValidateResourcePack", "cdecl")
+    HFValidateResourcePack.argtypes = [HPath, PHFResourcePackInfo]
+    HFValidateResourcePack.restype = HFStatus
+
 if _libs[_LIBRARY_FILENAME].has("HFLaunchInspireFace", "cdecl"):
     HFLaunchInspireFace = _libs[_LIBRARY_FILENAME].get("HFLaunchInspireFace", "cdecl")
     HFLaunchInspireFace.argtypes = [HPath]
@@ -1282,6 +841,11 @@ if _libs[_LIBRARY_FILENAME].has("HFQueryExpansiveHardwareRockchipDmaHeapPath", "
     HFQueryExpansiveHardwareRockchipDmaHeapPath = _libs[_LIBRARY_FILENAME].get("HFQueryExpansiveHardwareRockchipDmaHeapPath", "cdecl")
     HFQueryExpansiveHardwareRockchipDmaHeapPath.argtypes = [HString]
     HFQueryExpansiveHardwareRockchipDmaHeapPath.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFQueryExpansiveHardwareRockchipDmaHeapPathWithSize", "cdecl"):
+    HFQueryExpansiveHardwareRockchipDmaHeapPathWithSize = _libs[_LIBRARY_FILENAME].get("HFQueryExpansiveHardwareRockchipDmaHeapPathWithSize", "cdecl")
+    HFQueryExpansiveHardwareRockchipDmaHeapPathWithSize.argtypes = [HString, HInt32]
+    HFQueryExpansiveHardwareRockchipDmaHeapPathWithSize.restype = HResult
 
 enum_HFImageProcessingBackend = c_int# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 392
 
@@ -1392,6 +956,34 @@ HF_DETECT_MODE_TRACK_BY_DETECTION = (HF_DETECT_MODE_LIGHT_TRACK + 1)# /Users/tun
 
 HFDetectMode = enum_HFDetectMode# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 498
 
+class struct_HFSessionConfigV2(Structure):
+    pass
+
+struct_HFSessionConfigV2.__slots__ = [
+    'structSize',
+    'structVersion',
+    'featureMask',
+    'detectMode',
+    'maxDetectFaceNum',
+    'detectPixelLevel',
+    'trackByDetectModeFPS',
+    'reserved',
+]
+struct_HFSessionConfigV2._fields_ = [
+    ('structSize', HFUInt32),
+    ('structVersion', HFUInt32),
+    ('featureMask', HFUInt64),
+    ('detectMode', HInt32),
+    ('maxDetectFaceNum', HInt32),
+    ('detectPixelLevel', HInt32),
+    ('trackByDetectModeFPS', HInt32),
+    ('reserved', HFUInt32 * int(8)),
+]
+
+HFSessionConfigV2 = struct_HFSessionConfigV2
+
+PHFSessionConfigV2 = POINTER(struct_HFSessionConfigV2)
+
 enum_HFSessionLandmarkEngine = c_int# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 507
 
 HF_LANDMARK_HYPLMV2_0_25 = 0# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 507
@@ -1442,6 +1034,11 @@ if _libs[_LIBRARY_FILENAME].has("HFCreateInspireFaceSessionOptional", "cdecl"):
     HFCreateInspireFaceSessionOptional = _libs[_LIBRARY_FILENAME].get("HFCreateInspireFaceSessionOptional", "cdecl")
     HFCreateInspireFaceSessionOptional.argtypes = [HOption, HFDetectMode, HInt32, HInt32, HInt32, PHFSession]
     HFCreateInspireFaceSessionOptional.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFCreateInspireFaceSessionV2", "cdecl"):
+    HFCreateInspireFaceSessionV2 = _libs[_LIBRARY_FILENAME].get("HFCreateInspireFaceSessionV2", "cdecl")
+    HFCreateInspireFaceSessionV2.argtypes = [PHFSessionConfigV2, PHFSession]
+    HFCreateInspireFaceSessionV2.restype = HFStatus
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 572
 if _libs[_LIBRARY_FILENAME].has("HFReleaseInspireFaceSession", "cdecl"):
@@ -1510,6 +1107,172 @@ HFMultipleFaceData = struct_HFMultipleFaceData# /Users/tunm/work/InspireFace/cpp
 
 PHFMultipleFaceData = POINTER(struct_HFMultipleFaceData)# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 616
 
+HFFaceCaptureState = c_int
+
+
+class struct_HFFaceCaptureConfig(Structure):
+    pass
+
+
+struct_HFFaceCaptureConfig.__slots__ = [
+    'structSize',
+    'structVersion',
+    'filterMask',
+    'outputCount',
+    'minTrackCount',
+    'stableDurationMs',
+    'collectDurationMs',
+    'maxCollectDurationMs',
+    'trackLostGraceMs',
+    'minCandidateIntervalMs',
+    'minFaceWidthRatio',
+    'maxFaceWidthRatio',
+    'maxCenterOffsetX',
+    'maxCenterOffsetY',
+    'boundaryMarginRatio',
+    'maxCenterMotionRatio',
+    'maxSizeChangeRatio',
+    'maxAbsYaw',
+    'maxAbsPitch',
+    'maxAbsRoll',
+    'minQualityScore',
+    'minSharpnessScore',
+    'minBrightnessScore',
+    'maxBrightnessScore',
+    'reserved',
+]
+struct_HFFaceCaptureConfig._fields_ = [
+    ('structSize', HFUInt32),
+    ('structVersion', HFUInt32),
+    ('filterMask', HFUInt64),
+    ('outputCount', HFUInt32),
+    ('minTrackCount', HFUInt32),
+    ('stableDurationMs', HFUInt64),
+    ('collectDurationMs', HFUInt64),
+    ('maxCollectDurationMs', HFUInt64),
+    ('trackLostGraceMs', HFUInt64),
+    ('minCandidateIntervalMs', HFUInt64),
+    ('minFaceWidthRatio', HFloat),
+    ('maxFaceWidthRatio', HFloat),
+    ('maxCenterOffsetX', HFloat),
+    ('maxCenterOffsetY', HFloat),
+    ('boundaryMarginRatio', HFloat),
+    ('maxCenterMotionRatio', HFloat),
+    ('maxSizeChangeRatio', HFloat),
+    ('maxAbsYaw', HFloat),
+    ('maxAbsPitch', HFloat),
+    ('maxAbsRoll', HFloat),
+    ('minQualityScore', HFloat),
+    ('minSharpnessScore', HFloat),
+    ('minBrightnessScore', HFloat),
+    ('maxBrightnessScore', HFloat),
+    ('reserved', HFUInt32 * int(8)),
+]
+
+HFFaceCaptureConfig = struct_HFFaceCaptureConfig
+PHFFaceCaptureConfig = POINTER(struct_HFFaceCaptureConfig)
+
+
+class struct_HFFaceCaptureMetrics(Structure):
+    pass
+
+
+struct_HFFaceCaptureMetrics.__slots__ = [
+    'availableMetrics',
+    'faceWidthRatio',
+    'centerOffsetX',
+    'centerOffsetY',
+    'stabilityScore',
+    'poseScore',
+    'qualityScore',
+    'sharpnessScore',
+    'brightnessScore',
+]
+struct_HFFaceCaptureMetrics._fields_ = [
+    ('availableMetrics', HFUInt64),
+    ('faceWidthRatio', HFloat),
+    ('centerOffsetX', HFloat),
+    ('centerOffsetY', HFloat),
+    ('stabilityScore', HFloat),
+    ('poseScore', HFloat),
+    ('qualityScore', HFloat),
+    ('sharpnessScore', HFloat),
+    ('brightnessScore', HFloat),
+]
+
+HFFaceCaptureMetrics = struct_HFFaceCaptureMetrics
+PHFFaceCaptureMetrics = POINTER(struct_HFFaceCaptureMetrics)
+
+
+class struct_HFFaceCaptureProgress(Structure):
+    pass
+
+
+struct_HFFaceCaptureProgress.__slots__ = [
+    'state',
+    'candidateCount',
+    'frameId',
+    'timestampMs',
+    'trackId',
+    'trackCount',
+    'evaluatedFilters',
+    'rejectReasons',
+    'progress',
+    'currentScore',
+    'metrics',
+]
+struct_HFFaceCaptureProgress._fields_ = [
+    ('state', HInt32),
+    ('candidateCount', HFUInt32),
+    ('frameId', HFUInt64),
+    ('timestampMs', HFUInt64),
+    ('trackId', HInt32),
+    ('trackCount', HInt32),
+    ('evaluatedFilters', HFUInt64),
+    ('rejectReasons', HFUInt64),
+    ('progress', HFloat),
+    ('currentScore', HFloat),
+    ('metrics', HFFaceCaptureMetrics),
+]
+
+HFFaceCaptureProgress = struct_HFFaceCaptureProgress
+PHFFaceCaptureProgress = POINTER(struct_HFFaceCaptureProgress)
+
+
+class struct_HFFaceCaptureResult(Structure):
+    pass
+
+
+struct_HFFaceCaptureResult.__slots__ = [
+    'frameId',
+    'timestampMs',
+    'trackId',
+    'trackCount',
+    'score',
+    'rect',
+    'roll',
+    'yaw',
+    'pitch',
+    'token',
+    'metrics',
+]
+struct_HFFaceCaptureResult._fields_ = [
+    ('frameId', HFUInt64),
+    ('timestampMs', HFUInt64),
+    ('trackId', HInt32),
+    ('trackCount', HInt32),
+    ('score', HFloat),
+    ('rect', HFaceRect),
+    ('roll', HFloat),
+    ('yaw', HFloat),
+    ('pitch', HFloat),
+    ('token', HFFaceBasicToken),
+    ('metrics', HFFaceCaptureMetrics),
+]
+
+HFFaceCaptureResult = struct_HFFaceCaptureResult
+PHFFaceCaptureResult = POINTER(struct_HFFaceCaptureResult)
+
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 623
 if _libs[_LIBRARY_FILENAME].has("HFSessionClearTrackingFace", "cdecl"):
     HFSessionClearTrackingFace = _libs[_LIBRARY_FILENAME].get("HFSessionClearTrackingFace", "cdecl")
@@ -1570,11 +1333,92 @@ if _libs[_LIBRARY_FILENAME].has("HFSessionSetTrackModeDetectInterval", "cdecl"):
     HFSessionSetTrackModeDetectInterval.argtypes = [HFSession, HInt32]
     HFSessionSetTrackModeDetectInterval.restype = HResult
 
+# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h
+if _libs[_LIBRARY_FILENAME].has("HFSessionSetLandmarkAugmentationNum", "cdecl"):
+    HFSessionSetLandmarkAugmentationNum = _libs[_LIBRARY_FILENAME].get("HFSessionSetLandmarkAugmentationNum", "cdecl")
+    HFSessionSetLandmarkAugmentationNum.argtypes = [HFSession, HInt32]
+    HFSessionSetLandmarkAugmentationNum.restype = HResult
+
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 713
 if _libs[_LIBRARY_FILENAME].has("HFExecuteFaceTrack", "cdecl"):
     HFExecuteFaceTrack = _libs[_LIBRARY_FILENAME].get("HFExecuteFaceTrack", "cdecl")
     HFExecuteFaceTrack.argtypes = [HFSession, HFImageStream, PHFMultipleFaceData]
     HFExecuteFaceTrack.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFExecuteFaceTrackSnapshot", "cdecl"):
+    HFExecuteFaceTrackSnapshot = _libs[_LIBRARY_FILENAME].get("HFExecuteFaceTrackSnapshot", "cdecl")
+    HFExecuteFaceTrackSnapshot.argtypes = [HFSession, HFImageStream, PHFFaceResultSnapshot]
+    HFExecuteFaceTrackSnapshot.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFGetFaceResultSnapshotData", "cdecl"):
+    HFGetFaceResultSnapshotData = _libs[_LIBRARY_FILENAME].get("HFGetFaceResultSnapshotData", "cdecl")
+    HFGetFaceResultSnapshotData.argtypes = [HFFaceResultSnapshot, PHFMultipleFaceData]
+    HFGetFaceResultSnapshotData.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFReleaseFaceResultSnapshot", "cdecl"):
+    HFReleaseFaceResultSnapshot = _libs[_LIBRARY_FILENAME].get("HFReleaseFaceResultSnapshot", "cdecl")
+    HFReleaseFaceResultSnapshot.argtypes = [HFFaceResultSnapshot]
+    HFReleaseFaceResultSnapshot.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFGetDefaultFaceCaptureConfig", "cdecl"):
+    HFGetDefaultFaceCaptureConfig = _libs[_LIBRARY_FILENAME].get("HFGetDefaultFaceCaptureConfig", "cdecl")
+    HFGetDefaultFaceCaptureConfig.argtypes = [PHFFaceCaptureConfig]
+    HFGetDefaultFaceCaptureConfig.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFCreateFaceCaptureSession", "cdecl"):
+    HFCreateFaceCaptureSession = _libs[_LIBRARY_FILENAME].get("HFCreateFaceCaptureSession", "cdecl")
+    HFCreateFaceCaptureSession.argtypes = [HFSession, PHFFaceCaptureConfig, PHFFaceCaptureSession]
+    HFCreateFaceCaptureSession.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFUpdateFaceCaptureSession", "cdecl"):
+    HFUpdateFaceCaptureSession = _libs[_LIBRARY_FILENAME].get("HFUpdateFaceCaptureSession", "cdecl")
+    HFUpdateFaceCaptureSession.argtypes = [
+        HFFaceCaptureSession,
+        HFImageStream,
+        HFUInt64,
+        HFUInt64,
+        PHFFaceCaptureProgress,
+    ]
+    HFUpdateFaceCaptureSession.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFUpdateFaceCaptureSessionWithSnapshot", "cdecl"):
+    HFUpdateFaceCaptureSessionWithSnapshot = _libs[_LIBRARY_FILENAME].get(
+        "HFUpdateFaceCaptureSessionWithSnapshot", "cdecl"
+    )
+    HFUpdateFaceCaptureSessionWithSnapshot.argtypes = [
+        HFFaceCaptureSession,
+        HFImageStream,
+        HFFaceResultSnapshot,
+        HFUInt64,
+        HFUInt64,
+        PHFFaceCaptureProgress,
+    ]
+    HFUpdateFaceCaptureSessionWithSnapshot.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFGetFaceCaptureResults", "cdecl"):
+    HFGetFaceCaptureResults = _libs[_LIBRARY_FILENAME].get("HFGetFaceCaptureResults", "cdecl")
+    HFGetFaceCaptureResults.argtypes = [
+        HFFaceCaptureSession,
+        PHFFaceCaptureResult,
+        HFUInt32,
+        POINTER(HFUInt32),
+    ]
+    HFGetFaceCaptureResults.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFFinishFaceCaptureSession", "cdecl"):
+    HFFinishFaceCaptureSession = _libs[_LIBRARY_FILENAME].get("HFFinishFaceCaptureSession", "cdecl")
+    HFFinishFaceCaptureSession.argtypes = [HFFaceCaptureSession, PHFFaceCaptureProgress]
+    HFFinishFaceCaptureSession.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFResetFaceCaptureSession", "cdecl"):
+    HFResetFaceCaptureSession = _libs[_LIBRARY_FILENAME].get("HFResetFaceCaptureSession", "cdecl")
+    HFResetFaceCaptureSession.argtypes = [HFFaceCaptureSession]
+    HFResetFaceCaptureSession.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFReleaseFaceCaptureSession", "cdecl"):
+    HFReleaseFaceCaptureSession = _libs[_LIBRARY_FILENAME].get("HFReleaseFaceCaptureSession", "cdecl")
+    HFReleaseFaceCaptureSession.argtypes = [HFFaceCaptureSession]
+    HFReleaseFaceCaptureSession.restype = HResult
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 721
 if _libs[_LIBRARY_FILENAME].has("HFSessionLastFaceDetectionGetDebugPreviewImageSize", "cdecl"):
@@ -1699,6 +1543,8 @@ HF_PK_MANUAL_INPUT = (HF_PK_AUTO_INCREMENT + 1)# /Users/tunm/work/InspireFace/cp
 
 HFPKMode = enum_HFPKMode# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 903
 
+HF_INVALID_FACE_ID = -1
+
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 916
 class struct_HFFeatureHubConfiguration(Structure):
     pass
@@ -1748,6 +1594,25 @@ struct_HFFaceFeatureIdentity._fields_ = [
 HFFaceFeatureIdentity = struct_HFFaceFeatureIdentity# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 945
 
 PHFFaceFeatureIdentity = POINTER(struct_HFFaceFeatureIdentity)# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 945
+
+class struct_HFFeatureHubSearchResultV2(Structure):
+    pass
+
+struct_HFFeatureHubSearchResultV2.__slots__ = [
+    'found',
+    'id',
+    'confidence',
+    'feature',
+]
+struct_HFFeatureHubSearchResultV2._fields_ = [
+    ('found', HInt32),
+    ('id', HFaceId),
+    ('confidence', HFloat),
+    ('feature', HFFaceFeature),
+]
+
+HFFeatureHubSearchResultV2 = struct_HFFeatureHubSearchResultV2
+PHFFeatureHubSearchResultV2 = POINTER(struct_HFFeatureHubSearchResultV2)
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 954
 class struct_HFSearchTopKResults(Structure):
@@ -1844,6 +1709,11 @@ if _libs[_LIBRARY_FILENAME].has("HFFeatureHubFaceSearch", "cdecl"):
     HFFeatureHubFaceSearch = _libs[_LIBRARY_FILENAME].get("HFFeatureHubFaceSearch", "cdecl")
     HFFeatureHubFaceSearch.argtypes = [HFFaceFeature, HPFloat, PHFFaceFeatureIdentity]
     HFFeatureHubFaceSearch.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFFeatureHubFaceSearchV2", "cdecl"):
+    HFFeatureHubFaceSearchV2 = _libs[_LIBRARY_FILENAME].get("HFFeatureHubFaceSearchV2", "cdecl")
+    HFFeatureHubFaceSearchV2.argtypes = [HFFaceFeature, PHFFeatureHubSearchResultV2]
+    HFFeatureHubFaceSearchV2.restype = HResult
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 1067
 if _libs[_LIBRARY_FILENAME].has("HFFeatureHubFaceSearchTopK", "cdecl"):
@@ -2122,6 +1992,76 @@ if _libs[_LIBRARY_FILENAME].has("HFQueryInspireFaceVersion", "cdecl"):
     HFQueryInspireFaceVersion.argtypes = [PHFInspireFaceVersion]
     HFQueryInspireFaceVersion.restype = HResult
 
+if _libs[_LIBRARY_FILENAME].has("HFQueryCAPILevel", "cdecl"):
+    HFQueryCAPILevel = _libs[_LIBRARY_FILENAME].get("HFQueryCAPILevel", "cdecl")
+    HFQueryCAPILevel.argtypes = [POINTER(HFUInt32)]
+    HFQueryCAPILevel.restype = HFStatus
+
+enum_HFComponentType = c_int
+
+HF_COMPONENT_MNN = 0
+HF_COMPONENT_INSPIRECV = 1
+HF_COMPONENT_EIGEN = 2
+HF_COMPONENT_SQLITE = 3
+HF_COMPONENT_SQLITE_VEC = 4
+HF_COMPONENT_NLOHMANN_JSON = 5
+HF_COMPONENT_OPENCV = 6
+HF_COMPONENT_TENSORRT = 7
+HF_COMPONENT_CUDA = 8
+HF_COMPONENT_RKNN = 9
+HF_COMPONENT_RGA = 10
+HF_COMPONENT_COREML = 11
+HF_COMPONENT_COUNT = 12
+
+HFComponentType = enum_HFComponentType
+
+enum_HFComponentVersionState = c_int
+
+HF_COMPONENT_VERSION_DISABLED = 0
+HF_COMPONENT_VERSION_KNOWN = 1
+HF_COMPONENT_VERSION_UNKNOWN = 2
+
+HFComponentVersionState = enum_HFComponentVersionState
+
+class struct_HFComponentVersion(Structure):
+    pass
+
+struct_HFComponentVersion.__slots__ = [
+    'major',
+    'minor',
+    'patch',
+    'state',
+]
+struct_HFComponentVersion._fields_ = [
+    ('major', HInt32),
+    ('minor', HInt32),
+    ('patch', HInt32),
+    ('state', HFComponentVersionState),
+]
+
+HFComponentVersion = struct_HFComponentVersion
+PHFComponentVersion = POINTER(struct_HFComponentVersion)
+
+if _libs[_LIBRARY_FILENAME].has("HFQueryInspireFaceComponentVersion", "cdecl"):
+    HFQueryInspireFaceComponentVersion = _libs[_LIBRARY_FILENAME].get("HFQueryInspireFaceComponentVersion", "cdecl")
+    HFQueryInspireFaceComponentVersion.argtypes = [HFComponentType, PHFComponentVersion]
+    HFQueryInspireFaceComponentVersion.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFQueryInspireFaceComponentVersions", "cdecl"):
+    HFQueryInspireFaceComponentVersions = _libs[_LIBRARY_FILENAME].get("HFQueryInspireFaceComponentVersions", "cdecl")
+    HFQueryInspireFaceComponentVersions.argtypes = [HString, HInt32, HPInt32]
+    HFQueryInspireFaceComponentVersions.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFQueryInspireFaceDiagnosticInformation", "cdecl"):
+    HFQueryInspireFaceDiagnosticInformation = _libs[_LIBRARY_FILENAME].get("HFQueryInspireFaceDiagnosticInformation", "cdecl")
+    HFQueryInspireFaceDiagnosticInformation.argtypes = [HString, HInt32, HPInt32]
+    HFQueryInspireFaceDiagnosticInformation.restype = HResult
+
+if _libs[_LIBRARY_FILENAME].has("HFGetErrorMessage", "cdecl"):
+    HFGetErrorMessage = _libs[_LIBRARY_FILENAME].get("HFGetErrorMessage", "cdecl")
+    HFGetErrorMessage.argtypes = [HResult, HString, HInt32, HPInt32]
+    HFGetErrorMessage.restype = HResult
+
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 1372
 class struct_HFInspireFaceExtendedInformation(Structure):
     pass
@@ -2222,88 +2162,104 @@ if _libs[_LIBRARY_FILENAME].has("HFDeBugGetUnreleasedStreams", "cdecl"):
     HFDeBugGetUnreleasedStreams.restype = HResult
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 27
-try:
-    HF_STATUS_ENABLE = 1
-except:
-    pass
+HF_STATUS_ENABLE = 1
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 28
-try:
-    HF_STATUS_DISABLE = 0
-except:
-    pass
+HF_STATUS_DISABLE = 0
+
+HF_C_API_LEVEL = 2
+
+HF_SESSION_CONFIG_V2_VERSION = 1
+
+HF_FACE_CAPTURE_CONFIG_VERSION = 1
+
+HF_FACE_CAPTURE_MAX_RESULTS = 8
+
+HF_RESOURCE_PACK_INFO_VERSION = 1
+
+HF_RESOURCE_PACK_TAG_CAPACITY = 64
+
+HF_RESOURCE_PACK_VERSION_CAPACITY = 64
+
+HF_RESOURCE_PACK_MAJOR_CAPACITY = 64
+
+HF_RESOURCE_PACK_RELEASE_CAPACITY = 64
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 30
-try:
-    HF_ENABLE_NONE = 0x00000000
-except:
-    pass
+HF_ENABLE_NONE = 0x00000000
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 31
-try:
-    HF_ENABLE_FACE_RECOGNITION = 0x00000002
-except:
-    pass
+HF_ENABLE_FACE_RECOGNITION = 0x00000002
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 32
-try:
-    HF_ENABLE_LIVENESS = 0x00000004
-except:
-    pass
+HF_ENABLE_LIVENESS = 0x00000004
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 33
-try:
-    HF_ENABLE_IR_LIVENESS = 0x00000008
-except:
-    pass
+HF_ENABLE_IR_LIVENESS = 0x00000008
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 34
-try:
-    HF_ENABLE_MASK_DETECT = 0x00000010
-except:
-    pass
+HF_ENABLE_MASK_DETECT = 0x00000010
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 35
-try:
-    HF_ENABLE_FACE_ATTRIBUTE = 0x00000020
-except:
-    pass
+HF_ENABLE_FACE_ATTRIBUTE = 0x00000020
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 36
-try:
-    HF_ENABLE_PLACEHOLDER_ = 0x00000040
-except:
-    pass
+HF_ENABLE_PLACEHOLDER_ = 0x00000040
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 37
-try:
-    HF_ENABLE_QUALITY = 0x00000080
-except:
-    pass
+HF_ENABLE_QUALITY = 0x00000080
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 38
-try:
-    HF_ENABLE_INTERACTION = 0x00000100
-except:
-    pass
+HF_ENABLE_INTERACTION = 0x00000100
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 39
-try:
-    HF_ENABLE_FACE_POSE = 0x00000200
-except:
-    pass
+HF_ENABLE_FACE_POSE = 0x00000200
 
 # /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 40
-try:
-    HF_ENABLE_FACE_EMOTION = 0x00000400
-except:
-    pass
+HF_ENABLE_FACE_EMOTION = 0x00000400
+
+HF_CAPTURE_FILTER_NONE = 0
+HF_CAPTURE_FILTER_FACE_COUNT = 1 << 0
+HF_CAPTURE_FILTER_FACE_SIZE = 1 << 1
+HF_CAPTURE_FILTER_FACE_POSITION = 1 << 2
+HF_CAPTURE_FILTER_FACE_BOUNDARY = 1 << 3
+HF_CAPTURE_FILTER_STABILITY = 1 << 4
+HF_CAPTURE_FILTER_POSE = 1 << 5
+HF_CAPTURE_FILTER_QUALITY = 1 << 6
+HF_CAPTURE_FILTER_SHARPNESS = 1 << 7
+HF_CAPTURE_FILTER_BRIGHTNESS = 1 << 8
+HF_CAPTURE_FILTER_TRACK_COUNT = 1 << 9
+
+HF_CAPTURE_REJECT_NONE = 0
+HF_CAPTURE_REJECT_NO_FACE = 1 << 0
+HF_CAPTURE_REJECT_MULTIPLE_FACES = 1 << 1
+HF_CAPTURE_REJECT_FACE_TOO_SMALL = 1 << 2
+HF_CAPTURE_REJECT_FACE_TOO_LARGE = 1 << 3
+HF_CAPTURE_REJECT_FACE_OFF_CENTER = 1 << 4
+HF_CAPTURE_REJECT_FACE_OUT_OF_BOUNDS = 1 << 5
+HF_CAPTURE_REJECT_UNSTABLE = 1 << 6
+HF_CAPTURE_REJECT_POSE = 1 << 7
+HF_CAPTURE_REJECT_QUALITY = 1 << 8
+HF_CAPTURE_REJECT_SHARPNESS = 1 << 9
+HF_CAPTURE_REJECT_BRIGHTNESS = 1 << 10
+HF_CAPTURE_REJECT_TRACK_COUNT_TOO_LOW = 1 << 11
+
+HF_CAPTURE_STATE_IDLE = 0
+HF_CAPTURE_STATE_STABILIZING = 1
+HF_CAPTURE_STATE_COLLECTING = 2
+HF_CAPTURE_STATE_READY = 3
+HF_CAPTURE_STATE_FINISHED = 4
+HF_CAPTURE_STATE_TRACK_LOST = 5
 
 HFImageData = struct_HFImageData# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 123
 
 HFImageBitmapData = struct_HFImageBitmapData# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 200
 
 HFSessionCustomParameter = struct_HFSessionCustomParameter# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 485
+
+HFSessionConfigV2 = struct_HFSessionConfigV2
+
+HFResourcePackInfo = struct_HFResourcePackInfo
 
 HFFaceDetectPixelList = struct_HFFaceDetectPixelList# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 523
 
@@ -2313,11 +2269,21 @@ HFFaceEulerAngle = struct_HFFaceEulerAngle# /Users/tunm/work/InspireFace/cpp/ins
 
 HFMultipleFaceData = struct_HFMultipleFaceData# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 616
 
+HFFaceCaptureConfig = struct_HFFaceCaptureConfig
+
+HFFaceCaptureMetrics = struct_HFFaceCaptureMetrics
+
+HFFaceCaptureProgress = struct_HFFaceCaptureProgress
+
+HFFaceCaptureResult = struct_HFFaceCaptureResult
+
 HFFaceFeature = struct_HFFaceFeature# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 809
 
 HFFeatureHubConfiguration = struct_HFFeatureHubConfiguration# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 916
 
 HFFaceFeatureIdentity = struct_HFFaceFeatureIdentity# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 945
+
+HFFeatureHubSearchResultV2 = struct_HFFeatureHubSearchResultV2
 
 HFSearchTopKResults = struct_HFSearchTopKResults# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 954
 
@@ -2341,9 +2307,10 @@ HFFaceEmotionResult = struct_HFFaceEmotionResult# /Users/tunm/work/InspireFace/c
 
 HFInspireFaceVersion = struct_HFInspireFaceVersion# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 1354
 
+HFComponentVersion = struct_HFComponentVersion
+
 HFInspireFaceExtendedInformation = struct_HFInspireFaceExtendedInformation# /Users/tunm/work/InspireFace/cpp/inspireface/c_api/inspireface.h: 1372
 
 # No inserted files
 
 # No prefix-stripping
-

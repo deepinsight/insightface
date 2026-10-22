@@ -1,3 +1,9 @@
+# Heatmap-based Face Alignment
+
+This directory contains the MXNet training implementation of SDUNets and other heatmap-based face alignment methods. The training instructions below describe this implementation.
+
+For inference with supported ONNX landmark models, see the [InsightFace Python library](../../python-package/README.md#quick-example). See [face alignment](../README.md) for other methods and datasets.
+
 We provide our implementation of ``Stacked Dense U-Nets with Dual Transformers for Robust Face Alignment`` here at [BMVC](http://bmvc2018.org/contents/papers/0051.pdf) or link at [Arxiv](https://arxiv.org/abs/1812.01936).
 
 We also provide some popular heatmap based approaches like stacked hourglass, etc..  You can define different loss-type/network structure/dataset in ``config.py``(from ``sample_config.py``).

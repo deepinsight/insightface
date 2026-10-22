@@ -8,24 +8,29 @@
 namespace inspire {
 
 float RNetAdapt::operator()(const inspirecv::Image &bgr_affine) {
-    // auto resized = bgr_affine.Resize(24, 24);
-    uint8_t *resized_data = nullptr;
-    float scale;
-    auto ret = m_processor_->Resize(bgr_affine.Data(), bgr_affine.Width(), bgr_affine.Height(), bgr_affine.Channels(), &resized_data, 24, 24);
     inspirecv::Image resized;
-    if (ret == -1) {
+    if (ResizeImageForInference(bgr_affine, 24, 24, resized) != InferenceWrapper::WrapperOk) {
         // Some RK devices seem unable to resize to 24x24, fallback to CPU processing
+        m_processor_->MarkDone();
         resized = bgr_affine.Resize(24, 24);
-    } else {
-        // RGA resize success
-        resized = inspirecv::Image::Create(24, 24, bgr_affine.Channels(), resized_data, false);
+        if (resized.Empty()) {
+            return -1.0f;
+        }
     }
 
     AnyTensorOutputs outputs;
-    Forward(resized, outputs);
-    m_processor_->MarkDone();
+    if (Forward(resized, outputs) != InferenceWrapper::WrapperOk || outputs.empty() || outputs[0].second.size() < 2) {
+        m_processor_->MarkDone();
+        return -1.0f;
+    }
+    if (m_processor_->MarkDone() != 0) {
+        return -1.0f;
+    }
 #ifdef INFERENCE_WRAPPER_ENABLE_RKNN2
     auto sm = Softmax(outputs[0].second);
+    if (sm.size() < 2) {
+        return -1.0f;
+    }
     return sm[1];
 #else
     return outputs[0].second[1];

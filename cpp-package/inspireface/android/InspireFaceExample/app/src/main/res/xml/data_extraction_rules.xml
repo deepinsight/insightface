@@ -1,19 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
--->
+<?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
-    <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+    <!-- Face crops, native feature databases, identity metadata and the per-device
+         permission notice state must never leave this device through backup/transfer. -->
+    <cloud-backup disableIfNoEncryptionCapabilities="true">
+        <exclude domain="file" path="face_hub/" />
+        <exclude domain="sharedpref" path="face_records_Pikachu.xml" />
+        <exclude domain="sharedpref" path="face_records_Megatron.xml" />
+        <exclude domain="sharedpref" path="camera_permission.xml" />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="file" path="face_hub/" />
+        <exclude domain="sharedpref" path="face_records_Pikachu.xml" />
+        <exclude domain="sharedpref" path="face_records_Megatron.xml" />
+        <exclude domain="sharedpref" path="camera_permission.xml" />
     </device-transfer>
-    -->
 </data-extraction-rules>

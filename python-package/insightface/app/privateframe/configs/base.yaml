@@ -1,0 +1,515 @@
+schema_version: 1
+
+output:
+  # CLI --output.artifacts_level overrides this value. Production keeps only
+  # the self-contained result JSON; GUI/--output-dir name it <video>_privateframe.json.
+  artifacts_level: final
+
+models:
+  # The V2 package manifest maps tasks to files. It may declare external
+  # normalization or embedded preprocessing plus verifier expansion; omitted
+  # values receive task-specific defaults. Unknown package metadata is ignored
+  # by PrivateFrame. Base intentionally selects the small package by its
+  # standard ModelZoo name. InsightFace resolves it below ~/.insightface/models
+  # and downloads it when absent.
+  name: raccoon_s
+  # InsightFace root containing the models/ directory. GUI integrations should
+  # override this with the same global model_root used by FaceAnalysis. The
+  # selected root is authoritative: PrivateFrame never searches a second root.
+  root: ~/.insightface
+  detection:
+    nms_iou_threshold: 0.40
+    max_detections: 300
+
+runtime:
+  provider: auto
+  # By default SCRFD lazily creates and reuses one fixed-input-shape Session
+  # for every detector resolution. Set this to false to retain the legacy
+  # behavior where the main dynamic Session serves every input resolution.
+  # CoreML uses CPUAndGPU for that explicit dynamic compatibility mode because
+  # dynamic SCRFD compilation with ALL can terminate affected ORT processes.
+  scrfd_static_shape_sessions: true
+  intra_op_threads: 1
+  inter_op_threads: 1
+
+recognition:
+  # The default all policy omits recognition from FaceAnalysis.allowed_modules,
+  # so it never loads the recognizer or reads reference photos. Selective modes
+  # read images directly from reference_dir; no names or per-person folders.
+  # Each photo contributes only its largest detected face. If that face is
+  # unusable the photo is skipped; no usable photos is an error.
+  mode: all
+  reference_dir: null
+  # auto keeps unconfirmed faces visible in blur_only and blurs them in exempt.
+  # blur / keep explicitly override this fallback for selective modes. The all
+  # mode always blurs all detected faces. Inference failures stop the task.
+  unknown_action: auto
+  # fast / balanced / accurate select at most 1 / 3 / 5 eligible SCRFD
+  # landmark candidates per canonical track. Local-review landmarks take
+  # priority; the paired full-frame detector landmarks are the fallback. A
+  # custom max_frames_per_track may override the profile.
+  profile: balanced
+  # Shared raccoon_s/raccoon_l cosine threshold for temporally independent
+  # multi-frame evidence. Every selected quality-qualified sample must
+  # independently match the reference face set; appearance clusters must match
+  # too. Unconfirmed faces follow unknown_action. Reference photos never compete
+  # against one another as named identities.
+  # Video recognition alignment first uses already-computed local SCRFD
+  # five-points at confidence >=0.70 with strict same-face and alignment-quality
+  # gates. A detector observation can fall back to its paired original
+  # full-frame SCRFD box/five-points under the same confidence and quality
+  # gates. Reference still images instead use fixed upright 640/128 full-frame
+  # SCRFD detections and their original five-points, with no local review. These
+  # policies are internal and do not add user YAML. Detector and tracking-only
+  # video reviews share one bounded candidate pool. The profile controls only
+  # whether at most 1 / 3 / 5 time-distributed candidates are inferred. At least three selected
+  # frames whose every adjacent gap is >=1 second use this calibrated 0.40
+  # threshold. Shorter/correlated evidence internally adds 0.10; a one-frame
+  # decision additionally keeps the existing +0.05 guard. These internal rules
+  # do not add user YAML. Adjust only when reference matching needs calibration.
+  similarity_threshold: 0.40
+
+scan:
+  # Approximate ceiling on regular full-frame face detection samples per second
+  # of INPUT VIDEO. Fast mode (15) is the default and reduces detector work.
+  # This is a sampling control, not a wall-clock processing speed target; the
+  # output video keeps every source frame and its original frame rate.
+  # Sampling uses a uniform integer stride with a 5% rate tolerance. At 15,
+  # 30 FPS input is scanned every 2 frames (15/s), 60 FPS every 4 (15/s),
+  # and 25 FPS every 2 (12.5/s). At 30, 25/30 FPS input is scanned every
+  # frame and 60 FPS every 2 frames (30/s).
+  # Scene boundaries, endpoints, and new-track bursts may add scans, so the
+  # total detector rate can exceed this soft ceiling.
+  # Keep 15 for faster processing, especially with limited motion. Lowering
+  # further (e.g. to 10) reduces work but wider gaps can miss briefly
+  # visible faces. Use 30 for fast motion, frequent occlusion, or greater
+  # detection coverage; on higher-FPS input, raise to the source FPS to scan
+  # every frame. More sampling costs more work and cannot guarantee detection.
+  # Review representative output when changing the sampling rate.
+  max_analysis_fps: 15
+  # Skipped frames always run decode and scene-cut detection. When the resulting
+  # stride is greater than 1, the default interpolate policy reviews real
+  # detector anchors and publishes reduced-assurance geometry between them
+  # without per-frame flow/SCRFD/Verifier work. Explicitly select visual to run
+  # the optical-flow/review path between scans. Either sampled policy is an
+  # explicit recall/privacy tradeoff and can miss a face that exists only
+  # between sampled full-frame detections.
+  # By default SCRFD uses one fixed-input-shape Session per resolution for the
+  # 800/256 full-frame views, while all angles at the same resolution share it.
+  # Local revalidation owns an independent detector host/Session pool. The
+  # runtime.scrfd_static_shape_sessions switch can restore one shared dynamic
+  # Session. The following session_sharing option controls concurrency only
+  # among full-frame scan views.
+  session_sharing: single_session_parallel
+  # Concurrent scan workers and the number of frames queued for scanning.
+  workers: 18
+  pipeline_depth: 6
+  passes:
+    - name: scrfd10g_pad10_800_cardinal
+      angles: [0, 90, -90]
+      input_size: 800
+      horizontal_padding_ratio: 0.10
+      vertical_padding_ratio: 0.10
+      confidence_threshold: 0.50
+    - name: scrfd10g_pad20_256_upright_large_face
+      angles: [0]
+      input_size: 256
+      horizontal_padding_ratio: 0.20
+      vertical_padding_ratio: 0.20
+      confidence_threshold: 0.50
+      # This pass exists only to recover genuinely large upright faces. Apply
+      # the gate to the mapped raw prediction before clipping/local review so
+      # edge clipping and a later oversized local box cannot change admission.
+      candidate_filter:
+        enabled: true
+        min_box_area_fraction: 0.01
+        min_height_width_ratio: 0.80
+        # Near-full-frame profile faces are often wider than tall because the
+        # forehead/chin lie outside the image. Only this extreme-size regime
+        # bypasses the upright aspect gate.
+        aspect_ratio_exempt_min_area_fraction: 0.50
+  global_nms_iou: 0.45
+  containment_threshold: 0.80
+  # The default detector first finds a content jump relative to the recent
+  # motion baseline, then confirms that sparse 96px LK features cannot explain
+  # it as continuous motion. Decisions use one-frame lookahead so an A-B-A
+  # exposure flash can be suppressed before the earlier frame is committed.
+  scene_cut_detector:
+    signature_size: 96
+    history_frames: 30
+    min_mean_absdiff: 25.0
+    bootstrap_min_mean_absdiff: 45.0
+    relative_multiplier: 3.0
+    relative_offset: 18.0
+    max_corners: 120
+    min_corners: 6
+    quality_level: 0.01
+    min_distance: 3.0
+    block_size: 5
+    lk_window_size: 15
+    lk_max_level: 2
+    lk_max_iterations: 20
+    lk_epsilon: 0.01
+    lk_min_eigenvalue: 0.0001
+    max_forward_backward_error: 1.5
+    ransac_reprojection_threshold: 2.0
+    max_flow_inlier_fraction: 0.20
+    # A very strong appearance discontinuity may leave a few accidental LK
+    # inliers. This conservative conjunction recovers those hard cuts without
+    # globally relaxing the primary motion-continuity threshold.
+    appearance_confirmation:
+      enabled: true
+      min_mean_absdiff: 50.0
+      max_histogram_correlation: 0.20
+      max_spatial_correlation: 0.50
+      max_flow_inlier_fraction: 0.30
+    flash_suppression:
+      enabled: true
+      max_skip_mean_absdiff: 12.0
+      max_skip_to_transition_ratio: 0.30
+      min_skip_spatial_correlation: 0.90
+streaming:
+  max_missed_seconds: 5.0
+  max_retroactive_seconds: 5.0
+  # Keep one shared LRU of complete decoded BGR frames so overlapping history
+  # requests with different face crops reuse the same decode. null derives the
+  # frame target from the longest configured replay horizon; the byte limit is
+  # always the hard memory bound. Use an integer for an explicit frame cap, or
+  # zero to disable decoded-frame retention.
+  recent_frame_cache_frames: null
+  recent_frame_cache_max_bytes: 268435456
+  # Reverse pre-roll consumes newest blocks first instead of materializing all
+  # 150 maximum-size RGB corridors at once.
+  pre_roll_decode_chunk_frames: 32
+  corridor_expansion: 4.0
+  pre_roll_corridor_expansion: 6.0
+  max_corridor_side_pixels: 1024
+  eviction_interval_frames: 30
+  progress_every_frames: 50
+
+tracking:
+  # `interpolate` is the default when stride > 1 and publishes geometry directly
+  # between detector anchors. `visual` explicitly restores the full
+  # optical-flow/local-review path between scans. Stride 1 always uses the
+  # effective visual path because there is no regular sampled interval.
+  between_scan_frames: interpolate
+  # Association has two independent limits. Scan gap counts actual SCRFD
+  # opportunities (including adaptive burst scans), so sampled-out video frames
+  # are neutral while a real scan miss consumes the budget. Elapsed time remains
+  # a hard motion/identity safety ceiling independent of FPS and stride.
+  association_max_scan_gap: 12
+  association_max_gap_seconds: 1.0
+  # Once an anchor gap exceeds the former every-frame 12/30-second window,
+  # interpolate has no optical-flow path to disambiguate nearby identities.
+  # Require the existing strict overlap/center corridor for those reanchors.
+  association_strict_geometry_after_seconds: 0.4
+  association_min_iou: 0.05
+  association_max_center_distance: 1.75
+  association_sparse_max_center_distance: 1.0
+  association_max_area_ratio: 5.0
+  association_min_score: 0.0
+  # New tracks initially replay only a short endpoint so sparse false positives
+  # cannot create long paths. Once a track accumulates the reliable detector
+  # count, replay its first anchor once more and expose the longer pre-roll.
+  # In interpolate mode both leading and trailing unanchored endpoints share
+  # affine motion, sparse Verifier checkpoints, and anomaly-only Local SCRFD.
+  endpoint_extension: 8
+  reliable_endpoint_extension: 45
+  reliable_pre_roll_extension: 150
+  reliable_endpoint_min_detector_frames: 20
+  endpoint_conflicts:
+    # Resolve duplicate unanchored endpoint boxes from same-frame face evidence.
+    # First-stage behavior applies only to recognition.mode=all; selective
+    # photo policies keep their existing per-track identity decisions.
+    # Set false for an A/B comparison. This does not stop tracking early.
+    enabled: true
+    # Extra duplicate-box review uses upright SCRFD only. Each requested ROI
+    # runs once per listed angle; a frame can still need multiple ROIs.
+    # Ordinary tracking review keeps revalidation.angles. Upright-only review
+    # can retain tilted-face duplicates or change which overlapping boxes are
+    # removed and how far their blur extends around the face.
+    angles: [0]
+    # Nearby geometry proposes a conflict; overlap alone never proves that
+    # two boxes represent the same face. Center distances are normalized by
+    # sqrt(the smaller box area).
+    nearby_iou: 0.10
+    nearby_center_distance: 1.0
+    # These gates associate independently measured local faces with shared
+    # same-frame detections. Matching a predicted box to its own local face
+    # uses revalidation.match_* geometry, including IoU OR containment;
+    # confidence and uniqueness margin below apply to both selections.
+    match_min_iou: 0.30
+    match_max_center_distance: 0.50
+    match_max_area_ratio: 2.5
+    # Positive-claim threshold only: a weaker second face returned by the
+    # detector still blocks removal when no accepted core box covers it.
+    match_min_confidence: 0.35
+    match_min_margin: 0.10
+    # Strong equivalence applies only to independently detected locations,
+    # never final blurred boxes or predicted geometry by itself.
+    equivalence_iou: 0.90
+    # Reuse complete same-frame evidence before requesting local inference.
+    # One call means one SCRFD angle/view, not an entire multi-angle review.
+    # The total allowance is min(max_calls_total,
+    # ceil(source_video_duration_seconds * max_calls_per_video_second)).
+    # A zero frame/total/rate budget allows reuse but no added inference.
+    recheck_min_frame_gap: 1
+    max_calls_per_frame: 12
+    max_calls_total: 4096
+    max_calls_per_video_second: 90.0
+    # Cache only same-frame detection geometry, including empty results;
+    # do not copy video pixels or reuse evidence from another frame. Zero
+    # disables the cache. Missing/incomplete/ambiguous evidence is preserved,
+    # not treated as proof of a duplicate when a budget is exhausted.
+    cache_entries: 256
+  fragment_stitching:
+    enabled: true
+    resolve_duplicate_candidates_before_stabilization: true
+    min_local_confidence: 0.18
+    min_local_iou: 0.60
+    min_overlap_frames: 12
+    min_agreement_frames: 8
+    min_agreement_fraction: 0.70
+    max_interval_gap_frames: 8
+  long_gap_requires_continuous_flow: true
+  long_gap_min_iou: 0.15
+  long_gap_max_center_distance: 0.50
+  kalman_optical_flow:
+    roi_size: 384
+    roi_expansion: 4.0
+    roi_edge_padding_pixels: 12
+    max_source_canvas_side_pixels: 1024
+    max_points: 32
+    min_points: 6
+    pyramid_levels: 3
+    window_radius: 3
+    max_iterations: 8
+    termination_epsilon: 0.03
+    forward_backward_max_error: 1.75
+    residual_threshold: 2.5
+    feature_box_expansion: 0.05
+    max_scale_change: 0.15
+    max_coast_frames: 8
+    require_cycle_consistency_after_coast: true
+    recovery_cycle_min_iou: 0.10
+    # After ordinary visual-mode endpoint LK stops, try a strict partial-affine
+    # path for a few additional frames. `max_frames` limits only that fallback.
+    # Interpolate has no ordinary LK path, so its symmetric unanchored-endpoint
+    # tracking uses the shared endpoint limits above.
+    # Candidates remain isolated from Kalman, association, and core admission.
+    # Once the core track is accepted they join output stabilization; a sparse
+    # Local-SCRFD checkpoint may also contribute a normal recognition sample.
+    endpoint_affine_repair:
+      enabled: true
+      max_frames: 8
+    process_noise_position: 0.35
+    process_noise_velocity: 0.08
+    detector_measurement_noise: 0.75
+    flow_measurement_noise: 2.5
+    # Optical flow updates center translation only. Width/height are corrected
+    # by trusted detector/local-review geometry to avoid cumulative scale drift.
+    flow_updates_size: false
+    # Default detector-bounded gap policy. Both directions are replayed from
+    # fresh endpoint states in one fixed corridor. Local SCRFD evidence changes
+    # the directional weight smoothly; it never hard-switches by direction.
+    bidirectional_fusion:
+      max_gap_frames: 180
+      max_materialized_bytes: 268435456
+      corridor_expansion: 3.0
+      max_corridor_side_pixels: 2048
+      geometry_bridge:
+        enabled: true
+        edge_epsilon_pixels: 1.0
+        min_edge_expansion_ratio: 1.5
+        min_both_trusted_fraction: 0.75
+        min_mutual_consistent_fraction: 0.75
+      association_rescue:
+        enabled: true
+        max_endpoint_center_speed: 0.08
+        max_area_ratio: 2.50
+        min_endpoint_iou: 0.20
+        max_endpoint_center_distance: 0.50
+      mutual_min_iou: 0.50
+      mutual_max_center_distance: 0.40
+      anchor_max_center_distance: 0.75
+      anchor_max_area_ratio: 2.50
+      local_review_min_confidence: 0.25
+      local_review_min_iou: 0.50
+      local_review_min_iou_margin: 0.15
+      soft_bias_beta: 8.0
+      soft_bias_radius: 3
+      soft_confidence_low: 0.18
+      soft_confidence_high: 0.55
+
+revalidation:
+  input_size: 160
+  angles: [0, 90, -90]
+  confidence_threshold: 0.18
+  crop_expansion: 2.0
+  geometry_refinement:
+    enabled: true
+    min_local_confidence: 0.25
+    max_area_ratio: 2.5
+    max_center_distance: 0.50
+    # Confidence-fused local geometry is applied only to propagated tracking
+    # frames. Full-frame detector geometry and association stay untouched.
+    measurement_filter:
+      enabled: true
+      scope: tracking_only
+      confidence_low: 0.18
+      confidence_high: 0.55
+      center_gain_low: 0.40
+      center_gain_high: 0.80
+      recovery_center_gain: 0.85
+      size_gain_low: 0.08
+      size_gain_high: 0.28
+      max_center_step: 0.40
+      max_size_ratio_per_update: 1.30
+    # If motion leaves the detector association corridor and its centered
+    # local review fails, retry once around the nearest detector anchor. This
+    # recovers geometry from optical-flow drift without widening association.
+    anchor_recovery:
+      enabled: true
+      # Delayed reliable pre-roll may contain two nearby faces. Prefer the
+      # candidate that stays on the tracked geometry instead of the globally
+      # highest detector score. Lower confidence is accepted only together
+      # with these stricter spatial gates.
+      candidate_selection: target_geometry
+      min_local_confidence: 0.18
+      min_iou: 0.30
+      min_containment: 0.60
+      max_center_distance: 0.35
+  # Run one additional translated crop only when the centered crop has no
+  # valid match and its full square extends beyond an image edge. The shift is
+  # directed toward that edge (corner overflow combines the two axes).
+  edge_fallback:
+    enabled: true
+    shift_fraction: 0.05
+  # Also used to select an endpoint conflict's independent target-local
+  # detection and to verify that it supports the current predicted geometry.
+  # Either IoU or containment may pass; center distance and area must both pass.
+  match_min_iou: 0.08
+  match_min_containment: 0.35
+  match_max_center_distance: 0.85
+  match_max_area_ratio: 6.0
+  policy:
+    rule_gate:
+      # No final average score. A track must satisfy persistence, local SCRFD
+      # coverage, and a continuous joint SCRFD+Verifier anchor. A stronger
+      # joint window can replace chain-wide Verifier support; this keeps
+      # difficult edge faces without admitting weak non-face chains.
+      min_detector_frames: 6
+      min_local_match_fraction: 0.45
+      # A short high-scoring window is not enough when the same detector keeps
+      # firing on a persistent non-face texture. Require moderate local SCRFD
+      # evidence on a bounded fraction of the whole candidate trajectory too.
+      min_local_confidence_fraction_gte_035: 0.20
+      min_joint_strong_anchor: 0.45
+      strong_joint_anchor: 0.55
+      # Calibrated on both IMG_6505 videos: 0.60 recovers one manually
+      # confirmed face track, while no other rejected track crosses the gate.
+      min_verifier_pass_fraction: 0.60
+      # A face visible for only 1--5 detector frames cannot satisfy the normal
+      # six-frame persistence rule. Evaluate every such short track with the
+      # same two-model conjunction, independent of why or where it ended.
+      # Scene cuts remain absolute boundaries, but are never face evidence.
+      # This path never admits a tracking-only chain.
+      short_track:
+        enabled: true
+        min_detector_frames: 1
+        max_detector_frames: 5
+        min_local_match_fraction: 0.70
+        moderate_local_confidence_p50: 0.45
+        moderate_verifier_p50: 0.40
+        strong_local_confidence_p50: 0.75
+        strong_verifier_p50: 0.80
+      # A clip can begin in the middle of an already-visible, difficult face,
+      # truncating the persistence evidence available to the normal short-track
+      # gate. Only the true frame-zero boundary may use this SCRFD-only privacy
+      # override; the detector frames must form one consecutive leading run.
+      video_start_short_track:
+        enabled: true
+        min_detector_frames: 3
+        min_detector_confidence_p50: 0.65
+        min_local_match_fraction: 0.90
+        min_local_confidence_p50: 0.55
+      # A strong anchor is the best spatially continuous four-frame detector
+      # window. Each frame uses the weaker of its local SCRFD and Verifier scores;
+      # the window uses its weakest frame, so an isolated peak has no effect.
+      strong_anchor_window_frames: 4
+      normalizers:
+        local_confidence_low: 0.18
+        local_confidence_high: 0.50
+        verifier_score_low: 0.10
+        verifier_score_high: 0.80
+    continuity:
+      segment_max_center_jump: 1.0
+      segment_max_area_ratio: 4.0
+
+render:
+  debug_line_thickness: 2
+  redaction:
+    # gaussian is the production default. mosaic is also available without
+    # rerunning analysis.
+    method: gaussian
+    # Scale around the finalized face-box center. 1.0 is exact, values below
+    # 1.0 are smaller, and values above 1.0 add privacy margin.
+    box_scale: 1.0
+    gaussian:
+      # pyramid preserves the full kernel's relative blur strength on a smaller
+      # working image for CPU speed. exact remains available as a fallback.
+      algorithm: pyramid
+      max_side: 64
+      # Keep sigma automatic so blur strength scales with the face region.
+      kernel_ratio: 1.00
+      min_kernel: 121
+      sigma: 0.0
+    # Keep the inactive mosaic defaults in the single Base so switching the
+    # method from the CLI or GUI requires only one override.
+    mosaic:
+      block_size_ratio: 0.12
+      min_block_size: 8
+    # Disabled by default because fully opaque edges are safer for privacy.
+    feather:
+      enabled: false
+  video_output:
+    backend: pyav
+    encoder: libx264
+    pixel_format: yuv420p
+    # Balanced encoding speed and compression; GUI/CLI may override it.
+    preset: medium
+    rate_control:
+      mode: crf
+      # Balanced quality and file size for sharing; 18 keeps more detail,
+      # while 28 favors smaller files. This does not change face analysis.
+      quality: 23
+    keyframe_interval: 60
+    faststart: true
+    audio:
+      debug: none
+      redacted: aac
+      bitrate: 192k
+  box_stabilization:
+    enabled: true
+    median_window: 7
+    min_segment_frames: 7
+    reset_gap_frames: 1
+    center_alpha: 0.35
+    size_alpha: 0.12
+    max_center_innovation: 0.25
+    max_size_ratio: 1.25
+    detector_anchor_strength: 0.85
+    detector_anchor_min_gap_frames: 5
+    detector_anchor_max_gap_frames: 60
+    # Reset only the output smoother when a stable, detector-backed face scale
+    # changes abruptly. Track identity, admission, and observations stay intact.
+    change_point_reset:
+      enabled: true
+      window_frames: 3
+      min_detector_frames_per_side: 2
+      min_instantaneous_scale_ratio: 1.60
+      min_persistent_scale_ratio: 1.75
+      max_within_regime_ratio: 1.25
+      # This is deliberately lower than the hard scene-cut threshold because
+      # it is ANDed with the persistent detector-backed scale change above.
+      min_scene_mean_absdiff: 20.0

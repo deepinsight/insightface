@@ -32,7 +32,7 @@ TEST_CASE("test_ImageBitmap", "[image_bitmap]") {
     auto rect = multipleFaceData.rects[0];
     HColor color = {0, 0, 255};
     HFImageBitmapDrawRect(handle, rect, color, 2);
-    HFImageBitmapWriteToFile(handle, "bitmap_draw_test.jpg");
+    HFImageBitmapWriteToFile(handle, GET_SAVE_DATA("bitmap_draw_test.jpg").c_str());
 
     ret = HFReleaseInspireFaceSession(session);
     REQUIRE(ret == HSUCCEED);

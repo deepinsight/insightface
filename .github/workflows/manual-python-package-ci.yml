@@ -1,0 +1,276 @@
+name: Manual Python Package CI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  build-package:
+    name: Build package / macOS / Python 3.11
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: python-package
+
+    env:
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PIP_NO_PYTHON_VERSION_WARNING: "1"
+      PIP_NO_CACHE_DIR: "1"
+      PYTHONUTF8: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Upgrade packaging tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel build twine
+
+      - name: Build wheel and source distribution
+        run: |
+          rm -rf dist build *.egg-info
+          python -m build
+
+      - name: Check package metadata
+        run: |
+          python -m twine check --strict dist/*
+
+      - name: Inspect built package contents
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import subprocess
+          import sys
+
+          wheels = sorted(Path("dist").glob("insightface-*.whl"))
+          sdists = sorted(Path("dist").glob("insightface-*.tar.gz"))
+          assert len(wheels) == len(sdists) == 1, (wheels, sdists)
+          subprocess.check_call([
+              sys.executable, "packaging/pypi/artifact_smoke.py", "inspect",
+              "--wheel", str(wheels[0]), "--sdist", str(sdists[0]),
+          ])
+          PY
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: python-package-dist
+          path: python-package/dist/*
+
+  install-test:
+    name: Install test / ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    needs: build-package
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: python-package
+
+    env:
+      QT_QPA_PLATFORM: offscreen
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PIP_NO_PYTHON_VERSION_WARNING: "1"
+      PIP_NO_CACHE_DIR: "1"
+      PYTHONUTF8: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Linux GUI runtime libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 \
+            libgl1 \
+            libglib2.0-0 \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-render-util0 \
+            libxcb-xinerama0
+        working-directory: .
+
+      - name: Download macOS-built package artifacts
+        uses: actions/download-artifact@v5
+        with:
+          name: python-package-dist
+          path: python-package/dist
+
+      - name: Install test tools
+        run: |
+          python -m pip install --upgrade pip setuptools wheel pytest
+
+      - name: Install and smoke-test base wheel
+        run: |
+          python - <<'PY'
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          wheels = sorted(Path("dist").glob("insightface-*.whl"))
+          assert len(wheels) == 1, wheels
+          subprocess.check_call([sys.executable, "-m", "pip", "install", str(wheels[0])])
+          PY
+          python -m pip check
+          python packaging/pypi/artifact_smoke.py installed --profile base
+
+      - name: Install and smoke-test PrivateFrame extra
+        run: |
+          python - <<'PY'
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          wheels = sorted(Path("dist").glob("insightface-*.whl"))
+          assert len(wheels) == 1, wheels
+          subprocess.check_call([sys.executable, "-m", "pip", "install", f"{wheels[0]}[privateframe]"])
+          PY
+          python -m pip check
+          python packaging/pypi/artifact_smoke.py installed --profile privateframe
+
+      - name: Install built wheel with GUI extra
+        run: |
+          python - <<'PY'
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          wheels = sorted(Path("dist").glob("insightface-*.whl"))
+          assert len(wheels) == 1, wheels
+          wheel = wheels[0]
+          subprocess.check_call([sys.executable, "-m", "pip", "install", f"{wheel}[gui]"])
+          print(f"Installed package artifact: {wheel}")
+          PY
+
+      - name: Check PySide6 Essentials platform plugins
+        working-directory: ${{ runner.temp }}
+        run: |
+          python - <<'PY'
+          import os
+          import sys
+          from importlib import metadata
+          from pathlib import Path
+
+          assert metadata.version("PySide6-Essentials")
+          assert metadata.version("shiboken6")
+          for dist_name in ("PySide6", "PySide6-Addons"):
+              try:
+                  version = metadata.version(dist_name)
+              except metadata.PackageNotFoundError:
+                  continue
+              raise AssertionError(f"{dist_name} should not be installed in the GUI extra, found {version}")
+
+          from insightface.gui.app import configure_qt_plugin_paths, qt_plugin_root_candidates
+
+          os.environ.pop("QT_PLUGIN_PATH", None)
+          os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH", None)
+          configure_qt_plugin_paths()
+
+          if not os.environ.get("QT_PLUGIN_PATH") or not os.environ.get("QT_QPA_PLATFORM_PLUGIN_PATH"):
+              raise AssertionError(
+                  "Qt plugin paths were not configured. "
+                  f"Candidates: {[str(path) for path in qt_plugin_root_candidates()]}"
+              )
+
+          plugin_root = Path(os.environ["QT_PLUGIN_PATH"])
+          platform_dir = Path(os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"])
+          if sys.platform == "darwin":
+              expected = {"libqcocoa.dylib", "libqoffscreen.dylib"}
+          elif sys.platform.startswith("win"):
+              expected = {"qwindows.dll", "qoffscreen.dll"}
+          elif sys.platform.startswith("linux"):
+              expected = {"libqxcb.so", "libqoffscreen.so"}
+          else:
+              expected = set()
+
+          available = {path.name for path in platform_dir.iterdir()}
+          missing = expected - available
+          assert plugin_root.exists(), plugin_root
+          assert platform_dir.exists(), platform_dir
+          assert not missing, f"Missing Qt platform plugins: {sorted(missing)} in {platform_dir}"
+
+          print(f"PySide6 Essentials Qt plugin root: {plugin_root}")
+          print(f"Available platform plugins: {sorted(available)}")
+          PY
+
+      - name: Check installed dependencies
+        run: |
+          python -m pip check
+
+      - name: Smoke-test installed GUI extra and entry points
+        run: |
+          python packaging/pypi/artifact_smoke.py installed --profile gui
+
+      - name: Copy PersonAnalysis and GUI tests outside source tree
+        run: |
+          python - <<'PY'
+          import os
+          import shutil
+          from pathlib import Path
+
+          source = Path("tests")
+          target = Path(os.environ["RUNNER_TEMP"]) / "insightface-installed-tests"
+          if target.exists():
+              shutil.rmtree(target)
+          target.mkdir()
+          shutil.copy2(source / "conftest.py", target / "conftest.py")
+          for name in ("person", "gui"):
+              shutil.copytree(source / name, target / name)
+          print(f"Copied PersonAnalysis and GUI tests to {target}")
+          PY
+
+      - name: Run PersonAnalysis and GUI tests against installed wheel
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          test_dir = Path(os.environ["RUNNER_TEMP"]) / "insightface-installed-tests"
+          subprocess.check_call([
+              sys.executable, "-m", "pytest", str(test_dir), "-q", "--import-mode=importlib",
+          ], cwd=str(test_dir.parent))
+          PY
+
+      # Packaging contracts and server fixtures require the checkout. This also
+      # covers addons, model_zoo, PrivateFrame, GUI, telemetry, and release tests.
+      - name: Run complete source release test suite
+        run: |
+          python -m pytest -q tests

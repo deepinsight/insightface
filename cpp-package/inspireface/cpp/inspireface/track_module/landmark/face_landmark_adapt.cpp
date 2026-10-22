@@ -11,7 +11,9 @@ namespace inspire {
 std::vector<float> FaceLandmarkAdapt::operator()(const inspirecv::Image& bgr_affine) {
     COST_TIME_SIMPLE(FaceLandmarkAdapt);
     AnyTensorOutputs outputs;
-    Forward(bgr_affine, outputs);
+    if (Forward(bgr_affine, outputs) != InferenceWrapper::WrapperOk || outputs.empty()) {
+        return {};
+    }
     auto& out = outputs[0].second;
     if (m_is_center_scaling_) {
         for (int i = 0; i < out.size(); ++i) {

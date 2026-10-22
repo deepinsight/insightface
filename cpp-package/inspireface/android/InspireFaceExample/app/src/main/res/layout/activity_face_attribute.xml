@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/attributeRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:paddingStart="20dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="28dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_chip"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="@string/back"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/face_attribute_title"
+                android:textColor="@color/white"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/currentModel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_chip"
+                android:gravity="center"
+                android:maxLines="1"
+                android:paddingStart="10dp"
+                android:paddingTop="5dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:textColor="@color/liveness_accent"
+                android:textSize="11sp"
+                tools:text="Model · Megatron" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/face_attribute_heading"
+            android:textColor="@color/white"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/face_attribute_hint"
+            android:textColor="@color/home_text_secondary"
+            android:textSize="14sp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/attributeImageCard"
+            android:layout_width="match_parent"
+            android:layout_height="340dp"
+            android:layout_marginTop="18dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="@color/home_surface"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/home_stroke"
+            app:strokeWidth="1dp">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/attributeImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/attribute_photo"
+                    android:scaleType="centerCrop" />
+
+                <com.example.inspireface_example.widget.FaceImageOverlayView
+                    android:id="@+id/attributeFaceOverlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <TextView
+                    android:id="@+id/attributeImagePlaceholder"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:padding="24dp"
+                    android:text="@string/attribute_choose_photo_hint"
+                    android:textColor="@color/home_text_secondary"
+                    android:textSize="14sp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/attributeMagnifierCard"
+                    android:layout_width="132dp"
+                    android:layout_height="132dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginBottom="46dp"
+                    android:visibility="gone"
+                    app:cardBackgroundColor="@color/home_surface"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="5dp"
+                    app:strokeColor="@color/liveness_accent"
+                    app:strokeWidth="2dp">
+
+                    <ImageView
+                        android:id="@+id/attributeMagnifierImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@string/attribute_selected_face_crop"
+                        android:scaleType="centerCrop" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:id="@+id/attributeImageStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:background="@color/compare_status_scrim"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text="@string/no_image_selected"
+                    android:textColor="@color/home_text_secondary"
+                    android:textSize="12sp" />
+            </FrameLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnChooseAttributePhoto"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:enabled="false"
+            android:text="@string/attribute_choose_photo"
+            android:textColor="@color/home_tile_text_dark"
+            app:backgroundTint="@color/liveness_accent" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="@string/attribute_multi_face_hint"
+            android:textColor="@color/home_text_muted"
+            android:textSize="12sp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            app:cardBackgroundColor="@color/home_surface"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/home_stroke"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="18dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/attribute_result_title"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/attributeResultPlaceholder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="center"
+                    android:paddingTop="20dp"
+                    android:paddingBottom="20dp"
+                    android:text="@string/attribute_result_empty"
+                    android:textColor="@color/home_text_secondary"
+                    android:textSize="14sp" />
+
+                <LinearLayout
+                    android:id="@+id/attributeResultValues"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout style="@style/AttributeResultRow">
+                        <TextView style="@style/AttributeResultLabel" android:text="@string/attribute_mask" />
+                        <TextView android:id="@+id/attributeMaskValue" style="@style/AttributeResultValue" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/AttributeResultRow">
+                        <TextView style="@style/AttributeResultLabel" android:text="@string/attribute_age" />
+                        <TextView android:id="@+id/attributeAgeValue" style="@style/AttributeResultValue" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/AttributeResultRow">
+                        <TextView style="@style/AttributeResultLabel" android:text="@string/attribute_quality" />
+                        <TextView android:id="@+id/attributeQualityValue" style="@style/AttributeResultValue" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/AttributeResultRow">
+                        <TextView style="@style/AttributeResultLabel" android:text="@string/attribute_expression" />
+                        <TextView android:id="@+id/attributeExpressionValue" style="@style/AttributeResultValue" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/AttributeResultRow">
+                        <TextView style="@style/AttributeResultLabel" android:text="@string/attribute_race" />
+                        <TextView android:id="@+id/attributeRaceValue" style="@style/AttributeResultValue" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/AttributeResultRow">
+                        <TextView style="@style/AttributeResultLabel" android:text="@string/attribute_gender" />
+                        <TextView android:id="@+id/attributeGenderValue" style="@style/AttributeResultValue" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/AttributeResultRow">
+                        <TextView style="@style/AttributeResultLabel" android:text="@string/attribute_left_eye" />
+                        <TextView android:id="@+id/attributeLeftEyeValue" style="@style/AttributeResultValue" />
+                    </LinearLayout>
+
+                    <LinearLayout style="@style/AttributeResultRow">
+                        <TextView style="@style/AttributeResultLabel" android:text="@string/attribute_right_eye" />
+                        <TextView android:id="@+id/attributeRightEyeValue" style="@style/AttributeResultValue" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

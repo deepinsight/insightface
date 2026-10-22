@@ -4,6 +4,7 @@
  */
 
 #include <iostream>
+#include <vector>
 #include "settings/test_settings.h"
 #include "inspireface/c_api/inspireface.h"
 #include "unit/test_helper/simple_csv_writer.h"
@@ -229,14 +230,16 @@ TEST_CASE("test_BenchmarkFaceComparison", "[benchmark]") {
     REQUIRE(multipleFaceDataZy.detectedNum > 0);
 
     HInt32 featureNum;
-    HFGetFeatureLength(&featureNum);
+    ret = HFGetFeatureLength(&featureNum);
+    REQUIRE(ret == HSUCCEED);
+    REQUIRE(featureNum > 0);
 
     // Extract face feature
-    HFloat featureCacheZy[featureNum];
-    ret = HFFaceFeatureExtractCpy(session, imgHandle, multipleFaceDataZy.tokens[0], featureCacheZy);
+    std::vector<HFloat> featureCacheZy(featureNum);
+    ret = HFFaceFeatureExtractCpy(session, imgHandle, multipleFaceDataZy.tokens[0], featureCacheZy.data());
     HFFaceFeature featureZy = {0};
     featureZy.size = featureNum;
-    featureZy.data = featureCacheZy;
+    featureZy.data = featureCacheZy.data();
     REQUIRE(ret == HSUCCEED);
 
     auto imageQuery = inspirecv::Image::Create(GET_DATA("data/bulk/woman_search.jpeg"));
@@ -250,10 +253,10 @@ TEST_CASE("test_BenchmarkFaceComparison", "[benchmark]") {
     REQUIRE(multipleFaceDataQuery.detectedNum > 0);
 
     // Extract face feature
-    HFloat featureCacheZyQuery[featureNum];
-    ret = HFFaceFeatureExtractCpy(session, imgHandleQuery, multipleFaceDataQuery.tokens[0], featureCacheZyQuery);
+    std::vector<HFloat> featureCacheZyQuery(featureNum);
+    ret = HFFaceFeatureExtractCpy(session, imgHandleQuery, multipleFaceDataQuery.tokens[0], featureCacheZyQuery.data());
     HFFaceFeature featureZyQuery = {0};
-    featureZyQuery.data = featureCacheZyQuery;
+    featureZyQuery.data = featureCacheZyQuery.data();
     featureZyQuery.size = featureNum;
     REQUIRE(ret == HSUCCEED);
 

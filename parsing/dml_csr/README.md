@@ -4,11 +4,7 @@ The official repository of *[Decoupled Multi-task Learning with Cyclical Self-Re
 
 ## Installation
 
-Our model is based on Pytorch 1.7.1 with Python 3.6.2.
-
-```sh
-pip install -r requirements.txt
-```
+The original environment used PyTorch 1.7.1 with Python 3.6.2. A `requirements.txt` file is not included in this directory; prepare the dependencies for that environment before running the scripts.
 
 ## Data
 You can download original datasets:
@@ -26,13 +22,13 @@ dataset/
     test_list.txt
         each line: 'images/100032540_1.jpg labels/100032540_1.png'
 ```
-Besides, we provide the edge genearation code in the *generate_edge.py*.
+The `generate_edge.py` edge generation script is not included in this directory; prepare the edge labels separately before training.
 
 ## Usage
 
-If you need imagenet pretrained resent-101, please download from [baidu drive]() or [Google drive](https://drive.google.com/open?id=1rzLU-wK6rEorCNJfwrmIu5hY2wRMyKTK), and put it into snapshot folder.
+If you need ImageNet-pretrained ResNet-101, please download it from [Google Drive](https://drive.google.com/open?id=1rzLU-wK6rEorCNJfwrmIu5hY2wRMyKTK), and put it into the snapshot folder.
 
-For dstributed(multi-gpu) training. Inplace-abn requires pytorch distributed data parallel.
+For distributed (multi-GPU) training, Inplace-ABN requires PyTorch distributed data parallel.
 ```
 GPU=4,5,6,7
 Node=4

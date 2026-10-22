@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.linalg import norm as l2norm
-#from easydict import EasyDict
 
 class Face(dict):
 

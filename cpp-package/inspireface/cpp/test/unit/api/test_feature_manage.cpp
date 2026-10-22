@@ -465,7 +465,7 @@ TEST_CASE("test_SearchTopK", "[feature_search_top_k]") {
 #endif
 }
 
-TEST_CASE("test_FeatureBenchmark", "[feature_benchmark]") {
+TEST_CASE("test_FeatureBenchmark", "[feature_benchmark][benchmark]") {
     // Test the search time at 1k, 5k and 10k of the face library (the target face is at the back).
     SECTION("Search face benchmark from 1k") {
 #if defined(ISF_ENABLE_BENCHMARK) && defined(ISF_ENABLE_USE_LFW_DATA)

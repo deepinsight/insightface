@@ -25,7 +25,7 @@ def detect_person(img, detector):
 if __name__ == '__main__':
     import glob
     detector = insightface.model_zoo.get_model('scrfd_person_2.5g.onnx', download=True)
-    detector.prepare(0, nms_thresh=0.5, input_size=(640, 640))
+    detector.prepare(0, nms_thresh=0.5)
     img_paths = glob.glob('data/images/*.jpg')
     for img_path in img_paths:
         img = cv2.imread(img_path)
@@ -46,4 +46,3 @@ if __name__ == '__main__':
             cv2.circle(img, (vx2,vy2) , 1, color , 2)
         filename = img_path.split('/')[-1]
         cv2.imwrite('./outputs/%s'%filename, img)
-

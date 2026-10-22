@@ -5,8 +5,12 @@
 
 #ifndef MODELLOADERTAR_INSPIRE_MODEL_H
 #define MODELLOADERTAR_INSPIRE_MODEL_H
+
+#include <algorithm>
 #include <iostream>
-#include "vector"
+#include <memory>
+#include <vector>
+
 #include "yaml-cpp/yaml.h"
 #include "middleware/configurable.h"
 #include "log.h"
@@ -30,85 +34,125 @@ typedef enum {
 
 class INSPIRE_API InspireModel {
     CONFIGURABLE_SUPPORT
+
 public:
     explicit InspireModel(const YAML::Node &node) {
         Reset(node);
     }
 
-    explicit InspireModel() {};
+    InspireModel() = default;
 
+    // Parse into temporary state first. Invalid metadata must not leave a
+    // half-updated model or stale enum/buffer values behind.
     int32_t Reset(const YAML::Node &node) {
-        buffer = nullptr;
-        bufferSize = 0;
-        if (node["name"]) {
-            name = node["name"].as<std::string>();
-        }
-        if (node["fullname"]) {
-            fullname = node["fullname"].as<std::string>();
-        }
-        if (node["version"]) {
-            version = node["version"].as<std::string>();
-        }
-        if (node["model_type"]) {
-            auto type = node["model_type"].as<std::string>();
-            if (type == "MNN") {
-                modelType = InferenceWrapper::INFER_MNN;
-            } else if (type == "RKNN") {
-                modelType = InferenceWrapper::INFER_RKNN;
-            } else if (type == "COREML") {
-                modelType = InferenceWrapper::INFER_COREML;
-                // Special handling, the binary model is not loaded by default
-                loadFilePath = 1;
-            } else if (type == "TensorRT") {
-                modelType = InferenceWrapper::INFER_TENSORRT;
+        try {
+            if (!node || !node.IsMap()) {
+                return -1;
             }
-        }
-        if (node["infer_engine"]) {
-            auto type = node["infer_engine"].as<std::string>();
-            if (type == "MNN") {
-                inferEngine = InferenceWrapper::INFER_MNN;
-            } else if (type == "RKNN") {
-                inferEngine = InferenceWrapper::INFER_RKNN;
-            } else if (type == "COREML") {
-                inferEngine = InferenceWrapper::INFER_COREML;
-            } else if (type == "TensorRT") {
-                inferEngine = InferenceWrapper::INFER_TENSORRT;
+
+            std::string next_name;
+            std::string next_fullname;
+            std::string next_version;
+            InferenceWrapper::EngineType next_model_type = InferenceWrapper::INFER_MNN;
+            int next_infer_engine = InferenceWrapper::INFER_MNN;
+            int next_infer_device = InspireInferEngineMNN;
+            int next_infer_backend = InspireInferBackendCPU;
+            int next_load_file_path = 0;
+            Configurable next_configuration;
+
+            if (node["name"]) {
+                next_name = node["name"].as<std::string>();
             }
-        }
-        if (node["infer_device"]) {
-            auto type = node["infer_device"].as<std::string>();
-            if (type == "MNN") {
-                inferDevice = InspireInferEngineMNN;
-            } else if (type == "RKNPU") {
-                inferDevice = InspireInferEngineRKNN;
-            } else if (type == "COREML") {
-                inferDevice = InspireInferEngineCoreML;
-            } else if (type == "CUDA") {
-                inferDevice = InspireInferEngineTensorRT;
+            if (node["fullname"]) {
+                next_fullname = node["fullname"].as<std::string>();
             }
-        }
-        if (node["infer_backend"]) {
-            auto type = node["infer_backend"].as<std::string>();
-            if (type == "CPU") {
-                inferBackend = InspireInferBackendCPU;
-            } else if (type == "RKNPU") {
-                inferBackend = InspireInferBackendRKNPU;
-            } else if (type == "AUTO") {
-                inferBackend = InspireInferBackendAuto;
-            } else if (type == "CUDA") {
-                inferBackend = InspireInferBackendCUDA;
+            if (node["version"]) {
+                next_version = node["version"].as<std::string>();
             }
+            if (node["model_type"]) {
+                if (!DecodeEngine(node["model_type"].as<std::string>(), next_model_type)) {
+                    return -1;
+                }
+                if (next_model_type == InferenceWrapper::INFER_COREML) {
+                    // CoreML consumes a bundle path rather than an archive buffer.
+                    next_load_file_path = 1;
+                }
+            }
+            if (node["infer_engine"]) {
+                InferenceWrapper::EngineType engine = InferenceWrapper::INFER_MNN;
+                if (!DecodeEngine(node["infer_engine"].as<std::string>(), engine)) {
+                    return -1;
+                }
+                next_infer_engine = engine;
+            }
+            if (node["infer_device"]) {
+                const auto type = node["infer_device"].as<std::string>();
+                if (type == "MNN") {
+                    next_infer_device = InspireInferEngineMNN;
+                } else if (type == "RKNPU") {
+                    next_infer_device = InspireInferEngineRKNN;
+                } else if (type == "COREML") {
+                    next_infer_device = InspireInferEngineCoreML;
+                } else if (type == "CUDA") {
+                    next_infer_device = InspireInferEngineTensorRT;
+                } else {
+                    return -1;
+                }
+            }
+            if (node["infer_backend"]) {
+                const auto type = node["infer_backend"].as<std::string>();
+                if (type == "CPU") {
+                    next_infer_backend = InspireInferBackendCPU;
+                } else if (type == "RKNPU") {
+                    next_infer_backend = InspireInferBackendRKNPU;
+                } else if (type == "AUTO") {
+                    next_infer_backend = InspireInferBackendAuto;
+                } else if (type == "CUDA") {
+                    next_infer_backend = InspireInferBackendCUDA;
+                } else {
+                    return -1;
+                }
+            }
+            if (DecodeConfiguration(node, next_configuration) != 0) {
+                return -1;
+            }
+
+            name.swap(next_name);
+            fullname.swap(next_fullname);
+            version.swap(next_version);
+            modelType = next_model_type;
+            inferEngine = next_infer_engine;
+            inferDevice = next_infer_device;
+            inferBackend = next_infer_backend;
+            loadFilePath = next_load_file_path;
+            m_configuration = next_configuration;
+            m_buffer_owner_.reset();
+            buffer = nullptr;
+            bufferSize = 0;
+            return 0;
+        } catch (const std::exception &error) {
+            INSPIRE_LOGE("An error occurred parsing a model config: %s", error.what());
+            return -1;
         }
-        return decode(node);
     }
 
     void print() {
         INSPIRE_LOGD("%s", m_configuration.toString().c_str());
     }
 
+    // Compatibility overload for callers that explicitly own the vector.
     void SetBuffer(std::vector<char> &modelBuffer, size_t size) {
-        buffer = modelBuffer.data();
-        bufferSize = size;
+        m_buffer_owner_.reset();
+        buffer = modelBuffer.empty() ? nullptr : modelBuffer.data();
+        bufferSize = std::min(size, modelBuffer.size());
+    }
+
+    // Archive-loaded models retain their immutable backing storage, so a
+    // reload/close cannot invalidate the pointer passed to an inference engine.
+    void SetBuffer(const std::shared_ptr<const std::vector<char>>& modelBuffer) {
+        m_buffer_owner_ = modelBuffer;
+        buffer = modelBuffer && !modelBuffer->empty() ? const_cast<char*>(modelBuffer->data()) : nullptr;
+        bufferSize = modelBuffer ? modelBuffer->size() : 0;
     }
 
     Configurable &Config() {
@@ -116,102 +160,124 @@ public:
     }
 
 private:
-    int32_t decode(const YAML::Node &node) {
+    static bool DecodeEngine(const std::string& type, InferenceWrapper::EngineType& engine) {
+        if (type == "MNN") {
+            engine = InferenceWrapper::INFER_MNN;
+        } else if (type == "RKNN") {
+            engine = InferenceWrapper::INFER_RKNN;
+        } else if (type == "COREML") {
+            engine = InferenceWrapper::INFER_COREML;
+        } else if (type == "TensorRT") {
+            engine = InferenceWrapper::INFER_TENSORRT;
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    static bool DecodeTensorType(const std::string& type, int& tensor_type) {
+        if (type == "none") {
+            tensor_type = InputTensorInfo::TensorInfo::TensorTypeNone;
+        } else if (type == "uint8") {
+            tensor_type = InputTensorInfo::TensorInfo::TensorTypeUint8;
+        } else if (type == "int8") {
+            tensor_type = InputTensorInfo::TensorInfo::TensorTypeInt8;
+        } else if (type == "float32") {
+            tensor_type = InputTensorInfo::TensorInfo::TensorTypeFp32;
+        } else if (type == "int32") {
+            tensor_type = InputTensorInfo::TensorInfo::TensorTypeInt32;
+        } else if (type == "int64") {
+            tensor_type = InputTensorInfo::TensorInfo::TensorTypeInt64;
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    static int32_t DecodeConfiguration(const YAML::Node &node, Configurable& configuration) {
         try {
             if (node["input_channel"]) {
-                setData<int>("input_channel", node["input_channel"].as<int>());
+                configuration.set<int>("input_channel", node["input_channel"].as<int>());
             }
             if (node["input_image_channel"]) {
-                setData<int>("input_image_channel", node["input_image_channel"].as<int>());
+                configuration.set<int>("input_image_channel", node["input_image_channel"].as<int>());
             }
             if (node["nchw"]) {
-                setData<bool>("nchw", node["nchw"].as<bool>());
+                configuration.set<bool>("nchw", node["nchw"].as<bool>());
             }
             if (node["swap_color"]) {
-                setData<bool>("swap_color", node["swap_color"].as<bool>());
+                configuration.set<bool>("swap_color", node["swap_color"].as<bool>());
             }
             if (node["data_type"]) {
-                auto type = node["data_type"].as<std::string>();
-                if (type == "image") {
-                    setData<int>("data_type", InputTensorInfo::InputTensorInfo::DataTypeImage);
-                } else if (type == "data_nhwc") {
-                    setData<int>("data_type", InputTensorInfo::InputTensorInfo::DataTypeBlobNhwc);
+                const auto type = node["data_type"].as<std::string>();
+                int data_type = InputTensorInfo::InputTensorInfo::DataTypeImage;
+                if (type == "data_nhwc") {
+                    data_type = InputTensorInfo::InputTensorInfo::DataTypeBlobNhwc;
                 } else if (type == "data_nchw") {
-                    setData<int>("data_type", InputTensorInfo::InputTensorInfo::DataTypeBlobNchw);
+                    data_type = InputTensorInfo::InputTensorInfo::DataTypeBlobNchw;
+                } else if (type != "image") {
+                    return -1;
                 }
+                configuration.set<int>("data_type", data_type);
             }
             if (node["input_tensor_type"]) {
-                auto type = node["input_tensor_type"].as<std::string>();
-                if (type == "none") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeNone);
-                } else if (type == "uint8") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeUint8);
-                } else if (type == "int8") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt8);
-                } else if (type == "float32") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeFp32);
-                } else if (type == "int32") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt32);
-                } else if (type == "int64") {
-                    setData<int>("input_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt64);
+                int tensor_type = InputTensorInfo::TensorInfo::TensorTypeNone;
+                if (!DecodeTensorType(node["input_tensor_type"].as<std::string>(), tensor_type)) {
+                    return -1;
                 }
+                configuration.set<int>("input_tensor_type", tensor_type);
             }
             if (node["output_tensor_type"]) {
-                auto type = node["output_tensor_type"].as<std::string>();
-                if (type == "none") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeNone);
-                } else if (type == "uint8") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeUint8);
-                } else if (type == "int8") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt8);
-                } else if (type == "float32") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeFp32);
-                } else if (type == "int32") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt32);
-                } else if (type == "int64") {
-                    setData<int>("output_tensor_type", InputTensorInfo::TensorInfo::TensorTypeInt64);
+                int tensor_type = InputTensorInfo::TensorInfo::TensorTypeNone;
+                if (!DecodeTensorType(node["output_tensor_type"].as<std::string>(), tensor_type)) {
+                    return -1;
                 }
+                configuration.set<int>("output_tensor_type", tensor_type);
             }
             if (node["threads"]) {
-                setData<int>("threads", node["threads"].as<int>());
+                configuration.set<int>("threads", node["threads"].as<int>());
             }
             if (node["input_layer"]) {
-                setData<std::string>("input_layer", node["input_layer"].as<std::string>());
+                configuration.set<std::string>("input_layer", node["input_layer"].as<std::string>());
             }
             if (node["outputs_layers"]) {
-                auto n = node["outputs_layers"];
+                const auto values = node["outputs_layers"];
                 std::vector<std::string> names;
-                for (std::size_t i = 0; i < n.size(); ++i) {
-                    names.push_back(n[i].as<std::string>());
+                names.reserve(values.size());
+                for (std::size_t i = 0; i < values.size(); ++i) {
+                    names.push_back(values[i].as<std::string>());
                 }
-                setData<std::vector<std::string>>("outputs_layers", names);
+                configuration.set<std::vector<std::string>>("outputs_layers", names);
             }
             if (node["input_size"]) {
-                auto n = node["input_size"];
+                const auto values = node["input_size"];
                 std::vector<int> size;
-                for (std::size_t i = 0; i < n.size(); ++i) {
-                    size.push_back(n[i].as<int>());
+                size.reserve(values.size());
+                for (std::size_t i = 0; i < values.size(); ++i) {
+                    size.push_back(values[i].as<int>());
                 }
-                setData<std::vector<int>>("input_size", size);
+                configuration.set<std::vector<int>>("input_size", size);
             }
             if (node["mean"]) {
-                auto n = node["mean"];
+                const auto values = node["mean"];
                 std::vector<float> mean;
-                for (std::size_t i = 0; i < n.size(); ++i) {
-                    mean.push_back(n[i].as<float>());
+                mean.reserve(values.size());
+                for (std::size_t i = 0; i < values.size(); ++i) {
+                    mean.push_back(values[i].as<float>());
                 }
-                setData<std::vector<float>>("mean", mean);
+                configuration.set<std::vector<float>>("mean", mean);
             }
             if (node["norm"]) {
-                auto n = node["norm"];
+                const auto values = node["norm"];
                 std::vector<float> norm;
-                for (std::size_t i = 0; i < n.size(); ++i) {
-                    norm.push_back(n[i].as<float>());
+                norm.reserve(values.size());
+                for (std::size_t i = 0; i < values.size(); ++i) {
+                    norm.push_back(values[i].as<float>());
                 }
-                setData<std::vector<float>>("norm", norm);
+                configuration.set<std::vector<float>>("norm", norm);
             }
-        } catch (const YAML::Exception &e) {
-            INSPIRE_LOGE("An error occurred parsing the interpretation file in archive: %s", e.what());
+        } catch (const YAML::Exception &error) {
+            INSPIRE_LOGE("An error occurred parsing the interpretation file in archive: %s", error.what());
             return -1;
         }
         return 0;
@@ -221,16 +287,19 @@ public:
     std::string name;
     std::string fullname;
     std::string version;
-    InferenceWrapper::EngineType modelType;
-    int inferEngine;
-    int inferDevice;
-    int inferBackend;
+    InferenceWrapper::EngineType modelType{InferenceWrapper::INFER_MNN};
+    int inferEngine{InferenceWrapper::INFER_MNN};
+    int inferDevice{InspireInferEngineMNN};
+    int inferBackend{InspireInferBackendCPU};
     int loadFilePath{0};
 
-    char *buffer;
-    size_t bufferSize;
+    char *buffer{nullptr};
+    size_t bufferSize{0};
+
+private:
+    std::shared_ptr<const std::vector<char>> m_buffer_owner_;
 };
 
-};  // namespace inspire
+}  // namespace inspire
 
 #endif  // MODELLOADERTAR_INSPIRE_MODEL_H

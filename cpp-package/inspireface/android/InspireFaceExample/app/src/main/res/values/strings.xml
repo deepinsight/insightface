@@ -1,3 +1,294 @@
 <resources>
     <string name="app_name">InspireFace-Example</string>
+
+    <!-- Liveness screen -->
+    <string name="mode_silent">Silent liveness</string>
+    <string name="mode_action">Action liveness</string>
+    <string name="mode_pose">Pose recognition</string>
+    <string name="msg_initializing">Initializing engine…</string>
+    <string name="msg_no_face">Align your face within the frame</string>
+    <string name="msg_multiple_faces">Keep only one face in view</string>
+    <string name="msg_face_too_small">Move closer to the camera</string>
+    <string name="msg_permission_required">Camera permission is required</string>
+    <string name="msg_engine_failed">Failed to initialize the face engine</string>
+    <string name="msg_no_front_camera">No camera available on this device</string>
+    <string name="msg_camera_unavailable">That camera is not available</string>
+    <string name="flip_camera">Flip camera</string>
+    <string name="back">←</string>
+    <string name="current_model">Model · %1$s</string>
+    <string name="camera_privacy_notice_title">Camera and face data</string>
+    <string name="camera_privacy_notice_message">Camera access is used only for live demos and camera enrollment. Frames are processed on this device. Enrolled face crops and features stay in this app’s internal storage, are separated by model, excluded from device backup, and are not uploaded. Photo-only demos remain available without camera access.</string>
+    <string name="camera_permission_continue">Continue</string>
+    <string name="camera_permission_not_now">Not now</string>
+    <string name="camera_permission_rationale_title">Allow camera access</string>
+    <string name="camera_permission_rationale_message">Camera access is required only for this live feature. You can continue using photo-only features without it.</string>
+    <string name="camera_permission_try_again">Try again</string>
+    <string name="camera_permission_open_settings">Open settings</string>
+    <string name="camera_permission_retry_hint">Camera access is off. Tap Try again to continue.</string>
+    <string name="camera_permission_settings_hint">Camera access is blocked. Open system settings, allow Camera, then return here.</string>
+
+    <string name="silent_real">Live face</string>
+    <string name="silent_fake">Spoof suspected</string>
+    <string name="silent_analyzing">Analyzing…</string>
+    <string name="silent_score">Liveness score %1$.2f</string>
+
+    <string name="action_get_ready">Face the camera and hold still</string>
+    <string name="action_blink">Please blink</string>
+    <string name="action_shake">Please shake your head</string>
+    <string name="action_jaw_open">Please open your mouth</string>
+    <string name="action_head_raise">Please raise your head</string>
+    <string name="action_step">Step %1$d / %2$d</string>
+    <string name="action_time_left">%1$ds left</string>
+    <string name="action_passed">Liveness check passed</string>
+    <string name="action_failed_timeout">Timed out, check failed</string>
+    <string name="action_face_lost">Face lost, please try again</string>
+    <string name="btn_restart">Restart</string>
+
+    <string name="pose_hint">Try an action: blink, shake, open mouth, raise head</string>
+    <string name="name_blink">Blink</string>
+    <string name="name_shake">Head shake</string>
+    <string name="name_jaw_open">Mouth open</string>
+    <string name="name_head_raise">Head raise</string>
+
+    <string name="perf_format">%1$.1f FPS · %2$d ms</string>
+    <string name="switch_euler">Euler angles</string>
+    <!-- Label of the language toggle: names the language it switches TO. -->
+    <string name="lang_switch">中文</string>
+    <string name="euler_format">Yaw %1$.1f° · Pitch %2$.1f° · Roll %3$.1f°</string>
+    <string name="euler_no_face">—</string>
+
+    <!-- Home screen -->
+    <string name="home_title">Explore face intelligence</string>
+    <string name="home_subtitle">Choose a model, then open an InspireFace capability demo.</string>
+    <string name="model_section_title">Global model</string>
+    <string name="model_section_hint">The selected model is loaded when a feature opens.</string>
+    <string name="home_section_analysis">Face analysis</string>
+    <string name="home_section_recognition">Face recognition</string>
+    <string name="home_section_anti_fraud">Anti-fraud</string>
+    <string name="home_silent_desc">RGB anti-spoofing with a live confidence score</string>
+    <string name="home_action_desc">Complete a randomized sequence of face actions</string>
+    <string name="home_pose_desc">Recognize blink, shake, mouth and head poses</string>
+    <string name="home_compare_desc">Upload two portraits and compare face similarity</string>
+    <string name="home_management_desc">Manage model-specific identities, features and crops</string>
+    <string name="home_recognition_desc">Identify a face against the current model library</string>
+    <string name="home_detection_desc">Detect faces and inspect native 106-point landmarks</string>
+    <string name="home_attribute_desc">Inspect mask, age, quality and facial attributes</string>
+    <string name="model_pikachu" translatable="false">Pikachu</string>
+    <string name="model_megatron" translatable="false">Megatron</string>
+    <string name="menu_badge_rgb" translatable="false">RGB</string>
+    <string name="menu_badge_action" translatable="false">ACT</string>
+    <string name="menu_badge_pose" translatable="false">POSE</string>
+    <string name="menu_badge_compare" translatable="false">1:1</string>
+    <string name="menu_badge_management" translatable="false">DB</string>
+    <string name="menu_badge_recognition" translatable="false">1:N</string>
+    <string name="menu_badge_detection" translatable="false">TRACK</string>
+    <string name="menu_badge_attribute" translatable="false">ATTR</string>
+    <string name="add_symbol" translatable="false">＋</string>
+
+    <!-- 1:1 face comparison -->
+    <string name="face_compare_title">Face 1:1</string>
+    <string name="face_compare_heading">Are they the same person?</string>
+    <string name="face_compare_hint">Add one clear image to each side. Face 1 is selected by default; tap any numbered face box to switch, and the comparison updates immediately.</string>
+    <string name="image_a">Image A</string>
+    <string name="image_b">Image B</string>
+    <string name="upload_image_a">Add image A</string>
+    <string name="upload_image_b">Add image B</string>
+    <string name="image_empty">Tap to choose</string>
+    <string name="image_analyzing">Detecting face…</string>
+    <string name="image_face_ready">Face ready</string>
+    <string name="image_no_face">No face found</string>
+    <string name="image_face_selected">Face %1$d of %2$d selected</string>
+    <string name="image_load_failed">Could not load image</string>
+    <string name="face_extract_failed">Feature extraction failed</string>
+    <string name="similarity_title">Similarity</string>
+    <string name="compare_selected_face_a">Selected face crop A</string>
+    <string name="compare_selected_face_b">Selected face crop B</string>
+    <string name="compare_face_a_badge" translatable="false">A</string>
+    <string name="compare_face_b_badge" translatable="false">B</string>
+    <string name="compare_select_two">Select two images</string>
+    <string name="compare_analyzing">Analyzing image…</string>
+    <string name="compare_waiting_face">Add two valid face images</string>
+    <string name="compare_comparing">Comparing faces…</string>
+    <string name="compare_same_person">Likely the same person</string>
+    <string name="compare_different_person">Likely different people</string>
+    <string name="compare_failed">Comparison failed</string>
+    <string name="compare_engine_failed">Face engine unavailable</string>
+    <string name="compare_details">cosine confidence %1$.3f · threshold %2$.3f</string>
+    <string name="on_device_privacy">Images are processed only on this device.</string>
+
+    <!-- Face management -->
+    <string name="face_management_title">Face management</string>
+    <string name="face_library_heading">Face library</string>
+    <string name="face_storage_scope">%1$s uses an isolated feature DB and crop directory.</string>
+    <string name="search_faces">Search name or ID</string>
+    <string name="add_face">Add</string>
+    <string name="no_faces_title">No faces stored</string>
+    <string name="no_faces_hint">Add a portrait to create the first identity in this model library.</string>
+    <string name="stored_face_crop">Stored face crop</string>
+    <string name="face_id_format">ID · %1$d</string>
+    <string name="edit_short">Edit</string>
+    <string name="delete_short">Del</string>
+    <string name="add_face_title">Add face</string>
+    <string name="edit_face_title">Edit face</string>
+    <string name="choose_enrollment_image">Use the camera or choose an image</string>
+    <string name="enrollment_image">Face enrollment image</string>
+    <string name="no_image_selected">No image selected</string>
+    <string name="capture_or_replace_face">Use camera</string>
+    <string name="choose_or_replace_image">Choose from gallery</string>
+    <string name="tap_face_to_select">If multiple faces are detected, tap a box to choose the identity to store.</string>
+    <string name="face_name">Name</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="saving_face">Saving…</string>
+    <string name="face_saved">Face saved</string>
+    <string name="face_save_failed">Could not save this face</string>
+    <string name="face_library_failed">Could not open the model-specific face library</string>
+    <string name="delete_face_title">Delete face?</string>
+    <string name="delete_face_message">Delete %1$s from the current %2$s library? This removes its feature and crop.</string>
+    <string name="delete">Delete</string>
+    <string name="face_deleted">Face deleted</string>
+    <string name="face_delete_failed">Could not delete this face</string>
+    <string name="face_list_count">%1$d stored identities</string>
+
+    <!-- Face recognition -->
+    <string name="face_recognition_title">Face recognition</string>
+    <string name="face_recognition_heading">Who is this?</string>
+    <string name="face_recognition_hint">Search a face against identities enrolled for the current model.</string>
+    <string name="recognition_tab_photo">Photo input</string>
+    <string name="recognition_tab_video">Video stream</string>
+    <string name="recognition_session_parameters">Session parameters</string>
+    <string name="recognition_session_parameters_hint">Applying changes rebuilds the photo Session and saves these settings on this device.</string>
+    <string name="recognition_settings_expand">Expand</string>
+    <string name="recognition_settings_collapse">Collapse</string>
+    <string name="recognition_input_px">Detection input px</string>
+    <string name="recognition_max_faces">Maximum detected faces</string>
+    <string name="recognition_min_face_px">Minimum face px</string>
+    <string name="recognition_apply_session">Apply Session</string>
+    <string name="recognition_reset_defaults">Reset defaults</string>
+    <string name="recognition_session_summary">Session · %1$d px · max %2$d · min %3$d px</string>
+    <string name="recognition_session_rebuilding">Rebuilding Session…</string>
+    <string name="recognition_session_failed">Could not create this Session</string>
+    <string name="recognition_empty_library">No faces are enrolled for the %1$s model. Add identities in Face management first.</string>
+    <string name="recognition_photo">Recognition photo</string>
+    <string name="recognition_selected_face_crop">Selected face crop</string>
+    <string name="recognition_choose_photo_hint">Choose a photo to detect and identify faces</string>
+    <string name="recognition_choose_photo">Choose photo</string>
+    <string name="recognition_multi_face_hint">A single face is searched automatically. For multiple faces, tap a numbered box to switch.</string>
+    <string name="recognition_searching">Searching the current model library…</string>
+    <string name="recognition_match_found">Match found</string>
+    <string name="recognition_no_match">No matching identity</string>
+    <string name="recognition_library_empty_result">The current model library is empty</string>
+    <string name="recognition_result_name_unknown">Unknown</string>
+    <string name="recognition_result_details">ID · %1$d · cosine confidence %2$.3f · threshold %3$.3f</string>
+    <string name="recognition_no_match_details">cosine confidence %1$.3f · threshold %2$.3f</string>
+    <string name="recognition_no_confidence">No candidate exceeded the search threshold</string>
+    <string name="recognition_video_initializing">Starting camera…</string>
+    <string name="recognition_video_no_face">Place a face in the frame</string>
+    <string name="recognition_video_hold_still">Hold still for recognition</string>
+    <string name="recognition_video_first_face_hint">Only the first tracked face is identified after it stays stable for about 1 second.</string>
+    <string name="value_1" translatable="false">1</string>
+    <string name="value_3" translatable="false">3</string>
+    <string name="value_5" translatable="false">5</string>
+    <string name="value_10" translatable="false">10</string>
+    <string name="value_24" translatable="false">24</string>
+    <string name="value_48" translatable="false">48</string>
+    <string name="value_64" translatable="false">64</string>
+    <string name="value_128" translatable="false">128</string>
+    <string name="value_320" translatable="false">320</string>
+    <string name="value_640" translatable="false">640</string>
+    <string name="value_1280" translatable="false">1280</string>
+
+    <!-- Face detection and tracking -->
+    <string name="face_detection_title">Face tracking</string>
+    <string name="face_detection_heading">Find every face</string>
+    <string name="face_detection_hint">Detect selectable faces and inspect the SDK native 106-point dense landmarks.</string>
+    <string name="detection_tab_image">Image detection</string>
+    <string name="detection_tab_tracking">Video tracking</string>
+    <string name="detection_show_dense_landmarks">Show 106 dense landmarks</string>
+    <string name="detection_photo">Face detection photo</string>
+    <string name="detection_choose_photo_hint">Choose a photo to detect faces and landmarks</string>
+    <string name="detection_choose_photo">Choose detection photo</string>
+    <string name="detection_multi_face_hint">Face 1 is selected by default. Tap any numbered box to inspect that face.</string>
+    <string name="detection_landmark_behavior_hint">Large faces render landmarks on the source; small faces use the bottom-right magnifier.</string>
+    <string name="detection_face_selected">Face %1$d of %2$d selected · %3$d landmarks returned</string>
+    <string name="face_detection_failed">Face detection failed</string>
+    <string name="detection_landmarks_hidden">106 landmarks are hidden</string>
+    <string name="detection_landmarks_failed">Could not read 106 landmarks for this face</string>
+    <string name="detection_landmarks_on_source">Large face · %1$d%% of image · landmarks shown on source</string>
+    <string name="detection_landmarks_in_magnifier">Small face · %1$d%% of image · landmarks enlarged at bottom right</string>
+    <string name="detection_landmark_magnifier">Selected face magnifier</string>
+    <string name="detection_106_badge" translatable="false">106 PTS</string>
+    <string name="detection_tracking_initializing">Starting camera tracking…</string>
+    <string name="detection_tracking_restarting">Applying settings and restarting camera…</string>
+    <string name="detection_tracking_stats">%1$.1f FPS · %2$d ms</string>
+    <string name="detection_tracking_settings">Tracking Session parameters</string>
+    <string name="detection_tracking_settings_hint">Changes are saved automatically and restart the camera stream.</string>
+    <string name="detection_tracking_mode">Tracking mode</string>
+    <string name="detection_tracking_mode_light">Light</string>
+    <string name="detection_tracking_mode_tbd">Track-by-detection</string>
+    <string name="detection_tracking_summary">%1$s · %2$d px · max %3$d · min %4$d px</string>
+    <string name="detection_tracking_session_failed">Could not create this tracking Session</string>
+
+    <!-- Face attributes -->
+    <string name="face_attribute_title">Face attributes</string>
+    <string name="face_attribute_heading">Read facial attributes</string>
+    <string name="face_attribute_hint">Choose a photo, then tap any numbered face to update its attributes.</string>
+    <string name="attribute_photo">Face attribute photo</string>
+    <string name="attribute_choose_photo_hint">Choose a photo to analyze face attributes</string>
+    <string name="attribute_choose_photo">Choose photo</string>
+    <string name="attribute_multi_face_hint">Face 1 is selected by default. Small selected faces appear in the bottom-right magnifier.</string>
+    <string name="attribute_selected_face_crop">Selected face magnifier</string>
+    <string name="attribute_face_selected">Face %1$d of %2$d selected</string>
+    <string name="attribute_result_title">Selected face</string>
+    <string name="attribute_result_empty">Choose a photo to view attributes</string>
+    <string name="attribute_analyzing">Analyzing attributes…</string>
+    <string name="attribute_analysis_failed">Could not analyze face attributes</string>
+    <string name="attribute_no_face_result">No face attributes available</string>
+    <string name="attribute_mask">Wearing mask</string>
+    <string name="attribute_age">Age bracket</string>
+    <string name="attribute_quality">Image quality score</string>
+    <string name="attribute_expression">Expression</string>
+    <string name="attribute_race">Ethnicity</string>
+    <string name="attribute_gender">Gender</string>
+    <string name="attribute_left_eye">Left eye</string>
+    <string name="attribute_right_eye">Right eye</string>
+    <string name="attribute_mask_yes">Yes</string>
+    <string name="attribute_mask_no">No</string>
+    <string name="attribute_eye_open">Open</string>
+    <string name="attribute_eye_closed">Closed</string>
+    <string name="attribute_expression_neutral">Neutral</string>
+    <string name="attribute_expression_mouth_open">Mouth open</string>
+    <string name="attribute_gender_female">Female</string>
+    <string name="attribute_gender_male">Male</string>
+    <string name="attribute_race_black">Black</string>
+    <string name="attribute_race_asian">Asian</string>
+    <string name="attribute_race_latino">Latino / Hispanic</string>
+    <string name="attribute_race_middle_eastern">Middle Eastern</string>
+    <string name="attribute_race_white">White</string>
+    <string name="attribute_age_0_2">0–2</string>
+    <string name="attribute_age_3_9">3–9</string>
+    <string name="attribute_age_10_19">10–19</string>
+    <string name="attribute_age_20_29">20–29</string>
+    <string name="attribute_age_30_39">30–39</string>
+    <string name="attribute_age_40_49">40–49</string>
+    <string name="attribute_age_50_59">50–59</string>
+    <string name="attribute_age_60_69">60–69</string>
+    <string name="attribute_age_70_plus">70+</string>
+    <string name="attribute_score_format" translatable="false">%1$.3f</string>
+    <string name="attribute_unknown">—</string>
+
+    <!-- Camera face enrollment -->
+    <string name="face_capture_title">Camera enrollment</string>
+    <string name="capture_permission_hint">Allow camera access, then try again.</string>
+    <string name="capture_no_face">Place a face in the frame</string>
+    <string name="capture_first_face_hint">The first detected face is tracked. Keep it clear and centered.</string>
+    <string name="capture_move_closer">Move closer</string>
+    <string name="capture_hold_still">Hold still</string>
+    <string name="capture_warmup_hint">Stay steady for 1 second to start the ring.</string>
+    <string name="capture_keep_still">Keep holding still</string>
+    <string name="capture_progress">Stability %1$d%%</string>
+    <string name="capture_complete">Capture complete</string>
+    <string name="capture_complete_hint">The ring is full. Preparing this face…</string>
+    <string name="capture_failed">Could not capture this frame</string>
+    <string name="capture_retry_hint">Hold still and the app will try again.</string>
 </resources>

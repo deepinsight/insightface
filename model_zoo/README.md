@@ -4,27 +4,41 @@
 
 ## 0. Python Package models
 
-To check the detail of insightface python package, please see [here](../python-package).
+See the [Python library](../python-package/README.md) for installation and
+the [model usage guide](../python-package/docs/model_zoo.md) for loading models.
+
+InsightFace 2.0 also supports `raccoon_s` and `raccoon_l`; see the
+[Raccoon package guide](../python-package/docs/model_zoo.md#raccoon-model-packages).
+Ordinary `FaceAnalysis()` defaults to `buffalo_l`, while
+[PrivateFrame](../python-package/insightface/app/privateframe/README.md) and new
+GUI configurations default to `raccoon_s`. The optional
+[liveness addon](../python-package/docs/liveness.md) must be enabled explicitly.
+Packaged downloads are available from the
+[model-zoo release](https://github.com/deepinsight/insightface/releases/tag/model-zoo)
+and use `<root>/models/<name>/` locally (default root: `~/.insightface`).
 
 To install: ``pip install -U insightface``
 
 To use the specific model pack:
 
-```
+```python
+from insightface.app import FaceAnalysis
+
 model_pack_name = 'buffalo_l'
 app = FaceAnalysis(name=model_pack_name)
 ```
 
-Name in **bold** is the default model pack in latest version.
+The table below lists legacy model packs. The name in **bold** is the default
+for ordinary `FaceAnalysis()`.
 
 
 | Name           | Detection Model | Recognition Model   | Alignment    | Attributes | Model-Size |
 | -------------- | --------------- | ------------------- | ------------ | ---------- | ---------- |
-| antelopev2 | RetinaFace-10GF      | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age | 407MB |
-| **buffalo_l**      | RetinaFace-10GF      | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 326MB |
-| buffalo_m      | RetinaFace-2.5GF     | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 313MB |
-| buffalo_s      | RetinaFace-500MF     | MBF@WebFace600K | 2d106 & 3d68 | Gender&Age | 159MB |
-| buffalo_sc      | RetinaFace-500MF     | MBF@WebFace600K | - | - | 16MB |
+| antelopev2 | SCRFD-10GF      | ResNet100@Glint360K | 2d106 & 3d68 | Gender&Age | 407MB |
+| **buffalo_l**      | SCRFD-10GF      | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 326MB |
+| buffalo_m      | SCRFD-2.5GF     | ResNet50@WebFace600K | 2d106 & 3d68 | Gender&Age | 313MB |
+| buffalo_s      | SCRFD-500MF     | MBF@WebFace600K | 2d106 & 3d68 | Gender&Age | 159MB |
+| buffalo_sc      | SCRFD-500MF     | MBF@WebFace600K | - | - | 16MB |
 
 ### Recognition accuracy of python library model packs:
 
@@ -132,7 +146,7 @@ In RetinaFace, mAP was evaluated with multi-scale testing.
 
 ``m025``: means MobileNet-0.25
 
-| Impelmentation           | Easy-Set | Medium-Set | Hard-Set | Link                                                         |
+| Implementation           | Easy-Set | Medium-Set | Hard-Set | Link                                                         |
 | ------------------------ | -------- | ---------- | -------- | ------------------------------------------------------------ |
 | RetinaFace-R50           | 96.5     | 95.6       | 90.4     | [BDrive](https://pan.baidu.com/s/1C6nKq122gJxRhb37vK0_LQ), [GDrive](https://drive.google.com/file/d/1wm-6K688HQEx_H90UdAIuKv-NAsKBu85/view?usp=sharing) |
 | RetinaFace-m025(yangfly) | -        | -          | 82.5     | [BDrive](https://pan.baidu.com/s/1P1ypO7VYUbNAezdvLm2m9w)(nzof), [GDrive](https://drive.google.com/drive/folders/1OTXuAUdkLVaf78iz63D1uqGLZi4LbPeL?usp=sharing) |
@@ -161,19 +175,19 @@ In SCRFD, mAP was evaluated with single scale testing, VGA resolution.
 
 ## 3. Face Alignment models.
 
-### 2.1 2D Face Alignment
+### 3.1 2D Face Alignment
 
-| Impelmentation        | Points | Backbone      | Params(M) | Link(onnx)                                                   |
+| Implementation        | Points | Backbone      | Params(M) | Link(onnx)                                                   |
 | --------------------- | ------ | ------------- | --------- | ------------------------------------------------------------ |
 | Coordinate-regression | 106    | MobileNet-0.5 | 1.2       | [GDrive](https://drive.google.com/file/d/1M5685m-bKnMCt0u2myJoEK5gUY3TDt_1/view?usp=sharing) |
 
-### 2.2 3D Face Alignment
+### 3.2 3D Face Alignment
 
-| Impelmentation | Points | Backbone  | Params(M) | Link(onnx)                                                   |
+| Implementation | Points | Backbone  | Params(M) | Link(onnx)                                                   |
 | -------------- | ------ | --------- | --------- | ------------------------------------------------------------ |
 | -              | 68     | ResNet-50 | 34.2      | [GDrive](https://drive.google.com/file/d/1aJe5Rzoqrtf_a9U84E-V1b0rUi8-QbCI/view?usp=sharing) |
 
-### 2.3 Dense Face Alignment
+### 3.3 Dense Face Alignment
 
 ## 4. Face Attribute models.
 

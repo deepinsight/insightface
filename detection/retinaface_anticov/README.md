@@ -9,9 +9,11 @@ RetinaFace-Anti-Cov is a customized one stage face detector to help people prote
 
 ## Testing
 
-Please check ``test.py`` for testing.
+Please check [test.py](test.py) for testing. Set the model prefix, input image path, and `gpuid` in the script before running it from this directory. The example writes detections to `cov_test.jpg`.
 
 Make sure that you set ``network='net3l'`` instead of ``'net3'`` for 'mnet_cov2' model, otherwise you will get incorrect landmarks.
+
+See [RetinaFace](../retinaface/README.md) for the general detector and [face detection](../README.md) for other methods and datasets.
 
 ## Pretrained Models
 

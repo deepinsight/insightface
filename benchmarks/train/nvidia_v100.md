@@ -1,9 +1,10 @@
 # Training performance report on NVIDIA® V100
 
-[NVIDIA® V100](https://www.nvidia.com/en-us/data-center/v100/) 
-NVIDIA® V100 Tensor Core is the most advanced data center GPU ever built to accelerate AI, high performance computing (HPC), data science and graphics. It’s powered by NVIDIA Volta architecture, comes in 16 and 32GB configurations, and offers the performance of up to 32 CPUs in a single GPU.
+Historical report: see the [benchmark index](../README.md) for commit dates and
+[arcface_torch](../../recognition/arcface_torch/README.md) for training code and setup.
 
-Besides, we can also use NVIDIA® V100 to train deep learning models by its FP16 and FP32 supports.
+[NVIDIA® V100](https://www.nvidia.com/en-us/data-center/v100/) uses the Volta
+architecture and supports FP16 and FP32 training.
 
 ## Test Server Spec
 

@@ -3,11 +3,8 @@ import numbers
 import os
 from argparse import ArgumentParser, Namespace
 
-import mxnet as mx
 import numpy as np
 
-from ..app import MaskRenderer
-from ..data.rec_builder import RecBuilder
 from . import BaseInsightFaceCLICommand
 
 
@@ -36,6 +33,23 @@ class RecAddMaskParamCommand(BaseInsightFaceCLICommand):
 
 
     def run(self):
+        try:
+            import mxnet as mx
+        except ImportError as exc:
+            raise ImportError(
+                "The rec.addmaskparam command requires mxnet. "
+                "Please install mxnet before running this command."
+            ) from exc
+        try:
+            from ..app.mask_renderer import MaskRenderer
+            from ..data.rec_builder import RecBuilder
+        except ImportError as exc:
+            raise ImportError(
+                "The rec.addmaskparam command requires optional mask rendering "
+                "and MXNet record dependencies. Please install the required "
+                "optional dependencies before running this command."
+            ) from exc
+
         tool = MaskRenderer()
         tool.prepare(ctx_id=0, det_size=(128,128))
         root_dir = self._input
@@ -91,4 +105,3 @@ class RecAddMaskParamCommand(BaseInsightFaceCLICommand):
 
         wrec.close()
         print('finished on', self._output, ', failed:', stat[0])
-

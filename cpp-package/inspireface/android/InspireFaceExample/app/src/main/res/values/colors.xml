@@ -2,4 +2,30 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Liveness screen -->
+    <color name="liveness_accent">#FF00E5A0</color>
+    <color name="liveness_warn">#FFFFC400</color>
+    <color name="liveness_fail">#FFFF5252</color>
+    <color name="liveness_scrim">#99000000</color>
+    <color name="liveness_chip_bg">#B3000000</color>
+
+    <!-- Home screen -->
+    <color name="home_background">#FF07110F</color>
+    <color name="home_surface">#FF101C19</color>
+    <color name="home_stroke">#FF263A35</color>
+    <color name="home_text_secondary">#FF9FB2AD</color>
+    <color name="home_text_muted">#FF71847F</color>
+    <color name="home_tile_green">#FF72E2B5</color>
+    <color name="home_tile_blue">#FF84C8FF</color>
+    <color name="home_tile_purple">#FFC6B5FF</color>
+    <color name="home_tile_orange">#FFFFC988</color>
+    <color name="home_tile_pink">#FFFFB8D1</color>
+    <color name="home_tile_cyan">#FF79DDD9</color>
+    <color name="home_tile_yellow">#FFFFE082</color>
+    <color name="home_tile_lime">#FFB8E986</color>
+    <color name="home_tile_text_dark">#FF07110F</color>
+    <color name="home_tile_text_dark_secondary">#B307110F</color>
+    <color name="compare_ring_track">#FF23332F</color>
+    <color name="compare_status_scrim">#D907110F</color>
 </resources>

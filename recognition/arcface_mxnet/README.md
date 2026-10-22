@@ -1,5 +1,7 @@
 ## ArcFace with Parallel Acceleration on both Features and Centers
 
+This directory contains the historical MXNet training implementation of ArcFace. For inference with supported ONNX recognition models, see the [InsightFace Python library](../../python-package/README.md#quick-example).
+
 ### Memory Consumption and Training Speed
 
 ![Memoryspeed](https://insightface.ai/assets/img/github/memoryspeed.png)
@@ -43,7 +45,7 @@ git clone --recursive https://github.com/deepinsight/insightface.git
 The first three files are the training dataset while the last three files are verification sets.
 
 4. Train deep face recognition models.
-In this part, we assume you are in the directory *`$INSIGHTFACE_ROOT/recognition/ArcFace`*.
+In this part, we assume you are in the directory *`$INSIGHTFACE_ROOT/recognition/arcface_mxnet`*.
 
 Place and edit config file:
 ```Shell

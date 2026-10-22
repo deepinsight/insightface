@@ -1,5 +1,8 @@
 # Training performance report on NVIDIA RTX3090
 
+Historical report: see the [benchmark index](../README.md) for commit dates and
+[arcface_torch](../../recognition/arcface_torch/README.md) for training code and setup.
+
 [GEFORCE RTX 3090](https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3090/) 
 The GeForce RTX™ 3090 is a big ferocious GPU (BFGPU) with TITAN class performance.
 

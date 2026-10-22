@@ -35,6 +35,14 @@ public:
      */
     FaceLocList operator()(const inspirecv::Image &bgr);
 
+    /**
+     * @brief Detects faces while distinguishing failures from a valid empty result.
+     * @param bgr The input image in BGR format.
+     * @param results Receives detected faces and is cleared on failure.
+     * @return HSUCCEED, HERR_DEVICE_IMAGE_PROCESS_FAILURE, or HERR_SESS_TRACKER_FAILURE.
+     */
+    int32_t Detect(const inspirecv::Image &bgr, FaceLocList &results);
+
     /** @brief Set non-maximum suppression threshold */
     void SetNmsThreshold(float mNmsThreshold);
 
@@ -56,15 +64,6 @@ private:
     static void _nms(FaceLocList &input_faces, float nms_threshold);
 
     /**
-     * @brief Generates detection anchors based on stride.
-     * @param stride The stride of the detection.
-     * @param input_size The size of the input image.
-     * @param num_anchors The number of anchors.
-     * @param anchors The generated anchors.
-     */
-    void _generate_anchors(int stride, int input_size, int num_anchors, std::vector<float> &anchors);
-
-    /**
      * @brief Decodes network outputs to face locations.
      * @param cls_pred Classification predictions.
      * @param box_pred Bounding box predictions.
@@ -72,22 +71,13 @@ private:
      * @param stride The stride of the detection.
      * @param results Decoded face locations.
      */
-    void _decode(const std::vector<float> &cls_pred, const std::vector<float> &box_pred, const std::vector<float> &lmk_pred, int stride,
-                 std::vector<FaceLoc> &results);
+    void _decode(const float *cls_pred, const float *box_pred, const float *lmk_pred, int stride, std::vector<FaceLoc> &results);
 
 private:
     float m_nms_threshold_;  ///< Threshold for non-maximum suppression.
     float m_cls_threshold_;  ///< Threshold for classification score.
     int m_input_size_;       ///< Input size for the neural network model.
 };
-
-/**
- * @brief Sorts FaceLoc objects in descending order of area.
- * @param a The first FaceLoc object.
- * @param b The second FaceLoc object.
- * @return bool True if 'a' is larger than 'b'.
- */
-bool SortBoxSizeAdapt(const FaceLoc &a, const FaceLoc &b);
 
 }  // namespace inspire
 

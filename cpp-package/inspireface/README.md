@@ -1,13 +1,12 @@
 # InspireFace
-[![GitHub release](https://img.shields.io/github/v/release/HyperInspire/InspireFace.svg?style=for-the-badge&color=blue&label=Github+release&logo=github)](https://github.com/HyperInspire/InspireFace/releases/latest)
-[![Model](https://img.shields.io/github/v/release/HyperInspire/InspireFace.svg?style=for-the-badge&color=blue&label=Model+Zoo&logo=github)](https://github.com/HyperInspire/InspireFace/releases/tag/v1.x)
-[![pypi](https://img.shields.io/pypi/v/inspireface.svg?style=for-the-badge&color=orange&label=PYPI+release&logo=python)](https://pypi.org/project/inspireface/)
-[![JitPack](https://img.shields.io/jitpack/v/github/HyperInspire/inspireface-android-sdk?style=for-the-badge&color=green&label=JitPack&logo=android)](https://jitpack.io/#HyperInspire/inspireface-android-sdk)
-[![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=building&logo=cmake)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml)
-[![test](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?&style=for-the-badge&label=testing&logo=c)](https://github.com/HyperInspire/InspireFace/actions/workflows/test_ubuntu_x86_Pikachu.yaml)
-[![Document](https://img.shields.io/badge/Document-Building-blue?style=for-the-badge&logo=readthedocs)](https://doc.inspireface.online/)
 
-
+[![GitHub release](https://img.shields.io/github/v/release/HyperInspire/InspireFace.svg?style=flat&color=blue&label=GitHub+release&logo=github)](https://github.com/HyperInspire/InspireFace/releases/latest)
+[![Model](https://img.shields.io/github/v/release/HyperInspire/InspireFace.svg?style=flat&color=blue&label=Model+Zoo&logo=github)](https://github.com/HyperInspire/InspireFace/releases/tag/v1.x)
+[![PyPI](https://img.shields.io/pypi/v/inspireface.svg?style=flat&color=orange&label=PyPI+release&logo=python)](https://pypi.org/project/inspireface/)
+[![JitPack](https://jitpack.io/v/HyperInspire/inspireface-android-sdk.svg)](https://jitpack.io/#HyperInspire/inspireface-android-sdk)
+[![Release SDKs](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml/badge.svg)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml)
+[![Ubuntu x86 Tests](https://github.com/HyperInspire/InspireFace/actions/workflows/test_ubuntu_x86_Pikachu.yaml/badge.svg)](https://github.com/HyperInspire/InspireFace/actions/workflows/test_ubuntu_x86_Pikachu.yaml)
+[![Documentation](https://img.shields.io/badge/Document-Building-blue?style=flat&logo=readthedocs)](https://doc.inspireface.online/)
 
 InspireFace is a cross-platform face recognition SDK developed in C/C++, supporting multiple operating systems and various backend types for inference, such as CPU, GPU, and NPU.
 
@@ -15,14 +14,21 @@ If you require further information on tracking development branches, CI/CD proce
 
 Please contact [contact@insightface.ai](mailto:contact@insightface.ai?subject=InspireFace) using your company e-mail for commercial support, including obtaining and integrating higher accuracy models, as well as custom development.
 
-<img src="images/banner.jpg" alt="banner" style="zoom:80%;" />
+<img src="images/banner.webp" alt="banner" style="zoom:80%;" />
 
 ---
 
-📘 [Documentation](https://doc.inspireface.online/) is a **work in progress**.  
-We welcome your questions💬, they help guide and accelerate its development.
+📘 For detailed development and integration guides, see the [documentation](https://doc.inspireface.online/).
 
 ## Change Logs
+
+**`2026-09-27`** Add Windows platform support and precompiled SDKs.
+
+**`2026-09-20`** Add demos for passive face liveness detection and flash liveness detection.
+
+**`2026-08-30`** Add HarmonyOS support and configurable best-frame face capture, improve SDK performance, reliability, API compatibility, and Python usability, and expand regression tests, benchmarks, and bilingual documentation.
+
+**`2026-07-22`** Add an Android example app.
 
 **`2025-08-03`** Add a multi-link model download channel for the Python-SDK.
 
@@ -70,13 +76,31 @@ The licensing of the open-source models employed by InspireFace adheres to the s
 
 ## Quick Start
 
-For Python users on **Linux and MacOS**, InspireFace can be quickly installed via pip:
+### Try the Android Example App
+
+- Add a passive face liveness detection demo.
+- Add a flash liveness detection demo.
+
+<p>
+  <a href="http://fir.tunm.top/pro/pz7b3dgv">
+    <img src="images/inspireface-android-example-app-download.png" alt="Scan the QR code to download the InspireFace Android example app" width="220" />
+  </a>
+</p>
+
+<p>
+  <strong>Scan the QR code to download the Android example app</strong><br />
+  Or <a href="http://fir.tunm.top/pro/pz7b3dgv">download the app directly</a>.
+</p>
+
+### Python Quick Start
+
+For Python users on **Windows x64, Linux, and macOS**, InspireFace can be quickly installed via pip. CPU wheels are available for Windows x64 and for Linux/macOS on x86_64 and ARM64:
 
 ```bash
 pip install -U inspireface
 ```
 
-After installation, you can use inspireface like this:
+The wheels include the native CPU library, and models are downloaded automatically on first use. On Windows, use x64 Python and install the Microsoft Visual C++ 2022 x64 Redistributable as described in the [Windows runtime requirements](doc/Windows.md#installed-cc-consumers). After installation, you can use inspireface like this:
 
 ```Python
 import cv2
@@ -184,14 +208,20 @@ The '**3rdparty**' directory already includes the MNN library and specifies a pa
 ### Requirements
 
 - CMake (version 3.20 or higher)
+- Ninja (required by the Windows build scripts; included in Visual Studio's **C++ CMake tools for Windows** component)
+- Git (to fetch the source and recursive submodules)
+- 64-bit PowerShell (required to run the Windows build scripts)
+- Python 3.7 or newer with pip (for Python wheel builds; use x64 Python on Windows) [**Optional**]
 - NDK (version 16 or higher, only required for Android) [**Optional**]
-- MNN (version 1.4.0 or higher)
+- MNN (version 3.x or higher)
 - C++ Compiler
-    - Either GCC or Clang can be used (macOS does not require additional installation as Xcode is included)
+    - On Linux/macOS, use GCC or Clang (macOS provides Clang through Xcode or the Xcode Command Line Tools)
         - Recommended GCC version is 4.9 or higher
             - Note that in some distributions, GCC (GNU C Compiler) and G++ (GNU C++ Compiler) are installed separately.
             - For instance, on Ubuntu, you need to install both gcc and g++
         - Recommended Clang version is 3.9 or higher
+    - MSVC v143 from Visual Studio 2022 or Build Tools 2022 (Windows x64)
+        - Install the **Desktop development with C++** workload, including the MSVC x64/x86 build tools and a Windows 10 or Windows 11 SDK.
     - arm-linux-gnueabihf (for RV1109/RV1126) [**Optional**]
         - Prepare the cross-compilation toolchain in advance, such as gcc-arm-8.3-2019.03-x86_64-arm-linux-gnueabihf
 - CUDA (version 11.x or higher) [**Optional**]
@@ -205,6 +235,11 @@ The '**3rdparty**' directory already includes the MNN library and specifies a pa
 ## Compilation
 CMake option are used to control the various details of the compilation phase. Please select according to your actual requirements. [CMake Option](doc/CMake-Option.md).
 
+For Windows x64 desktop and Windows Server builds with the CPU/MNN backend, use the PowerShell entry point
+[`command/build_windows.ps1`](command/build_windows.ps1) from a Visual Studio
+x64 Native Tools environment. See [Windows build and SDK consumption](doc/Windows.md)
+for test resources, shared/static builds, and the installed CMake package.
+
 ### Local Compilation
 If you are using macOS or Linux, you can quickly compile using the shell scripts provided in the `command` folder at the project root:
 ```bash
@@ -212,7 +247,9 @@ cd InspireFace/
 # Execute the local compilation script
 bash command/build.sh
 ```
-After compilation, you can find the local file in the build directory, which contains the compilation results. The install directory structure is as follows:
+On Windows, run `.\command\build_windows.ps1` from PowerShell in a Visual Studio x64 Native Tools environment. The default Release shared SDK is installed to `build/windows-x64-Release-shared/install/InspireFace`; its `lib/` directory contains `libInspireFace.dll` and the import library. Add `-Static` for a static SDK. Test resources must be prepared before using the default build, which also runs CTest; see the [Windows build instructions](doc/Windows.md).
+
+Compilation results are placed in the build directory. For example, a Linux shared SDK has the following layout:
 ```bash
 inspireface-linux
    ├── include
@@ -253,14 +290,52 @@ After the compilation is complete, `inspireface.framework` will be placed in the
 
 ### Android Compilation
 
-You can compile for Android using the following command, but first you need to set your Android NDK path:
+With a JDK (8 or later), CMake and Python 3 installed, set your Android NDK path and build:
 
 ```
 export ANDROID_NDK=YOUR_ANDROID_NDK_PATH
 bash command/build_android.sh
 ```
 
-After the compilation is complete, arm64-v8a and armeabi-v7a libraries will be placed in the `build/inspireface-android` directory.
+The `build/inspireface-android` directory contains arm64-v8a, armeabi-v7a and x86_64 libraries, C/C++ headers, and `java/inspireface.jar`. Each ABI directory contains a single `libInspireFace.so` with the C/C++ API, legacy Android JNI and complete Java binding.
+
+### HarmonyOS Compilation and ArkTS Usage
+
+Prepare an OpenHarmony Native SDK, set its native directory, and build the ARM64 Node-API module:
+
+```bash
+export OHOS_NATIVE_HOME=/path/to/openharmony-sdk/native
+./command/build_harmonyos_napi.sh
+```
+
+The build stages an importable HAR module at `build/inspireface-harmonyos-napi-arm64-v8a/install/HarmonyOS/har`. Add this module to a DevEco Studio project, then use the ArkTS wrapper as follows. `modelPath` must be a filesystem path accessible to the application, and the image byte length must exactly match its format and dimensions.
+
+```typescript
+import { DetectMode, ImageFormat, InspireFace, Rotation } from '@hyperinspire/inspireface';
+
+InspireFace.launch(modelPath);
+const session = InspireFace.createSession({
+  detectMode: DetectMode.ALWAYS_DETECT,
+  maxFaces: 5
+});
+const image = InspireFace.createImageStream(rgbaBytes, width, height,
+  ImageFormat.RGBA, Rotation.DEGREE_0);
+
+try {
+  const result = session.track(image);
+  try {
+    console.info(`Detected faces: ${result.detectedNum}`);
+  } finally {
+    session.releaseFaceResult(result);
+  }
+} finally {
+  image.close();
+  session.close();
+  InspireFace.terminate();
+}
+```
+
+The ArkTS package covers the complete portable C API surface, including Pipeline, FeatureHub, image bitmaps, aligned features, diagnostics, and hardware capability queries. Platform-inapplicable backends such as CUDA and CoreML remain callable for parity and report `UNSUPPORTED`. For ownership and complete API notes, see [HarmonyOS SDK documentation](harmony/inspireface/README.md).
 
 ### Linux-based NVIDIA GPU Acceleration with TensorRT Compilation
 
@@ -291,7 +366,7 @@ For Android and iOS, in addition to the native interface, you can use the React 
 
 ### Supported Platforms and Architectures
 
-We have completed the adaptation and testing of the software across various operating systems and CPU architectures. This includes compatibility verification for platforms such as Linux, macOS, iOS, and Android, as well as testing for specific hardware support to ensure stable operation in diverse environments.
+We have completed the adaptation and testing of the software across various operating systems and CPU architectures. This includes compatibility verification for platforms such as Windows x64, Linux, macOS, iOS, and Android, as well as testing for specific hardware support to ensure stable operation in diverse environments. Windows desktop and Windows Server builds currently support the x64 CPU/MNN backend.
 
 | No. | Platform | Architecture<sup><br/>(CPU) | Device<sup><br/>(Special) | **Supported** | Passed Tests | Release<sup><br/>(Online) |
 | ------- | -------------------- | --------------------- | -------------------------- | :-----------: | :----------------: | :----------------: |
@@ -312,13 +387,17 @@ We have completed the adaptation and testing of the software across various oper
 | 15 | | x86_64 | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
 | 16 | **Android**<sup><br/>(Rockchip) | ARMv8 | RK3566/RK3568 | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
 | 17 |  | ARMv8 | RK3588 | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
-| 18 | **HarmonyOS** | ARMv8 | - | - | - | - |
-| 19 | **Linux**<sup><br/>(Jetson series) | ARMv8 | Jetson series | - | - | - |
+| 18 | **HarmonyOS** | ARMv8 | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
+| 19 | **Windows** | x86_64 (x64) | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![build](https://img.shields.io/github/actions/workflow/status/HyperInspire/InspireFace/release-sdks.yaml?label=✓&labelColor=success&color=success&failedLabel=✗&failedColor=critical&logo=github&logoColor=white)](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) |
+| 20 |  | ARMv8 | - | - | - | - |
+| 21 | **Linux**<sup><br/>(Jetson series) | ARMv8 | Jetson series | - | - | - |
 
 - **Device**: Some special device support, primarily focused on computing power devices.
 - **Supported**: The solution has been fully developed and successfully verified on offline devices.
 - **Passed Tests**: The feature has at least **passed unit tests** on offline devices.
-- **Release**: The solution is already supported and has been successfully compiled and released through **[GitHub Actions](https://github.com/HyperInspire/InspireFace/actions/workflows/built_release_from_docker.yaml)**.
+- **Release**: Links to the platform's [SDK release workflow](https://github.com/HyperInspire/InspireFace/actions/workflows/release-sdks.yaml) or published Python wheels on PyPI.
+
+> HarmonyOS currently marks build and API adaptation support only. Passed Tests and Release remain unmarked until validation on HarmonyOS hardware is available.
 
 ### Multi-platform compilation using Docker
 
@@ -519,13 +598,62 @@ Please note that the C++ interface has not been fully tested. It is recommended 
 - [C Sample](cpp/sample/api/)
 - [C++ Sample](cpp/sample/cpp_api/)
 
+### Objective-C and Swift Samples (iOS / macOS)
+
+Add `InspireFace.xcframework` to your Xcode project; Swift also requires `InspireFaceSwift.xcframework`. See the [Apple integration guide](https://doc.inspireface.online/zh/using-with/apple.html) for project setup and creating image streams from files or camera buffers.
+
+These one-shot examples take a model resource file path (such as `Pikachu`) and an existing image stream, and return the number of detected faces. Models are provided separately from the frameworks; see [model paths and error handling](https://doc.inspireface.online/zh/using-with/apple.html#model-paths-and-errors).
+
+#### Objective-C
+
+```objective-c
+#import <InspireFace/InspireFaceApple.h>
+
+BOOL DetectFaces(NSString *modelPath, IFImageStream *stream,
+                 HInt32 *faceCount, NSError **error) {
+    *faceCount = 0;
+    if (![IFRuntime launchAtPath:modelPath error:error]) return NO;
+    IFSession *session = [[IFSession alloc] initWithOptions:0
+                                                     mode:HF_DETECT_MODE_ALWAYS_DETECT
+                                             maximumFaces:10
+                                               pixelLevel:320
+                                          framesPerSecond:-1
+                                                    error:error];
+    HFMultipleFaceData faces = {0};
+    BOOL success = session && [session trackStream:stream borrowedResult:&faces error:error];
+    if (success) *faceCount = faces.detectedNum;
+    [session closeWithError:NULL];
+    [IFRuntime terminateWithError:NULL];
+    return success;
+}
+```
+
+#### Swift
+
+```swift
+import InspireFaceSwift
+
+func detectFaces(modelPath: String, stream: ImageStream) throws -> Int {
+    try InspireFaceRuntime.launch(path: modelPath)
+    defer { try? InspireFaceRuntime.terminate() }
+    let session = try FaceSession(configuration: SessionConfiguration(
+        detectionMode: .alwaysDetect, maximumFaces: 10, pixelLevel: 320))
+    defer { try? session.close() }
+    return try session.withUnsafeFaces(in: stream) { faces in
+        faces.count
+    }
+}
+```
+
+Keep the input stream and its pixel storage alive during the call, then close the stream when finished. For continuous processing, initialize the runtime once and reuse a session on a serial work queue across frames.
+
 ### Python Native Sample
 
 The Python implementation is compiled based on InspireFace source code, and is integrated using a native interface approach.
 
 #### Use pip to install InspireFace
 
-You can use pip to install the InspireFace Python package:
+You can use pip to install the InspireFace Python package on Windows x64, Linux, and macOS:
 
 ```bash
 pip install inspireface
@@ -533,7 +661,7 @@ pip install inspireface
 
 #### Python Native Sample
 
-We provide a Python API that allows for more efficient use of the InspireFace library. After compiling the dynamic link library, you need to either symlink or copy it to the `python/inspireface/modules/core` directory within the root directory. You can then start testing by navigating to the **[python](python/)** directory. Your Python environment will need to have some dependencies installed:
+For source-based Python development, copy or symlink the compiled native library into `python/inspireface/modules/core/libs/PLATFORM/ARCH/`, matching the Python process's OS and architecture. Use `linux` or `darwin` with `x64` or `arm64`, or `windows/x64` for Windows. The library is named `libInspireFace.so` on Linux, `libInspireFace.dylib` on macOS, and `libInspireFace.dll` on Windows. PyPI wheels already include this library. You can then start testing by navigating to the **[python](python/)** directory. Your Python environment will need to have some dependencies installed:
 
 - python >= 3.7
 - opencv-python
@@ -542,11 +670,14 @@ We provide a Python API that allows for more efficient use of the InspireFace li
 - numpy
 - ctypes
 ```bash
-# Use a symbolic link
-ln -s YOUR_BUILD_DIR/install/InspireFace/lib/libInspireFace.so python/inspireface/modules/core/PLATFORM/ARCH/
+# Linux example: use a symbolic link to the matching architecture directory
+mkdir -p python/inspireface/modules/core/libs/linux/x64
+ln -s /absolute/path/to/YOUR_BUILD_DIR/install/InspireFace/lib/libInspireFace.so python/inspireface/modules/core/libs/linux/x64/
 # Navigate to the sub-project directory
 cd python
 ```
+
+To build a Windows wheel, run `.\command\build_wheel_windows.ps1 -PythonExecutable python` from the repository root in an x64 Native Tools PowerShell environment. The wheel is written to `python/dist/inspireface-<version>-py3-none-win_amd64.whl`; see [Windows wheel builds](doc/Windows.md#python-and-platform-scope).
 
 Import inspireface for a quick facial detection example:
 ```python
@@ -586,7 +717,49 @@ In the project, more usage examples are provided:
 - `sample_face_recognition.py`: Facial recognition example
 - `sample_face_track_from_video.py`: Facial tracking from video stream example
 
-### Java and Android platform API
+### Java Sample (JVM, non-Android)
+
+The portable Java binding provides the complete C API through JNI, with a Java 8-compatible JAR and native libraries built for the target OS and CPU architecture. Users do not need to write JNI code.
+
+Build with a JDK, CMake and Python 3 installed:
+
+```bash
+bash command/build_java.sh
+# To also run the JVM contract tests with the local test models:
+# ISF_JAVA_TESTS=ON bash command/build_java.sh
+```
+
+The SDK is installed in `build/java-sdk/install/Java`, containing `inspireface.jar`, generated Java sources, an API manifest, native libraries and a [face detection example](java/examples/DetectFaces.java). For example, on macOS arm64:
+
+```bash
+cd build/java-sdk/install/Java
+javac -cp inspireface.jar examples/DetectFaces.java
+java -Djava.library.path=native/macos-arm64 -cp inspireface.jar:examples \
+    DetectFaces /path/to/Pikachu /path/to/face.jpg
+```
+
+Choose the native directory matching the running JVM's OS and architecture. The JAR is shared across targets; the JNI library and its core SDK dependency must come from the same build. Model files are supplied separately. The low-level API uses `Native`, `NativeTypes` and `NativeConstants` in `com.insightface.sdk.inspireface.jni`; `InspireFaceException.check(status)` optionally converts C error codes into exceptions.
+
+Image and feature buffers use direct `ByteBuffer` storage in native byte order. Input pixels are retained until the stream is released or its buffer is replaced. Borrowed output buffers retain the C API's validity limits; close native resources explicitly and serialize operations on each resource. The existing Android API remains available separately below.
+
+CPU inference defaults to `NORMAL`. Configure the process-wide policy before creating sessions (the same API works on Android):
+
+```java
+import com.insightface.sdk.inspireface.jni.CPUEngine;
+
+CPUEngine.setGlobalPowerMode(CPUEngine.PowerMode.NORMAL); // NORMAL, HIGH or LOW
+CPUEngine.PowerMode mode = CPUEngine.getGlobalPowerMode();
+```
+
+The setting applies to subsequently initialized CPU runtimes and survives launch/reload/terminate. Existing runtimes, model thread counts and precision are unchanged. Serialize configuration with session/model initialization.
+
+### Android Java API
+
+For the complete C API and `CPUEngine`, build locally with `command/build_android.sh`. Copy `java/inspireface.jar` to your app's `libs/`, add `implementation files('libs/inspireface.jar')`, and copy `lib/<abi>/libInspireFace.so` into `app/src/main/jniLibs/<abi>/` for each ABI. The JAR automatically loads `InspireFace` on Android; all JNI entry points are built into that one library. Remove `libInspireFaceJNI.so` when upgrading from the earlier two-library build. Use the same `com.insightface.sdk.inspireface.jni` API shown above and the JAR from the matching build. The low-level binding does not require the separate Android SDK dependency below.
+
+For builds with R8/ProGuard enabled, copy `java/consumer-rules.pro` into the app module and add it to `proguardFiles` so JNI class and field names are preserved.
+
+Existing apps can continue using the legacy Android API with the rebuilt core library. The supplementary capture/snapshot sources remain in `java/com/insightface/sdk/inspireface/`. When combining both APIs, package only one matching copy of `libInspireFace.so` and explicitly manage native resource ownership.
 
 We have an [Android SDK project](https://github.com/HyperInspire/inspireface-android-sdk) that integrates pre-compiled dynamic libraries, and you can use it directly.
 
@@ -614,7 +787,7 @@ We released InspireFace's Android SDK on JitPack, which you can incorporate into
 
   ```groovy
   dependencies {
-      implementation 'com.github.HyperInspire:inspireface-android-sdk:1.2.3.post4'
+      implementation 'com.github.HyperInspire:inspireface-android-sdk:v1.2.4.post1'
   }
   ```
 
@@ -704,7 +877,7 @@ test_res
 └── video_frames
 
 ```
-After compilation, you can find the executable program "**Test**" in `YOUR_BUILD_FOLDER/test`. The program accepts two optional parameters:
+After compilation, you can find the executable program **Test** (**Test.exe** on Windows) in `YOUR_BUILD_FOLDER/test`. The program accepts two optional parameters:
 
 - **test_dir**：Path to the test resource files
 - **pack**：Name of the model to be tested
@@ -725,11 +898,11 @@ If you need to perform a quick test, you can use the script we provide. This scr
 # If you are using Ubuntu, you can execute this.
 bash ci/quick_test_linux_x86_usual.sh
 
-# If you are using another system (including Ubuntu), you can execute this.
+# For macOS or Linux, you can execute this.
 bash ci/quick_test_local.sh
 ```
 
-Every time code is committed, tests are run on GitHub Actions.
+On Windows, `.\command\build_windows.ps1` builds the SDK and runs the registered CTest suite with the prepared `test_res` resources. To rerun it, use `ctest --test-dir build/windows-x64-Release-shared --output-on-failure --no-tests=error`. Automated tests also run through the configured GitHub Actions workflows.
 
 ## Features
 The following Features and technologies are currently supported.
@@ -745,11 +918,13 @@ The following Features and technologies are currently supported.
 | Tracking | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) |
 | Mask Detection | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | - |
 | Silent Liveness | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | - |
+| Passive Liveness<sup>Plus</sup> | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) |
+| Flash Liveness<sup>Plus</sup> | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) |
 | Face Quality | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) |
 | Pose Estimation | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) |
 | Face Attribute | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) |
 | Cooperative Liveness | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) |
-| Face Emotion<sup>New</sup> | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) |
+| Face Emotion | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) |
 | Embedding Management | [![](https://img.shields.io/badge/%E2%9C%93-green)](#) | - | - | - | - | - |
 
 - Some models and features that do **not support** NPU or GPU will **automatically use CPU** for computation when running the program.
@@ -773,8 +948,8 @@ For different scenarios, we currently provide several Packs, each containing mul
 - [x] Add TensorRT backend support.
 - [x] Add Add C++ style header files.
 - [x] Add the RKNPU backend support for Android .
-- [ ] Python packages that support more platforms.
-- [ ] Example app project for Android and iOS samples.
+- [x] Python wheels for Windows x64 and Linux/macOS on x86_64 and ARM64.
+- [x] Example app project for Android and iOS samples.
 - [ ] Add the batch forward feature.
 - [ ] Design a scheme that can be adapted to multiple CUDA devices.
 

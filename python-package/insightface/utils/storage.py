@@ -2,9 +2,21 @@
 import os
 import os.path as osp
 import zipfile
+
 from .download import download_file
 
-BASE_REPO_URL = 'https://github.com/deepinsight/insightface/releases/download/v0.7'
+MODEL_ZOO_RELEASE_TAG = "model-zoo"
+MODEL_ZOO_RELEASE_DOWNLOAD_URL = (
+    "https://github.com/deepinsight/insightface/releases/download/model-zoo/"
+)
+
+# Kept for compatibility with callers that imported the historical constant.
+BASE_REPO_URL = MODEL_ZOO_RELEASE_DOWNLOAD_URL.rstrip("/")
+
+
+def model_zoo_download_url(filename):
+    return f"{MODEL_ZOO_RELEASE_DOWNLOAD_URL}{filename}"
+
 
 def download(sub_dir, name, force=False, root='~/.insightface'):
     _root = os.path.expanduser(root)
@@ -13,7 +25,7 @@ def download(sub_dir, name, force=False, root='~/.insightface'):
         return dir_path
     print('download_path:', dir_path)
     zip_file_path = os.path.join(_root, sub_dir, name + '.zip')
-    model_url = "%s/%s.zip"%(BASE_REPO_URL, name)
+    model_url = model_zoo_download_url(f"{name}.zip")
     download_file(model_url,
              path=zip_file_path,
              overwrite=True)
@@ -37,16 +49,16 @@ def download_onnx(sub_dir, model_file, force=False, root='~/.insightface', downl
         os.makedirs(model_root)
     print('download_path:', new_model_file)
     if not download_zip:
-        model_url = "%s/%s"%(BASE_REPO_URL, model_file)
+        model_url = model_zoo_download_url(model_file)
         download_file(model_url,
                  path=new_model_file,
                  overwrite=True)
     else:
-        model_url = "%s/%s.zip"%(BASE_REPO_URL, model_file)
+        model_url = model_zoo_download_url(f"{model_file}.zip")
         zip_file_path = new_model_file+".zip"
         download_file(model_url,
                  path=zip_file_path,
                  overwrite=True)
         with zipfile.ZipFile(zip_file_path) as zf:
             zf.extractall(model_root)
-        return new_model_file
+    return new_model_file

@@ -1,0 +1,9 @@
+{
+  "license_version": 1,
+  "license_id": "antelopev2-public-v1",
+  "issuer": "InsightFace",
+  "model_id": "antelopev2",
+  "grant": "non-commercial",
+  "valid_from": "2021-09-22T00:00:00Z",
+  "signature": "d_3EK5bUdYWMXESwLMO1tUmUW_pXO3BmFlBQtq9gLx7ruHQA7SFi21JVfCjvecPiUf21SVeRNqpIP99m4OEZCg"
+}

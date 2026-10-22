@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.1"
+agp = "8.6.1"
 inspirefaceAndroidSdk = "1.2.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -8,6 +8,8 @@ appcompat = "1.6.1"
 material = "1.10.0"
 activity = "1.8.0"
 constraintlayout = "2.1.4"
+camerax = "1.5.3"
+exifinterface = "1.3.2"
 
 [libraries]
 inspireface-android-sdk = { module = "com.github.HyperInspire:inspireface-android-sdk", version.ref = "inspirefaceAndroidSdk" }
@@ -18,8 +20,12 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
-

@@ -28,3 +28,17 @@ cpp/inspireface/version.txt
 .rknpu2_cache/
 test_res/data/video_frames/
 *.mp4
+build_*/
+/benchmark_logs/
+
+# Local keys, models, and generated tools
+/.isf-local/
+
+# Python bytecode caches
+__pycache__/
+*.py[cod]
+
+# Local execution plans, investigation notes, and test reports
+/prompt_docs/
+*.profraw
+*.profdata

@@ -10,6 +10,7 @@ import cv2
 import onnx
 import onnxruntime
 from ..utils import face_align
+from .onnxruntime_utils import get_default_providers
 
 __all__ = [
     'Attribute',
@@ -45,7 +46,10 @@ class Attribute:
         self.input_std = input_std
         #print('input mean and std:', model_file, self.input_mean, self.input_std)
         if self.session is None:
-            self.session = onnxruntime.InferenceSession(self.model_file, None)
+            self.session = onnxruntime.InferenceSession(
+                self.model_file,
+                providers=get_default_providers(),
+            )
         input_cfg = self.session.get_inputs()[0]
         input_shape = input_cfg.shape
         input_name = input_cfg.name
@@ -90,5 +94,4 @@ class Attribute:
             return gender, age
         else:
             return pred
-
 

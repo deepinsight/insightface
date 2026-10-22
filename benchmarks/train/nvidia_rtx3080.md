@@ -1,5 +1,8 @@
 # Training performance report on NVIDIA RTX3080
 
+Historical report: see the [benchmark index](../README.md) for commit dates and
+[arcface_torch](../../recognition/arcface_torch/README.md) for training code and setup.
+
 [GeForce RTX 3080](https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3080-3080ti/) 
 The GeForce RTX™ 3080 Ti and RTX 3080 graphics cards deliver the ultra performance that gamers crave, powered by Ampere—NVIDIA’s 2nd gen RTX architecture. They are built with enhanced RT Cores and Tensor Cores, new streaming multiprocessors, and superfast G6X memory for an amazing gaming experience.
 

@@ -4,6 +4,9 @@
  */
 
 #include "rgb_anti_spoofing_adapt.h"
+#include "herror.h"
+#include <cmath>
+#include <limits>
 
 namespace inspire {
 
@@ -13,24 +16,39 @@ RBGAntiSpoofingAdapt::RBGAntiSpoofingAdapt(int input_size, bool use_softmax) : A
 }
 
 float RBGAntiSpoofingAdapt::operator()(const inspirecv::Image& bgr_affine27) {
+    float score = std::numeric_limits<float>::quiet_NaN();
+    Predict(bgr_affine27, score);
+    return score;
+}
+
+int32_t RBGAntiSpoofingAdapt::Predict(const inspirecv::Image& bgr_affine27, float& score) {
+    score = std::numeric_limits<float>::quiet_NaN();
     AnyTensorOutputs outputs;
-    if (bgr_affine27.Width() != m_input_size_ || bgr_affine27.Height() != m_input_size_) {
-        // auto resized = bgr_affine27.Resize(m_input_size_, m_input_size_);
-        uint8_t* resized_data = nullptr;
-        float scale;
-        m_processor_->Resize(bgr_affine27.Data(), bgr_affine27.Width(), bgr_affine27.Height(), bgr_affine27.Channels(), &resized_data, m_input_size_,
-                             m_input_size_);
-        auto resized = inspirecv::Image::Create(m_input_size_, m_input_size_, bgr_affine27.Channels(), resized_data, false);
-        Forward(resized, outputs);
-    } else {
-        Forward(bgr_affine27, outputs);
+    inspirecv::Image resized;
+    if (ResizeImageForInference(bgr_affine27, m_input_size_, m_input_size_, resized) != InferenceWrapper::WrapperOk) {
+        m_processor_->MarkDone();
+        return HERR_DEVICE_IMAGE_PROCESS_FAILURE;
+    }
+    if (Forward(resized, outputs) != InferenceWrapper::WrapperOk) {
+        m_processor_->MarkDone();
+        return HERR_SESS_PIPELINE_FAILURE;
+    }
+    if (m_processor_->MarkDone() != 0) {
+        return HERR_DEVICE_IMAGE_PROCESS_FAILURE;
+    }
+    if (outputs.empty() || outputs[0].second.size() < 2) {
+        return HERR_SESS_PIPELINE_FAILURE;
     }
     if (m_softmax_) {
         auto sm = Softmax(outputs[0].second);
-        return sm[1];
+        if (sm.size() < 2) {
+            return HERR_SESS_PIPELINE_FAILURE;
+        }
+        score = sm[1];
     } else {
-        return outputs[0].second[1];
+        score = outputs[0].second[1];
     }
+    return std::isfinite(score) ? HSUCCEED : HERR_SESS_PIPELINE_FAILURE;
 }
 
 }  // namespace inspire

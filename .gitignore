@@ -30,6 +30,7 @@ wheels/
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+!python-package/packaging/desktop/pyinstaller.spec
 
 # Installer logs
 pip-log.txt
@@ -100,4 +101,22 @@ ENV/
 # mypy
 .mypy_cache/
 
+# InsightFace Server local state and private biometric/model assets
+.private/
+evaluation_data/
+.pytest_cache/
+.ruff_cache/
+server/.data/
+server/.models/*
+!server/.models/.gitkeep
+server/test-results/
+*.onnx
+
+# Local development artifacts and internal notes
+/tmp/
+/.agent_tmp/
+:memory:.ses
+**/README_INTERNAL*.md
+
 .DS_Store
+._*

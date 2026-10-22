@@ -54,6 +54,11 @@ public:
     void UpdateStream(inspirecv::FrameProcess &image);
 
     /**
+     * @brief Updates the stream and returns preprocessing/inference failures to session callers.
+     */
+    int32_t UpdateStreamWithStatus(inspirecv::FrameProcess &image);
+
+    /**
      * @brief Sets the preview size for tracking.
      * @param preview_size Size of the preview for tracking.
      */
@@ -73,7 +78,7 @@ private:
      * @param score Confidence score for the landmarks prediction.
      * @param size Size for normalizing the face crop.
      */
-    void SparseLandmarkPredict(const inspirecv::Image &raw_face_crop, std::vector<inspirecv::Point2f> &landmarks_output, float &score,
+    bool SparseLandmarkPredict(const inspirecv::Image &raw_face_crop, std::vector<inspirecv::Point2f> &landmarks_output, float &score,
                                float size = 112.0);
 
     /**
@@ -89,7 +94,12 @@ private:
      * @param face FaceObject to be tracked.
      * @return bool Status of face tracking.
      */
-    bool TrackFace(inspirecv::FrameProcess &image, FaceObjectInternal &face);
+    bool TrackFace(inspirecv::FrameProcess &image, FaceObjectInternal &face, int32_t &status);
+
+    /**
+     * @brief Moves detected candidate faces into the active tracking list while preserving their order.
+     */
+    void AppendCandidateFaces();
 
     /**
      * @brief Blacks out the region specified in the image for tracking.
@@ -109,7 +119,7 @@ private:
      * @param input Image in which faces are to be detected.
      * @param scale Scale factor for image processing.
      */
-    void DetectFace(const inspirecv::Image &input, float scale);
+    int32_t DetectFace(const inspirecv::Image &input, float scale);
 
     /**
      * @brief Initializes the landmark model.

@@ -2,12 +2,38 @@
 # InsightFace: 2D and 3D Face Analysis Project
 
 <div align="left">
-  <img src="https://github.com/nttstar/insightface-resources/blob/master/images/insightface_logo.jpg_320x320.webp?raw=true" width="240"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/insightface_logo.jpg_320x320.webp" width="240"/>
 </div>
 
 InsightFace project is mainly maintained by [Jia Guo](mailto:guojia@insightface.ai) and [Jiankang Deng](https://jiankangdeng.github.io/). 
 
-For more information, please visit our website at [https://insightface.ai](https://insightface.ai)
+For more information, please visit our website at [https://www.insightface.ai](https://www.insightface.ai)
+
+## InsightFace 2.0 Update
+
+InsightFace 2.0 adds [PrivateFrame](python-package/insightface/app/privateframe/README.md)
+for local video face blur and mosaic, reference-photo selection, and editable
+analysis JSON through desktop, CLI, and Python workflows, plus optional
+[RGB liveness detection](python-package/README.md#optional-liveness-addon) for
+FaceAnalysis and InsightFace Server. The [Python package](python-package/README.md)
+also supports `raccoon_s` / `raccoon_l` model packages, automatic CoreML/CUDA/CPU
+provider selection, and reusable CoreML compilation caches. PrivateFrame defaults
+to **Fast mode (target 15 analysis FPS)**.
+
+[PersonAnalysis](python-package/docs/person_analysis.md) adds person detection,
+face recognition, and body ReID for matching people against registered references.
+Use its Python API or try local videos, webcams, and RTSP streams in the desktop GUI.
+
+For installation and use, start with the [Python SDK and GUI documentation](python-package/README.md).
+
+## InsightFace Server
+
+The new [InsightFace Server](server/) provides a simple self-hosted Web UI,
+snake_case REST API, and Python client for detection, optional liveness checks,
+comparison, registration, and Person search. A single Linux x86_64 CPU or NVIDIA GPU
+container runs local ONNX Runtime inference and SQLite with operator-supplied,
+manifest-verified models. It is a simple AWS Rekognition alternative with 
+accuracy-preserving INT8 embedding quantization and 50M+ image search on one RTX 5090 GPU.
 
 ## License
 
@@ -23,20 +49,17 @@ Both manual-downloading models from our github repo and auto-downloading models 
 2. For open-sourced face recognition models (e.g., buffalo_l package), please contact [recognition-oss-pack@insightface.ai](mailto:recognition-oss-pack@insightface.ai) for licensing.
 3. For advanced face recognition SDK and models (e.g., InspireFace SDK), please contact [contact@insightface.ai](mailto:contact@insightface.ai) for licensing and additional support.
 
-
-## Top News
-
-**`2025-11-18`** `[Picsi.ai]` Released Live Face Swap macOS & iOS App and updated [Picsi.ai](https://www.picsi.ai) services with our latest series of swap models (incl. [inswapper-512-live](https://github.com/deepinsight/inswapper-512-live)/Cyn/Dax).
-
-**`2024-05-04`** `[Picsi.ai]` Released [InspireFace](cpp-package/inspireface), a cross-platform C/C++ face recognition SDK.
-
-**`2022-08-12`**: We achieved Rank-1st of 
-[Perspective Projection Based Monocular 3D Face Reconstruction Challenge](https://tianchi.aliyun.com/competition/entrance/531961/introduction)
-of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](https://arxiv.org/abs/2208.07142) and [code](reconstruction/jmlr).
-
-**`2021-10-29`**: We achieved 1st place on the [VISA track](https://pages.nist.gov/frvt/plots/11/visa.html) of [NIST-FRVT 1:1](https://pages.nist.gov/frvt/html/frvt11.html) by using Partial FC (Xiang An, Jiankang Deng, Jia Guo).
-
 ## ChangeLogs
+
+**`2026-10-03`** `InsightFace 2.1` **PersonAnalysis update:** Add person detection, face recognition and body ReID with separate `get()`, `match()` and optional `update()` calls. Support `cheetah_s` / `cheetah_l` on CPU or CUDA with automatic model downloads, plus a GUI workflow for local videos, webcams and RTSP with analysis-rate controls and advanced settings. See the [Python package](python-package/README.md) and [full change log](python-package/CHANGELOG.md).
+
+**`2026-09-09`** `InsightFace 2.0` **Liveness update:** Add the optional RGB liveness addon, `normal`/`observe` modes, per-face scores and input-rejection reasons, plus Server Web model installation and activation. See [Python usage](python-package/README.md#optional-liveness-addon) and [Server usage](server/docs/user-guide.md#optional-liveness-addon).
+
+**`2026-09-09`** `InsightFace 2.0` **PrivateFrame update:** Add local video detection and tracking, Gaussian blur/mosaic, selective redaction from reference photos, reusable JSON with rendering without another inference pass, and integrated desktop, CLI, and Python API workflows. See the [feature and usage guide](python-package/insightface/app/privateframe/README.md).
+
+**`2026-07-27`** [InsightFace Server](server/) Added a simple AWS Rekognition alternative with accuracy-preserving INT8 embedding quantization and 50M+ image search on one RTX 5090 GPU.
+
+**`2026-05-23`** `InsightFace 1.0` Added a cross-platform desktop GUI Demo for face recognition, enterprise evaluation, reports, and face swap trials, with a lighter default Python install that removes C++ build requirements.
 
 **`2025-11-18`** `[Picsi.ai]` Released Live Face Swap macOS & iOS App and updated [Picsi.ai](https://www.picsi.ai) services with our latest series of swap models (incl. [inswapper-live](https://github.com/deepinsight/inswapper-512-live)/Cyn/Dax).
 
@@ -68,7 +91,7 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 
 **`2021-10-29`**: We achieved 1st place on the [VISA track](https://pages.nist.gov/frvt/plots/11/visa.html) of [NIST-FRVT 1:1](https://pages.nist.gov/frvt/html/frvt11.html) by using Partial FC (Xiang An, Jiankang Deng, Jia Guo).
 
-**`2021-10-11`**: [Leaderboard](https://insightface.ai/mfr21) of [ICCV21 - Masked Face Recognition Challenge](challenges/iccv21-mfr) released. Video: [Youtube](https://www.youtube.com/watch?v=lL-7l5t6x2w), [Bilibili](https://www.bilibili.com/video/BV15b4y1h79N/).
+**`2021-10-11`**: [Leaderboard](https://www.insightface.ai/mfr21) of [ICCV21 - Masked Face Recognition Challenge](challenges/iccv21-mfr) released. Video: [Youtube](https://www.youtube.com/watch?v=lL-7l5t6x2w), [Bilibili](https://www.bilibili.com/video/BV15b4y1h79N/).
 
 **`2021-06-05`**: We launch a [Masked Face Recognition Challenge & Workshop](challenges/iccv21-mfr) on ICCV 2021.
 
@@ -76,9 +99,9 @@ of [ECCV-2022 WCPA Workshop](https://sites.google.com/view/wcpa2022), [paper](ht
 
 ## Introduction
 
-[InsightFace](https://insightface.ai) is an open source 2D&3D deep face analysis toolbox, mainly based on PyTorch and MXNet. 
+[InsightFace](https://www.insightface.ai) is an open source 2D&3D deep face analysis toolbox, mainly based on PyTorch and MXNet.
 
-Please check our [website](https://insightface.ai) for detail.
+Please check our [website](https://www.insightface.ai) for detail.
 
 The master branch works with **PyTorch 1.6+** and/or **MXNet=1.6-1.8**, with **Python 3.x**.
 
@@ -92,7 +115,7 @@ Please start with our [python-package](python-package/), for testing detection, 
 ### ArcFace Video Demo
 
 
-[<img src=https://insightface.ai/assets/img/github/facerecognitionfromvideo.PNG width="760" />](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
+[<img src=https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/facerecognitionfromvideo.PNG width="760" />](https://www.youtube.com/watch?v=y-D1tReryGA&t=81s)
 
 
 Please click the image to watch the Youtube video. For Bilibili users, click [here](https://www.bilibili.com/video/av38041494?from=search&seid=11501833604850032313).
@@ -101,9 +124,9 @@ Please click the image to watch the Youtube video. For Bilibili users, click [he
 
 ## Projects
 
-The [page](https://insightface.ai/projects) on InsightFace website also describes all supported projects in InsightFace.
+The [page](https://www.insightface.ai/projects) on InsightFace website also describes all supported projects in InsightFace.
 
-You may also interested in some [challenges](https://insightface.ai/challenges) hold by InsightFace.
+You may also interested in some [challenges](https://www.insightface.ai/challenges) hold by InsightFace.
 
 
 
@@ -163,7 +186,7 @@ We provide standard IJB and Megaface evaluation pipelines in [evaluation](recogn
 ### Introduction
 
 <div align="left">
-  <img src="https://insightface.ai/assets/img/github/11513D05.jpg" width="640"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/11513D05.jpg" width="640"/>
 </div>
 
 In this module, we provide training data with annotation, network settings and loss designs for face detection training, evaluation and inference.
@@ -184,7 +207,7 @@ The supported methods are as follows:
 ### Introduction
 
 <div align="left">
-  <img src="https://insightface.ai/assets/img/custom/thumb_sdunet.png" width="600"/>
+  <img src="https://raw.githubusercontent.com/nttstar/insightface-resources/refs/heads/master/images/thumb_sdunet.png" width="600"/>
 </div>
 
 In this module, we provide datasets and training/inference pipelines for face alignment.
@@ -285,3 +308,4 @@ Main contributors:
 - [Xiang An](https://github.com/anxiangsir) ``anxiangsir[at]gmail.com``
 - [Jack Yu](https://github.com/szad670401) ``jackyu961127[at]gmail.com``
 - [Baris Gecer](https://barisgecer.github.io/) ``barisgecer[at]msn.com``
+ ``

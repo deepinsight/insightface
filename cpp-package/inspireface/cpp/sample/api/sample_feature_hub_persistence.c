@@ -1,5 +1,9 @@
 #include <inspireface.h>
+#if defined(_WIN32)
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include <stdio.h>
 
 int main(int argc, char* argv[]) {
@@ -15,10 +19,14 @@ int main(int argc, char* argv[]) {
         HFLogPrint(HF_LOG_ERROR, "Load Resource error: %d", ret);
         return ret;
     }
-    const char* DBFilePath = "feature.db";
+    char DBFilePath[] = "feature.db";
     
     // remove old db file
+#if defined(_WIN32)
+    if (_access(DBFilePath, 0) == 0) {
+#else
     if (access(DBFilePath, F_OK) == 0) {
+#endif
         if (remove(DBFilePath) != 0) {
             HFLogPrint(HF_LOG_ERROR, "Failed to remove old db file: %s", DBFilePath);
             return -1;
@@ -39,7 +47,11 @@ int main(int argc, char* argv[]) {
         HFLogPrint(HF_LOG_ERROR, "Enable FeatureHub failed: %d\n", ret);
         return ret;
     }
+#if defined(_WIN32)
+    if (_access(DBFilePath, 0) != 0) {
+#else
     if (access(DBFilePath, F_OK) != 0) {
+#endif
         HFLogPrint(HF_LOG_ERROR, "DB file not found: %s", DBFilePath);
         return -1;
     }

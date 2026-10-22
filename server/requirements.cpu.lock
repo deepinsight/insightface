@@ -1,0 +1,2 @@
+-r requirements.common.lock
+onnxruntime==1.27.0

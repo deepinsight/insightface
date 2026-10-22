@@ -45,7 +45,6 @@ int main(int argc, char* argv[]) {
     /* Enable ALL available functions in the pipeline */
     option = HF_ENABLE_FACE_RECOGNITION |    // Face recognition
              HF_ENABLE_LIVENESS |            // RGB liveness detection
-             HF_ENABLE_IR_LIVENESS |         // IR liveness detection
              HF_ENABLE_MASK_DETECT |         // Mask detection
              HF_ENABLE_FACE_ATTRIBUTE |      // Face attribute prediction
              HF_ENABLE_QUALITY |             // Face quality assessment
@@ -56,7 +55,7 @@ int main(int argc, char* argv[]) {
     HFLogPrint(HF_LOG_INFO, "Enabled features:");
     HFLogPrint(HF_LOG_INFO, "- Face Recognition: YES");
     HFLogPrint(HF_LOG_INFO, "- RGB Liveness Detection: YES");
-    HFLogPrint(HF_LOG_INFO, "- IR Liveness Detection: YES");
+    HFLogPrint(HF_LOG_INFO, "- IR Liveness Detection: UNSUPPORTED");
     HFLogPrint(HF_LOG_INFO, "- Mask Detection: YES");
     HFLogPrint(HF_LOG_INFO, "- Face Attributes: YES");
     HFLogPrint(HF_LOG_INFO, "- Face Quality: YES");

@@ -1,5 +1,8 @@
 # Training performance report on NVIDIA A100
 
+Historical report: see the [benchmark index](../README.md) for commit dates and
+[arcface_torch](../../recognition/arcface_torch/README.md) for training code and setup.
+
 [NVIDIA A100 Tensor Core GPU](https://www.nvidia.com/en-us/data-center/a100/) 
 
 

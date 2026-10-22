@@ -32,11 +32,10 @@ uint8_t* ReadNV21File(const char* filepath, size_t* fileSize) {
     return data;
 }
 
-TEST_CASE("test_ImageProcessRotateNV21", "[image_process]") {
+TEST_CASE("C API rejects unsafe odd-sized NV21 streams", "[image_process][api][contract][boundary]") {
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
-    HFImageBitmap originBmp;
     size_t fileSize;
     uint8_t* data = ReadNV21File(GET_DATA("data/bulk/r0_w330_h409_c3.nv21").c_str(), &fileSize);
     REQUIRE(data != nullptr);
@@ -48,64 +47,22 @@ TEST_CASE("test_ImageProcessRotateNV21", "[image_process]") {
     imageData.rotation = HF_CAMERA_ROTATION_0;
     imageData.format = HF_STREAM_YUV_NV21;
 
-    HFImageStream stream;
+    HFImageStream stream = reinterpret_cast<HFImageStream>(static_cast<uintptr_t>(1));
     HResult ret = HFCreateImageStream(&imageData, &stream);
-    REQUIRE(ret == HSUCCEED);
-
-    ret = HFCreateImageBitmapFromImageStreamProcess(stream, &originBmp, 1, 1.0f);
-    REQUIRE(ret == HSUCCEED);
-
-    HFImageBitmapData originData;
-    ret = HFImageBitmapGetData(originBmp, &originData);
-    REQUIRE(ret == HSUCCEED);
-
-    // compare with eps(0~1)
-    float eps = 0.01;
-
-    SECTION("rotate 90") {
-        size_t fileSize;
-        uint8_t* r90nv21 = ReadNV21File(GET_DATA("data/bulk/r90_w409_h330_c3.nv21").c_str(), &fileSize);
-        REQUIRE(r90nv21 != nullptr);
-
-        HFImageData imageData;
-        imageData.data = r90nv21;
-        imageData.width = 409;
-        imageData.height = 330;
-        imageData.rotation = HF_CAMERA_ROTATION_90;
-        imageData.format = HF_STREAM_YUV_NV21;
-
-        HFImageStream stream;
-        ret = HFCreateImageStream(&imageData, &stream);
-        REQUIRE(ret == HSUCCEED);
-
-        HFImageBitmap rot90;
-        ret = HFCreateImageBitmapFromImageStreamProcess(stream, &rot90, 1, 1.0f);
-        REQUIRE(ret == HSUCCEED);
-
-        // HFImageBitmapShow(rot90, "w", 0);
-
-        HFImageBitmapData rot90Data;
-        ret = HFImageBitmapGetData(rot90, &rot90Data);
-        REQUIRE(ret == HSUCCEED);
-
-        REQUIRE_EQ_IMAGE_WITH_EPS(originData.data, rot90Data.data, originData.height, originData.width, originData.channels, eps);
-
-        ret = HFReleaseImageBitmap(rot90);
-        REQUIRE(ret == HSUCCEED);
-
-        ret = HFReleaseImageStream(stream);
-        REQUIRE(ret == HSUCCEED);
-
-        delete[] r90nv21;
-    }
-
-    ret = HFReleaseImageStream(stream);
-    REQUIRE(ret == HSUCCEED);
-
-    ret = HFReleaseImageBitmap(originBmp);
-    REQUIRE(ret == HSUCCEED);
-
+    CHECK(ret == HERR_INVALID_IMAGE_STREAM_PARAM);
+    CHECK(stream == nullptr);
     delete[] data;
+
+    uint8_t* rotated = ReadNV21File(GET_DATA("data/bulk/r90_w409_h330_c3.nv21").c_str(), &fileSize);
+    REQUIRE(rotated != nullptr);
+    imageData.data = rotated;
+    imageData.width = 409;
+    imageData.height = 330;
+    imageData.rotation = HF_CAMERA_ROTATION_90;
+    stream = reinterpret_cast<HFImageStream>(static_cast<uintptr_t>(1));
+    CHECK(HFCreateImageStream(&imageData, &stream) == HERR_INVALID_IMAGE_STREAM_PARAM);
+    CHECK(stream == nullptr);
+    delete[] rotated;
 }
 
 TEST_CASE("test_ImageProcessRotate", "[image_process]") {

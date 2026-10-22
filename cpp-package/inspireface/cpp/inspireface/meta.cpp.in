@@ -19,12 +19,12 @@ static const SDKInfo g_sdk_info = {
     __DATE__,                   // build_date
     __TIME__,                   // build_time
     
-#ifdef __GNUC__
+#if defined(__clang__)
+    "Clang " __VERSION__,
+#elif defined(__GNUC__)
     "GCC " __VERSION__,         // compiler
 #elif defined(_MSC_VER)
     "MSVC " + std::to_string(_MSC_VER),
-#elif defined(__clang__)
-    "Clang " __VERSION__,
 #else
     "Unknown Compiler",
 #endif
@@ -33,10 +33,12 @@ static const SDKInfo g_sdk_info = {
     "Windows",                  // platform
 #elif defined(__APPLE__)
     "MacOS",
-#elif defined(__linux__)
-    "Linux",
+#elif defined(__OHOS__)
+    "OpenHarmony",
 #elif defined(__ANDROID__)
     "Android",
+#elif defined(__linux__)
+    "Linux",
 #else
     "Unknown Platform",
 #endif

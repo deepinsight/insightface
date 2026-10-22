@@ -5,6 +5,7 @@ import cv2
 import onnx
 from onnx import numpy_helper
 from ..utils import face_align
+from .onnxruntime_utils import get_default_providers
 
 
 
@@ -20,7 +21,10 @@ class INSwapper():
         self.input_std = 255.0
         #print('input mean and std:', model_file, self.input_mean, self.input_std)
         if self.session is None:
-            self.session = onnxruntime.InferenceSession(self.model_file, None)
+            self.session = onnxruntime.InferenceSession(
+                self.model_file,
+                providers=get_default_providers(),
+            )
         inputs = self.session.get_inputs()
         self.input_names = []
         for inp in inputs:
@@ -102,4 +106,3 @@ class INSwapper():
             fake_merged = img_mask * bgr_fake + (1-img_mask) * target_img.astype(np.float32)
             fake_merged = fake_merged.astype(np.uint8)
             return fake_merged
-

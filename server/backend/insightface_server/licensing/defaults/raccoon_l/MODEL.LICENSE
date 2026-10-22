@@ -1,0 +1,9 @@
+{
+  "license_version": 1,
+  "license_id": "raccoon_l-public-v1",
+  "issuer": "InsightFace",
+  "model_id": "raccoon_l",
+  "grant": "non-commercial",
+  "valid_from": "2026-08-29T00:00:00Z",
+  "signature": "yZoSbuEy0gAtaMl6Uwbrjxy88SNJ9lHMljHfQC68mm92xySq1Vt6jgrSa2Ow5aEYqg2hfiHEd2NDJVh4n3UkBQ"
+}

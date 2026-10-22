@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <memory>
 #include "session.h"
 #include "engine/face_session.h"
@@ -11,53 +12,75 @@ public:
 
     int32_t Configure(DetectModuleMode detect_mode, int32_t max_detect_face, CustomPipelineParameter param, int32_t detect_level_px,
                       int32_t track_by_detect_mode_fps) {
-        return m_face_session_->Configuration(detect_mode, max_detect_face, param, detect_level_px, track_by_detect_mode_fps);
+        status_ = m_face_session_->Configuration(detect_mode, max_detect_face, param, detect_level_px, track_by_detect_mode_fps);
+        return status_;
     }
 
     void ClearTrackingFace() {
-        m_face_session_->ClearTrackingFace();
+        if (status_ == HSUCCEED) {
+            m_face_session_->ClearTrackingFace();
+        }
     }
 
     ~Impl() = default;
 
     void SetTrackPreviewSize(int32_t preview_size) {
-        m_face_session_->SetTrackPreviewSize(preview_size);
+        if (status_ == HSUCCEED) {
+            m_face_session_->SetTrackPreviewSize(preview_size);
+        }
     }
 
     void SetFilterMinimumFacePixelSize(int32_t min_face_pixel_size) {
-        m_face_session_->SetTrackFaceMinimumSize(min_face_pixel_size);
+        if (status_ == HSUCCEED) {
+            m_face_session_->SetTrackFaceMinimumSize(min_face_pixel_size);
+        }
     }
 
     void SetFaceDetectThreshold(float threshold) {
-        m_face_session_->SetFaceDetectThreshold(threshold);
+        if (status_ == HSUCCEED) {
+            m_face_session_->SetFaceDetectThreshold(threshold);
+        }
     }
 
-    void SetTrackModeSmoothRatio(int32_t smooth_ratio) {
-        m_face_session_->SetTrackModeSmoothRatio(smooth_ratio);
+    void SetTrackModeSmoothRatio(float smooth_ratio) {
+        if (status_ == HSUCCEED) {
+            m_face_session_->SetTrackModeSmoothRatio(smooth_ratio);
+        }
     }
 
     void SetTrackModeNumSmoothCacheFrame(int32_t num_smooth_cache_frame) {
-        m_face_session_->SetTrackModeNumSmoothCacheFrame(num_smooth_cache_frame);
+        if (status_ == HSUCCEED) {
+            m_face_session_->SetTrackModeNumSmoothCacheFrame(num_smooth_cache_frame);
+        }
     }
 
     void SetTrackModeDetectInterval(int32_t detect_interval) {
-        m_face_session_->SetTrackModeDetectInterval(detect_interval);
+        if (status_ == HSUCCEED) {
+            m_face_session_->SetTrackModeDetectInterval(detect_interval);
+        }
     }
 
     void SetTrackLostRecoveryMode(bool value) {
-        m_face_session_->SetTrackLostRecoveryMode(value);
+        if (status_ == HSUCCEED) {
+            m_face_session_->SetTrackLostRecoveryMode(value);
+        }
     }
 
     void SetLightTrackConfidenceThreshold(float value) {
-        m_face_session_->SetLightTrackConfidenceThreshold(value);
+        if (status_ == HSUCCEED) {
+            m_face_session_->SetLightTrackConfidenceThreshold(value);
+        }
     }
 
     int32_t FaceDetectAndTrack(inspirecv::FrameProcess& process, std::vector<FaceTrackWrap>& results) {
+        results.clear();
+        if (status_ != HSUCCEED) {
+            return status_;
+        }
         int32_t ret = m_face_session_->FaceDetectAndTrack(process);
-        if (ret < 0) {
+        if (ret != HSUCCEED) {
             return ret;
         }
-        results.clear();
         const auto& face_data = m_face_session_->GetDetectCache();
         for (const auto& data : face_data) {
             FaceTrackWrap hyper_face_data;
@@ -89,8 +112,12 @@ public:
     }
 
     int32_t FaceFeatureExtract(inspirecv::FrameProcess& process, FaceTrackWrap& data, FaceEmbedding& embedding, bool normalize) {
+        embedding = FaceEmbedding{};
+        if (status_ != HSUCCEED) {
+            return status_;
+        }
         int32_t ret = m_face_session_->FaceFeatureExtract(process, data, normalize);
-        if (ret < 0) {
+        if (ret != HSUCCEED) {
             return ret;
         }
         embedding.isNormal = normalize;
@@ -101,8 +128,12 @@ public:
     }
 
     int32_t FaceFeatureExtractWithAlignmentImage(inspirecv::FrameProcess& process, FaceEmbedding& embedding, bool normalize) {
+        embedding = FaceEmbedding{};
+        if (status_ != HSUCCEED) {
+            return status_;
+        }
         int32_t ret = m_face_session_->FaceFeatureExtractWithAlignmentImage(process, embedding.embedding, embedding.norm, normalize);
-        if (ret < 0) {
+        if (ret != HSUCCEED) {
             return ret;
         }
         embedding.isNormal = normalize;
@@ -111,8 +142,12 @@ public:
     }
 
     int32_t FaceFeatureExtractWithAlignmentImage(const inspirecv::Image& wrapped, FaceEmbedding& embedding, bool normalize) {
+        embedding = FaceEmbedding{};
+        if (status_ != HSUCCEED) {
+            return status_;
+        }
         int32_t ret = m_face_session_->FaceFeatureExtractWithAlignmentImage(wrapped, embedding, embedding.norm, normalize);
-        if (ret < 0) {
+        if (ret != HSUCCEED) {
             return ret;
         }
         embedding.isNormal = normalize;
@@ -131,12 +166,15 @@ public:
 
     int32_t MultipleFacePipelineProcess(inspirecv::FrameProcess& process, const CustomPipelineParameter& param,
                                         const std::vector<FaceTrackWrap>& face_data_list) {
+        if (status_ != HSUCCEED) {
+            return status_;
+        }
         int32_t ret = m_face_session_->FacesProcess(process, face_data_list, param);
         return ret;
     }
 
     std::vector<float> GetRGBLivenessConfidence() {
-        return m_face_session_->GetDetConfidenceCache();
+        return m_face_session_->GetRgbLivenessResultsCache();
     }
 
     std::vector<float> GetFaceMaskConfidence() {
@@ -148,37 +186,47 @@ public:
     }
 
     std::vector<FaceInteractionState> GetFaceInteractionState() {
-        auto left_eyes_confidence = m_face_session_->GetFaceInteractionLeftEyeStatusCache();
-        auto right_eyes_confidence = m_face_session_->GetFaceInteractionRightEyeStatusCache();
+        const auto& left_eyes_confidence = m_face_session_->GetFaceInteractionLeftEyeStatusCache();
+        const auto& right_eyes_confidence = m_face_session_->GetFaceInteractionRightEyeStatusCache();
         std::vector<FaceInteractionState> face_interaction_state;
-        for (size_t i = 0; i < left_eyes_confidence.size(); ++i) {
+        const size_t count = std::min(left_eyes_confidence.size(), right_eyes_confidence.size());
+        face_interaction_state.reserve(count);
+        for (size_t i = 0; i < count; ++i) {
             face_interaction_state.emplace_back(FaceInteractionState{left_eyes_confidence[i], right_eyes_confidence[i]});
         }
         return face_interaction_state;
     }
 
     std::vector<FaceInteractionAction> GetFaceInteractionAction() {
-        auto num = m_face_session_->GetFaceNormalAactionsResultCache().size();
+        const auto& normal = m_face_session_->GetFaceNormalAactionsResultCache();
+        const auto& shake = m_face_session_->GetFaceShakeAactionsResultCache();
+        const auto& jaw_open = m_face_session_->GetFaceJawOpenAactionsResultCache();
+        const auto& head_raise = m_face_session_->GetFaceRaiseHeadAactionsResultCache();
+        const auto& blink = m_face_session_->GetFaceBlinkAactionsResultCache();
+        const size_t num = std::min({normal.size(), shake.size(), jaw_open.size(), head_raise.size(), blink.size()});
         std::vector<FaceInteractionAction> face_interaction_action;
         face_interaction_action.resize(num);
         for (size_t i = 0; i < num; ++i) {
-            face_interaction_action[i].normal = m_face_session_->GetFaceNormalAactionsResultCache()[i];
-            face_interaction_action[i].shake = m_face_session_->GetFaceShakeAactionsResultCache()[i];
-            face_interaction_action[i].jawOpen = m_face_session_->GetFaceJawOpenAactionsResultCache()[i];
-            face_interaction_action[i].headRaise = m_face_session_->GetFaceRaiseHeadAactionsResultCache()[i];
-            face_interaction_action[i].blink = m_face_session_->GetFaceBlinkAactionsResultCache()[i];
+            face_interaction_action[i].normal = normal[i];
+            face_interaction_action[i].shake = shake[i];
+            face_interaction_action[i].jawOpen = jaw_open[i];
+            face_interaction_action[i].headRaise = head_raise[i];
+            face_interaction_action[i].blink = blink[i];
         }
         return face_interaction_action;
     }
 
     std::vector<FaceAttributeResult> GetFaceAttributeResult() {
-        auto num = m_face_session_->GetFaceNormalAactionsResultCache().size();
+        const auto& race = m_face_session_->GetFaceRaceResultsCache();
+        const auto& gender = m_face_session_->GetFaceGenderResultsCache();
+        const auto& age = m_face_session_->GetFaceAgeBracketResultsCache();
+        const size_t num = std::min({race.size(), gender.size(), age.size()});
         std::vector<FaceAttributeResult> face_attribute_result;
         face_attribute_result.resize(num);
         for (size_t i = 0; i < num; ++i) {
-            face_attribute_result[i].race = m_face_session_->GetFaceRaceResultsCache()[i];
-            face_attribute_result[i].gender = m_face_session_->GetFaceGenderResultsCache()[i];
-            face_attribute_result[i].ageBracket = m_face_session_->GetFaceAgeBracketResultsCache()[i];
+            face_attribute_result[i].race = race[i];
+            face_attribute_result[i].gender = gender[i];
+            face_attribute_result[i].ageBracket = age[i];
         }
         return face_attribute_result;
     }
@@ -195,6 +243,7 @@ public:
 
 
     std::unique_ptr<FaceSession> m_face_session_;
+    int32_t status_{HERR_SESS_INVALID_RESOURCE};
 };
 
 Session::Session() : pImpl(std::make_unique<Impl>()) {}
@@ -237,6 +286,10 @@ void Session::SetFaceDetectThreshold(float threshold) {
 }
 
 void Session::SetTrackModeSmoothRatio(int32_t smooth_ratio) {
+    pImpl->SetTrackModeSmoothRatio(static_cast<float>(smooth_ratio));
+}
+
+void Session::SetTrackModeSmoothRatio(float smooth_ratio) {
     pImpl->SetTrackModeSmoothRatio(smooth_ratio);
 }
 

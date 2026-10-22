@@ -18,9 +18,9 @@ namespace inspire {
  * This includes pitch, yaw, roll angles, landmarks, and their corresponding quality scores.
  */
 struct FacePoseQualityAdaptResult {
-    float pitch;                          ///< Pitch angle of the face.
-    float yaw;                            ///< Yaw angle of the face.
-    float roll;                           ///< Roll angle of the face.
+    float pitch = 0.0f;                   ///< Pitch angle of the face.
+    float yaw = 0.0f;                     ///< Yaw angle of the face.
+    float roll = 0.0f;                    ///< Roll angle of the face.
     std::vector<inspirecv::Point2f> lmk;  ///< Landmarks of the face.
     std::vector<float> lmk_quality;       ///< Quality scores for each landmark.
 };
@@ -44,6 +44,9 @@ public:
      * @return FacePoseQualityResult The computed face pose quality metrics.
      */
     FacePoseQualityAdaptResult operator()(const inspirecv::Image& img);
+
+    /** @brief Runs pose-quality inference and reports preprocessing failures explicitly. */
+    int32_t Predict(const inspirecv::Image& img, FacePoseQualityAdaptResult& result);
 
     /**
      * @brief Computes the affine transformation matrix for face cropping.

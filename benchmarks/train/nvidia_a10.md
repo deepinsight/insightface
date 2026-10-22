@@ -1,5 +1,8 @@
 # Training performance report on NVIDIA A10
 
+Historical report: see the [benchmark index](../README.md) for commit dates and
+[arcface_torch](../../recognition/arcface_torch/README.md) for training code and setup.
+
 [NVIDIA A10 Tensor Core GPU](https://www.nvidia.com/en-us/data-center/products/a10-gpu/) 
 
 We can use A10 to train deep learning models by its FP16 and TF32 supports.

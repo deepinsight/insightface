@@ -6,4 +6,44 @@
     </style>
 
     <style name="Theme.InspireFaceExample" parent="Base.Theme.InspireFaceExample" />
+
+    <style name="Theme.InspireFaceExample.Home">
+        <item name="android:windowBackground">@color/home_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/home_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <!-- Full-bleed dark theme for the camera liveness screen -->
+    <style name="Theme.InspireFaceExample.Liveness">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <style name="AttributeResultRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="AttributeResultLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/home_text_secondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="AttributeResultValue">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">end</item>
+        <item name="android:textColor">@color/liveness_accent</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

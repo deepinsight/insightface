@@ -18,7 +18,11 @@ Firstly install insightface python library, with version>=0.7:
 pip install -U insightface
 ```
 
-Second, download the `inswapper_128.onnx` swapping model from [googledrive]() and put it under `~/.insightface/models/`.
+The example requests automatic download of `inswapper_128.onnx` on first use
+with `download=True` and reuses the cached model on later runs. The published
+asset is a direct ONNX file, so leave `download_zip` at its default `False`.
+You can also download [inswapper_128.onnx](https://github.com/deepinsight/insightface/releases/download/model-zoo/inswapper_128.onnx)
+manually and put it under `~/.insightface/models/`.
 
 Then use the recognition model from our `buffalo_l` pack and initialize the INSwapper class. 
 

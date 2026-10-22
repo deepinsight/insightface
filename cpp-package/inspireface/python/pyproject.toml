@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+target-version = "py37"
+line-length = 120
+extend-exclude = ["inspireface/modules/core/native.py", "test"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501", "UP006", "UP007", "UP035"]
+
+[tool.mypy]
+python_version = "3.7"
+warn_unused_configs = true
+check_untyped_defs = true
+exclude = ["inspireface/modules/core/native.py", "test/"]
+
+[[tool.mypy.overrides]]
+module = ["modelscope.*"]
+ignore_missing_imports = true

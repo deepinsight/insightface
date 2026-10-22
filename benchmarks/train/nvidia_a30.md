@@ -1,5 +1,8 @@
 # Training performance report on NVIDIA A30
 
+Historical report: see the [benchmark index](../README.md) for commit dates and
+[arcface_torch](../../recognition/arcface_torch/README.md) for training code and setup.
+
 [NVIDIA A30 Tensor Core GPU](https://www.nvidia.com/en-us/data-center/products/a30-gpu/) is the most versatile mainstream
 compute GPU for AI inference and mainstream enterprise
 workloads. 

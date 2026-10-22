@@ -14,7 +14,7 @@ and then load our person detection model by:
 
 ```
 detector = insightface.model_zoo.get_model('scrfd_person_2.5g.onnx', download=True)
-detector.prepare(0, nms_thresh=0.5, input_size=(640, 640))
+detector.prepare(0, nms_thresh=0.5)
 ```
 
 the model will be auto-downloaded from our storage server.

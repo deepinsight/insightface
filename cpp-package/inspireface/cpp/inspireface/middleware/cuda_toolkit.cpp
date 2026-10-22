@@ -9,6 +9,9 @@
 namespace inspire {
 
 int32_t INSPIRE_API_EXPORT GetCudaDeviceCount(int32_t *device_count) {
+    if (device_count == nullptr) {
+        return HERR_INVALID_PARAM;
+    }
 #ifdef ISF_ENABLE_TENSORRT
     cudaError_t error = cudaGetDeviceCount(device_count);
     if (error != cudaSuccess) {
@@ -23,6 +26,9 @@ int32_t INSPIRE_API_EXPORT GetCudaDeviceCount(int32_t *device_count) {
 }
 
 int32_t INSPIRE_API_EXPORT CheckCudaUsability(int32_t *is_support) {
+    if (is_support == nullptr) {
+        return HERR_INVALID_PARAM;
+    }
 #ifdef ISF_ENABLE_TENSORRT
     int device_count;
     auto ret = GetCudaDeviceCount(&device_count);

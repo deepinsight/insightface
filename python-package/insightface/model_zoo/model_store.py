@@ -36,7 +36,7 @@ def short_hash(name):
 def find_params_file(dir_path):
     if not os.path.exists(dir_path):
         return None
-    paths = glob.glob("%s/*.params" % dir_path)
+    paths = glob.glob(os.path.join(dir_path, "*.params"))
     if len(paths) == 0:
         return None
     paths = sorted(paths)
@@ -100,4 +100,3 @@ def get_model_file(name, root=os.path.join('~', '.insightface', 'models')):
     else:
         raise ValueError(
             'Downloaded file has different hash. Please try again.')
-

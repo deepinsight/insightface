@@ -10,6 +10,7 @@
 #include "track_module/landmark/landmark_param.h"
 #include "recognition_module/dest_const.h"
 #include "herror.h"
+#include <cmath>
 
 namespace inspire {
 
@@ -20,29 +21,37 @@ FacePipelineModule::FacePipelineModule(InspireArchive &archive, bool enableLiven
   m_enable_attribute_(enableAttribute),
   m_enable_interaction_liveness_(enableInteractionLiveness),
   m_enable_face_emotion_(enableFaceEmotion) {
+    m_landmark_param_ = archive.GetLandmarkParam();
     if (m_enable_attribute_) {
         InspireModel attrModel;
         auto ret = archive.LoadModel("face_attribute", attrModel);
-        if (ret != 0) {
+        if (ret != SARC_SUCCESS) {
             INSPIRE_LOGE("Load Face attribute model: %d", ret);
+            m_status_code_ = HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+            return;
         }
 
         ret = InitFaceAttributePredict(attrModel);
-        if (ret != 0) {
-            INSPIRE_LOGE("InitAgePredict error.");
+        if (ret != HSUCCEED) {
+            INSPIRE_LOGE("InitAgePredict error: %d", ret);
+            m_status_code_ = ret;
+            return;
         }
     }
-    m_landmark_param_ = archive.GetLandmarkParam();
     // Initialize the mask detection model
     if (m_enable_mask_detect_) {
         InspireModel maskModel;
         auto ret = archive.LoadModel("mask_detect", maskModel);
-        if (ret != 0) {
+        if (ret != SARC_SUCCESS) {
             INSPIRE_LOGE("Load Mask model: %d", ret);
+            m_status_code_ = HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+            return;
         }
         ret = InitMaskPredict(maskModel);
-        if (ret != 0) {
-            INSPIRE_LOGE("InitMaskPredict error.");
+        if (ret != HSUCCEED) {
+            INSPIRE_LOGE("InitMaskPredict error: %d", ret);
+            m_status_code_ = ret;
+            return;
         }
     }
 
@@ -50,12 +59,16 @@ FacePipelineModule::FacePipelineModule(InspireArchive &archive, bool enableLiven
     if (m_enable_liveness_) {
         InspireModel livenessModel;
         auto ret = archive.LoadModel("rgb_anti_spoofing", livenessModel);
-        if (ret != 0) {
-            INSPIRE_LOGE("Load anti-spoofing model.");
+        if (ret != SARC_SUCCESS) {
+            INSPIRE_LOGE("Load anti-spoofing model: %d", ret);
+            m_status_code_ = HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+            return;
         }
         ret = InitRBGAntiSpoofing(livenessModel);
-        if (ret != 0) {
-            INSPIRE_LOGE("InitRBGAntiSpoofing error.");
+        if (ret != HSUCCEED) {
+            INSPIRE_LOGE("InitRBGAntiSpoofing error: %d", ret);
+            m_status_code_ = ret;
+            return;
         }
     }
 
@@ -64,12 +77,16 @@ FacePipelineModule::FacePipelineModule(InspireArchive &archive, bool enableLiven
         // Blink model
         InspireModel blinkModel;
         auto ret = archive.LoadModel("blink_predict", blinkModel);
-        if (ret != 0) {
-            INSPIRE_LOGE("Load Blink model error.");
+        if (ret != SARC_SUCCESS) {
+            INSPIRE_LOGE("Load Blink model error: %d", ret);
+            m_status_code_ = HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+            return;
         }
         ret = InitBlinkFromLivenessInteraction(blinkModel);
-        if (ret != 0) {
-            INSPIRE_LOGE("InitBlinkFromLivenessInteraction error.");
+        if (ret != HSUCCEED) {
+            INSPIRE_LOGE("InitBlinkFromLivenessInteraction error: %d", ret);
+            m_status_code_ = ret;
+            return;
         }
     }
 
@@ -77,19 +94,26 @@ FacePipelineModule::FacePipelineModule(InspireArchive &archive, bool enableLiven
     if (m_enable_face_emotion_) {
         InspireModel faceEmotionModel;
         auto ret = archive.LoadModel("face_emotion", faceEmotionModel);
-        if (ret != 0) {
-            INSPIRE_LOGE("Load Face emotion model error.");
+        if (ret != SARC_SUCCESS) {
+            INSPIRE_LOGE("Load Face emotion model error: %d", ret);
+            m_status_code_ = HERR_ARCHIVE_LOAD_MODEL_FAILURE;
+            return;
         }
         ret = InitFaceEmotion(faceEmotionModel);
-        if (ret != 0) {
-            INSPIRE_LOGE("InitFaceEmotion error.");
+        if (ret != HSUCCEED) {
+            INSPIRE_LOGE("InitFaceEmotion error: %d", ret);
+            m_status_code_ = ret;
+            return;
         }
     }
 }
 
-int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const FaceTrackWrap &face, FaceProcessFunctionOption proc) {
-    // Original image
-    inspirecv::Image originImage;
+int32_t FacePipelineModule::QueryStatus() const {
+    return m_status_code_;
+}
+
+int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const FaceTrackWrap &face, FaceProcessFunctionOption proc,
+                                    const inspirecv::Image *aligned_crop, const inspirecv::Image *origin_image) {
     std::vector<inspirecv::Point2f> stand_lmk;
     switch (proc) {
         case PROCESS_MASK: {
@@ -97,15 +121,22 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
                 INSPIRE_LOGE("Mask detection disabled");
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
-            std::vector<inspirecv::Point2f> pointsFive;
-            for (const auto &p : face.keyPoints) {
-                pointsFive.push_back(inspirecv::Point2f(p.x, p.y));
+            inspirecv::Image local_crop;
+            if (aligned_crop == nullptr) {
+                std::vector<inspirecv::Point2f> pointsFive;
+                pointsFive.reserve(5);
+                for (const auto &p : face.keyPoints) {
+                    pointsFive.emplace_back(p.x, p.y);
+                }
+                auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, pointsFive);
+                local_crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
+                aligned_crop = &local_crop;
             }
-
-            auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, pointsFive);
-            auto crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
-            auto mask_score = (*m_mask_predict_)(crop);
-            // crop.Show();
+            float mask_score = 0.0f;
+            const int32_t mask_status = m_mask_predict_->Predict(*aligned_crop, mask_score);
+            if (mask_status != HSUCCEED) {
+                return mask_status;
+            }
             faceMaskCache = mask_score;
             break;
         }
@@ -133,20 +164,26 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
             // auto image_affine = processor.ExecuteImageAffineProcessing(affine, 112, 112);
             // image_affine.Write("liveness_affine.jpg");
 
-            if (originImage.Empty()) {
+            inspirecv::Image local_origin_image;
+            if (origin_image == nullptr) {
                 // This is a poor approach that impacts performance, 
                 // but in order to capture clearer images and improve liveness detection accuracy, 
                 // we have to keep it.
-                originImage = processor.ExecuteImageScaleProcessing(1.0, true);
+                local_origin_image = processor.ExecuteImageScaleProcessing(1.0, true);
+                origin_image = &local_origin_image;
             }
             inspirecv::Rect2i oriRect(face.rect.x, face.rect.y, face.rect.width, face.rect.height);
-            auto rect = GetNewBox(originImage.Width(), originImage.Height(), oriRect, 2.7f);
+            auto rect = GetNewBox(origin_image->Width(), origin_image->Height(), oriRect, 2.7f);
             if (Launch::GetInstance()->GetImageProcessingBackend() == Launch::IMAGE_PROCESSING_RGA) {
                 // RKRGA must be aligned to 16
                 rect = AlignmentBoxToStrideSquareBox(rect, 16);
             }
-            auto crop = originImage.Crop(rect);
-            auto score = (*m_rgb_anti_spoofing_)(crop);
+            auto crop = origin_image->Crop(rect);
+            float score = 0.0f;
+            const int32_t liveness_status = m_rgb_anti_spoofing_->Predict(crop, score);
+            if (liveness_status != HSUCCEED) {
+                return liveness_status;
+            }
             // crop.Show();
             // crop.Resize(112, 112).Write("liveness.jpg");
             faceLivenessCache = score;
@@ -188,6 +225,9 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
                 // eye_affine.Write("eye_"+std::to_string(i)+".jpg");
                 // auto crop = originImage.Crop(new_rect);
                 auto score = (*m_blink_predict_)(eye_affine);
+                if (!std::isfinite(score)) {
+                    return HERR_SESS_PIPELINE_FAILURE;
+                }
                 eyesStatusCache[i] = score;
             }
             break;
@@ -197,13 +237,21 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
                 INSPIRE_LOGE("Face attribute detection disabled");
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
-            std::vector<inspirecv::Point2f> pointsFive;
-            for (const auto &p : face.keyPoints) {
-                pointsFive.push_back(inspirecv::Point2f(p.x, p.y));
+            inspirecv::Image local_crop;
+            if (aligned_crop == nullptr) {
+                std::vector<inspirecv::Point2f> pointsFive;
+                pointsFive.reserve(5);
+                for (const auto &p : face.keyPoints) {
+                    pointsFive.emplace_back(p.x, p.y);
+                }
+                auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, pointsFive);
+                local_crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
+                aligned_crop = &local_crop;
             }
-            auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, pointsFive);
-            auto crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
-            auto outputs = (*m_attribute_predict_)(crop);
+            auto outputs = (*m_attribute_predict_)(*aligned_crop);
+            if (outputs.size() < 3) {
+                return HERR_SESS_PIPELINE_FAILURE;
+            }
             faceAttributeCache = inspirecv::Vec3i{outputs[0], outputs[1], outputs[2]};
             break;
         }
@@ -212,14 +260,21 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, const Fa
                 INSPIRE_LOGE("Face emotion detection disabled");
                 return HERR_SESS_PIPELINE_FAILURE;  // uninitialized
             }
-            std::vector<inspirecv::Point2f> pointsFive;
-            for (const auto &p : face.keyPoints) {
-                pointsFive.push_back(inspirecv::Point2f(p.x, p.y));
+            inspirecv::Image local_crop;
+            if (aligned_crop == nullptr) {
+                std::vector<inspirecv::Point2f> pointsFive;
+                pointsFive.reserve(5);
+                for (const auto &p : face.keyPoints) {
+                    pointsFive.emplace_back(p.x, p.y);
+                }
+                auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, pointsFive);
+                local_crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
+                aligned_crop = &local_crop;
             }
-            auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, pointsFive);
-            auto crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
-            // crop.Show();
-            faceEmotionCache = (*m_face_emotion_)(crop);
+            faceEmotionCache = (*m_face_emotion_)(*aligned_crop);
+            if (faceEmotionCache.empty()) {
+                return HERR_SESS_PIPELINE_FAILURE;
+            }
             break;
         }
     }
@@ -235,7 +290,11 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, FaceObje
     auto trans = inspirecv::SimilarityTransformEstimateUmeyama(SIMILARITY_TRANSFORM_DEST, lmk_5);
     auto crop = processor.ExecuteImageAffineProcessing(trans, FACE_CROP_SIZE, FACE_CROP_SIZE);
     if (m_mask_predict_ != nullptr) {
-        auto mask_score = (*m_mask_predict_)(crop);
+        float mask_score = 0.0f;
+        const int32_t mask_status = m_mask_predict_->Predict(crop, mask_score);
+        if (mask_status != HSUCCEED) {
+            return mask_status;
+        }
         if (mask_score > 0.95) {
             face.faceProcess.maskInfo = MaskInfo::MASKED;
         } else {
@@ -248,7 +307,11 @@ int32_t FacePipelineModule::Process(inspirecv::FrameProcess &processor, FaceObje
         inspirecv::Rect2i oriRect(face.detect_bbox_.GetX(), face.detect_bbox_.GetY(), face.detect_bbox_.GetWidth(), face.detect_bbox_.GetHeight());
         auto rect = oriRect.Square(2.7f);
         auto crop = img.Crop(rect);
-        auto score = (*m_rgb_anti_spoofing_)(crop);
+        float score = 0.0f;
+        const int32_t liveness_status = m_rgb_anti_spoofing_->Predict(crop, score);
+        if (liveness_status != HSUCCEED) {
+            return liveness_status;
+        }
         if (score > 0.88) {
             face.faceProcess.rgbLivenessInfo = RGBLivenessInfo::LIVENESS_REAL;
         } else {
@@ -279,6 +342,9 @@ int32_t FacePipelineModule::InitMaskPredict(InspireModel &model) {
 
 int32_t FacePipelineModule::InitRBGAntiSpoofing(InspireModel &model) {
     auto input_size = model.Config().get<std::vector<int>>("input_size");
+    if (input_size.size() < 2 || input_size[0] <= 0 || input_size[1] <= 0) {
+        return HERR_ARCHIVE_LOAD_FAILURE;
+    }
 #ifdef INFERENCE_WRAPPER_ENABLE_RKNN2
     m_rgb_anti_spoofing_ = std::make_shared<RBGAntiSpoofingAdapt>(input_size[0], true);
 #else

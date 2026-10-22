@@ -17,6 +17,7 @@ namespace inspire {
 
 // Forward declarations
 class InspireArchive;
+class FaceSession;
 
 // The Launch class acts as the main entry point for the InspireFace system.
 // It is responsible for loading static resources such as models, configurations, and parameters.
@@ -30,6 +31,13 @@ public:
         NN_INFERENCE_COREML_GPU,
         NN_INFERENCE_COREML_ANE,
         NN_INFERENCE_TENSORRT_CUDA,
+    };
+
+    // CPU power/scheduling policy. Precision and model thread counts are unchanged.
+    enum CPUEnginePowerMode : int32_t {
+        CPU_ENGINE_POWER_NORMAL = 0,
+        CPU_ENGINE_POWER_HIGH,
+        CPU_ENGINE_POWER_LOW,
     };
 
     // Landmark engine enum
@@ -87,6 +95,15 @@ public:
     // Get the global coreml inference mode
     NNInferenceBackend GetGlobalCoreMLInferenceMode() const;
 
+    // Defaults to Normal. Configure before creating sessions; do not change the
+    // mode concurrently with session/model initialization. Only subsequently
+    // initialized CPU engine runtimes read the setting; existing runtimes are not
+    // reconfigured. Load/Reload/Unload preserve this process-wide setting.
+    // Returns HERR_INVALID_PARAM for an unknown mode without changing the setting.
+    int32_t SetGlobalCPUEnginePowerMode(CPUEnginePowerMode mode);
+
+    CPUEnginePowerMode GetGlobalCPUEnginePowerMode() const;
+
     // Build the extension path
     void BuildAppleExtensionPath(const std::string& resource_path);
 
@@ -109,7 +126,7 @@ public:
     std::vector<std::string> GetFaceDetectModelList() const;
 
     // Switch the landmark engine(It must be used before creating a session)
-    void SwitchLandmarkEngine(LandmarkEngine engine);
+    int32_t SwitchLandmarkEngine(LandmarkEngine engine);
 
     // Switch the image processing backend(It must be used before creating a session)
     void SwitchImageProcessingBackend(ImageProcessingBackend backend);
@@ -124,6 +141,13 @@ public:
     int32_t GetImageProcessAlignedWidth() const;
 
 private:
+    friend class FaceSession;
+
+    // Returns a lifetime-pinned snapshot for internal session construction.
+    // Reload and Unload only replace the global snapshot; existing sessions keep
+    // the archive they were configured with alive.
+    std::shared_ptr<InspireArchive> AcquireArchive() const;
+
     // Private constructor for the singleton pattern
     Launch();
 

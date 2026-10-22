@@ -24,9 +24,12 @@
 
 ## Challenge
 
-We host the WILD track of Face Anti-spoofing Workshop and Challenge@CVPR2023 here. The challenge will officially start together with [4th Face Anti-spoofing Workshop](https://sites.google.com/view/face-anti-spoofing-challenge/welcome/challengecvpr2023). 
+This page documents the WILD track of the Face Anti-spoofing Workshop and
+Challenge@CVPR2023, held with the [4th Face Anti-spoofing Workshop](https://sites.google.com/view/face-anti-spoofing-challenge/welcome/challengecvpr2023).
 
-[Registration](https://codalab.lisn.upsaclay.fr/competitions/10670) is now open on codalab.
+The [original 2023 competition page](https://codalab.lisn.upsaclay.fr/competitions/10670)
+is retained for reference. See the dated 2023-05-03 update above for the
+ongoing-version announcement and its separate link.
 
 Our competition encompasses over 800K spoof photos and over 500K live photos. In the spoof photos, there are three major categories and 17 subcategories.
 

@@ -33,7 +33,7 @@ RUN apt-get update && \
 #     fi
 
 # Set the URL and installation path for the Linaro toolchain
-ARG LINARO_URL="https://releases.linaro.org/components/toolchain/binaries/6.3-2017.05/aarch64-linux-gnu/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu.tar.xz"
+ARG LINARO_URL="https://developer.arm.com/-/cdn-downloads/permalink/legacy-linaro-gnu-toolchains/6.3-2017.05/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu.tar.xz"
 ARG TOOLCHAIN_PATH="/opt/linaro-toolchain"
 
 # Create the installation path, download, and extract the Linaro toolchain

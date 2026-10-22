@@ -10,6 +10,7 @@ import cv2
 import onnx
 import onnxruntime
 from ..utils import face_align
+from .onnxruntime_utils import get_default_providers
 
 __all__ = [
     'ArcFaceONNX',
@@ -43,7 +44,10 @@ class ArcFaceONNX:
         self.input_std = input_std
         #print('input mean and std:', self.input_mean, self.input_std)
         if self.session is None:
-            self.session = onnxruntime.InferenceSession(self.model_file, None)
+            self.session = onnxruntime.InferenceSession(
+                self.model_file,
+                providers=get_default_providers(),
+            )
         input_cfg = self.session.get_inputs()[0]
         input_shape = input_cfg.shape
         input_name = input_cfg.name
@@ -74,6 +78,12 @@ class ArcFaceONNX:
         sim = np.dot(feat1, feat2) / (norm(feat1) * norm(feat2))
         return sim
 
+    def _coerce_input_blob(self, blob):
+        return np.ascontiguousarray(
+            blob,
+            dtype=getattr(self, 'input_dtype', np.float32),
+        )
+
     def get_feat(self, imgs):
         if not isinstance(imgs, list):
             imgs = [imgs]
@@ -81,12 +91,12 @@ class ArcFaceONNX:
         
         blob = cv2.dnn.blobFromImages(imgs, 1.0 / self.input_std, input_size,
                                       (self.input_mean, self.input_mean, self.input_mean), swapRB=True)
+        blob = self._coerce_input_blob(blob)
         net_out = self.session.run(self.output_names, {self.input_name: blob})[0]
         return net_out
 
     def forward(self, batch_data):
         blob = (batch_data - self.input_mean) / self.input_std
+        blob = self._coerce_input_blob(blob)
         net_out = self.session.run(self.output_names, {self.input_name: blob})[0]
         return net_out
-
-

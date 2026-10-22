@@ -25,6 +25,7 @@
 #define HERR_INVALID_DETECTION_INPUT (HERR_BASIC_BASE + 10)      // Failed to modify detector input size (11)
 #define HERR_INVALID_IMAGE_BITMAP_HANDLE (HERR_BASIC_BASE + 11)  // Invalid image bitmap handle (12)
 #define HERR_IMAGE_STREAM_DECODE_FAILED (HERR_BASIC_BASE + 12)  // ImageStream failed to decode the image (13)
+#define HERR_UNSUPPORTED (HERR_BASIC_BASE + 13)                 // Requested feature or operation is unsupported (14)
 
 // Session error types (100-199)
 #define HERR_SESS_BASE 0x0064                                   // Session error types (100)
@@ -45,6 +46,8 @@
 #define HERR_FT_HUB_DISABLE (HERR_FT_HUB_BASE + 1)            // FeatureHub is disabled (201)
 #define HERR_FT_HUB_INSERT_FAILURE (HERR_FT_HUB_BASE + 2)     // Data insertion error (202)
 #define HERR_FT_HUB_NOT_FOUND_FEATURE (HERR_FT_HUB_BASE + 3)  // Get face feature error (203)
+#define HERR_FT_HUB_INVALID_FEATURE (HERR_FT_HUB_BASE + 4)    // Invalid feature data (204)
+#define HERR_FT_HUB_DATABASE_FAILURE (HERR_FT_HUB_BASE + 5)   // Database operation error (205)
 
 // Archive error types (250-299)
 #define HERR_ARCHIVE_BASE 0x00FA                                 // Archive error types (250)
@@ -60,6 +63,7 @@
 #define HERR_DEVICE_CUDA_TENSORRT_NOT_SUPPORT (HERR_DEVICE_BASE + 2)  // CUDA TensorRT not supported (302)
 #define HERR_DEVICE_CUDA_UNKNOWN_ERROR (HERR_DEVICE_BASE + 3)         // CUDA unknown error (303)
 #define HERR_DEVICE_CUDA_DISABLE (HERR_DEVICE_BASE + 4)               // CUDA support is disabled (304)
+#define HERR_DEVICE_IMAGE_PROCESS_FAILURE (HERR_DEVICE_BASE + 5)      // Image preprocessing failed (305)
 
 // Extension module error types (350-549)
 #define HERR_EXTENSION_BASE 0x015E                                             // Extension module error types (350)
@@ -69,6 +73,13 @@
 #define HERR_EXTENSION_HETERO_REC_HEAD_CONFIG_ERROR (HERR_EXTENSION_BASE + 4)  // Rec head config error (354)
 #define HERR_EXTENSION_HETERO_MODEL_NOT_MATCH (HERR_EXTENSION_BASE + 5)        // Heterogeneous model dimensions do not match (355)
 #define HERR_EXTENSION_HETERO_MODEL_NOT_LOADED (HERR_EXTENSION_BASE + 6)       // Heterogeneous model dimensions not loaded (356)
+
+// Face capture error types (400-449)
+#define HERR_CAPTURE_BASE 0x0190                                      // Face capture errors (400)
+#define HERR_CAPTURE_INVALID_CONFIG (HERR_CAPTURE_BASE + 1)           // Invalid capture configuration (401)
+#define HERR_CAPTURE_REQUIRED_FEATURE_OFF (HERR_CAPTURE_BASE + 2)     // Required session feature is disabled (402)
+#define HERR_CAPTURE_FRAME_OUT_OF_ORDER (HERR_CAPTURE_BASE + 3)       // Frame ID or timestamp is not increasing (403)
+#define HERR_CAPTURE_INVALID_HANDLE (HERR_CAPTURE_BASE + 4)           // Invalid capture session handle (404)
 
 // [Anchor-End]
 

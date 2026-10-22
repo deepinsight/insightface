@@ -2,19 +2,36 @@
  * Created by Jingyu Yan
  * @date 2024-10-01
  */
+#include <algorithm>
+#include <chrono>
 #include <iostream>
 #include "settings/test_settings.h"
 #include "inspireface/c_api/inspireface.h"
 #include "unit/test_helper/test_help.h"
 #include <thread>
 
+namespace {
+
+class ScopedFeatureHubDisable {
+public:
+    ScopedFeatureHubDisable() {
+        HFFeatureHubDataDisable();
+    }
+    ~ScopedFeatureHubDisable() {
+        HFFeatureHubDataDisable();
+    }
+};
+
+}  // namespace
+
 TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
+    ScopedFeatureHubDisable reset;
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
     SECTION("FeatureHub basic function") {
         HResult ret;
-        HFFeatureHubConfiguration configuration;
+        HFFeatureHubConfiguration configuration = {};
         auto dbPath = GET_SAVE_DATA(".test");
         HString dbPathStr = new char[dbPath.size() + 1];
         std::strcpy(dbPathStr, dbPath.c_str());
@@ -38,7 +55,7 @@ TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
 
     SECTION("FeatureHub search top-k") {
         HResult ret;
-        HFFeatureHubConfiguration configuration;
+        HFFeatureHubConfiguration configuration = {};
         auto dbPath = GET_SAVE_DATA(".test");
         HString dbPathStr = new char[dbPath.size() + 1];
         std::strcpy(dbPathStr, dbPath.c_str());
@@ -121,7 +138,7 @@ TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
         HResult ret;
         auto dbPath = GET_SAVE_DATA(".test");
         HString dbPathStr = new char[dbPath.size() + 1];
-        HFFeatureHubConfiguration configuration;
+        HFFeatureHubConfiguration configuration = {};
         configuration.primaryKeyMode = HF_PK_AUTO_INCREMENT;
         configuration.enablePersistence = 0;
         configuration.persistenceDbPath = dbPathStr;
@@ -145,7 +162,7 @@ TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
 
     SECTION("Only memory storage is used") {
         HResult ret;
-        HFFeatureHubConfiguration configuration;
+        HFFeatureHubConfiguration configuration = {};
         configuration.enablePersistence = 0;
         ret = HFFeatureHubDataEnable(configuration);
         REQUIRE(ret == HSUCCEED);
@@ -157,12 +174,13 @@ TEST_CASE("test_FeatureHubBase", "[FeatureHub][BasicFunction]") {
     }
 }
 
-TEST_CASE("test_ConcurrencyInsertion", "[FeatureHub][Concurrency]") {
+TEST_CASE("test_ConcurrencyInsertion", "[FeatureHub][Concurrency][stress]") {
+    ScopedFeatureHubDisable reset;
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
     HResult ret;
-    HFFeatureHubConfiguration configuration;
+    HFFeatureHubConfiguration configuration = {};
     auto dbPath = GET_SAVE_DATA(".test");
     HString dbPathStr = new char[dbPath.size() + 1];
     std::strcpy(dbPathStr, dbPath.c_str());
@@ -189,9 +207,11 @@ TEST_CASE("test_ConcurrencyInsertion", "[FeatureHub][Concurrency]") {
     const int insertsPerThread = 50;
     std::vector<std::thread> threads;
     auto beginGenId = 2000;
+    std::vector<HResult> insertResults(numThreads * insertsPerThread, HERR_INVALID_PARAM);
+    std::vector<HFaceId> allocatedIds(numThreads * insertsPerThread, -1);
 
     for (int i = 0; i < numThreads; ++i) {
-        threads.emplace_back([=]() {
+        threads.emplace_back([&, i]() {
             for (int j = 0; j < insertsPerThread; ++j) {
                 auto feat = GenerateRandomFeature(featureLength);
                 auto name = std::to_string(beginGenId + j + i * insertsPerThread);
@@ -204,9 +224,8 @@ TEST_CASE("test_ConcurrencyInsertion", "[FeatureHub][Concurrency]") {
                 featureIdentity.feature = &feature;
                 // featureIdentity.customId = beginGenId + j + i * insertsPerThread;
                 // featureIdentity.tag = nameBuffer.data();
-                HFaceId allocId;
-                auto ret = HFFeatureHubInsertFeature(featureIdentity, &allocId);
-                REQUIRE(ret == HSUCCEED);
+                const int resultIndex = i * insertsPerThread + j;
+                insertResults[resultIndex] = HFFeatureHubInsertFeature(featureIdentity, &allocatedIds[resultIndex]);
             }
         });
     }
@@ -214,6 +233,16 @@ TEST_CASE("test_ConcurrencyInsertion", "[FeatureHub][Concurrency]") {
     for (auto &th : threads) {
         th.join();
     }
+
+    REQUIRE(std::all_of(insertResults.begin(), insertResults.end(), [](HResult status) {
+        return status == HSUCCEED;
+    }));
+    REQUIRE(std::all_of(allocatedIds.begin(), allocatedIds.end(), [](HFaceId id) {
+        return id >= 0;
+    }));
+    auto sortedAllocatedIds = allocatedIds;
+    std::sort(sortedAllocatedIds.begin(), sortedAllocatedIds.end());
+    REQUIRE(std::adjacent_find(sortedAllocatedIds.begin(), sortedAllocatedIds.end()) == sortedAllocatedIds.end());
 
     HInt32 count;
     ret = HFFeatureHubGetFaceCount(&count);
@@ -226,12 +255,13 @@ TEST_CASE("test_ConcurrencyInsertion", "[FeatureHub][Concurrency]") {
     delete[] dbPathStr;
 }
 
-TEST_CASE("test_ConcurrencyRemove", "[FeatureHub][Concurrency]") {
+TEST_CASE("test_ConcurrencyRemove", "[FeatureHub][Concurrency][stress]") {
+    ScopedFeatureHubDisable reset;
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
     HResult ret;
-    HFFeatureHubConfiguration configuration;
+    HFFeatureHubConfiguration configuration = {};
     auto dbPath = GET_SAVE_DATA(".test");
     HString dbPathStr = new char[dbPath.size() + 1];
     std::strcpy(dbPathStr, dbPath.c_str());
@@ -247,45 +277,48 @@ TEST_CASE("test_ConcurrencyRemove", "[FeatureHub][Concurrency]") {
     ret = HFFeatureHubDataEnable(configuration);
     REQUIRE(ret == HSUCCEED);
 
-    std::vector<std::vector<HFloat>> baseFeatures;
-    size_t genSizeOfBase = 1000;
+    constexpr size_t genSizeOfBase = 1000;
     HInt32 featureLength;
     HFGetFeatureLength(&featureLength);
 
     REQUIRE(featureLength > 0);
-    for (int i = 0; i < genSizeOfBase; ++i) {
+    std::vector<HFaceId> insertedIds;
+    insertedIds.reserve(genSizeOfBase);
+    for (size_t i = 0; i < genSizeOfBase; ++i) {
         auto feat = GenerateRandomFeature(featureLength);
-        baseFeatures.push_back(feat);
-        auto name = std::to_string(i);
-        // Establish a security buffer
-        std::vector<char> nameBuffer(name.begin(), name.end());
-        nameBuffer.push_back('\0');
         // Construct face feature
         HFFaceFeature feature = {0};
         feature.size = feat.size();
         feature.data = feat.data();
         HFFaceFeatureIdentity identity = {0};
         identity.feature = &feature;
-        // identity.customId = i;
-        // identity.tag = nameBuffer.data();
-        HFaceId allocId;
+        HFaceId allocId = -1;
         ret = HFFeatureHubInsertFeature(identity, &allocId);
         REQUIRE(ret == HSUCCEED);
+        insertedIds.push_back(allocId);
     }
+    auto sortedInsertedIds = insertedIds;
+    std::sort(sortedInsertedIds.begin(), sortedInsertedIds.end());
+    REQUIRE(std::adjacent_find(sortedInsertedIds.begin(), sortedInsertedIds.end()) == sortedInsertedIds.end());
+
     HInt32 totalFace;
     ret = HFFeatureHubGetFaceCount(&totalFace);
     REQUIRE(ret == HSUCCEED);
-    REQUIRE(totalFace == genSizeOfBase);
+    REQUIRE(totalFace == static_cast<HInt32>(genSizeOfBase));
 
-    const int numThreads = 4;
-    const int removePerThread = genSizeOfBase / 5;
+    constexpr size_t numThreads = 4;
+    constexpr size_t removePerThread = genSizeOfBase / 5;
+    constexpr size_t removeCount = numThreads * removePerThread;
+    constexpr auto maxRemovalDuration = std::chrono::seconds(5);
+    std::vector<HResult> removeResults(removeCount, HERR_INVALID_PARAM);
     std::vector<std::thread> threads;
-    for (int t = 0; t < numThreads; ++t) {
+    threads.reserve(numThreads);
+    const auto removeStart = std::chrono::steady_clock::now();
+    for (size_t t = 0; t < numThreads; ++t) {
         threads.emplace_back([&, t]() {
-            for (int j = 0; j < removePerThread; ++j) {
-                int idToRemove = t * removePerThread + j;
-                auto ret = HFFeatureHubFaceRemove(idToRemove);
-                REQUIRE(ret == HSUCCEED);
+            for (size_t j = 0; j < removePerThread; ++j) {
+                const size_t index = t * removePerThread + j;
+                removeResults[index] = HFFeatureHubFaceRemove(insertedIds[index]);
             }
         });
     }
@@ -293,11 +326,41 @@ TEST_CASE("test_ConcurrencyRemove", "[FeatureHub][Concurrency]") {
     for (auto &th : threads) {
         th.join();
     }
+    const auto removalDuration = std::chrono::steady_clock::now() - removeStart;
+    const double removalMilliseconds = std::chrono::duration<double, std::milli>(removalDuration).count();
+    TEST_PRINT("Concurrent removal: {} entries in {:.3f} ms", removeCount, removalMilliseconds);
+
+    const auto failedRemoval = std::find_if(removeResults.begin(), removeResults.end(), [](HResult status) {
+        return status != HSUCCEED;
+    });
+    if (failedRemoval != removeResults.end()) {
+        const size_t failedIndex = static_cast<size_t>(std::distance(removeResults.begin(), failedRemoval));
+        INFO("Failed ID: " << insertedIds[failedIndex] << ", status: " << *failedRemoval);
+    }
+    REQUIRE(failedRemoval == removeResults.end());
+    CHECK(removalDuration < maxRemovalDuration);
+
     HInt32 remainingCount;
     ret = HFFeatureHubGetFaceCount(&remainingCount);
     REQUIRE(ret == HSUCCEED);
-    // need exclude id=0
-    REQUIRE(remainingCount - 1 == genSizeOfBase - numThreads * removePerThread);
+    REQUIRE(remainingCount == static_cast<HInt32>(genSizeOfBase - removeCount));
+
+    HFFeatureHubExistingIds existingIds = {};
+    REQUIRE(HFFeatureHubGetExistingIds(&existingIds) == HSUCCEED);
+    REQUIRE(existingIds.size == remainingCount);
+    REQUIRE(existingIds.ids != nullptr);
+    std::vector<HFaceId> actualRemainingIds(existingIds.ids, existingIds.ids + existingIds.size);
+    std::vector<HFaceId> expectedRemainingIds(insertedIds.begin() + removeCount, insertedIds.end());
+    std::sort(actualRemainingIds.begin(), actualRemainingIds.end());
+    std::sort(expectedRemainingIds.begin(), expectedRemainingIds.end());
+    CHECK(actualRemainingIds == expectedRemainingIds);
+
+    for (size_t t = 0; t < numThreads; ++t) {
+        const size_t first = t * removePerThread;
+        const size_t last = first + removePerThread - 1;
+        CHECK(HFFeatureHubFaceRemove(insertedIds[first]) == HERR_FT_HUB_NOT_FOUND_FEATURE);
+        CHECK(HFFeatureHubFaceRemove(insertedIds[last]) == HERR_FT_HUB_NOT_FOUND_FEATURE);
+    }
     TEST_PRINT("Remaining Count: {}", remainingCount);
 
     ret = HFFeatureHubDataDisable();
@@ -306,12 +369,13 @@ TEST_CASE("test_ConcurrencyRemove", "[FeatureHub][Concurrency]") {
     delete[] dbPathStr;
 }
 
-TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency]") {
+TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency][stress]") {
+    ScopedFeatureHubDisable reset;
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
     HResult ret;
-    HFFeatureHubConfiguration configuration;
+    HFFeatureHubConfiguration configuration = {};
     auto dbPath = GET_SAVE_DATA(".test");
     HString dbPathStr = new char[dbPath.size() + 1];
     std::strcpy(dbPathStr, dbPath.c_str());
@@ -400,17 +464,24 @@ TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency]") {
     REQUIRE(notSimilarFeatures.size() == numberOfNotSimilar);
 
     // Multithreaded search simulation
-    const int numThreads = 5;
+    constexpr int numThreads = 5;
+    constexpr int searchesPerKind = 50;
+    constexpr int searchesPerThread = searchesPerKind * 2;
+    struct SearchResult {
+        HResult status = HERR_INVALID_PARAM;
+        HFaceId actualId = -1;
+        HFaceId expectedId = -1;
+    };
+    std::vector<SearchResult> searchResults(numThreads * searchesPerThread);
     std::vector<std::thread> threads;
-    std::mutex mutex;
 
     // Start threads for concurrent searching
     for (int t = 0; t < numThreads; ++t) {
-        threads.emplace_back([&]() {
+        threads.emplace_back([&, t]() {
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_int_distribution<> dis(0, preDataSample - 1);
-            for (int j = 0; j < 50; ++j) {  // Each thread performs 50 similar searches
+            for (int j = 0; j < searchesPerKind; ++j) {
                 int idx = dis(gen);
                 auto targetId = targetIds[idx];
                 HFFaceFeature feature = {0};
@@ -418,23 +489,33 @@ TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency]") {
                 feature.size = similarFeatures[idx].size();
                 HFloat score;
                 HFFaceFeatureIdentity identity = {0};
-                HFFeatureHubFaceSearch(feature, &score, &identity);
-                REQUIRE(identity.id == targetId + 1);
+                auto &result = searchResults[t * searchesPerThread + j];
+                result.status = HFFeatureHubFaceSearch(feature, &score, &identity);
+                result.actualId = identity.id;
+                result.expectedId = targetId + 1;
             }
-            for (int j = 0; j < 50; ++j) {
+            for (int j = 0; j < searchesPerKind; ++j) {
                 int idx = dis(gen);
                 HFFaceFeature feature = {0};
                 feature.data = notSimilarFeatures[idx].data();
                 feature.size = notSimilarFeatures[idx].size();
                 HFloat score;
                 HFFaceFeatureIdentity identity = {0};
-                HFFeatureHubFaceSearch(feature, &score, &identity);
-                REQUIRE(identity.id == -1);
+                auto &result = searchResults[t * searchesPerThread + searchesPerKind + j];
+                result.status = HFFeatureHubFaceSearch(feature, &score, &identity);
+                result.actualId = identity.id;
+                result.expectedId = -1;
             }
         });
     }
     for (auto &thread : threads) {
         thread.join();
+    }
+
+    for (size_t i = 0; i < searchResults.size(); ++i) {
+        INFO("Concurrent search result index: " << i);
+        REQUIRE(searchResults[i].status == HSUCCEED);
+        REQUIRE(searchResults[i].actualId == searchResults[i].expectedId);
     }
 
     ret = HFFeatureHubDataDisable();
@@ -443,12 +524,13 @@ TEST_CASE("test_ConcurrencySearch", "[FeatureHub][Concurrency]") {
     delete[] dbPathStr;
 }
 
-TEST_CASE("test_FeatureCache", "[FeatureHub][Concurrency]") {
+TEST_CASE("test_FeatureCache", "[FeatureHub][Concurrency][stress]") {
+    ScopedFeatureHubDisable reset;
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
 
     HResult ret;
-    HFFeatureHubConfiguration configuration;
+    HFFeatureHubConfiguration configuration = {};
     auto dbPath = GET_SAVE_DATA(".test");
     HString dbPathStr = new char[dbPath.size() + 1];
     std::strcpy(dbPathStr, dbPath.c_str());
@@ -501,10 +583,11 @@ TEST_CASE("test_FeatureCache", "[FeatureHub][Concurrency]") {
 }
 
 TEST_CASE("test_FeatureHubManualInput", "[FeatureHub][ManualInput]") {
+    ScopedFeatureHubDisable reset;
     DRAW_SPLIT_LINE
     TEST_PRINT_OUTPUT(true);
     HResult ret;
-    HFFeatureHubConfiguration configuration;
+    HFFeatureHubConfiguration configuration = {};
     configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
     configuration.enablePersistence = 0;
     TEST_PRINT("Start enable feature hub");
@@ -531,10 +614,11 @@ TEST_CASE("test_FeatureHubManualInput", "[FeatureHub][ManualInput]") {
     ret = HFFeatureHubGetExistingIds(&existingIds);
     REQUIRE(ret == HSUCCEED);
     REQUIRE(existingIds.size == ids.size());
-    for (int i = 0; i < existingIds.size; ++i) {
-        TEST_PRINT("Existing ID: {}", existingIds.ids[i]);
-        REQUIRE(existingIds.ids[i] == ids[i]);
-    }
+    std::vector<HFaceId> actual_ids(existingIds.ids, existingIds.ids + existingIds.size);
+    auto expected_ids = ids;
+    std::sort(actual_ids.begin(), actual_ids.end());
+    std::sort(expected_ids.begin(), expected_ids.end());
+    CHECK(actual_ids == expected_ids);
 
     ret = HFFeatureHubViewDBTable();
     REQUIRE(ret == HSUCCEED);

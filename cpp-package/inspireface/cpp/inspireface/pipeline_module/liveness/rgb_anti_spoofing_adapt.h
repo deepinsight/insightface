@@ -34,6 +34,9 @@ public:
      */
     float operator()(const inspirecv::Image& bgr_affine27);
 
+    /** @brief Runs RGB liveness prediction and reports preprocessing failures explicitly. */
+    int32_t Predict(const inspirecv::Image& bgr_affine27, float& score);
+
 private:
     int m_input_size_;        ///< The input size for the model.
     bool m_softmax_ = false;  ///< Whether to use softmax activation.
