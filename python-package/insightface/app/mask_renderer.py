@@ -1,6 +1,13 @@
 import os, sys, datetime
 import numpy as np
 import os.path as osp
+
+import os
+## Disable albumentations version check before importing it, refer to
+## https://github.com/albumentations-team/albumentations/issues/2206
+## (upstream recommends libraries to disable it themselves)
+os.environ["NO_ALBUMENTATIONS_UPDATE"] = "1"
+
 import albumentations as A
 from albumentations.core.transforms_interface import ImageOnlyTransform
 from .face_analysis import FaceAnalysis
