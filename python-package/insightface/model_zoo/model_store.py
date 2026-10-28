@@ -8,7 +8,7 @@ import os
 import zipfile
 import glob
 
-from ..utils import download, check_sha1
+from ..utils.download import check_sha1, download_file as download
 
 _model_sha1 = {
     name: checksum
