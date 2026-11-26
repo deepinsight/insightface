@@ -1268,16 +1268,19 @@ def _check_modelscope_availability():
 
     # Dynamic check for ModelScope availability (don't rely on cached MODELSCOPE_AVAILABLE)
     modelscope_available = True
+    import_error = None
     try:
         from modelscope.hub.snapshot_download import snapshot_download
     except ImportError as error:
         modelscope_available = False
+        # ``error`` is unbound once the except block exits, so keep a reference.
+        import_error = error
     
     if not USE_OSS_DOWNLOAD and not modelscope_available:
         raise ResourceError(
             "ModelScope is unavailable; install modelscope or call use_oss_download(True) before downloading models",
-            original_error=str(error),
-        ) from error
+            original_error=str(import_error),
+        ) from import_error
 
 
 def launch(model_name: str = "Pikachu", resource_path: str = None) -> bool:
